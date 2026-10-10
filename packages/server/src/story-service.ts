@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { type Db, schema } from '@dn/db'
-import { ID_PREFIX, newId, slugify } from '@dn/domain'
+import { ID_PREFIX, newId, renumberCitations, slugify } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
@@ -134,6 +134,8 @@ export async function recordGeneratedSummary(
     output: StorySummaryOutput
     analysisRunId: string
     inputFingerprint: string
+    /** Article ids in the order shown to the model; enables `[n]` citation markers. */
+    shownArticleIds?: string[]
   },
 ): Promise<{ status: 'recorded'; versionId: string } | { status: 'stale' }> {
   const [story] = await db
@@ -159,7 +161,12 @@ export async function recordGeneratedSummary(
     .from(schema.storyArticle)
     .where(and(eq(schema.storyArticle.storyId, story.id), isNull(schema.storyArticle.removedAt)))
   const linkedIds = new Set(linked.map((l) => l.articleId))
-  const citedArticles = [...new Set(input.output.sourceArticleIds)]
+  const { body, citation } = renumberCitations(
+    input.output.summary,
+    input.shownArticleIds ?? [],
+    input.output.sourceArticleIds,
+  )
+  const citedArticles = [...citation.keys()]
   const unknownArticles = citedArticles.filter((id) => !linkedIds.has(id))
   if (citedArticles.length === 0 || unknownArticles.length > 0) {
     throw new DomainError(
@@ -207,13 +214,17 @@ export async function recordGeneratedSummary(
     storyId: story.id,
     interpretationId,
     headline: input.output.headline,
-    body: input.output.summary,
+    body,
     supersedesVersionId: story.currentSummaryId,
     inputFingerprint: input.inputFingerprint,
   })
-  await db
-    .insert(schema.storySummarySource)
-    .values(citedArticles.map((articleId) => ({ summaryVersionId: versionId, articleId })))
+  await db.insert(schema.storySummarySource).values(
+    citedArticles.map((articleId) => ({
+      summaryVersionId: versionId,
+      articleId,
+      citation: citation.get(articleId) ?? null,
+    })),
+  )
   await db
     .update(schema.story)
     .set({
@@ -256,7 +267,10 @@ export async function editSummary(
     .where(eq(schema.storySummaryVersion.id, input.basedOnVersionId))
   if (!base) throw new DomainError('not_found', 'base version not found')
   const sources = await db
-    .select({ articleId: schema.storySummarySource.articleId })
+    .select({
+      articleId: schema.storySummarySource.articleId,
+      citation: schema.storySummarySource.citation,
+    })
     .from(schema.storySummarySource)
     .where(eq(schema.storySummarySource.summaryVersionId, base.id))
   const versionId = newId(ID_PREFIX.summaryVersion)
@@ -271,9 +285,13 @@ export async function editSummary(
     inputFingerprint: base.inputFingerprint,
   })
   if (sources.length > 0) {
-    await db
-      .insert(schema.storySummarySource)
-      .values(sources.map((s) => ({ summaryVersionId: versionId, articleId: s.articleId })))
+    await db.insert(schema.storySummarySource).values(
+      sources.map((s) => ({
+        summaryVersionId: versionId,
+        articleId: s.articleId,
+        citation: s.citation,
+      })),
+    )
   }
   await db
     .update(schema.story)

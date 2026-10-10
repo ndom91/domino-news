@@ -365,6 +365,9 @@ export const narrative = pgTable('narrative', {
   updatedAt: ts('updated_at').notNull(),
   version: integer('version').notNull().default(1),
   titleInterpretationId: text('title_interpretation_id'),
+  // Narrative colour key 1–6 (null = none, rendered as slot 0). Kept for the Narrative's
+  // lifetime so its colour is stable everywhere; see claimColorSlot.
+  colorSlot: integer('color_slot'),
 })
 
 export const narrativeStory = pgTable(
@@ -414,6 +417,8 @@ export const storySummarySource = pgTable(
     articleId: text('article_id')
       .notNull()
       .references(() => article.id),
+    // Display number used by `[n]` markers in the summary body (publishing order of cited sources).
+    citation: integer('citation'),
   },
   (t) => [primaryKey({ columns: [t.summaryVersionId, t.articleId] })],
 )

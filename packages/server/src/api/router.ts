@@ -9,6 +9,7 @@ import {
 } from '@dn/schemas'
 import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
+import { getFrontPage } from '../front.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
 import { getPreferences, savePreferences } from '../preferences.ts'
 import { getPublisher, listPublishers } from '../publishers.ts'
@@ -99,7 +100,14 @@ const route = (method: Route['method'], pathname: string, handler: Route['handle
   handler,
 })
 
+const frontQuery = z.object({ region: regionSchema.optional() })
+
 const routes: Route[] = [
+  route('GET', '/api/v1/front', async ({ ctx, url, userId }) => {
+    const { region } = frontQuery.parse(Object.fromEntries(url.searchParams))
+    const { edition } = await getPreferences(ctx.db, userId)
+    return json(await getFrontPage(ctx.db, { region, edition }))
+  }),
   route('GET', '/api/v1/stories', async ({ ctx, url }) =>
     json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
   ),

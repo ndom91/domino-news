@@ -208,3 +208,28 @@ describe('isWireCopy', () => {
     expect(isWireCopy('<p>Reuters reported that the AP and AFP agreed.</p>')).toBe(false)
   })
 })
+
+describe('citation markers', () => {
+  it('renumbers model markers to cited-source order and drops unknown ones', async () => {
+    const { renumberCitations, splitCitations } = await import('@dn/domain')
+    // Shown in publishing order: a (1), b (2), c (3), d (4). The model cites b and d, plus lists c.
+    const { body, citation } = renumberCitations(
+      'X happened, according to B[2] and D[4, 9]. C reports more [7].',
+      ['a', 'b', 'c', 'd'],
+      ['c'],
+    )
+    expect([...citation.entries()]).toEqual([
+      ['b', 1],
+      ['c', 2],
+      ['d', 3],
+    ])
+    expect(body).toBe('X happened, according to B[1] and D[3]. C reports more.')
+    expect(splitCitations('A[1] and B[3].')).toEqual([
+      { text: 'A' },
+      { citation: 1 },
+      { text: ' and B' },
+      { citation: 3 },
+      { text: '.' },
+    ])
+  })
+})

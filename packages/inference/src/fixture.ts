@@ -77,11 +77,12 @@ export function createFixtureGeneration(): GenerationProvider {
       }
     },
     async summarizeStory({ story }) {
-      const [lead, ...rest] = story.articles
+      const [lead] = story.articles
       if (!lead) throw new Error('summarizeStory requires at least one article')
-      const others = rest.map((a) => a.publisher)
+      // Each outlet cited with its position in the shown list, like the real prompt asks.
+      const named = story.articles.map((a, i) => `${a.publisher}[${i + 1}]`)
       const reportedBy =
-        others.length > 0 ? `${lead.publisher} and ${others.join(', ')}` : lead.publisher
+        named.length > 1 ? `${named.slice(0, -1).join(', ')} and ${named.at(-1)}` : named[0]
       const detail = lead.description ? ` ${truncate(lead.description, 280)}` : ''
       return {
         output: {

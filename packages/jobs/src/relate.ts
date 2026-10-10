@@ -2,7 +2,13 @@ import { type Db, schema, withTransaction } from '@dn/db'
 import { type GraphEdge, ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
 import type { StoryInput } from '@dn/inference'
 import type { StoryRelation } from '@dn/schemas'
-import { type AnalysisJob, nearestByVector, touchNarrative, touchStory } from '@dn/server'
+import {
+  type AnalysisJob,
+  claimColorSlot,
+  nearestByVector,
+  touchNarrative,
+  touchStory,
+} from '@dn/server'
 import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
@@ -274,6 +280,7 @@ async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: st
         .values(toAdd.map((id) => ({ narrativeId, storyId: id, addedAt: now })))
         .onConflictDoNothing()
     }
+    await claimColorSlot(tx.db, narrativeId)
     await touchNarrative(
       tx.db,
       narrativeId,

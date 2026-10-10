@@ -3,7 +3,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@3',
-  summarizeStory: 'summarize-story@3',
+  summarizeStory: 'summarize-story@4',
   classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
   explainContext: 'explain-context@2',
@@ -65,6 +65,7 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
   return `Write an original, neutral summary of this news story using only the source articles below.
 - headline: a concise, factual headline (max ~14 words), not copied verbatim from any one source.
 - summary: 2-4 short sentences. Attribute claims to sources ("according to X", "X reports") where they are not established facts. No speculation.
+  After each attributed statement, add a citation marker with the source's number "n" from the list, e.g. "according to X[2]". Use only numbers from the list.
 - sourceArticleIds: the articleId of every article you relied on.
 - observationIds: the observationId of every article you relied on.
 - regions: 1-3 regions where the events take place or that they directly affect, most relevant first. Not where the publishers are based. Pick from:
@@ -72,8 +73,8 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
   Use "global" only when no single region fits: worldwide events, or more than three regions equally involved.
 Do not copy sentences from the sources.
 
-SOURCE ARTICLES:
-${data(storyData(input.story).articles)}`
+SOURCE ARTICLES (numbered, in publishing order):
+${data(storyData(input.story).articles.map((a, i) => ({ n: i + 1, ...a })))}`
 }
 
 export function classifyRelationshipPrompt(input: { newer: StoryInput; older: StoryInput }) {

@@ -77,6 +77,8 @@ export const storySourceSchema = z.object({
   // Government, court, regulator or IGO rather than a newsroom.
   official: z.boolean(),
   citedInSummary: z.boolean(),
+  // Number used by `[n]` markers in the summary; null if not cited.
+  citation: z.number().int().positive().nullable(),
 })
 export type StorySource = z.infer<typeof storySourceSchema>
 
@@ -92,10 +94,14 @@ export const summarySchema = z.object({
 })
 export type Summary = z.infer<typeof summarySchema>
 
+// Narrative colour key: 1–6 while the Narrative holds a slot, 0 = none.
+export const colorSlotSchema = z.number().int().min(0).max(6)
+
 export const narrativeRefSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
+  colorSlot: colorSlotSchema,
 })
 export type NarrativeRef = z.infer<typeof narrativeRefSchema>
 
@@ -112,7 +118,19 @@ export const storyListItemSchema = z.object({
   publishers: z.array(publisherRefSchema),
   narratives: z.array(narrativeRefSchema),
   // When each source reported (publishedAt, else first seen), for coverage traces.
-  trace: z.array(z.object({ id: z.string(), publisherName: z.string(), at: z.string() })),
+  trace: z.array(
+    z.object({
+      id: z.string(),
+      publisherName: z.string(),
+      at: z.string(),
+      citation: z.number().int().positive().nullable(),
+    }),
+  ),
+  // The Story's main typed link to an earlier Story, if any (shown as "Follows …").
+  relation: z.object({ type: storyRelationSchema, slug: z.string(), title: z.string() }).nullable(),
+  primarySource: z.object({ title: z.string().nullable(), url: z.string() }).nullable(),
+  // This Story corrects an earlier one.
+  correction: z.boolean(),
 })
 export type StoryListItem = z.infer<typeof storyListItemSchema>
 
@@ -232,6 +250,7 @@ export const narrativeDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
+  colorSlot: colorSlotSchema,
   description: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -247,6 +266,7 @@ export const narrativeListResponseSchema = z.object({
       slug: z.string(),
       title: z.string(),
       description: z.string().nullable(),
+      colorSlot: colorSlotSchema,
       storyCount: z.number().int().nonnegative(),
       updatedAt: z.string(),
     }),
@@ -378,3 +398,45 @@ export const userPreferencesSchema = z.object({
   edition: regionSchema.nullable(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
+
+// A Narrative's Stories as a list of steps, oldest first (front page Developing band).
+export const narrativeStepSchema = z.object({
+  storyId: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  firstObservedAt: z.string(),
+  // Typed link to an earlier Story in the same Narrative.
+  relation: z.object({ type: storyRelationSchema, title: z.string(), at: z.string() }).nullable(),
+  // When a later Story corrected this one.
+  correctedAt: z.string().nullable(),
+})
+export type NarrativeStep = z.infer<typeof narrativeStepSchema>
+
+export const developingNarrativeSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  colorSlot: colorSlotSchema,
+  storyCount: z.number().int().nonnegative(),
+  since: z.string(),
+  updatedAt: z.string(),
+  steps: z.array(narrativeStepSchema),
+})
+export type DevelopingNarrative = z.infer<typeof developingNarrativeSchema>
+
+// Everything above the Latest grid: strip stats, lead Story and the Developing band.
+export const frontPageSchema = z.object({
+  editionAt: z.string(),
+  stats: z.object({
+    stories: z.number().int().nonnegative(),
+    publishers: z.number().int().nonnegative(),
+  }),
+  lead: storyDetailSchema.nullable(),
+  // "Story 3 of 6" within the lead's Narrative.
+  leadPosition: z
+    .object({ index: z.number().int().positive(), total: z.number().int() })
+    .nullable(),
+  developing: z.array(developingNarrativeSchema),
+  narrativeCount: z.number().int().nonnegative(),
+})
+export type FrontPage = z.infer<typeof frontPageSchema>

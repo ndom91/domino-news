@@ -1,5 +1,5 @@
 import { type Db, schema } from '@dn/db'
-import { eq, sql } from 'drizzle-orm'
+import { asc, eq, isNotNull, sql } from 'drizzle-orm'
 
 export type AggregateType = 'story' | 'narrative' | 'article'
 
@@ -78,4 +78,43 @@ export async function touchNarrative(
     version: row.version,
   })
   return row.version
+}
+
+export const NARRATIVE_COLOR_SLOTS = 6
+
+/**
+ * Give a Narrative a colour slot if it has none: the lowest free slot 1–6, or, when all
+ * are taken, the slot of the least recently updated Narrative (which then shows slot 0).
+ * Never derived from the title, so colours don't collide or shift. Call inside the
+ * transaction that creates or updates the Narrative.
+ */
+export async function claimColorSlot(db: Db, narrativeId: string) {
+  const holders = await db
+    .select({
+      id: schema.narrative.id,
+      slot: schema.narrative.colorSlot,
+      updatedAt: schema.narrative.updatedAt,
+    })
+    .from(schema.narrative)
+    .where(isNotNull(schema.narrative.colorSlot))
+    .orderBy(asc(schema.narrative.updatedAt))
+    .for('update')
+  const own = holders.find((h) => h.id === narrativeId)
+  if (own?.slot) return own.slot
+  const used = new Set(holders.map((h) => h.slot))
+  let slot = [1, 2, 3, 4, 5, 6].find((s) => !used.has(s))
+  if (!slot) {
+    const oldest = holders[0]
+    if (!oldest?.slot) return null
+    slot = oldest.slot
+    await db
+      .update(schema.narrative)
+      .set({ colorSlot: null })
+      .where(eq(schema.narrative.id, oldest.id))
+  }
+  await db
+    .update(schema.narrative)
+    .set({ colorSlot: slot })
+    .where(eq(schema.narrative.id, narrativeId))
+  return slot
 }

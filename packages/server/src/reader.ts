@@ -61,6 +61,7 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
+      colorSlot: schema.narrative.colorSlot,
     })
     .from(schema.narrativeStory)
     .innerJoin(schema.narrative, eq(schema.narrative.id, schema.narrativeStory.narrativeId))
@@ -70,9 +71,9 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
         isNull(schema.narrativeStory.removedAt),
       ),
     )
-  for (const { storyId, ...ref } of rows) {
+  for (const { storyId, colorSlot, ...ref } of rows) {
     const list = map.get(storyId) ?? []
-    list.push(ref)
+    list.push({ ...ref, colorSlot: colorSlot ?? 0 })
     map.set(storyId, list)
   }
   return map
@@ -92,6 +93,8 @@ async function tracesByStory(db: Db, storyIds: string[]) {
       publisherName: schema.publisher.name,
       publishedAt: schema.article.publishedAt,
       firstSeenAt: schema.article.firstSeenAt,
+      citation: schema.storySummarySource.citation,
+      cited: sql<boolean>`${schema.storySummarySource.articleId} is not null`.as('cited'),
       rank: sql<number>`row_number() over (partition by ${schema.storyArticle.storyId} order by ${reportedAt} desc)`.as(
         'rank',
       ),
@@ -99,6 +102,14 @@ async function tracesByStory(db: Db, storyIds: string[]) {
     .from(schema.storyArticle)
     .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
     .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+    .innerJoin(schema.story, eq(schema.story.id, schema.storyArticle.storyId))
+    .leftJoin(
+      schema.storySummarySource,
+      and(
+        eq(schema.storySummarySource.summaryVersionId, schema.story.currentSummaryId),
+        eq(schema.storySummarySource.articleId, schema.article.id),
+      ),
+    )
     .where(
       and(inArray(schema.storyArticle.storyId, storyIds), isNull(schema.storyArticle.removedAt)),
     )
@@ -106,9 +117,73 @@ async function tracesByStory(db: Db, storyIds: string[]) {
   const rows = await db.select().from(ranked).where(sql`${ranked.rank} <= ${MAX_TRACE_PER_STORY}`)
   for (const r of rows) {
     const list = map.get(r.storyId) ?? []
-    list.push({ id: r.id, publisherName: r.publisherName, at: iso(r.publishedAt ?? r.firstSeenAt) })
+    list.push({
+      id: r.id,
+      publisherName: r.publisherName,
+      at: iso(r.publishedAt ?? r.firstSeenAt),
+      // Summaries from before numbered markers still count as cited, just without a number.
+      citation: r.citation ?? (r.cited ? 0 : null),
+    })
     map.set(r.storyId, list)
   }
+  return map
+}
+
+// When a Story has several outgoing links, show the most specific one.
+const RELATION_PRIORITY = [
+  'corrects',
+  'branches_from',
+  'responds_to',
+  'follows',
+  'provides_context_for',
+  'related_to',
+]
+
+async function relationsByStory(db: Db, storyIds: string[]) {
+  const map = new Map<string, StoryListItem['relation']>()
+  if (storyIds.length === 0) return map
+  const rows = await db
+    .select({
+      storyId: schema.storyRelationship.fromStoryId,
+      type: schema.storyRelationship.relation,
+      slug: schema.story.slug,
+      title: schema.story.title,
+    })
+    .from(schema.storyRelationship)
+    .innerJoin(schema.story, eq(schema.story.id, schema.storyRelationship.toStoryId))
+    .where(
+      and(
+        inArray(schema.storyRelationship.fromStoryId, storyIds),
+        isNull(schema.storyRelationship.supersededAt),
+        isNotNull(schema.story.publishedAt),
+      ),
+    )
+  for (const { storyId, ...rel } of rows) {
+    const current = map.get(storyId)
+    if (!current || RELATION_PRIORITY.indexOf(rel.type) < RELATION_PRIORITY.indexOf(current.type)) {
+      map.set(storyId, rel)
+    }
+  }
+  return map
+}
+
+async function primarySourceByStory(db: Db, storyIds: string[]) {
+  const map = new Map<string, StoryListItem['primarySource']>()
+  if (storyIds.length === 0) return map
+  const rows = await db
+    .select({
+      storyId: schema.storySourceReference.storyId,
+      title: schema.sourceReference.title,
+      url: schema.sourceReference.url,
+    })
+    .from(schema.storySourceReference)
+    .innerJoin(
+      schema.sourceReference,
+      eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+    )
+    .where(inArray(schema.storySourceReference.storyId, storyIds))
+    .orderBy(schema.storySourceReference.addedAt)
+  for (const { storyId, ...ref } of rows) if (!map.has(storyId)) map.set(storyId, ref)
   return map
 }
 
@@ -134,11 +209,13 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
       eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
     )
     .where(inArray(schema.story.id, storyIds))
-  const [publishers, narratives, counts, traces] = await Promise.all([
+  const [publishers, narratives, counts, traces, relations, primary] = await Promise.all([
     publishersByStory(db, storyIds),
     narrativesByStory(db, storyIds),
     sourceCounts(db, storyIds),
     tracesByStory(db, storyIds),
+    relationsByStory(db, storyIds),
+    primarySourceByStory(db, storyIds),
   ])
   const byId = new Map(rows.map((r) => [r.story.id, r]))
   return storyIds.flatMap((id) => {
@@ -159,6 +236,9 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
         publishers: publishers.get(s.id) ?? [],
         narratives: narratives.get(s.id) ?? [],
         trace: traces.get(s.id) ?? [],
+        relation: relations.get(s.id) ?? null,
+        primarySource: primary.get(s.id) ?? null,
+        correction: relations.get(s.id)?.type === 'corrects',
       },
     ]
   })
@@ -230,11 +310,15 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
   const current = versions.find((v) => v.version.id === story.currentSummaryId)
   const cited = current
     ? await db
-        .select({ articleId: schema.storySummarySource.articleId })
+        .select({
+          articleId: schema.storySummarySource.articleId,
+          citation: schema.storySummarySource.citation,
+        })
         .from(schema.storySummarySource)
         .where(eq(schema.storySummarySource.summaryVersionId, current.version.id))
     : []
   const citedIds = new Set(cited.map((c) => c.articleId))
+  const citationOf = new Map(cited.map((c) => [c.articleId, c.citation]))
 
   const sources = await db
     .select({
@@ -328,6 +412,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       publisher: s.publisher,
       official: s.publisherKind === 'official',
       citedInSummary: citedIds.has(s.articleId),
+      citation: citationOf.get(s.articleId) ?? null,
     })),
     related: edges.flatMap((e) => {
       const otherId = e.fromStoryId === id ? e.toStoryId : e.fromStoryId
@@ -401,6 +486,7 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
     id: narrative.id,
     slug: narrative.slug,
     title: narrative.title,
+    colorSlot: narrative.colorSlot ?? 0,
     description: narrative.description,
     createdAt: iso(narrative.createdAt),
     updatedAt: iso(narrative.updatedAt),
@@ -429,6 +515,7 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
       slug: schema.narrative.slug,
       title: schema.narrative.title,
       description: schema.narrative.description,
+      colorSlot: schema.narrative.colorSlot,
       updatedAt: schema.narrative.updatedAt,
       storyCount: sql<number>`count(${schema.story.id})::int`,
     })
@@ -447,7 +534,9 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
     .groupBy(schema.narrative.id)
     .orderBy(desc(schema.narrative.updatedAt))
     .limit(50)
-  return { items: rows.map((r) => ({ ...r, updatedAt: iso(r.updatedAt) })) }
+  return {
+    items: rows.map((r) => ({ ...r, colorSlot: r.colorSlot ?? 0, updatedAt: iso(r.updatedAt) })),
+  }
 }
 
 async function storyContext(db: Db, storyId: string): Promise<StoryDetail['context']> {

@@ -58,6 +58,7 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
         output: result.output,
         analysisRunId: runId,
         inputFingerprint: job.inputFingerprint,
+        shownArticleIds: input.articles.map((a) => a.articleId),
       })
     } catch (error) {
       // Ungrounded citations are a model-output problem: retryable, never published.

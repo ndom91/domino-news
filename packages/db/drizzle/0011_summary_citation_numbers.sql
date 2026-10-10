@@ -1,0 +1,1 @@
+ALTER TABLE "story_summary_source" ADD COLUMN "citation" integer;

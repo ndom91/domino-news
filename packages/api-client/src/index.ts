@@ -1,6 +1,8 @@
 import {
   type ApiErrorCode,
   apiErrorSchema,
+  type FrontPage,
+  frontPageSchema,
   type NarrativeDetail,
   type NarrativeListResponse,
   narrativeDetailSchema,
@@ -90,6 +92,8 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
   }
 
   return {
+    getFrontPage: (opts: { region?: Region | null } = {}, signal?: AbortSignalLike) =>
+      request<FrontPage>(frontPageSchema, `/front${qs({ region: opts.region })}`, { signal }),
     listStories: (
       opts: { cursor?: string | null; limit?: number; region?: Region | null } = {},
       signal?: AbortSignalLike,

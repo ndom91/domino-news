@@ -7,6 +7,7 @@ import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/
 
 export const queryKeys = {
   stories: () => ['stories'] as const,
+  front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
   narratives: () => ['narratives'] as const,
@@ -20,6 +21,12 @@ export const queryKeys = {
 
 export function createQueries(api: ApiClient) {
   return {
+    front: (region: Region | null = null) =>
+      queryOptions({
+        queryKey: queryKeys.front(region),
+        queryFn: ({ signal }) => api.getFrontPage({ region }, signal),
+        staleTime: 30_000,
+      }),
     storyList: (region: Region | null = null) =>
       infiniteQueryOptions({
         queryKey: queryKeys.storyList(region),
