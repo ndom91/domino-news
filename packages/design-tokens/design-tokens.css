@@ -1,0 +1,151 @@
+/*
+ * Semantic design tokens. Values are provisional (no brand sign-off yet).
+ * Components must reference these through the Tailwind theme in theme.css,
+ * never through hard-coded colors, radii or spacing.
+ */
+@import "@fontsource-variable/newsreader";
+@import "@fontsource-variable/newsreader/wght-italic.css";
+@import "@fontsource-variable/instrument-sans";
+@import "@fontsource-variable/jetbrains-mono";
+
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --dn-canvas: #f7f6f2;
+  --dn-surface: #ffffff;
+  --dn-surface-sunken: #efede7;
+  --dn-elevated: #ffffff;
+  --dn-overlay-scrim: rgb(20 22 21 / 0.36);
+
+  /* Text */
+  --dn-text: #1b1f1e;
+  --dn-text-secondary: #3d4442;
+  --dn-text-muted: #6a716e;
+  --dn-text-inverse: #f7f6f2;
+
+  /* Lines */
+  --dn-border: #dedbd2;
+  --dn-border-strong: #b9b5aa;
+  --dn-rule: #1b1f1e;
+
+  /* Interaction */
+  --dn-accent: #2b6b5e;
+  --dn-accent-hover: #1f564b;
+  --dn-accent-subtle: #e3eeea;
+  --dn-accent-contrast: #ffffff;
+  --dn-focus-ring: #2b6b5e;
+
+  /* Status */
+  --dn-success: #2f6b3a;
+  --dn-success-subtle: #e4efe2;
+  --dn-warning: #8a5a12;
+  --dn-warning-subtle: #f6ecd8;
+  --dn-error: #a33a2c;
+  --dn-error-subtle: #f6e3df;
+
+  /*
+   * Data-visualisation palette (graph lanes, coverage, source categories).
+   * These encode categories only, never truth or credibility.
+   */
+  --dn-viz-1: #2b6b5e;
+  --dn-viz-2: #8a5a12;
+  --dn-viz-3: #3c5a8c;
+  --dn-viz-4: #8c3c5a;
+  --dn-viz-5: #5a6b2b;
+  --dn-viz-6: #6b4a8a;
+  --dn-viz-neutral: #8f9491;
+
+  /* Typography */
+  --dn-font-serif: "Newsreader Variable", "Iowan Old Style", Georgia, serif;
+  --dn-font-sans: "Instrument Sans Variable", "Helvetica Neue", Arial, sans-serif;
+  --dn-font-mono: "JetBrains Mono Variable", ui-monospace, monospace;
+
+  --dn-text-2xs: 0.6875rem;
+  --dn-text-xs: 0.75rem;
+  --dn-text-sm: 0.875rem;
+  --dn-text-base: 1rem;
+  --dn-text-md: 1.125rem;
+  --dn-text-lg: 1.3125rem;
+  --dn-text-xl: 1.625rem;
+  --dn-text-2xl: 2.125rem;
+  --dn-text-3xl: 2.875rem;
+
+  --dn-leading-tight: 1.12;
+  --dn-leading-snug: 1.3;
+  --dn-leading-normal: 1.5;
+  --dn-leading-reading: 1.62;
+
+  --dn-weight-regular: 400;
+  --dn-weight-medium: 500;
+  --dn-weight-semibold: 600;
+  --dn-weight-bold: 700;
+
+  --dn-tracking-tight: -0.015em;
+  --dn-tracking-label: 0.06em;
+
+  /* Spacing (4px base) */
+  --dn-space-0-5: 0.125rem;
+  --dn-space-1: 0.25rem;
+  --dn-space-2: 0.5rem;
+  --dn-space-3: 0.75rem;
+  --dn-space-4: 1rem;
+  --dn-space-5: 1.25rem;
+  --dn-space-6: 1.5rem;
+  --dn-space-8: 2rem;
+  --dn-space-10: 2.5rem;
+  --dn-space-12: 3rem;
+  --dn-space-16: 4rem;
+
+  /* Layout */
+  --dn-content-max: 76rem;
+  --dn-reading-max: 42rem;
+  --dn-gutter: clamp(1rem, 4vw, 2.5rem);
+  --dn-safe-top: env(safe-area-inset-top, 0px);
+  --dn-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --dn-tap-min: 2.75rem;
+
+  /* Shape */
+  --dn-radius-sm: 0.25rem;
+  --dn-radius-md: 0.5rem;
+  --dn-radius-lg: 0.875rem;
+  --dn-border-width: 1px;
+  --dn-shadow-sm: 0 1px 2px rgb(27 31 30 / 0.06);
+  --dn-shadow-md: 0 6px 20px -6px rgb(27 31 30 / 0.18), 0 1px 3px rgb(27 31 30 / 0.08);
+
+  /* Motion */
+  --dn-duration-fast: 120ms;
+  --dn-duration-base: 180ms;
+  --dn-duration-slow: 280ms;
+  --dn-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dn-ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
+}
+
+/* Dark mode structure only; values are a first pass, not a polished variant. */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --dn-canvas: #141716;
+  --dn-surface: #1c201f;
+  --dn-surface-sunken: #111312;
+  --dn-elevated: #232827;
+  --dn-text: #ecebe6;
+  --dn-text-secondary: #c9cbc6;
+  --dn-text-muted: #979d99;
+  --dn-text-inverse: #141716;
+  --dn-border: #313735;
+  --dn-border-strong: #4a514e;
+  --dn-rule: #ecebe6;
+  --dn-accent: #6fb5a5;
+  --dn-accent-hover: #8cc7b9;
+  --dn-accent-subtle: #1f302c;
+  --dn-accent-contrast: #0f1312;
+  --dn-focus-ring: #6fb5a5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dn-duration-fast: 0ms;
+    --dn-duration-base: 0ms;
+    --dn-duration-slow: 0ms;
+  }
+}

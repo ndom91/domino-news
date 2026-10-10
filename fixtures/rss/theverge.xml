@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>The Verge</title>
+    <link>https://www.theverge.com</link>
+    <description>The Verge</description>
+    <item>
+      <title>Decade-old RAM is making a comeback</title>
+      <link>https://www.theverge.com/games/1009140/ram-shortage-intel-amd-ddr4-comeback</link>
+      <guid isPermaLink="false">https://www.theverge.com/?p=1009140</guid>
+      <pubDate>Fri, 09 Oct 2026 17:50:00 -0400</pubDate>
+      <description>CPU makers have noticed that the seemingly unending RAM price hikes are making it tough for a lot of us to upgrade our PCs. Their solution? A return to last-gen DDR4 RAM. Intel and AMD are making new CPUs that'll support the older, more affordable type of memory. On Friday, Gigabyte announced that two of […]</description>
+    </item>
+    <item>
+      <title>Google teases Fitbit Edge launch next week</title>
+      <link>https://www.theverge.com/tech/1008918/google-fitbit-edge-launch-next-week</link>
+      <guid isPermaLink="false">https://www.theverge.com/?p=1008918</guid>
+      <pubDate>Fri, 09 Oct 2026 14:05:55 -0400</pubDate>
+      <description>It looks like Google is getting ready to take the wraps off its rumored Fitbit Edge next Monday. In a post on X, Google posted a picture of what appears to be the side of the fitness tracker, with the caption: "Get an Edge on your health. 10.12.26." A trove of Fitbit Edge leaks has […]</description>
+    </item>
+  </channel>
+</rss>

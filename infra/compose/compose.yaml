@@ -1,0 +1,88 @@
+# Local development and single-VM deployment.
+#   Infra only:   docker compose -f infra/compose/compose.yaml up -d postgres typesense
+#   Full stack:   docker compose -f infra/compose/compose.yaml --profile app up -d --build
+name: domino-news
+
+x-app: &app
+  build:
+    context: ../..
+    dockerfile: infra/compose/Dockerfile
+  env_file: ../../.env
+  environment:
+    DATABASE_URL: postgres://dn:dn@postgres:5432/dn
+    TYPESENSE_URL: http://typesense:8108
+    # Private CA for the inference endpoint, if any (see README).
+    NODE_EXTRA_CA_CERTS: /certs/inference-ca.pem
+  volumes:
+    - ./certs:/certs:ro
+  depends_on:
+    postgres:
+      condition: service_healthy
+    typesense:
+      condition: service_started
+  restart: unless-stopped
+  profiles: [app]
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg17-trixie
+    environment:
+      POSTGRES_USER: dn
+      POSTGRES_PASSWORD: dn
+      POSTGRES_DB: dn
+    ports:
+      - "${POSTGRES_PORT:-5442}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dn -d dn"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  typesense:
+    image: typesense/typesense:30.2
+    command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_API_KEY:-dev-typesense-key}", "--enable-cors=false"]
+    ports:
+      - "${TYPESENSE_PORT:-8108}:8108"
+    volumes:
+      - tsdata:/data
+    restart: unless-stopped
+
+  migrate:
+    <<: *app
+    command: ["pnpm", "db:migrate"]
+    restart: "no"
+
+  web:
+    <<: *app
+    command: ["node", "apps/web/.output/server/index.mjs"]
+    environment:
+      DATABASE_URL: postgres://dn:dn@postgres:5432/dn
+      TYPESENSE_URL: http://typesense:8108
+      NODE_EXTRA_CA_CERTS: /certs/inference-ca.pem
+      PORT: "3000"
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    <<: *app
+    command: ["pnpm", "--filter", "@dn/worker", "start"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  indexer:
+    <<: *app
+    command: ["pnpm", "--filter", "@dn/worker", "start:indexer"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+volumes:
+  pgdata:
+  tsdata:

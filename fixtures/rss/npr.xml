@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>NPR Topics: News</title>
+    <link>https://www.npr.org/templates/story/story.php?storyId=1001</link>
+    <description>NPR Topics: News</description>
+    <item>
+      <title>Ongoing lawsuits allege GLP-1s can cause serious harm. But we don't know how often</title>
+      <link>https://www.npr.org/2026/10/10/nx-s1-5996652/glp1-fda-naion-blind-lawsuit-ozempic</link>
+      <guid isPermaLink="true">https://www.npr.org/2026/10/10/nx-s1-5996652/glp1-fda-naion-blind-lawsuit-ozempic</guid>
+      <pubDate>Sat, 10 Oct 2026 07:00:00 -0400</pubDate>
+      <description>Scant data about serious adverse effects makes it harder to answer scientific and legal questions about how often the drugs might cause serious harm like blindness or pancreatitis.</description>
+    </item>
+    <item>
+      <title>Trump says U.S. to get diesel from Russia, relaxing pressure on Moscow to ease prices before midterms</title>
+      <link>https://www.npr.org/2026/10/09/nx-s1-5996912/trump-says-u-s-to-get-diesel-from-russia-relaxing-pressure-on-moscow-to-ease-prices-before-midterms</link>
+      <guid isPermaLink="true">https://www.npr.org/2026/10/09/nx-s1-5996912/trump-says-u-s-to-get-diesel-from-russia-relaxing-pressure-on-moscow-to-ease-prices-before-midterms</guid>
+      <pubDate>Fri, 09 Oct 2026 17:24:13 -0400</pubDate>
+      <description>Trump says the U.S. will obtain diesel from Russia, relaxing years of U.S. pressure on Moscow, to combat prices before midterms. He said he struck the deal with Russian President Vladimir Putin in a phone call.</description>
+    </item>
+  </channel>
+</rss>

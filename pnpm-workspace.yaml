@@ -1,0 +1,7 @@
+packages:
+  - apps/*
+  - packages/*
+  - playroom
+
+allowBuilds:
+  esbuild: true

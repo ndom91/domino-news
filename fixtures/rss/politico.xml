@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>Politics</title>
+    <link>https://rss.politico.com/politics-news.xml</link>
+    <description>Politics</description>
+    <item>
+      <title>House Republicans are bracing for catastrophe in once safe red seats</title>
+      <link>https://www.politico.com/news/2026/10/09/house-gop-panic-deep-red-seats-trump-01113006</link>
+      <guid isPermaLink="false">000001a1-1da6-d787-a9a1-bde73c0d0001</guid>
+      <pubDate>Fri, 09 Oct 2026 04:45:00 EDT</pubDate>
+      <description>GOP internal polling revealed key House seats that Trump won comfortably in 2024 are now competitive.</description>
+    </item>
+    <item>
+      <title>Kansas enters the chat as Senate map tilts further into red territory</title>
+      <link>https://www.politico.com/news/2026/10/02/kansas-becomes-a-surprise-senate-battleground-01105125</link>
+      <guid isPermaLink="false">000001a0-fdf2-d424-abed-fff238120001</guid>
+      <pubDate>Fri, 02 Oct 2026 15:28:29 EDT</pubDate>
+      <description>The Senate GOP’s top PAC is diving into Kansas, a sign that the deep-red state is in play amid a worsening political environment for Republicans.</description>
+    </item>
+  </channel>
+</rss>

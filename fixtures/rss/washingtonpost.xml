@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>World</title>
+    <link>https://www.washingtonpost.com</link>
+    <description>World</description>
+    <item>
+      <title>Trump hits International Criminal Court with sanctions after Nobel goes to former judge</title>
+      <link>https://www.washingtonpost.com/world/2026/10/09/trump-hits-international-criminal-court-with-new-us-sanctions/</link>
+      <guid isPermaLink="true">https://www.washingtonpost.com/world/2026/10/09/trump-hits-international-criminal-court-with-new-us-sanctions/</guid>
+      <pubDate>Fri, 09 Oct 2026 21:00:22 +0000</pubDate>
+      <description>The sanctions are aimed at cutting the ICC off from the global financial system and include threats of punishment for countries that do business with the court.</description>
+    </item>
+    <item>
+      <title>Trump announces diesel deal with Russia in bid to lower prices</title>
+      <link>https://www.washingtonpost.com/politics/2026/10/09/trump-says-putin-will-export-diesel-bid-lower-prices/</link>
+      <guid isPermaLink="true">https://www.washingtonpost.com/politics/2026/10/09/trump-says-putin-will-export-diesel-bid-lower-prices/</guid>
+      <pubDate>Fri, 09 Oct 2026 20:56:04 +0000</pubDate>
+      <description>The amount is small compared with U.S. demand, but the deal aligns the U.S. with Russia and against Ukraine’s efforts to bomb Russian refineries.</description>
+    </item>
+    <item>
+      <title>Navi Pillay, leading human rights jurist, awarded Nobel Peace Prize</title>
+      <link>https://www.washingtonpost.com/world/2026/10/09/navi-pillay-wins-nobel-peace-prize/</link>
+      <guid isPermaLink="true">https://www.washingtonpost.com/world/2026/10/09/navi-pillay-wins-nobel-peace-prize/</guid>
+      <pubDate>Fri, 09 Oct 2026 17:27:11 +0000</pubDate>
+      <description>The trailblazing South African human rights lawyer and International Criminal Court judge was recognized for her work “ensuring that war crimes, crimes against humanity and genocide are prosecuted.”</description>
+    </item>
+  </channel>
+</rss>

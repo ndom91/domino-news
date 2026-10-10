@@ -1,0 +1,31 @@
+{
+  "name": "domino-news",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.8.0",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "pnpm --filter @dn/web dev",
+    "dev:worker": "pnpm --filter @dn/worker dev",
+    "build": "pnpm --filter @dn/web build",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "typecheck": "pnpm -r --parallel typecheck",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "playroom": "pnpm --filter @dn/playroom start",
+    "db:generate": "pnpm --filter @dn/db generate",
+    "db:migrate": "pnpm --filter @dn/db migrate",
+    "cli": "pnpm --filter @dn/worker cli"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.5.15",
+    "@playwright/test": "1.64.0",
+    "@types/node": "^24",
+    "typescript": "7.0.2",
+    "vitest": "5.0.3"
+  }
+}

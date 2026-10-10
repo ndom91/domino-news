@@ -1,2 +1,14 @@
 .DS_Store
 node_modules
+dist
+.output
+.vinxi
+.tanstack
+.nitro
+*.tsbuildinfo
+.env
+.env.local
+infra/compose/certs/*.pem
+playwright-report
+test-results
+playroom/dist
