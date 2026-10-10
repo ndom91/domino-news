@@ -244,3 +244,39 @@ describe('passkey endpoints', () => {
     expect(await authed.json()).toEqual([])
   })
 })
+
+describe('publisher coverage', () => {
+  it('lists outlets with stats consistent with story membership', async () => {
+    const res = await call('/api/v1/publishers')
+    expect(res.status).toBe(200)
+    const { publisherListResponseSchema } = await import('@dn/schemas')
+    const body = publisherListResponseSchema.parse(await res.json())
+    expect(body.items.length).toBe(12)
+    for (const p of body.items) {
+      const { rows } = await h.ctx.pool.query(
+        `select count(distinct sa.story_id)::int as n from story_article sa
+         join article a on a.id = sa.article_id join story s on s.id = sa.story_id
+         where a.publisher_id = $1 and sa.removed_at is null and s.published_at is not null`,
+        [p.id],
+      )
+      expect(p.storiesCovered, p.name).toBe(rows[0].n)
+      expect(p.exclusives).toBeLessThanOrEqual(p.storiesCovered)
+      expect(p.firstReports).toBeLessThanOrEqual(p.storiesCovered)
+    }
+    // Every matrix row is a multi-outlet story with exactly one-or-more first reporters.
+    for (const story of body.matrix.stories) {
+      expect(story.coverage.length).toBeGreaterThan(1)
+      expect(story.coverage.some((c) => c.first)).toBe(true)
+    }
+  })
+
+  it('returns a publisher with recent stories and co-coverage, or 404', async () => {
+    const { publisherDetailSchema } = await import('@dn/schemas')
+    const res = await call('/api/v1/publishers/bbc')
+    expect(res.status).toBe(200)
+    const bbc = publisherDetailSchema.parse(await res.json())
+    expect(bbc.recentStories.length).toBe(bbc.storiesCovered)
+    expect(bbc.coCoverage.every((c) => c.publisher.slug !== 'bbc')).toBe(true)
+    expect((await call('/api/v1/publishers/nope')).status).toBe(404)
+  })
+})

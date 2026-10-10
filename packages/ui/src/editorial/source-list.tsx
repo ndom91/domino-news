@@ -1,9 +1,22 @@
 import type { StorySource } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import type { LinkLike } from './story-row.tsx'
 import { Timestamp } from './time.tsx'
 
 /** Original reporting for a Story. Links open the publisher's article; no text is reproduced beyond the feed description. */
-export function SourceList({ sources }: { sources: StorySource[] }) {
+const DefaultLink: LinkLike = ({ to, className, children }) => (
+  <a href={to} className={className}>
+    {children}
+  </a>
+)
+
+export function SourceList({
+  sources,
+  Link = DefaultLink,
+}: {
+  sources: StorySource[]
+  Link?: LinkLike
+}) {
   return (
     <ol className="flex flex-col divide-y divide-border border-y border-border">
       {sources.map((s) => (
@@ -13,7 +26,12 @@ export function SourceList({ sources }: { sources: StorySource[] }) {
           className="scroll-mt-24 py-4 target:bg-accent-subtle"
         >
           <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-sm font-semibold text-text">{s.publisher.name}</span>
+            <Link
+              to={`/publishers/${s.publisher.slug}`}
+              className="text-sm font-semibold text-text hover:underline underline-offset-4"
+            >
+              {s.publisher.name}
+            </Link>
             <Timestamp iso={s.publishedAt ?? s.observedAt} />
             <span
               className={cx(

@@ -1,4 +1,4 @@
-import type { NarrativeDetail, StoryDetail, StoryListItem } from '@dn/schemas'
+import type { CoverageMatrix, NarrativeDetail, StoryDetail, StoryListItem } from '@dn/schemas'
 
 // Deterministic view-model fixtures for Playroom and component tests. Headlines mirror the
 // RSS fixture set; summaries are illustrative.
@@ -170,5 +170,34 @@ export const fixtureNarrative: NarrativeDetail = {
     { id: 'e2', fromStoryId: fixtureStory.id, toStoryId: 'sty_icc', relation: 'related_to' },
     { id: 'e3', fromStoryId: 'sty_reax', toStoryId: fixtureStory.id, relation: 'branches_from' },
     { id: 'e4', fromStoryId: 'sty_reax', toStoryId: 'sty_icc', relation: 'responds_to' },
+  ],
+}
+
+export const fixtureCoverage: CoverageMatrix = {
+  publishers: Object.values(fixturePublishers),
+  stories: [
+    {
+      id: fixtureStory.id,
+      slug: fixtureStory.slug,
+      title: fixtureStory.title,
+      lastUpdatedAt: fixtureStory.lastUpdatedAt,
+      coverage: [
+        { publisherId: 'pub_nytimes', first: true },
+        { publisherId: 'pub_guardian', first: false },
+        { publisherId: 'pub_france24', first: false },
+        { publisherId: 'pub_washingtonpost', first: false },
+      ],
+    },
+    {
+      id: 'sty_trump',
+      slug: 'trump-attacks-norway',
+      title: 'Trump attacks Norway over Nobel snub',
+      lastUpdatedAt: '2026-10-10T07:00:00.000Z',
+      coverage: [
+        { publisherId: 'pub_bbc', first: true },
+        { publisherId: 'pub_guardian', first: false },
+        { publisherId: 'pub_aljazeera', first: false },
+      ],
+    },
   ],
 }

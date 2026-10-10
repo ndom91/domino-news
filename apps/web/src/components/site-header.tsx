@@ -6,6 +6,7 @@ import { authClient } from '../lib/auth-client.ts'
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
   { to: '/narratives', label: 'Narratives', exact: false },
+  { to: '/publishers', label: 'Publishers', exact: false },
   { to: '/search', label: 'Search', exact: false },
   { to: '/ops', label: 'Pipeline', exact: false },
 ] as const

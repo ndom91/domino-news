@@ -127,7 +127,7 @@ function StoryPage() {
               Headlines and descriptions as each outlet published them in its feed. Open a link to
               read the full article on the publisher's site.
             </p>
-            <SourceList sources={story.sources} />
+            <SourceList sources={story.sources} Link={RouterLink} />
           </section>
 
           {narrative.data ? (

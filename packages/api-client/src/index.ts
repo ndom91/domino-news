@@ -8,8 +8,10 @@ import {
   type OpsAction,
   type OpsStatus,
   opsStatusSchema,
-  type PublisherRef,
-  publisherRefSchema,
+  type PublisherDetail,
+  type PublisherListResponse,
+  publisherDetailSchema,
+  publisherListResponseSchema,
   type SearchQuery,
   type SearchResponse,
   type StoryDetail,
@@ -41,8 +43,6 @@ export interface ApiClientOptions {
   /** Extra headers per request, e.g. `authorization: Bearer <token>` on native. */
   headers?: () => Record<string, string>
 }
-
-const publisherListSchema = z.object({ items: z.array(publisherRefSchema) })
 
 /** Typed client for /api/v1. Framework-free; works in browsers, Node and React Native. */
 export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
@@ -107,7 +107,11 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
     search: (query: Partial<SearchQuery> & { q: string }, signal?: AbortSignalLike) =>
       request<SearchResponse>(searchResponseSchema, `/search${qs(query)}`, { signal }),
     listPublishers: (signal?: AbortSignalLike) =>
-      request<{ items: PublisherRef[] }>(publisherListSchema, '/publishers', { signal }),
+      request<PublisherListResponse>(publisherListResponseSchema, '/publishers', { signal }),
+    getPublisher: (slug: string, signal?: AbortSignalLike) =>
+      request<PublisherDetail>(publisherDetailSchema, `/publishers/${encodeURIComponent(slug)}`, {
+        signal,
+      }),
     getOpsStatus: (signal?: AbortSignalLike) =>
       request<OpsStatus>(opsStatusSchema, '/ops/status', { signal }),
     runOpsAction: (action: OpsAction['action']) =>

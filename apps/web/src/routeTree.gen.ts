@@ -16,6 +16,8 @@ import { Route as OpsRouteImport } from './routes/ops'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as NarrativesIndexRouteImport } from './routes/narratives/index'
 import { Route as NarrativesSlugRouteImport } from './routes/narratives/$slug'
+import { Route as PublishersIndexRouteImport } from './routes/publishers/index'
+import { Route as PublishersSlugRouteImport } from './routes/publishers/$slug'
 import { Route as StoriesSlugRouteImport } from './routes/stories/$slug'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
@@ -55,6 +57,16 @@ const NarrativesSlugRoute = NarrativesSlugRouteImport.update({
   path: '/narratives/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublishersIndexRoute = PublishersIndexRouteImport.update({
+  id: '/publishers/',
+  path: '/publishers/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PublishersSlugRoute = PublishersSlugRouteImport.update({
+  id: '/publishers/$slug',
+  path: '/publishers/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StoriesSlugRoute = StoriesSlugRouteImport.update({
   id: '/stories/$slug',
   path: '/stories/$slug',
@@ -78,8 +90,10 @@ export interface FileRoutesByFullPath {
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
+  '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
   '/narratives/': typeof NarrativesIndexRoute
+  '/publishers/': typeof PublishersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
 }
@@ -90,8 +104,10 @@ export interface FileRoutesByTo {
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
+  '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
   '/narratives': typeof NarrativesIndexRoute
+  '/publishers': typeof PublishersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
 }
@@ -103,8 +119,10 @@ export interface FileRoutesById {
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
+  '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
   '/narratives/': typeof NarrativesIndexRoute
+  '/publishers/': typeof PublishersIndexRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/v1/$': typeof ApiV1SplatRoute
 }
@@ -117,8 +135,10 @@ export interface FileRouteTypes {
     | '/ops'
     | '/search'
     | '/narratives/$slug'
+    | '/publishers/$slug'
     | '/stories/$slug'
     | '/narratives/'
+    | '/publishers/'
     | '/api/auth/$'
     | '/api/v1/$'
   fileRoutesByTo: FileRoutesByTo
@@ -129,8 +149,10 @@ export interface FileRouteTypes {
     | '/ops'
     | '/search'
     | '/narratives/$slug'
+    | '/publishers/$slug'
     | '/stories/$slug'
     | '/narratives'
+    | '/publishers'
     | '/api/auth/$'
     | '/api/v1/$'
   id:
@@ -141,8 +163,10 @@ export interface FileRouteTypes {
     | '/ops'
     | '/search'
     | '/narratives/$slug'
+    | '/publishers/$slug'
     | '/stories/$slug'
     | '/narratives/'
+    | '/publishers/'
     | '/api/auth/$'
     | '/api/v1/$'
   fileRoutesById: FileRoutesById
@@ -154,8 +178,10 @@ export interface RootRouteChildren {
   OpsRoute: typeof OpsRoute
   SearchRoute: typeof SearchRoute
   NarrativesSlugRoute: typeof NarrativesSlugRoute
+  PublishersSlugRoute: typeof PublishersSlugRoute
   StoriesSlugRoute: typeof StoriesSlugRoute
   NarrativesIndexRoute: typeof NarrativesIndexRoute
+  PublishersIndexRoute: typeof PublishersIndexRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiV1SplatRoute: typeof ApiV1SplatRoute
 }
@@ -211,6 +237,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NarrativesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/publishers/': {
+      id: '/publishers/'
+      path: '/publishers'
+      fullPath: '/publishers/'
+      preLoaderRoute: typeof PublishersIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/publishers/$slug': {
+      id: '/publishers/$slug'
+      path: '/publishers/$slug'
+      fullPath: '/publishers/$slug'
+      preLoaderRoute: typeof PublishersSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stories/$slug': {
       id: '/stories/$slug'
       path: '/stories/$slug'
@@ -242,8 +282,10 @@ const rootRouteChildren: RootRouteChildren = {
   OpsRoute: OpsRoute,
   SearchRoute: SearchRoute,
   NarrativesSlugRoute: NarrativesSlugRoute,
+  PublishersSlugRoute: PublishersSlugRoute,
   StoriesSlugRoute: StoriesSlugRoute,
   NarrativesIndexRoute: NarrativesIndexRoute,
+  PublishersIndexRoute: PublishersIndexRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiV1SplatRoute: ApiV1SplatRoute,
 }

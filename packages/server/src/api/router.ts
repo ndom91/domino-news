@@ -1,4 +1,3 @@
-import { schema } from '@dn/db'
 import {
   type ApiErrorBody,
   type ApiErrorCode,
@@ -6,10 +5,10 @@ import {
   searchQuerySchema,
   summaryEditRequestSchema,
 } from '@dn/schemas'
-import { asc } from 'drizzle-orm'
 import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
+import { getPublisher, listPublishers } from '../publishers.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { DomainError, editSummary } from '../story-service.ts'
@@ -120,19 +119,12 @@ const routes: Route[] = [
     if (!narrative) throw new HttpError('not_found', 'narrative not found')
     return json(narrative)
   }),
-  route('GET', '/api/v1/publishers', async ({ ctx }) =>
-    json({
-      items: await ctx.db
-        .select({
-          id: schema.publisher.id,
-          slug: schema.publisher.slug,
-          name: schema.publisher.name,
-          domain: schema.publisher.domain,
-        })
-        .from(schema.publisher)
-        .orderBy(asc(schema.publisher.name)),
-    }),
-  ),
+  route('GET', '/api/v1/publishers', async ({ ctx }) => json(await listPublishers(ctx.db))),
+  route('GET', '/api/v1/publishers/:slug', async ({ ctx, params }) => {
+    const publisher = await getPublisher(ctx.db, params.slug ?? '')
+    if (!publisher) throw new HttpError('not_found', 'publisher not found')
+    return json(publisher)
+  }),
   route('GET', '/api/v1/search', async ({ ctx, url }) => {
     const query = searchQuerySchema.parse(Object.fromEntries(url.searchParams))
     try {

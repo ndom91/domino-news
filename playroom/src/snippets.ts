@@ -90,4 +90,9 @@ export default [
     name: 'NarrativeGraph',
     code: '<div className="max-w-2xl"><NarrativeGraph narrative={fixtureNarrative} currentStoryId="sty_pillay" /></div>',
   },
+  {
+    group: 'Editorial',
+    name: 'CoverageMatrix',
+    code: '<CoverageMatrix matrix={fixtureCoverage} />',
+  },
 ]

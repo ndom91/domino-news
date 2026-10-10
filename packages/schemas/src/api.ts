@@ -32,6 +32,37 @@ export const publisherRefSchema = z.object({
 })
 export type PublisherRef = z.infer<typeof publisherRefSchema>
 
+export const publisherStatsSchema = publisherRefSchema.extend({
+  countryCode: z.string().nullable(),
+  bodyPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
+  storiesCovered: z.number().int().nonnegative(),
+  firstReports: z.number().int().nonnegative(),
+  exclusives: z.number().int().nonnegative(),
+  articleCount: z.number().int().nonnegative(),
+  lastSeenAt: z.string().nullable(),
+})
+export type PublisherStats = z.infer<typeof publisherStatsSchema>
+
+export const coverageMatrixSchema = z.object({
+  publishers: z.array(publisherRefSchema),
+  stories: z.array(
+    z.object({
+      id: z.string(),
+      slug: z.string(),
+      title: z.string(),
+      lastUpdatedAt: z.string(),
+      coverage: z.array(z.object({ publisherId: z.string(), first: z.boolean() })),
+    }),
+  ),
+})
+export type CoverageMatrix = z.infer<typeof coverageMatrixSchema>
+
+export const publisherListResponseSchema = z.object({
+  items: z.array(publisherStatsSchema),
+  matrix: coverageMatrixSchema,
+})
+export type PublisherListResponse = z.infer<typeof publisherListResponseSchema>
+
 export const storySourceSchema = z.object({
   articleId: z.string(),
   title: z.string(),
@@ -283,3 +314,14 @@ export const opsActionSchema = z.object({
   action: z.enum(['pause_backfill', 'resume_backfill', 'poll_all_feeds', 'rebuild_search']),
 })
 export type OpsAction = z.infer<typeof opsActionSchema>
+
+export const publisherDetailSchema = publisherStatsSchema.extend({
+  languages: z.array(z.string()),
+  policyNote: z.string().nullable(),
+  policyReviewedAt: z.string().nullable(),
+  recentStories: z.array(storyListItemSchema),
+  coCoverage: z.array(
+    z.object({ publisher: publisherRefSchema, sharedStories: z.number().int().nonnegative() }),
+  ),
+})
+export type PublisherDetail = z.infer<typeof publisherDetailSchema>

@@ -13,6 +13,7 @@ export const queryKeys = {
   narrative: (id: string) => ['narratives', 'detail', id] as const,
   search: (query: Partial<SearchQuery> & { q: string }) => ['search', query] as const,
   publishers: () => ['publishers'] as const,
+  publisher: (slug: string) => ['publishers', 'detail', slug] as const,
   ops: () => ['ops', 'status'] as const,
 }
 
@@ -57,6 +58,12 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.publishers(),
         queryFn: ({ signal }) => api.listPublishers(signal),
         staleTime: 10 * 60_000,
+      }),
+    publisher: (slug: string) =>
+      queryOptions({
+        queryKey: queryKeys.publisher(slug),
+        queryFn: ({ signal }) => api.getPublisher(slug, signal),
+        staleTime: 60_000,
       }),
     ops: () =>
       queryOptions({

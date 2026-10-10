@@ -53,6 +53,13 @@ test('feed → story → narrative → search', async ({ page }) => {
   await nodes.first().click()
   await expect(page).toHaveURL(/\/stories\//)
 
+  // Publisher coverage
+  await page.goto('/publishers')
+  await expect(page.getByRole('table').first()).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+  await page.getByRole('row').nth(1).getByRole('link').first().click()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+
   // Search (hybrid or keyword fallback)
   await page.goto('/search?q=nobel')
   await expect(page.getByText(/results ·/)).toBeVisible()
