@@ -27,11 +27,11 @@ export const FONT_FAMILIES = {
 } as const
 
 export const COLORS_LIGHT = {
-  canvas: '#f7f6f2',
+  canvas: '#f6f7f5',
   surface: '#ffffff',
   text: '#1b1f1e',
   textMuted: '#6a716e',
-  border: '#dedbd2',
+  border: '#dadfda',
   accent: '#2b6b5e',
   error: '#a33a2c',
 } as const

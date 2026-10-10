@@ -1,0 +1,30 @@
+{
+  "name": "@dn/playroom",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "playroom start",
+    "build": "playroom build",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@dn/design-tokens": "workspace:*",
+    "@dn/schemas": "workspace:*",
+    "@dn/ui": "workspace:*",
+    "react": "19.3.0",
+    "react-dom": "19.3.0"
+  },
+  "devDependencies": {
+    "@babel/preset-typescript": "^7",
+    "@tailwindcss/postcss": "4.3.3",
+    "@types/react": "^19",
+    "babel-loader": "^10",
+    "css-loader": "^7",
+    "playroom": "1.4.0",
+    "postcss": "^8",
+    "postcss-loader": "^8",
+    "style-loader": "^4",
+    "tailwindcss": "4.3.3"
+  }
+}

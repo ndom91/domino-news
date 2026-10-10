@@ -12,9 +12,9 @@
   color-scheme: light;
 
   /* Surfaces */
-  --dn-canvas: #f7f6f2;
+  --dn-canvas: #f6f7f5;
   --dn-surface: #ffffff;
-  --dn-surface-sunken: #efede7;
+  --dn-surface-sunken: #eceeea;
   --dn-elevated: #ffffff;
   --dn-overlay-scrim: rgb(20 22 21 / 0.36);
 
@@ -25,8 +25,8 @@
   --dn-text-inverse: #f7f6f2;
 
   /* Lines */
-  --dn-border: #dedbd2;
-  --dn-border-strong: #b9b5aa;
+  --dn-border: #dadfda;
+  --dn-border-strong: #aeb5b0;
   --dn-rule: #1b1f1e;
 
   /* Interaction */

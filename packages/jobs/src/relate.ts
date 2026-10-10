@@ -1,0 +1,273 @@
+import { type Db, schema, withTransaction } from '@dn/db'
+import { ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
+import type { StoryInput } from '@dn/inference'
+import { type AnalysisJob, touchNarrative, touchStory } from '@dn/server'
+import { and, asc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
+import type { WorkerContext } from './context.ts'
+import { loadStoryInput } from './inputs.ts'
+import { THRESHOLDS } from './match.ts'
+import { withAnalysisRun } from './provenance.ts'
+
+const MAX_CANDIDATES = 3
+const MAX_NARRATIVE_COMPONENT = 40
+
+interface VectorHit {
+  document: { id: string }
+  vector_distance?: number
+}
+
+/**
+ * After a Story has a summary: embed it, look for related published Stories, ask the
+ * model how they relate, add valid typed edges, then update narrative membership.
+ */
+export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
+  const [story] = await ctx.db.select().from(schema.story).where(eq(schema.story.id, job.targetId))
+  if (!story?.publishedAt || story.currentSummaryId !== job.inputFingerprint)
+    return { status: 'stale' }
+  const input = await loadStoryInput(ctx.db, story.id)
+  if (!input) return { status: 'stale' }
+
+  const [vector] = await ctx.gpu.embeddings.run(job.priorityClass, () =>
+    ctx.inference.embeddings.embedDocuments([{ title: input.title, text: input.summary ?? '' }]),
+  )
+  if (!vector) throw new Error('empty story embedding')
+  await withTransaction(ctx.pool, async (tx) => {
+    await tx.db.update(schema.story).set({ embedding: vector }).where(eq(schema.story.id, story.id))
+    await touchStory(tx.db, story.id, 'story.embedded', story.lastUpdatedAt)
+  })
+
+  const { results } = await ctx.ts.multiSearch<{ hits?: VectorHit[] }>([
+    {
+      collection: 'stories',
+      q: '*',
+      vector_query: `embedding:([${vector.join(',')}], k:10)`,
+      filter_by: `id:!=${story.id}`,
+      exclude_fields: 'embedding,summary',
+      per_page: 10,
+    },
+  ])
+  const { relateMin, autoSame } = THRESHOLDS[ctx.inference.mode]
+  const candidates = (results[0]?.hits ?? [])
+    .map((h) => ({ id: h.document.id, similarity: 1 - (h.vector_distance ?? 1) }))
+    // Near-duplicates are left for a future merge flow rather than linked.
+    .filter((c) => c.similarity >= relateMin && c.similarity < autoSame)
+    .slice(0, MAX_CANDIDATES)
+
+  let added = 0
+  for (const candidate of candidates) {
+    if (
+      await createEdgeIfRelated(
+        ctx,
+        job,
+        input,
+        story.firstObservedAt,
+        candidate.id,
+        candidate.similarity,
+      )
+    ) {
+      added++
+    }
+  }
+  await assignNarrative(ctx, job, story.id)
+  return { status: 'ok', candidates: candidates.length, added }
+}
+
+async function createEdgeIfRelated(
+  ctx: WorkerContext,
+  job: AnalysisJob,
+  self: StoryInput,
+  selfFirstObservedAt: Date,
+  otherId: string,
+  similarity: number,
+) {
+  const existing = await activeEdges(ctx.db)
+  const linked = existing.some(
+    (e) =>
+      (e.fromStoryId === self.storyId && e.toStoryId === otherId) ||
+      (e.fromStoryId === otherId && e.toStoryId === self.storyId),
+  )
+  if (linked) return false
+  const [other] = await ctx.db
+    .select()
+    .from(schema.story)
+    .where(and(eq(schema.story.id, otherId), isNotNull(schema.story.publishedAt)))
+  const otherInput = other ? await loadStoryInput(ctx.db, otherId) : null
+  if (!other || !otherInput) return false
+
+  const selfIsNewer = selfFirstObservedAt >= other.firstObservedAt
+  const newer = selfIsNewer ? self : otherInput
+  const older = selfIsNewer ? otherInput : self
+  const { runId, result } = await withAnalysisRun(
+    ctx.db,
+    {
+      operation: 'story_relationship',
+      targetType: 'story',
+      targetId: newer.storyId,
+      inputFingerprint: `${newer.storyId}|${older.storyId}|${job.inputFingerprint}`,
+      modelId: ctx.inference.generation.modelId,
+    },
+    () =>
+      ctx.gpu.generation.run(job.priorityClass, () =>
+        ctx.inference.generation.classifyRelationship({ newer, older }),
+      ),
+  )
+  const { decision, relation } = result.output
+  if (decision !== 'related' || !relation) return false
+
+  const edge = { fromStoryId: newer.storyId, toStoryId: older.storyId, relation }
+  const verdict = validateNewEdge(
+    edge,
+    {
+      fromFirstObservedAt: new Date(newer.firstObservedAt),
+      toFirstObservedAt: new Date(older.firstObservedAt),
+    },
+    existing,
+  )
+  if (!verdict.ok) {
+    console.warn(`[relate] rejected edge ${edge.fromStoryId}->${edge.toStoryId}: ${verdict.reason}`)
+    return false
+  }
+  await withTransaction(ctx.pool, async (tx) => {
+    await tx.db
+      .insert(schema.storyRelationship)
+      .values({
+        id: newId(ID_PREFIX.storyRelationship),
+        ...edge,
+        analysisRunId: runId,
+        confidence: similarity,
+      })
+      .onConflictDoNothing()
+    await touchStory(tx.db, edge.fromStoryId, 'story.related')
+    await touchStory(tx.db, edge.toStoryId, 'story.related')
+  })
+  return true
+}
+
+function activeEdges(db: Db) {
+  return db
+    .select({
+      fromStoryId: schema.storyRelationship.fromStoryId,
+      toStoryId: schema.storyRelationship.toStoryId,
+      relation: schema.storyRelationship.relation,
+    })
+    .from(schema.storyRelationship)
+    .where(isNull(schema.storyRelationship.supersededAt))
+}
+
+/** Stories reachable from `storyId` through active edges (bounded BFS). */
+async function component(db: Db, storyId: string) {
+  const seen = new Set([storyId])
+  let frontier = [storyId]
+  while (frontier.length > 0 && seen.size < MAX_NARRATIVE_COMPONENT) {
+    const edges = await db
+      .select()
+      .from(schema.storyRelationship)
+      .where(
+        and(
+          isNull(schema.storyRelationship.supersededAt),
+          or(
+            inArray(schema.storyRelationship.fromStoryId, frontier),
+            inArray(schema.storyRelationship.toStoryId, frontier),
+          ),
+        ),
+      )
+    const next: string[] = []
+    for (const e of edges) {
+      for (const id of [e.fromStoryId, e.toStoryId]) {
+        if (!seen.has(id)) {
+          seen.add(id)
+          next.push(id)
+        }
+      }
+    }
+    frontier = next
+  }
+  return [...seen]
+}
+
+/**
+ * Connected Stories share a Narrative. Joins the oldest existing Narrative in the
+ * component, or creates one. Narratives are never merged automatically.
+ */
+async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: string) {
+  const members = await component(ctx.db, storyId)
+  if (members.length < 2) return
+
+  const memberships = await ctx.db
+    .select({ storyId: schema.narrativeStory.storyId, narrative: schema.narrative })
+    .from(schema.narrativeStory)
+    .innerJoin(schema.narrative, eq(schema.narrative.id, schema.narrativeStory.narrativeId))
+    .where(
+      and(inArray(schema.narrativeStory.storyId, members), isNull(schema.narrativeStory.removedAt)),
+    )
+    .orderBy(asc(schema.narrative.createdAt))
+  const target = memberships[0]?.narrative
+  const alreadyIn = new Set(memberships.map((m) => m.storyId))
+  const toAdd = members.filter((id) => !alreadyIn.has(id))
+  if (target && toAdd.length === 0) return
+
+  const stories = (await Promise.all(members.map((id) => loadStoryInput(ctx.db, id, 3)))).filter(
+    (s): s is StoryInput => s !== null,
+  )
+  const { runId, result } = await withAnalysisRun(
+    ctx.db,
+    {
+      operation: 'narrative_title',
+      targetType: 'narrative',
+      targetId: target?.id ?? `new:${storyId}`,
+      inputFingerprint: [...members].sort().join(','),
+      modelId: ctx.inference.generation.modelId,
+    },
+    () =>
+      ctx.gpu.generation.run(job.priorityClass, () =>
+        ctx.inference.generation.titleNarrative({ stories }),
+      ),
+  )
+
+  await withTransaction(ctx.pool, async (tx) => {
+    const now = new Date()
+    const interpretationId = newId(ID_PREFIX.interpretation)
+    const narrativeId = target?.id ?? newId(ID_PREFIX.narrative)
+    await tx.db.insert(schema.interpretation).values({
+      id: interpretationId,
+      type: 'narrative_title',
+      subjectType: 'narrative',
+      subjectId: narrativeId,
+      output: result.output,
+      analysisRunId: runId,
+      supersedesInterpretationId: target?.titleInterpretationId ?? null,
+    })
+    if (target) {
+      await tx.db
+        .update(schema.narrative)
+        .set({
+          title: result.output.title,
+          description: result.output.description,
+          titleInterpretationId: interpretationId,
+        })
+        .where(eq(schema.narrative.id, target.id))
+    } else {
+      await tx.db.insert(schema.narrative).values({
+        id: narrativeId,
+        slug: `${slugify(result.output.title, 60)}-${narrativeId.slice(-6)}`,
+        title: result.output.title,
+        description: result.output.description,
+        updatedAt: now,
+        titleInterpretationId: interpretationId,
+      })
+    }
+    if (toAdd.length > 0) {
+      await tx.db
+        .insert(schema.narrativeStory)
+        .values(toAdd.map((id) => ({ narrativeId, storyId: id, addedAt: now })))
+        .onConflictDoNothing()
+    }
+    await touchNarrative(
+      tx.db,
+      narrativeId,
+      target ? 'narrative.updated' : 'narrative.created',
+      now,
+    )
+    for (const id of toAdd) await touchStory(tx.db, id, 'story.narrative_assigned')
+  })
+}

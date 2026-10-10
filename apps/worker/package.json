@@ -1,0 +1,22 @@
+{
+  "name": "@dn/worker",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/worker.ts",
+    "dev:indexer": "tsx watch --env-file-if-exists=../../.env src/indexer.ts",
+    "start": "tsx --env-file-if-exists=../../.env src/worker.ts",
+    "start:indexer": "tsx --env-file-if-exists=../../.env src/indexer.ts",
+    "cli": "tsx --env-file-if-exists=../../.env src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@dn/db": "workspace:*",
+    "@dn/jobs": "workspace:*",
+    "@dn/server": "workspace:*",
+    "drizzle-orm": "0.45.4",
+    "pg-boss": "12.37.1",
+    "tsx": "^4"
+  }
+}
