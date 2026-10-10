@@ -12,3 +12,6 @@ infra/compose/certs/*.pem
 playwright-report
 test-results
 playroom/dist
+
+# Design handoff archives from Claude Design (large binaries, kept locally)
+docs/*-handoff.zip
