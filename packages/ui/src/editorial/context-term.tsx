@@ -50,7 +50,7 @@ export function ContextExplanation({ item }: { item: StoryContextItem }) {
               </a>
             </span>
           ))}
-          . Written by a language model.
+          .
         </p>
       ) : null}
     </div>

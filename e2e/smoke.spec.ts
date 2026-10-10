@@ -48,7 +48,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   }
   await expect(term.first()).toBeVisible()
   await term.first().click()
-  await expect(page.getByText(/Written by a language model/).first()).toBeVisible()
+  await expect(page.getByText(/^Based on/).first()).toBeVisible()
   await page.keyboard.press('Escape')
   // Claims: grounded statements with the outlets that make them.
   await expect(page.getByRole('heading', { name: 'Claims' })).toBeVisible()
