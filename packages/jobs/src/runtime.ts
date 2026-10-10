@@ -128,7 +128,7 @@ export async function startWorkers(ctx: WorkerContext) {
   await workWithReservedSlots(
     boss,
     QUEUES.embedArticle,
-    2,
+    ctx.config.embeddingConcurrency,
     async (jobs) => {
       await embedArticles(ctx, jobs)
       console.log(`[embed_article] embedded batch of ${jobs.length}`)

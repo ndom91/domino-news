@@ -1,4 +1,4 @@
-import { schema, withTransaction } from '@dn/db'
+import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import { InvalidModelOutputError } from '@dn/inference'
 import {
@@ -78,12 +78,7 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
   return outcome
 }
 
-async function recordPrimarySources(
-  db: Parameters<typeof recordGeneratedSummary>[0],
-  storyId: string,
-  articleId: string,
-  links: string[],
-) {
+async function recordPrimarySources(db: Db, storyId: string, articleId: string, links: string[]) {
   const now = new Date()
   for (const url of links) {
     const observationId = newId(ID_PREFIX.observation)

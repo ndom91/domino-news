@@ -25,7 +25,6 @@ export interface LocalConfig {
   apiKey?: string
   embeddingModel: string
   generationModel: string
-  timeoutMs?: number
 }
 
 const EMBED_BATCH_SIZE = 16
@@ -78,12 +77,7 @@ export function createLocalEmbeddings(config: LocalConfig): EmbeddingProvider {
     for (let i = 0; i < inputs.length; i += EMBED_BATCH_SIZE) {
       const batch = inputs.slice(i, i + EMBED_BATCH_SIZE)
       const json = embeddingResponse.parse(
-        await post(
-          config,
-          '/embeddings',
-          { model: config.embeddingModel, input: batch },
-          config.timeoutMs ?? 60_000,
-        ),
+        await post(config, '/embeddings', { model: config.embeddingModel, input: batch }, 60_000),
       )
       const sorted = [...json.data].sort((a, b) => a.index - b.index)
       // A short or misindexed response would attach vectors to the wrong articles.
@@ -137,7 +131,7 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
             json_schema: { name, strict: true, schema: z.toJSONSchema(schema) },
           },
         },
-        config.timeoutMs ?? 120_000,
+        120_000,
       ),
     )
     const content = json.choices[0]?.message.content ?? ''

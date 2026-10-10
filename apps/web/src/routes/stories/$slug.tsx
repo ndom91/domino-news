@@ -1,4 +1,4 @@
-import { formatDateTime, hostnameOf, relativeTime } from '@dn/domain'
+import { formatDateTime, hostnameOf } from '@dn/domain'
 import {
   Badge,
   Button,
@@ -8,6 +8,7 @@ import {
   SourceList,
   SourceTrace,
   SummaryBlock,
+  Timestamp,
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -69,9 +70,7 @@ function StoryPage() {
               <div className="flex gap-1.5">
                 <dt>Updated</dt>
                 <dd>
-                  <time dateTime={story.lastUpdatedAt} title={formatDateTime(story.lastUpdatedAt)}>
-                    {relativeTime(story.lastUpdatedAt)}
-                  </time>
+                  <Timestamp iso={story.lastUpdatedAt} />
                 </dd>
               </div>
               <div className="flex gap-1.5">

@@ -1,4 +1,4 @@
-import { type Db, schema, withTransaction } from '@dn/db'
+import { type Db, schema, type TxContext, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import {
   type AnalysisJob,
@@ -253,7 +253,7 @@ async function recordMatchInterpretation(
 
 export async function enqueueSummary(
   ctx: WorkerContext,
-  tx: Parameters<typeof sendInTx>[1],
+  tx: TxContext,
   storyId: string,
   priorityClass: AnalysisJob['priorityClass'],
 ) {

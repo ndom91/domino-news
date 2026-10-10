@@ -37,7 +37,6 @@ try {
   switch (positionals[0]) {
     case 'seed':
       await createQueues(ctx.workerBoss)
-      await ensureCollections(ctx.ts)
       console.log(await seedPublishers(ctx.db, ctx.config.fixtureDir))
       break
     case 'ingest':

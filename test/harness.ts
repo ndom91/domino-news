@@ -51,7 +51,6 @@ export function createFakeTypesense() {
     importDocuments: async (collection: string, docs: Record<string, unknown>[]) => {
       for (const doc of docs) coll(collection).set(String(doc.id), doc)
     },
-    health: async () => ({ ok: true }),
     upsert: async (collection: string, doc: Record<string, unknown>) => {
       coll(collection).set(String(doc.id), doc)
       return doc

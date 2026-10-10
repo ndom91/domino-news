@@ -9,7 +9,6 @@ export const QUEUES = {
   rebuildSearch: 'rebuild_search_projection',
   pruneEvents: 'prune_delivered_events',
 } as const
-export type QueueName = (typeof QUEUES)[keyof typeof QUEUES]
 
 export type JobClass = 'interactive' | 'fresh' | 'backfill'
 

@@ -16,7 +16,6 @@ export function createTypesense(baseUrl: string, apiKey: string) {
   }
   return {
     request,
-    health: () => request<{ ok: boolean }>('GET', '/health'),
     upsert: (collection: string, doc: Record<string, unknown>) =>
       request('POST', `/collections/${collection}/documents?action=upsert`, doc),
     /** Bulk upsert (JSONL import). Throws if any document fails. */
