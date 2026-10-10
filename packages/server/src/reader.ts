@@ -339,7 +339,10 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       ]
     }),
     narratives: (await narrativesByStory(db, [id])).get(id) ?? [],
-    context: await storyContext(db, id),
+    // Only entries whose anchor is still in the current text (an edit may have removed it).
+    context: (await storyContext(db, id)).filter((c) =>
+      current?.version.body.includes(c.anchorText),
+    ),
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,
       url: ref.url,

@@ -9,6 +9,7 @@ import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
 import { getPublisher, listPublishers } from '../publishers.ts'
+import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { DomainError, editSummary } from '../story-service.ts'
@@ -109,7 +110,12 @@ const routes: Route[] = [
     const body = await readJson(request, summaryEditRequestSchema)
     const storyId = await resolveStoryId(ctx.db, params.id ?? '')
     if (!storyId) throw new HttpError('not_found', 'story not found')
-    await ctx.db.transaction((tx) => editSummary(tx, { storyId, userId, ...body }))
+    const versionId = await ctx.db.transaction((tx) =>
+      editSummary(tx, { storyId, userId, ...body }),
+    )
+    // Context anchors refer to the old wording; regenerate them for the edited text.
+    const job = analysisJob(storyId, versionId, 'interactive')
+    await (await ctx.boss()).send(QUEUES.generateContext, job.data, job.options)
     const story = await getStory(ctx.db, storyId)
     return json(story)
   }),

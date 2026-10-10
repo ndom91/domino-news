@@ -141,6 +141,13 @@ describe('/api/v1 write endpoints', () => {
     const after = storyDetailSchema.parse(await ok.json())
     expect(after.summary).toMatchObject({ headline: 'Edited headline', origin: 'edited' })
     expect(after.summaryHistory.map((v) => v.versionId)).toContain(baseVersion)
+    // Stale anchors are hidden and regeneration is queued for the edited text.
+    expect(after.context.every((c) => 'Edited body.'.includes(c.anchorText))).toBe(true)
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from pgboss.job where name = 'generate_context' and data->>'inputFingerprint' = $1`,
+      [after.summary?.versionId],
+    )
+    expect(rows[0].n).toBe(1)
 
     const stale = await post(`/api/v1/stories/${story.id}/summary`, {
       headline: 'Again',

@@ -787,14 +787,18 @@ describe('context popovers', () => {
     expect(links.length).toBeGreaterThan(0)
     for (const link of links) {
       const [story] = await db
-        .select({ summary: schema.storySummaryVersion.body })
+        .select({
+          summary: schema.storySummaryVersion.body,
+          editedBy: schema.storySummaryVersion.editedByUserId,
+        })
         .from(schema.story)
         .innerJoin(
           schema.storySummaryVersion,
           eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
         )
         .where(eq(schema.story.id, link.storyId))
-      expect(story?.summary).toContain(link.anchorText)
+      // Human edits regenerate context asynchronously; generated summaries must match now.
+      if (!story?.editedBy) expect(story?.summary).toContain(link.anchorText)
     }
     // Shared subjects are stored once.
     const keys = await db
