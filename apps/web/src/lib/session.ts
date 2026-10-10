@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 
 export interface SessionInfo {
-  user: { id: string; name: string; username: string | null } | null
+  user: { id: string; name: string; username: string | null; isAdmin: boolean } | null
   features: { summaryEditing: boolean; googleSignIn: boolean }
 }
 
@@ -18,6 +18,7 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
             id: session.user.id,
             name: session.user.name,
             username: (session.user as { username?: string | null }).username ?? null,
+            isAdmin: session.user.role === 'admin',
           }
         : null,
       features: {

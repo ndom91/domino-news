@@ -85,6 +85,13 @@
       "when": 1791654401644,
       "tag": "0011_summary_citation_numbers",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1791655835587,
+      "tag": "0012_user_role",
+      "breakpoints": true
     }
   ]
 }

@@ -85,6 +85,7 @@ async function readJson<T>(request: Request, parser: z.ZodType<T>): Promise<T> {
 interface Route {
   method: 'GET' | 'POST'
   pattern: URLPattern
+  adminOnly: boolean
   handler: (args: {
     ctx: ServerContext
     request: Request
@@ -94,9 +95,15 @@ interface Route {
   }) => Promise<Response>
 }
 
-const route = (method: Route['method'], pathname: string, handler: Route['handler']): Route => ({
+const route = (
+  method: Route['method'],
+  pathname: string,
+  handler: Route['handler'],
+  { adminOnly = false } = {},
+): Route => ({
   method,
   pattern: new URLPattern({ pathname }),
+  adminOnly,
   handler,
 })
 
@@ -158,11 +165,18 @@ const routes: Route[] = [
   route('POST', '/api/v1/me/preferences', async ({ ctx, request, userId }) =>
     json(await savePreferences(ctx.db, userId, await readJson(request, userPreferencesSchema))),
   ),
-  route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx))),
-  route('POST', '/api/v1/ops/actions', async ({ ctx, request }) => {
-    await runOpsAction(ctx, await readJson(request, opsActionSchema))
-    return json({ ok: true })
+  route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx)), {
+    adminOnly: true,
   }),
+  route(
+    'POST',
+    '/api/v1/ops/actions',
+    async ({ ctx, request }) => {
+      await runOpsAction(ctx, await readJson(request, opsActionSchema))
+      return json({ ok: true })
+    },
+    { adminOnly: true },
+  ),
 ]
 
 /**
@@ -179,6 +193,8 @@ export async function handleApiRequest(ctx: ServerContext, request: Request): Pr
 
     const session = await ctx.auth.api.getSession({ headers: request.headers })
     if (!session) throw new HttpError('unauthorized', 'sign in required')
+    if (match.adminOnly && session.user.role !== 'admin')
+      throw new HttpError('forbidden', 'admin only')
 
     const params = match.pattern.exec({ pathname: url.pathname })?.pathname.groups ?? {}
     return await match.handler({ ctx, request, url, params, userId: session.user.id })

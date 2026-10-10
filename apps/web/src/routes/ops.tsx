@@ -2,12 +2,16 @@ import { relativeTime } from '@dn/domain'
 import type { OpsAction } from '@dn/schemas'
 import { Badge, Button, Card, Notice, Skeleton } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/ops')({
+  // UI guard only; the /api/v1/ops endpoints enforce admin themselves.
+  beforeLoad: ({ context }) => {
+    if (!context.session.user?.isAdmin) throw redirect({ to: '/' })
+  },
   head: () => ({ meta: [{ title: 'Pipeline · Domino News' }] }),
   component: OpsPage,
 })

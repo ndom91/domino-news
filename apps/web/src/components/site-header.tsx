@@ -9,7 +9,7 @@ const NAV = [
   { to: '/narratives', label: 'Narratives', exact: false },
   { to: '/publishers', label: 'Publishers', exact: false },
   { to: '/search', label: 'Search', exact: false },
-  { to: '/ops', label: 'Pipeline', exact: false },
+  { to: '/ops', label: 'Pipeline', exact: false, adminOnly: true },
 ] as const
 
 /** Always-dark strip: edition date and time, and how much was reported in the last 24 hours. */
@@ -36,7 +36,11 @@ function Strip() {
   )
 }
 
-export function SiteHeader({ user }: { user: { name: string; username: string | null } }) {
+export function SiteHeader({
+  user,
+}: {
+  user: { name: string; username: string | null; isAdmin: boolean }
+}) {
   return (
     <>
       <Strip />
@@ -49,7 +53,7 @@ export function SiteHeader({ user }: { user: { name: string; username: string | 
             aria-label="Primary"
             className="flex gap-7 text-base font-semibold [scrollbar-width:none] max-md:w-full max-md:gap-6 max-md:overflow-x-auto"
           >
-            {NAV.map((item) => (
+            {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}

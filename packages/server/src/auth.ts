@@ -4,6 +4,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
+import { eq } from 'drizzle-orm'
 
 /**
  * Whole app sits behind login: username + password or passkeys (added after a password
@@ -12,6 +13,7 @@ import { bearer, username } from 'better-auth/plugins'
  * Public sign-up is disabled: create accounts with `pnpm cli user:create`.
  * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). It may only create
  * accounts for emails in GOOGLE_ALLOWED_EMAILS, because disableSignUp doesn't cover OAuth.
+ * Roles: CLI-created accounts are admins by default; Google sign-ups are plain users.
  */
 export function createAuth(db: Db, env = process.env) {
   const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:4000'
@@ -54,6 +56,8 @@ export function createAuth(db: Db, env = process.env) {
         },
       },
     },
+    // input: false keeps clients from setting their own role at sign-up or via update-user.
+    user: { additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } } },
     session: { expiresIn: 60 * 60 * 24 * 30 },
     plugins: [
       username(),
@@ -66,10 +70,12 @@ export function createAuth(db: Db, env = process.env) {
 
 export type Auth = ReturnType<typeof createAuth>
 
+export type UserRole = 'admin' | 'user'
+
 /** Server-side account creation, bypassing the disabled public sign-up endpoint. */
 export async function createUserAccount(
   auth: Auth,
-  input: { username: string; password: string; name?: string },
+  input: { username: string; password: string; name?: string; role?: UserRole },
 ) {
   const ctx = await auth.$context
   const normalized = input.username.trim().toLowerCase()
@@ -80,6 +86,7 @@ export async function createUserAccount(
       emailVerified: false,
       username: normalized,
       displayUsername: input.username,
+      role: input.role ?? 'admin',
     },
     { method: 'admin' },
   )
@@ -95,5 +102,15 @@ export async function createUserAccount(
     await ctx.internalAdapter.deleteUser(user.id)
     throw error
   }
+  return user
+}
+
+export async function setUserRole(db: Db, username: string, role: UserRole) {
+  const [user] = await db
+    .update(schema.authUser)
+    .set({ role, updatedAt: new Date() })
+    .where(eq(schema.authUser.username, username.trim().toLowerCase()))
+    .returning({ id: schema.authUser.id })
+  if (!user) throw new Error(`no user with username ${username}`)
   return user
 }

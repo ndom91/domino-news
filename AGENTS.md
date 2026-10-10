@@ -36,7 +36,8 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm db:generate` / `pnpm db:migrate` | Drizzle migrations |
 | `pnpm cli seed` | Upsert publishers and feeds |
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
-| `pnpm cli user:create --username u --password p` | Create an account (public sign-up is disabled) |
+| `pnpm cli user:create --username u --password p [--role user]` | Create an account (public sign-up is disabled). CLI accounts are admins unless `--role user` |
+| `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
@@ -101,8 +102,8 @@ GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=&region=
 GET  /api/v1/publishers                  # outlet stats + who-covered-what matrix
 GET  /api/v1/publishers/:slug            # stats, source-use policy, recent stories, co-coverage
-GET  /api/v1/ops/status
-POST /api/v1/ops/actions                  # pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
+GET  /api/v1/ops/status                  # admin only
+POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
 GET  /api/v1/me/preferences              # { edition: region | null }
 POST /api/v1/me/preferences
 ```
@@ -131,7 +132,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Article bodies:** 10 of 41 seeded publishers allow transient bodies (open licences or public domain, commercial use allowed). Federal Register and EU Commission pages need an API or a JS-capable fetcher, so they fall back to metadata for now. Fixture mode only has captured RSS for the original 12 publishers. The policy review was best-effort, not legal advice; get permission before production ingestion.
 - **Matching thresholds** are calibrated on about 34 articles only (see doc 006).
 - **Merge/split:** the data model and alias resolution exist; there is no operation or UI.
-- **Ops page** is a diagnostics view, not an admin product.
+- **Ops page** is a diagnostics view for admins (`role = admin`), not an admin product.
 - **Claims evidence** needs primary sources, which are only discovered from publishers that allow body processing. All seeded publishers are `metadata_only`, so evidence links stay empty for now.
 
 ## Deferred (per doc 005)

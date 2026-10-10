@@ -9,6 +9,8 @@ import {
   resetIngestedData,
   resetStoryGraph,
   setBackfillPaused,
+  setUserRole,
+  type UserRole,
 } from '@dn/server'
 import { bootWorkerContext } from './boot.ts'
 
@@ -16,7 +18,8 @@ const USAGE = `Usage: pnpm cli <command> [options]
 
   seed                              Upsert curated publishers and feeds (fixtures/publishers.json)
   ingest [--variant rss|rss-update] Poll every feed once now (fixture or live, per INGEST_MODE)
-  user:create --username u --password p
+  user:create --username u --password p [--role admin|user]   (default admin)
+  user:role --username u --role admin|user
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
@@ -29,10 +32,16 @@ const { positionals, values } = parseArgs({
   options: {
     username: { type: 'string' },
     password: { type: 'string' },
+    role: { type: 'string' },
     variant: { type: 'string', default: 'rss' },
     'reset-graph': { type: 'boolean', default: false },
   },
 })
+
+function parseRole(role: string): UserRole {
+  if (role !== 'admin' && role !== 'user') throw new Error('--role must be admin or user')
+  return role
+}
 
 // Everything keyed on a Story's current summary version.
 const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
@@ -55,8 +64,15 @@ try {
       const user = await createUserAccount(ctx.auth, {
         username: values.username,
         password: values.password,
+        role: parseRole(values.role ?? 'admin'),
       })
       console.log(`created user ${user.id} (${values.username})`)
+      break
+    }
+    case 'user:role': {
+      if (!values.username || !values.role) throw new Error('--username and --role required')
+      await setUserRole(ctx.db, values.username, parseRole(values.role))
+      console.log(`${values.username} is now ${values.role}`)
       break
     }
     case 'search:rebuild':

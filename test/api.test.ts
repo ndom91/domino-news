@@ -218,6 +218,42 @@ describe('/api/v1 write endpoints', () => {
     const bad = await post('/api/v1/ops/actions', { action: 'drop_database' })
     expect(bad.status).toBe(400)
   })
+
+  it('limits pipeline routes to admins', async () => {
+    await createUserAccount(h.ctx.auth, {
+      username: 'reader',
+      password: 'reader-password',
+      role: 'user',
+    })
+    const res = await h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/sign-in/username', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'http://localhost:3000' },
+        body: JSON.stringify({ username: 'reader', password: 'reader-password' }),
+      }),
+    )
+    const readerToken = res.headers.get('set-auth-token') ?? ''
+    const asReader = (path: string, init: RequestInit = {}) =>
+      handleApiRequest(
+        h.ctx,
+        new Request(`http://localhost:3000${path}`, {
+          ...init,
+          headers: { authorization: `Bearer ${readerToken}`, 'content-type': 'application/json' },
+        }),
+      )
+    expect((await asReader('/api/v1/ops/status')).status).toBe(403)
+    const action = await asReader('/api/v1/ops/actions', {
+      method: 'POST',
+      body: JSON.stringify({ action: 'pause_backfill' }),
+    })
+    expect(action.status).toBe(403)
+    expect(apiErrorSchema.parse(await action.json()).error.code).toBe('forbidden')
+    expect((await asReader('/api/v1/stories')).status).toBe(200)
+
+    const { setUserRole } = await import('@dn/server')
+    await setUserRole(h.ctx.db, 'reader', 'admin')
+    expect((await asReader('/api/v1/ops/status')).status).toBe(200)
+  })
 })
 
 describe('preferences', () => {

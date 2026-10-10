@@ -14,7 +14,7 @@ Usage: scripts/deploy.sh <command>
 
   up                 Build images, start everything (migrations run first), seed publishers
   update             git pull, then the same as `up`
-  user <username>    Create a login (prompts for the password)
+  user <username>    Create an admin login (prompts for the password)
   status             Container state and pipeline status
   logs [service]     Follow logs (all services, or one: web, worker, indexer, ...)
   cli <args...>      Run any CLI command (see AGENTS.md) inside the worker image
