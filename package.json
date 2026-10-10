@@ -23,8 +23,20 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@dn/db": "workspace:*",
+    "@dn/domain": "workspace:*",
+    "@dn/inference": "workspace:*",
+    "@dn/jobs": "workspace:*",
+    "@dn/schemas": "workspace:*",
+    "@dn/server": "workspace:*",
+    "@dn/ui": "workspace:*",
     "@playwright/test": "1.64.0",
     "@types/node": "^24",
+    "@types/pg": "^8",
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1",
+    "pg-boss": "12.37.1",
+    "tsx": "^4",
     "typescript": "7.0.2",
     "vitest": "5.0.3"
   }

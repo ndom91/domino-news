@@ -4,6 +4,9 @@ import {
   createUserAccount,
   ensureCollections,
   getOpsStatus,
+  PIPELINE_VERSION,
+  PRIORITY,
+  QUEUES,
   rebuildSearchIndex,
   setBackfillPaused,
 } from '@dn/server'
@@ -16,7 +19,9 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
   backfill:pause | backfill:resume
-  status                            Print pipeline/queue status as JSON`
+  relate:all                        Re-run story relationship + narrative detection for published stories
+  status                            Print pipeline/queue status as JSON
+  dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
 
 const { positionals, values } = parseArgs({
   allowPositionals: true,
@@ -58,6 +63,55 @@ try {
       await setBackfillPaused(ctx, positionals[0] === 'backfill:pause')
       console.log(positionals[0])
       break
+    case 'dev:reset': {
+      // Observations are append-only; deleting them needs the explicit escape hatch.
+      await ctx.pool.query(`begin;
+        set local dn.allow_observation_delete = 'on';
+        alter table story_summary_version disable trigger story_summary_version_immutable;
+        alter table article_revision disable trigger article_revision_immutable;
+        truncate story_summary_source, story_summary_version, story_source_reference, source_reference,
+          narrative_story, narrative, story_relationship, story_lineage_event, story_alias, story_article,
+          story, interpretation_evidence, interpretation, analysis_run, article_embedding, feed_entry,
+          ingest_run, outbox_event, inbox_event, search_projection_state, observation, article_revision,
+          article, pipeline_control;
+        alter table story_summary_version enable trigger story_summary_version_immutable;
+        alter table article_revision enable trigger article_revision_immutable;
+        update feed set last_polled_at = null, last_status = null, last_error = null, etag = null, last_modified = null;
+        delete from pgboss.job;
+        commit;`)
+      for (const alias of ['stories', 'narratives', 'articles']) {
+        const collection = await ctx.ts
+          .request<{ collection_name: string }>('GET', `/aliases/${alias}`)
+          .catch(() => null)
+        if (collection) await ctx.ts.request('DELETE', `/collections/${collection.collection_name}`)
+        await ctx.ts.request('DELETE', `/aliases/${alias}`).catch(() => {})
+      }
+      await ensureCollections(ctx.ts)
+      console.log('reset complete')
+      break
+    }
+    case 'relate:all': {
+      const { rows } = await ctx.pool.query<{ id: string; current_summary_id: string }>(
+        'select id, current_summary_id from story where published_at is not null order by first_observed_at',
+      )
+      for (const r of rows) {
+        await ctx.workerBoss.send(
+          QUEUES.relateStory,
+          {
+            targetId: r.id,
+            inputFingerprint: r.current_summary_id,
+            pipelineVersion: PIPELINE_VERSION,
+            priorityClass: 'interactive',
+          },
+          {
+            singletonKey: `${r.id}:${r.current_summary_id}:${PIPELINE_VERSION}`,
+            priority: PRIORITY.interactive,
+          },
+        )
+      }
+      console.log(`enqueued ${rows.length} relate jobs`)
+      break
+    }
     case 'status':
       console.log(JSON.stringify(await getOpsStatus(ctx), null, 2))
       break

@@ -15,6 +15,7 @@ const TRACKING_PARAMS = new Set([
   'at_medium',
   'at_campaign',
   'xtor',
+  'maca',
   'mc_cid',
   'mc_eid',
 ])

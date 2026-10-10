@@ -1,4 +1,4 @@
-import { normalizeArticleUrl, stripHtml } from '@dn/domain'
+import { decodeEntities, normalizeArticleUrl, stripHtml } from '@dn/domain'
 import { type ArticleMetadata, articleMetadataSchema } from '@dn/schemas'
 import { XMLParser } from 'fast-xml-parser'
 
@@ -52,12 +52,13 @@ export function parseFeed(xml: string): { items: ArticleMetadata[]; skipped: num
         )
         .find(Boolean) ?? null
     const description = text(item.description ?? item.summary)
+    const guid = text(item.guid ?? item.id)
     const candidate = {
       title: stripHtml(text(item.title) ?? ''),
       description: description ? stripHtml(description) || null : null,
-      canonicalUrl: href ? safeNormalize(href) : '',
+      canonicalUrl: href ? safeNormalize(decodeEntities(href.trim())) : '',
       publishedAt: toIso(item.pubDate ?? item['dc:date'] ?? item.published ?? item.updated),
-      externalGuid: text(item.guid ?? item.id),
+      externalGuid: guid ? decodeEntities(guid) : null,
     }
     const parsed = articleMetadataSchema.safeParse(candidate)
     if (parsed.success) items.push(parsed.data)

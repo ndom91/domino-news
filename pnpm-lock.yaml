@@ -11,12 +11,48 @@ importers:
       '@biomejs/biome':
         specifier: 2.5.15
         version: 2.5.15
+      '@dn/db':
+        specifier: workspace:*
+        version: link:packages/db
+      '@dn/domain':
+        specifier: workspace:*
+        version: link:packages/domain
+      '@dn/inference':
+        specifier: workspace:*
+        version: link:packages/inference
+      '@dn/jobs':
+        specifier: workspace:*
+        version: link:packages/jobs
+      '@dn/schemas':
+        specifier: workspace:*
+        version: link:packages/schemas
+      '@dn/server':
+        specifier: workspace:*
+        version: link:packages/server
+      '@dn/ui':
+        specifier: workspace:*
+        version: link:packages/ui
       '@playwright/test':
         specifier: 1.64.0
         version: 1.64.0
       '@types/node':
         specifier: ^24
         version: 24.19.1
+      '@types/pg':
+        specifier: ^8
+        version: 8.23.1
+      drizzle-orm:
+        specifier: 0.45.4
+        version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1)
+      pg:
+        specifier: 8.23.1
+        version: 8.23.1
+      pg-boss:
+        specifier: 12.37.1
+        version: 12.37.1(@opentelemetry/api@1.9.1)
+      tsx:
+        specifier: ^4
+        version: 4.23.15
       typescript:
         specifier: 7.0.2
         version: 7.0.2

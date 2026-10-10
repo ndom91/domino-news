@@ -28,7 +28,8 @@ export function decodeEntities(input: string): string {
 }
 
 export function stripHtml(input: string): string {
-  return decodeEntities(input.replace(/<[^>]*>/g, ' '))
+  // Decode first so entity-encoded markup (&lt;p&gt;) is stripped too.
+  return decodeEntities(decodeEntities(input).replace(/<[^>]*>/g, ' '))
     .replace(/\s+/g, ' ')
     .trim()
 }

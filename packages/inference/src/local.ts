@@ -29,8 +29,23 @@ export interface LocalConfig {
 }
 
 const EMBED_BATCH_SIZE = 16
+// Short in-call retries smooth over brief gateway blips; longer outages fall
+// through to the job queue's backoff.
+const TRANSIENT_RETRY_DELAYS_MS = [400, 1500]
 
 async function post(config: LocalConfig, path: string, body: unknown, timeoutMs: number) {
+  for (const delay of TRANSIENT_RETRY_DELAYS_MS) {
+    try {
+      return await postOnce(config, path, body, timeoutMs)
+    } catch (error) {
+      if (!(error instanceof InferenceUnavailableError)) throw error
+      await new Promise((resolve) => setTimeout(resolve, delay))
+    }
+  }
+  return postOnce(config, path, body, timeoutMs)
+}
+
+async function postOnce(config: LocalConfig, path: string, body: unknown, timeoutMs: number) {
   let res: Response
   try {
     res = await fetch(`${config.baseUrl.replace(/\/$/, '')}${path}`, {

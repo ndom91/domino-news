@@ -8,7 +8,7 @@ import { loadStoryInput } from './inputs.ts'
 import { THRESHOLDS } from './match.ts'
 import { withAnalysisRun } from './provenance.ts'
 
-const MAX_CANDIDATES = 3
+const MAX_CANDIDATES = 4
 const MAX_NARRATIVE_COMPONENT = 40
 
 interface VectorHit {
@@ -111,8 +111,17 @@ async function createEdgeIfRelated(
         ctx.inference.generation.classifyRelationship({ newer, older }),
       ),
   )
-  const { decision, relation } = result.output
-  if (decision !== 'related' || !relation) return false
+  await ctx.db.insert(schema.interpretation).values({
+    id: newId(ID_PREFIX.interpretation),
+    type: 'story_relationship',
+    subjectType: 'story',
+    subjectId: newer.storyId,
+    output: { ...result.output, olderStoryId: older.storyId, similarity },
+    analysisRunId: runId,
+  })
+  if (result.output.decision !== 'related') return false
+  // "Related" without a specific type still deserves a (symmetric) link.
+  const relation = result.output.relation ?? 'related_to'
 
   const edge = { fromStoryId: newer.storyId, toStoryId: older.storyId, relation }
   const verdict = validateNewEdge(

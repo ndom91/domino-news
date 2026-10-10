@@ -18,7 +18,7 @@ import { withAnalysisRun } from './provenance.ts'
 // Fixture vectors are bag-of-words hashes, so their scale differs from EmbeddingGemma's.
 export const THRESHOLDS = {
   fixture: { autoSame: 0.75, llmMin: 0.2, relateMin: 0.12 },
-  local: { autoSame: 0.93, llmMin: 0.72, relateMin: 0.7 },
+  local: { autoSame: 0.93, llmMin: 0.72, relateMin: 0.6 },
 } as const
 
 const CANDIDATE_WINDOW_SECONDS = 4 * 86_400
@@ -192,7 +192,13 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
     await enqueueSummary(ctx, tx, id, job.priorityClass)
     return id
   })
-  return { status: decision ? 'attached' : 'new_story', storyId }
+  return {
+    status: decision ? 'attached' : 'new_story',
+    storyId,
+    method: decision?.method,
+    bestSimilarity: top ? Number(top[1].toFixed(3)) : null,
+    candidates: ranked.length,
+  }
 }
 
 async function recordMatchInterpretation(

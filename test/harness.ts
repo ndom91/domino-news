@@ -1,0 +1,105 @@
+import { createQueues, PriorityLimiter, type WorkerContext } from '@dn/jobs'
+import { createServerContext, type Typesense } from '@dn/server'
+import { PgBoss } from 'pg-boss'
+
+/** In-memory stand-in for Typesense: enough for upserts, deletes and vector lookups. */
+export function createFakeTypesense() {
+  const collections = new Map<string, Map<string, Record<string, unknown>>>()
+  const coll = (name: string) => {
+    let c = collections.get(name)
+    if (!c) {
+      c = new Map()
+      collections.set(name, c)
+    }
+    return c
+  }
+  const cosine = (a: number[], b: number[]) => {
+    let dot = 0
+    let na = 0
+    let nb = 0
+    for (let i = 0; i < a.length; i++) {
+      dot += (a[i] ?? 0) * (b[i] ?? 0)
+      na += (a[i] ?? 0) ** 2
+      nb += (b[i] ?? 0) ** 2
+    }
+    return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1)
+  }
+  const ts = {
+    collections,
+    request: async () => ({}) as never,
+    health: async () => ({ ok: true }),
+    upsert: async (collection: string, doc: Record<string, unknown>) => {
+      coll(collection).set(String(doc.id), doc)
+      return doc
+    },
+    remove: async (collection: string, id: string) => {
+      coll(collection).delete(id)
+    },
+    multiSearch: async (searches: Record<string, unknown>[]) => ({
+      results: searches.map((s) => {
+        const vq = String(s.vector_query ?? '')
+        const match = vq.match(/\(\[(.*)\],/)
+        const exclude = String(s.filter_by ?? '').match(/id:!=([\w-]+)/)?.[1]
+        const docs = [...coll(String(s.collection)).values()].filter((d) => d.id !== exclude)
+        if (!match?.[1]) return { hits: docs.map((document) => ({ document })) }
+        const vector = match[1].split(',').map(Number)
+        return {
+          hits: docs
+            .filter((d) => Array.isArray(d.embedding))
+            .map((d) => ({
+              document: d,
+              vector_distance: 1 - cosine(vector, d.embedding as number[]),
+            }))
+            .sort((a, b) => a.vector_distance - b.vector_distance)
+            .slice(0, 12),
+        }
+      }),
+    }),
+  }
+  return ts as unknown as Typesense & { collections: typeof collections }
+}
+
+export async function createTestContext() {
+  const base = createServerContext()
+  const ts = createFakeTypesense()
+  const workerBoss = new PgBoss({
+    connectionString: base.config.databaseUrl,
+    max: 3,
+    supervise: false,
+    schedule: false,
+  })
+  workerBoss.on('error', () => {})
+  await workerBoss.start()
+  await createQueues(workerBoss)
+  const ctx: WorkerContext & { ts: ReturnType<typeof createFakeTypesense> } = {
+    ...base,
+    ts,
+    boss: async () => workerBoss,
+    workerBoss,
+    gpu: { embeddings: new PriorityLimiter(2), generation: new PriorityLimiter(2) },
+  }
+  return {
+    ctx,
+    async close() {
+      await workerBoss.stop({ graceful: false })
+      await base.pool.end()
+    },
+  }
+}
+
+/** Removes all domain rows between tests (keeps the schema). */
+export async function truncateAll(ctx: { pool: { query: (q: string) => Promise<unknown> } }) {
+  await ctx.pool.query(`begin;
+    set local dn.allow_observation_delete = 'on';
+    alter table story_summary_version disable trigger story_summary_version_immutable;
+    alter table article_revision disable trigger article_revision_immutable;
+    truncate story_summary_source, story_summary_version, story_source_reference, source_reference,
+      narrative_story, narrative, story_relationship, story_lineage_event, story_alias, story_article,
+      story, interpretation_evidence, interpretation, analysis_run, article_embedding, feed_entry,
+      ingest_run, outbox_event, inbox_event, search_projection_state, observation, article_revision,
+      article, pipeline_control, feed, publisher, auth_session, auth_account, auth_user, auth_verification cascade;
+    alter table story_summary_version enable trigger story_summary_version_immutable;
+    alter table article_revision enable trigger article_revision_immutable;
+    commit;`)
+  await ctx.pool.query('delete from pgboss.job').catch(() => {})
+}

@@ -4,7 +4,7 @@ import type { ArticleInput, StoryInput } from './types.ts'
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@1',
   summarizeStory: 'summarize-story@1',
-  classifyRelationship: 'classify-relationship@1',
+  classifyRelationship: 'classify-relationship@2',
   titleNarrative: 'title-narrative@1',
 } as const
 
@@ -76,8 +76,11 @@ Decide whether NEWER is a development connected to OLDER, and if so pick the rel
 - "responds_to": NEWER is a reaction/response (statement, protest, counter-move) to OLDER.
 - "corrects": NEWER corrects or retracts OLDER.
 - "provides_context_for": NEWER is background that helps explain OLDER.
-- "related_to": connected topic, none of the above clearly applies.
-Answer decision "unrelated" (relation null) when they only share a broad subject area such as "politics" or "technology".
+- "related_to": clearly connected (same people, institutions or events), but none of the above fits.
+NEWER does not need to be caused by OLDER. If NEWER reports an event in connection with OLDER
+(for example "hours after X, Y happened", or the same dispute moving forward), it is connected.
+Answer decision "unrelated" (relation null) only when they merely share a broad subject area such as
+"politics", "technology" or "the war in Ukraine" without a specific link.
 Answer "uncertain" (relation null) when unsure.
 
 NEWER:

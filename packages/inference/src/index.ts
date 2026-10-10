@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs'
+import tls from 'node:tls'
 import { createFixtureEmbeddings, createFixtureGeneration } from './fixture.ts'
 import { createLocalEmbeddings, createLocalGeneration } from './local.ts'
 import type { InferenceProviders } from './types.ts'
@@ -14,6 +16,7 @@ export function createInferenceFromEnv(env = process.env): InferenceProviders {
     return { mode, embeddings: createFixtureEmbeddings(), generation: createFixtureGeneration() }
   }
   if (!env.INFERENCE_BASE_URL) throw new Error('INFERENCE_BASE_URL is required in local mode')
+  if (env.INFERENCE_CA_CERT) trustExtraCa(env.INFERENCE_CA_CERT)
   const config = {
     baseUrl: env.INFERENCE_BASE_URL,
     apiKey: env.INFERENCE_API_KEY || undefined,
@@ -25,4 +28,13 @@ export function createInferenceFromEnv(env = process.env): InferenceProviders {
     embeddings: createLocalEmbeddings(config),
     generation: createLocalGeneration(config),
   }
+}
+
+// Private CA for the inference endpoint (e.g. a LAN or WireGuard host). Unlike
+// NODE_EXTRA_CA_CERTS this also works when env vars come from `--env-file`.
+let caLoaded = false
+function trustExtraCa(path: string) {
+  if (caLoaded) return
+  tls.setDefaultCACertificates([...tls.getCACertificates('default'), readFileSync(path, 'utf8')])
+  caLoaded = true
 }

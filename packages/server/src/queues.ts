@@ -16,7 +16,7 @@ export type JobClass = 'interactive' | 'fresh' | 'backfill'
 export const PRIORITY: Record<JobClass, number> = { interactive: 20, fresh: 10, backfill: 0 }
 
 // Bump when pipeline logic changes in a way that should allow reprocessing.
-export const PIPELINE_VERSION = 'p1'
+export const PIPELINE_VERSION = 'p2'
 
 export interface AnalysisJob {
   targetId: string
