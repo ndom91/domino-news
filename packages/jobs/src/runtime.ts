@@ -135,10 +135,11 @@ export async function startWorkers(ctx: WorkerContext) {
     },
     16,
   )
-  // Matching is serialised so two near-identical articles cannot both start a Story.
-  await boss.work<AnalysisJob>(
+  // Matching runs in parallel; matchArticle serialises only its final write (advisory lock).
+  await workWithReservedSlots(
+    boss,
     QUEUES.matchArticle,
-    { localConcurrency: 1, pollingIntervalSeconds: 1 },
+    genSlots,
     each((job) => matchArticle(ctx, job)),
   )
   await workWithReservedSlots(
@@ -147,7 +148,7 @@ export async function startWorkers(ctx: WorkerContext) {
     genSlots,
     each((job) => summarizeStory(ctx, job)),
   )
-  // Relating is also serialised: it reads and extends the shared story graph.
+  // Relating is serialised: it reads and extends the shared story graph.
   await boss.work<AnalysisJob>(
     QUEUES.relateStory,
     { localConcurrency: 1, pollingIntervalSeconds: 1 },

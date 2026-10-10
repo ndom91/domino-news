@@ -45,10 +45,11 @@ indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
 ```
 
 - **Queues:** pg-boss 12 with the `exclusive` policy. The singleton key is `target:fingerprint:pipelineVersion`, so duplicate in-flight work is rejected.
-- **Priorities:** `interactive=20`, `fresh=10`, `backfill=0`. The embed and summarise queues each have a worker that only takes `priority >= fresh` (reserved slots) plus one shared slot, so backfill never uses more than one slot there. Match and relate run with a single worker (see below).
+- **Priorities:** `interactive=20`, `fresh=10`, `backfill=0`. The embed, match and summarise queues each have a worker that only takes `priority >= fresh` (reserved slots) plus one shared slot, so backfill never uses more than one slot there. Relate runs with a single worker (see below).
 - **GPU caps:** an in-process `PriorityLimiter` per model type (`EMBEDDING_CONCURRENCY`, `GENERATION_CONCURRENCY`), served interactive → fresh → backfill.
 - **Backfill:** articles older than `FRESH_WINDOW_HOURS` are marked `pending_backfill`. A once-a-minute producer admits `BACKFILL_ADMIT_PER_MINUTE` of them (newest first) while total queued embeddings stay under 50. Pausing stops admission (ops page or `pnpm cli backfill:pause`).
-- **Serialised steps:** matching and relating run with concurrency 1, so two near-identical articles cannot both create a Story and graph edits do not race.
+- **Matching** runs in parallel (reserved fresh slots like embed/summarise). Only the final write is serialised: it takes a Postgres advisory lock, re-checks the candidate Stories, and retries the job if a neighbour joined a Story it never evaluated, so two near-identical articles cannot both create a Story.
+- **Relating** runs with concurrency 1, so graph edits do not race.
 - **Retries:** 20 attempts, 10s initial, exponential, capped at 10 minutes: this rides out an inference outage of several hours. The local adapter also retries 502/503/429 twice in-call. Failed jobs stay in pg-boss and appear on the Pipeline page.
 - **Transient bodies:** fetched only for publishers with `transient_body_allowed`, held in memory for one inference call, never logged or queued. Outbound links matching primary-document patterns become `source_reference` rows. **All 12 seeded publishers are `metadata_only`** after a best-effort robots.txt/terms review (see `fixtures/publishers.json`), so this path is implemented but inactive.
 

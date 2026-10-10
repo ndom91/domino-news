@@ -1,4 +1,4 @@
-import { schema, withTransaction } from '@dn/db'
+import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import {
   type AnalysisJob,
@@ -26,6 +26,37 @@ const CANDIDATE_WINDOW_SECONDS = 4 * 86_400
 const MAX_LLM_CANDIDATES = 3
 
 export class NotIndexedYetError extends Error {}
+export class CandidatesChangedError extends Error {}
+
+/** Best similarity per Story among the neighbours, using canonical membership from Postgres. */
+async function rankCandidateStories(
+  db: Db,
+  neighbours: { articleId: string; similarity: number }[],
+  minSimilarity: number,
+) {
+  if (neighbours.length === 0) return []
+  const memberships = await db
+    .select({ articleId: schema.storyArticle.articleId, storyId: schema.storyArticle.storyId })
+    .from(schema.storyArticle)
+    .where(
+      and(
+        inArray(
+          schema.storyArticle.articleId,
+          neighbours.map((n) => n.articleId),
+        ),
+        isNull(schema.storyArticle.removedAt),
+      ),
+    )
+  const storyOf = new Map(memberships.map((m) => [m.articleId, m.storyId]))
+  const bestByStory = new Map<string, number>()
+  for (const n of neighbours) {
+    const storyId = storyOf.get(n.articleId)
+    if (storyId) bestByStory.set(storyId, Math.max(bestByStory.get(storyId) ?? 0, n.similarity))
+  }
+  return [...bestByStory.entries()]
+    .filter(([, s]) => s >= minSimilarity)
+    .sort((a, b) => b[1] - a[1])
+}
 
 interface VectorHit {
   document: { id: string }
@@ -56,8 +87,9 @@ async function similarArticles(
 }
 
 /**
- * Conservative Story assignment for one article. Runs with concurrency 1 so two
- * near-identical articles cannot both create a Story at the same moment.
+ * Conservative Story assignment for one article. Jobs run concurrently; the final write
+ * takes an advisory lock and re-checks candidates, so two near-identical articles cannot
+ * both create a Story.
  */
 export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
   const [row] = await ctx.db
@@ -102,29 +134,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
   const at = row.article.publishedAt ?? row.article.firstSeenAt
   const neighbours = await similarArticles(ctx, job.targetId, row.embedding.embedding, at)
 
-  // Best similarity per Story, using canonical membership from Postgres.
-  const memberships = neighbours.length
-    ? await ctx.db
-        .select({ articleId: schema.storyArticle.articleId, storyId: schema.storyArticle.storyId })
-        .from(schema.storyArticle)
-        .where(
-          and(
-            inArray(
-              schema.storyArticle.articleId,
-              neighbours.map((n) => n.articleId),
-            ),
-            isNull(schema.storyArticle.removedAt),
-          ),
-        )
-    : []
-  const bestByStory = new Map<string, number>()
-  for (const n of neighbours) {
-    const storyId = memberships.find((m) => m.articleId === n.articleId)?.storyId
-    if (storyId) bestByStory.set(storyId, Math.max(bestByStory.get(storyId) ?? 0, n.similarity))
-  }
-  const ranked = [...bestByStory.entries()]
-    .filter(([, s]) => s >= thresholds.llmMin)
-    .sort((a, b) => b[1] - a[1])
+  const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin)
 
   let decision: { storyId: string; similarity: number; method: string; runId?: string } | null =
     null
@@ -165,7 +175,23 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
     }
   }
 
+  // Model calls above run concurrently across jobs; the write below is serialised.
   const storyId = await withTransaction(ctx.pool, async (tx) => {
+    await tx.client.query(`select pg_advisory_xact_lock(hashtext('dn:story-matching'))`)
+    const [alreadyIn] = await tx.db
+      .select({ storyId: schema.storyArticle.storyId })
+      .from(schema.storyArticle)
+      .where(
+        and(eq(schema.storyArticle.articleId, job.targetId), isNull(schema.storyArticle.removedAt)),
+      )
+    if (alreadyIn) return alreadyIn.storyId
+    // A neighbour may have joined a Story we never evaluated while the model was running.
+    // Re-run with full information rather than risk a duplicate Story.
+    const considered = new Set(ranked.map(([id]) => id))
+    const current = await rankCandidateStories(tx.db, neighbours, thresholds.llmMin)
+    if (current.some(([id]) => !considered.has(id))) {
+      throw new CandidatesChangedError(`candidate stories changed for ${job.targetId}; retrying`)
+    }
     const [articleRow] = await loadArticles(tx.db, [job.targetId])
     if (!articleRow) throw new Error('article vanished')
     let id: string

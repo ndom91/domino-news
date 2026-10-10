@@ -8,7 +8,7 @@ import {
   storyInputFingerprint,
   touchStory,
 } from '@dn/server'
-import { and, count, eq, isNotNull, isNull } from 'drizzle-orm'
+import { and, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { drainPipeline } from './drain.ts'
 import { createTestContext, truncateAll } from './harness.ts'
@@ -535,5 +535,98 @@ describe('event retention', () => {
     expect(ids).not.toContain(delivered?.id)
     expect(ids).toContain(pending?.id)
     await db.delete(schema.outboxEvent).where(eq(schema.outboxEvent.id, pending?.id ?? 0))
+  })
+})
+
+describe('concurrent matching', () => {
+  it('puts two near-identical articles matched at the same time into one story', async () => {
+    const { db, ts } = h.ctx
+    const { matchArticle, CandidatesChangedError } = await import('@dn/jobs')
+    const { ID_PREFIX, newId } = await import('@dn/domain')
+    const [publisher] = await db.select().from(schema.publisher).limit(1)
+    if (!publisher) throw new Error('no publisher')
+    const title = 'Glaciologists confirm record-breaking Antarctic ice shelf collapse near Thwaites'
+    const now = new Date()
+    const ids: string[] = []
+    for (const suffix of ['a', 'b']) {
+      const articleId = newId(ID_PREFIX.article)
+      const revisionId = newId(ID_PREFIX.articleRevision)
+      await db.insert(schema.article).values({
+        id: articleId,
+        publisherId: publisher.id,
+        canonicalUrl: `https://example.com/ice-${suffix}-${articleId}`,
+        firstSeenAt: now,
+        publishedAt: now,
+        pipelineState: 'embedded',
+      })
+      await db.insert(schema.articleRevision).values({
+        id: revisionId,
+        articleId,
+        observedAt: now,
+        title,
+        description: 'Researchers report the collapse in a new survey.',
+        contentHash: `h-${articleId}`,
+      })
+      await db
+        .update(schema.article)
+        .set({ latestRevisionId: revisionId })
+        .where(eq(schema.article.id, articleId))
+      await db.insert(schema.observation).values({
+        id: newId(ID_PREFIX.observation),
+        type: 'article_discovered',
+        observedAt: now,
+        sourceUrl: `https://example.com/ice-${suffix}`,
+        collectionMethod: 'rss',
+        subjectType: 'article',
+        subjectId: articleId,
+        payload: { revisionId },
+        schemaVersion: 1,
+      })
+      const [vector] = await h.ctx.inference.embeddings.embedDocuments([{ title, text: '' }])
+      await db.insert(schema.articleEmbedding).values({
+        articleId,
+        revisionId,
+        modelId: 'test',
+        inputFingerprint: revisionId,
+        embedding: vector ?? [],
+      })
+      await db.insert(schema.outboxEvent).values({
+        aggregateType: 'article',
+        aggregateId: articleId,
+        eventType: 'article.embedded',
+        aggregateVersion: 1,
+      })
+      ids.push(articleId)
+    }
+    await processOutboxBatch(db, ts)
+    const jobs = await Promise.all(
+      ids.map(async (id) => {
+        const [a] = await db.select().from(schema.article).where(eq(schema.article.id, id))
+        return {
+          targetId: id,
+          inputFingerprint: a?.latestRevisionId ?? '',
+          pipelineVersion: 'p2',
+          priorityClass: 'fresh' as const,
+        }
+      }),
+    )
+    const results = await Promise.allSettled(jobs.map((job) => matchArticle(h.ctx, job)))
+    // A job that lost the race must retry (as pg-boss would), not create a second story.
+    for (const [i, r] of results.entries()) {
+      if (r.status === 'rejected') {
+        expect(r.reason).toBeInstanceOf(CandidatesChangedError)
+        const job = jobs[i]
+        if (job) await matchArticle(h.ctx, job)
+      }
+    }
+    const memberships = await db
+      .select({ storyId: schema.storyArticle.storyId })
+      .from(schema.storyArticle)
+      .where(
+        and(inArray(schema.storyArticle.articleId, ids), isNull(schema.storyArticle.removedAt)),
+      )
+    expect(memberships).toHaveLength(2)
+    expect(new Set(memberships.map((m) => m.storyId)).size).toBe(1)
+    await drainPipeline(h.ctx)
   })
 })
