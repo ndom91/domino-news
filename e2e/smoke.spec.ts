@@ -25,7 +25,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   await signIn(page)
 
   // Feed
-  const firstStory = page.locator('main article h2 a').first()
+  const firstStory = page.locator('main article h3 a').first()
   await expect(firstStory).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
@@ -37,11 +37,11 @@ test('feed → story → narrative → search', async ({ page }) => {
     page.locator('section[aria-labelledby="sources-heading"] a[target="_blank"]').first(),
   ).toBeVisible()
   // Context popovers: open the first one found among the first few stories.
-  const term = page.locator('#summary-heading ~ div button')
+  const term = page.locator('#lead-heading ~ p button.cursor-help')
   for (let i = 0; i < 6 && (await term.count()) === 0; i++) {
     await page.goto('/')
     await page
-      .locator('main article h2 a')
+      .locator('main article h3 a')
       .nth(i + 1)
       .click()
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
@@ -51,9 +51,9 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(page.getByText(/Written by a language model/).first()).toBeVisible()
   await page.keyboard.press('Escape')
   // Claims: grounded statements with the outlets that make them.
-  await expect(page.getByRole('heading', { name: 'Claims in coverage' })).toBeVisible()
-  await expect(page.getByText(/These are not verified facts/)).toBeVisible()
-  await page.getByRole('button', { name: 'About this summary' }).click()
+  await expect(page.getByRole('heading', { name: 'Claims' })).toBeVisible()
+  await expect(page.getByText(/not verified facts/)).toBeVisible()
+  await page.getByRole('button', { name: "How it's made" }).click()
   await expect(page.getByText('How this summary is made')).toBeVisible()
   await page.keyboard.press('Escape')
   await expectNoHorizontalOverflow(page)

@@ -4,7 +4,7 @@ import { Badge, Button, Card, Notice, Skeleton } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Page, SectionLabel } from '../components/page.tsx'
+import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/ops')({
@@ -42,17 +42,20 @@ function OpsPage() {
 
   return (
     <Page>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="font-serif text-2xl font-medium tracking-tight md:text-3xl">Pipeline</h1>
-          <p className="mt-1 text-sm text-text-secondary">
-            Inference: <strong className="font-medium text-text">{s.inferenceMode}</strong> ·
+      <PageTitle
+        meta={
+          <>
+            Inference: <strong className="font-semibold text-text">{s.inferenceMode}</strong> ·
             Backfill:{' '}
-            <strong className="font-medium text-text">
+            <strong className="font-semibold text-text">
               {s.backfillPaused ? 'paused' : 'running'}
             </strong>
-          </p>
-        </div>
+          </>
+        }
+      >
+        Pipeline
+      </PageTitle>
+      <div className="-mt-4 flex flex-wrap gap-4">
         <div className="flex flex-wrap gap-2">
           <Button
             size="sm"
@@ -79,7 +82,7 @@ function OpsPage() {
         </Notice>
       ) : null}
 
-      <dl className="mt-8 grid grid-cols-2 gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-4">
+      <dl className="mt-8 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
         <Stat
           label="Articles"
           value={p.articles}
@@ -143,9 +146,7 @@ function OpsPage() {
             <tr key={f.id}>
               <Td>
                 <span className="font-medium">{f.publisherName}</span>
-                <span className="block max-w-48 truncate font-mono text-2xs text-text-muted sm:max-w-xs">
-                  {f.url}
-                </span>
+                <span className="block max-w-48 truncate type-meta sm:max-w-xs">{f.url}</span>
               </Td>
               <Td>
                 {f.lastStatus === 'error' ? (
@@ -171,10 +172,10 @@ function OpsPage() {
           <ul className="flex flex-col gap-3">
             {s.recentFailures.map((f) => (
               <Card key={f.id} tone="sunken" padded={false} className="p-3">
-                <p className="font-mono text-xs">
+                <p className="type-label">
                   {f.queue} · {f.failedAt ? relativeTime(f.failedAt) : ''}
                 </p>
-                <p className="mt-1 font-mono text-xs break-all text-text-secondary">{f.error}</p>
+                <p className="mt-1 text-xs break-all text-text-secondary">{f.error}</p>
               </Card>
             ))}
           </ul>
@@ -186,10 +187,10 @@ function OpsPage() {
 
 function Stat({ label, value, note }: { label: string; value: number; note?: string }) {
   return (
-    <div className="bg-surface p-4">
-      <dt className="text-xs uppercase tracking-label text-text-muted">{label}</dt>
-      <dd className="mt-1 font-mono text-2xl tabular-nums">{value}</dd>
-      {note ? <dd className="mt-1 text-xs text-text-muted">{note}</dd> : null}
+    <div className="border-b border-border py-4 pr-4">
+      <dt className="type-label text-text-muted">{label}</dt>
+      <dd className="mt-1 type-numeral tabular-nums">{value}</dd>
+      {note ? <dd className="mt-1 type-meta">{note}</dd> : null}
     </div>
   )
 }
@@ -199,9 +200,9 @@ function Table({ head, children }: { head: string[]; children: ReactNode }) {
     <div className="overflow-x-auto">
       <table className="w-full text-left text-sm">
         <thead>
-          <tr className="border-b border-border text-xs text-text-muted">
+          <tr className="border-b-2 border-rule text-left type-label">
             {head.map((h) => (
-              <th key={h} scope="col" className="py-2 pr-4 font-medium">
+              <th key={h} scope="col" className="py-2 pr-4">
                 {h}
               </th>
             ))}
@@ -216,7 +217,7 @@ function Table({ head, children }: { head: string[]; children: ReactNode }) {
 function Td({ children, mono, num }: { children: ReactNode; mono?: boolean; num?: boolean }) {
   return (
     <td
-      className={`py-2 pr-4 align-top ${mono ? 'font-mono text-xs' : ''} ${num ? 'tabular-nums' : ''}`}
+      className={`py-2 pr-4 align-top ${mono ? 'text-xs font-semibold' : ''} ${num ? 'tabular-nums' : ''}`}
     >
       {children}
     </td>

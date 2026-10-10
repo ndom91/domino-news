@@ -1,7 +1,8 @@
-import { Button, cx } from '@dn/ui'
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
-import { authClient } from '../lib/auth-client.ts'
+import { clockTime, longDate } from '@dn/domain'
+import { cx } from '@dn/ui'
+import { useQuery } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
+import { queries } from '../lib/api.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
@@ -11,60 +12,67 @@ const NAV = [
   { to: '/ops', label: 'Pipeline', exact: false },
 ] as const
 
-export function SiteHeader({ user }: { user: { name: string; username: string | null } }) {
-  const router = useRouter()
-  const navigate = useNavigate()
-  const [signingOut, setSigningOut] = useState(false)
-  const today = new Intl.DateTimeFormat('en-GB', {
-    weekday: 'long',
-    day: 'numeric',
-    month: 'long',
-  }).format(new Date())
-
+/** Always-dark strip: edition date and time, and how much was reported in the last 24 hours. */
+function Strip() {
+  // Shared with the front page loader; other pages fill it in after load.
+  const front = useQuery(queries.front()).data
+  const editionAt = front?.editionAt
   return (
-    <header className="border-b border-rule bg-canvas pt-(--dn-safe-top)">
-      <div className="mx-auto flex max-w-content flex-wrap items-end justify-between gap-x-6 gap-y-3 px-(--dn-gutter) pt-5 pb-3">
-        <div className="flex items-baseline gap-4">
-          <Link to="/" className="font-serif text-2xl font-semibold tracking-tight text-text">
+    <div className="bg-band text-sm text-band-text">
+      <div className="mx-auto flex h-strip max-w-page items-center justify-between gap-4 px-gutter">
+        <span suppressHydrationWarning>
+          <b className="font-bold">{longDate(editionAt ?? new Date().toISOString())}</b>
+          {editionAt ? ` · Edition ${clockTime(editionAt)} UTC` : null}
+        </span>
+        {front ? (
+          <span className="max-md:hidden">
+            {front.stats.stories} {front.stats.stories === 1 ? 'story' : 'stories'} from{' '}
+            {front.stats.publishers} {front.stats.publishers === 1 ? 'publisher' : 'publishers'} in
+            the last 24 hours
+          </span>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
+export function SiteHeader({ user }: { user: { name: string; username: string | null } }) {
+  return (
+    <>
+      <Strip />
+      <div className="mx-auto max-w-page px-gutter pt-(--dn-safe-top)">
+        <header className="flex items-end justify-between gap-x-6 border-b-6 border-rule pt-5.5 pb-3.5 max-md:flex-wrap max-md:gap-y-2 max-md:border-b-4">
+          <Link to="/" className="type-masthead" aria-label="Domino, front page">
             Domino<span className="text-accent">.</span>
           </Link>
-          <span className="hidden font-mono text-xs text-text-muted sm:inline">{today}</span>
-        </div>
-        <div className="flex items-center gap-3 text-sm">
-          <Link to="/account" className="text-text-muted hover:text-text">
-            {user.username ?? user.name}
-          </Link>
-          <Button
-            size="sm"
-            variant="ghost"
-            loading={signingOut}
-            onClick={async () => {
-              setSigningOut(true)
-              await authClient.signOut()
-              await router.invalidate()
-              await navigate({ to: '/login' })
-            }}
+          <nav
+            aria-label="Primary"
+            className="flex gap-7 text-base font-semibold [scrollbar-width:none] max-md:w-full max-md:gap-6 max-md:overflow-x-auto"
           >
-            Sign out
-          </Button>
-        </div>
-      </div>
-      <nav aria-label="Main" className="mx-auto max-w-content overflow-x-auto px-(--dn-gutter)">
-        <ul className="flex gap-6 text-sm">
-          {NAV.map((item) => (
-            <li key={item.to}>
+            {NAV.map((item) => (
               <Link
+                key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.exact }}
-                className="inline-flex min-h-tap items-center border-b-2 border-transparent pb-1 whitespace-nowrap text-text-secondary hover:text-text"
-                activeProps={{ className: cx('border-text! text-text!') }}
+                className="inline-flex min-h-tap flex-none items-end pb-0.5 whitespace-nowrap hover:text-accent-text"
+                activeProps={{
+                  className: cx('shadow-[inset_0_-3px_0_var(--dn-accent)]'),
+                  'aria-current': 'page',
+                }}
               >
                 {item.label}
               </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-    </header>
+            ))}
+            <Link
+              to="/account"
+              className="inline-flex min-h-tap flex-none items-end pb-0.5 font-medium whitespace-nowrap text-text-muted hover:text-accent-text"
+              activeProps={{ className: cx('shadow-[inset_0_-3px_0_var(--dn-accent)]') }}
+            >
+              {user.username ?? user.name}
+            </Link>
+          </nav>
+        </header>
+      </div>
+    </>
   )
 }

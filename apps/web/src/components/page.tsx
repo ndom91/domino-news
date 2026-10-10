@@ -1,25 +1,21 @@
 import { cx } from '@dn/ui'
 import type { ReactNode } from 'react'
 
+export { SectionLabel } from '@dn/ui'
+
+/** Page column: max 1440 including gutters. */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <div className={cx('mx-auto max-w-content px-(--dn-gutter) pt-8 md:pt-10', className)}>
-      {children}
-    </div>
+    <div className={cx('mx-auto max-w-page px-gutter pt-8 md:pt-10', className)}>{children}</div>
   )
 }
 
-/** Small uppercase section label that names the content below it. */
-export function SectionLabel({
-  children,
-  as: As = 'h2',
-}: {
-  children: ReactNode
-  as?: 'h2' | 'h3'
-}) {
+/** Page title in the section style (uppercase, condensed), with optional meta on the right. */
+export function PageTitle({ children, meta }: { children: ReactNode; meta?: ReactNode }) {
   return (
-    <As className="mb-4 border-b border-rule pb-2 text-xs font-semibold uppercase tracking-label text-text">
-      {children}
-    </As>
+    <div className="mb-8 flex items-baseline justify-between gap-4 max-md:flex-col max-md:gap-1">
+      <h1 className="type-section">{children}</h1>
+      {meta ? <span className="text-label text-text-muted">{meta}</span> : null}
+    </div>
   )
 }

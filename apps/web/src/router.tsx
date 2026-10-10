@@ -20,9 +20,9 @@ export function getRouter() {
 
 function RouteError({ error }: { error: Error }) {
   return (
-    <div className="mx-auto max-w-reading px-(--dn-gutter) py-16">
-      <p className="font-medium">This page could not be loaded.</p>
-      <p className="mt-2 text-sm text-text-secondary">{error.message}</p>
+    <div className="mx-auto max-w-page px-gutter py-16">
+      <p className="type-section">This page could not be loaded</p>
+      <p className="mt-3 text-base text-text-muted">{error.message}</p>
     </div>
   )
 }

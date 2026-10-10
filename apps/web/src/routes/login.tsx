@@ -89,11 +89,11 @@ function LoginPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-(--dn-gutter) py-16">
-      <p className="font-serif text-3xl font-semibold tracking-tight">
+    <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-gutter py-16">
+      <p className="border-b-6 border-rule pb-3.5 type-masthead">
         Domino<span className="text-accent">.</span>
       </p>
-      <p className="mt-2 mb-8 text-sm text-text-secondary">
+      <p className="mt-4 mb-8 text-text-secondary">
         News stories assembled from many outlets, with every source linked.
       </p>
       <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
@@ -131,7 +131,7 @@ function LoginPage() {
       ) : null}
       <p className="mt-8 text-xs text-text-muted">
         Accounts are created by an administrator with{' '}
-        <code className="font-mono">pnpm cli user:create</code>
+        <code className="font-semibold text-text">pnpm cli user:create</code>
         {session.features.googleSignIn ? ', or on first Google sign-in for allowed emails' : ''}.
       </p>
     </div>

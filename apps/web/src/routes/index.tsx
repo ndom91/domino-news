@@ -1,16 +1,22 @@
-import { pickLead, relativeTime } from '@dn/domain'
-import { REGION_LABELS, REGIONS, type Region, regionSchema } from '@dn/schemas'
-import { Button, cx, Notice, Skeleton, StoryRow } from '@dn/ui'
+import { REGION_LABELS, REGIONS, type Region, regionSchema, type StoryListItem } from '@dn/schemas'
+import {
+  Button,
+  HeroStory,
+  NarrativeColumn,
+  SectionHeader,
+  StoryItem,
+  StoryItemSkeleton,
+} from '@dn/ui'
 import {
   useInfiniteQuery,
   useQuery,
   useSuspenseInfiniteQuery,
   useSuspenseQuery,
 } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useId } from 'react'
 import { z } from 'zod'
 import { RouterLink } from '../components/link.tsx'
-import { Page, SectionLabel } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/')({
@@ -18,170 +24,183 @@ export const Route = createFileRoute('/')({
   loaderDeps: ({ search }) => ({ region: search.region ?? null }),
   loader: async ({ context, deps }) => {
     await Promise.all([
+      context.queryClient.ensureQueryData(queries.front(deps.region)),
       context.queryClient.ensureInfiniteQueryData(queries.storyList(deps.region)),
-      context.queryClient.ensureQueryData(queries.narratives()),
     ])
   },
   pendingComponent: FeedSkeleton,
   component: FeedPage,
 })
 
+// Two wide, four narrow, repeating: rows always fill the 4-column grid.
+const isWide = (i: number) => i % 6 < 2
+
+function StoryGrid({ stories, now }: { stories: StoryListItem[]; now: string }) {
+  return (
+    <section className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+      {stories.map((story, i) => (
+        <StoryItem
+          key={story.id}
+          story={story}
+          size={isWide(i) ? 'wide' : 'standard'}
+          now={now}
+          Link={RouterLink}
+        />
+      ))}
+    </section>
+  )
+}
+
 function FeedPage() {
   const { region = null } = Route.useSearch()
+  const { data: front } = useSuspenseQuery(queries.front(region))
   const list = useSuspenseInfiniteQuery(queries.storyList(region))
-  const { data: narratives } = useSuspenseQuery(queries.narratives())
-  // Client-only: the feed renders without it, then the lead and rail adapt.
+  // Client-only: the edition section appears once preferences load.
   const edition = useQuery(queries.preferences()).data?.edition ?? null
-  const stories = list.data.pages.flatMap((p) => p.items)
-  const lead = pickLead(stories, region ? null : edition)
-  const rest = stories.filter((s) => s.id !== lead?.id)
-
-  if (stories.length === 0 && !region) {
-    return (
-      <Page>
-        <Notice title="No published stories yet">
-          Stories appear here once feeds are ingested and summarised. Run{' '}
-          <code>pnpm cli ingest</code> with the worker running, then check progress on the Pipeline
-          page.
-        </Notice>
-      </Page>
-    )
-  }
+  const now = front.editionAt
+  const latest = list.data.pages.flatMap((p) => p.items).filter((s) => s.id !== front.lead?.id)
 
   return (
-    <Page>
-      <div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
-        <div className="min-w-0">
-          <RegionChips active={region} />
-          {stories.length === 0 && region ? (
-            <p className="text-text-muted">No stories about {REGION_LABELS[region]} yet.</p>
-          ) : null}
-          {lead ? <StoryRow story={lead} lead Link={RouterLink} className="pb-8" /> : null}
-          {edition && !region ? <EditionRail edition={edition} excludeId={lead?.id} /> : null}
-          <SectionLabel>Latest</SectionLabel>
-          <ol className="flex flex-col divide-y divide-border">
-            {rest.map((story) => (
-              <li key={story.id} className="py-6 first:pt-2">
-                <StoryRow story={story} Link={RouterLink} />
-              </li>
-            ))}
-          </ol>
+    <>
+      <div className="mx-auto max-w-page px-gutter">
+        {front.lead ? (
+          <HeroStory story={front.lead} position={front.leadPosition} now={now} Link={RouterLink} />
+        ) : null}
+
+        {edition && !region ? (
+          <EditionSection edition={edition} excludeId={front.lead?.id} now={now} />
+        ) : null}
+
+        <SectionHeader title="Latest" meta={<RegionFilter active={region} />} id="latest-heading" />
+        {latest.length === 0 ? (
+          <p className="pb-16 type-meta text-base">
+            {region
+              ? `No stories about ${REGION_LABELS[region]} in the last 24 hours.`
+              : 'No stories in the last 24 hours. The next poll runs within 15 minutes.'}
+          </p>
+        ) : (
+          <StoryGrid stories={latest} now={now} />
+        )}
+        <div className="pt-12 pb-16">
           {list.hasNextPage ? (
-            <div className="mt-6">
-              <Button onClick={() => list.fetchNextPage()} loading={list.isFetchingNextPage}>
-                Show older stories
-              </Button>
-            </div>
+            <Button onClick={() => list.fetchNextPage()} loading={list.isFetchingNextPage}>
+              Show older stories
+            </Button>
           ) : null}
         </div>
-        <aside aria-labelledby="narratives-heading" className="lg:sticky lg:top-6 lg:self-start">
-          <SectionLabel>
-            <span id="narratives-heading">Developing narratives</span>
-          </SectionLabel>
-          {narratives.items.length === 0 ? (
-            <p className="text-sm text-text-muted">
-              Narratives form when related stories are linked. None yet.
-            </p>
-          ) : (
-            <ol className="flex flex-col gap-5">
-              {narratives.items.slice(0, 8).map((n) => (
-                <li key={n.id}>
-                  <Link
-                    to="/narratives/$slug"
-                    params={{ slug: n.slug }}
-                    className="font-serif text-md leading-snug text-text hover:underline underline-offset-4"
-                  >
-                    {n.title}
-                  </Link>
-                  <p className="mt-1 font-mono text-xs text-text-muted">
-                    {n.storyCount} stories · updated {relativeTime(n.updatedAt)}
-                  </p>
-                </li>
-              ))}
-            </ol>
-          )}
-        </aside>
       </div>
-    </Page>
+
+      {front.developing.length > 0 ? (
+        <section aria-labelledby="developing-heading" className="bg-band text-band-text">
+          <div className="mx-auto max-w-page px-gutter pt-2 pb-15">
+            <SectionHeader
+              title="Developing"
+              meta="Stories linked over time"
+              id="developing-heading"
+              muted="text-band-muted"
+            />
+            <div className="grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-md:grid-cols-1">
+              {front.developing.map((n) => (
+                <NarrativeColumn key={n.id} narrative={n} Link={RouterLink} />
+              ))}
+            </div>
+            <Link
+              to="/narratives"
+              className="mt-7 inline-flex min-h-tap items-center text-base font-bold underline decoration-accent decoration-2 underline-offset-4"
+            >
+              All {front.narrativeCount} narratives
+            </Link>
+          </div>
+        </section>
+      ) : null}
+    </>
   )
 }
 
-function RegionChips({ active }: { active: Region | null }) {
-  const chip = (current: boolean) =>
-    cx(
-      'rounded-full border px-3 py-1 text-xs whitespace-nowrap',
-      current
-        ? 'border-text bg-text text-surface'
-        : 'border-border-strong text-text-secondary hover:text-text',
-    )
+/** Region filter as a square native select in the Latest header (works without JS-heavy UI). */
+function RegionFilter({ active }: { active: Region | null }) {
+  const navigate = useNavigate({ from: '/' })
+  const id = useId()
   return (
-    <nav aria-label="Filter by region" className="mb-8 flex gap-2 overflow-x-auto pb-1">
-      <Link
-        to="/"
-        search={{}}
-        className={chip(!active)}
-        aria-current={!active ? 'page' : undefined}
+    <span className="inline-flex items-center gap-2">
+      <span className="max-md:hidden">Newest report first ·</span>
+      <label htmlFor={id} className="sr-only">
+        Region
+      </label>
+      <select
+        id={id}
+        value={active ?? ''}
+        onChange={(e) =>
+          navigate({ search: e.target.value ? { region: e.target.value as Region } : {} })
+        }
+        className="min-h-9 border-2 border-text bg-canvas px-2 text-label font-semibold text-text"
       >
-        All
-      </Link>
-      {REGIONS.map((r) => (
-        <Link
-          key={r}
-          to="/"
-          search={{ region: r }}
-          className={chip(active === r)}
-          aria-current={active === r ? 'page' : undefined}
-        >
-          {REGION_LABELS[r]}
-        </Link>
-      ))}
-    </nav>
+        <option value="">All regions</option>
+        {REGIONS.map((r) => (
+          <option key={r} value={r}>
+            {REGION_LABELS[r]}
+          </option>
+        ))}
+      </select>
+    </span>
   )
 }
 
-/** Latest Stories in the reader's edition, above the chronological feed. */
-function EditionRail({ edition, excludeId }: { edition: Region; excludeId?: string }) {
+/** Latest Stories in the reader's edition, above the chronological grid. */
+function EditionSection({
+  edition,
+  excludeId,
+  now,
+}: {
+  edition: Region
+  excludeId?: string
+  now: string
+}) {
   const list = useInfiniteQuery(queries.storyList(edition))
-  const items = (list.data?.pages[0]?.items ?? []).filter((s) => s.id !== excludeId).slice(0, 5)
+  const items = (list.data?.pages[0]?.items ?? []).filter((s) => s.id !== excludeId).slice(0, 4)
   if (items.length === 0) return null
   return (
-    <section aria-labelledby="edition-heading" className="mb-10">
-      <SectionLabel>
-        <span id="edition-heading">In {REGION_LABELS[edition]}</span>
-      </SectionLabel>
-      <ol className="flex flex-col divide-y divide-border">
+    <section aria-labelledby="edition-heading">
+      <SectionHeader
+        title={`In ${REGION_LABELS[edition]}`}
+        id="edition-heading"
+        meta={
+          <Link
+            to="/"
+            search={{ region: edition }}
+            className="font-semibold underline decoration-accent decoration-2 underline-offset-4"
+          >
+            More from {REGION_LABELS[edition]}
+          </Link>
+        }
+      />
+      <section className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {items.map((story) => (
-          <li key={story.id} className="py-4 first:pt-2">
-            <StoryRow story={story} Link={RouterLink} />
-          </li>
+          <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
         ))}
-      </ol>
-      <Link
-        to="/"
-        search={{ region: edition }}
-        className="mt-2 inline-block text-sm text-accent hover:underline"
-      >
-        More from {REGION_LABELS[edition]}
-      </Link>
+      </section>
     </section>
   )
 }
 
 function FeedSkeleton() {
   return (
-    <Page>
-      <div
-        role="status"
-        className="flex max-w-3xl flex-col gap-4"
-        aria-busy="true"
-        aria-label="Loading stories"
-      >
-        <Skeleton className="h-10 w-4/5" />
-        <Skeleton className="h-10 w-3/5" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="mt-8 h-6 w-2/3" />
-        <Skeleton className="h-12 w-full" />
+    <div
+      role="status"
+      aria-busy="true"
+      aria-label="Loading stories"
+      className="mx-auto max-w-page px-gutter"
+    >
+      <div className="mt-8 h-96 bg-sunken" />
+      <SectionHeader title="Latest" />
+      <div className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+        <StoryItemSkeleton size="wide" />
+        <StoryItemSkeleton size="wide" />
+        <StoryItemSkeleton />
+        <StoryItemSkeleton />
+        <StoryItemSkeleton />
+        <StoryItemSkeleton />
       </div>
-    </Page>
+    </div>
   )
 }

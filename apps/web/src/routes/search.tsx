@@ -5,7 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
 import { z } from 'zod'
-import { Page } from '../components/page.tsx'
+import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
 // Same filters as the API; the page also allows an empty query (no search yet).
@@ -48,12 +48,12 @@ function SearchPage() {
   }
 
   const selectClass =
-    'h-10 rounded-md border border-border-strong bg-surface px-2 text-sm text-text focus:outline-2 focus:outline-focus'
+    'min-h-10 border-2 border-text bg-canvas px-2 text-label font-semibold text-text'
 
   return (
-    <Page className="max-w-3xl!">
-      <h1 className="font-serif text-2xl font-medium tracking-tight md:text-3xl">Search</h1>
-      <search className="mt-6 block">
+    <Page>
+      <PageTitle>Search</PageTitle>
+      <search className="block max-w-4xl">
         <form onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="flex gap-2">
             <TextInput
@@ -71,7 +71,7 @@ function SearchPage() {
             </Button>
           </div>
           <div className="flex flex-wrap items-center gap-3 text-sm">
-            <label htmlFor={sinceId} className="text-text-secondary">
+            <label htmlFor={sinceId} className="type-label">
               Updated
             </label>
             <select id={sinceId} name="since" defaultValue={search.since} className={selectClass}>
@@ -81,7 +81,7 @@ function SearchPage() {
                 </option>
               ))}
             </select>
-            <label htmlFor={pubId} className="text-text-secondary">
+            <label htmlFor={pubId} className="type-label">
               Outlet
             </label>
             <select
@@ -97,7 +97,7 @@ function SearchPage() {
                 </option>
               ))}
             </select>
-            <label htmlFor={regionId} className="text-text-secondary">
+            <label htmlFor={regionId} className="type-label">
               Region
             </label>
             <select
@@ -117,7 +117,7 @@ function SearchPage() {
         </form>
       </search>
 
-      <div className="mt-10" aria-live="polite">
+      <div className="mt-10 max-w-4xl" aria-live="polite">
         {!search.q ? (
           <p className="text-text-muted">Search by topic, person, place or outlet.</p>
         ) : results.isPending ? (
@@ -144,47 +144,43 @@ function SearchPage() {
           </Notice>
         ) : (
           <>
-            <p className="mb-4 font-mono text-xs text-text-muted">
+            <p className="mb-4 type-meta">
               {results.data.hits.length} results ·{' '}
               {results.data.mode === 'hybrid'
                 ? 'keyword and meaning'
                 : 'keyword only (embedding service unavailable)'}
             </p>
-            <ol className="flex flex-col divide-y divide-border border-t border-rule">
+            <ol className="flex flex-col divide-y divide-border border-t-2 border-rule">
               {results.data.hits.map((hit) => (
                 <li key={`${hit.type}-${hit.id}`} className="py-5">
                   {hit.type === 'narrative' ? (
                     <>
-                      <Badge>Narrative</Badge>
+                      <Badge tone="ink">Narrative</Badge>
                       <Link
                         to="/narratives/$slug"
                         params={{ slug: hit.slug }}
-                        className="mt-2 block font-serif text-lg leading-snug hover:underline underline-offset-4"
+                        className="mt-2 block type-headline link-headline"
                       >
                         {hit.title}
                       </Link>
                       {hit.description ? (
-                        <p className="mt-1 text-sm text-text-secondary">{hit.description}</p>
+                        <p className="mt-1.5 text-text-secondary">{hit.description}</p>
                       ) : null}
-                      <p className="mt-2 font-mono text-xs text-text-muted">
-                        {hit.storyCount} stories
-                      </p>
+                      <p className="mt-2 type-meta">{hit.storyCount} stories</p>
                     </>
                   ) : (
                     <>
                       <Link
                         to="/stories/$slug"
                         params={{ slug: hit.slug }}
-                        className="font-serif text-lg leading-snug hover:underline underline-offset-4"
+                        className="type-headline link-headline"
                       >
                         {hit.title}
                       </Link>
                       {hit.summary ? (
-                        <p className="mt-1 line-clamp-2 text-sm text-text-secondary">
-                          {hit.summary}
-                        </p>
+                        <p className="mt-1.5 line-clamp-2 text-text-secondary">{hit.summary}</p>
                       ) : null}
-                      <p className="mt-2 font-mono text-xs text-text-muted">
+                      <p className="mt-2 type-meta">
                         {hit.publisherNames.slice(0, 3).join(', ')}
                         {hit.publisherNames.length > 3 ? ` +${hit.publisherNames.length - 3}` : ''}{' '}
                         · updated {relativeTime(hit.lastUpdatedAt)}

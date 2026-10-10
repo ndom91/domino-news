@@ -42,7 +42,7 @@ export function SummaryEditor({
   return (
     <form
       onSubmit={onSubmit}
-      className="flex flex-col gap-4 rounded-lg border border-border bg-surface p-4 md:p-5"
+      className="flex flex-col gap-4 border-2 border-rule bg-canvas p-4 md:p-5"
     >
       <TextInput
         label="Headline"

@@ -3,9 +3,9 @@ import { savePreferencesMutation } from '@dn/queries'
 import { REGION_LABELS, REGIONS, regionSchema } from '@dn/schemas'
 import { Button, Notice, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
-import { type FormEvent, useId } from 'react'
-import { Page, SectionLabel } from '../components/page.tsx'
+import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { type FormEvent, useId, useState } from 'react'
+import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
 
@@ -52,81 +52,106 @@ function AccountPage() {
   }
 
   return (
-    <Page className="max-w-2xl!">
-      <h1 className="font-serif text-2xl font-medium tracking-tight md:text-3xl">Account</h1>
-      <p className="mt-2 text-text-secondary">
-        Signed in as{' '}
-        <span className="font-medium text-text">
-          {session.user?.username ?? session.user?.name}
-        </span>
-      </p>
+    <Page>
+      <div className="max-w-2xl">
+        <PageTitle>Account</PageTitle>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-text-secondary">
+            Signed in as{' '}
+            <span className="font-semibold text-text">
+              {session.user?.username ?? session.user?.name}
+            </span>
+          </p>
+          <SignOutButton />
+        </div>
 
-      <EditionSection />
+        <EditionSection />
 
-      <section aria-labelledby="passkeys-heading" className="mt-10">
-        <SectionLabel>
-          <span id="passkeys-heading">Passkeys</span>
-        </SectionLabel>
-        <p className="mb-6 max-w-reading text-sm text-text-secondary">
-          Sign in with your device's screen lock or a security key instead of a password. Your
-          password keeps working.
-        </p>
+        <section aria-labelledby="passkeys-heading" className="mt-10">
+          <SectionLabel id="passkeys-heading">Passkeys</SectionLabel>
+          <p className="mb-6 max-w-reading text-sm text-text-secondary">
+            Sign in with your device's screen lock or a security key instead of a password. Your
+            password keeps working.
+          </p>
 
-        {passkeys.isPending ? null : passkeys.isError ? (
-          <Notice tone="error" title="Passkeys could not be loaded">
-            {passkeys.error.message}
-          </Notice>
-        ) : passkeys.data.length === 0 ? (
-          <p className="mb-6 text-sm text-text-muted">No passkeys yet.</p>
-        ) : (
-          <ul className="mb-6 flex flex-col divide-y divide-border border-y border-border">
-            {passkeys.data.map((p) => (
-              <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
-                <div>
-                  <p className="font-medium">{p.name || 'Unnamed passkey'}</p>
-                  <p className="font-mono text-xs text-text-muted">
-                    Added{' '}
-                    {p.createdAt ? formatDateTime(new Date(p.createdAt).toISOString()) : 'earlier'}
-                    {p.backedUp ? ' · synced' : ''}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="danger"
-                  loading={remove.isPending && remove.variables === p.id}
-                  onClick={() => remove.mutate(p.id)}
-                >
-                  Remove
-                </Button>
-              </li>
-            ))}
-          </ul>
-        )}
+          {passkeys.isPending ? null : passkeys.isError ? (
+            <Notice tone="error" title="Passkeys could not be loaded">
+              {passkeys.error.message}
+            </Notice>
+          ) : passkeys.data.length === 0 ? (
+            <p className="mb-6 text-sm text-text-muted">No passkeys yet.</p>
+          ) : (
+            <ul className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule">
+              {passkeys.data.map((p) => (
+                <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                  <div>
+                    <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
+                    <p className="type-meta">
+                      Added{' '}
+                      {p.createdAt
+                        ? formatDateTime(new Date(p.createdAt).toISOString())
+                        : 'earlier'}
+                      {p.backedUp ? ' · synced' : ''}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    loading={remove.isPending && remove.variables === p.id}
+                    onClick={() => remove.mutate(p.id)}
+                  >
+                    Remove
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          )}
 
-        <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
-          <TextInput
-            label="Name (optional)"
-            name="name"
-            placeholder="e.g. Work laptop"
-            maxLength={60}
-            className="min-w-48 flex-1"
-          />
-          <Button type="submit" variant="primary" loading={add.isPending}>
-            Add a passkey
-          </Button>
-        </form>
-        {add.isError ? (
-          <Notice tone="error" title="Passkey not added" className="mt-4">
-            {add.error.message}
-          </Notice>
-        ) : null}
-        {remove.isError ? (
-          <Notice tone="error" title="Passkey not removed" className="mt-4">
-            {remove.error.message}
-          </Notice>
-        ) : null}
-      </section>
+          <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
+            <TextInput
+              label="Name (optional)"
+              name="name"
+              placeholder="e.g. Work laptop"
+              maxLength={60}
+              className="min-w-48 flex-1"
+            />
+            <Button type="submit" variant="primary" loading={add.isPending}>
+              Add a passkey
+            </Button>
+          </form>
+          {add.isError ? (
+            <Notice tone="error" title="Passkey not added" className="mt-4">
+              {add.error.message}
+            </Notice>
+          ) : null}
+          {remove.isError ? (
+            <Notice tone="error" title="Passkey not removed" className="mt-4">
+              {remove.error.message}
+            </Notice>
+          ) : null}
+        </section>
+      </div>
     </Page>
+  )
+}
+
+function SignOutButton() {
+  const router = useRouter()
+  const navigate = useNavigate()
+  const [signingOut, setSigningOut] = useState(false)
+  return (
+    <Button
+      size="sm"
+      loading={signingOut}
+      onClick={async () => {
+        setSigningOut(true)
+        await authClient.signOut()
+        await router.invalidate()
+        await navigate({ to: '/login' })
+      }}
+    >
+      Sign out
+    </Button>
   )
 }
 
@@ -138,14 +163,12 @@ function EditionSection() {
 
   return (
     <section aria-labelledby="edition-heading" className="mt-10">
-      <SectionLabel>
-        <span id="edition-heading">News edition</span>
-      </SectionLabel>
+      <SectionLabel id="edition-heading">News edition</SectionLabel>
       <p className="mb-4 max-w-reading text-sm text-text-secondary">
         Stories about this region lead your feed. Everything else still appears.
       </p>
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label htmlFor={selectId} className="text-text-secondary">
+        <label htmlFor={selectId} className="type-label">
           Region
         </label>
         <select
@@ -156,7 +179,7 @@ function EditionSection() {
             const parsed = regionSchema.safeParse(e.target.value)
             save.mutate({ edition: parsed.success ? parsed.data : null })
           }}
-          className="h-10 rounded-md border border-border-strong bg-surface px-2 text-sm text-text focus:outline-2 focus:outline-focus"
+          className="min-h-10 border-2 border-text bg-canvas px-2 text-label font-semibold text-text"
         >
           <option value="">No preference</option>
           {REGIONS.map((r) => (

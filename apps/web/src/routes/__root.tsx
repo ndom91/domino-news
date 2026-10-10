@@ -37,9 +37,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   shellComponent: RootDocument,
   component: RootLayout,
   notFoundComponent: () => (
-    <div className="mx-auto max-w-reading px-(--dn-gutter) py-16">
-      <h1 className="font-serif text-2xl">Page not found</h1>
-      <p className="mt-2 text-text-secondary">
+    <div className="mx-auto max-w-page px-gutter py-16">
+      <h1 className="type-section">Page not found</h1>
+      <p className="mt-3 text-base text-text-muted">
         The link may be out of date. Try the front page or search.
       </p>
     </div>
@@ -51,7 +51,7 @@ function RootLayout() {
   return (
     <TooltipProvider>
       {session.user ? <SiteHeader user={session.user} /> : null}
-      <main id="main" className="pb-24">
+      <main id="main">
         <Outlet />
       </main>
     </TooltipProvider>
@@ -67,7 +67,7 @@ function RootDocument({ children }: { children: ReactNode }) {
       <body className="min-h-dvh bg-canvas text-text antialiased">
         <a
           href="#main"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-md focus:bg-surface focus:px-3 focus:py-2"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-text focus:px-3 focus:py-2 focus:text-canvas"
         >
           Skip to content
         </a>
