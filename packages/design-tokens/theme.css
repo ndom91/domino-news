@@ -1,7 +1,12 @@
 /*
- * Maps semantic tokens into the Tailwind v4 theme. Import after tailwindcss.
+ * Maps the semantic tokens in design-tokens.css into the Tailwind v4 theme. Import after tailwindcss:
+ *   @import "tailwindcss";
+ *   @import "@dn/design-tokens/design-tokens.css";
+ *   @import "@dn/design-tokens/theme.css";
  * `inline` keeps utilities pointing at the runtime variables so theme switching works.
  */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 @theme inline {
   --color-*: initial;
   --color-canvas: var(--dn-canvas);
@@ -9,6 +14,10 @@
   --color-sunken: var(--dn-surface-sunken);
   --color-elevated: var(--dn-elevated);
   --color-scrim: var(--dn-overlay-scrim);
+  --color-band: var(--dn-band);
+  --color-band-text: var(--dn-band-text);
+  --color-band-muted: var(--dn-band-muted);
+  --color-band-line: var(--dn-band-line);
   --color-text: var(--dn-text);
   --color-text-secondary: var(--dn-text-secondary);
   --color-text-muted: var(--dn-text-muted);
@@ -17,9 +26,9 @@
   --color-border-strong: var(--dn-border-strong);
   --color-rule: var(--dn-rule);
   --color-accent: var(--dn-accent);
-  --color-accent-hover: var(--dn-accent-hover);
-  --color-accent-subtle: var(--dn-accent-subtle);
+  --color-accent-text: var(--dn-accent-text);
   --color-accent-contrast: var(--dn-accent-contrast);
+  --color-accent-subtle: var(--dn-accent-subtle);
   --color-focus: var(--dn-focus-ring);
   --color-success: var(--dn-success);
   --color-success-subtle: var(--dn-success-subtle);
@@ -27,55 +36,82 @@
   --color-warning-subtle: var(--dn-warning-subtle);
   --color-error: var(--dn-error);
   --color-error-subtle: var(--dn-error-subtle);
-  --color-viz-1: var(--dn-viz-1);
-  --color-viz-2: var(--dn-viz-2);
-  --color-viz-3: var(--dn-viz-3);
-  --color-viz-4: var(--dn-viz-4);
-  --color-viz-5: var(--dn-viz-5);
-  --color-viz-6: var(--dn-viz-6);
-  --color-viz-neutral: var(--dn-viz-neutral);
+  --color-narrative-0: var(--dn-narrative-0);
+  --color-narrative-0-text: var(--dn-narrative-0-text);
+  --color-narrative-1: var(--dn-narrative-1);
+  --color-narrative-1-text: var(--dn-narrative-1-text);
+  --color-narrative-2: var(--dn-narrative-2);
+  --color-narrative-2-text: var(--dn-narrative-2-text);
+  --color-narrative-3: var(--dn-narrative-3);
+  --color-narrative-3-text: var(--dn-narrative-3-text);
+  --color-narrative-4: var(--dn-narrative-4);
+  --color-narrative-4-text: var(--dn-narrative-4-text);
+  --color-narrative-5: var(--dn-narrative-5);
+  --color-narrative-5-text: var(--dn-narrative-5-text);
+  --color-narrative-6: var(--dn-narrative-6);
+  --color-narrative-6-text: var(--dn-narrative-6-text);
+  /* The active Narrative colour, set per element with the narrative-* key utilities below. */
+  --color-key: var(--dn-key, var(--dn-narrative-0));
+  --color-key-text: var(--dn-key-text, var(--dn-narrative-0-text));
+  --color-trace-cited: var(--dn-trace-cited);
+  --color-trace-observed: var(--dn-trace-observed);
+  --color-trace-cell: var(--dn-trace-cell);
   --color-transparent: transparent;
   --color-current: currentColor;
 
   --font-*: initial;
-  --font-serif: var(--dn-font-serif);
   --font-sans: var(--dn-font-sans);
-  --font-mono: var(--dn-font-mono);
 
   --text-*: initial;
   --text-2xs: var(--dn-text-2xs);
   --text-xs: var(--dn-text-xs);
   --text-sm: var(--dn-text-sm);
+  --text-label: var(--dn-text-label);
   --text-base: var(--dn-text-base);
   --text-md: var(--dn-text-md);
   --text-lg: var(--dn-text-lg);
-  --text-xl: var(--dn-text-xl);
-  --text-2xl: var(--dn-text-2xl);
-  --text-3xl: var(--dn-text-3xl);
+  --text-numeral: var(--dn-text-numeral);
+  --text-headline: var(--dn-text-headline);
+  --text-headline-lg: var(--dn-text-headline-lg);
+  --text-section: var(--dn-text-section);
+  --text-masthead: var(--dn-text-masthead);
+  --text-display: var(--dn-text-display);
 
+  --leading-display: var(--dn-leading-display);
+  --leading-headline: var(--dn-leading-headline);
   --leading-tight: var(--dn-leading-tight);
   --leading-snug: var(--dn-leading-snug);
   --leading-normal: var(--dn-leading-normal);
-  --leading-reading: var(--dn-leading-reading);
 
-  --tracking-tight: var(--dn-tracking-tight);
+  --font-weight-regular: var(--dn-weight-regular);
+  --font-weight-medium: var(--dn-weight-medium);
+  --font-weight-semibold: var(--dn-weight-semibold);
+  --font-weight-bold: var(--dn-weight-bold);
+  --font-weight-heavy: var(--dn-weight-heavy);
+  --font-weight-extrabold: var(--dn-weight-extrabold);
+  --font-weight-black: var(--dn-weight-black);
+
+  --tracking-display: var(--dn-tracking-display);
+  --tracking-masthead: var(--dn-tracking-masthead);
+  --tracking-headline: var(--dn-tracking-headline);
   --tracking-label: var(--dn-tracking-label);
 
   --spacing: 0.25rem;
   --spacing-tap: var(--dn-tap-min);
+  --spacing-gutter: var(--dn-gutter);
+  --spacing-grid: var(--dn-grid-gap);
+  --spacing-strip: var(--dn-strip-height);
+  --spacing-bar: var(--dn-story-bar-height);
 
-  --container-content: var(--dn-content-max);
+  --container-page: var(--dn-page-max);
   --container-reading: var(--dn-reading-max);
 
   --radius-*: initial;
+  --radius-none: var(--dn-radius-none);
   --radius-sm: var(--dn-radius-sm);
-  --radius-md: var(--dn-radius-md);
-  --radius-lg: var(--dn-radius-lg);
-  --radius-full: 9999px;
 
   --shadow-*: initial;
-  --shadow-sm: var(--dn-shadow-sm);
-  --shadow-md: var(--dn-shadow-md);
+  --shadow-popover: var(--dn-shadow-popover);
 
   --ease-out: var(--dn-ease-out);
   --ease-in-out: var(--dn-ease-in-out);
@@ -84,10 +120,124 @@
 
   /* Breakpoints mirror BREAKPOINTS in src/index.ts. */
   --breakpoint-*: initial;
-  --breakpoint-sm: 30rem;
-  --breakpoint-md: 48rem;
-  --breakpoint-lg: 64rem;
-  --breakpoint-xl: 80rem;
+  --breakpoint-sm: 30rem; /* 480 */
+  --breakpoint-md: 48rem; /* 768 */
+  --breakpoint-lg: 64rem; /* 1024 */
+  --breakpoint-xl: 80rem; /* 1280 */
+}
+
+/*
+ * Type roles. Each sets family width, weight, size, leading and tracking together, so a role is one class.
+ * Use these instead of composing font-stretch by hand.
+ */
+@utility type-masthead {
+  font-stretch: var(--dn-width-masthead);
+  font-weight: var(--dn-weight-black);
+  font-size: var(--dn-text-masthead);
+  line-height: 0.8;
+  letter-spacing: var(--dn-tracking-masthead);
+  text-transform: uppercase;
+}
+@utility type-display {
+  font-stretch: var(--dn-width-display);
+  font-weight: var(--dn-weight-extrabold);
+  font-size: var(--dn-text-display);
+  line-height: var(--dn-leading-display);
+  letter-spacing: var(--dn-tracking-display);
+  text-wrap: balance;
+}
+@utility type-section {
+  font-stretch: var(--dn-width-masthead);
+  font-weight: var(--dn-weight-black);
+  font-size: var(--dn-text-section);
+  line-height: 1;
+  letter-spacing: var(--dn-tracking-headline);
+  text-transform: uppercase;
+}
+@utility type-narrative-title {
+  font-stretch: var(--dn-width-display);
+  font-weight: var(--dn-weight-extrabold);
+  font-size: var(--dn-text-section);
+  line-height: 0.95;
+  letter-spacing: var(--dn-tracking-headline);
+}
+@utility type-headline-lg {
+  font-stretch: var(--dn-width-headline);
+  font-weight: var(--dn-weight-heavy);
+  font-size: var(--dn-text-headline-lg);
+  line-height: var(--dn-leading-headline);
+  letter-spacing: var(--dn-tracking-headline);
+  text-wrap: balance;
+}
+@utility type-headline {
+  font-stretch: var(--dn-width-headline);
+  font-weight: var(--dn-weight-heavy);
+  font-size: var(--dn-text-headline);
+  line-height: var(--dn-leading-headline);
+  letter-spacing: var(--dn-tracking-headline);
+  text-wrap: balance;
+}
+@utility type-numeral {
+  font-stretch: var(--dn-width-numeral);
+  font-weight: var(--dn-weight-bold);
+  font-size: var(--dn-text-numeral);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+@utility type-label {
+  font-weight: var(--dn-weight-extrabold);
+  font-size: var(--dn-text-label);
+  line-height: 1.2;
+  letter-spacing: var(--dn-tracking-label);
+  text-transform: uppercase;
+}
+@utility type-meta {
+  font-weight: var(--dn-weight-regular);
+  font-size: var(--dn-text-sm);
+  line-height: var(--dn-leading-normal);
+  color: var(--dn-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Narrative keys: set once on a container, then use bg-key / text-key-text / border-key inside it. */
+@utility narrative-0 {
+  --dn-key: var(--dn-narrative-0);
+  --dn-key-text: var(--dn-narrative-0-text);
+}
+@utility narrative-1 {
+  --dn-key: var(--dn-narrative-1);
+  --dn-key-text: var(--dn-narrative-1-text);
+}
+@utility narrative-2 {
+  --dn-key: var(--dn-narrative-2);
+  --dn-key-text: var(--dn-narrative-2-text);
+}
+@utility narrative-3 {
+  --dn-key: var(--dn-narrative-3);
+  --dn-key-text: var(--dn-narrative-3-text);
+}
+@utility narrative-4 {
+  --dn-key: var(--dn-narrative-4);
+  --dn-key-text: var(--dn-narrative-4-text);
+}
+@utility narrative-5 {
+  --dn-key: var(--dn-narrative-5);
+  --dn-key-text: var(--dn-narrative-5-text);
+}
+@utility narrative-6 {
+  --dn-key: var(--dn-narrative-6);
+  --dn-key-text: var(--dn-narrative-6-text);
+}
+
+/* Brand hover underline used on every headline link. */
+@utility link-headline {
+  text-decoration-line: none;
+  &:hover {
+    text-decoration-line: underline;
+    text-decoration-color: var(--dn-accent);
+    text-decoration-thickness: 0.09em;
+    text-underline-offset: 0.14em;
+  }
 }
 
 @layer base {
@@ -95,12 +245,13 @@
     background: var(--dn-canvas);
     color: var(--dn-text);
     font-family: var(--dn-font-sans);
+    font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   :focus-visible {
-    outline: 2px solid var(--dn-focus-ring);
+    outline: 3px solid var(--dn-focus-ring);
     outline-offset: 2px;
   }
 
