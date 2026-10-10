@@ -116,3 +116,73 @@ describe('/api/v1 contracts', () => {
     narrativeListResponseSchema.parse(await res.json())
   })
 })
+
+describe('/api/v1 write endpoints', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+
+  it('edits a summary as a new version and rejects stale or disabled edits', async () => {
+    const list = storyListResponseSchema.parse(await (await call('/api/v1/stories?limit=1')).json())
+    const story = list.items[0]
+    if (!story) throw new Error('no story')
+    const before = storyDetailSchema.parse(await (await call(`/api/v1/stories/${story.id}`)).json())
+    const baseVersion = before.summary?.versionId ?? ''
+
+    const ok = await post(`/api/v1/stories/${story.id}/summary`, {
+      headline: 'Edited headline',
+      body: 'Edited body.',
+      basedOnVersionId: baseVersion,
+    })
+    expect(ok.status).toBe(200)
+    const after = storyDetailSchema.parse(await ok.json())
+    expect(after.summary).toMatchObject({ headline: 'Edited headline', origin: 'edited' })
+    expect(after.summaryHistory.map((v) => v.versionId)).toContain(baseVersion)
+
+    const stale = await post(`/api/v1/stories/${story.id}/summary`, {
+      headline: 'Again',
+      body: 'Again.',
+      basedOnVersionId: baseVersion,
+    })
+    expect(stale.status).toBe(409)
+    expect(apiErrorSchema.parse(await stale.json()).error.code).toBe('conflict')
+
+    h.ctx.config.enableSummaryEditing = false
+    try {
+      const disabled = await post(`/api/v1/stories/${story.id}/summary`, {
+        headline: 'x',
+        body: 'y',
+        basedOnVersionId: after.summary?.versionId ?? '',
+      })
+      expect(disabled.status).toBe(403)
+    } finally {
+      h.ctx.config.enableSummaryEditing = true
+    }
+  })
+
+  it('runs pipeline actions', async () => {
+    const { isBackfillPaused } = await import('@dn/server')
+    expect((await post('/api/v1/ops/actions', { action: 'pause_backfill' })).status).toBe(200)
+    expect(await isBackfillPaused(h.ctx)).toBe(true)
+    expect((await post('/api/v1/ops/actions', { action: 'resume_backfill' })).status).toBe(200)
+    expect(await isBackfillPaused(h.ctx)).toBe(false)
+
+    const queued = async (name: string) => {
+      const { rows } = await h.ctx.pool.query(
+        `select count(*)::int as n from pgboss.job where name = $1 and state = 'created'`,
+        [name],
+      )
+      return rows[0].n as number
+    }
+    expect((await post('/api/v1/ops/actions', { action: 'poll_all_feeds' })).status).toBe(200)
+    expect(await queued('poll_feed')).toBeGreaterThan(0)
+    expect((await post('/api/v1/ops/actions', { action: 'rebuild_search' })).status).toBe(200)
+    expect(await queued('rebuild_search_projection')).toBe(1)
+
+    const bad = await post('/api/v1/ops/actions', { action: 'drop_database' })
+    expect(bad.status).toBe(400)
+  })
+})

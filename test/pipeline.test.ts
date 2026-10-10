@@ -693,3 +693,74 @@ describe('search rebuild', () => {
     expect(ts.collections.get(target ?? '')?.size).toBe(published)
   })
 })
+
+describe('transient article bodies', () => {
+  it('passes permitted bodies to inference but never persists them', async () => {
+    const { db } = h.ctx
+    const { summarizeStory } = await import('@dn/jobs')
+    const MARKER = 'TRANSIENT-BODY-MARKER-7f3a'
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    const [link] = await db
+      .select({ publisherId: schema.article.publisherId })
+      .from(schema.storyArticle)
+      .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+      .where(eq(schema.storyArticle.storyId, story?.id ?? ''))
+    if (!story || !link) throw new Error('no story')
+    await db
+      .update(schema.publisher)
+      .set({ articleBodyPolicy: 'transient_body_allowed' })
+      .where(eq(schema.publisher.id, link.publisherId))
+    await db
+      .update(schema.story)
+      .set({ inputFingerprint: 'fp_transient' })
+      .where(eq(schema.story.id, story.id))
+
+    const html = `<html><article><p>${MARKER} long enough paragraph about the event that a reader would see on the page.</p>
+      <p>See <a href="https://www.congress.gov/bill/119th-congress/house-bill/1">the bill</a> for details here.</p></article></html>`
+    const realFetch = globalThis.fetch
+    globalThis.fetch = (async () =>
+      new Response(html, { headers: { 'content-type': 'text/html' } })) as typeof fetch
+    const realSummarize = h.ctx.inference.generation.summarizeStory
+    let bodySeenByModel = false
+    h.ctx.inference.generation.summarizeStory = async (input) => {
+      bodySeenByModel = input.story.articles.some((a) => a.body?.includes(MARKER))
+      return realSummarize(input)
+    }
+    try {
+      const result = await summarizeStory(h.ctx, {
+        targetId: story.id,
+        inputFingerprint: 'fp_transient',
+        pipelineVersion: 'p2',
+        priorityClass: 'fresh',
+      })
+      expect(result).toMatchObject({ status: 'recorded' })
+    } finally {
+      globalThis.fetch = realFetch
+      h.ctx.inference.generation.summarizeStory = realSummarize
+      await db
+        .update(schema.publisher)
+        .set({ articleBodyPolicy: 'metadata_only' })
+        .where(eq(schema.publisher.id, link.publisherId))
+    }
+    expect(bodySeenByModel).toBe(true)
+
+    const { rows } = await h.ctx.pool.query(
+      `select
+        (select count(*) from observation where payload::text like $1) +
+        (select count(*) from interpretation where output::text like $1) +
+        (select count(*) from story_summary_version where body like $1 or headline like $1) +
+        (select count(*) from analysis_run where coalesce(error, '') like $1) +
+        (select count(*) from outbox_event where payload::text like $1 or coalesce(last_error, '') like $1) +
+        (select count(*) from pgboss.job where data::text like $1 or coalesce(output::text, '') like $1) as n`,
+      [`%${MARKER}%`],
+    )
+    expect(Number(rows[0].n)).toBe(0)
+
+    const refs = await db.select().from(schema.sourceReference)
+    expect(refs.some((r) => r.url.includes('congress.gov'))).toBe(true)
+  })
+})

@@ -111,3 +111,32 @@ describe('layoutNarrative', () => {
     expect(lane('sty_reax')).not.toBe(lane('sty_pillay'))
   })
 })
+
+describe('PriorityLimiter', () => {
+  it('serves waiting work interactive → fresh → backfill and never exceeds the cap', async () => {
+    const { PriorityLimiter } = await import('@dn/jobs')
+    const limiter = new PriorityLimiter(1)
+    const order: string[] = []
+    let active = 0
+    let maxActive = 0
+    let releaseFirst: () => void = () => {}
+    const task = (name: string, hold?: Promise<void>) => async () => {
+      active++
+      maxActive = Math.max(maxActive, active)
+      order.push(name)
+      await hold
+      active--
+    }
+    const first = limiter.run('backfill', task('running', new Promise((r) => (releaseFirst = r))))
+    // Queue while the only slot is busy, in deliberately "wrong" order.
+    const waiting = [
+      limiter.run('backfill', task('backfill')),
+      limiter.run('fresh', task('fresh')),
+      limiter.run('interactive', task('interactive')),
+    ]
+    releaseFirst()
+    await Promise.all([first, ...waiting])
+    expect(order).toEqual(['running', 'interactive', 'fresh', 'backfill'])
+    expect(maxActive).toBe(1)
+  })
+})
