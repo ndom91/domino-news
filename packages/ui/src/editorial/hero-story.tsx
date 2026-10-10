@@ -105,8 +105,8 @@ export function HeroStory({
               />
             </p>
             <p className="mt-5 max-w-reading border-t border-key-text/45 pt-2.5 text-label leading-normal">
-              A summary of what {citedCount} of {outlets} {outlets === 1 ? 'outlet' : 'outlets'}{' '}
-              reported, not verified by Domino.{' '}
+              A summary of what {citedCount} of {outlets}{' '}
+              {outlets === 1 ? 'publisher' : 'publishers'} reported, not verified by Domino.{' '}
               {story.summary.origin === 'edited' ? 'Edited' : 'Generated'}{' '}
               <Timestamp at={story.summary.createdAt} />.{' '}
               <Popover
@@ -123,9 +123,9 @@ export function HeroStory({
                   articles unless the publisher allows it.
                 </p>
                 <p className="mt-2">
-                  It describes what outlets <em>report</em>. Reported claims are not confirmed
-                  facts. Numbers like [1] link to the outlet each statement comes from. Edits create
-                  a new version; earlier versions are kept.
+                  It describes what publishers <em>report</em>. Reported claims are not confirmed
+                  facts. Numbers like [1] link to the publisher each statement comes from. Edits
+                  create a new version; earlier versions are kept.
                 </p>
               </Popover>
             </p>
@@ -137,7 +137,7 @@ export function HeroStory({
         <h2 className="mb-3 flex justify-between gap-3 type-label">
           Who reported it
           <span className="font-medium tracking-normal normal-case">
-            {outlets} {outlets === 1 ? 'outlet' : 'outlets'}
+            {outlets} {outlets === 1 ? 'publisher' : 'publishers'}
             {spanHours > 0 ? ` · ${spanHours} ${spanHours === 1 ? 'hour' : 'hours'}` : ''}
           </span>
         </h2>

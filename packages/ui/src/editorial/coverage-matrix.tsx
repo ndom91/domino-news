@@ -21,8 +21,8 @@ export function CoverageMatrix({
     <div className={cx('relative overflow-x-auto', className)}>
       <table className="w-full border-collapse text-sm">
         <caption className="mb-3 text-left type-meta">
-          Each row is a Story covered by more than one outlet. A square means the outlet reported
-          it; an outlined square means it reported first.
+          Each row is a Story covered by more than one publisher. A square means the publisher
+          reported it; an outlined square means it reported first.
         </caption>
         <thead>
           <tr>

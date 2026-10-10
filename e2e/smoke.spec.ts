@@ -64,7 +64,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(narrative).toBeVisible()
   await narrative.click()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-  const nodes = page.locator('main ol[aria-label*="developments"] h3 a')
+  const nodes = page.locator('main ol[aria-label*="oldest first"] h3 a')
   await expect(nodes.first()).toBeVisible()
   await expectNoHorizontalOverflow(page)
   await nodes.first().click()

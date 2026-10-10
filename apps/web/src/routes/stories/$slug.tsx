@@ -97,11 +97,11 @@ function StoryPage() {
             <SectionHeader
               id="sources-heading"
               title="Original reporting"
-              meta={`${story.sources.length} ${story.sources.length === 1 ? 'report' : 'reports'} from ${outlets} ${outlets === 1 ? 'outlet' : 'outlets'}`}
+              meta={`${story.sources.length} ${story.sources.length === 1 ? 'report' : 'reports'} from ${outlets} ${outlets === 1 ? 'publisher' : 'publishers'}`}
             />
             <p className="mb-4 max-w-reading text-sm text-text-secondary">
-              Headlines and descriptions as each outlet published them in its feed. Open a link to
-              read the full article on the publisher's site.
+              Headlines and descriptions as each publisher published them in its feed. Open a link
+              to read the full article on the publisher's site.
             </p>
             <SourceList sources={story.sources} Link={RouterLink} />
           </section>
@@ -177,8 +177,8 @@ function StoryPage() {
             <SectionLabel id="primary-heading">Primary sources</SectionLabel>
             {story.primarySources.length === 0 ? (
               <p className="text-sm text-text-muted">
-                No primary documents found. They are only extracted from publishers that permit
-                article processing.
+                No primary documents found. We only look for them in articles from publishers that
+                let us read the full text.
               </p>
             ) : (
               <ul className="flex flex-col gap-3 text-sm">

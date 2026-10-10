@@ -92,9 +92,9 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
               Domino<span className="text-accent">.</span>
             </Link>
             <p className="mt-4 max-w-reading text-base leading-normal text-band-muted">
-              Stories assembled from the feeds of many outlets, with every source linked. Summaries
-              are written by a language model and say what outlets report, not what Domino has
-              verified.
+              Stories assembled from the feeds of many publishers, with every source linked.
+              Summaries are written by a language model and say what publishers report, not what
+              Domino has verified.
             </p>
           </div>
           <nav aria-label="Footer" className="border-t-2 border-band-text pt-3">

@@ -87,7 +87,7 @@ function SearchPage() {
               ))}
             </select>
             <label htmlFor={pubId} className="type-label">
-              Outlet
+              Publisher
             </label>
             <select
               id={pubId}
@@ -95,7 +95,7 @@ function SearchPage() {
               defaultValue={search.publisher ?? ''}
               className={selectClass}
             >
-              <option value="">Any outlet</option>
+              <option value="">Any publisher</option>
               {publishers.data?.items.map((p) => (
                 <option key={p.id} value={p.slug}>
                   {p.name}
@@ -124,7 +124,7 @@ function SearchPage() {
 
       <div className="mt-10 max-w-4xl" aria-live="polite">
         {!search.q ? (
-          <p className="text-text-muted">Search by topic, person, place or outlet.</p>
+          <p className="text-text-muted">Search by topic, person, place or publisher.</p>
         ) : results.isPending ? (
           <div className="flex flex-col gap-4" aria-busy="true">
             <Skeleton className="h-6 w-3/4" />
@@ -153,7 +153,7 @@ function SearchPage() {
               {plural(results.data.hits.length, 'result')} ·{' '}
               {results.data.mode === 'hybrid'
                 ? 'keyword and meaning'
-                : 'keyword only (embedding service unavailable)'}
+                : 'exact words only right now'}
             </p>
             <ol className="flex flex-col divide-y divide-border border-t-2 border-rule">
               {results.data.hits.map((hit) => (

@@ -69,7 +69,7 @@ export function SourceTrace({
       width={width}
       height={H}
       role="img"
-      aria-label={`${plural(sources.length, 'outlet')} by hour, ${cited} cited`}
+      aria-label={`${plural(sources.length, 'publisher')} by hour, ${cited} cited`}
       className={cx('block h-auto max-w-full', className)}
     >
       {columns.map((_, i) => (

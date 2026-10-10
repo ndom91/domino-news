@@ -80,7 +80,7 @@ function FeedPage() {
           <p className="pb-16 type-meta text-base">
             {region
               ? `No stories about ${REGION_LABELS[region]} in the last 24 hours.`
-              : 'No stories in the last 24 hours. The next poll runs within 15 minutes.'}
+              : 'No stories in the last 24 hours. New stories usually arrive within 15 minutes.'}
           </p>
         ) : (
           <StoryGrid stories={latest} now={now} />

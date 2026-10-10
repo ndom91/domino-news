@@ -95,7 +95,7 @@ function LoginPage() {
         Domino<span className="text-accent">.</span>
       </h1>
       <p className="mt-4 mb-8 text-text-secondary">
-        News stories assembled from many outlets, with every source linked.
+        News stories assembled from many publishers, with every source linked.
       </p>
       <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
         <TextInput
@@ -148,9 +148,8 @@ function LoginPage() {
         </Button>
       ) : null}
       <p className="mt-8 text-xs text-text-muted">
-        Accounts are created by an administrator with{' '}
-        <code className="font-semibold text-text">pnpm cli user:create</code>
-        {session.features.googleSignIn ? ', or on first Google sign-in for allowed emails' : ''}.
+        Ask an administrator for an account
+        {session.features.googleSignIn ? ', or continue with Google if your email is allowed' : ''}.
       </p>
     </div>
   )

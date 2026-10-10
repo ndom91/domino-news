@@ -112,8 +112,8 @@ export function StoryItem({
           width={wide ? 336 : 216}
         />
         <span>
-          {story.sourceCount} {story.sourceCount === 1 ? 'outlet' : 'outlets'} · {cited} cited ·
-          first {clockTime(first)} UTC
+          {story.sourceCount} {story.sourceCount === 1 ? 'publisher' : 'publishers'} · {cited} cited
+          · first {clockTime(first)} UTC
         </span>
       </div>
     </article>

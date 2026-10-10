@@ -35,7 +35,7 @@ function NarrativePage() {
           </p>
         ) : null}
         <p className="mt-4 mb-10 type-meta">
-          {plural(narrative.stories.length, 'development')}
+          {plural(narrative.stories.length, 'story', 'stories')}
           {first && last
             ? ` · ${formatDate(first.firstObservedAt)} to ${formatDate(last.firstObservedAt)}`
             : ''}

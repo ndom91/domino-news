@@ -15,14 +15,14 @@ function NarrativesPage() {
   const { data } = useSuspenseQuery(queries.narratives())
   return (
     <Page>
-      <PageTitle meta={`${data.items.length} followed`}>Narratives</PageTitle>
+      <PageTitle meta={plural(data.items.length, 'narrative')}>Narratives</PageTitle>
       <p className="-mt-4 mb-10 max-w-reading text-text-secondary">
         Connected stories followed over time: what happened first, what followed, and where it
         branched.
       </p>
       {data.items.length === 0 ? (
         <Notice title="No narratives yet">
-          Narratives form once related stories are linked by the pipeline.
+          A narrative appears once several related stories are linked together.
         </Notice>
       ) : (
         <ol className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
