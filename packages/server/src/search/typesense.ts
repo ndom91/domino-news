@@ -19,6 +19,26 @@ export function createTypesense(baseUrl: string, apiKey: string) {
     health: () => request<{ ok: boolean }>('GET', '/health'),
     upsert: (collection: string, doc: Record<string, unknown>) =>
       request('POST', `/collections/${collection}/documents?action=upsert`, doc),
+    /** Bulk upsert (JSONL import). Throws if any document fails. */
+    importDocuments: async (collection: string, docs: Record<string, unknown>[]) => {
+      if (docs.length === 0) return
+      const res = await fetch(
+        `${baseUrl.replace(/\/$/, '')}/collections/${collection}/documents/import?action=upsert`,
+        {
+          method: 'POST',
+          headers: { 'x-typesense-api-key': apiKey, 'content-type': 'text/plain' },
+          body: docs.map((d) => JSON.stringify(d)).join('\n'),
+          signal: AbortSignal.timeout(60_000),
+        },
+      )
+      if (!res.ok) throw new TypesenseError(res.status, `import ${collection}: ${await res.text()}`)
+      const failed = (await res.text())
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => JSON.parse(line) as { success: boolean; error?: string })
+        .find((r) => !r.success)
+      if (failed) throw new TypesenseError(400, `import ${collection}: ${failed.error}`)
+    },
     remove: async (collection: string, id: string) => {
       try {
         await request('DELETE', `/collections/${collection}/documents/${encodeURIComponent(id)}`)

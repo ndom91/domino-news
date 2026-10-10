@@ -676,3 +676,20 @@ describe('story graph validation', () => {
     }
   })
 })
+
+describe('search rebuild', () => {
+  it('rebuilds every published story into a fresh collection and swaps the alias', async () => {
+    const { db, ts } = h.ctx
+    const { rebuildSearchIndex } = await import('@dn/server')
+    await rebuildSearchIndex(db, ts, () => {})
+    const target = ts.aliases.get('stories')
+    expect(target).toMatch(/^stories_/)
+    const published = await n(
+      db.select({ n: count() }).from(schema.story).where(isNotNull(schema.story.publishedAt)),
+    )
+    expect(ts.collections.get(target ?? '')?.size).toBe(published)
+    // Later outbox processing writes through the alias into the rebuilt collection.
+    await processOutboxBatch(db, ts)
+    expect(ts.collections.get(target ?? '')?.size).toBe(published)
+  })
+})

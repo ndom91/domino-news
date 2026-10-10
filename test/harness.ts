@@ -5,7 +5,7 @@ import { PgBoss } from 'pg-boss'
 /** In-memory stand-in for Typesense: enough for upserts, deletes and vector lookups. */
 export function createFakeTypesense() {
   const collections = new Map<string, Map<string, Record<string, unknown>>>()
-  const coll = (name: string) => {
+  const collRaw = (name: string) => {
     let c = collections.get(name)
     if (!c) {
       c = new Map()
@@ -24,9 +24,33 @@ export function createFakeTypesense() {
     }
     return dot / (Math.sqrt(na) * Math.sqrt(nb) || 1)
   }
+  const aliases = new Map<string, string>()
+  const resolve = (name: string) => aliases.get(name) ?? name
+  const coll = (name: string) => collRaw(resolve(name))
   const ts = {
     collections,
-    request: async () => ({}) as never,
+    aliases,
+    // Minimal collection/alias API used by rebuildSearchIndex.
+    request: async (
+      method: string,
+      path: string,
+      body?: { name?: string; collection_name?: string },
+    ) => {
+      const alias = path.match(/^\/aliases\/(\w+)$/)?.[1]
+      if (alias && method === 'GET') {
+        const target = aliases.get(alias)
+        if (!target) throw new Error('alias not found')
+        return { collection_name: target } as never
+      }
+      if (alias && method === 'PUT') aliases.set(alias, body?.collection_name ?? '')
+      if (path === '/collections' && method === 'POST' && body?.name) collRaw(body.name)
+      const dropped = path.match(/^\/collections\/(\w+)$/)?.[1]
+      if (dropped && method === 'DELETE') collections.delete(dropped)
+      return {} as never
+    },
+    importDocuments: async (collection: string, docs: Record<string, unknown>[]) => {
+      for (const doc of docs) coll(collection).set(String(doc.id), doc)
+    },
     health: async () => ({ ok: true }),
     upsert: async (collection: string, doc: Record<string, unknown>) => {
       coll(collection).set(String(doc.id), doc)

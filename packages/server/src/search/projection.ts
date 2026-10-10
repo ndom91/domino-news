@@ -139,6 +139,15 @@ export async function projectAggregate(
   const built = await buildDocument(db, type, id)
   if (built) await ts.upsert(collection, built.doc)
   else await ts.remove(collection, id)
+  await recordProjectionState(db, type, id, built)
+}
+
+async function recordProjectionState(
+  db: Db,
+  type: AggregateType,
+  id: string,
+  built: { version: number | null } | null,
+) {
   await db
     .insert(schema.searchProjectionState)
     .values({
@@ -265,6 +274,8 @@ async function projectEvent(db: Db, ts: Typesense, event: OutboxRow): Promise<st
  * Rebuild every search collection from Postgres into fresh collections, then swap aliases.
  * The live index keeps serving until the swap.
  */
+const REBUILD_BATCH = 100
+
 export async function rebuildSearchIndex(db: Db, ts: Typesense, log = console.log) {
   const startedAt = new Date()
   for (const alias of ALIASES) {
@@ -280,7 +291,18 @@ export async function rebuildSearchIndex(db: Db, ts: Typesense, log = console.lo
           : await db.select({ id: schema.articleEmbedding.articleId }).from(schema.articleEmbedding)
     const type: AggregateType =
       alias === 'stories' ? 'story' : alias === 'narratives' ? 'narrative' : 'article'
-    for (const { id } of ids) await projectAggregate(db, ts, type, id, collection)
+    // Build documents per aggregate, but send them to Typesense in bulk.
+    for (let i = 0; i < ids.length; i += REBUILD_BATCH) {
+      const batch = ids.slice(i, i + REBUILD_BATCH)
+      const built = await Promise.all(batch.map(({ id }) => buildDocument(db, type, id)))
+      await ts.importDocuments(
+        collection,
+        built.flatMap((b) => (b ? [b.doc] : [])),
+      )
+      for (const [j, { id }] of batch.entries()) {
+        await recordProjectionState(db, type, id, built[j] ?? null)
+      }
+    }
     const previous = await pointAlias(ts, alias, collection)
     if (previous && previous !== collection) {
       await ts.request('DELETE', `/collections/${previous}`).catch(() => {})
