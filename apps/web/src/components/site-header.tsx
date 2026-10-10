@@ -1,11 +1,12 @@
 import { clockTime, longDate } from '@dn/domain'
-import { cx, Menu, MenuCheckboxItem, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { cx, Menu, MenuChoice, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
-import { currentTheme, setTheme } from '../lib/theme.ts'
+import { currentTheme, setTheme, type Theme } from '../lib/theme.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
@@ -115,17 +116,20 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
 
 /** Menu content only mounts when open, on the client, so reading the DOM here is safe. */
 function ThemeItem() {
-  const [dark, setDark] = useState(() => currentTheme() === 'dark')
+  const [theme, setThemeState] = useState(currentTheme)
   return (
-    <MenuCheckboxItem
-      checked={dark}
-      onCheckedChange={(checked) => {
-        setTheme(checked ? 'dark' : 'light')
-        setDark(checked)
+    <MenuChoice<Theme>
+      label="Theme"
+      value={theme}
+      options={[
+        { value: 'light', label: 'Light theme', icon: <SunIcon size={18} weight="bold" /> },
+        { value: 'dark', label: 'Dark theme', icon: <MoonIcon size={18} weight="bold" /> },
+      ]}
+      onChange={(next) => {
+        setTheme(next)
+        setThemeState(next)
       }}
-    >
-      Dark theme
-    </MenuCheckboxItem>
+    />
   )
 }
 

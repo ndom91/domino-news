@@ -2,7 +2,7 @@ import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog'
 import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Popover as BasePopover } from '@base-ui/react/popover'
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
-import { type ReactElement, type ReactNode, useRef, useState } from 'react'
+import { type ReactElement, type ReactNode, useId, useRef, useState } from 'react'
 import { cx } from '../cx.ts'
 import { Button } from './button.tsx'
 
@@ -91,28 +91,45 @@ export function MenuLinkItem({ children, render }: { children: ReactNode; render
   )
 }
 
-/** Menu on/off setting. Stays open on click so the change is visible. */
-export function MenuCheckboxItem({
-  children,
-  checked,
-  onCheckedChange,
+/**
+ * Labelled row of icon choices inside a menu, e.g. light/dark. The selected choice is boxed.
+ * Each icon is a menu radio item, so arrow keys reach it and it needs its own `label`.
+ */
+export function MenuChoice<T extends string>({
+  label,
+  value,
+  options,
+  onChange,
 }: {
-  children: ReactNode
-  checked: boolean
-  onCheckedChange: (checked: boolean) => void
+  label: string
+  value: T
+  options: { value: T; label: string; icon: ReactNode }[]
+  onChange: (value: T) => void
 }) {
+  const labelId = useId()
   return (
-    <BaseMenu.CheckboxItem
-      className={cx(menuItemClass, 'group justify-between gap-4')}
-      checked={checked}
-      onCheckedChange={onCheckedChange}
-    >
-      {children}
-      <span
-        aria-hidden
-        className="size-3.5 flex-none border-2 border-current group-data-checked:bg-accent group-data-checked:border-accent"
-      />
-    </BaseMenu.CheckboxItem>
+    <div className="flex min-h-tap items-center justify-between gap-4 pr-1 pl-4 text-base font-semibold">
+      <span id={labelId}>{label}</span>
+      <BaseMenu.RadioGroup
+        aria-labelledby={labelId}
+        value={value}
+        onValueChange={(next) => onChange(next as T)}
+        className="flex"
+      >
+        {options.map((option) => (
+          <BaseMenu.RadioItem
+            key={option.value}
+            value={option.value}
+            aria-label={option.label}
+            className="group flex size-tap cursor-pointer items-center justify-center outline-none"
+          >
+            <span className="flex size-8 items-center justify-center border-2 border-transparent group-data-checked:border-current group-data-highlighted:bg-text group-data-highlighted:text-canvas">
+              {option.icon}
+            </span>
+          </BaseMenu.RadioItem>
+        ))}
+      </BaseMenu.RadioGroup>
+    </div>
   )
 }
 
