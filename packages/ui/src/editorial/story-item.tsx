@@ -1,6 +1,7 @@
 import { clockTime, hostnameOf } from '@dn/domain'
 import type { StoryListItem } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { useReveal } from '../primitives/reveal.tsx'
 import { Skeleton } from '../primitives/surface.tsx'
 import type { CitedSource } from './citation.tsx'
 import { SummaryText } from './citation.tsx'
@@ -49,9 +50,16 @@ export function StoryItem({
   const latest = story.trace.reduce((max, t) => (t.at > max ? t.at : max), story.lastUpdatedAt)
   const first = story.trace.reduce((min, t) => (t.at < min ? t.at : min), story.firstObservedAt)
   const cited = story.trace.filter((t) => t.citation !== null).length
+  const reveal = useReveal()
   return (
     <article
-      className={cx('flex min-w-0 flex-col', wide && 'lg:col-span-2 md:col-span-2', className)}
+      className={cx(
+        'flex min-w-0 flex-col',
+        wide && 'lg:col-span-2 md:col-span-2',
+        reveal.className,
+        className,
+      )}
+      style={reveal.style}
     >
       <StoryBar
         desk={story.desk}

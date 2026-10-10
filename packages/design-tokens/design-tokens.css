@@ -171,7 +171,12 @@
   --dn-duration-fast: 120ms;
   --dn-duration-base: 180ms;
   --dn-duration-slow: 280ms;
+  --dn-duration-instant: 50ms; /* tooltip close */
+  --dn-duration-exit: 150ms; /* popup/dialog close, tooltip open, hover colour */
+  --dn-duration-enter: 250ms; /* popup/dialog open, accordion */
+  --dn-duration-reveal: 400ms; /* content replacing a skeleton */
   --dn-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+  --dn-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1); /* open/close, reveal, position change */
   --dn-ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
 }
 
@@ -244,5 +249,9 @@
     --dn-duration-fast: 0ms;
     --dn-duration-base: 0ms;
     --dn-duration-slow: 0ms;
+    --dn-duration-instant: 0ms;
+    --dn-duration-exit: 0ms;
+    --dn-duration-enter: 0ms;
+    --dn-duration-reveal: 0ms;
   }
 }

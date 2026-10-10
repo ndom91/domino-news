@@ -54,7 +54,7 @@ export function Badge({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <span aria-hidden className={cx('block bg-sunken', className)} />
+  return <span aria-hidden className={cx('t-skel block bg-sunken', className)} />
 }
 
 /** Empty, error and info states: one plain line of direction, no illustration. */

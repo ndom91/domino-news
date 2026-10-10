@@ -27,7 +27,7 @@ const sizes: Record<Size, string> = {
 export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'className'> {
   variant?: Variant
   size?: Size
-  /** Keeps the label and appends "…" while busy; no spinner. */
+  /** Keeps the label and appends "…" while busy; a text label shimmers. No spinner. */
   loading?: boolean
   className?: string
   children?: ReactNode
@@ -50,7 +50,13 @@ export function Button({
       aria-busy={loading || undefined}
       className={cx(base, variants[variant], sizes[size], className)}
     >
-      {children}
+      {loading && typeof children === 'string' ? (
+        <span className="t-shimmer" data-text={children}>
+          {children}
+        </span>
+      ) : (
+        children
+      )}
       {loading ? <span aria-hidden>…</span> : null}
     </BaseButton>
   )

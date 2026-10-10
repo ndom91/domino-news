@@ -63,7 +63,7 @@ export function Select<T extends string>({
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={4} align="start" alignItemWithTrigger={false}>
-          <BaseSelect.Popup className="max-h-(--available-height) min-w-(--anchor-width) origin-(--transform-origin) overflow-y-auto overscroll-contain bg-elevated py-1 text-text shadow-popover outline-none transition-[opacity,scale] duration-[var(--dn-duration-fast)] data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0">
+          <BaseSelect.Popup className="max-h-(--available-height) min-w-(--anchor-width) t-popup overflow-y-auto overscroll-contain bg-elevated py-1 text-text shadow-popover outline-none">
             {options.map((option) => (
               <BaseSelect.Item
                 key={option.value ?? ''}

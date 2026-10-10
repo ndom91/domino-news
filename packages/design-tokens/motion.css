@@ -1,0 +1,197 @@
+/*
+ * Motion recipes (t-* classes), tuned from transitions.dev and wired to Base UI's state
+ * attributes (data-starting-style / data-ending-style), so no JS orchestration is needed.
+ * Every duration reads a --dn-duration-* token, and those drop to 0 under reduced motion.
+ * Keyframe animations get their own reduced-motion guard at the end.
+ * Animate transform, scale, opacity and filter only.
+ */
+
+/* Popovers, menus, selects: grow from the trigger (Base UI sets --transform-origin).
+   Slower in than out, so opening feels deliberate and closing gets out of the way. */
+.t-popup {
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity var(--dn-duration-enter) var(--dn-ease-smooth),
+    scale var(--dn-duration-enter) var(--dn-ease-smooth);
+}
+.t-popup[data-starting-style] {
+  opacity: 0;
+  scale: 0.97;
+}
+.t-popup[data-ending-style] {
+  opacity: 0;
+  scale: 0.99;
+  transition-duration: var(--dn-duration-exit);
+}
+
+/* Tooltips: quick fade + scale in, near-instant out. The open delay is the Provider's. */
+.t-tooltip {
+  transform-origin: var(--transform-origin);
+  transition:
+    opacity var(--dn-duration-exit) ease-out,
+    scale var(--dn-duration-exit) ease-out;
+}
+.t-tooltip[data-starting-style] {
+  opacity: 0;
+  scale: 0.98;
+}
+.t-tooltip[data-ending-style] {
+  opacity: 0;
+  transition-duration: var(--dn-duration-instant);
+}
+/* Moving between triggers inside the Provider's window: no re-animation. */
+.t-tooltip[data-instant] {
+  transition-duration: 0ms;
+}
+
+/* Centred dialogs: scale up from 0.96, softer and quicker on close. */
+.t-modal {
+  transition:
+    opacity var(--dn-duration-enter) var(--dn-ease-smooth),
+    scale var(--dn-duration-enter) var(--dn-ease-smooth);
+}
+.t-modal[data-starting-style],
+.t-modal[data-ending-style] {
+  opacity: 0;
+  scale: 0.96;
+}
+.t-modal[data-ending-style] {
+  transition-duration: var(--dn-duration-exit);
+}
+
+/* Native <details> accordion. ::details-content animates where supported (Chromium,
+   Safari 18.4+); elsewhere it opens instantly, which is the old behaviour. */
+.t-acc {
+  interpolate-size: allow-keywords;
+}
+.t-acc::details-content {
+  block-size: 0;
+  overflow-y: clip;
+  opacity: 0;
+  filter: blur(2px);
+  transition:
+    block-size var(--dn-duration-enter) var(--dn-ease-smooth),
+    opacity var(--dn-duration-enter) var(--dn-ease-smooth),
+    filter var(--dn-duration-enter) var(--dn-ease-smooth),
+    content-visibility var(--dn-duration-enter) allow-discrete;
+}
+.t-acc[open]::details-content {
+  block-size: auto;
+  opacity: 1;
+  filter: none;
+}
+.t-acc-chevron {
+  display: inline-block;
+  transition: rotate var(--dn-duration-enter) var(--dn-ease-smooth);
+}
+.t-acc[open] .t-acc-chevron {
+  rotate: 90deg;
+}
+
+/* Skeleton placeholder: a slow breathing pulse while data loads. */
+.t-skel {
+  animation: t-skel-pulse 1.6s ease-in-out infinite;
+}
+@keyframes t-skel-pulse {
+  50% {
+    opacity: 0.5;
+  }
+}
+
+/* Content that replaces a skeleton (or arrives with "Show older stories"): a soft
+   cross-blur rise. --reveal-i staggers siblings by 40ms each. */
+.t-reveal {
+  animation: t-reveal var(--dn-duration-reveal) var(--dn-ease-smooth) both;
+  animation-delay: calc(var(--reveal-i, 0) * 40ms);
+}
+@keyframes t-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+}
+
+/* A changed number or short label re-enters from below with a slight blur.
+   Re-keying the element (React key) replays it. */
+.t-pop {
+  display: inline-block;
+  animation: t-pop 500ms cubic-bezier(0.34, 1.45, 0.64, 1) both;
+}
+@keyframes t-pop {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+    filter: blur(2px);
+  }
+}
+
+/* "Working" label: a highlight band sweeps across the text (pure CSS).
+   Needs data-text with the same text as the element. The empty alt text after "/" keeps
+   screen readers from reading the label twice. */
+.t-shimmer {
+  position: relative;
+  display: inline-block;
+}
+.t-shimmer::before {
+  content: attr(data-text) / "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: linear-gradient(
+    90deg,
+    transparent 40%,
+    color-mix(in oklab, currentColor 55%, var(--dn-accent)) 50%,
+    transparent 60%
+  );
+  background-size: 400% 100%;
+  background-repeat: no-repeat;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  animation: t-shimmer 2s linear infinite;
+}
+@keyframes t-shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+/* Wrong input: a short damped shake (80/60/80/60ms legs). Re-key or re-add to replay. */
+.t-shake {
+  animation: t-shake 280ms linear;
+}
+@keyframes t-shake {
+  0% {
+    transform: translateX(0);
+    animation-timing-function: var(--dn-ease-smooth);
+  }
+  28.57% {
+    transform: translateX(6px);
+    animation-timing-function: var(--dn-ease-smooth);
+  }
+  57.14% {
+    transform: translateX(-6px);
+    animation-timing-function: var(--dn-ease-smooth);
+  }
+  78.57% {
+    transform: translateX(4px);
+    animation-timing-function: var(--dn-ease-smooth);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .t-skel,
+  .t-reveal,
+  .t-pop,
+  .t-shimmer::before,
+  .t-shake {
+    animation: none;
+  }
+}

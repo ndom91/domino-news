@@ -5,6 +5,7 @@
  *   @import "@dn/design-tokens/theme.css";
  * `inline` keeps utilities pointing at the runtime variables so theme switching works.
  */
+@import "./motion.css";
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
@@ -263,12 +264,14 @@
 
 /* Brand hover underline used on every headline link. */
 @utility link-headline {
-  text-decoration-line: none;
+  /* Always underlined but transparent, so hover can fade the colour in. */
+  text-decoration-line: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 0.09em;
+  text-underline-offset: 0.14em;
+  transition: text-decoration-color var(--dn-duration-exit) ease-out;
   &:hover {
-    text-decoration-line: underline;
     text-decoration-color: var(--dn-accent);
-    text-decoration-thickness: 0.09em;
-    text-underline-offset: 0.14em;
   }
 }
 

@@ -128,7 +128,8 @@ Follow these for any UI work in `apps/web` and `packages/ui`. They come from the
 - Pluralise counts with `plural()`. Use "…" (not "...") and curly quotes in UI text. Button labels say exactly what happens ("Remove passkey", not "Submit").
 
 **Motion**
-- Animate only `transform` and `opacity`, using the duration tokens. Those tokens drop to 0 under `prefers-reduced-motion`. Never use `transition-all`.
+- Animate only `transform`, `scale`, `opacity` and a small `filter: blur`, using the duration tokens. Those tokens drop to 0 under `prefers-reduced-motion`. Never use `transition-all`.
+- Reuse the `t-*` recipes in `packages/design-tokens/motion.css` before writing new motion: `t-popup`, `t-tooltip`, `t-modal` (Base UI popups), `t-acc` (`<details>`), `t-skel`, `t-reveal` (via `useReveal` / `<Reveal>`, which skips server-rendered content), `t-pop`, `t-shimmer`, `t-shake`.
 
 ## API
 

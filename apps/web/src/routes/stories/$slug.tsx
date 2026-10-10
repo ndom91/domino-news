@@ -7,6 +7,7 @@ import {
   ContextExplanation,
   HeroStory,
   NarrativeGraph,
+  Reveal,
   relationLabel,
   SectionHeader,
   Skeleton,
@@ -131,11 +132,13 @@ function StoryPage() {
                   </Link>
                 }
               />
-              <NarrativeGraph
-                narrative={narrative.data}
-                currentStoryId={story.id}
-                Link={RouterLink}
-              />
+              <Reveal>
+                <NarrativeGraph
+                  narrative={narrative.data}
+                  currentStoryId={story.id}
+                  Link={RouterLink}
+                />
+              </Reveal>
             </section>
           ) : narrativeRef && narrative.isPending ? (
             <Skeleton className="mt-12 h-40 w-full" />

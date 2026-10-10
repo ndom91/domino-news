@@ -8,7 +8,7 @@ import {
   regionSchema,
   searchQuerySchema,
 } from '@dn/schemas'
-import { Badge, Button, cx, deskKey, Notice, Select, Skeleton, TextInput } from '@dn/ui'
+import { Badge, Button, cx, deskKey, Notice, Reveal, Select, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
@@ -141,7 +141,7 @@ function SearchPage() {
             Try fewer words, or widen the time range.
           </Notice>
         ) : (
-          <>
+          <Reveal>
             <p className="mb-4 type-meta">
               {plural(results.data.hits.length, 'result')} ·{' '}
               {results.data.mode === 'hybrid'
@@ -189,7 +189,7 @@ function SearchPage() {
                 </li>
               ))}
             </ol>
-          </>
+          </Reveal>
         )}
       </div>
     </Page>

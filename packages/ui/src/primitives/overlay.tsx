@@ -6,9 +6,8 @@ import { type ReactElement, type ReactNode, useRef, useState } from 'react'
 import { cx } from '../cx.ts'
 import { Button } from './button.tsx'
 
-// Popovers are the only element with a shadow.
-const popupBase =
-  'origin-(--transform-origin) bg-elevated text-text shadow-popover outline-none transition-[opacity,scale] duration-[var(--dn-duration-fast)] data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0'
+// Popovers are the only element with a shadow. Motion comes from the t-* class each adds.
+const popupBase = 'bg-elevated text-text shadow-popover outline-none'
 
 export interface PopoverProps {
   /** Element that opens the popover. Rendered via Base UI so it stays keyboard/touch accessible. */
@@ -27,7 +26,7 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
       <BasePopover.Portal>
         <BasePopover.Positioner side={side} sideOffset={8} collisionPadding={12} className="z-50">
           <BasePopover.Popup
-            className={cx(popupBase, 'w-[min(22rem,calc(100vw-1.5rem))] p-4', className)}
+            className={cx(popupBase, 't-popup w-[min(22rem,calc(100vw-1.5rem))] p-4', className)}
           >
             {title ? (
               <BasePopover.Title className="mb-2 type-label">{title}</BasePopover.Title>
@@ -63,7 +62,7 @@ export function Menu({
       <BaseMenu.Trigger render={trigger} />
       <BaseMenu.Portal>
         <BaseMenu.Positioner align={align} sideOffset={8} collisionPadding={12} className="z-50">
-          <BaseMenu.Popup className={cx(popupBase, 'min-w-44 border-2 border-rule py-1')}>
+          <BaseMenu.Popup className={cx(popupBase, 't-popup min-w-44 border-2 border-rule py-1')}>
             {children}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>
@@ -118,7 +117,7 @@ export function Tooltip({ content, children }: { content: ReactNode; children: R
       <BaseTooltip.Trigger render={children} />
       <BaseTooltip.Portal>
         <BaseTooltip.Positioner sideOffset={6} className="z-50">
-          <BaseTooltip.Popup className={cx(popupBase, 'max-w-64 px-2 py-1 text-sm')}>
+          <BaseTooltip.Popup className={cx(popupBase, 't-tooltip max-w-64 px-2 py-1 text-sm')}>
             {content}
           </BaseTooltip.Popup>
         </BaseTooltip.Positioner>
@@ -165,12 +164,12 @@ export function ConfirmDialog({
     >
       {trigger ? <BaseAlertDialog.Trigger render={trigger} /> : null}
       <BaseAlertDialog.Portal>
-        <BaseAlertDialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-[var(--dn-duration-fast)] data-starting-style:opacity-0 data-ending-style:opacity-0" />
+        <BaseAlertDialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-(--dn-duration-enter) data-ending-style:duration-(--dn-duration-exit) data-starting-style:opacity-0 data-ending-style:opacity-0" />
         <BaseAlertDialog.Popup
           initialFocus={cancelRef}
           className={cx(
             popupBase,
-            'fixed top-1/2 left-1/2 z-50 w-[min(26rem,calc(100vw-1.5rem))] -translate-1/2 p-5',
+            't-modal fixed top-1/2 left-1/2 z-50 w-[min(26rem,calc(100vw-1.5rem))] -translate-1/2 p-5',
           )}
         >
           <BaseAlertDialog.Title className="text-md font-bold">{title}</BaseAlertDialog.Title>

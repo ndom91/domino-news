@@ -222,7 +222,9 @@ function Stat({ label, value, note }: { label: string; value: number; note?: str
   return (
     <div className="border-b border-border py-4 pr-4">
       <dt className="type-label text-text-muted">{label}</dt>
-      <dd className="mt-1 type-numeral tabular-nums">{value}</dd>
+      <dd className="mt-1 type-numeral tabular-nums">
+        <Digits value={value} />
+      </dd>
       {note ? <dd className="mt-1 type-meta">{note}</dd> : null}
     </div>
   )
@@ -254,5 +256,23 @@ function Td({ children, mono, num }: { children: ReactNode; mono?: boolean; num?
     >
       {children}
     </td>
+  )
+}
+
+/**
+ * A number whose changed digits pop in on each 5s refresh. Digits are keyed by place
+ * (counted from the right) and value, so only the digits that changed re-mount and animate.
+ */
+function Digits({ value }: { value: number }) {
+  const text = String(value)
+  return (
+    <span className="inline-flex">
+      {[...text].map((digit, i) => (
+        // biome-ignore lint/suspicious/noArrayIndexKey: the place is the identity here
+        <span key={`${text.length - i}:${digit}`} className="t-pop">
+          {digit}
+        </span>
+      ))}
+    </span>
   )
 }

@@ -1,6 +1,6 @@
 import { Button, Notice, TextInput } from '@dn/ui'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
-import { type FormEvent, useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { authClient } from '../lib/auth-client.ts'
 
@@ -22,6 +22,15 @@ function LoginPage() {
   )
   // Which sign-in method is in flight, so only its button spins.
   const [pending, setPending] = useState<null | 'password' | 'passkey' | 'google'>(null)
+  // Wrong credentials shake the fields. Remove, reflow, re-add so repeat failures replay it.
+  const fieldsRef = useRef<HTMLDivElement>(null)
+  function shakeFields() {
+    const el = fieldsRef.current
+    if (!el) return
+    el.classList.remove('t-shake')
+    void el.offsetWidth
+    el.classList.add('t-shake')
+  }
   // Only follow same-origin relative paths.
   const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
 
@@ -84,6 +93,7 @@ function LoginPage() {
           ? 'Username or password is incorrect.'
           : (error.message ?? 'Sign-in failed.'),
       )
+      if (error.status === 401) shakeFields()
       return
     }
     await finishSignIn()
@@ -98,22 +108,24 @@ function LoginPage() {
         News stories assembled from many publishers, with every source linked.
       </p>
       <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-        <TextInput
-          label="Username"
-          name="username"
-          autoComplete="username webauthn"
-          autoCapitalize="none"
-          spellCheck={false}
-          required
-          autoFocus
-        />
-        <TextInput
-          label="Password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-        />
+        <div ref={fieldsRef} className="flex flex-col gap-4">
+          <TextInput
+            label="Username"
+            name="username"
+            autoComplete="username webauthn"
+            autoCapitalize="none"
+            spellCheck={false}
+            required
+            autoFocus
+          />
+          <TextInput
+            label="Password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            required
+          />
+        </div>
         {error ? <Notice tone="error" title={error} /> : null}
         <Button
           type="submit"

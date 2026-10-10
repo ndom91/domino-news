@@ -1,7 +1,7 @@
 import { formatDateTime } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
 import { REGION_LABELS, REGIONS } from '@dn/schemas'
-import { Button, ConfirmDialog, Notice, Select, TextInput } from '@dn/ui'
+import { Button, ConfirmDialog, Notice, Reveal, Select, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useId, useState } from 'react'
@@ -83,7 +83,11 @@ function AccountPage() {
           ) : (
             <ul className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule">
               {passkeys.data.map((p) => (
-                <li key={p.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                <Reveal
+                  as="li"
+                  key={p.id}
+                  className="flex flex-wrap items-center justify-between gap-3 py-3"
+                >
                   <div>
                     <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
                     <p className="type-meta">
@@ -113,7 +117,7 @@ function AccountPage() {
                     You will no longer be able to sign in with {p.name || 'this passkey'}. Your
                     password keeps working.
                   </ConfirmDialog>
-                </li>
+                </Reveal>
               ))}
             </ul>
           )}
@@ -131,14 +135,18 @@ function AccountPage() {
             </Button>
           </form>
           {add.isError ? (
-            <Notice tone="error" title="Passkey not added" className="mt-4">
-              {add.error.message}
-            </Notice>
+            <Reveal className="mt-4">
+              <Notice tone="error" title="Passkey not added">
+                {add.error.message}
+              </Notice>
+            </Reveal>
           ) : null}
           {remove.isError ? (
-            <Notice tone="error" title="Passkey not removed" className="mt-4">
-              {remove.error.message}
-            </Notice>
+            <Reveal className="mt-4">
+              <Notice tone="error" title="Passkey not removed">
+                {remove.error.message}
+              </Notice>
+            </Reveal>
           ) : null}
         </section>
       </div>

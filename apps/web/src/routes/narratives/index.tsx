@@ -50,13 +50,13 @@ function NarrativesPage() {
         <div className="flex flex-col gap-6">
           {groups.map((g, i) => (
             // Only the newest period starts open; native <details> collapses without JS.
-            <details key={g.period} open={i === 0} className="group">
+            <details key={g.period} open={i === 0} className="t-acc">
               <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <PeriodBar
                   position={i}
                   title={
                     <>
-                      <span aria-hidden className="mr-2 inline-block group-open:rotate-90">
+                      <span aria-hidden className="t-acc-chevron mr-2">
                         ›
                       </span>
                       {PERIOD_LABELS[g.period]}
