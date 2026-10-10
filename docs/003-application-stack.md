@@ -22,6 +22,7 @@
 | AI generation and decisions | **One Gemma 4 variant** | Shared local model for summaries, extraction, decisions, framing, etc. |
 | Cloud LLM | Optional provider interface only | Disabled; no active escalation policy initially |
 | Deployment | **Docker Compose** | Core stack on app VM; separate inference Compose stack |
+| Authentication | **better-auth** | Whole app behind login; username/password now, bearer tokens for API clients, passkeys planned |
 
 **TanStack Pacer:** process-local throttling/queuing tool, **not** the durable job queue. No need to include it initially; add only if a specific in-process control benefits from it.
 
@@ -202,6 +203,17 @@ Constraints:
 - Reads from PostgreSQL provide the canonical story and narrative data; Typesense returns candidate IDs/scores for discovery, filtering and retrieval.
 - On a GPU outage, already published stories, narratives and search remain available; fresh processing visibly degrades instead of failing the site.
 - Keep personally sensitive reading activity minimal and opt-in as needed; Personal Blindspots should not presume the reader's political beliefs.
+
+## 8a. Authentication (better-auth)
+
+Added 2026-10-10 by founder decision: **the entire application sits behind a login**, including Story and Narrative pages and every `/api/v1` route.
+
+- **Library:** [better-auth](https://www.better-auth.com) with the Drizzle adapter. Auth tables (`auth_user`, `auth_session`, `auth_account`, `auth_verification`) live in PostgreSQL next to domain data.
+- **Methods now:** username + password (`username` plugin). Public sign-up is **disabled**; accounts are created server-side with `pnpm cli user:create`.
+- **API clients:** the `bearer` plugin issues a token on sign-in (`set-auth-token` header) that clients send as `Authorization: Bearer <token>`. The web app uses the same session via cookies. This keeps the API usable by the future Expo app without browser cookies.
+- **Planned:** passkeys (WebAuthn) via the better-auth passkey plugin. It needs one extra table and client wiring; no change to the API boundary.
+- **Boundary:** `/api/auth/*` is served by better-auth; every `/api/v1/*` handler resolves the session first and returns a typed `401 unauthorized` error otherwise. Web route guards use a web-only server function to read the session, which the HTTP-first rule allows.
+- **Secrets:** `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` are required configuration; `BETTER_AUTH_URL` must match the public origin.
 
 ## 9. Observability and test plan
 

@@ -19,7 +19,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
   backfill:pause | backfill:resume
-  relate:all                        Re-run story relationship + narrative detection for published stories
+  relate:all [--reset]              Re-run story relationship + narrative detection (--reset clears edges/narratives first)
   status                            Print pipeline/queue status as JSON
   dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
 
@@ -29,6 +29,7 @@ const { positionals, values } = parseArgs({
     username: { type: 'string' },
     password: { type: 'string' },
     variant: { type: 'string', default: 'rss' },
+    reset: { type: 'boolean', default: false },
   },
 })
 
@@ -91,6 +92,17 @@ try {
       break
     }
     case 'relate:all': {
+      if (values.reset) {
+        // Graph rows are derived interpretations; outbox events let the indexer drop stale narratives.
+        await ctx.pool.query(`begin;
+          insert into outbox_event (aggregate_type, aggregate_id, event_type, aggregate_version)
+            select 'narrative', id, 'narrative.removed', version + 1 from narrative;
+          insert into outbox_event (aggregate_type, aggregate_id, event_type, aggregate_version)
+            select 'story', id, 'story.graph_reset', version + 1 from story;
+          update story set version = version + 1;
+          delete from narrative_story; delete from narrative; delete from story_relationship;
+          commit;`)
+      }
       const { rows } = await ctx.pool.query<{ id: string; current_summary_id: string }>(
         'select id, current_summary_id from story where published_at is not null order by first_observed_at',
       )

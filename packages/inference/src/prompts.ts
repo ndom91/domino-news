@@ -2,9 +2,9 @@ import type { ArticleInput, StoryInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
-  matchStory: 'match-story@1',
+  matchStory: 'match-story@3',
   summarizeStory: 'summarize-story@1',
-  classifyRelationship: 'classify-relationship@2',
+  classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
 } as const
 
@@ -43,10 +43,13 @@ const data = (value: unknown) => `<data>\n${JSON.stringify(value, null, 2)}\n</d
 export function matchStoryPrompt(input: { article: ArticleInput; story: StoryInput }) {
   return `Decide whether the NEW ARTICLE reports the same discrete news development as the EXISTING STORY.
 - "same_development": the same event/announcement/ruling, reported by another outlet or updated.
-- "related_development": same broader topic, but a distinct new development (follow-up, reaction, consequence).
+- "related_development": same broader topic, but a distinct development: a follow-up, a consequence, or a
+  reaction/criticism/response by another actor. This applies in BOTH directions: if one side reports an
+  event and the other side mainly reports someone's reaction to that event, answer "related_development",
+  even if the reaction was published first.
 - "unrelated": different topic.
 - "uncertain": not enough information. Prefer "uncertain" over guessing.
-Be conservative: only answer "same_development" when the core event clearly matches.
+Be conservative: only answer "same_development" when the primary event each side reports is the same.
 evidenceArticleIds must only contain articleId values from the EXISTING STORY that support your decision.
 
 NEW ARTICLE:
@@ -76,11 +79,12 @@ Decide whether NEWER is a development connected to OLDER, and if so pick the rel
 - "responds_to": NEWER is a reaction/response (statement, protest, counter-move) to OLDER.
 - "corrects": NEWER corrects or retracts OLDER.
 - "provides_context_for": NEWER is background that helps explain OLDER.
-- "related_to": clearly connected (same people, institutions or events), but none of the above fits.
-NEWER does not need to be caused by OLDER. If NEWER reports an event in connection with OLDER
+- "related_to": both are about the same specific event, decision or dispute, but none of the above fits.
+NEWER does not need to be caused by OLDER. If NEWER explicitly reports an event in connection with OLDER
 (for example "hours after X, Y happened", or the same dispute moving forward), it is connected.
-Answer decision "unrelated" (relation null) only when they merely share a broad subject area such as
-"politics", "technology" or "the war in Ukraine" without a specific link.
+Answer decision "unrelated" (relation null) when the only link is a shared person, country or organisation
+(for example both involve Donald Trump or the United States) or a broad subject area such as "politics",
+"technology" or "the war in Ukraine". A reader should be able to say exactly which event links them.
 Answer "uncertain" (relation null) when unsure.
 
 NEWER:

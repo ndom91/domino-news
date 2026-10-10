@@ -30,6 +30,7 @@ export function decodeEntities(input: string): string {
 export function stripHtml(input: string): string {
   // Decode first so entity-encoded markup (&lt;p&gt;) is stripped too.
   return decodeEntities(decodeEntities(input).replace(/<[^>]*>/g, ' '))
+    .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')
     .replace(/\s+/g, ' ')
     .trim()
 }

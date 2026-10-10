@@ -10,7 +10,8 @@
 
 - **Supported product platforms:** Web, iOS, Android. Native desktop apps are **out of scope**.
 - **First prototype:** Web only, with a first-class responsive web experience.
-- **Web:** TanStack Start, TanStack Router, React DOM, and TanStack Query. Retain SSR for public, indexable Story and Narrative pages.
+- **Web:** TanStack Start, TanStack Router, React DOM, and TanStack Query. Retain SSR for Story and Narrative pages.
+- **Access (updated 2026-10-10):** the whole app is behind a login (better-auth, see doc 003 §8a). Pages are server-rendered for signed-in users and marked `noindex`; public SEO is not a goal for now.
 - **Future native apps:** Expo + React Native (iOS and Android), using Expo Router and native UI components.
 - **No cross-platform component-sharing requirement:** Build the best UI for each platform. Share TypeScript contracts, data-access and query logic, domain utilities, and design tokens wherever practical.
 - **Critical boundary:** Any domain operation or data needed by the future native app **must be exposed via an ordinary versioned HTTPS HTTP API**. Do not make TanStack Start server functions the only way to perform mobile-relevant actions.
@@ -96,7 +97,7 @@ The web app may call domain services directly **on the server during SSR**, but 
 - **Platform-specific auth transport:** Do not couple API calls exclusively to browser cookies or web-specific session APIs. Design for secure native credentials later; choose concrete session/token and CSRF details before implementing authenticated endpoints.
 - **Do not ship server secrets to the client:** Clients call application HTTP endpoints, never PostgreSQL, Typesense admin APIs, pg-boss, or GPU inference endpoints.
 - **Consistent API errors:** Standardize status codes, stable machine-readable error codes, validation errors and pagination. Support cancellation/timeouts via `AbortSignal` where appropriate.
-- **SSR is retained:** Public Story/Narrative routes should render useful HTML for accessibility and discoverability, not become client-only just because mobile apps are planned.
+- **SSR is retained:** Story/Narrative routes render useful HTML for accessibility and fast first paint (for signed-in users), not become client-only just because mobile apps are planned.
 - **API compatibility:** Version the public client surface (provisionally `/api/v1`); introduce additive changes where possible. Contract tests should detect breaking response changes.
 
 ### Server functions policy
@@ -173,7 +174,7 @@ A contextual definition may be a desktop popover but a native bottom sheet. Shar
 - [ ] Search uses a normal HTTP API route; Typesense credentials are never exposed to clients.
 - [ ] Routes return Zod-conformant responses and standardized errors; contracts have automated tests.
 - [ ] The web reader uses the reusable HTTP client / TanStack Query logic for client-side data access.
-- [ ] Web SSR remains available for public Story/Narrative pages, and SSR does not duplicate domain logic.
+- [ ] Web SSR remains available for Story/Narrative pages (behind login), and SSR does not duplicate domain logic.
 - [ ] Shared client packages can compile in a non-browser, non-Node-specific TypeScript target (future Expo-compatible API surface).
 - [ ] At least one contract test exercises API behavior without booting the React web UI.
 - [ ] No Expo implementation is required for prototype completion.

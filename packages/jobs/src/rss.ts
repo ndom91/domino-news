@@ -64,7 +64,22 @@ export function parseFeed(xml: string): { items: ArticleMetadata[]; skipped: num
     if (parsed.success) items.push(parsed.data)
     else skipped++
   }
-  return { items, skipped }
+  return { items: collapseDuplicates(items), skipped }
+}
+
+/**
+ * Some feeds list one article twice (e.g. a "live" variant without a description).
+ * Keep the most complete item per URL so polls don't flip-flop between variants.
+ */
+function collapseDuplicates(items: ArticleMetadata[]) {
+  const byUrl = new Map<string, ArticleMetadata>()
+  for (const item of items) {
+    const existing = byUrl.get(item.canonicalUrl)
+    const score = (i: ArticleMetadata) =>
+      (i.description?.length ?? 0) - (/^\p{Extended_Pictographic}/u.test(i.title) ? 1 : 0)
+    if (!existing || score(item) > score(existing)) byUrl.set(item.canonicalUrl, item)
+  }
+  return [...byUrl.values()]
 }
 
 function safeNormalize(href: string) {

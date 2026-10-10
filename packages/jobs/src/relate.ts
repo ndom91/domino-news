@@ -46,11 +46,10 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
       per_page: 10,
     },
   ])
-  const { relateMin, autoSame } = THRESHOLDS[ctx.inference.mode]
+  const { relateMin } = THRESHOLDS[ctx.inference.mode]
   const candidates = (results[0]?.hits ?? [])
     .map((h) => ({ id: h.document.id, similarity: 1 - (h.vector_distance ?? 1) }))
-    // Near-duplicates are left for a future merge flow rather than linked.
-    .filter((c) => c.similarity >= relateMin && c.similarity < autoSame)
+    .filter((c) => c.similarity >= relateMin)
     .slice(0, MAX_CANDIDATES)
 
   let added = 0

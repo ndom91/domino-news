@@ -86,6 +86,15 @@ describe('parseFeed', () => {
     })
     expect(items[1]?.canonicalUrl).toBe('https://bbc.co.uk/news/x')
   })
+  it('keeps the most complete item when a feed lists one URL twice', () => {
+    const xml = `<rss><channel>
+      <item><title>🔴 Live: quake</title><link>https://ex.com/q</link></item>
+      <item><title>Quake</title><link>https://ex.com/q</link><description>Details\u200b here</description></item>
+    </channel></rss>`
+    const { items } = parseFeed(xml)
+    expect(items).toHaveLength(1)
+    expect(items[0]).toMatchObject({ title: 'Quake', description: 'Details here' })
+  })
 })
 
 describe('layoutNarrative', () => {
