@@ -186,6 +186,10 @@ export type StoryContextItem = z.infer<typeof storyContextItemSchema>
 export const storyClaimSchema = z.object({
   id: z.string(),
   proposition: z.string(),
+  /** When the claim was extracted (claims are re-extracted when the summary changes). */
+  createdAt: z.string(),
+  /** Earliest publish (or first-seen) time among the articles that carry the claim. */
+  firstReportedAt: z.string().nullable(),
   mentions: z.array(
     z.object({
       stance: z.enum(['asserts', 'denies', 'quotes', 'discusses']),

@@ -296,6 +296,8 @@ export const fixtureLead: StoryDetail = {
     {
       id: 'clm_1',
       proposition: 'A regional court suspended the 48-hour rail strike.',
+      createdAt: ago(1),
+      firstReportedAt: ago(5),
       mentions: [
         { stance: 'asserts', articleId: 'art_lead_0', publisher: P.meridian },
         { stance: 'asserts', articleId: 'art_lead_4', publisher: P.civic },
@@ -305,6 +307,8 @@ export const fixtureLead: StoryDetail = {
     {
       id: 'clm_2',
       proposition: 'The union will appeal the injunction.',
+      createdAt: ago(1),
+      firstReportedAt: ago(5),
       mentions: [{ stance: 'quotes', articleId: 'art_lead_2', publisher: P.southbank }],
       evidence: [],
     },

@@ -611,7 +611,11 @@ async function storyContext(db: Db, storyId: string): Promise<StoryDetail['conte
 
 async function storyClaims(db: Db, storyId: string): Promise<StoryDetail['claims']> {
   const claims = await db
-    .select({ id: schema.claim.id, proposition: schema.claim.proposition })
+    .select({
+      id: schema.claim.id,
+      proposition: schema.claim.proposition,
+      createdAt: schema.claim.createdAt,
+    })
     .from(schema.claim)
     .where(and(eq(schema.claim.storyId, storyId), isNull(schema.claim.supersededAt)))
     .orderBy(schema.claim.createdAt)
@@ -623,6 +627,7 @@ async function storyClaims(db: Db, storyId: string): Promise<StoryDetail['claims
         claimId: schema.claimMention.claimId,
         stance: schema.claimMention.stance,
         articleId: schema.claimMention.articleId,
+        reportedAt: sql<Date>`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt})`,
         publisher: {
           id: schema.publisher.id,
           slug: schema.publisher.slug,
@@ -648,9 +653,18 @@ async function storyClaims(db: Db, storyId: string): Promise<StoryDetail['claims
       )
       .where(inArray(schema.claimEvidence.claimId, ids)),
   ])
-  return claims.map((c) => ({
-    ...c,
-    mentions: mentions.filter((m) => m.claimId === c.id).map(({ claimId: _, ...m }) => m),
-    evidence: evidence.filter((e) => e.claimId === c.id).map(({ claimId: _, ...e }) => e),
-  }))
+  return claims.map((c) => {
+    const own = mentions.filter((m) => m.claimId === c.id)
+    const first = own.reduce<Date | null>(
+      (min, m) => (!min || new Date(m.reportedAt) < min ? new Date(m.reportedAt) : min),
+      null,
+    )
+    return {
+      ...c,
+      createdAt: iso(c.createdAt),
+      firstReportedAt: first ? iso(first) : null,
+      mentions: own.map(({ claimId: _, reportedAt: __, ...m }) => m),
+      evidence: evidence.filter((e) => e.claimId === c.id).map(({ claimId: _, ...e }) => e),
+    }
+  })
 }

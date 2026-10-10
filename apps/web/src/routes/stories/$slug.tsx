@@ -11,6 +11,7 @@ import {
   SectionHeader,
   Skeleton,
   SourceList,
+  Timestamp,
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -32,6 +33,10 @@ export const Route = createFileRoute('/stories/$slug')({
   }),
   component: StoryPage,
 })
+
+/** Newest extraction time. ISO strings sort chronologically, so a string max is enough. */
+const latestAt = (items: { createdAt: string }[]) =>
+  items.reduce((latest, item) => (item.createdAt > latest ? item.createdAt : latest), '')
 
 function StoryPage() {
   const { slug } = Route.useParams()
@@ -87,7 +92,12 @@ function StoryPage() {
               <SectionHeader
                 id="claims-heading"
                 title="Claims"
-                meta="Statements in the reporting, not verified facts"
+                meta={
+                  <>
+                    Statements in the reporting, not verified facts ·{' '}
+                    <Timestamp at={latestAt(story.claims)} prefix="Extracted" />
+                  </>
+                }
               />
               <ClaimList claims={story.claims} />
             </section>

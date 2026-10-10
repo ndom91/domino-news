@@ -151,7 +151,7 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
   return (
     <footer className="mt-24 bg-band text-band-text">
       <div className="mx-auto max-w-page px-gutter pb-[calc(3rem+var(--dn-safe-bottom))]">
-        <div className="grid gap-x-14 gap-y-8 border-t border-band-line pt-12 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <div className="grid gap-x-14 gap-y-8 pt-12 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
           <div>
             <Link to="/" className="type-section" aria-label="Domino, front page">
               Domino<span className="text-accent">.</span>
