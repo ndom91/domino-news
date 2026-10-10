@@ -1,4 +1,4 @@
-import { formatDate, truncate } from '@dn/domain'
+import { formatDate, plural, truncate } from '@dn/domain'
 import type { DevelopingNarrative, NarrativeStep } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
@@ -115,8 +115,8 @@ export function NarrativeColumn({
         </Link>
       </h3>
       <p className="text-sm text-band-muted">
-        {narrative.storyCount} stories since {formatDate(narrative.since)} · updated{' '}
-        <Timestamp at={narrative.updatedAt} />
+        {plural(narrative.storyCount, 'story', 'stories')} since {formatDate(narrative.since)} ·
+        updated <Timestamp at={narrative.updatedAt} />
       </p>
       <NarrativeSteps steps={narrative.steps} Link={Link} />
     </div>

@@ -20,7 +20,8 @@ function LoginPage() {
   const [error, setError] = useState<string | null>(
     oauthError ? "This Google account isn't allowed to sign in." : null,
   )
-  const [pending, setPending] = useState(false)
+  // Which sign-in method is in flight, so only its button spins.
+  const [pending, setPending] = useState<null | 'password' | 'passkey' | 'google'>(null)
   // Only follow same-origin relative paths.
   const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
 
@@ -41,11 +42,11 @@ function LoginPage() {
   }, [])
 
   async function signInWithPasskey() {
-    setPending(true)
+    setPending('passkey')
     setError(null)
     const { error } = await authClient.signIn.passkey()
-    setPending(false)
     if (error) {
+      setPending(null)
       setError('Passkey sign-in was cancelled or not recognised. Try again or use your password.')
       return
     }
@@ -53,7 +54,7 @@ function LoginPage() {
   }
 
   async function signInWithGoogle() {
-    setPending(true)
+    setPending('google')
     setError(null)
     // Success leaves the page for Google; failures come back to /login?error=...
     const { error } = await authClient.signIn.social({
@@ -62,7 +63,7 @@ function LoginPage() {
       errorCallbackURL: '/login',
     })
     if (error) {
-      setPending(false)
+      setPending(null)
       setError(error.message ?? 'Google sign-in failed.')
     }
   }
@@ -70,14 +71,14 @@ function LoginPage() {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
-    setPending(true)
+    setPending('password')
     setError(null)
     const { error } = await authClient.signIn.username({
       username: String(form.get('username') ?? ''),
       password: String(form.get('password') ?? ''),
     })
-    setPending(false)
     if (error) {
+      setPending(null)
       setError(
         error.status === 401
           ? 'Username or password is incorrect.'
@@ -90,9 +91,9 @@ function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-sm flex-col justify-center px-gutter py-16">
-      <p className="border-b-6 border-rule pb-3.5 type-masthead">
+      <h1 translate="no" className="border-b-6 border-rule pb-3.5 type-masthead">
         Domino<span className="text-accent">.</span>
-      </p>
+      </h1>
       <p className="mt-4 mb-8 text-text-secondary">
         News stories assembled from many outlets, with every source linked.
       </p>
@@ -101,6 +102,8 @@ function LoginPage() {
           label="Username"
           name="username"
           autoComplete="username webauthn"
+          autoCapitalize="none"
+          spellCheck={false}
           required
           autoFocus
         />
@@ -112,7 +115,12 @@ function LoginPage() {
           required
         />
         {error ? <Notice tone="error" title={error} /> : null}
-        <Button type="submit" variant="primary" loading={pending}>
+        <Button
+          type="submit"
+          variant="primary"
+          loading={pending === 'password'}
+          disabled={pending !== null}
+        >
           Sign in
         </Button>
       </form>
@@ -121,11 +129,21 @@ function LoginPage() {
         or
         <span className="h-px flex-1 bg-border" />
       </div>
-      <Button className="mt-4 w-full" onClick={signInWithPasskey} disabled={pending}>
+      <Button
+        className="mt-4 w-full"
+        onClick={signInWithPasskey}
+        loading={pending === 'passkey'}
+        disabled={pending !== null}
+      >
         Sign in with a passkey
       </Button>
       {session.features.googleSignIn ? (
-        <Button className="mt-3 w-full" onClick={signInWithGoogle} disabled={pending}>
+        <Button
+          className="mt-3 w-full"
+          onClick={signInWithGoogle}
+          loading={pending === 'google'}
+          disabled={pending !== null}
+        >
           Continue with Google
         </Button>
       ) : null}

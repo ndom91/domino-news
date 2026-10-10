@@ -1,4 +1,4 @@
-import { relativeTime } from '@dn/domain'
+import { plural, relativeTime } from '@dn/domain'
 import { cx, Notice, narrativeKey } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -37,7 +37,7 @@ function NarrativesPage() {
               </Link>
               {n.description ? <p className="mt-2 text-text-secondary">{n.description}</p> : null}
               <p className="mt-2 type-meta">
-                {n.storyCount} stories · updated {relativeTime(n.updatedAt)}
+                {plural(n.storyCount, 'story', 'stories')} · updated {relativeTime(n.updatedAt)}
               </p>
             </li>
           ))}

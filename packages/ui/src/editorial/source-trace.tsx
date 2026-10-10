@@ -1,4 +1,4 @@
-import { clockTime, formatDate, formatDateTime } from '@dn/domain'
+import { clockTime, formatDate, formatDateTime, plural } from '@dn/domain'
 import { cx } from '../cx.ts'
 
 export interface TraceSource {
@@ -36,6 +36,8 @@ export function SourceTrace({
   onKey?: boolean
   className?: string
 }) {
+  // No reports means no time window to draw (Math.max() of nothing is -Infinity).
+  if (sources.length === 0) return null
   const latest = Math.max(...sources.map((s) => Date.parse(s.at)))
   const nowMs = Date.parse(now)
   const end = latest < nowMs - CELLS * HOUR ? latest : nowMs
@@ -67,7 +69,7 @@ export function SourceTrace({
       width={width}
       height={H}
       role="img"
-      aria-label={`${sources.length} outlets by hour, ${cited} cited`}
+      aria-label={`${plural(sources.length, 'outlet')} by hour, ${cited} cited`}
       className={cx('block h-auto max-w-full', className)}
     >
       {columns.map((_, i) => (

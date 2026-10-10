@@ -1,4 +1,4 @@
-import { formatDate } from '@dn/domain'
+import { formatDate, plural } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
@@ -30,7 +30,7 @@ export function NarrativeGraph({
 
   return (
     <ol
-      aria-label={`${narrative.stories.length} developments, oldest first`}
+      aria-label={`${plural(narrative.stories.length, 'development')}, oldest first`}
       className={cx(narrativeKey(narrative.colorSlot), 'flex flex-col border-t-2 border-rule')}
     >
       {layout.rows.map(({ node, row, lane, primary, secondary }) => {

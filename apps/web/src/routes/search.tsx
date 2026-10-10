@@ -1,4 +1,4 @@
-import { relativeTime } from '@dn/domain'
+import { plural, relativeTime } from '@dn/domain'
 import { REGION_LABELS, REGIONS, regionSchema, searchQuerySchema } from '@dn/schemas'
 import { Badge, Button, Notice, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
@@ -13,6 +13,9 @@ const searchParams = searchQuerySchema.extend({ q: z.string().optional().default
 
 export const Route = createFileRoute('/search')({
   validateSearch: searchParams,
+  // Load outlets up front so a deep-linked ?publisher= shows as selected. Prefetch never
+  // throws, so search still works if the outlet list fails.
+  loader: ({ context }) => context.queryClient.prefetchQuery(queries.publishers()),
   head: () => ({ meta: [{ title: 'Search · Domino News' }] }),
   component: SearchPage,
 })
@@ -54,7 +57,8 @@ function SearchPage() {
     <Page>
       <PageTitle>Search</PageTitle>
       <search className="block max-w-4xl">
-        <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        {/* Keyed on the URL so back/forward remounts the fields with the current filters. */}
+        <form key={JSON.stringify(search)} onSubmit={onSubmit} className="flex flex-col gap-3">
           <div className="flex gap-2">
             <TextInput
               label="Search stories and narratives"
@@ -64,7 +68,8 @@ function SearchPage() {
               defaultValue={search.q}
               placeholder="Search stories and narratives"
               className="flex-1"
-              autoFocus
+              // Only on an empty search: on mobile it would pop the keyboard over the results.
+              autoFocus={!search.q}
             />
             <Button type="submit" variant="primary">
               Search
@@ -145,7 +150,7 @@ function SearchPage() {
         ) : (
           <>
             <p className="mb-4 type-meta">
-              {results.data.hits.length} results ·{' '}
+              {plural(results.data.hits.length, 'result')} ·{' '}
               {results.data.mode === 'hybrid'
                 ? 'keyword and meaning'
                 : 'keyword only (embedding service unavailable)'}
@@ -166,7 +171,7 @@ function SearchPage() {
                       {hit.description ? (
                         <p className="mt-1.5 text-text-secondary">{hit.description}</p>
                       ) : null}
-                      <p className="mt-2 type-meta">{hit.storyCount} stories</p>
+                      <p className="mt-2 type-meta">{plural(hit.storyCount, 'story', 'stories')}</p>
                     </>
                   ) : (
                     <>

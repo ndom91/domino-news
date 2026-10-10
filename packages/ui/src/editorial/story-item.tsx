@@ -1,4 +1,4 @@
-import { clockTime } from '@dn/domain'
+import { clockTime, hostnameOf } from '@dn/domain'
 import type { StoryListItem } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { Skeleton } from '../primitives/surface.tsx'
@@ -93,7 +93,9 @@ export function StoryItem({
             rel="noopener noreferrer"
             className="font-semibold underline decoration-accent decoration-2 underline-offset-3"
           >
-            {story.primarySource.title ?? new URL(story.primarySource.url).hostname}
+            {story.primarySource.title ??
+              hostnameOf(story.primarySource.url) ??
+              story.primarySource.url}
           </a>
         </p>
       ) : null}

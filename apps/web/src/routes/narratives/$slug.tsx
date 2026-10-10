@@ -1,4 +1,4 @@
-import { formatDate } from '@dn/domain'
+import { formatDate, plural } from '@dn/domain'
 import { cx, NarrativeGraph, narrativeKey } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -35,7 +35,7 @@ function NarrativePage() {
           </p>
         ) : null}
         <p className="mt-4 mb-10 type-meta">
-          {narrative.stories.length} developments
+          {plural(narrative.stories.length, 'development')}
           {first && last
             ? ` · ${formatDate(first.firstObservedAt)} to ${formatDate(last.firstObservedAt)}`
             : ''}

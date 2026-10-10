@@ -76,3 +76,8 @@ export function truncate(input: string, max: number): string {
   if (input.length <= max) return input
   return `${input.slice(0, max - 1).trimEnd()}…`
 }
+
+/** "1 story", "3 stories". Pass the plural when adding "s" is wrong. */
+export function plural(count: number, singular: string, pluralForm = `${singular}s`): string {
+  return `${count} ${count === 1 ? singular : pluralForm}`
+}

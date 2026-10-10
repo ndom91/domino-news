@@ -1,4 +1,11 @@
-import { normalizeArticleUrl, pickLead, regionForCountry, validateNewEdge } from '@dn/domain'
+import {
+  hostnameOf,
+  normalizeArticleUrl,
+  pickLead,
+  plural,
+  regionForCountry,
+  validateNewEdge,
+} from '@dn/domain'
 import { isWireCopy, parseFeed } from '@dn/jobs'
 import { layoutNarrative } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
@@ -231,5 +238,18 @@ describe('citation markers', () => {
       { citation: 3 },
       { text: '.' },
     ])
+  })
+})
+
+describe('display helpers', () => {
+  it('pluralises counts', () => {
+    expect(plural(1, 'story', 'stories')).toBe('1 story')
+    expect(plural(0, 'story', 'stories')).toBe('0 stories')
+    expect(plural(3, 'outlet')).toBe('3 outlets')
+  })
+
+  it('returns null for a malformed URL instead of throwing', () => {
+    expect(hostnameOf('https://www.example.com/a?b=1')).toBe('example.com')
+    expect(hostnameOf('not a url')).toBeNull()
   })
 })

@@ -1,3 +1,4 @@
+import { hostnameOf } from '@dn/domain'
 import type { StoryClaim } from '@dn/schemas'
 import { DefaultLink, type LinkLike } from './link.tsx'
 
@@ -29,7 +30,7 @@ export function ClaimList({
               return (
                 <div key={stance} className="flex flex-wrap gap-x-1.5">
                   <dt
-                    className={stance === 'denies' ? 'font-bold text-text' : 'font-bold text-text'}
+                    className={stance === 'denies' ? 'font-bold text-error' : 'font-bold text-text'}
                   >
                     {STANCE_LABEL[stance]}
                   </dt>
@@ -62,7 +63,7 @@ export function ClaimList({
                         rel="noopener noreferrer"
                         className="font-semibold text-text underline decoration-accent decoration-2 underline-offset-3"
                       >
-                        {e.title ?? new URL(e.url).hostname} ↗
+                        {e.title ?? hostnameOf(e.url) ?? e.url} ↗
                       </a>
                       <span className="text-text-muted"> ({e.relationship})</span>
                     </span>
