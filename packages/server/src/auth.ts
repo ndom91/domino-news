@@ -4,6 +4,7 @@ import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
+import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { eq } from 'drizzle-orm'
 
 /**
@@ -19,6 +20,11 @@ export function createAuth(db: Db, env = process.env) {
   const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:4000'
   const googleClientId = env.GOOGLE_CLIENT_ID
   const googleClientSecret = env.GOOGLE_CLIENT_SECRET
+  // Behind proxies X-Forwarded-For holds several hops, which better-auth won't trust, so rate
+  // limits would fall back to one bucket shared by everyone. E.g. cf-connecting-ip behind Cloudflare.
+  const ipAddressHeaders = env.AUTH_IP_HEADERS?.split(',')
+    .map((header) => header.trim().toLowerCase())
+    .filter(Boolean)
   const googleAllowedEmails = new Set(
     (env.GOOGLE_ALLOWED_EMAILS ?? '')
       .split(',')
@@ -59,11 +65,15 @@ export function createAuth(db: Db, env = process.env) {
     // input: false keeps clients from setting their own role at sign-up or via update-user.
     user: { additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } } },
     session: { expiresIn: 60 * 60 * 24 * 30 },
+    advanced: ipAddressHeaders?.length ? { ipAddress: { ipAddressHeaders } } : undefined,
     plugins: [
       username(),
       bearer(),
       // WebAuthn is bound to the public origin: rpID must be its hostname.
       passkey({ rpID: new URL(baseURL).hostname, rpName: 'Domino News', origin: baseURL }),
+      // Writes cookies set by server-side auth.api calls (e.g. getSession's sliding refresh)
+      // onto the TanStack Start response. Must stay last.
+      tanstackStartCookies(),
     ],
   })
 }
