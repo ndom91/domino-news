@@ -47,11 +47,17 @@ export async function createUserAccount(
     },
     { method: 'admin' },
   )
-  await ctx.internalAdapter.linkAccount({
-    userId: user.id,
-    providerId: 'credential',
-    accountId: user.id,
-    password: await ctx.password.hash(input.password),
-  })
+  try {
+    await ctx.internalAdapter.linkAccount({
+      userId: user.id,
+      providerId: 'credential',
+      accountId: user.id,
+      password: await ctx.password.hash(input.password),
+    })
+  } catch (error) {
+    // Don't leave a user without a credential behind; it would block re-running the command.
+    await ctx.internalAdapter.deleteUser(user.id)
+    throw error
+  }
   return user
 }

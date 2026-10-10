@@ -186,3 +186,27 @@ describe('/api/v1 write endpoints', () => {
     expect(bad.status).toBe(400)
   })
 })
+
+describe('account creation', () => {
+  it('leaves no half-created user when the credential step fails', async () => {
+    const { createUserAccount } = await import('@dn/server')
+    const ctx = await h.ctx.auth.$context
+    const link = ctx.internalAdapter.linkAccount
+    ctx.internalAdapter.linkAccount = async () => {
+      throw new Error('link failed')
+    }
+    try {
+      await expect(
+        createUserAccount(h.ctx.auth, { username: 'halfmade', password: 'halfmade-password' }),
+      ).rejects.toThrow(/link failed/)
+    } finally {
+      ctx.internalAdapter.linkAccount = link
+    }
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from auth_user where username = 'halfmade'`,
+    )
+    expect(rows[0].n).toBe(0)
+    // And creating it properly afterwards works.
+    await createUserAccount(h.ctx.auth, { username: 'halfmade', password: 'halfmade-password' })
+  })
+})
