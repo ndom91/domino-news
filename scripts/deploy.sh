@@ -34,7 +34,8 @@ case "${1:-}" in
   up) up ;;
   update)
     git pull --ff-only
-    up
+    # Re-run the freshly pulled script; this process still holds the old functions.
+    exec "$0" up
     ;;
   user)
     [[ -n "${2:-}" ]] || { usage; exit 1; }
