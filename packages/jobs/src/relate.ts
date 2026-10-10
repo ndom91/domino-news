@@ -1,8 +1,9 @@
 import { type Db, schema, withTransaction } from '@dn/db'
-import { ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
+import { type GraphEdge, ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
 import type { StoryInput } from '@dn/inference'
+import type { StoryRelation } from '@dn/schemas'
 import { type AnalysisJob, touchNarrative, touchStory } from '@dn/server'
-import { and, asc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
 import { THRESHOLDS } from './match.ts'
@@ -79,7 +80,7 @@ async function createEdgeIfRelated(
   otherId: string,
   similarity: number,
 ) {
-  const existing = await activeEdges(ctx.db)
+  const existing = await edgesForValidation(ctx.db, self.storyId, otherId)
   const linked = existing.some(
     (e) =>
       (e.fromStoryId === self.storyId && e.toStoryId === otherId) ||
@@ -151,15 +152,32 @@ async function createEdgeIfRelated(
   return true
 }
 
-function activeEdges(db: Db) {
-  return db
-    .select({
-      fromStoryId: schema.storyRelationship.fromStoryId,
-      toStoryId: schema.storyRelationship.toStoryId,
-      relation: schema.storyRelationship.relation,
-    })
-    .from(schema.storyRelationship)
-    .where(isNull(schema.storyRelationship.supersededAt))
+/**
+ * Edges `validateNewEdge` needs, without loading the whole graph: any edge between the
+ * two Stories, plus temporal edges reachable from either one (enough to detect cycles,
+ * whichever Story ends up as the edge target).
+ */
+export async function edgesForValidation(db: Db, a: string, b: string): Promise<GraphEdge[]> {
+  const { rows } = await db.execute<{
+    from_story_id: string
+    to_story_id: string
+    relation: StoryRelation
+  }>(sql`
+    with recursive reach(id) as (
+      select unnest(array[${a}, ${b}]::text[])
+      union
+      select r.to_story_id from story_relationship r
+      join reach on r.from_story_id = reach.id
+      where r.superseded_at is null and r.relation in ('follows', 'branches_from', 'responds_to', 'corrects')
+    )
+    select from_story_id, to_story_id, relation from story_relationship
+    where superseded_at is null
+      and (from_story_id in (select id from reach) or (from_story_id in (${a}, ${b}) and to_story_id in (${a}, ${b})))`)
+  return rows.map((r) => ({
+    fromStoryId: r.from_story_id,
+    toStoryId: r.to_story_id,
+    relation: r.relation,
+  }))
 }
 
 /** Stories reachable from `storyId` through active edges (bounded BFS). */

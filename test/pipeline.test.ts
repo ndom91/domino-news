@@ -630,3 +630,49 @@ describe('concurrent matching', () => {
     await drainPipeline(h.ctx)
   })
 })
+
+describe('story graph validation', () => {
+  it('detects a cycle from the reachable edge subset', async () => {
+    const { db } = h.ctx
+    const { edgesForValidation } = await import('@dn/jobs')
+    const { validateNewEdge, newId, ID_PREFIX } = await import('@dn/domain')
+    const stories = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(3)
+    const [a, b, c] = stories
+    if (!a || !b || !c) throw new Error('need three stories')
+    const inserted = await db
+      .insert(schema.storyRelationship)
+      .values([
+        {
+          id: newId(ID_PREFIX.storyRelationship),
+          fromStoryId: b.id,
+          toStoryId: c.id,
+          relation: 'follows',
+        },
+        {
+          id: newId(ID_PREFIX.storyRelationship),
+          fromStoryId: c.id,
+          toStoryId: a.id,
+          relation: 'follows',
+        },
+      ])
+      .onConflictDoNothing()
+      .returning()
+    try {
+      const edges = await edgesForValidation(db, a.id, b.id)
+      const verdict = validateNewEdge(
+        { fromStoryId: a.id, toStoryId: b.id, relation: 'follows' },
+        { fromFirstObservedAt: new Date('2100-01-01'), toFirstObservedAt: new Date('2000-01-01') },
+        edges,
+      )
+      expect(verdict).toEqual({ ok: false, reason: 'cycle' })
+    } finally {
+      for (const e of inserted) {
+        await db.delete(schema.storyRelationship).where(eq(schema.storyRelationship.id, e.id))
+      }
+    }
+  })
+})
