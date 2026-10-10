@@ -3,7 +3,9 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-compose() { docker compose -f infra/compose/compose.yaml --profile app "$@"; }
+# --env-file: Compose otherwise looks for .env next to compose.yaml when substituting
+# ${WEB_BIND}, ${TYPESENSE_API_KEY} etc.; env_file only feeds the containers.
+compose() { docker compose --env-file .env -f infra/compose/compose.yaml --profile app "$@"; }
 cli() { compose run --rm worker node_modules/.bin/tsx src/cli.ts "$@"; }
 
 usage() {

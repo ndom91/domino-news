@@ -13,7 +13,7 @@ You need Node 26, pnpm (`npm install -g corepack && corepack enable`; Node 26 no
 ```bash
 pnpm install
 cp .env.example .env
-docker compose -f infra/compose/compose.yaml up -d postgres typesense
+docker compose --env-file .env -f infra/compose/compose.yaml up -d postgres typesense
 pnpm db:migrate
 pnpm cli seed
 pnpm cli user:create --username dev --password dev-password-change-me

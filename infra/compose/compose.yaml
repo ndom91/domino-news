@@ -1,6 +1,7 @@
-# Local development and single-VM deployment.
-#   Infra only:   docker compose -f infra/compose/compose.yaml up -d postgres typesense
-#   Full stack:   docker compose -f infra/compose/compose.yaml --profile app up -d --build
+# Local development and single-VM deployment (see scripts/deploy.sh).
+# Pass --env-file .env so ${...} below comes from the repo-root .env, not infra/compose/.env:
+#   Infra only:   docker compose --env-file .env -f infra/compose/compose.yaml up -d postgres typesense
+#   Full stack:   docker compose --env-file .env -f infra/compose/compose.yaml --profile app up -d --build
 name: domino-news
 
 x-app: &app
