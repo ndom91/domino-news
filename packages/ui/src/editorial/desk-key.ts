@@ -17,6 +17,11 @@ export function deskKey(desk: Desk | null | undefined) {
   return KEYS[desk ? DESK_SLOT[desk] : 0] ?? 'narrative-0'
 }
 
+/** Key-colour utility by position (1…6, cycling): distinct colours for side-by-side items. */
+export function positionKey(position: number) {
+  return KEYS[1 + (position % (KEYS.length - 1))] ?? 'narrative-1'
+}
+
 /** Story-bar label: the Narrative's title, else the desk, else "Single story". */
 export function deskLabel(desk: Desk | null | undefined, narrativeTitle?: string) {
   return narrativeTitle ?? (desk ? DESK_LABELS[desk] : 'Single story')

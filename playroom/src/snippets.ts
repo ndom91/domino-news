@@ -83,7 +83,7 @@ export default [
   {
     group: 'Editorial',
     name: 'Developing band',
-    code: '<div className="bg-band p-8 text-band-text"><div className="grid gap-8 lg:grid-cols-3">{fixtureDeveloping.map((n) => <NarrativeColumn key={n.id} narrative={n} />)}</div></div>',
+    code: '<div className="bg-band p-8 text-band-text"><div className="grid gap-8 lg:grid-cols-3">{fixtureDeveloping.map((n, i) => <NarrativeColumn key={n.id} narrative={n} position={i} />)}</div></div>',
   },
   {
     group: 'Editorial',

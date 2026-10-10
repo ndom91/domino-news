@@ -1,7 +1,7 @@
 import { formatDate, plural, truncate } from '@dn/domain'
 import type { DevelopingNarrative, NarrativeStep } from '@dn/schemas'
 import { cx } from '../cx.ts'
-import { deskKey } from './desk-key.ts'
+import { deskKey, positionKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { Timestamp } from './time.tsx'
 
@@ -49,7 +49,7 @@ export function NarrativeSteps({
             className={cx(
               'relative grid grid-cols-[4rem_1.125rem_minmax(0,1fr)] items-start gap-x-2.5 pb-3 text-base leading-snug',
               !latest &&
-                'before:absolute before:top-3.5 before:-bottom-0.5 before:left-[82px] before:w-0.5 before:bg-band-line',
+                'before:absolute before:top-3.5 before:-bottom-0.5 before:left-[calc(4rem+0.625rem+0.5625rem-1px)] before:w-0.5 before:bg-band-line',
               latest && 'font-bold',
             )}
           >
@@ -62,9 +62,9 @@ export function NarrativeSteps({
             <span
               aria-hidden
               className={cx(
-                'relative z-10',
+                'relative z-10 justify-self-center',
                 latest
-                  ? '-ml-px mt-0.5 size-3.5 bg-key'
+                  ? 'mt-0.5 size-3.5 bg-key'
                   : 'mt-[3px] size-3 bg-band shadow-[inset_0_0_0_2px_var(--dn-band-text)]',
               )}
             />
@@ -96,16 +96,22 @@ export function NarrativeSteps({
   )
 }
 
-/** One Narrative in the Developing band: key-colour rule, title, meta and its step list. */
+/**
+ * One Narrative in the Developing band: key-colour rule, title, meta and its step list.
+ * Pass `position` to colour columns by place, so neighbours never share a desk colour.
+ */
 export function NarrativeColumn({
   narrative,
+  position,
   Link = DefaultLink,
 }: {
   narrative: DevelopingNarrative
+  position?: number
   Link?: LinkLike
 }) {
+  const key = position === undefined ? deskKey(narrative.desk) : positionKey(position)
   return (
-    <div className={cx(deskKey(narrative.desk), 'min-w-0 border-t-6 border-key pt-4')}>
+    <div className={cx(key, 'min-w-0 border-t-6 border-key pt-4')}>
       <h3 className="mb-1.5 type-narrative-title">
         <Link
           to={`/narratives/${narrative.slug}`}

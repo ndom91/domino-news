@@ -105,8 +105,8 @@ function FeedPage() {
               muted="text-band-muted"
             />
             <div className="grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-md:grid-cols-1">
-              {front.developing.map((n) => (
-                <NarrativeColumn key={n.id} narrative={n} Link={RouterLink} />
+              {front.developing.map((n, i) => (
+                <NarrativeColumn key={n.id} narrative={n} position={i} Link={RouterLink} />
               ))}
             </div>
             <Link
