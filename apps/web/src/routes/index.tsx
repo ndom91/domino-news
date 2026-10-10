@@ -1,16 +1,24 @@
-import { relativeTime } from '@dn/domain'
-import type { StoryListItem } from '@dn/schemas'
-import { Button, Notice, Skeleton, StoryRow } from '@dn/ui'
-import { useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { pickLead, relativeTime } from '@dn/domain'
+import { REGION_LABELS, REGIONS, type Region, regionSchema } from '@dn/schemas'
+import { Button, cx, Notice, Skeleton, StoryRow } from '@dn/ui'
+import {
+  useInfiniteQuery,
+  useQuery,
+  useSuspenseInfiniteQuery,
+  useSuspenseQuery,
+} from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { z } from 'zod'
 import { RouterLink } from '../components/link.tsx'
 import { Page, SectionLabel } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/')({
-  loader: async ({ context }) => {
+  validateSearch: z.object({ region: regionSchema.optional() }),
+  loaderDeps: ({ search }) => ({ region: search.region ?? null }),
+  loader: async ({ context, deps }) => {
     await Promise.all([
-      context.queryClient.ensureInfiniteQueryData(queries.storyList()),
+      context.queryClient.ensureInfiniteQueryData(queries.storyList(deps.region)),
       context.queryClient.ensureQueryData(queries.narratives()),
     ])
   },
@@ -18,24 +26,17 @@ export const Route = createFileRoute('/')({
   component: FeedPage,
 })
 
-/** Lead = the most widely reported Story updated in the last 48 hours (else the newest). */
-function pickLead(stories: StoryListItem[]) {
-  const cutoff = Date.now() - 48 * 3_600_000
-  const recent = stories.filter((s) => new Date(s.lastUpdatedAt).getTime() >= cutoff)
-  return (recent.length > 0 ? recent : stories).reduce<StoryListItem | undefined>(
-    (best, s) => (!best || s.sourceCount > best.sourceCount ? s : best),
-    undefined,
-  )
-}
-
 function FeedPage() {
-  const list = useSuspenseInfiniteQuery(queries.storyList())
+  const { region = null } = Route.useSearch()
+  const list = useSuspenseInfiniteQuery(queries.storyList(region))
   const { data: narratives } = useSuspenseQuery(queries.narratives())
+  // Client-only: the feed renders without it, then the lead and rail adapt.
+  const edition = useQuery(queries.preferences()).data?.edition ?? null
   const stories = list.data.pages.flatMap((p) => p.items)
-  const lead = pickLead(stories)
+  const lead = pickLead(stories, region ? null : edition)
   const rest = stories.filter((s) => s.id !== lead?.id)
 
-  if (stories.length === 0) {
+  if (stories.length === 0 && !region) {
     return (
       <Page>
         <Notice title="No published stories yet">
@@ -51,7 +52,12 @@ function FeedPage() {
     <Page>
       <div className="grid gap-x-12 gap-y-10 lg:grid-cols-[minmax(0,1fr)_18rem]">
         <div className="min-w-0">
+          <RegionChips active={region} />
+          {stories.length === 0 && region ? (
+            <p className="text-text-muted">No stories about {REGION_LABELS[region]} yet.</p>
+          ) : null}
           {lead ? <StoryRow story={lead} lead Link={RouterLink} className="pb-8" /> : null}
+          {edition && !region ? <EditionRail edition={edition} excludeId={lead?.id} /> : null}
           <SectionLabel>Latest</SectionLabel>
           <ol className="flex flex-col divide-y divide-border">
             {rest.map((story) => (
@@ -97,6 +103,67 @@ function FeedPage() {
         </aside>
       </div>
     </Page>
+  )
+}
+
+function RegionChips({ active }: { active: Region | null }) {
+  const chip = (current: boolean) =>
+    cx(
+      'rounded-full border px-3 py-1 text-xs whitespace-nowrap',
+      current
+        ? 'border-text bg-text text-surface'
+        : 'border-border-strong text-text-secondary hover:text-text',
+    )
+  return (
+    <nav aria-label="Filter by region" className="mb-8 flex gap-2 overflow-x-auto pb-1">
+      <Link
+        to="/"
+        search={{}}
+        className={chip(!active)}
+        aria-current={!active ? 'page' : undefined}
+      >
+        All
+      </Link>
+      {REGIONS.map((r) => (
+        <Link
+          key={r}
+          to="/"
+          search={{ region: r }}
+          className={chip(active === r)}
+          aria-current={active === r ? 'page' : undefined}
+        >
+          {REGION_LABELS[r]}
+        </Link>
+      ))}
+    </nav>
+  )
+}
+
+/** Latest Stories in the reader's edition, above the chronological feed. */
+function EditionRail({ edition, excludeId }: { edition: Region; excludeId?: string }) {
+  const list = useInfiniteQuery(queries.storyList(edition))
+  const items = (list.data?.pages[0]?.items ?? []).filter((s) => s.id !== excludeId).slice(0, 5)
+  if (items.length === 0) return null
+  return (
+    <section aria-labelledby="edition-heading" className="mb-10">
+      <SectionLabel>
+        <span id="edition-heading">In {REGION_LABELS[edition]}</span>
+      </SectionLabel>
+      <ol className="flex flex-col divide-y divide-border">
+        {items.map((story) => (
+          <li key={story.id} className="py-4 first:pt-2">
+            <StoryRow story={story} Link={RouterLink} />
+          </li>
+        ))}
+      </ol>
+      <Link
+        to="/"
+        search={{ region: edition }}
+        className="mt-2 inline-block text-sm text-accent hover:underline"
+      >
+        More from {REGION_LABELS[edition]}
+      </Link>
+    </section>
   )
 }
 

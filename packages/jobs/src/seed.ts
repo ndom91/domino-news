@@ -13,6 +13,8 @@ const publisherSeed = z.array(
     countryCode: z.string().nullable().optional(),
     languages: z.array(z.string()),
     articleBodyProcessingPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
+    kind: z.enum(['newsroom', 'official']).default('newsroom'),
+    license: z.string().nullable().optional(),
     policyNote: z.string(),
     policyReviewedAt: z.string(),
     feeds: z.array(z.object({ url: z.url(), title: z.string().optional() })),
@@ -31,6 +33,8 @@ export async function seedPublishers(db: Db, fixtureDir: string) {
       countryCode: p.countryCode ?? null,
       languages: p.languages,
       articleBodyPolicy: p.articleBodyProcessingPolicy,
+      kind: p.kind,
+      license: p.license ?? null,
       policyNote: p.policyNote,
       policyReviewedAt: new Date(p.policyReviewedAt),
     }

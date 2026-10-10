@@ -1,4 +1,5 @@
 export * from './ids.ts'
+export * from './regions.ts'
 export * from './story-graph.ts'
 export * from './text.ts'
 export * from './time.ts'

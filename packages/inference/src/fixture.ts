@@ -1,5 +1,5 @@
-import { contentTokens, jaccard, truncate } from '@dn/domain'
-import { EMBEDDING_DIMENSIONS } from '@dn/schemas'
+import { contentTokens, jaccard, regionForCountry, truncate } from '@dn/domain'
+import { EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
 import { PROMPT_VERSIONS } from './prompts.ts'
 import type { ArticleInput, EmbeddingProvider, GenerationProvider, StoryInput } from './types.ts'
 
@@ -29,6 +29,16 @@ export function fixtureVector(text: string): number[] {
 
 const articleTokens = (a: ArticleInput) => contentTokens(`${a.title} ${a.description ?? ''}`)
 const storyTokens = (s: StoryInput) => s.articles.flatMap(articleTokens)
+
+// Stand-in for model tagging: the publishers' home regions, capped at the schema's 3.
+function fixtureRegions(s: StoryInput): Region[] {
+  const regions = new Set<Region>()
+  for (const a of s.articles) {
+    const region = regionForCountry(a.publisherCountry)
+    if (region) regions.add(region)
+  }
+  return regions.size > 0 ? [...regions].slice(0, 3) : ['global']
+}
 
 export const FIXTURE_EMBEDDING_MODEL = 'fixture-embedding@1'
 export const FIXTURE_GENERATION_MODEL = 'fixture-generation@1'
@@ -79,6 +89,7 @@ export function createFixtureGeneration(): GenerationProvider {
           summary: `Reported by ${reportedBy}.${detail}`,
           sourceArticleIds: story.articles.map((a) => a.articleId),
           observationIds: story.articles.map((a) => a.observationId),
+          regions: fixtureRegions(story),
         },
         modelId,
         promptVersion: PROMPT_VERSIONS.summarizeStory,

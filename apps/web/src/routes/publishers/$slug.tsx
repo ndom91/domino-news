@@ -39,6 +39,7 @@ function PublisherPage() {
               {p.domain} ↗
             </a>
             {p.countryCode ? ` · ${p.countryCode}` : ''}
+            {p.kind === 'official' ? ' · Official source' : ''}
             {p.languages.length ? ` · ${p.languages.join(', ')}` : ''}
           </p>
 
@@ -86,6 +87,9 @@ function PublisherPage() {
             </Badge>
             {p.policyNote ? (
               <p className="mt-3 text-sm leading-normal text-text-secondary">{p.policyNote}</p>
+            ) : null}
+            {p.license ? (
+              <p className="mt-2 font-mono text-xs text-text-muted">Licence: {p.license}</p>
             ) : null}
             {p.policyReviewedAt ? (
               <p className="mt-2 font-mono text-xs text-text-muted">

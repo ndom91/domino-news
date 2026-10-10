@@ -71,7 +71,10 @@ function PublishersPage() {
                     >
                       {p.name}
                     </Link>
-                    <span className="ml-2 font-mono text-2xs text-text-muted">{p.countryCode}</span>
+                    <span className="ml-2 font-mono text-2xs text-text-muted">
+                      {p.countryCode}
+                      {p.kind === 'official' ? ' · official' : ''}
+                    </span>
                   </td>
                   <td className="py-2.5 pr-4 tabular-nums">{p.storiesCovered}</td>
                   <td className="py-2.5 pr-4 tabular-nums">{p.firstReports}</td>

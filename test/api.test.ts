@@ -1,8 +1,10 @@
 import {
   apiErrorSchema,
   narrativeListResponseSchema,
+  searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
+  userPreferencesSchema,
 } from '@dn/schemas'
 import { createUserAccount } from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
@@ -57,6 +59,8 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/search?q=x'],
       ['GET', '/api/v1/ops/status'],
       ['POST', '/api/v1/ops/actions'],
+      ['GET', '/api/v1/me/preferences'],
+      ['POST', '/api/v1/me/preferences'],
     ]
     for (const [method, path] of routes) {
       const res = await call(path, { method }, false)
@@ -95,6 +99,28 @@ describe('/api/v1 contracts', () => {
     expect(page2.items.length).toBeGreaterThan(0)
     const ids = new Set(page1.items.map((s) => s.id))
     expect(page2.items.some((s) => ids.has(s.id))).toBe(false)
+  })
+
+  it('filters stories by region, across pages', async () => {
+    const all = storyListResponseSchema.parse(
+      await (await call('/api/v1/stories?limit=100')).json(),
+    )
+    const region = all.items.flatMap((s) => s.regions)[0]
+    if (!region) throw new Error('no tagged stories')
+    const expected = all.items.filter((s) => s.regions.includes(region)).map((s) => s.id)
+
+    const seen: string[] = []
+    let cursor: string | null = null
+    do {
+      const qs = `region=${region}&limit=2${cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''}`
+      const page = storyListResponseSchema.parse(await (await call(`/api/v1/stories?${qs}`)).json())
+      expect(page.items.every((s) => s.regions.includes(region))).toBe(true)
+      seen.push(...page.items.map((s) => s.id))
+      cursor = page.pageInfo.nextCursor
+    } while (cursor)
+    expect(seen).toEqual(expected)
+
+    expect((await call('/api/v1/stories?region=atlantis')).status).toBe(400)
   })
 
   it('returns typed errors for unknown resources and bad input', async () => {
@@ -194,6 +220,48 @@ describe('/api/v1 write endpoints', () => {
   })
 })
 
+describe('preferences', () => {
+  const save = (auth: string, body: unknown) =>
+    handleApiRequest(
+      h.ctx,
+      new Request('http://localhost:3000/api/v1/me/preferences', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json', authorization: `Bearer ${auth}` },
+      }),
+    )
+
+  it('round-trips the edition per user', async () => {
+    const empty = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect(empty.edition).toBeNull()
+
+    const saved = await save(token, { edition: 'europe' })
+    expect(saved.status).toBe(200)
+    expect(userPreferencesSchema.parse(await saved.json()).edition).toBe('europe')
+
+    await createUserAccount(h.ctx.auth, { username: 'other', password: 'other-password' })
+    const res = await h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/sign-in/username', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'http://localhost:3000' },
+        body: JSON.stringify({ username: 'other', password: 'other-password' }),
+      }),
+    )
+    const otherToken = res.headers.get('set-auth-token') ?? ''
+    const other = await handleApiRequest(
+      h.ctx,
+      new Request('http://localhost:3000/api/v1/me/preferences', {
+        headers: { authorization: `Bearer ${otherToken}` },
+      }),
+    )
+    expect(userPreferencesSchema.parse(await other.json()).edition).toBeNull()
+
+    expect((await save(token, { edition: 'atlantis' })).status).toBe(400)
+    const cleared = await save(token, { edition: null })
+    expect(userPreferencesSchema.parse(await cleared.json()).edition).toBeNull()
+  })
+})
+
 describe('account creation', () => {
   it('leaves no half-created user when the credential step fails', async () => {
     const { createUserAccount } = await import('@dn/server')
@@ -219,6 +287,19 @@ describe('account creation', () => {
 })
 
 describe('search hydration', () => {
+  it('filters story hits by region and skips narratives', async () => {
+    const all = storyListResponseSchema.parse(
+      await (await call('/api/v1/stories?limit=100')).json(),
+    )
+    const region = all.items.flatMap((s) => s.regions)[0]
+    if (!region) throw new Error('no tagged stories')
+    const res = await call(`/api/v1/search?q=anything&region=${region}`)
+    const body = searchResponseSchema.parse(await res.json())
+    expect(body.hits.length).toBeGreaterThan(0)
+    const tagged = new Set(all.items.filter((s) => s.regions.includes(region)).map((s) => s.id))
+    expect(body.hits.every((x) => x.type === 'story' && tagged.has(x.id))).toBe(true)
+  })
+
   it('reports narrative story counts from Postgres, not the search index', async () => {
     const narratives = h.ctx.ts.collections.get(h.ctx.ts.aliases.get('narratives') ?? 'narratives')
     const [doc] = [...(narratives?.values() ?? [])]
@@ -258,7 +339,7 @@ describe('publisher coverage', () => {
     expect(res.status).toBe(200)
     const { publisherListResponseSchema } = await import('@dn/schemas')
     const body = publisherListResponseSchema.parse(await res.json())
-    expect(body.items.length).toBe(12)
+    expect(body.items.length).toBe(41)
     for (const p of body.items) {
       const { rows } = await h.ctx.pool.query(
         `select count(distinct sa.story_id)::int as n from story_article sa
@@ -274,6 +355,44 @@ describe('publisher coverage', () => {
     for (const story of body.matrix.stories) {
       expect(story.coverage.length).toBeGreaterThan(1)
       expect(story.coverage.some((c) => c.first)).toBe(true)
+    }
+  })
+
+  it('keeps official sources out of first-report, only-source and matrix stats', async () => {
+    const { publisherListResponseSchema } = await import('@dn/schemas')
+    const list = async () =>
+      publisherListResponseSchema.parse(await (await call('/api/v1/publishers')).json())
+    const before = await list()
+    const top = [...before.items].sort((a, b) => b.firstReports - a.firstReports)[0]
+    if (!top || top.firstReports === 0) throw new Error('no first reporter')
+
+    await h.ctx.pool.query(`update publisher set kind = 'official' where id = $1`, [top.id])
+    try {
+      const after = await list()
+      const official = after.items.find((p) => p.id === top.id)
+      expect(official).toMatchObject({
+        kind: 'official',
+        storiesCovered: top.storiesCovered,
+        firstReports: 0,
+        exclusives: 0,
+      })
+      expect(after.matrix.publishers.some((p) => p.id === top.id)).toBe(false)
+
+      const [story] = await h.ctx.pool
+        .query(
+          `select s.slug from story s join story_article sa on sa.story_id = s.id
+           join article a on a.id = sa.article_id
+           where a.publisher_id = $1 and sa.removed_at is null and s.published_at is not null
+           limit 1`,
+          [top.id],
+        )
+        .then((r) => r.rows)
+      const detail = storyDetailSchema.parse(
+        await (await call(`/api/v1/stories/${story.slug}`)).json(),
+      )
+      for (const src of detail.sources) expect(src.official).toBe(src.publisher.id === top.id)
+    } finally {
+      await h.ctx.pool.query(`update publisher set kind = 'newsroom' where id = $1`, [top.id])
     }
   })
 

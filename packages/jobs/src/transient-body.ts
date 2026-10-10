@@ -18,6 +18,22 @@ const PRIMARY_PATTERNS = [
   /legislation\.gov\.uk\//,
 ]
 
+// Wire copy republished by an open-licence outlet keeps the agency's rights, so its
+// body is never used. Only author metadata is checked: body text often cites agencies.
+const WIRE_AUTHOR = /\b(associated press|ap|reuters|afp|agence france-presse)\b/i
+const AUTHOR_FIELDS = [
+  /<meta[^>]+(?:name|property)="(?:author|article:author|dc\.creator|byl)"[^>]*content="([^"]*)"/gi,
+  /<meta[^>]+content="([^"]*)"[^>]*(?:name|property)="(?:author|article:author|dc\.creator|byl)"/gi,
+  /"author"\s*:\s*(?:\[\s*)?\{[^}]*"name"\s*:\s*"([^"]*)"/gi,
+  /"author"\s*:\s*"([^"]*)"/gi,
+]
+
+export function isWireCopy(html: string): boolean {
+  return AUTHOR_FIELDS.some((re) =>
+    [...html.matchAll(re)].some((m) => WIRE_AUTHOR.test(m[1] ?? '')),
+  )
+}
+
 export interface TransientArticle {
   /** Plain-text body. Keep in memory only; never persist, enqueue or log it. */
   body: string
@@ -37,6 +53,7 @@ export async function fetchTransientArticle(url: string): Promise<TransientArtic
     })
     if (!res.ok || !(res.headers.get('content-type') ?? '').includes('html')) return null
     const html = (await res.text()).slice(0, MAX_HTML_BYTES)
+    if (isWireCopy(html)) return null
     const article = html.match(/<article[\s\S]*?<\/article>/i)?.[0] ?? html
     const paragraphs = [...article.matchAll(/<p[^>]*>([\s\S]*?)<\/p>/gi)].map((m) =>
       stripHtml(m[1] ?? ''),

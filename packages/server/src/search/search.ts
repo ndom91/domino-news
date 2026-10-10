@@ -59,6 +59,8 @@ export async function searchAll(
       .where(eq(schema.publisher.slug, query.publisher))
     filters.push(`publisher_ids:=[${pub?.id ?? 'none'}]`)
   }
+  // Region values come from a fixed enum, so they are safe inside filter_by.
+  if (query.region) filters.push(`regions:=[${query.region}]`)
 
   const searches: Record<string, unknown>[] = []
   if (query.type !== 'narrative') {
@@ -73,7 +75,7 @@ export async function searchAll(
       per_page: 20,
     })
   }
-  if (query.type !== 'story' && !query.publisher) {
+  if (query.type !== 'story' && !query.publisher && !query.region) {
     searches.push({
       collection: 'narratives',
       q: query.q,

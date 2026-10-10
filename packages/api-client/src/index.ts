@@ -12,6 +12,7 @@ import {
   type PublisherListResponse,
   publisherDetailSchema,
   publisherListResponseSchema,
+  type Region,
   type SearchQuery,
   type SearchResponse,
   type StoryDetail,
@@ -20,6 +21,8 @@ import {
   searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
+  type UserPreferences,
+  userPreferencesSchema,
 } from '@dn/schemas'
 import { z } from 'zod'
 import type { AbortSignalLike, Fetcher, FetchResponse } from './fetch.ts'
@@ -88,7 +91,7 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
 
   return {
     listStories: (
-      opts: { cursor?: string | null; limit?: number } = {},
+      opts: { cursor?: string | null; limit?: number; region?: Region | null } = {},
       signal?: AbortSignalLike,
     ) => request<StoryListResponse>(storyListResponseSchema, `/stories${qs(opts)}`, { signal }),
     getStory: (id: string, signal?: AbortSignalLike) =>
@@ -114,6 +117,10 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       }),
     getOpsStatus: (signal?: AbortSignalLike) =>
       request<OpsStatus>(opsStatusSchema, '/ops/status', { signal }),
+    getPreferences: (signal?: AbortSignalLike) =>
+      request<UserPreferences>(userPreferencesSchema, '/me/preferences', { signal }),
+    savePreferences: (body: UserPreferences) =>
+      request<UserPreferences>(userPreferencesSchema, '/me/preferences', { method: 'POST', body }),
     runOpsAction: (action: OpsAction['action']) =>
       request(z.object({ ok: z.boolean() }), '/ops/actions', { method: 'POST', body: { action } }),
   }

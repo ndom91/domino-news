@@ -1,4 +1,4 @@
-import { EMBEDDING_DIMENSIONS } from '@dn/schemas'
+import { EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import {
   bigserial,
@@ -24,6 +24,10 @@ export const articleBodyPolicy = pgEnum('article_body_policy', [
   'metadata_only',
   'transient_body_allowed',
 ])
+
+// "official" = government, court, regulator or IGO. Shown as such and excluded from
+// outlet coverage stats so a press release never "beats" newsrooms.
+export const publisherKind = pgEnum('publisher_kind', ['newsroom', 'official'])
 
 export const observationType = pgEnum('observation_type', [
   'article_discovered',
@@ -86,6 +90,9 @@ export const publisher = pgTable('publisher', {
   languages: text('languages').array().notNull().default(sql`'{}'::text[]`),
   // Conservative default. Only verified permissions should switch this.
   articleBodyPolicy: articleBodyPolicy('article_body_policy').notNull().default('metadata_only'),
+  kind: publisherKind('kind').notNull().default('newsroom'),
+  // Licence the body policy relies on, e.g. "CC-BY-ND-4.0", "public-domain".
+  license: text('license'),
   policyNote: text('policy_note'),
   policyReviewedAt: ts('policy_reviewed_at'),
   createdAt: createdAt(),
@@ -270,10 +277,13 @@ export const story = pgTable(
     version: integer('version').notNull().default(1),
     mergedIntoStoryId: text('merged_into_story_id'),
     embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
+    // Macro-regions the Story concerns (`REGIONS` in @dn/schemas), set by generated summaries.
+    regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
   },
   (t) => [
     index('story_published_idx').on(t.publishedAt),
     index('story_last_updated_idx').on(t.lastUpdatedAt),
+    index('story_regions_idx').using('gin', t.regions),
   ],
 )
 
@@ -645,6 +655,16 @@ export const authVerification = pgTable('auth_verification', {
   value: text('value').notNull(),
   expiresAt: ts('expires_at').notNull(),
   createdAt: ts('created_at').notNull().defaultNow(),
+  updatedAt: ts('updated_at').notNull().defaultNow(),
+})
+
+// Reader settings. Kept out of auth_user so better-auth owns that table's shape.
+export const userPreference = pgTable('user_preference', {
+  userId: text('user_id')
+    .primaryKey()
+    .references(() => authUser.id, { onDelete: 'cascade' }),
+  // A region from `REGIONS` that boosts the feed; null = no preference.
+  edition: text('edition').$type<Region>(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 

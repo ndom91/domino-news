@@ -34,6 +34,7 @@ export const fixtureStory: StoryListItem = {
   firstObservedAt: '2026-10-09T09:05:00.000Z',
   lastUpdatedAt: '2026-10-09T15:40:00.000Z',
   sourceCount: 4,
+  regions: ['europe', 'africa'],
   publishers: [
     fixturePublishers.nyt,
     fixturePublishers.wapo,
@@ -59,6 +60,7 @@ export const fixtureStorySingle: StoryListItem = {
   firstObservedAt: '2026-10-10T02:10:00.000Z',
   lastUpdatedAt: '2026-10-10T02:10:00.000Z',
   sourceCount: 1,
+  regions: ['latin-america'],
   publishers: [fixturePublishers.bbc],
   narratives: [],
   trace: [{ id: 'b1', publisherName: 'BBC News', at: '2026-10-10T02:10:00.000Z' }],
@@ -103,6 +105,7 @@ export const fixtureStoryDetail: StoryDetail = {
     publisher:
       Object.values(fixturePublishers).find((p) => p.name === t.publisherName) ??
       fixturePublishers.guardian,
+    official: false,
     citedInSummary: t.cited,
   })),
   related: [

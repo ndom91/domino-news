@@ -37,6 +37,7 @@ const INGESTED_TABLES = [
 const SOURCE_AND_ACCOUNT_TABLES = [
   'feed',
   'publisher',
+  'user_preference',
   'auth_passkey',
   'auth_session',
   'auth_account',

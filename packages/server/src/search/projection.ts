@@ -34,6 +34,7 @@ async function storyDocument(db: Db, storyId: string) {
       summary: summary?.body,
       publisher_ids: publishers.map((p) => p.id),
       publisher_names: publishers.map((p) => p.name),
+      regions: story.regions,
       last_updated_at: seconds(story.lastUpdatedAt),
       ...(story.embedding ? { embedding: story.embedding } : {}),
     },

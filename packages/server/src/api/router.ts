@@ -2,12 +2,15 @@ import {
   type ApiErrorBody,
   type ApiErrorCode,
   opsActionSchema,
+  regionSchema,
   searchQuerySchema,
   summaryEditRequestSchema,
+  userPreferencesSchema,
 } from '@dn/schemas'
 import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
+import { getPreferences, savePreferences } from '../preferences.ts'
 import { getPublisher, listPublishers } from '../publishers.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
@@ -21,6 +24,7 @@ const storyListQuery = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}T[^|]+\|.+$/)
     .optional(),
   limit: z.coerce.number().int().min(1).max(100).default(30),
+  region: regionSchema.optional(),
 })
 
 const STATUS: Record<ApiErrorCode, number> = {
@@ -140,6 +144,12 @@ const routes: Route[] = [
       throw new HttpError('unavailable', 'search is temporarily unavailable')
     }
   }),
+  route('GET', '/api/v1/me/preferences', async ({ ctx, userId }) =>
+    json(await getPreferences(ctx.db, userId)),
+  ),
+  route('POST', '/api/v1/me/preferences', async ({ ctx, request, userId }) =>
+    json(await savePreferences(ctx.db, userId, await readJson(request, userPreferencesSchema))),
+  ),
   route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx))),
   route('POST', '/api/v1/ops/actions', async ({ ctx, request }) => {
     await runOpsAction(ctx, await readJson(request, opsActionSchema))

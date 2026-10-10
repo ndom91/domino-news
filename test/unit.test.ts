@@ -1,5 +1,5 @@
-import { normalizeArticleUrl, validateNewEdge } from '@dn/domain'
-import { parseFeed } from '@dn/jobs'
+import { normalizeArticleUrl, pickLead, regionForCountry, validateNewEdge } from '@dn/domain'
+import { isWireCopy, parseFeed } from '@dn/jobs'
 import { layoutNarrative } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
@@ -174,5 +174,37 @@ describe('annotateText', () => {
     expect(parts.map((p) => ('item' in p ? `[${p.text}]` : p.text)).join('')).toBe(
       'The [ICC] said the [ICC Prosecutor] would appeal.',
     )
+  })
+})
+
+describe('regions', () => {
+  it('maps publisher countries to macro-regions', () => {
+    expect(regionForCountry('GB')).toBe('europe')
+    expect(regionForCountry('qa')).toBe('middle-east')
+    expect(regionForCountry('ZZ')).toBeNull()
+    expect(regionForCountry(null)).toBeNull()
+  })
+
+  it('prefers recent edition stories for the lead, else the most-sourced recent story', () => {
+    const now = Date.parse('2026-10-10T12:00:00Z')
+    const at = (hoursAgo: number) => new Date(now - hoursAgo * 3_600_000).toISOString()
+    const stories = [
+      { id: 'big', lastUpdatedAt: at(1), sourceCount: 9, regions: ['north-america'] },
+      { id: 'eu', lastUpdatedAt: at(2), sourceCount: 3, regions: ['europe'] },
+      { id: 'old-eu', lastUpdatedAt: at(72), sourceCount: 12, regions: ['europe'] },
+    ]
+    expect(pickLead(stories, null, now)?.id).toBe('big')
+    expect(pickLead(stories, 'europe', now)?.id).toBe('eu')
+    expect(pickLead(stories, 'africa', now)?.id).toBe('big')
+  })
+})
+
+describe('isWireCopy', () => {
+  it('flags agency bylines in author metadata only', () => {
+    expect(isWireCopy('<meta name="author" content="The Associated Press">')).toBe(true)
+    expect(isWireCopy('<meta content="Reuters" property="article:author">')).toBe(true)
+    expect(isWireCopy('{"author":[{"@type":"Organization","name":"AFP"}]}')).toBe(true)
+    expect(isWireCopy('<meta name="author" content="Jane Doe">')).toBe(false)
+    expect(isWireCopy('<p>Reuters reported that the AP and AFP agreed.</p>')).toBe(false)
   })
 })

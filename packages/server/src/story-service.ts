@@ -219,6 +219,7 @@ export async function recordGeneratedSummary(
     .set({
       currentSummaryId: versionId,
       title: input.output.headline,
+      regions: [...new Set(input.output.regions)],
       publishedAt: story.publishedAt ?? new Date(),
     })
     .where(eq(schema.story.id, story.id))

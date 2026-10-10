@@ -57,6 +57,20 @@
       "when": 1791642762230,
       "tag": "0007_claims",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1791651378895,
+      "tag": "0008_story_regions",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1791652414822,
+      "tag": "0009_publisher_kind_license",
+      "breakpoints": true
     }
   ]
 }

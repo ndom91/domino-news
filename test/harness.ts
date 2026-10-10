@@ -63,7 +63,11 @@ export function createFakeTypesense() {
         const vq = String(s.vector_query ?? '')
         const match = vq.match(/\(\[(.*)\],/)
         const exclude = String(s.filter_by ?? '').match(/id:!=([\w-]+)/)?.[1]
-        const docs = [...coll(String(s.collection)).values()].filter((d) => d.id !== exclude)
+        const region = String(s.filter_by ?? '').match(/regions:=\[([\w-]+)\]/)?.[1]
+        const docs = [...coll(String(s.collection)).values()].filter(
+          (d) =>
+            d.id !== exclude && (!region || (d.regions as string[] | undefined)?.includes(region)),
+        )
         if (!match?.[1]) return { hits: docs.map((document) => ({ document })) }
         const vector = match[1].split(',').map(Number)
         return {

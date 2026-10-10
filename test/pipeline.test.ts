@@ -59,6 +59,7 @@ describe('fixture pipeline end to end', () => {
       )
       expect(links).toBeGreaterThan(0)
       expect(story.currentSummaryId).toBeTruthy()
+      expect(story.regions.length).toBeGreaterThan(0)
     }
   })
 
@@ -242,6 +243,7 @@ describe('summary versioning', () => {
           summary: 'Stale',
           sourceArticleIds: [link?.articleId ?? ''],
           observationIds: ['obs_x'],
+          regions: ['global'],
         },
         analysisRunId: 'run_none',
         inputFingerprint: 'outdated-fingerprint',
@@ -282,6 +284,7 @@ describe('summary versioning', () => {
             summary: 'y',
             sourceArticleIds: ['art_elsewhere'],
             observationIds: ['obs_x'],
+            regions: ['global'],
           },
           analysisRunId: 'run_none',
           inputFingerprint: 'fp_new',

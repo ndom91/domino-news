@@ -10,17 +10,21 @@ import { storyListItems } from './reader.ts'
 
 // Coverage is measured over published Stories and their active source articles.
 // "First" = the outlet whose article has the earliest report time in that Story.
+// Official sources (agencies, courts) count as coverage but never compete with
+// newsrooms for "first" or "only source".
 const LINKS = sql`
   links as (
-    select sa.story_id, a.publisher_id, coalesce(a.published_at, a.first_seen_at) as at
+    select sa.story_id, a.publisher_id, coalesce(a.published_at, a.first_seen_at) as at,
+      p.kind = 'newsroom' as newsroom
     from story_article sa
     join article a on a.id = sa.article_id
+    join publisher p on p.id = a.publisher_id
     join story s on s.id = sa.story_id
     where sa.removed_at is null and s.published_at is not null
   ),
   per_story as (
     select story_id, min(at) as first_at, count(distinct publisher_id)::int as outlets
-    from links group by story_id
+    from links where newsroom group by story_id
   )`
 
 type StatsRow = {
@@ -30,6 +34,8 @@ type StatsRow = {
   domain: string
   country_code: string | null
   article_body_policy: 'metadata_only' | 'transient_body_allowed'
+  kind: 'newsroom' | 'official'
+  license: string | null
   stories: number
   first_reports: number
   exclusives: number
@@ -43,16 +49,16 @@ async function statsRows(db: Db, slug?: string) {
     per_pub as (
       select l.publisher_id,
         count(distinct l.story_id)::int as stories,
-        count(distinct l.story_id) filter (where l.at = ps.first_at)::int as first_reports,
-        count(distinct l.story_id) filter (where ps.outlets = 1)::int as exclusives
-      from links l join per_story ps using (story_id)
+        count(distinct l.story_id) filter (where l.newsroom and l.at = ps.first_at)::int as first_reports,
+        count(distinct l.story_id) filter (where l.newsroom and ps.outlets = 1)::int as exclusives
+      from links l left join per_story ps using (story_id)
       group by l.publisher_id
     ),
     per_article as (
       select publisher_id, count(*)::int as article_count, max(first_seen_at) as last_seen
       from article group by publisher_id
     )
-    select p.id, p.slug, p.name, p.domain, p.country_code, p.article_body_policy,
+    select p.id, p.slug, p.name, p.domain, p.country_code, p.article_body_policy, p.kind, p.license,
       coalesce(pp.stories, 0) as stories,
       coalesce(pp.first_reports, 0) as first_reports,
       coalesce(pp.exclusives, 0) as exclusives,
@@ -71,6 +77,8 @@ async function statsRows(db: Db, slug?: string) {
       domain: r.domain,
       countryCode: r.country_code,
       bodyPolicy: r.article_body_policy,
+      kind: r.kind,
+      license: r.license,
       storiesCovered: r.stories,
       firstReports: r.first_reports,
       exclusives: r.exclusives,
@@ -99,7 +107,7 @@ async function coverageMatrix(db: Db, publishers: PublisherRef[]) {
     )
     select distinct l.story_id, l.publisher_id, bool_or(l.at = ps.first_at) over (partition by l.story_id, l.publisher_id) as first
     from links l join per_story ps using (story_id)
-    where l.story_id in (select story_id from top)`)
+    where l.newsroom and l.story_id in (select story_id from top)`)
   const storyIds = [...new Set(rows.map((r) => r.story_id))]
   const stories = await storyListItems(db, storyIds)
   const covered = new Set(rows.map((r) => r.publisher_id))

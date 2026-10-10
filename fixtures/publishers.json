@@ -24,7 +24,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "Metered/hard paywall; robots.txt disallows ClaudeBot, anthropic-ai, CCBot and other AI agents from /. Metadata only.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://feeds.washingtonpost.com/rss/world", "title": "World" }]
+    "feeds": [
+      {
+        "url": "https://feeds.washingtonpost.com/rss/world",
+        "title": "World"
+      }
+    ]
   },
   {
     "slug": "politico",
@@ -35,7 +40,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "robots.txt returned 403 to a browser-like client, so permissions could not be verified; Politico Pro content is paywalled. Conservative default.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://rss.politico.com/politics-news.xml", "title": "Politics" }]
+    "feeds": [
+      {
+        "url": "https://rss.politico.com/politics-news.xml",
+        "title": "Politics"
+      }
+    ]
   },
   {
     "slug": "npr",
@@ -46,7 +56,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and other AI agents from /. Metadata only.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://feeds.npr.org/1001/rss.xml", "title": "NPR Topics: News" }]
+    "feeds": [
+      {
+        "url": "https://feeds.npr.org/1001/rss.xml",
+        "title": "NPR Topics: News"
+      }
+    ]
   },
   {
     "slug": "guardian",
@@ -58,7 +73,10 @@
     "policyNote": "No paywall, but robots.txt header states use for LLMs, machine learning or AI purposes is not permitted (licensing@theguardian.com) and blocks ClaudeBot/CCBot. Metadata only.",
     "policyReviewedAt": "2026-10-10",
     "feeds": [
-      { "url": "https://www.theguardian.com/world/rss", "title": "World news | The Guardian" }
+      {
+        "url": "https://www.theguardian.com/world/rss",
+        "title": "World news | The Guardian"
+      }
     ]
   },
   {
@@ -70,7 +88,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "No paywall for UK, but robots.txt on bbc.co.uk and bbc.com disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "title": "BBC News" }]
+    "feeds": [
+      {
+        "url": "https://feeds.bbci.co.uk/news/world/rss.xml",
+        "title": "BBC News"
+      }
+    ]
   },
   {
     "slug": "404media",
@@ -81,7 +104,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "robots.txt only blocks GPTBot, but many articles sit behind a free-account/subscriber wall that the publisher has said exists to deter AI scraping; no explicit permission found. Conservative default.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://www.404media.co/rss/", "title": "404 Media" }]
+    "feeds": [
+      {
+        "url": "https://www.404media.co/rss/",
+        "title": "404 Media"
+      }
+    ]
   },
   {
     "slug": "theverge",
@@ -92,7 +120,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "Partial paywall; robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only. Feed is Atom.",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://www.theverge.com/rss/index.xml", "title": "The Verge" }]
+    "feeds": [
+      {
+        "url": "https://www.theverge.com/rss/index.xml",
+        "title": "The Verge"
+      }
+    ]
   },
   {
     "slug": "dw",
@@ -103,7 +136,12 @@
     "articleBodyProcessingPolicy": "metadata_only",
     "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only. Feed is RSS 1.0 (RDF).",
     "policyReviewedAt": "2026-10-10",
-    "feeds": [{ "url": "https://rss.dw.com/rdf/rss-en-all", "title": "Deutsche Welle" }]
+    "feeds": [
+      {
+        "url": "https://rss.dw.com/rdf/rss-en-all",
+        "title": "Deutsche Welle"
+      }
+    ]
   },
   {
     "slug": "france24",
@@ -150,6 +188,544 @@
       {
         "url": "https://www.euronews.com/rss?format=mrss&level=theme&name=news",
         "title": "News | Euronews RSS"
+      }
+    ]
+  },
+  {
+    "slug": "globalvoices",
+    "name": "Global Voices",
+    "domain": "globalvoices.org",
+    "countryCode": "NL",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-3.0",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "Site licensed CC BY 3.0 unless otherwise stated (globalvoices.org/about/global-voices-attribution-policy); commercial use allowed with credit and link. Third-party photos/audio/video may differ. robots.txt does not restrict AI agents. Feed carries full text.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://globalvoices.org/feed/",
+        "title": "Global Voices"
+      }
+    ]
+  },
+  {
+    "slug": "mongabay",
+    "name": "Mongabay",
+    "domain": "news.mongabay.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-ND-4.0",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "Articles CC BY-ND 4.0 (news.mongabay.com/copyright/creative-commons); asks republishers not to sell material separately or republish behind paywalls. GFRN partner content is CC BY-NC-ND. Third-party photos excluded. robots.txt does not restrict AI agents. Feed carries excerpts.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://news.mongabay.com/feed/",
+        "title": "Conservation news"
+      }
+    ]
+  },
+  {
+    "slug": "apublica",
+    "name": "Agência Pública",
+    "domain": "apublica.org",
+    "countryCode": "BR",
+    "languages": ["pt"],
+    "kind": "newsroom",
+    "license": "CC-BY-ND-4.0",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "Reports distributed under CC BY-ND 4.0 (apublica.org/republique); own rules forbid reselling reports and cutting or editing them; newsletter columns excluded. robots.txt is empty. Feed carries full text.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://apublica.org/feed/",
+        "title": "Agência Pública"
+      }
+    ]
+  },
+  {
+    "slug": "ec-presscorner",
+    "name": "European Commission Press Corner",
+    "domain": "ec.europa.eu",
+    "countryCode": null,
+    "languages": ["en"],
+    "kind": "official",
+    "license": "CC-BY-4.0",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "EU-owned content licensed CC BY 4.0 under Decision 2011/833/EU (commission.europa.eu/legal-notice_en); logos, trade marks and third-party works excluded. robots.txt does not restrict AI agents. Feed carries short descriptions; press-corner pages are rendered client-side.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://ec.europa.eu/commission/presscorner/api/rss?language=en",
+        "title": "Press releases"
+      }
+    ]
+  },
+  {
+    "slug": "ecb",
+    "name": "European Central Bank",
+    "domain": "ecb.europa.eu",
+    "countryCode": null,
+    "languages": ["en"],
+    "kind": "official",
+    "license": "reuse-with-attribution",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "ECB site terms allow free use with the ECB cited as source; if included in sold documents, buyers must be told the information is free on ecb.europa.eu. Signed working papers excluded. robots.txt does not restrict AI agents. Feed mixes press releases, speeches and interviews; no body text.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.ecb.europa.eu/rss/press.html",
+        "title": "Press, speeches, interviews"
+      }
+    ]
+  },
+  {
+    "slug": "govuk",
+    "name": "GOV.UK",
+    "domain": "gov.uk",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "OGL-UK-3.0",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "Content under the Open Government Licence v3.0 except where stated (gov.uk/help/terms-conditions); commercial reuse allowed with attribution; logos and third-party material excluded. robots.txt does not restrict AI agents. Feed carries summaries; high volume across departments.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.gov.uk/search/news-and-communications.atom",
+        "title": "News and communications"
+      }
+    ]
+  },
+  {
+    "slug": "cdc",
+    "name": "Centers for Disease Control and Prevention",
+    "domain": "cdc.gov",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "public-domain",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "Most CDC content is public domain (cdc.gov/other/agencymaterials.html); requires 'Source: CDC' attribution, a no-endorsement disclaimer and no change to substantive content; contractor, third-party and stock items excluded. robots.txt does not restrict AI agents; edge blocks some user agents. Feed is large (1,800+ items since 2006).",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://tools.cdc.gov/api/v2/resources/media/132608.rss",
+        "title": "CDC Online Newsroom"
+      }
+    ]
+  },
+  {
+    "slug": "noaa",
+    "name": "NOAA",
+    "domain": "noaa.gov",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "public-domain",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "US federal government work, public domain under 17 U.S.C. 105; third-party images may differ. robots.txt does not restrict AI agents. Low-volume feed with summaries only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.noaa.gov/news-release/rss.xml",
+        "title": "News Releases"
+      }
+    ]
+  },
+  {
+    "slug": "sec",
+    "name": "U.S. Securities and Exchange Commission",
+    "domain": "sec.gov",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "public-domain",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "sec.gov information is public and 'may be copied or further distributed ... without the SEC's permission' (sec.gov/about/privacy-information); seal and logos excluded. Fair Access policy: max 10 requests/second, declared User-Agent, no unclassified bots. robots.txt does not restrict AI agents. Feed carries summaries.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.sec.gov/news/pressreleases.rss",
+        "title": "Press Releases"
+      }
+    ]
+  },
+  {
+    "slug": "federalregister",
+    "name": "Federal Register",
+    "domain": "federalregister.gov",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "public-domain",
+    "articleBodyProcessingPolicy": "transient_body_allowed",
+    "policyNote": "US government publication, public domain. robots.txt does not restrict AI agents, but document HTML pages redirect automated clients to unblock.federalregister.gov; full text must be fetched from the API's raw_text_url/body_html_url. Feed carries titles only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.federalregister.gov/api/v1/documents.rss?conditions%5Btype%5D%5B%5D=PRESDOCU",
+        "title": "Presidential Documents"
+      }
+    ]
+  },
+  {
+    "slug": "nasa",
+    "name": "NASA",
+    "domain": "nasa.gov",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "official",
+    "license": "public-domain",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Text is a US federal work, but NASA's media guidelines say AI outputs must not be attributed to NASA ('References like \"according to NASA\" ... are prohibited in AI products'), which conflicts with cited summaries. robots.txt allows all. Held at metadata only pending a decision.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.nasa.gov/news-release/feed/",
+        "title": "News Releases"
+      }
+    ]
+  },
+  {
+    "slug": "theconversation",
+    "name": "The Conversation",
+    "domain": "theconversation.com",
+    "countryCode": "AU",
+    "languages": ["en", "id"],
+    "kind": "newsroom",
+    "license": "CC-BY-ND-4.0",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Articles CC BY-ND 4.0 but commercial use needs a paid licence and AI training is prohibited (republishing guidelines). robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude agents from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://theconversation.com/global/articles.atom",
+        "title": "Global"
+      },
+      {
+        "url": "https://theconversation.com/uk/articles.atom",
+        "title": "UK"
+      },
+      {
+        "url": "https://theconversation.com/africa/articles.atom",
+        "title": "Africa"
+      },
+      {
+        "url": "https://theconversation.com/au/articles.atom",
+        "title": "Australia"
+      },
+      {
+        "url": "https://theconversation.com/id/articles.atom",
+        "title": "Indonesia"
+      }
+    ]
+  },
+  {
+    "slug": "kffhealthnews",
+    "name": "KFF Health News",
+    "domain": "kffhealthnews.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-NC-ND-4.0",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "CC BY-NC-ND 4.0; KFF states for-profit outlets may republish, but the licence is non-commercial and summarisation is not covered. Wire photos and 'All Rights Reserved' stories excluded. robots.txt does not restrict AI agents. Metadata only until permission is confirmed.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://kffhealthnews.org/feed/",
+        "title": "KFF Health News"
+      }
+    ]
+  },
+  {
+    "slug": "texastribune",
+    "name": "The Texas Tribune",
+    "domain": "texastribune.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "republish-terms",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Free republishing under house rules with no named CC licence ('Don't sell the story'); ToS grants only a revocable limited licence; partner stories excluded. robots.txt does not restrict AI agents. Too vague for commercial processing; metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://feeds.texastribune.org/feeds/main/",
+        "title": "The Texas Tribune"
+      }
+    ]
+  },
+  {
+    "slug": "calmatters",
+    "name": "CalMatters",
+    "domain": "calmatters.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "republish-terms",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Free republishing under house rules with no named CC licence; ToS forbids automated access and copying or reselling site resources. Wire photos excluded. robots.txt does not restrict AI agents. Metadata only until permission is confirmed.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://calmatters.org/feed/",
+        "title": "CalMatters"
+      }
+    ]
+  },
+  {
+    "slug": "the19th",
+    "name": "The 19th",
+    "domain": "19thnews.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-NC-ND-4.0",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "CC BY-NC-ND 4.0; republishing rules say 'Do not sell or syndicate our content' and 'Do not scrape our website'. Photos excluded. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://19thnews.org/feed/",
+        "title": "The 19th"
+      }
+    ]
+  },
+  {
+    "slug": "grist",
+    "name": "Grist",
+    "domain": "grist.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Terms limit use to personal, noncommercial purposes and state RSS is 'for private, non-commercial use only'. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://grist.org/feed/",
+        "title": "Grist"
+      }
+    ]
+  },
+  {
+    "slug": "insideclimatenews",
+    "name": "Inside Climate News",
+    "domain": "insideclimatenews.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-NC-ND-3.0",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "CC BY-NC-ND 3.0 with prior permission required; forbids wholesale or automatic republishing. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://insideclimatenews.org/feed/",
+        "title": "Inside Climate News"
+      }
+    ]
+  },
+  {
+    "slug": "propublica",
+    "name": "ProPublica",
+    "domain": "propublica.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "CC-BY-NC-ND-3.0-US",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "CC BY-NC-ND 3.0 US; 'You can't republish our material wholesale, or automatically'. Photos excluded. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.propublica.org/feeds/propublica/main",
+        "title": "ProPublica"
+      }
+    ]
+  },
+  {
+    "slug": "themarkup",
+    "name": "The Markup",
+    "domain": "themarkup.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Terms allow one personal, noncommercial copy; other use needs written permission. Some articles carry a CC licence (variant not verified). robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://themarkup.org/feeds/rss.xml",
+        "title": "The Markup"
+      }
+    ]
+  },
+  {
+    "slug": "restofworld",
+    "name": "Rest of World",
+    "domain": "restofworld.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "unverified",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude-Web from /. Republishing licence not verified. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://restofworld.org/feed/latest",
+        "title": "Latest"
+      }
+    ]
+  },
+  {
+    "slug": "kyivindependent",
+    "name": "The Kyiv Independent",
+    "domain": "kyivindependent.com",
+    "countryCode": "UA",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No open licence; content is offered through paid syndication and licensing. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://kyivindependent.com/news-archive/rss/",
+        "title": "The Kyiv Independent"
+      }
+    ]
+  },
+  {
+    "slug": "scroll",
+    "name": "Scroll.in",
+    "domain": "scroll.in",
+    "countryCode": "IN",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No open licence found (terms page not located, so unverified). robots.txt does not restrict AI agents. Conservative default.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://feeds.feedburner.com/ScrollinArticles.rss",
+        "title": "Scroll.in"
+      }
+    ]
+  },
+  {
+    "slug": "dailymaverick",
+    "name": "Daily Maverick",
+    "domain": "dailymaverick.co.za",
+    "countryCode": "ZA",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Terms say users must not republish, reproduce or redistribute material. robots.txt explicitly allows GPTBot, ClaudeBot, CCBot and Google-Extended, but that is not a licence. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.dailymaverick.co.za/dmrss/",
+        "title": "Latest News"
+      }
+    ]
+  },
+  {
+    "slug": "rappler",
+    "name": "Rappler",
+    "domain": "rappler.com",
+    "countryCode": "PH",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude agents from /. No open licence found. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.rappler.com/feed/",
+        "title": "Rappler"
+      }
+    ]
+  },
+  {
+    "slug": "groundup",
+    "name": "GroundUp",
+    "domain": "groundup.org.za",
+    "countryCode": "ZA",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "republish-terms",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Articles under the GroundUp Republication Licence 1.0, which requires prior approval before republishing. robots.txt does not restrict AI agents. Metadata only until permission is confirmed.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://groundup.org.za/sitenews/rss/",
+        "title": "GroundUp News"
+      }
+    ]
+  },
+  {
+    "slug": "meduza",
+    "name": "Meduza",
+    "domain": "meduza.io",
+    "countryCode": "LV",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "unverified",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Reported to use CC BY 4.0, but no licence statement was found on the site or in the feed. robots.txt does not restrict AI agents. Metadata only until the licence is verified.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://meduza.io/rss/en/all",
+        "title": "Meduza (English)"
+      }
+    ]
+  },
+  {
+    "slug": "agenciabrasil",
+    "name": "Agência Brasil",
+    "domain": "agenciabrasil.ebc.com.br",
+    "countryCode": "BR",
+    "languages": ["pt"],
+    "kind": "official",
+    "license": "CC-BY-NC",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "EBC states its content is Creative Commons and free to reproduce for non-commercial purposes; commercial use needs a licence (licenciamento@ebc.com.br). robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://agenciabrasil.ebc.com.br/rss/ultimasnoticias/feed.xml",
+        "title": "Últimas notícias"
+      }
+    ]
+  },
+  {
+    "slug": "unnews",
+    "name": "UN News",
+    "domain": "news.un.org",
+    "countryCode": null,
+    "languages": ["en"],
+    "kind": "official",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "UN terms of use allow personal, non-commercial use only, with no right to redistribute or create derivative works. robots.txt does not restrict AI agents. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://news.un.org/feed/subscribe/en/news/all/rss.xml",
+        "title": "All news"
       }
     ]
   }

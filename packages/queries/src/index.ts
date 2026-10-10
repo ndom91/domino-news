@@ -1,5 +1,5 @@
 import type { ApiClient } from '@dn/api-client'
-import type { SearchQuery, SummaryEditRequest } from '@dn/schemas'
+import type { Region, SearchQuery, SummaryEditRequest, UserPreferences } from '@dn/schemas'
 import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/react-query'
 
 // Query keys and options shared by web (and later native). Each factory takes the
@@ -7,7 +7,7 @@ import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/
 
 export const queryKeys = {
   stories: () => ['stories'] as const,
-  storyList: () => ['stories', 'list'] as const,
+  storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
   narratives: () => ['narratives'] as const,
   narrative: (id: string) => ['narratives', 'detail', id] as const,
@@ -15,15 +15,16 @@ export const queryKeys = {
   publishers: () => ['publishers'] as const,
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
   ops: () => ['ops', 'status'] as const,
+  preferences: () => ['me', 'preferences'] as const,
 }
 
 export function createQueries(api: ApiClient) {
   return {
-    storyList: () =>
+    storyList: (region: Region | null = null) =>
       infiniteQueryOptions({
-        queryKey: queryKeys.storyList(),
+        queryKey: queryKeys.storyList(region),
         queryFn: ({ pageParam, signal }) =>
-          api.listStories({ cursor: pageParam, limit: 30 }, signal),
+          api.listStories({ cursor: pageParam, limit: 30, region }, signal),
         initialPageParam: null as string | null,
         getNextPageParam: (last) => last.pageInfo.nextCursor,
         staleTime: 30_000,
@@ -65,6 +66,12 @@ export function createQueries(api: ApiClient) {
         queryFn: ({ signal }) => api.getPublisher(slug, signal),
         staleTime: 60_000,
       }),
+    preferences: () =>
+      queryOptions({
+        queryKey: queryKeys.preferences(),
+        queryFn: ({ signal }) => api.getPreferences(signal),
+        staleTime: 5 * 60_000,
+      }),
     ops: () =>
       queryOptions({
         queryKey: queryKeys.ops(),
@@ -81,6 +88,15 @@ export function editSummaryMutation(api: ApiClient, queryClient: QueryClient, st
     mutationFn: (body: SummaryEditRequest) => api.editSummary(storyId, body),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.stories() })
+    },
+  }
+}
+
+export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient) {
+  return {
+    mutationFn: (body: UserPreferences) => api.savePreferences(body),
+    onSuccess: (prefs: UserPreferences) => {
+      queryClient.setQueryData(queryKeys.preferences(), prefs)
     },
   }
 }

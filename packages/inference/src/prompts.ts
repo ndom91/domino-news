@@ -3,7 +3,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@3',
-  summarizeStory: 'summarize-story@1',
+  summarizeStory: 'summarize-story@2',
   classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
   explainContext: 'explain-context@2',
@@ -67,6 +67,7 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
 - summary: 2-4 short sentences. Attribute claims to sources ("according to X", "X reports") where they are not established facts. No speculation.
 - sourceArticleIds: the articleId of every article you relied on.
 - observationIds: the observationId of every article you relied on.
+- regions: 1-3 regions where the events take place or that they directly affect. Not where the publishers are based. Use "global" only when the story truly spans many regions.
 Do not copy sentences from the sources.
 
 SOURCE ARTICLES:

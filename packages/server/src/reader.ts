@@ -4,11 +4,12 @@ import type {
   NarrativeListResponse,
   NarrativeRef,
   PublisherRef,
+  Region,
   StoryDetail,
   StoryListItem,
   StoryListResponse,
 } from '@dn/schemas'
-import { and, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
+import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
 
 const iso = (d: Date) => d.toISOString()
 
@@ -154,6 +155,7 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
         firstObservedAt: iso(s.firstObservedAt),
         lastUpdatedAt: iso(s.lastUpdatedAt),
         sourceCount: counts.get(s.id) ?? 0,
+        regions: s.regions,
         publishers: publishers.get(s.id) ?? [],
         narratives: narratives.get(s.id) ?? [],
         trace: traces.get(s.id) ?? [],
@@ -165,7 +167,7 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
 // Cursor = "<lastUpdatedAt ISO>|<id>" for stable keyset pagination.
 export async function listStories(
   db: Db,
-  opts: { limit?: number; cursor?: string | null },
+  opts: { limit?: number; cursor?: string | null; region?: Region },
 ): Promise<StoryListResponse> {
   const limit = Math.min(Math.max(opts.limit ?? 30, 1), 100)
   let cursorFilter = sql`true`
@@ -187,6 +189,7 @@ export async function listStories(
       and(
         isNotNull(schema.story.publishedAt),
         isNull(schema.story.mergedIntoStoryId),
+        opts.region ? arrayContains(schema.story.regions, [opts.region]) : undefined,
         cursorFilter,
       ),
     )
@@ -247,6 +250,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
         name: schema.publisher.name,
         domain: schema.publisher.domain,
       },
+      publisherKind: schema.publisher.kind,
     })
     .from(schema.storyArticle)
     .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
@@ -296,6 +300,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
     firstObservedAt: iso(story.firstObservedAt),
     lastUpdatedAt: iso(story.lastUpdatedAt),
     publishedAt: iso(story.publishedAt),
+    regions: story.regions,
     summary: current
       ? {
           versionId: current.version.id,
@@ -321,6 +326,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       publishedAt: s.publishedAt ? iso(s.publishedAt) : null,
       observedAt: iso(s.observedAt),
       publisher: s.publisher,
+      official: s.publisherKind === 'official',
       citedInSummary: citedIds.has(s.articleId),
     })),
     related: edges.flatMap((e) => {

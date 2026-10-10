@@ -1,5 +1,5 @@
 import { relativeTime } from '@dn/domain'
-import { searchQuerySchema } from '@dn/schemas'
+import { REGION_LABELS, REGIONS, regionSchema, searchQuerySchema } from '@dn/schemas'
 import { Badge, Button, Notice, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
@@ -31,6 +31,7 @@ function SearchPage() {
   const publishers = useQuery(queries.publishers())
   const sinceId = useId()
   const pubId = useId()
+  const regionId = useId()
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -41,6 +42,7 @@ function SearchPage() {
         type: search.type,
         since: (form.get('since') as typeof search.since) ?? 'all',
         publisher: String(form.get('publisher') ?? '') || undefined,
+        region: regionSchema.safeParse(form.get('region')).data,
       },
     })
   }
@@ -92,6 +94,22 @@ function SearchPage() {
               {publishers.data?.items.map((p) => (
                 <option key={p.id} value={p.slug}>
                   {p.name}
+                </option>
+              ))}
+            </select>
+            <label htmlFor={regionId} className="text-text-secondary">
+              Region
+            </label>
+            <select
+              id={regionId}
+              name="region"
+              defaultValue={search.region ?? ''}
+              className={selectClass}
+            >
+              <option value="">Any region</option>
+              {REGIONS.map((r) => (
+                <option key={r} value={r}>
+                  {REGION_LABELS[r]}
                 </option>
               ))}
             </select>

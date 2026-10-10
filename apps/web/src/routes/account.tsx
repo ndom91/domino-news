@@ -1,9 +1,12 @@
 import { formatDateTime } from '@dn/domain'
+import { savePreferencesMutation } from '@dn/queries'
+import { REGION_LABELS, REGIONS, regionSchema } from '@dn/schemas'
 import { Button, Notice, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import type { FormEvent } from 'react'
+import { type FormEvent, useId } from 'react'
 import { Page, SectionLabel } from '../components/page.tsx'
+import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
 
 export const Route = createFileRoute('/account')({
@@ -57,6 +60,8 @@ function AccountPage() {
           {session.user?.username ?? session.user?.name}
         </span>
       </p>
+
+      <EditionSection />
 
       <section aria-labelledby="passkeys-heading" className="mt-10">
         <SectionLabel>
@@ -122,5 +127,50 @@ function AccountPage() {
         ) : null}
       </section>
     </Page>
+  )
+}
+
+function EditionSection() {
+  const queryClient = useQueryClient()
+  const prefs = useQuery(queries.preferences())
+  const save = useMutation(savePreferencesMutation(api, queryClient))
+  const selectId = useId()
+
+  return (
+    <section aria-labelledby="edition-heading" className="mt-10">
+      <SectionLabel>
+        <span id="edition-heading">News edition</span>
+      </SectionLabel>
+      <p className="mb-4 max-w-reading text-sm text-text-secondary">
+        Stories about this region lead your feed. Everything else still appears.
+      </p>
+      <div className="flex flex-wrap items-center gap-3 text-sm">
+        <label htmlFor={selectId} className="text-text-secondary">
+          Region
+        </label>
+        <select
+          id={selectId}
+          value={prefs.data?.edition ?? ''}
+          disabled={prefs.isPending || save.isPending}
+          onChange={(e) => {
+            const parsed = regionSchema.safeParse(e.target.value)
+            save.mutate({ edition: parsed.success ? parsed.data : null })
+          }}
+          className="h-10 rounded-md border border-border-strong bg-surface px-2 text-sm text-text focus:outline-2 focus:outline-focus"
+        >
+          <option value="">No preference</option>
+          {REGIONS.map((r) => (
+            <option key={r} value={r}>
+              {REGION_LABELS[r]}
+            </option>
+          ))}
+        </select>
+      </div>
+      {save.isError ? (
+        <Notice tone="error" title="Edition not saved" className="mt-4">
+          {save.error.message}
+        </Notice>
+      ) : null}
+    </section>
   )
 }

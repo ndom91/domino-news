@@ -32,6 +32,11 @@ export function SourceList({
             >
               {s.publisher.name}
             </Link>
+            {s.official ? (
+              <span className="font-mono text-2xs uppercase tracking-label text-accent">
+                Official source
+              </span>
+            ) : null}
             <Timestamp iso={s.publishedAt ?? s.observedAt} />
             <span
               className={cx(

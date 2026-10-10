@@ -12,6 +12,8 @@ export interface ArticleInput {
   articleId: string
   observationId: string
   publisher: string
+  /** Publisher's home country. Not sent to models; fixture inference derives regions from it. */
+  publisherCountry?: string | null
   title: string
   description: string | null
   publishedAt: string | null

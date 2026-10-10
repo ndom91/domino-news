@@ -1,4 +1,5 @@
 import { formatDateTime, hostnameOf } from '@dn/domain'
+import { REGION_LABELS } from '@dn/schemas'
 import {
   Badge,
   Button,
@@ -82,6 +83,12 @@ function StoryPage() {
                   {outlets} {outlets === 1 ? 'outlet' : 'outlets'}
                 </dd>
               </div>
+              {story.regions.length > 0 ? (
+                <div className="flex gap-1.5">
+                  <dt>Regions</dt>
+                  <dd>{story.regions.map((r) => REGION_LABELS[r]).join(', ')}</dd>
+                </div>
+              ) : null}
             </dl>
           </header>
 

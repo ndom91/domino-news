@@ -1,4 +1,4 @@
-import type { StoryListItem } from '@dn/schemas'
+import { REGION_LABELS, type StoryListItem } from '@dn/schemas'
 import type { ComponentType, ReactNode } from 'react'
 import { cx } from '../cx.ts'
 import { SourceTrace } from './source-trace.tsx'
@@ -65,6 +65,11 @@ export function StoryRow({ story, Link = DefaultLink, lead = false, className }:
             .join(', ')}
           {story.publishers.length > 4 ? ` +${story.publishers.length - 4}` : ''}
         </span>
+        {story.regions.length > 0 ? (
+          <span className="text-xs text-text-muted">
+            {story.regions.map((r) => REGION_LABELS[r]).join(' · ')}
+          </span>
+        ) : null}
         <Timestamp iso={story.lastUpdatedAt} prefix="Updated" />
       </div>
     </article>

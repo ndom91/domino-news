@@ -93,16 +93,18 @@ Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (port `
 All routes require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`). Passkeys are managed through better-auth's own `/api/auth/passkey/*` endpoints (web: `/account`).
 
 ```text
-GET  /api/v1/stories?cursor=&limit=
+GET  /api/v1/stories?cursor=&limit=&region=
 GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related
 POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE_SUMMARY_EDITING)
 GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
-GET  /api/v1/search?q=&type=&since=&publisher=
+GET  /api/v1/search?q=&type=&since=&publisher=&region=
 GET  /api/v1/publishers                  # outlet stats + who-covered-what matrix
 GET  /api/v1/publishers/:slug            # stats, source-use policy, recent stories, co-coverage
 GET  /api/v1/ops/status
 POST /api/v1/ops/actions                  # pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
+GET  /api/v1/me/preferences              # { edition: region | null }
+POST /api/v1/me/preferences
 ```
 
 Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `packages/queries` are platform-neutral for a future Expo app.
@@ -116,6 +118,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - Narratives from connected Stories, with model-written titles.
 - **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
+- **Regions and editions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region; a reader's edition (`/account`) picks the lead and adds an "In {region}" rail without re-ranking the chronological feed. After upgrading, existing Stories have no regions until re-summarised, and Typesense needs `pnpm cli search:rebuild`.
 - **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, Story, Narrative (branching lane graph), publishers, search, pipeline and account pages. Desktop-first and checked at 375px.
@@ -125,7 +128,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 ## Fixture-only or limited
 
 - **Fixture inference** is a deterministic stand-in (bag-of-words vectors, token-overlap decisions). Its grouping is noticeably coarser than the real models'.
-- **Article bodies:** every seeded publisher is `metadata_only`. The transient-body path, and primary-source discovery that depends on it, is implemented but unused. The policy review was best-effort, not legal advice; get permission before production ingestion.
+- **Article bodies:** 10 of 41 seeded publishers allow transient bodies (open licences or public domain, commercial use allowed). Federal Register and EU Commission pages need an API or a JS-capable fetcher, so they fall back to metadata for now. Fixture mode only has captured RSS for the original 12 publishers. The policy review was best-effort, not legal advice; get permission before production ingestion.
 - **Matching thresholds** are calibrated on about 34 articles only (see doc 006).
 - **Merge/split:** the data model and alias resolution exist; there is no operation or UI.
 - **Ops page** is a diagnostics view, not an admin product.

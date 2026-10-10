@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
+import { regionSchema } from './regions.ts'
 
 // Versioned HTTP contracts (/api/v1). Shared by web and future native clients;
 // keep this file free of DOM, Node and framework imports.
@@ -35,6 +36,8 @@ export type PublisherRef = z.infer<typeof publisherRefSchema>
 export const publisherStatsSchema = publisherRefSchema.extend({
   countryCode: z.string().nullable(),
   bodyPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
+  kind: z.enum(['newsroom', 'official']),
+  license: z.string().nullable(),
   storiesCovered: z.number().int().nonnegative(),
   firstReports: z.number().int().nonnegative(),
   exclusives: z.number().int().nonnegative(),
@@ -71,6 +74,8 @@ export const storySourceSchema = z.object({
   publishedAt: z.string().nullable(),
   observedAt: z.string(),
   publisher: publisherRefSchema,
+  // Government, court, regulator or IGO rather than a newsroom.
+  official: z.boolean(),
   citedInSummary: z.boolean(),
 })
 export type StorySource = z.infer<typeof storySourceSchema>
@@ -103,6 +108,7 @@ export const storyListItemSchema = z.object({
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
   sourceCount: z.number().int().nonnegative(),
+  regions: z.array(regionSchema),
   publishers: z.array(publisherRefSchema),
   narratives: z.array(narrativeRefSchema),
   // When each source reported (publishedAt, else first seen), for coverage traces.
@@ -185,6 +191,7 @@ export const storyDetailSchema = z.object({
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
   publishedAt: z.string().nullable(),
+  regions: z.array(regionSchema),
   summary: summarySchema.nullable(),
   summaryHistory: z.array(
     z.object({
@@ -252,6 +259,7 @@ export const searchQuerySchema = z.object({
   type: z.enum(['all', 'story', 'narrative']).default('all'),
   publisher: z.string().optional(),
   since: z.enum(['24h', '7d', '30d', 'all']).default('all'),
+  region: regionSchema.optional(),
 })
 export type SearchQuery = z.infer<typeof searchQuerySchema>
 
@@ -365,3 +373,8 @@ export const publisherDetailSchema = publisherStatsSchema.extend({
   ),
 })
 export type PublisherDetail = z.infer<typeof publisherDetailSchema>
+
+export const userPreferencesSchema = z.object({
+  edition: regionSchema.nullable(),
+})
+export type UserPreferences = z.infer<typeof userPreferencesSchema>
