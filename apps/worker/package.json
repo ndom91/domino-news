@@ -15,8 +15,8 @@
     "@dn/db": "workspace:*",
     "@dn/jobs": "workspace:*",
     "@dn/server": "workspace:*",
-    "drizzle-orm": "0.45.4",
-    "pg-boss": "12.37.1",
-    "tsx": "^4"
+    "drizzle-orm": "0.45.3",
+    "pg-boss": "12.36.0",
+    "tsx": "4.23.15"
   }
 }

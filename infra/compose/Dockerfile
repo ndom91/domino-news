@@ -10,6 +10,8 @@ WORKDIR /app
 
 FROM base AS build
 COPY . .
+# Host file modes are copied as-is; the runtime user must be able to read every source file.
+RUN chmod -R a+rX /app
 RUN pnpm install --frozen-lockfile
 RUN pnpm --filter @dn/web build
 

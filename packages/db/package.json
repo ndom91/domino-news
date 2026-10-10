@@ -15,12 +15,12 @@
   "dependencies": {
     "@dn/domain": "workspace:*",
     "@dn/schemas": "workspace:*",
-    "drizzle-orm": "0.45.4",
+    "drizzle-orm": "0.45.3",
     "pg": "8.23.1"
   },
   "devDependencies": {
-    "@types/pg": "^8",
+    "@types/pg": "8.23.1",
     "drizzle-kit": "0.31.11",
-    "tsx": "^4"
+    "tsx": "4.23.15"
   }
 }

@@ -105,6 +105,8 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - `BETTER_AUTH_URL` must match the origin users load the app from, or sign-in fails the origin check.
 - **Node 25+ no longer bundles corepack.** CI and the Dockerfile install it with `npm install -g corepack`; locally run the same once per Node version.
 - **pnpm 12 in the image:** it downloads a native binary on first run and checks dependencies before every script. The Dockerfile pre-fetches the binary during the build (and gives the cache to the `node` user) and sets `pnpm_config_verify_deps_before_run=false`, since dependencies are frozen at build time. Note the `pnpm_config_` prefix; pnpm 12 ignores `npm_config_`.
+- **Dependency policy:** every direct dependency is an exact version (`saveExact: true`), and pnpm only installs versions at least 7 days old (`minimumReleaseAge: 10080` minutes), including transitive ones. "Latest" therefore means the newest release older than a week. Passing an explicit range (`pnpm add foo@8`) still writes a range, so add without one or pin by hand. Upgrades: re-pin, then regenerate the lockfile so transitive packages also re-resolve under the rule.
+- **Playroom uses Babel 8** (`@babel/core`, `preset-react`, `preset-typescript` pinned in `playroom/package.json`); all three must stay on the same major.
 - **TypeScript 7** is the Go port: `tsc` hands off to the native `@typescript/typescript-<platform>` binary, so `pnpm typecheck` already uses it.
 - Feeds are messy: entity-encoded links (BBC), tracking params (`maca`, `traffic_source`, `utm_*`), duplicate items per feed (France 24), zero-width characters. All handled in `rss.ts` / `url.ts` and covered by unit tests.
 
