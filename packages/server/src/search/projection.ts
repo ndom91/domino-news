@@ -1,5 +1,5 @@
 import { type Db, schema } from '@dn/db'
-import { and, asc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, asc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { AggregateType } from '../outbox.ts'
 import { ALIASES, type Alias, createCollection, pointAlias, type Typesense } from './typesense.ts'
 
@@ -162,80 +162,65 @@ export async function projectAggregate(
 
 const INDEXER = 'typesense-indexer'
 const MAX_ATTEMPTS = 8
+// A claimed event is retried by any indexer once its lease runs out (e.g. after a crash).
+const LEASE_SECONDS = 60
+
+type OutboxRow = typeof schema.outboxEvent.$inferSelect
 
 /**
  * Process one batch of outbox events. At-least-once: an event is marked processed only
  * after the projection succeeded; failures back off exponentially and dead-letter after
  * MAX_ATTEMPTS (still visible on the ops page and replayable).
+ *
+ * Events are claimed with a short lease instead of a long transaction, so slow Typesense
+ * calls never hold row locks or a pooled connection open.
  */
 export async function processOutboxBatch(db: Db, ts: Typesense, limit = 50) {
-  return db.transaction(async (tx) => {
-    const events = await tx
-      .select()
-      .from(schema.outboxEvent)
-      .where(
-        and(
-          isNull(schema.outboxEvent.processedAt),
-          isNull(schema.outboxEvent.deadAt),
-          sql`${schema.outboxEvent.nextAttemptAt} <= now()`,
-        ),
-      )
-      .orderBy(asc(schema.outboxEvent.id))
-      .limit(limit)
-      .for('update', { skipLocked: true })
-    let processed = 0
-    let failed = 0
-    // Collapse duplicates within the batch: projecting current state once covers them all.
-    const done = new Map<string, string | null>()
-    for (const event of events) {
-      const key = `${event.aggregateType}:${event.aggregateId}`
-      if (!done.has(key)) {
-        try {
-          // Savepoint: a failed statement must not abort the batch transaction.
-          await tx.transaction(async (sp) => {
-            const [state] = await sp
-              .select()
-              .from(schema.searchProjectionState)
-              .where(
-                and(
-                  eq(schema.searchProjectionState.aggregateType, event.aggregateType),
-                  eq(schema.searchProjectionState.aggregateId, event.aggregateId),
-                ),
-              )
-            const alreadyApplied =
-              event.aggregateType !== 'article' &&
-              state !== undefined &&
-              !state.deleted &&
-              state.indexedVersion > event.aggregateVersion
-            if (!alreadyApplied) {
-              await projectAggregate(
-                sp,
-                ts,
-                event.aggregateType as AggregateType,
-                event.aggregateId,
-              )
-            }
-          })
-          done.set(key, null)
-        } catch (error) {
-          done.set(key, String(error).slice(0, 500))
-        }
-      }
-      const error = done.get(key)
-      if (error) {
-        failed++
-        const attempts = event.attempts + 1
-        await tx
-          .update(schema.outboxEvent)
-          .set({
-            attempts,
-            lastError: error,
-            nextAttemptAt: new Date(Date.now() + Math.min(2 ** attempts, 600) * 1000),
-            deadAt: attempts >= MAX_ATTEMPTS ? new Date() : null,
-          })
-          .where(eq(schema.outboxEvent.id, event.id))
-      } else {
-        processed++
+  const claimed = await db.execute<{ id: number }>(sql`
+    update ${schema.outboxEvent}
+    set next_attempt_at = now() + make_interval(secs => ${LEASE_SECONDS})
+    where id in (
+      select id from ${schema.outboxEvent}
+      where processed_at is null and dead_at is null and next_attempt_at <= now()
+      order by id
+      limit ${limit}
+      for update skip locked
+    )
+    returning id`)
+  const ids = claimed.rows.map((r) => Number(r.id))
+  if (ids.length === 0) return { processed: 0, failed: 0, fetched: 0 }
+  const events = await db
+    .select()
+    .from(schema.outboxEvent)
+    .where(inArray(schema.outboxEvent.id, ids))
+    .orderBy(asc(schema.outboxEvent.id))
+
+  // Collapse duplicates within the batch: projecting current state once covers them all.
+  const outcome = new Map<string, string | null>()
+  for (const event of events) {
+    const key = `${event.aggregateType}:${event.aggregateId}`
+    if (!outcome.has(key)) outcome.set(key, await projectEvent(db, ts, event))
+  }
+
+  let processed = 0
+  let failed = 0
+  for (const event of events) {
+    const error = outcome.get(`${event.aggregateType}:${event.aggregateId}`)
+    if (error) {
+      failed++
+      const attempts = event.attempts + 1
+      await db
+        .update(schema.outboxEvent)
+        .set({
+          attempts,
+          lastError: error,
+          nextAttemptAt: new Date(Date.now() + Math.min(2 ** attempts, 600) * 1000),
+          deadAt: attempts >= MAX_ATTEMPTS ? new Date() : null,
+        })
+        .where(eq(schema.outboxEvent.id, event.id))
+    } else {
+      processed++
+      await db.transaction(async (tx) => {
         await tx
           .update(schema.outboxEvent)
           .set({ processedAt: new Date(), lastError: null })
@@ -244,10 +229,36 @@ export async function processOutboxBatch(db: Db, ts: Typesense, limit = 50) {
           .insert(schema.inboxEvent)
           .values({ consumer: INDEXER, eventId: String(event.id) })
           .onConflictDoNothing()
-      }
+      })
     }
-    return { processed, failed, fetched: events.length }
-  })
+  }
+  return { processed, failed, fetched: events.length }
+}
+
+/** Returns an error message, or null when the aggregate's document is current. */
+async function projectEvent(db: Db, ts: Typesense, event: OutboxRow): Promise<string | null> {
+  try {
+    const [state] = await db
+      .select()
+      .from(schema.searchProjectionState)
+      .where(
+        and(
+          eq(schema.searchProjectionState.aggregateType, event.aggregateType),
+          eq(schema.searchProjectionState.aggregateId, event.aggregateId),
+        ),
+      )
+    const alreadyApplied =
+      event.aggregateType !== 'article' &&
+      state !== undefined &&
+      !state.deleted &&
+      state.indexedVersion > event.aggregateVersion
+    if (!alreadyApplied) {
+      await projectAggregate(db, ts, event.aggregateType as AggregateType, event.aggregateId)
+    }
+    return null
+  } catch (error) {
+    return String(error).slice(0, 500)
+  }
 }
 
 /**

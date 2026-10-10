@@ -331,17 +331,59 @@ describe('search outbox replay', () => {
     if (!doc) throw new Error('story not indexed')
     // Sentinel: if the stale event triggers a re-projection, the title is overwritten.
     stories?.set(story.id, { ...doc, title: 'SENTINEL' })
-    await db
+    await db.insert(schema.outboxEvent).values({
+      aggregateType: 'story',
+      aggregateId: story.id,
+      eventType: 'late',
+      aggregateVersion: 1,
+    })
+    await processOutboxBatch(db, ts)
+    expect(stories?.get(story.id)?.title).toBe('SENTINEL')
+    stories?.set(story.id, doc)
+  })
+
+  it('backs off and keeps failed events pending instead of marking them processed', async () => {
+    const { db, ts } = h.ctx
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story) throw new Error('no story')
+    await processOutboxBatch(db, ts)
+    const [event] = await db
       .insert(schema.outboxEvent)
       .values({
         aggregateType: 'story',
         aggregateId: story.id,
-        eventType: 'late',
-        aggregateVersion: 1,
+        eventType: 'retry-me',
+        aggregateVersion: 999,
       })
-    await processOutboxBatch(db, ts)
-    expect(stories?.get(story.id)?.title).toBe('SENTINEL')
-    stories?.set(story.id, doc)
+      .returning()
+    const upsert = ts.upsert
+    ts.upsert = async () => {
+      throw new Error('typesense down')
+    }
+    try {
+      expect(await processOutboxBatch(db, ts)).toMatchObject({ failed: 1, processed: 0 })
+    } finally {
+      ts.upsert = upsert
+    }
+    const [after] = await db
+      .select()
+      .from(schema.outboxEvent)
+      .where(eq(schema.outboxEvent.id, event?.id ?? 0))
+    expect(after?.processedAt).toBeNull()
+    expect(after?.attempts).toBe(1)
+    expect(after?.lastError).toMatch(/typesense down/)
+    expect(after?.nextAttemptAt.getTime()).toBeGreaterThan(Date.now())
+    // Not due yet: a second pass must not pick it up.
+    expect((await processOutboxBatch(db, ts)).fetched).toBe(0)
+    await db
+      .update(schema.outboxEvent)
+      .set({ nextAttemptAt: new Date(0) })
+      .where(eq(schema.outboxEvent.id, event?.id ?? 0))
+    expect(await processOutboxBatch(db, ts)).toMatchObject({ processed: 1 })
   })
 
   it('removes withdrawn stories from the index', async () => {
