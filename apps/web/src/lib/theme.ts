@@ -21,3 +21,39 @@ export function setTheme(theme: Theme) {
     // Private mode or storage disabled: the choice lasts for this page only.
   }
 }
+
+let revealRun = 0
+
+/**
+ * Switches theme with a circular reveal growing from `origin` (the control that was used),
+ * via the View Transitions API. Falls back to an instant switch without support or with
+ * reduced motion. The animation itself lives in styles.css.
+ */
+export function switchTheme(theme: Theme, origin?: Element | null) {
+  if (
+    typeof document.startViewTransition !== 'function' ||
+    matchMedia('(prefers-reduced-motion: reduce)').matches
+  ) {
+    setTheme(theme)
+    return
+  }
+  const rect = origin?.getBoundingClientRect()
+  const x = rect ? rect.left + rect.width / 2 : innerWidth / 2
+  const y = rect ? rect.top + rect.height / 2 : innerHeight / 2
+  // Far enough to reach the furthest corner of the viewport.
+  const radius = Math.ceil(Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)))
+  const root = document.documentElement.style
+  root.setProperty('--theme-reveal-x', `${x}px`)
+  root.setProperty('--theme-reveal-y', `${y}px`)
+  root.setProperty('--theme-reveal-radius', `${radius}px`)
+  const run = ++revealRun
+  document
+    .startViewTransition(() => setTheme(theme))
+    .finished.finally(() => {
+      // A newer switch may have started; it owns the properties now.
+      if (run !== revealRun) return
+      root.removeProperty('--theme-reveal-x')
+      root.removeProperty('--theme-reveal-y')
+      root.removeProperty('--theme-reveal-radius')
+    })
+}

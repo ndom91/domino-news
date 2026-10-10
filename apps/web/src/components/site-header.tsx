@@ -1,12 +1,13 @@
 import { clockTime, longDate } from '@dn/domain'
-import { cx, Menu, MenuChoice, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { cx, Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
-import { currentTheme, setTheme, type Theme } from '../lib/theme.ts'
+import { currentTheme, switchTheme, type Theme } from '../lib/theme.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
@@ -114,22 +115,34 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
   )
 }
 
-/** Menu content only mounts when open, on the client, so reading the DOM here is safe. */
+/**
+ * One toggle: the icon shows the current theme and the new theme grows out of it. The menu
+ * stays open so the flip is visible. Menu content only mounts on the client, so reading the
+ * DOM here is safe.
+ */
 function ThemeItem() {
   const [theme, setThemeState] = useState(currentTheme)
+  const icon = useRef<HTMLSpanElement>(null)
+  const next: Theme = theme === 'dark' ? 'light' : 'dark'
   return (
-    <MenuChoice<Theme>
-      label="Theme"
-      value={theme}
-      options={[
-        { value: 'light', label: 'Light theme', icon: <SunIcon size={18} weight="bold" /> },
-        { value: 'dark', label: 'Dark theme', icon: <MoonIcon size={18} weight="bold" /> },
-      ]}
-      onChange={(next) => {
-        setTheme(next)
-        setThemeState(next)
+    <MenuItem
+      closeOnClick={false}
+      aria-label={`Switch to ${next} theme`}
+      onClick={() => {
+        // Flip the icon first so the new snapshot already shows it.
+        flushSync(() => setThemeState(next))
+        switchTheme(next, icon.current)
       }}
-    />
+    >
+      <span className="flex-1">Theme</span>
+      <span ref={icon} aria-hidden className="flex size-8 items-center justify-center">
+        {theme === 'dark' ? (
+          <MoonIcon size={18} weight="bold" />
+        ) : (
+          <SunIcon size={18} weight="bold" />
+        )}
+      </span>
+    </MenuItem>
   )
 }
 

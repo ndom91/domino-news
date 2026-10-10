@@ -3,3 +3,42 @@
 @import "@dn/design-tokens/theme.css";
 
 @source "../../../packages/ui/src";
+
+/*
+ * Theme switch (see switchTheme): the new theme grows as a circle from the control that was
+ * used, while the old view dims slightly underneath. switchTheme skips it under reduced motion.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 560ms;
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.2, 0.9, 0.15, 1.15);
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  animation-name: theme-reveal-fade;
+}
+
+::view-transition-new(root) {
+  animation-name: theme-reveal;
+}
+
+@keyframes theme-reveal-fade {
+  to {
+    opacity: 0.72;
+  }
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh));
+    filter: saturate(0.78) contrast(0.94);
+  }
+  to {
+    clip-path: circle(
+      var(--theme-reveal-radius, 150vmax) at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh)
+    );
+    filter: none;
+  }
+}
