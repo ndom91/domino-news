@@ -178,7 +178,7 @@ describe('/api/v1 write endpoints', () => {
       return rows[0].n as number
     }
     expect((await post('/api/v1/ops/actions', { action: 'poll_all_feeds' })).status).toBe(200)
-    expect(await queued('poll_feed')).toBeGreaterThan(0)
+    expect(await queued('poll_all_feeds')).toBe(1)
     expect((await post('/api/v1/ops/actions', { action: 'rebuild_search' })).status).toBe(200)
     expect(await queued('rebuild_search_projection')).toBe(1)
 

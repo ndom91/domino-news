@@ -1,5 +1,9 @@
 import { z } from 'zod'
 
+// Vector size of EmbeddingGemma 2 (and the fixture adapter). Changing it needs a DB
+// migration and a search-index rebuild.
+export const EMBEDDING_DIMENSIONS = 768
+
 // Structured-output contracts for local generation. Valid structure is necessary,
 // not sufficient: callers must also check that referenced IDs exist and are linked.
 

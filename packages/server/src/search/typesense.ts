@@ -1,4 +1,4 @@
-import { EMBEDDING_DIMENSIONS } from '@dn/db'
+import { EMBEDDING_DIMENSIONS } from '@dn/schemas'
 
 /** Minimal Typesense REST client: only the calls this app needs. */
 export function createTypesense(baseUrl: string, apiKey: string) {
@@ -152,4 +152,29 @@ export async function ensureCollections(ts: Typesense) {
       .catch(() => false)
     if (!exists) await pointAlias(ts, alias, await createCollection(ts, alias))
   }
+}
+
+/** The k documents nearest to `vector`, as cosine similarity (1 - vector distance). */
+export async function nearestByVector(
+  ts: Typesense,
+  collection: Alias,
+  vector: number[],
+  opts: { k: number; filter: string },
+) {
+  const { results } = await ts.multiSearch<{
+    hits?: { document: { id: string }; vector_distance?: number }[]
+  }>([
+    {
+      collection,
+      q: '*',
+      vector_query: `embedding:([${vector.join(',')}], k:${opts.k})`,
+      filter_by: opts.filter,
+      include_fields: 'id',
+      per_page: opts.k,
+    },
+  ])
+  return (results[0]?.hits ?? []).map((h) => ({
+    id: h.document.id,
+    similarity: 1 - (h.vector_distance ?? 1),
+  }))
 }

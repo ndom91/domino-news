@@ -1,3 +1,4 @@
+import { EMBEDDING_DIMENSIONS } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import {
   bigserial,
@@ -15,10 +16,6 @@ import {
   uniqueIndex,
   vector,
 } from 'drizzle-orm/pg-core'
-
-// Embedding dimension contract for EmbeddingGemma 2 (and the fixture adapter).
-// Changing it requires a migration plus a search-index rebuild.
-export const EMBEDDING_DIMENSIONS = 768
 
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' })
 const createdAt = () => ts('created_at').notNull().defaultNow()

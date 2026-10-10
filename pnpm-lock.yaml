@@ -171,6 +171,9 @@ importers:
       '@dn/domain':
         specifier: workspace:*
         version: link:../domain
+      '@dn/schemas':
+        specifier: workspace:*
+        version: link:../schemas
       drizzle-orm:
         specifier: 0.45.4
         version: 0.45.4(@opentelemetry/api@1.9.1)(@types/pg@8.23.1)(kysely@0.29.6)(pg@8.23.1)

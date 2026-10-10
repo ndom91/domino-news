@@ -29,10 +29,8 @@ const QUEUE_OPTIONS: Omit<Queue, 'name'> = {
   deleteAfterSeconds: 3 * 86_400,
 }
 
-const POLL_ALL = 'poll_all_feeds'
-
 export async function createQueues(boss: PgBoss) {
-  for (const name of [...Object.values(QUEUES), POLL_ALL]) {
+  for (const name of Object.values(QUEUES)) {
     const existing = await boss.getQueue(name)
     if (existing) continue
     // A rebuild re-creates collections; retrying a still-running one would orphan them.
@@ -103,7 +101,7 @@ export async function startWorkers(ctx: WorkerContext) {
       console.log(`[poll_feed] ${job.data.feedId} ${JSON.stringify(result)}`)
     },
   )
-  await boss.work(POLL_ALL, async () => {
+  await boss.work(QUEUES.pollAllFeeds, async () => {
     for (const feedId of await feedIds(ctx.db)) {
       await boss.send(
         QUEUES.pollFeed,
@@ -155,7 +153,7 @@ export async function startWorkers(ctx: WorkerContext) {
     each((job) => relateStory(ctx, job)),
   )
 
-  await boss.schedule(POLL_ALL, ctx.config.feedPollCron, null, { singletonKey: 'cron' })
+  await boss.schedule(QUEUES.pollAllFeeds, ctx.config.feedPollCron, null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.admitBackfill, '* * * * *', null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.pruneEvents, '17 3 * * *', null, { singletonKey: 'cron' })
 }

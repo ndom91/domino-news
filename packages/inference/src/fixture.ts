@@ -1,12 +1,7 @@
 import { contentTokens, jaccard, truncate } from '@dn/domain'
+import { EMBEDDING_DIMENSIONS } from '@dn/schemas'
 import { PROMPT_VERSIONS } from './prompts.ts'
-import {
-  type ArticleInput,
-  EMBEDDING_DIMENSIONS,
-  type EmbeddingProvider,
-  type GenerationProvider,
-  type StoryInput,
-} from './types.ts'
+import type { ArticleInput, EmbeddingProvider, GenerationProvider, StoryInput } from './types.ts'
 
 // Deterministic, GPU-free stand-ins. Good enough to exercise every pipeline stage;
 // not a quality benchmark for the real models.

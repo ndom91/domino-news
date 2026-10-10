@@ -5,6 +5,7 @@ import {
   analysisJob,
   attachArticleToStory,
   createStoryWithArticle,
+  nearestByVector,
   QUEUES,
   refreshFingerprint,
 } from '@dn/server'
@@ -57,11 +58,6 @@ async function rankCandidateStories(
     .sort((a, b) => b[1] - a[1])
 }
 
-interface VectorHit {
-  document: { id: string }
-  vector_distance?: number
-}
-
 async function similarArticles(
   ctx: WorkerContext,
   articleId: string,
@@ -69,20 +65,11 @@ async function similarArticles(
   at: Date,
 ) {
   const t = Math.floor(at.getTime() / 1000)
-  const { results } = await ctx.ts.multiSearch<{ hits?: VectorHit[] }>([
-    {
-      collection: 'articles',
-      q: '*',
-      vector_query: `embedding:([${embedding.join(',')}], k:12)`,
-      filter_by: `id:!=${articleId} && published_at:>=${t - CANDIDATE_WINDOW_SECONDS} && published_at:<=${t + CANDIDATE_WINDOW_SECONDS}`,
-      exclude_fields: 'embedding',
-      per_page: 12,
-    },
-  ])
-  return (results[0]?.hits ?? []).map((h) => ({
-    articleId: h.document.id,
-    similarity: 1 - (h.vector_distance ?? 1),
-  }))
+  const hits = await nearestByVector(ctx.ts, 'articles', embedding, {
+    k: 12,
+    filter: `id:!=${articleId} && published_at:>=${t - CANDIDATE_WINDOW_SECONDS} && published_at:<=${t + CANDIDATE_WINDOW_SECONDS}`,
+  })
+  return hits.map((h) => ({ articleId: h.id, similarity: h.similarity }))
 }
 
 /**

@@ -5,8 +5,6 @@ import type {
   StorySummaryOutput,
 } from '@dn/schemas'
 
-export const EMBEDDING_DIMENSIONS = 768
-
 /** Publisher-controlled text. Always treated as untrusted data, never as instructions. */
 export interface ArticleInput {
   articleId: string

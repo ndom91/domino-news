@@ -1,5 +1,6 @@
 // Shared pg-boss queue names and priority classes (used by web for ops actions and by workers).
 export const QUEUES = {
+  pollAllFeeds: 'poll_all_feeds',
   pollFeed: 'poll_feed',
   embedArticle: 'embed_article',
   matchArticle: 'match_article',

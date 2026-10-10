@@ -2,7 +2,7 @@ import { type Db, schema, withTransaction } from '@dn/db'
 import { type GraphEdge, ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
 import type { StoryInput } from '@dn/inference'
 import type { StoryRelation } from '@dn/schemas'
-import { type AnalysisJob, touchNarrative, touchStory } from '@dn/server'
+import { type AnalysisJob, nearestByVector, touchNarrative, touchStory } from '@dn/server'
 import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
@@ -11,11 +11,6 @@ import { withAnalysisRun } from './provenance.ts'
 
 const MAX_CANDIDATES = 4
 const MAX_NARRATIVE_COMPONENT = 40
-
-interface VectorHit {
-  document: { id: string }
-  vector_distance?: number
-}
 
 /**
  * After a Story has a summary: embed it, look for related published Stories, ask the
@@ -37,19 +32,10 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
     await touchStory(tx.db, story.id, 'story.embedded', null)
   })
 
-  const { results } = await ctx.ts.multiSearch<{ hits?: VectorHit[] }>([
-    {
-      collection: 'stories',
-      q: '*',
-      vector_query: `embedding:([${vector.join(',')}], k:10)`,
-      filter_by: `id:!=${story.id}`,
-      exclude_fields: 'embedding,summary',
-      per_page: 10,
-    },
-  ])
   const { relateMin } = THRESHOLDS[ctx.inference.mode]
-  const candidates = (results[0]?.hits ?? [])
-    .map((h) => ({ id: h.document.id, similarity: 1 - (h.vector_distance ?? 1) }))
+  const candidates = (
+    await nearestByVector(ctx.ts, 'stories', vector, { k: 10, filter: `id:!=${story.id}` })
+  )
     .filter((c) => c.similarity >= relateMin)
     .slice(0, MAX_CANDIDATES)
 

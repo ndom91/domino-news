@@ -136,18 +136,13 @@ export async function runOpsAction(ctx: ServerContext, { action }: OpsAction) {
     case 'resume_backfill':
       return setBackfillPaused(ctx, false)
     case 'poll_all_feeds': {
+      // Same job the cron runs; the worker fans out one poll per enabled feed.
       const boss = await ctx.boss()
-      const feeds = await ctx.db
-        .select({ id: schema.feed.id })
-        .from(schema.feed)
-        .where(eq(schema.feed.enabled, true))
-      for (const f of feeds) {
-        await boss.send(
-          QUEUES.pollFeed,
-          { feedId: f.id },
-          { singletonKey: f.id, priority: PRIORITY.interactive },
-        )
-      }
+      await boss.send(
+        QUEUES.pollAllFeeds,
+        {},
+        { singletonKey: 'manual', priority: PRIORITY.interactive },
+      )
       return
     }
     case 'rebuild_search': {

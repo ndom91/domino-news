@@ -1,4 +1,5 @@
 import { relativeTime } from '@dn/domain'
+import { searchQuerySchema } from '@dn/schemas'
 import { Badge, Button, Notice, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
@@ -7,12 +8,8 @@ import { z } from 'zod'
 import { Page } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
-const searchParams = z.object({
-  q: z.string().optional().default(''),
-  type: z.enum(['all', 'story', 'narrative']).optional().default('all'),
-  since: z.enum(['24h', '7d', '30d', 'all']).optional().default('all'),
-  publisher: z.string().optional(),
-})
+// Same filters as the API; the page also allows an empty query (no search yet).
+const searchParams = searchQuerySchema.extend({ q: z.string().optional().default('') })
 
 export const Route = createFileRoute('/search')({
   validateSearch: searchParams,

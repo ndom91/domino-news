@@ -764,3 +764,18 @@ describe('transient article bodies', () => {
     expect(refs.some((r) => r.url.includes('congress.gov'))).toBe(true)
   })
 })
+
+describe('story graph reset', () => {
+  it('removes relationships and narratives and drops narratives from search', async () => {
+    const { db, ts } = h.ctx
+    const { resetStoryGraph } = await import('@dn/server')
+    await processOutboxBatch(db, ts)
+    const narratives = () => ts.collections.get(ts.aliases.get('narratives') ?? 'narratives')
+    expect(narratives()?.size ?? 0).toBeGreaterThan(0)
+    await resetStoryGraph(db)
+    expect(await n(db.select({ n: count() }).from(schema.narrative))).toBe(0)
+    expect(await n(db.select({ n: count() }).from(schema.storyRelationship))).toBe(0)
+    for (let i = 0; i < 5 && (await processOutboxBatch(db, ts, 500)).fetched > 0; i++) {}
+    expect(narratives()?.size ?? 0).toBe(0)
+  })
+})
