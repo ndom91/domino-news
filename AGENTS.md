@@ -62,6 +62,16 @@ INFERENCE_CA_CERT=/abs/path/to/private-ca.pem        # only for a private CA
 
 Fixture and model embeddings live in different vector spaces. When you switch modes, run `pnpm cli dev:reset` and ingest again.
 
+### Google sign-in (optional)
+
+```bash
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_ALLOWED_EMAILS=you@gmail.com,someone@example.com
+```
+
+Create an OAuth client (type "Web application") in Google Cloud and add `${BETTER_AUTH_URL}/api/auth/callback/google` as an authorised redirect URI. The login page shows the Google button only when both client values are set. Google can only create accounts for allowlisted emails. It does not link to existing `user:create` accounts.
+
 ### Live RSS
 
 `INGEST_MODE=live` polls the real feeds in `fixtures/publishers.json` on `FEED_POLL_CRON` (default every 15 minutes), or once with `pnpm cli ingest`. Conditional requests (ETag / Last-Modified) avoid refetching unchanged feeds.
@@ -76,7 +86,7 @@ docker compose -f infra/compose/compose.yaml --profile app run --rm worker pnpm 
 docker compose -f infra/compose/compose.yaml --profile app run --rm worker pnpm cli user:create --username you --password '...'
 ```
 
-Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (port `WEB_PORT`, default 3000), `worker`, `indexer`. TLS termination (Caddy) and backups are not included yet.
+Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (port `WEB_PORT`, default 4000), `worker`, `indexer`. TLS termination (Caddy) and backups are not included yet.
 
 ## API
 
@@ -109,7 +119,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, Story, Narrative (branching lane graph), publishers, search, pipeline and account pages. Desktop-first and checked at 375px.
-- Auth: username/password and passkeys (better-auth), bearer tokens for API clients; sign-up closed.
+- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except Google for allowlisted emails.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited

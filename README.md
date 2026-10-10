@@ -27,7 +27,7 @@ pnpm --filter @dn/worker dev:indexer
 pnpm dev
 ```
 
-Run `pnpm cli ingest` to pull in articles, and open http://localhost:3000.
+Run `pnpm cli ingest` to pull in articles, and open http://localhost:4000.
 
 The default setup uses fixture data and fake inference, so no GPU is needed.
 

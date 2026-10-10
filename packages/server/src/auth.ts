@@ -2,6 +2,7 @@ import { passkey } from '@better-auth/passkey'
 import { type Db, schema } from '@dn/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { APIError } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
 
 /**
@@ -9,9 +10,19 @@ import { bearer, username } from 'better-auth/plugins'
  * sign-in, from the account page). Bearer tokens let API clients (and later the Expo app)
  * authenticate without cookies.
  * Public sign-up is disabled: create accounts with `pnpm cli user:create`.
+ * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). It may only create
+ * accounts for emails in GOOGLE_ALLOWED_EMAILS, because disableSignUp doesn't cover OAuth.
  */
 export function createAuth(db: Db, env = process.env) {
-  const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:3000'
+  const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:4000'
+  const googleClientId = env.GOOGLE_CLIENT_ID
+  const googleClientSecret = env.GOOGLE_CLIENT_SECRET
+  const googleAllowedEmails = new Set(
+    (env.GOOGLE_ALLOWED_EMAILS ?? '')
+      .split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter(Boolean),
+  )
   return betterAuth({
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
@@ -26,6 +37,23 @@ export function createAuth(db: Db, env = process.env) {
       },
     }),
     emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 10 },
+    socialProviders:
+      googleClientId && googleClientSecret
+        ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
+        : {},
+    databaseHooks: {
+      user: {
+        create: {
+          // Only OAuth callbacks are gated; the CLI creates users without a request context.
+          before: async (user, ctx) => {
+            if (!ctx?.path.startsWith('/callback/')) return
+            if (!googleAllowedEmails.has(user.email.toLowerCase())) {
+              throw new APIError('FORBIDDEN', { message: 'Email is not allowed to sign in' })
+            }
+          },
+        },
+      },
+    },
     session: { expiresIn: 60 * 60 * 24 * 30 },
     plugins: [
       username(),

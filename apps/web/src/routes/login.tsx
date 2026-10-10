@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { authClient } from '../lib/auth-client.ts'
 
 export const Route = createFileRoute('/login')({
-  validateSearch: z.object({ next: z.string().optional() }),
+  validateSearch: z.object({ next: z.string().optional(), error: z.string().optional() }),
   beforeLoad: ({ context }) => {
     if (context.session.user) throw redirect({ to: '/' })
   },
@@ -15,14 +15,17 @@ export const Route = createFileRoute('/login')({
 
 function LoginPage() {
   const router = useRouter()
-  const { next } = Route.useSearch()
-  const [error, setError] = useState<string | null>(null)
+  const { next, error: oauthError } = Route.useSearch()
+  const { session } = Route.useRouteContext()
+  const [error, setError] = useState<string | null>(
+    oauthError ? "This Google account isn't allowed to sign in." : null,
+  )
   const [pending, setPending] = useState(false)
+  // Only follow same-origin relative paths.
+  const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
 
   async function finishSignIn() {
     await router.invalidate()
-    // Only follow same-origin relative paths.
-    const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
     await router.navigate({ href: target })
   }
 
@@ -47,6 +50,21 @@ function LoginPage() {
       return
     }
     await finishSignIn()
+  }
+
+  async function signInWithGoogle() {
+    setPending(true)
+    setError(null)
+    // Success leaves the page for Google; failures come back to /login?error=...
+    const { error } = await authClient.signIn.social({
+      provider: 'google',
+      callbackURL: target,
+      errorCallbackURL: '/login',
+    })
+    if (error) {
+      setPending(false)
+      setError(error.message ?? 'Google sign-in failed.')
+    }
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -106,9 +124,15 @@ function LoginPage() {
       <Button className="mt-4 w-full" onClick={signInWithPasskey} disabled={pending}>
         Sign in with a passkey
       </Button>
+      {session.features.googleSignIn ? (
+        <Button className="mt-3 w-full" onClick={signInWithGoogle} disabled={pending}>
+          Continue with Google
+        </Button>
+      ) : null}
       <p className="mt-8 text-xs text-text-muted">
         Accounts are created by an administrator with{' '}
-        <code className="font-mono">pnpm cli user:create</code>.
+        <code className="font-mono">pnpm cli user:create</code>
+        {session.features.googleSignIn ? ', or on first Google sign-in for allowed emails' : ''}.
       </p>
     </div>
   )

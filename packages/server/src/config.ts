@@ -19,6 +19,7 @@ export function readConfig(env = process.env) {
     generationConcurrency: num('GENERATION_CONCURRENCY', 2),
     summaryMaxAgeHours: num('SUMMARY_MAX_AGE_HOURS', 24 * 14),
     enableSummaryEditing: env.ENABLE_SUMMARY_EDITING === 'true',
+    googleSignIn: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
     eventRetentionDays: num('EVENT_RETENTION_DAYS', 7),
   }
 }

@@ -32,7 +32,7 @@ services:
       POSTGRES_PASSWORD: dn
       POSTGRES_DB: dn
     ports:
-      - "${POSTGRES_PORT:-5442}:5432"
+      - "127.0.0.1:${POSTGRES_PORT:-5442}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
@@ -46,7 +46,7 @@ services:
     image: typesense/typesense:30.2
     command: ["--data-dir", "/data", "--api-key", "${TYPESENSE_API_KEY:-dev-typesense-key}", "--enable-cors=false"]
     ports:
-      - "${TYPESENSE_PORT:-8108}:8108"
+      - "127.0.0.1:${TYPESENSE_PORT:-8108}:8108"
     volumes:
       - tsdata:/data
     restart: unless-stopped
@@ -63,9 +63,9 @@ services:
       DATABASE_URL: postgres://dn:dn@postgres:5432/dn
       TYPESENSE_URL: http://typesense:8108
       INFERENCE_CA_CERT: /certs/inference-ca.pem
-      PORT: "3000"
+      PORT: "4000"
     ports:
-      - "${WEB_PORT:-3000}:3000"
+      - "127.0.0.1:${WEB_PORT:-4000}:4000"
     depends_on:
       migrate:
         condition: service_completed_successfully

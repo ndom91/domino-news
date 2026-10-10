@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 
 export interface SessionInfo {
   user: { id: string; name: string; username: string | null } | null
-  features: { summaryEditing: boolean }
+  features: { summaryEditing: boolean; googleSignIn: boolean }
 }
 
 // Web-only convenience for route guards. API clients authenticate per request instead.
@@ -20,7 +20,10 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
             username: (session.user as { username?: string | null }).username ?? null,
           }
         : null,
-      features: { summaryEditing: ctx.config.enableSummaryEditing },
+      features: {
+        summaryEditing: ctx.config.enableSummaryEditing,
+        googleSignIn: ctx.config.googleSignIn,
+      },
     }
   },
 )

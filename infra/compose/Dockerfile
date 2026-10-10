@@ -20,5 +20,5 @@ FROM base AS runtime
 ENV NODE_ENV=production pnpm_config_verify_deps_before_run=false
 COPY --from=build /app /app
 USER node
-EXPOSE 3000
+EXPOSE 4000
 CMD ["node", "apps/web/server.mjs"]
