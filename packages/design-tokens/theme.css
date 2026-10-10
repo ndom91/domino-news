@@ -28,7 +28,6 @@
   --color-accent: var(--dn-accent);
   --color-accent-text: var(--dn-accent-text);
   --color-accent-contrast: var(--dn-accent-contrast);
-  --color-accent-subtle: var(--dn-accent-subtle);
   --color-focus: var(--dn-focus-ring);
   --color-success: var(--dn-success);
   --color-success-subtle: var(--dn-success-subtle);
@@ -288,8 +287,10 @@
     outline-offset: 2px;
   }
 
+  /* The masthead orange, with dark text (5.7:1), so selections read on every key fill. */
   ::selection {
-    background: var(--dn-accent-subtle);
+    background: var(--dn-accent);
+    color: var(--dn-accent-contrast);
   }
 
   /* Tailwind v4's preflight gives buttons the default cursor; anything clickable should show

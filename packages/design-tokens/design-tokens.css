@@ -41,7 +41,6 @@
   --dn-accent: #ff4d1a; /* signal orange: masthead dot, active nav, hover underlines. Fill/decoration only */
   --dn-accent-text: #c7330b; /* orange when it must be read as text: citation markers (4.8:1) */
   --dn-accent-contrast: #121212; /* text on an --dn-accent fill (5.7:1) */
-  --dn-accent-subtle: #ffe2d6; /* text selection */
   --dn-focus-ring: #c7330b;
 
   /* ── Status (real states only) ────────────────────────── */
@@ -197,7 +196,6 @@
   --dn-rule: #f3f1ec;
 
   --dn-accent-text: #ff7a52;
-  --dn-accent-subtle: #3a1d12;
   --dn-focus-ring: #ff7a52;
 
   --dn-success: #5cc283;
@@ -229,7 +227,6 @@
     --dn-border-strong: #737067;
     --dn-rule: #f3f1ec;
     --dn-accent-text: #ff7a52;
-    --dn-accent-subtle: #3a1d12;
     --dn-focus-ring: #ff7a52;
     --dn-success: #5cc283;
     --dn-success-subtle: #12301d;
