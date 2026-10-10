@@ -21,8 +21,8 @@ jobs:
     env:
       TEST_DATABASE_URL: postgres://dn:dn@localhost:5432/dn_test
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
       - run: corepack enable
@@ -38,8 +38,8 @@ jobs:
       # Fixture pubDates are fixed; treat them all as fresh so CI doesn't depend on today's date.
       FRESH_WINDOW_HOURS: "100000"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
       - run: corepack enable
