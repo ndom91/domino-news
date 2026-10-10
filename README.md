@@ -31,6 +31,31 @@ Run `pnpm cli ingest` to pull in articles, and open http://localhost:4000.
 
 The default setup uses fixture data and fake inference, so no GPU is needed.
 
+## Deploy with Docker Compose
+
+The host only needs Docker and git. `scripts/deploy.sh` wraps the Compose commands.
+
+### Quick start
+
+```bash
+git clone <repo> && cd domino-news
+cp .env.example .env
+# Edit .env: BETTER_AUTH_SECRET, BETTER_AUTH_URL (public https origin), INGEST_MODE=live,
+# INFERENCE_* settings, and WEB_BIND if your reverse proxy runs on another machine.
+scripts/deploy.sh up            # build, migrate, start, seed publishers
+scripts/deploy.sh user you      # create your login (prompts for a password)
+```
+
+The web app listens on `WEB_BIND:WEB_PORT` (default `127.0.0.1:4000`). Point your reverse proxy there.
+
+### Updating
+
+```bash
+scripts/deploy.sh update        # git pull, rebuild, migrate, restart, re-seed publishers
+```
+
+Data lives in Docker volumes and survives updates. Run `scripts/deploy.sh` with no arguments for the other commands (`status`, `logs`, `cli`, `down`).
+
 ## Learn more
 
 - [`AGENTS.md`](AGENTS.md): commands, configuration, API, repo layout, and current status.

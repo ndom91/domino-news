@@ -81,12 +81,12 @@ Create an OAuth client (type "Web application") in Google Cloud and add `${BETTE
 ```bash
 cp .env.example .env    # set BETTER_AUTH_SECRET, BETTER_AUTH_URL (public origin), inference settings
 # optional private CA: put it at infra/compose/certs/inference-ca.pem
-docker compose -f infra/compose/compose.yaml --profile app up -d --build
-docker compose -f infra/compose/compose.yaml --profile app run --rm worker pnpm cli seed
-docker compose -f infra/compose/compose.yaml --profile app run --rm worker pnpm cli user:create --username you --password '...'
+scripts/deploy.sh up            # compose up --build (migrate runs first), then cli seed
+scripts/deploy.sh user you      # cli user:create, prompts for the password
+scripts/deploy.sh update        # git pull --ff-only, then the same as up
 ```
 
-Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (port `WEB_PORT`, default 4000), `worker`, `indexer`. TLS termination (Caddy) and backups are not included yet.
+Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) and backups are not included yet.
 
 ## API
 
