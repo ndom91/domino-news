@@ -3,9 +3,8 @@ import { ID_PREFIX, newId } from '@dn/domain'
 import { InvalidModelOutputError } from '@dn/inference'
 import {
   type AnalysisJob,
+  analysisJob,
   DomainError,
-  PIPELINE_VERSION,
-  PRIORITY,
   QUEUES,
   recordGeneratedSummary,
 } from '@dn/server'
@@ -72,11 +71,8 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     for (const [articleId, links] of primaryLinks) {
       await recordPrimarySources(tx.db, story.id, articleId, links)
     }
-    const relateJob: AnalysisJob = { ...job, inputFingerprint: recorded.versionId }
-    await sendInTx(ctx, tx, QUEUES.relateStory, relateJob, {
-      singletonKey: `${story.id}:${recorded.versionId}:${PIPELINE_VERSION}`,
-      priority: PRIORITY[job.priorityClass],
-    })
+    const relate = analysisJob(story.id, recorded.versionId, job.priorityClass)
+    await sendInTx(ctx, tx, QUEUES.relateStory, relate.data, relate.options)
     return recorded
   })
   return outcome

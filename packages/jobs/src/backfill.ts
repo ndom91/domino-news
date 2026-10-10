@@ -1,5 +1,5 @@
 import { schema, withTransaction } from '@dn/db'
-import { type AnalysisJob, isBackfillPaused, PIPELINE_VERSION, PRIORITY, QUEUES } from '@dn/server'
+import { analysisJob, isBackfillPaused, QUEUES } from '@dn/server'
 import { and, desc, eq, isNotNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 
@@ -37,12 +37,7 @@ export async function admitBackfill(ctx: WorkerContext) {
     .limit(limit)
   let count = 0
   for (const a of pending) {
-    const job: AnalysisJob = {
-      targetId: a.id,
-      inputFingerprint: a.revisionId ?? '',
-      pipelineVersion: PIPELINE_VERSION,
-      priorityClass: 'backfill',
-    }
+    const job = analysisJob(a.id, a.revisionId ?? '', 'backfill')
     // Admit only if ingest hasn't revised the article since we read it; job and state commit together.
     const admitted = await withTransaction(ctx.pool, async (tx) => {
       const updated = await tx.db
@@ -57,10 +52,7 @@ export async function admitBackfill(ctx: WorkerContext) {
         )
         .returning({ id: schema.article.id })
       if (updated.length === 0) return false
-      await sendInTx(ctx, tx, QUEUES.embedArticle, job, {
-        singletonKey: `${a.id}:${a.revisionId}:${PIPELINE_VERSION}`,
-        priority: PRIORITY.backfill,
-      })
+      await sendInTx(ctx, tx, QUEUES.embedArticle, job.data, job.options)
       return true
     })
     if (admitted) count++

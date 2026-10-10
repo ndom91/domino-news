@@ -3,7 +3,7 @@ import path from 'node:path'
 import { schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import type { ArticleMetadata } from '@dn/schemas'
-import { type AnalysisJob, PIPELINE_VERSION, PRIORITY, QUEUES, sha256 } from '@dn/server'
+import { analysisJob, QUEUES, sha256 } from '@dn/server'
 import { and, eq, sql } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { parseFeed } from './rss.ts'
@@ -152,17 +152,8 @@ async function ingestItem(
     })
 
     if (pipelineState === 'queued') {
-      const priorityClass = latest ? 'fresh' : cls
-      const job: AnalysisJob = {
-        targetId: article.id,
-        inputFingerprint: revisionId,
-        pipelineVersion: PIPELINE_VERSION,
-        priorityClass,
-      }
-      await sendInTx(ctx, tx, QUEUES.embedArticle, job, {
-        singletonKey: `${article.id}:${revisionId}:${PIPELINE_VERSION}`,
-        priority: PRIORITY[priorityClass],
-      })
+      const job = analysisJob(article.id, revisionId, latest ? 'fresh' : cls)
+      await sendInTx(ctx, tx, QUEUES.embedArticle, job.data, job.options)
     }
     return { created: isNew, revised: !isNew }
   })

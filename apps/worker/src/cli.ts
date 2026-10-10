@@ -1,11 +1,10 @@
 import { parseArgs } from 'node:util'
 import { createQueues, type FixtureVariant, feedIds, pollFeed, seedPublishers } from '@dn/jobs'
 import {
+  analysisJob,
   createUserAccount,
   ensureCollections,
   getOpsStatus,
-  PIPELINE_VERSION,
-  PRIORITY,
   QUEUES,
   rebuildSearchIndex,
   setBackfillPaused,
@@ -102,19 +101,8 @@ try {
         'select id, current_summary_id from story where published_at is not null order by first_observed_at',
       )
       for (const r of rows) {
-        await ctx.workerBoss.send(
-          QUEUES.relateStory,
-          {
-            targetId: r.id,
-            inputFingerprint: r.current_summary_id,
-            pipelineVersion: PIPELINE_VERSION,
-            priorityClass: 'backfill',
-          },
-          {
-            singletonKey: `${r.id}:${r.current_summary_id}:${PIPELINE_VERSION}`,
-            priority: PRIORITY.backfill,
-          },
-        )
+        const job = analysisJob(r.id, r.current_summary_id, 'backfill')
+        await ctx.workerBoss.send(QUEUES.relateStory, job.data, job.options)
       }
       console.log(`enqueued ${rows.length} relate jobs`)
       break

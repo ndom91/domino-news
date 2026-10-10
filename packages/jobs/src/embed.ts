@@ -1,5 +1,5 @@
 import { schema, withTransaction } from '@dn/db'
-import { type AnalysisJob, PIPELINE_VERSION, PRIORITY, QUEUES, writeOutbox } from '@dn/server'
+import { type AnalysisJob, analysisJob, QUEUES, writeOutbox } from '@dn/server'
 import { eq, inArray } from 'drizzle-orm'
 import type { Job } from 'pg-boss'
 import { sendInTx, type WorkerContext } from './context.ts'
@@ -81,9 +81,9 @@ export async function embedArticles(ctx: WorkerContext, jobs: Job<AnalysisJob>[]
         eventType: 'article.embedded',
         version: Math.floor(Date.now() / 1000),
       })
-      await sendInTx(ctx, tx, QUEUES.matchArticle, job.data, {
-        singletonKey: `${row.id}:${job.data.inputFingerprint}:${PIPELINE_VERSION}`,
-        priority: PRIORITY[job.data.priorityClass],
+      const next = analysisJob(row.id, job.data.inputFingerprint, job.data.priorityClass)
+      await sendInTx(ctx, tx, QUEUES.matchArticle, next.data, {
+        ...next.options,
         startAfter: 2, // give the indexer a moment to project the embedding
       })
     })

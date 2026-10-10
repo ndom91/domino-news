@@ -19,6 +19,27 @@ export const PRIORITY: Record<JobClass, number> = { interactive: 20, fresh: 10, 
 // Bump when pipeline logic changes in a way that should allow reprocessing.
 export const PIPELINE_VERSION = 'p2'
 
+/**
+ * Payload and send options for an analysis job. The singleton key (target + input
+ * fingerprint + pipeline version, scoped per queue) is what makes duplicate work collapse
+ * under the `exclusive` queue policy, so it is built here and nowhere else.
+ */
+export function analysisJob(targetId: string, inputFingerprint: string, priorityClass: JobClass) {
+  const data: AnalysisJob = {
+    targetId,
+    inputFingerprint,
+    pipelineVersion: PIPELINE_VERSION,
+    priorityClass,
+  }
+  return {
+    data,
+    options: {
+      singletonKey: `${targetId}:${inputFingerprint}:${PIPELINE_VERSION}`,
+      priority: PRIORITY[priorityClass],
+    },
+  }
+}
+
 export interface AnalysisJob {
   targetId: string
   inputFingerprint: string

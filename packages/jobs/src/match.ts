@@ -2,10 +2,9 @@ import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import {
   type AnalysisJob,
+  analysisJob,
   attachArticleToStory,
   createStoryWithArticle,
-  PIPELINE_VERSION,
-  PRIORITY,
   QUEUES,
   refreshFingerprint,
 } from '@dn/server'
@@ -259,22 +258,13 @@ export async function enqueueSummary(
   priorityClass: AnalysisJob['priorityClass'],
 ) {
   const [story] = await tx.db
-    .select({
-      fingerprint: schema.story.inputFingerprint,
-      lastUpdatedAt: schema.story.lastUpdatedAt,
-    })
+    .select({ fingerprint: schema.story.inputFingerprint })
     .from(schema.story)
     .where(eq(schema.story.id, storyId))
   if (!story?.fingerprint) return
-  const job: AnalysisJob = {
-    targetId: storyId,
-    inputFingerprint: story.fingerprint,
-    pipelineVersion: PIPELINE_VERSION,
-    priorityClass,
-  }
-  await sendInTx(ctx, tx, QUEUES.summarizeStory, job, {
-    singletonKey: `${storyId}:${story.fingerprint}:${PIPELINE_VERSION}`,
-    priority: PRIORITY[priorityClass],
+  const job = analysisJob(storyId, story.fingerprint, priorityClass)
+  await sendInTx(ctx, tx, QUEUES.summarizeStory, job.data, {
+    ...job.options,
     // Short delay lets sibling articles from the same poll land before summarising.
     startAfter: 5,
   })
