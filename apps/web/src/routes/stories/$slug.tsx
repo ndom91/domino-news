@@ -14,7 +14,8 @@ import {
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
 import { SectionLabel } from '../../components/page.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
@@ -38,6 +39,7 @@ function StoryPage() {
   const { session } = Route.useRouteContext()
   const { data: story } = useSuspenseQuery(queries.story(slug))
   const [editing, setEditing] = useState(false)
+  const editButtonRef = useRef<HTMLButtonElement>(null)
   const outlets = new Set(story.sources.map((s) => s.publisher.id)).size
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
@@ -64,10 +66,14 @@ function StoryPage() {
             <SummaryEditor
               storyId={story.id}
               summary={story.summary}
-              onDone={() => setEditing(false)}
+              onDone={() => {
+                // The editor took focus when it opened; hand it back to the button that opened it.
+                flushSync(() => setEditing(false))
+                editButtonRef.current?.focus()
+              }}
             />
           ) : (
-            <Button size="sm" onClick={() => setEditing(true)}>
+            <Button ref={editButtonRef} size="sm" onClick={() => setEditing(true)}>
               Edit summary
             </Button>
           )}

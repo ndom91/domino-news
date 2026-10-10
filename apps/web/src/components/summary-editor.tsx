@@ -1,10 +1,19 @@
 import { ApiError } from '@dn/api-client'
 import { editSummaryMutation } from '@dn/queries'
 import type { Summary } from '@dn/schemas'
-import { Button, Notice, Textarea, TextInput } from '@dn/ui'
+import { Button, ConfirmDialog, Notice, Textarea, TextInput } from '@dn/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import type { FormEvent } from 'react'
+import { useBlocker } from '@tanstack/react-router'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api.ts'
+
+const discard = {
+  title: 'Discard your changes?',
+  children: 'Your edits to this summary have not been saved.',
+  confirmLabel: 'Discard changes',
+  cancelLabel: 'Keep editing',
+  destructive: true,
+}
 
 /** Dev-only editor. Saving creates a new summary version; the previous one stays in history. */
 export function SummaryEditor({
@@ -18,6 +27,23 @@ export function SummaryEditor({
 }) {
   const queryClient = useQueryClient()
   const mutation = useMutation(editSummaryMutation(api, queryClient, storyId))
+  const [dirty, setDirty] = useState(false)
+  // Guards in-app navigation and closing the tab while there are unsaved edits.
+  const blocker = useBlocker({
+    shouldBlockFn: () => dirty,
+    enableBeforeUnload: dirty,
+    withResolver: true,
+  })
+  const headlineRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    headlineRef.current?.focus()
+  }, [])
+
+  function onChange(event: FormEvent<HTMLFormElement>) {
+    const form = new FormData(event.currentTarget)
+    setDirty(form.get('headline') !== summary.headline || form.get('body') !== summary.body)
+  }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -42,9 +68,11 @@ export function SummaryEditor({
   return (
     <form
       onSubmit={onSubmit}
+      onChange={onChange}
       className="flex flex-col gap-4 border-2 border-rule bg-canvas p-4 md:p-5"
     >
       <TextInput
+        ref={headlineRef}
         label="Headline"
         name="headline"
         defaultValue={summary.headline}
@@ -69,10 +97,28 @@ export function SummaryEditor({
         <Button type="submit" variant="primary" loading={mutation.isPending}>
           Save new version
         </Button>
-        <Button type="button" variant="ghost" onClick={onDone} disabled={mutation.isPending}>
-          Cancel
-        </Button>
+        {dirty ? (
+          <ConfirmDialog
+            trigger={
+              <Button type="button" variant="ghost" disabled={mutation.isPending}>
+                Cancel
+              </Button>
+            }
+            {...discard}
+            onConfirm={onDone}
+          />
+        ) : (
+          <Button type="button" variant="ghost" onClick={onDone} disabled={mutation.isPending}>
+            Cancel
+          </Button>
+        )}
       </div>
+      <ConfirmDialog
+        open={blocker.status === 'blocked'}
+        {...discard}
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+      />
     </form>
   )
 }

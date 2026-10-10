@@ -23,7 +23,7 @@ export function StoryBar({
     <div
       className={cx(
         narrativeKey(slot),
-        'flex h-bar items-center justify-between gap-3 bg-key px-2.5 text-sm font-bold text-key-text',
+        'flex h-bar items-center justify-between gap-3 key-fill px-2.5 text-sm font-bold',
         className,
       )}
     >

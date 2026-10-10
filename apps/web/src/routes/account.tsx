@@ -1,7 +1,7 @@
 import { formatDateTime } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
 import { REGION_LABELS, REGIONS, regionSchema } from '@dn/schemas'
-import { Button, Notice, TextInput } from '@dn/ui'
+import { Button, ConfirmDialog, Notice, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useId, useState } from 'react'
@@ -94,14 +94,25 @@ function AccountPage() {
                       {p.backedUp ? ' · synced' : ''}
                     </p>
                   </div>
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    loading={remove.isPending && remove.variables === p.id}
-                    onClick={() => remove.mutate(p.id)}
+                  <ConfirmDialog
+                    trigger={
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        loading={remove.isPending && remove.variables === p.id}
+                        aria-label={`Remove ${p.name || 'unnamed passkey'}`}
+                      >
+                        Remove
+                      </Button>
+                    }
+                    title="Remove this passkey?"
+                    confirmLabel="Remove passkey"
+                    destructive
+                    onConfirm={() => remove.mutate(p.id)}
                   >
-                    Remove
-                  </Button>
+                    You will no longer be able to sign in with {p.name || 'this passkey'}. Your
+                    password keeps working.
+                  </ConfirmDialog>
                 </li>
               ))}
             </ul>

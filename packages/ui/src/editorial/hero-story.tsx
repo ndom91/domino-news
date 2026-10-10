@@ -62,7 +62,7 @@ export function HeroStory({
       aria-labelledby="lead-heading"
       className={cx(
         narrativeKey(narrative?.colorSlot),
-        'mt-8 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-x-14 bg-key px-10 pt-9 pb-10 text-key-text',
+        'mt-8 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-x-14 key-fill px-10 pt-9 pb-10',
         'max-lg:grid-cols-1 max-lg:gap-y-8',
         'max-md:-mx-gutter max-md:mt-4 max-md:px-gutter max-md:pt-5 max-md:pb-8',
       )}
@@ -105,7 +105,8 @@ export function HeroStory({
               />
             </p>
             <p className="mt-5 max-w-reading border-t border-key-text/45 pt-2.5 text-label leading-normal">
-              A summary of what {citedCount} of {outlets} outlets reported, not verified by Domino.{' '}
+              A summary of what {citedCount} of {outlets} {outlets === 1 ? 'outlet' : 'outlets'}{' '}
+              reported, not verified by Domino.{' '}
               {story.summary.origin === 'edited' ? 'Edited' : 'Generated'}{' '}
               <Timestamp at={story.summary.createdAt} />.{' '}
               <Popover

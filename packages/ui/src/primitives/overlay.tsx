@@ -1,7 +1,9 @@
+import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog'
 import { Popover as BasePopover } from '@base-ui/react/popover'
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
-import type { ReactElement, ReactNode } from 'react'
+import { type ReactElement, type ReactNode, useRef, useState } from 'react'
 import { cx } from '../cx.ts'
+import { Button } from './button.tsx'
 
 // Popovers are the only element with a shadow.
 const popupBase =
@@ -59,5 +61,82 @@ export function Tooltip({ content, children }: { content: ReactNode; children: R
         </BaseTooltip.Positioner>
       </BaseTooltip.Portal>
     </BaseTooltip.Root>
+  )
+}
+
+export interface ConfirmDialogProps {
+  /** Element that opens the dialog. Omit it and pass `open` to control the dialog yourself. */
+  trigger?: ReactElement
+  open?: boolean
+  title: string
+  children?: ReactNode
+  confirmLabel: string
+  cancelLabel?: string
+  destructive?: boolean
+  onConfirm: () => void
+  /** Called on Cancel, Escape or any other dismissal. */
+  onCancel?: () => void
+}
+
+/** Asks before an action that is hard to undo. Focus starts on Cancel, the safe choice. */
+export function ConfirmDialog({
+  trigger,
+  open,
+  title,
+  children,
+  confirmLabel,
+  cancelLabel = 'Cancel',
+  destructive = false,
+  onConfirm,
+  onCancel,
+}: ConfirmDialogProps) {
+  const [triggeredOpen, setTriggeredOpen] = useState(false)
+  const cancelRef = useRef<HTMLButtonElement>(null)
+  return (
+    <BaseAlertDialog.Root
+      open={open ?? triggeredOpen}
+      onOpenChange={(next) => {
+        setTriggeredOpen(next)
+        if (!next) onCancel?.()
+      }}
+    >
+      {trigger ? <BaseAlertDialog.Trigger render={trigger} /> : null}
+      <BaseAlertDialog.Portal>
+        <BaseAlertDialog.Backdrop className="fixed inset-0 z-50 bg-scrim transition-opacity duration-[var(--dn-duration-fast)] data-starting-style:opacity-0 data-ending-style:opacity-0" />
+        <BaseAlertDialog.Popup
+          initialFocus={cancelRef}
+          className={cx(
+            popupBase,
+            'fixed top-1/2 left-1/2 z-50 w-[min(26rem,calc(100vw-1.5rem))] -translate-1/2 p-5',
+          )}
+        >
+          <BaseAlertDialog.Title className="text-md font-bold">{title}</BaseAlertDialog.Title>
+          {children ? (
+            <BaseAlertDialog.Description
+              render={<div />}
+              className="mt-2 text-base leading-normal text-text-secondary"
+            >
+              {children}
+            </BaseAlertDialog.Description>
+          ) : null}
+          <div className="mt-5 flex flex-wrap justify-end gap-3">
+            <BaseAlertDialog.Close render={<Button ref={cancelRef} size="sm" variant="ghost" />}>
+              {cancelLabel}
+            </BaseAlertDialog.Close>
+            {/* Not a Close: closing that way would also report a cancel. */}
+            <Button
+              size="sm"
+              variant={destructive ? 'danger' : 'primary'}
+              onClick={() => {
+                setTriggeredOpen(false)
+                onConfirm()
+              }}
+            >
+              {confirmLabel}
+            </Button>
+          </div>
+        </BaseAlertDialog.Popup>
+      </BaseAlertDialog.Portal>
+    </BaseAlertDialog.Root>
   )
 }

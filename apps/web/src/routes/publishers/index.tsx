@@ -1,4 +1,4 @@
-import { relativeTime } from '@dn/domain'
+import { plural, relativeTime } from '@dn/domain'
 import { CoverageMatrix, Notice } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -16,7 +16,7 @@ function PublishersPage() {
   const { data } = useSuspenseQuery(queries.publishers())
   return (
     <Page>
-      <PageTitle meta={`${data.items.length} outlets`}>Publishers</PageTitle>
+      <PageTitle meta={plural(data.items.length, 'outlet')}>Publishers</PageTitle>
       <p className="-mt-4 mb-10 max-w-reading text-text-secondary">
         Which outlets reported which stories, and who was first. This shows coverage only; it does
         not rate accuracy or political leaning.

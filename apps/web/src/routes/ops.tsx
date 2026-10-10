@@ -1,6 +1,6 @@
 import { relativeTime } from '@dn/domain'
 import type { OpsAction } from '@dn/schemas'
-import { Badge, Button, Card, Notice, Skeleton } from '@dn/ui'
+import { Badge, Button, Card, ConfirmDialog, Notice, Skeleton } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
@@ -24,6 +24,7 @@ function OpsPage() {
     mutationFn: (a: OpsAction['action']) => api.runOpsAction(a),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: queries.ops().queryKey }),
   })
+  const running = (a: OpsAction['action']) => action.isPending && action.variables === a
 
   if (status.isPending) {
     return (
@@ -64,20 +65,46 @@ function OpsPage() {
           <Button
             size="sm"
             onClick={() => action.mutate('poll_all_feeds')}
-            loading={action.variables === 'poll_all_feeds' && action.isPending}
+            loading={running('poll_all_feeds')}
           >
             Poll feeds now
           </Button>
-          <Button
-            size="sm"
-            variant={s.backfillPaused ? 'primary' : 'secondary'}
-            onClick={() => action.mutate(s.backfillPaused ? 'resume_backfill' : 'pause_backfill')}
+          {s.backfillPaused ? (
+            <Button
+              size="sm"
+              variant="primary"
+              onClick={() => action.mutate('resume_backfill')}
+              loading={running('resume_backfill')}
+            >
+              Resume backfill
+            </Button>
+          ) : (
+            <ConfirmDialog
+              trigger={
+                <Button size="sm" loading={running('pause_backfill')}>
+                  Pause backfill
+                </Button>
+              }
+              title="Pause backfill?"
+              confirmLabel="Pause backfill"
+              onConfirm={() => action.mutate('pause_backfill')}
+            >
+              Older articles stop being admitted until you resume. Fresh articles keep flowing.
+            </ConfirmDialog>
+          )}
+          <ConfirmDialog
+            trigger={
+              <Button size="sm" loading={running('rebuild_search')}>
+                Rebuild search index
+              </Button>
+            }
+            title="Rebuild the search index?"
+            confirmLabel="Rebuild index"
+            onConfirm={() => action.mutate('rebuild_search')}
           >
-            {s.backfillPaused ? 'Resume backfill' : 'Pause backfill'}
-          </Button>
-          <Button size="sm" onClick={() => action.mutate('rebuild_search')}>
-            Rebuild search index
-          </Button>
+            Typesense is rebuilt from Postgres and the alias swaps when it finishes. This can take a
+            while on a large database.
+          </ConfirmDialog>
         </div>
       </div>
       {action.isError ? (
@@ -175,12 +202,14 @@ function OpsPage() {
           <SectionLabel>Failed jobs</SectionLabel>
           <ul className="flex flex-col gap-3">
             {s.recentFailures.map((f) => (
-              <Card key={f.id} tone="sunken" padded={false} className="p-3">
-                <p className="type-label">
-                  {f.queue} · {f.failedAt ? relativeTime(f.failedAt) : ''}
-                </p>
-                <p className="mt-1 text-xs break-all text-text-secondary">{f.error}</p>
-              </Card>
+              <li key={f.id}>
+                <Card tone="sunken" padded={false} className="p-3">
+                  <p className="type-label">
+                    {f.queue} · {f.failedAt ? relativeTime(f.failedAt) : ''}
+                  </p>
+                  <p className="mt-1 text-xs break-all text-text-secondary">{f.error}</p>
+                </Card>
+              </li>
             ))}
           </ul>
         </section>

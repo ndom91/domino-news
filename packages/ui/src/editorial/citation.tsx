@@ -25,8 +25,15 @@ export function CitationMarker({
     inherit ? 'text-inherit' : 'text-accent-text',
   )
   if (!source) return <span className={className}>[{n}]</span>
+  const label = `Source ${n}: ${source.outlet}`
   return (
-    <a href={source.href} title={`Source ${n}: ${source.outlet}`} className={className}>
+    // The marker is ~9px; the invisible ::before widens the hit area without moving text.
+    <a
+      href={source.href}
+      title={label}
+      aria-label={label}
+      className={cx(className, 'relative before:absolute before:-inset-x-1 before:-inset-y-2')}
+    >
       [{n}]
     </a>
   )

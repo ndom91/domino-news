@@ -1,3 +1,4 @@
+import { plural } from '@dn/domain'
 import { REGION_LABELS, REGIONS, type Region, regionSchema, type StoryListItem } from '@dn/schemas'
 import {
   Button,
@@ -63,9 +64,12 @@ function FeedPage() {
   return (
     <>
       <div className="mx-auto max-w-page px-gutter">
+        {/* The lead headline is the page's h1; without a lead the page still needs one. */}
         {front.lead ? (
           <HeroStory story={front.lead} position={front.leadPosition} now={now} Link={RouterLink} />
-        ) : null}
+        ) : (
+          <h1 className="sr-only">Domino News</h1>
+        )}
 
         {edition && !region ? (
           <EditionSection edition={edition} excludeId={front.lead?.id} now={now} />
@@ -109,7 +113,7 @@ function FeedPage() {
               to="/narratives"
               className="mt-7 inline-flex min-h-tap items-center text-base font-bold underline decoration-accent decoration-2 underline-offset-4"
             >
-              All {front.narrativeCount} narratives
+              All {plural(front.narrativeCount, 'narrative')}
             </Link>
           </div>
         </section>

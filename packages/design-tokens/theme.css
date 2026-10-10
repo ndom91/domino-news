@@ -53,6 +53,12 @@
   /* The active Narrative colour, set per element with the narrative-* key utilities below. */
   --color-key: var(--dn-key, var(--dn-narrative-0));
   --color-key-text: var(--dn-key-text, var(--dn-narrative-0-text));
+  /* Secondary text on a key fill. A solid mix, not opacity: ≥4.6:1 on every Narrative fill. */
+  --color-key-text-muted: color-mix(
+    in srgb,
+    var(--dn-key-text, var(--dn-narrative-0-text)) 85%,
+    var(--dn-key, var(--dn-narrative-0))
+  );
   --color-trace-cited: var(--dn-trace-cited);
   --color-trace-observed: var(--dn-trace-observed);
   --color-trace-cell: var(--dn-trace-cell);
@@ -244,6 +250,16 @@
 @utility narrative-6 {
   --dn-key: var(--dn-narrative-6);
   --dn-key-text: var(--dn-narrative-6-text);
+}
+
+/*
+ * A Narrative-coloured block. The focus ring takes the fill's text colour: the orange ring
+ * drops to 1.1–3:1 on most fills, the text colour is ≥5.7:1 on all of them.
+ */
+@utility key-fill {
+  background-color: var(--dn-key, var(--dn-narrative-0));
+  color: var(--dn-key-text, var(--dn-narrative-0-text));
+  --dn-focus-ring: var(--dn-key-text, var(--dn-narrative-0-text));
 }
 
 /* Brand hover underline used on every headline link. */

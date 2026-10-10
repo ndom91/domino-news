@@ -1,5 +1,6 @@
+import { Button } from '@dn/ui'
 import { QueryClient } from '@tanstack/react-query'
-import { createRouter } from '@tanstack/react-router'
+import { createRouter, Link, useRouter } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
 import { routeTree } from './routeTree.gen'
 
@@ -19,10 +20,26 @@ export function getRouter() {
 }
 
 function RouteError({ error }: { error: Error }) {
+  const router = useRouter()
   return (
     <div className="mx-auto max-w-page px-gutter py-16">
-      <p className="type-section">This page could not be loaded</p>
-      <p className="mt-3 text-base text-text-muted">{error.message}</p>
+      <h1 className="type-section">This page could not be loaded</h1>
+      <p className="mt-3 max-w-reading text-base text-text-secondary">
+        Something went wrong while loading it. Try again, or go back to the front page.
+      </p>
+      <div className="mt-6 flex flex-wrap items-center gap-4">
+        {/* invalidate() reruns the loaders and clears the error boundary. */}
+        <Button size="sm" variant="primary" onClick={() => router.invalidate()}>
+          Try again
+        </Button>
+        <Link
+          to="/"
+          className="font-semibold underline decoration-accent decoration-2 underline-offset-4"
+        >
+          Front page
+        </Link>
+      </div>
+      <p className="mt-8 type-meta">Details: {error.message}</p>
     </div>
   )
 }

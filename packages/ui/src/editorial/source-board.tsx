@@ -23,6 +23,7 @@ export function SourceBoard({
   onKey?: boolean
 }) {
   const ordered = [...sources].sort((a, b) => a.at.localeCompare(b.at))
+  const muted = onKey ? 'text-key-text-muted' : 'text-text-muted'
   return (
     <>
       <ol className={cx('mt-5 border-t-2', onKey ? 'border-key-text' : 'border-rule')}>
@@ -31,14 +32,15 @@ export function SourceBoard({
             key={s.id}
             id={`source-${s.id}`}
             className={cx(
-              'grid min-h-12 grid-cols-[4.75rem_minmax(0,1fr)_2.5rem] items-center border-b max-md:grid-cols-[4rem_minmax(0,1fr)_2.5rem]',
+              // Citation markers jump here; the outline shows which row was the target.
+              'grid min-h-12 scroll-mt-24 grid-cols-[4.75rem_minmax(0,1fr)_2.5rem] items-center border-b target:outline-2 target:outline-current max-md:grid-cols-[4rem_minmax(0,1fr)_2.5rem]',
               onKey ? 'border-key-text/30' : 'border-border',
             )}
           >
             <time
               dateTime={s.at}
               title={formatDateTime(s.at)}
-              className={cx('type-numeral', s.citation === null && 'opacity-75')}
+              className={cx('type-numeral', s.citation === null && muted)}
             >
               {clockTime(s.at)}
             </time>
@@ -48,11 +50,11 @@ export function SourceBoard({
               rel="noopener noreferrer"
               className={cx(
                 'min-w-0 py-1.5 text-[1rem] font-semibold hover:underline',
-                s.citation === null && 'opacity-75',
+                s.citation === null && muted,
               )}
             >
               <span className="block truncate">{s.outlet}</span>
-              <small className="block text-xs font-medium opacity-80">{formatDate(s.at)}</small>
+              <small className={cx('block text-xs font-medium', muted)}>{formatDate(s.at)}</small>
             </a>
             <span className="sr-only">
               {s.citation === null

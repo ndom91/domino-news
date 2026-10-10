@@ -50,8 +50,10 @@ function RootLayout() {
   const { session } = Route.useRouteContext()
   return (
     <TooltipProvider>
-      {session.user ? <SiteHeader user={session.user} /> : null}
-      <main id="main">
+      {/* Block wrapper: as flex items, the header's mx-auto rows would shrink to fit. */}
+      <div>{session.user ? <SiteHeader user={session.user} /> : null}</div>
+      {/* flex-1 pins the footer to the bottom when the page is short. */}
+      <main id="main" className="flex-1">
         <Outlet />
       </main>
       {session.user ? <SiteFooter user={session.user} /> : null}
@@ -65,7 +67,7 @@ function RootDocument({ children }: { children: ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-dvh bg-canvas text-text antialiased">
+      <body className="flex min-h-dvh flex-col bg-canvas text-text antialiased">
         <a
           href="#main"
           className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:bg-text focus:px-3 focus:py-2 focus:text-canvas"
