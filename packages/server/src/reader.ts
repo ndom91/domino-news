@@ -77,16 +77,23 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
   return map
 }
 
+// List views only need the shape of coverage; the Story page shows every source.
+const MAX_TRACE_PER_STORY = 20
+
 async function tracesByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, StoryListItem['trace']>()
   if (storyIds.length === 0) return map
-  const rows = await db
+  const reportedAt = sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt})`
+  const ranked = db
     .select({
       storyId: schema.storyArticle.storyId,
       id: schema.article.id,
       publisherName: schema.publisher.name,
       publishedAt: schema.article.publishedAt,
       firstSeenAt: schema.article.firstSeenAt,
+      rank: sql<number>`row_number() over (partition by ${schema.storyArticle.storyId} order by ${reportedAt} desc)`.as(
+        'rank',
+      ),
     })
     .from(schema.storyArticle)
     .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
@@ -94,6 +101,8 @@ async function tracesByStory(db: Db, storyIds: string[]) {
     .where(
       and(inArray(schema.storyArticle.storyId, storyIds), isNull(schema.storyArticle.removedAt)),
     )
+    .as('ranked')
+  const rows = await db.select().from(ranked).where(sql`${ranked.rank} <= ${MAX_TRACE_PER_STORY}`)
   for (const r of rows) {
     const list = map.get(r.storyId) ?? []
     list.push({ id: r.id, publisherName: r.publisherName, at: iso(r.publishedAt ?? r.firstSeenAt) })
