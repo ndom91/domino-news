@@ -2,9 +2,9 @@
   "name": "domino-news",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@11.8.0",
+  "packageManager": "pnpm@12.11.2",
   "engines": {
-    "node": ">=24"
+    "node": ">=26"
   },
   "scripts": {
     "dev": "pnpm --filter @dn/web dev",
@@ -31,7 +31,7 @@
     "@dn/server": "workspace:*",
     "@dn/ui": "workspace:*",
     "@playwright/test": "1.64.0",
-    "@types/node": "^24",
+    "@types/node": "^26",
     "@types/pg": "^8",
     "drizzle-orm": "0.45.4",
     "pg": "8.23.1",

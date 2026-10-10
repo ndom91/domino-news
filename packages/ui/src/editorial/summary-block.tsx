@@ -22,9 +22,10 @@ export function SummaryBlock({
     const parts = annotateText(text, remaining)
     const used = new Set(parts.flatMap((p) => ('item' in p ? [p.item.id] : [])))
     remaining = remaining.filter((c) => !used.has(c.id))
-    return parts.map((p, i) =>
+    // Each entry is annotated at most once, so its id is a stable key.
+    return parts.map((p) =>
       'item' in p ? (
-        <ContextTerm key={`${p.item.id}-${i}`} item={p.item}>
+        <ContextTerm key={p.item.id} item={p.item}>
           {p.text}
         </ContextTerm>
       ) : (

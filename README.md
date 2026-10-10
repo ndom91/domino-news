@@ -8,7 +8,7 @@ This is an early prototype.
 
 ## Run it locally
 
-You need Node 24, pnpm (`corepack enable`), and Docker.
+You need Node 26, pnpm (`npm install -g corepack && corepack enable`; Node 26 no longer bundles corepack), and Docker.
 
 ```bash
 pnpm install

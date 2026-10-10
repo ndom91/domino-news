@@ -7,7 +7,7 @@
 
 | Decision | Choice | Why |
 | --- | --- | --- |
-| Package manager | pnpm workspaces (11.x), Node 24 | Strict, fast, good monorepo support; Node 24 for `URLPattern`, `tls.setDefaultCACertificates`, `--env-file`. |
+| Package manager | pnpm workspaces (12.x), Node 26 (pinned in `.node-version`) | Strict, fast, good monorepo support; Node 24+ needed for `URLPattern`, `tls.setDefaultCACertificates`, `--env-file`. |
 | Running TypeScript | Workspace packages export `.ts` source; Node processes run via `tsx`; the web app is bundled by Vite | No per-package build step to maintain. |
 | Formatting/linting | Biome 2.5 only (2 spaces, no semicolons, single quotes) | Per doc 005. |
 | Tests | Vitest (unit + integration on a real Postgres `dn_test` DB); Playwright smoke tests | Integration tests exercise the real triggers and constraints. |
@@ -103,6 +103,9 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 
 - `NODE_EXTRA_CA_CERTS` is ignored when set through `--env-file` (Node reads it before). Use `INFERENCE_CA_CERT=/path/ca.pem` instead; the inference package registers it at runtime.
 - `BETTER_AUTH_URL` must match the origin users load the app from, or sign-in fails the origin check.
+- **Node 25+ no longer bundles corepack.** CI and the Dockerfile install it with `npm install -g corepack`; locally run the same once per Node version.
+- **pnpm 12 in the image:** it downloads a native binary on first run and checks dependencies before every script. The Dockerfile pre-fetches the binary during the build (and gives the cache to the `node` user) and sets `pnpm_config_verify_deps_before_run=false`, since dependencies are frozen at build time. Note the `pnpm_config_` prefix; pnpm 12 ignores `npm_config_`.
+- **TypeScript 7** is the Go port: `tsc` hands off to the native `@typescript/typescript-<platform>` binary, so `pnpm typecheck` already uses it.
 - Feeds are messy: entity-encoded links (BBC), tracking params (`maca`, `traffic_source`, `utm_*`), duplicate items per feed (France 24), zero-width characters. All handled in `rss.ts` / `url.ts` and covered by unit tests.
 
 ## Feature round 2 (passkeys, publishers, context, claims)
