@@ -1,4 +1,5 @@
 export { cx } from './cx.ts'
+export * from './editorial/claim-list.tsx'
 export * from './editorial/context-term.tsx'
 export * from './editorial/coverage-matrix.tsx'
 export * from './editorial/narrative-graph.tsx'

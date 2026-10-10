@@ -1,4 +1,5 @@
 import type {
+  ClaimsOutput,
   NarrativeTitle,
   RelationshipCandidate,
   StoryContextOutput,
@@ -16,6 +17,12 @@ export interface ArticleInput {
   publishedAt: string | null
   /** Transient body, only when publisher policy allows. Never persisted or logged. */
   body?: string
+}
+
+export interface PrimarySourceInput {
+  sourceReferenceId: string
+  url: string
+  title: string | null
 }
 
 export interface StoryInput {
@@ -51,6 +58,10 @@ export interface GenerationProvider {
     story: StoryInput
     summary: string
   }): Promise<Generated<StoryContextOutput>>
+  extractClaims(input: {
+    story: StoryInput
+    primarySources: PrimarySourceInput[]
+  }): Promise<Generated<ClaimsOutput>>
 }
 
 export interface InferenceProviders {

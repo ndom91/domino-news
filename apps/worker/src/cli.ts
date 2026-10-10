@@ -19,7 +19,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
   backfill:pause | backfill:resume
-  enrich:all [--reset-graph]        Re-run relationships, narratives and context for published stories
+  enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
   status                            Print pipeline/queue status as JSON
   dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
@@ -35,7 +35,7 @@ const { positionals, values } = parseArgs({
 })
 
 // Everything keyed on a Story's current summary version.
-const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext]
+const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
 
 const ctx = await bootWorkerContext()
 try {

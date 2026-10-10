@@ -157,6 +157,26 @@ export const storyContextItemSchema = z.object({
 })
 export type StoryContextItem = z.infer<typeof storyContextItemSchema>
 
+export const storyClaimSchema = z.object({
+  id: z.string(),
+  proposition: z.string(),
+  mentions: z.array(
+    z.object({
+      stance: z.enum(['asserts', 'denies', 'quotes', 'discusses']),
+      articleId: z.string(),
+      publisher: publisherRefSchema,
+    }),
+  ),
+  evidence: z.array(
+    z.object({
+      relationship: z.enum(['supports', 'contradicts', 'context', 'inconclusive']),
+      url: z.string(),
+      title: z.string().nullable(),
+    }),
+  ),
+})
+export type StoryClaim = z.infer<typeof storyClaimSchema>
+
 export const storyDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -178,6 +198,7 @@ export const storyDetailSchema = z.object({
   narratives: z.array(narrativeRefSchema),
   primarySources: z.array(primarySourceSchema),
   context: z.array(storyContextItemSchema),
+  claims: z.array(storyClaimSchema),
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 

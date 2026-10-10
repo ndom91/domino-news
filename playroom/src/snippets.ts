@@ -100,4 +100,9 @@ export default [
     name: 'SummaryBlock with context',
     code: '<div className="max-w-reading"><SummaryBlock summary={fixtureStoryDetail.summary} sourceCount={4} context={fixtureStoryDetail.context} /></div>',
   },
+  {
+    group: 'Editorial',
+    name: 'ClaimList',
+    code: '<div className="max-w-reading"><ClaimList claims={fixtureStoryDetail.claims} /></div>',
+  },
 ]

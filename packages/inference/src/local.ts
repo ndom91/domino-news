@@ -1,4 +1,5 @@
 import {
+  claimsOutputSchema,
   narrativeTitleSchema,
   relationshipCandidateSchema,
   storyContextOutputSchema,
@@ -9,6 +10,7 @@ import { z } from 'zod'
 import {
   classifyRelationshipPrompt,
   explainContextPrompt,
+  extractClaimsPrompt,
   matchStoryPrompt,
   PROMPT_VERSIONS,
   SYSTEM_PROMPT,
@@ -179,6 +181,13 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         storyContextOutputSchema,
         explainContextPrompt(input),
         PROMPT_VERSIONS.explainContext,
+      ),
+    extractClaims: (input) =>
+      generate(
+        'story_claims',
+        claimsOutputSchema,
+        extractClaimsPrompt(input),
+        PROMPT_VERSIONS.extractClaims,
       ),
     titleNarrative: (input) =>
       generate(

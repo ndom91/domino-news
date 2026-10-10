@@ -50,6 +50,9 @@ test('feed → story → narrative → search', async ({ page }) => {
   await term.first().click()
   await expect(page.getByText(/Written by a language model/).first()).toBeVisible()
   await page.keyboard.press('Escape')
+  // Claims: grounded statements with the outlets that make them.
+  await expect(page.getByRole('heading', { name: 'Claims in coverage' })).toBeVisible()
+  await expect(page.getByText(/These are not verified facts/)).toBeVisible()
   await page.getByRole('button', { name: 'About this summary' }).click()
   await expect(page.getByText('How this summary is made')).toBeVisible()
   await page.keyboard.press('Escape')

@@ -343,6 +343,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
     context: (await storyContext(db, id)).filter((c) =>
       current?.version.body.includes(c.anchorText),
     ),
+    claims: await storyClaims(db, id),
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,
       url: ref.url,
@@ -491,5 +492,51 @@ async function storyContext(db: Db, storyId: string): Promise<StoryDetail['conte
     sources: sources
       .filter((s) => s.interpretationId === interpretationId)
       .map(({ interpretationId: _, ...s }) => s),
+  }))
+}
+
+async function storyClaims(db: Db, storyId: string): Promise<StoryDetail['claims']> {
+  const claims = await db
+    .select({ id: schema.claim.id, proposition: schema.claim.proposition })
+    .from(schema.claim)
+    .where(and(eq(schema.claim.storyId, storyId), isNull(schema.claim.supersededAt)))
+    .orderBy(schema.claim.createdAt)
+  if (claims.length === 0) return []
+  const ids = claims.map((c) => c.id)
+  const [mentions, evidence] = await Promise.all([
+    db
+      .select({
+        claimId: schema.claimMention.claimId,
+        stance: schema.claimMention.stance,
+        articleId: schema.claimMention.articleId,
+        publisher: {
+          id: schema.publisher.id,
+          slug: schema.publisher.slug,
+          name: schema.publisher.name,
+          domain: schema.publisher.domain,
+        },
+      })
+      .from(schema.claimMention)
+      .innerJoin(schema.article, eq(schema.article.id, schema.claimMention.articleId))
+      .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+      .where(inArray(schema.claimMention.claimId, ids)),
+    db
+      .select({
+        claimId: schema.claimEvidence.claimId,
+        relationship: schema.claimEvidence.relationship,
+        url: schema.sourceReference.url,
+        title: schema.sourceReference.title,
+      })
+      .from(schema.claimEvidence)
+      .innerJoin(
+        schema.sourceReference,
+        eq(schema.sourceReference.id, schema.claimEvidence.sourceReferenceId),
+      )
+      .where(inArray(schema.claimEvidence.claimId, ids)),
+  ])
+  return claims.map((c) => ({
+    ...c,
+    mentions: mentions.filter((m) => m.claimId === c.id).map(({ claimId: _, ...m }) => m),
+    evidence: evidence.filter((e) => e.claimId === c.id).map(({ claimId: _, ...e }) => e),
   }))
 }

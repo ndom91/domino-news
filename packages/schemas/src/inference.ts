@@ -94,3 +94,27 @@ export const sourceReferenceCandidateSchema = z.object({
   kind: sourceReferenceKindSchema,
 })
 export type SourceReferenceCandidate = z.infer<typeof sourceReferenceCandidateSchema>
+
+export const claimStanceSchema = z.enum(['asserts', 'denies', 'quotes', 'discusses'])
+export const claimEvidenceRelationSchema = z.enum([
+  'supports',
+  'contradicts',
+  'context',
+  'inconclusive',
+])
+
+// Claims made in a Story's coverage. Ids must refer to this Story's articles/primary sources.
+export const claimsOutputSchema = z.object({
+  claims: z
+    .array(
+      z.object({
+        proposition: z.string().min(8).max(300),
+        mentions: z.array(z.object({ articleId: z.string(), stance: claimStanceSchema })).min(1),
+        evidence: z.array(
+          z.object({ sourceReferenceId: z.string(), relationship: claimEvidenceRelationSchema }),
+        ),
+      }),
+    )
+    .max(5),
+})
+export type ClaimsOutput = z.infer<typeof claimsOutputSchema>

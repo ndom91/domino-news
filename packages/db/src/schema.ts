@@ -64,6 +64,15 @@ export const evidenceRelationship = pgEnum('evidence_relationship', [
 
 export const summaryFormat = pgEnum('summary_format', ['paragraph', 'bullets'])
 
+export const claimStance = pgEnum('claim_stance', ['asserts', 'denies', 'quotes', 'discusses'])
+
+export const claimEvidenceRelation = pgEnum('claim_evidence_relation', [
+  'supports',
+  'contradicts',
+  'context',
+  'inconclusive',
+])
+
 export const contextKind = pgEnum('context_kind', ['definition', 'background', 'prerequisite'])
 
 // Sources and ingest
@@ -468,6 +477,66 @@ export const storyContext = pgTable(
     addedAt: ts('added_at').notNull(),
   },
   (t) => [primaryKey({ columns: [t.storyId, t.contextEntryId] })],
+)
+
+// Claims (lite): statements made in a Story's coverage and which outlets make them.
+// A claim is an interpretation, not a verified fact. Re-extraction supersedes, never edits.
+
+export const claim = pgTable(
+  'claim',
+  {
+    id: text('id').primaryKey(),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    proposition: text('proposition').notNull(),
+    interpretationId: text('interpretation_id')
+      .notNull()
+      .references(() => interpretation.id),
+    // Summary version the extraction was based on.
+    summaryVersionId: text('summary_version_id').notNull(),
+    createdAt: createdAt(),
+    supersededAt: ts('superseded_at'),
+  },
+  (t) => [index('claim_story_idx').on(t.storyId)],
+)
+
+export const claimMention = pgTable(
+  'claim_mention',
+  {
+    claimId: text('claim_id')
+      .notNull()
+      .references(() => claim.id),
+    articleId: text('article_id')
+      .notNull()
+      .references(() => article.id),
+    articleRevisionId: text('article_revision_id').notNull(),
+    observationId: text('observation_id')
+      .notNull()
+      .references(() => observation.id),
+    stance: claimStance('stance').notNull(),
+    analysisRunId: text('analysis_run_id')
+      .notNull()
+      .references(() => analysisRun.id),
+  },
+  (t) => [primaryKey({ columns: [t.claimId, t.articleId] })],
+)
+
+export const claimEvidence = pgTable(
+  'claim_evidence',
+  {
+    claimId: text('claim_id')
+      .notNull()
+      .references(() => claim.id),
+    sourceReferenceId: text('source_reference_id')
+      .notNull()
+      .references(() => sourceReference.id),
+    relationship: claimEvidenceRelation('relationship').notNull(),
+    analysisRunId: text('analysis_run_id')
+      .notNull()
+      .references(() => analysisRun.id),
+  },
+  (t) => [primaryKey({ columns: [t.claimId, t.sourceReferenceId] })],
 )
 
 // Outbox / inbox / search projection state

@@ -2,6 +2,7 @@ import { formatDateTime, hostnameOf } from '@dn/domain'
 import {
   Badge,
   Button,
+  ClaimList,
   ContextExplanation,
   NarrativeGraph,
   relationLabel,
@@ -108,6 +109,19 @@ function StoryPage() {
           ) : (
             <p className="text-text-secondary">A summary has not been generated yet.</p>
           )}
+
+          {story.claims.length > 0 ? (
+            <section aria-labelledby="claims-heading" className="mt-12">
+              <SectionLabel>
+                <span id="claims-heading">Claims in coverage</span>
+              </SectionLabel>
+              <p className="mb-5 max-w-reading text-sm text-text-secondary">
+                Statements made in the reporting and which outlets make them. These are not verified
+                facts.
+              </p>
+              <ClaimList claims={story.claims} />
+            </section>
+          ) : null}
 
           <section aria-labelledby="coverage-heading" className="mt-12">
             <SectionLabel>

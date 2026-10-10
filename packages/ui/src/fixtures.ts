@@ -116,6 +116,27 @@ export const fixtureStoryDetail: StoryDetail = {
     },
   ],
   primarySources: [],
+  claims: [
+    {
+      id: 'clm_1',
+      proposition: 'The Norwegian Nobel Committee awarded the 2026 Peace Prize to Navi Pillay.',
+      mentions: [
+        { stance: 'asserts', articleId: 'a1', publisher: fixturePublishers.nyt },
+        { stance: 'asserts', articleId: 'a2', publisher: fixturePublishers.guardian },
+        { stance: 'asserts', articleId: 'a3', publisher: fixturePublishers.france24 },
+      ],
+      evidence: [],
+    },
+    {
+      id: 'clm_2',
+      proposition: "The committee cited Pillay's work on accountability for war crimes.",
+      mentions: [
+        { stance: 'quotes', articleId: 'a3', publisher: fixturePublishers.france24 },
+        { stance: 'discusses', articleId: 'a4', publisher: fixturePublishers.wapo },
+      ],
+      evidence: [],
+    },
+  ],
   context: [
     {
       id: 'ctx_icc',

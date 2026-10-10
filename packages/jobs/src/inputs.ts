@@ -7,6 +7,7 @@ export interface LoadedArticle extends ArticleInput {
   url: string
   bodyPolicy: 'metadata_only' | 'transient_body_allowed'
   firstSeenAt: Date
+  revisionId: string
 }
 
 /** Current metadata for articles, plus the observation backing their latest revision. */
@@ -50,6 +51,7 @@ export async function loadArticles(db: Db, articleIds: string[]): Promise<Loaded
     url: r.url,
     bodyPolicy: r.bodyPolicy,
     firstSeenAt: r.firstSeenAt,
+    revisionId: r.revisionId ?? '',
   }))
 }
 

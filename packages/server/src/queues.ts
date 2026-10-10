@@ -7,6 +7,7 @@ export const QUEUES = {
   summarizeStory: 'build_story_summary',
   relateStory: 'relate_story',
   generateContext: 'generate_context',
+  extractClaims: 'extract_claims',
   admitBackfill: 'admit_backfill',
   rebuildSearch: 'rebuild_search_projection',
   pruneEvents: 'prune_delivered_events',

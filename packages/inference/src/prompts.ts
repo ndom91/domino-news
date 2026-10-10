@@ -1,4 +1,4 @@
-import type { ArticleInput, StoryInput } from './types.ts'
+import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
@@ -7,6 +7,7 @@ export const PROMPT_VERSIONS = {
   classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
   explainContext: 'explain-context@2',
+  extractClaims: 'extract-claims@1',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -123,4 +124,25 @@ ${data(input.summary)}
 
 SOURCE ARTICLES:
 ${data(storyData(input.story).articles)}`
+}
+
+export function extractClaimsPrompt(input: {
+  story: StoryInput
+  primarySources: PrimarySourceInput[]
+}) {
+  return `List the key factual claims made in this story's coverage: at most 5, most important first.
+A claim is a specific, checkable statement (who did/said what, numbers, outcomes), not an opinion or a topic.
+- proposition: one neutral sentence stating the claim itself, without "X reports that".
+- mentions: for each source article that addresses the claim, its articleId and stance:
+  "asserts" (states it as fact), "denies" (disputes it), "quotes" (attributes it to someone else),
+  "discusses" (mentions it without taking a position).
+- evidence: only if a PRIMARY SOURCE below is the document the claim is about (e.g. the court ruling, the bill):
+  its sourceReferenceId and relationship ("supports", "contradicts", "context", "inconclusive"). Otherwise [].
+Use only the information below. Do not judge whether claims are true.
+
+SOURCE ARTICLES:
+${data(storyData(input.story).articles)}
+
+PRIMARY SOURCES:
+${data(input.primarySources)}`
 }

@@ -636,11 +636,12 @@ describe('story graph validation', () => {
     const { db } = h.ctx
     const { edgesForValidation } = await import('@dn/jobs')
     const { validateNewEdge, newId, ID_PREFIX } = await import('@dn/domain')
-    const stories = await db
-      .select()
-      .from(schema.story)
-      .where(isNotNull(schema.story.publishedAt))
-      .limit(3)
+    // Stories with no existing relationships, so the only edges are the ones added here.
+    const { rows: stories } = await h.ctx.pool.query<{ id: string }>(
+      `select s.id from story s where s.published_at is not null and not exists (
+         select 1 from story_relationship r where r.from_story_id = s.id or r.to_story_id = s.id
+       ) order by s.id limit 3`,
+    )
     const [a, b, c] = stories
     if (!a || !b || !c) throw new Error('need three stories')
     const inserted = await db
@@ -829,5 +830,122 @@ describe('context popovers', () => {
     await expect(
       h.ctx.pool.query(`update context_entry_version set explanation = 'x'`),
     ).rejects.toThrow(/append-only/)
+  })
+})
+
+describe('claims', () => {
+  it('extracts grounded claims for published stories', async () => {
+    const { db } = h.ctx
+    const claims = await db.select().from(schema.claim).where(isNull(schema.claim.supersededAt))
+    expect(claims.length).toBeGreaterThan(0)
+    for (const c of claims) {
+      const mentions = await db
+        .select({ articleId: schema.claimMention.articleId })
+        .from(schema.claimMention)
+        .where(eq(schema.claimMention.claimId, c.id))
+      expect(mentions.length).toBeGreaterThan(0)
+      for (const m of mentions) {
+        const [link] = await db
+          .select()
+          .from(schema.storyArticle)
+          .where(
+            and(
+              eq(schema.storyArticle.storyId, c.storyId),
+              eq(schema.storyArticle.articleId, m.articleId),
+            ),
+          )
+        expect(link).toBeDefined()
+      }
+    }
+  })
+
+  it('drops mentions and evidence that are not part of the story', async () => {
+    const { validClaims } = await import('@dn/jobs')
+    const claim = {
+      proposition: 'The committee awarded the prize.',
+      mentions: [
+        { articleId: 'art_in', stance: 'asserts' as const },
+        { articleId: 'art_out', stance: 'asserts' as const },
+        { articleId: 'art_in', stance: 'quotes' as const },
+      ],
+      evidence: [
+        { sourceReferenceId: 'src_in', relationship: 'supports' as const },
+        { sourceReferenceId: 'src_out', relationship: 'supports' as const },
+      ],
+    }
+    const [kept] = validClaims([claim], new Set(['art_in']), new Set(['src_in']))
+    expect(kept?.mentions).toEqual([{ articleId: 'art_in', stance: 'asserts' }])
+    expect(kept?.evidence).toEqual([{ sourceReferenceId: 'src_in', relationship: 'supports' }])
+    expect(
+      validClaims(
+        [{ ...claim, mentions: [{ articleId: 'art_out', stance: 'asserts' }] }],
+        new Set(['art_in']),
+        new Set(),
+      ),
+    ).toEqual([])
+  })
+
+  it('supersedes earlier claims on re-extraction and links primary-source evidence', async () => {
+    const { db } = h.ctx
+    const { extractStoryClaims } = await import('@dn/jobs')
+    const { ID_PREFIX, newId } = await import('@dn/domain')
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .orderBy(schema.story.id)
+      .limit(1)
+    if (!story?.currentSummaryId) throw new Error('no story')
+    const before = await db
+      .select({ id: schema.claim.id })
+      .from(schema.claim)
+      .where(and(eq(schema.claim.storyId, story.id), isNull(schema.claim.supersededAt)))
+
+    // A primary document linked to this story, and a model that cites it.
+    const refId = newId(ID_PREFIX.sourceReference)
+    await db.insert(schema.sourceReference).values({
+      id: refId,
+      url: `https://www.congress.gov/claims-test/${refId}`,
+      kind: 'primary_document',
+      discoveredAt: new Date(),
+    })
+    await db
+      .insert(schema.storySourceReference)
+      .values({ storyId: story.id, sourceReferenceId: refId, addedAt: new Date() })
+    const real = h.ctx.inference.generation.extractClaims
+    h.ctx.inference.generation.extractClaims = async (input) => {
+      const result = await real(input)
+      return {
+        ...result,
+        output: {
+          claims: result.output.claims.map((c) => ({
+            ...c,
+            evidence: [{ sourceReferenceId: refId, relationship: 'supports' as const }],
+          })),
+        },
+      }
+    }
+    try {
+      const result = await extractStoryClaims(h.ctx, {
+        targetId: story.id,
+        inputFingerprint: story.currentSummaryId,
+        pipelineVersion: 'p2',
+        priorityClass: 'fresh',
+      })
+      expect(result).toMatchObject({ status: 'ok' })
+    } finally {
+      h.ctx.inference.generation.extractClaims = real
+    }
+    const superseded = await db
+      .select({ supersededAt: schema.claim.supersededAt })
+      .from(schema.claim)
+      .where(inArray(schema.claim.id, before.map((b) => b.id).concat('none')))
+    expect(superseded.every((c) => c.supersededAt !== null)).toBe(true)
+
+    const { getStory } = await import('@dn/server')
+    const detail = await getStory(db, story.id)
+    expect(detail?.claims.length).toBeGreaterThan(0)
+    expect(detail?.claims[0]?.evidence[0]).toMatchObject({ relationship: 'supports' })
+    expect(detail?.claims[0]?.mentions[0]?.publisher.name).toBeTruthy()
   })
 })
