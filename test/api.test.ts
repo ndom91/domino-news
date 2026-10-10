@@ -210,3 +210,21 @@ describe('account creation', () => {
     await createUserAccount(h.ctx.auth, { username: 'halfmade', password: 'halfmade-password' })
   })
 })
+
+describe('search hydration', () => {
+  it('reports narrative story counts from Postgres, not the search index', async () => {
+    const narratives = h.ctx.ts.collections.get(h.ctx.ts.aliases.get('narratives') ?? 'narratives')
+    const [doc] = [...(narratives?.values() ?? [])]
+    if (!doc) throw new Error('no narrative indexed')
+    narratives?.set(String(doc.id), { ...doc, story_count: 999 })
+    const res = await call('/api/v1/search?q=anything&type=narrative')
+    const body = (await res.json()) as { hits: { id: string; storyCount: number }[] }
+    const hit = body.hits.find((x) => x.id === doc.id)
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from narrative_story ns join story s on s.id = ns.story_id
+       where ns.narrative_id = $1 and ns.removed_at is null and s.published_at is not null`,
+      [doc.id],
+    )
+    expect(hit?.storyCount).toBe(rows[0].n)
+  })
+})

@@ -1,7 +1,7 @@
 import { type Db, schema } from '@dn/db'
 import type { EmbeddingProvider } from '@dn/inference'
 import type { SearchHit, SearchQuery, SearchResponse } from '@dn/schemas'
-import { eq, inArray } from 'drizzle-orm'
+import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import { storyListItems } from '../reader.ts'
 import type { Typesense } from './typesense.ts'
 
@@ -108,12 +108,29 @@ export async function searchAll(
         )
     : []
   const narrativeById = new Map(narrativeRows.map((n) => [n.id, n]))
+  const narrativeCounts = narrativeRows.length
+    ? await db
+        .select({ id: schema.narrativeStory.narrativeId, n: sql<number>`count(*)::int` })
+        .from(schema.narrativeStory)
+        .innerJoin(schema.story, eq(schema.story.id, schema.narrativeStory.storyId))
+        .where(
+          and(
+            inArray(
+              schema.narrativeStory.narrativeId,
+              narrativeRows.map((n) => n.id),
+            ),
+            isNull(schema.narrativeStory.removedAt),
+            isNotNull(schema.story.publishedAt),
+          ),
+        )
+        .groupBy(schema.narrativeStory.narrativeId)
+    : []
+  const storyCountOf = new Map(narrativeCounts.map((c) => [c.id, c.n]))
 
   const hits: SearchHit[] = [
     ...narrativeHits.flatMap((h): SearchHit[] => {
       const n = narrativeById.get(h.document.id)
       if (!n) return []
-      const doc = h.document as { id: string; story_count?: number }
       return [
         {
           type: 'narrative',
@@ -122,7 +139,7 @@ export async function searchAll(
           title: n.title,
           description: n.description,
           updatedAt: n.updatedAt.toISOString(),
-          storyCount: doc.story_count ?? 0,
+          storyCount: storyCountOf.get(n.id) ?? 0,
           score: scoreOf(h),
         },
       ]
