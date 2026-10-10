@@ -47,15 +47,10 @@ export function HeroStory({
     ? Math.round((Math.max(...times) - Math.min(...times)) / 3_600_000)
     : 0
   const outlets = story.sources.length
-  // Long titles step down a size. An unlinked headline is the Story page's own title, one step smaller.
+  // Long titles step down a size. The front-page lead shares the Story page's scale: the
+  // largest display size crowded out the summary and the source board beside it.
   const long = story.title.length > LONG_TITLE
-  const display = linkHeadline
-    ? long
-      ? 'type-display-md'
-      : 'type-display'
-    : long
-      ? 'type-display-sm'
-      : 'type-display-md'
+  const display = long ? 'type-display-sm' : 'type-display-md'
 
   return (
     <section
