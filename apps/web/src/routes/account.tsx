@@ -161,6 +161,7 @@ function SignOutButton() {
   return (
     <Button
       size="sm"
+      variant="danger"
       loading={signingOut}
       onClick={async () => {
         setSigningOut(true)

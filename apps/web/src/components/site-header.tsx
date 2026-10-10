@@ -103,6 +103,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
       <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>
       <ThemeItem />
       <MenuItem
+        tone="danger"
         onClick={async () => {
           await authClient.signOut()
           await router.invalidate()
