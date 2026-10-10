@@ -42,8 +42,15 @@ export async function embedArticles(ctx: WorkerContext, jobs: Job<AnalysisJob>[]
 
   for (const [i, { job, row }] of current.entries()) {
     const embedding = vectors[i]
-    if (!embedding) continue
+    if (!embedding) throw new Error(`missing embedding for article ${row.id}`)
     await withTransaction(ctx.pool, async (tx) => {
+      // Re-check under lock: a newer revision may have landed during the inference call.
+      const [locked] = await tx.db
+        .select({ latestRevisionId: schema.article.latestRevisionId })
+        .from(schema.article)
+        .where(eq(schema.article.id, row.id))
+        .for('update')
+      if (locked?.latestRevisionId !== job.data.inputFingerprint) return
       await tx.db
         .insert(schema.articleEmbedding)
         .values({

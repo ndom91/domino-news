@@ -67,9 +67,7 @@ export const evidenceRelationship = pgEnum('evidence_relationship', [
 
 export const summaryFormat = pgEnum('summary_format', ['paragraph', 'bullets'])
 
-// ---------------------------------------------------------------------------
 // Sources and ingest
-// ---------------------------------------------------------------------------
 
 export const publisher = pgTable('publisher', {
   id: text('id').primaryKey(),
@@ -186,9 +184,7 @@ export const articleEmbedding = pgTable('article_embedding', {
   createdAt: createdAt(),
 })
 
-// ---------------------------------------------------------------------------
 // Observations (immutable, enforced by trigger in migration)
-// ---------------------------------------------------------------------------
 
 export const observation = pgTable(
   'observation',
@@ -210,9 +206,7 @@ export const observation = pgTable(
   ],
 )
 
-// ---------------------------------------------------------------------------
 // Analysis provenance
-// ---------------------------------------------------------------------------
 
 export const analysisRun = pgTable(
   'analysis_run',
@@ -267,9 +261,7 @@ export const interpretationEvidence = pgTable(
   (t) => [primaryKey({ columns: [t.interpretationId, t.observationId] })],
 )
 
-// ---------------------------------------------------------------------------
 // Stories, graph and narratives
-// ---------------------------------------------------------------------------
 
 export const story = pgTable(
   'story',
@@ -451,9 +443,7 @@ export const storySourceReference = pgTable(
   (t) => [primaryKey({ columns: [t.storyId, t.sourceReferenceId] })],
 )
 
-// ---------------------------------------------------------------------------
 // Outbox / inbox / search projection state
-// ---------------------------------------------------------------------------
 
 export const outboxEvent = pgTable(
   'outbox_event',
@@ -507,9 +497,7 @@ export const pipelineControl = pgTable('pipeline_control', {
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 
-// ---------------------------------------------------------------------------
 // Auth (better-auth, username plugin). Table names mapped in the auth adapter.
-// ---------------------------------------------------------------------------
 
 export const authUser = pgTable('auth_user', {
   id: text('id').primaryKey(),

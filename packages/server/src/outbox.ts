@@ -16,11 +16,20 @@ export async function writeOutbox(
   })
 }
 
-/** Bump a Story's aggregate version and emit an outbox event, in the caller's transaction. */
-export async function touchStory(db: Db, storyId: string, eventType: string, at = new Date()) {
+/**
+ * Bump a Story's aggregate version and emit an outbox event, in the caller's transaction.
+ * Pass `at: null` for bookkeeping changes (graph links, embeddings) that must not move the
+ * Story's "last updated" time, which drives feed order.
+ */
+export async function touchStory(
+  db: Db,
+  storyId: string,
+  eventType: string,
+  at: Date | null = new Date(),
+) {
   const [row] = await db
     .update(schema.story)
-    .set({ version: sql`${schema.story.version} + 1`, lastUpdatedAt: at })
+    .set({ version: sql`${schema.story.version} + 1`, ...(at ? { lastUpdatedAt: at } : {}) })
     .where(eq(schema.story.id, storyId))
     .returning({ version: schema.story.version })
   if (!row) throw new Error(`story ${storyId} not found`)

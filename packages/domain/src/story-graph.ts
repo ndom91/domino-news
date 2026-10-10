@@ -52,28 +52,3 @@ export function validateNewEdge(
   }
   return { ok: true }
 }
-
-/** Connected components over all edge types; used to propose narrative membership. */
-export function connectedComponents(nodeIds: readonly string[], edges: readonly GraphEdge[]) {
-  const parent = new Map<string, string>()
-  const find = (x: string): string => {
-    let root = x
-    while (parent.get(root) !== root) root = parent.get(root) as string
-    parent.set(x, root)
-    return root
-  }
-  for (const id of nodeIds) parent.set(id, id)
-  for (const e of edges) {
-    if (!parent.has(e.fromStoryId)) parent.set(e.fromStoryId, e.fromStoryId)
-    if (!parent.has(e.toStoryId)) parent.set(e.toStoryId, e.toStoryId)
-    parent.set(find(e.fromStoryId), find(e.toStoryId))
-  }
-  const groups = new Map<string, string[]>()
-  for (const id of parent.keys()) {
-    const root = find(id)
-    const list = groups.get(root) ?? []
-    list.push(id)
-    groups.set(root, list)
-  }
-  return [...groups.values()]
-}

@@ -7,12 +7,21 @@ import {
   summaryEditRequestSchema,
 } from '@dn/schemas'
 import { asc } from 'drizzle-orm'
-import { ZodError, type z } from 'zod'
+import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { DomainError, editSummary } from '../story-service.ts'
+
+// Cursor format: "<ISO timestamp>|<story id>" (see listStories).
+const storyListQuery = z.object({
+  cursor: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}T[^|]+\|.+$/)
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(100).default(30),
+})
 
 const STATUS: Record<ApiErrorCode, number> = {
   bad_request: 400,
@@ -88,12 +97,7 @@ const route = (method: Route['method'], pathname: string, handler: Route['handle
 
 const routes: Route[] = [
   route('GET', '/api/v1/stories', async ({ ctx, url }) =>
-    json(
-      await listStories(ctx.db, {
-        cursor: url.searchParams.get('cursor'),
-        limit: Number(url.searchParams.get('limit') ?? 30),
-      }),
-    ),
+    json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
   route('GET', '/api/v1/stories/:id', async ({ ctx, params }) => {
     const story = await getStory(ctx.db, params.id ?? '')

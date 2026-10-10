@@ -42,6 +42,10 @@ export function createServerContext(env = process.env): ServerContext {
         await boss.start()
         return boss
       })()
+      // Don't cache a failed start (e.g. pg-boss schema not installed yet); retry next call.
+      bossPromise.catch(() => {
+        bossPromise = null
+      })
       return bossPromise
     },
   }

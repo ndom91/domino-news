@@ -16,6 +16,14 @@ import { createTestContext, truncateAll } from './harness.ts'
 let h: Awaited<ReturnType<typeof createTestContext>>
 const n = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
 
+// pg-boss queue stats are cached by its supervisor; count job rows directly.
+async function pendingJobs() {
+  const { rows } = await h.ctx.pool.query(
+    `select count(*)::int as n from pgboss.job where state in ('created', 'retry', 'active')`,
+  )
+  return rows[0].n as number
+}
+
 async function pollAll(variant: 'rss' | 'rss-update' = 'rss') {
   for (const id of await feedIds(h.ctx.db)) await pollFeed(h.ctx, id, variant)
 }
@@ -80,6 +88,12 @@ describe('fixture pipeline end to end', () => {
     }
   })
 
+  it('links related stories into at least one narrative', async () => {
+    const { db } = h.ctx
+    expect(await n(db.select({ n: count() }).from(schema.storyRelationship))).toBeGreaterThan(0)
+    expect(await n(db.select({ n: count() }).from(schema.narrativeStory))).toBeGreaterThan(1)
+  })
+
   it('projects published stories into the search index', async () => {
     const published = await n(
       h.ctx.db.select({ n: count() }).from(schema.story).where(isNotNull(schema.story.publishedAt)),
@@ -91,6 +105,7 @@ describe('fixture pipeline end to end', () => {
 describe('ingestion dedupe and revisions', () => {
   it('re-polling identical feeds creates no articles, revisions, observations or jobs', async () => {
     const { db } = h.ctx
+    const jobsBefore = await pendingJobs()
     const before = {
       articles: await n(db.select({ n: count() }).from(schema.article)),
       revisions: await n(db.select({ n: count() }).from(schema.articleRevision)),
@@ -100,8 +115,7 @@ describe('ingestion dedupe and revisions', () => {
     expect(await n(db.select({ n: count() }).from(schema.article))).toBe(before.articles)
     expect(await n(db.select({ n: count() }).from(schema.articleRevision))).toBe(before.revisions)
     expect(await n(db.select({ n: count() }).from(schema.observation))).toBe(before.observations)
-    const queued = await h.ctx.workerBoss.getQueues()
-    expect(queued.reduce((sum, q) => sum + q.queuedCount, 0)).toBe(0)
+    expect(await pendingJobs()).toBe(jobsBefore)
   })
 
   it('records headline changes as new revisions and dedupes tracking-param URLs', async () => {
@@ -123,6 +137,19 @@ describe('ingestion dedupe and revisions', () => {
     )
     expect(revisionObservations).toBe(3)
     await drainPipeline(h.ctx)
+  })
+
+  it('re-summarises stories whose articles were revised', async () => {
+    const { db } = h.ctx
+    const stories = await db.select().from(schema.story).where(isNotNull(schema.story.publishedAt))
+    for (const story of stories) {
+      expect(story.inputFingerprint).toBe(await storyInputFingerprint(db, story.id))
+      const [current] = await db
+        .select()
+        .from(schema.storySummaryVersion)
+        .where(eq(schema.storySummaryVersion.id, story.currentSummaryId ?? ''))
+      expect(current?.inputFingerprint).toBe(story.inputFingerprint)
+    }
   })
 })
 
@@ -222,6 +249,15 @@ describe('summary versioning', () => {
     )
     expect(result).toEqual({ status: 'stale' })
     expect(await storyInputFingerprint(db, story.id)).toBe(story.inputFingerprint)
+    const [after] = await db.select().from(schema.story).where(eq(schema.story.id, story.id))
+    expect(after?.currentSummaryId).toBe(story.currentSummaryId)
+    const versions = await n(
+      db
+        .select({ n: count() })
+        .from(schema.storySummaryVersion)
+        .where(eq(schema.storySummaryVersion.headline, 'Stale')),
+    )
+    expect(versions).toBe(0)
   })
 
   it('rejects summaries citing articles not linked to the story', async () => {
@@ -281,6 +317,33 @@ describe('search outbox replay', () => {
     expect(stories?.get(story.id)?.title).toBe(current?.title)
   })
 
+  it('ignores events older than the version already indexed', async () => {
+    const { db, ts } = h.ctx
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story) throw new Error('no story')
+    await processOutboxBatch(db, ts)
+    const stories = ts.collections.get('stories')
+    const doc = stories?.get(story.id)
+    if (!doc) throw new Error('story not indexed')
+    // Sentinel: if the stale event triggers a re-projection, the title is overwritten.
+    stories?.set(story.id, { ...doc, title: 'SENTINEL' })
+    await db
+      .insert(schema.outboxEvent)
+      .values({
+        aggregateType: 'story',
+        aggregateId: story.id,
+        eventType: 'late',
+        aggregateVersion: 1,
+      })
+    await processOutboxBatch(db, ts)
+    expect(stories?.get(story.id)?.title).toBe('SENTINEL')
+    stories?.set(story.id, doc)
+  })
+
   it('removes withdrawn stories from the index', async () => {
     const { db, ts } = h.ctx
     const [story] = await db
@@ -319,8 +382,83 @@ describe('stale jobs', () => {
       .where(eq(schema.articleEmbedding.articleId, row.articleId))
     expect(after?.createdAt.getTime()).toBe(row.createdAt.getTime())
     expect(await matchArticle(h.ctx, job)).toEqual({ status: 'stale' })
-    expect(await summarizeStory(h.ctx, { ...job, targetId: 'sty_missing' })).toEqual({
-      status: 'stale',
-    })
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story) throw new Error('no story')
+    const versionCount = () =>
+      n(
+        db
+          .select({ n: count() })
+          .from(schema.storySummaryVersion)
+          .where(eq(schema.storySummaryVersion.storyId, story.id)),
+      )
+    const versionsBefore = await versionCount()
+    expect(await summarizeStory(h.ctx, { ...job, targetId: story.id })).toEqual({ status: 'stale' })
+    expect(await versionCount()).toBe(versionsBefore)
+  })
+})
+
+describe('stale inference races', () => {
+  it('does not store an embedding when a newer revision lands during the inference call', async () => {
+    const { db } = h.ctx
+    const [row] = await db.select().from(schema.articleEmbedding).limit(1)
+    if (!row) throw new Error('no embedding')
+    const [article] = await db
+      .select()
+      .from(schema.article)
+      .where(eq(schema.article.id, row.articleId))
+    const { embedArticles } = await import('@dn/jobs')
+    const original = h.ctx.inference.embeddings.embedDocuments
+    h.ctx.inference.embeddings.embedDocuments = async (docs) => {
+      // A newer revision is ingested while the old one is being embedded.
+      await h.ctx.pool.query(`update article set latest_revision_id = 'rev_newer' where id = $1`, [
+        row.articleId,
+      ])
+      return original(docs)
+    }
+    try {
+      const job = {
+        targetId: row.articleId,
+        inputFingerprint: article?.latestRevisionId ?? '',
+        pipelineVersion: 'p2',
+        priorityClass: 'fresh' as const,
+      }
+      await embedArticles(h.ctx, [{ id: 'x', name: 'embed_article', data: job } as never])
+      const [after] = await db
+        .select()
+        .from(schema.articleEmbedding)
+        .where(eq(schema.articleEmbedding.articleId, row.articleId))
+      expect(after?.createdAt.getTime()).toBe(row.createdAt.getTime())
+    } finally {
+      h.ctx.inference.embeddings.embedDocuments = original
+      await h.ctx.pool.query('update article set latest_revision_id = $2 where id = $1', [
+        row.articleId,
+        article?.latestRevisionId,
+      ])
+    }
+  })
+})
+
+describe('backfill admission', () => {
+  it('admits nothing while paused and admits pending articles when resumed', async () => {
+    const { db } = h.ctx
+    const { admitBackfill } = await import('@dn/jobs')
+    const { setBackfillPaused } = await import('@dn/server')
+    const [article] = await db.select().from(schema.article).limit(1)
+    if (!article) throw new Error('no article')
+    await db
+      .update(schema.article)
+      .set({ pipelineState: 'pending_backfill' })
+      .where(eq(schema.article.id, article.id))
+    await setBackfillPaused(h.ctx, true)
+    expect(await admitBackfill(h.ctx)).toEqual({ admitted: 0, paused: true })
+    await setBackfillPaused(h.ctx, false)
+    expect((await admitBackfill(h.ctx)).admitted).toBeGreaterThanOrEqual(1)
+    const [after] = await db.select().from(schema.article).where(eq(schema.article.id, article.id))
+    expect(after?.pipelineState).toBe('queued')
+    await drainPipeline(h.ctx)
   })
 })

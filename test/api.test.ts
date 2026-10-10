@@ -46,10 +46,23 @@ afterAll(async () => {
 })
 
 describe('/api/v1 contracts', () => {
-  it('requires authentication', async () => {
-    const res = await call('/api/v1/stories', {}, false)
-    expect(res.status).toBe(401)
-    expect(apiErrorSchema.parse(await res.json()).error.code).toBe('unauthorized')
+  it('requires authentication on every route', async () => {
+    const routes: [string, string][] = [
+      ['GET', '/api/v1/stories'],
+      ['GET', '/api/v1/stories/x'],
+      ['POST', '/api/v1/stories/x/summary'],
+      ['GET', '/api/v1/narratives'],
+      ['GET', '/api/v1/narratives/x'],
+      ['GET', '/api/v1/publishers'],
+      ['GET', '/api/v1/search?q=x'],
+      ['GET', '/api/v1/ops/status'],
+      ['POST', '/api/v1/ops/actions'],
+    ]
+    for (const [method, path] of routes) {
+      const res = await call(path, { method }, false)
+      expect(res.status, `${method} ${path}`).toBe(401)
+      expect(apiErrorSchema.parse(await res.json()).error.code).toBe('unauthorized')
+    }
   })
 
   it('lists stories and fetches one by slug', async () => {
@@ -70,6 +83,7 @@ describe('/api/v1 contracts', () => {
     const page1 = storyListResponseSchema.parse(
       await (await call('/api/v1/stories?limit=2')).json(),
     )
+    expect(page1.pageInfo.nextCursor).toBeTruthy()
     if (!page1.pageInfo.nextCursor) return
     const page2 = storyListResponseSchema.parse(
       await (
@@ -78,6 +92,7 @@ describe('/api/v1 contracts', () => {
         )
       ).json(),
     )
+    expect(page2.items.length).toBeGreaterThan(0)
     const ids = new Set(page1.items.map((s) => s.id))
     expect(page2.items.some((s) => ids.has(s.id))).toBe(false)
   })
@@ -86,6 +101,10 @@ describe('/api/v1 contracts', () => {
     const missing = await call('/api/v1/stories/does-not-exist')
     expect(missing.status).toBe(404)
     expect(apiErrorSchema.parse(await missing.json()).error.code).toBe('not_found')
+    for (const path of ['/api/v1/stories?limit=abc', '/api/v1/stories?cursor=not-a-cursor']) {
+      const res = await call(path)
+      expect(res.status, path).toBe(400)
+    }
     const bad = await call('/api/v1/search?q=')
     expect(bad.status).toBe(400)
     expect(apiErrorSchema.parse(await bad.json()).error.issues?.length).toBeGreaterThan(0)

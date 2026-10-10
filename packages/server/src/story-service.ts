@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId, slugify } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
-import { and, desc, eq, inArray, isNull } from 'drizzle-orm'
+import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
 
 export function sha256(input: string) {
@@ -46,7 +46,7 @@ async function uniqueSlug(db: Db, title: string) {
   return `${base}-${newId('x').slice(-6)}`
 }
 
-async function refreshFingerprint(db: Db, storyId: string) {
+export async function refreshFingerprint(db: Db, storyId: string) {
   const fingerprint = await storyInputFingerprint(db, storyId)
   await db
     .update(schema.story)
@@ -280,12 +280,4 @@ export async function editSummary(
     .where(eq(schema.story.id, story.id))
   await touchStory(db, story.id, 'story.summary_edited')
   return versionId
-}
-
-export async function latestSummaryVersions(db: Db, storyId: string) {
-  return db
-    .select()
-    .from(schema.storySummaryVersion)
-    .where(eq(schema.storySummaryVersion.storyId, storyId))
-    .orderBy(desc(schema.storySummaryVersion.createdAt))
 }

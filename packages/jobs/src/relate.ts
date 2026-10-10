@@ -33,7 +33,7 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
   if (!vector) throw new Error('empty story embedding')
   await withTransaction(ctx.pool, async (tx) => {
     await tx.db.update(schema.story).set({ embedding: vector }).where(eq(schema.story.id, story.id))
-    await touchStory(tx.db, story.id, 'story.embedded', story.lastUpdatedAt)
+    await touchStory(tx.db, story.id, 'story.embedded', null)
   })
 
   const { results } = await ctx.ts.multiSearch<{ hits?: VectorHit[] }>([
@@ -145,8 +145,8 @@ async function createEdgeIfRelated(
         confidence: similarity,
       })
       .onConflictDoNothing()
-    await touchStory(tx.db, edge.fromStoryId, 'story.related')
-    await touchStory(tx.db, edge.toStoryId, 'story.related')
+    await touchStory(tx.db, edge.fromStoryId, 'story.related', null)
+    await touchStory(tx.db, edge.toStoryId, 'story.related', null)
   })
   return true
 }
@@ -276,6 +276,6 @@ async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: st
       target ? 'narrative.updated' : 'narrative.created',
       now,
     )
-    for (const id of toAdd) await touchStory(tx.db, id, 'story.narrative_assigned')
+    for (const id of toAdd) await touchStory(tx.db, id, 'story.narrative_assigned', null)
   })
 }

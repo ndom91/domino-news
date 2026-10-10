@@ -44,15 +44,14 @@ test('feed → story → narrative → search', async ({ page }) => {
   // Narrative graph with clickable story nodes
   await page.goto('/narratives')
   const narrative = page.locator('main li a').first()
-  if (await narrative.count()) {
-    await narrative.click()
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
-    const nodes = page.locator('main ol[aria-label*="developments"] h3 a')
-    await expect(nodes.first()).toBeVisible()
-    await expectNoHorizontalOverflow(page)
-    await nodes.first().click()
-    await expect(page).toHaveURL(/\/stories\//)
-  }
+  await expect(narrative).toBeVisible()
+  await narrative.click()
+  await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  const nodes = page.locator('main ol[aria-label*="developments"] h3 a')
+  await expect(nodes.first()).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+  await nodes.first().click()
+  await expect(page).toHaveURL(/\/stories\//)
 
   // Search (hybrid or keyword fallback)
   await page.goto('/search?q=nobel')

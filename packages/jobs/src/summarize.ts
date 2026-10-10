@@ -23,7 +23,7 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
   if (!story || story.inputFingerprint !== job.inputFingerprint) return { status: 'stale' }
 
   // Only summarise recent stories in live mode; fixtures are always summarised.
-  const ageHours = (Date.now() - story.lastUpdatedAt.getTime()) / 3_600_000
+  const ageHours = (Date.now() - story.firstObservedAt.getTime()) / 3_600_000
   if (
     ctx.config.ingestMode === 'live' &&
     !story.publishedAt &&

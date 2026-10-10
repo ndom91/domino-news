@@ -82,8 +82,10 @@ export async function loadStoryInput(
       links.map((l) => l.articleId),
     )
   )
-    .sort((a, b) => (a.publishedAt ?? '').localeCompare(b.publishedAt ?? ''))
+    // Keep the newest reports so new sources can be summarised and cited; present them oldest-first.
+    .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))
     .slice(0, maxArticles)
+    .reverse()
   return {
     storyId: story.id,
     title: story.title,

@@ -1,7 +1,7 @@
-import { schema } from '@dn/db'
+import { schema, withTransaction } from '@dn/db'
 import { type AnalysisJob, isBackfillPaused, PIPELINE_VERSION, PRIORITY, QUEUES } from '@dn/server'
 import { and, desc, eq, isNotNull } from 'drizzle-orm'
-import type { WorkerContext } from './context.ts'
+import { sendInTx, type WorkerContext } from './context.ts'
 
 const MAX_QUEUED_BACKFILL = 50
 
@@ -12,8 +12,14 @@ const MAX_QUEUED_BACKFILL = 50
  */
 export async function admitBackfill(ctx: WorkerContext) {
   if (await isBackfillPaused(ctx)) return { admitted: 0, paused: true }
-  const [queue] = await ctx.workerBoss.getQueues([QUEUES.embedArticle])
-  const room = Math.max(0, MAX_QUEUED_BACKFILL - (queue?.queuedCount ?? 0))
+  // Count the slower downstream stages too, so their backlog stays bounded as well.
+  const queues = await ctx.workerBoss.getQueues([
+    QUEUES.embedArticle,
+    QUEUES.matchArticle,
+    QUEUES.summarizeStory,
+  ])
+  const queued = queues.reduce((sum, q) => sum + q.queuedCount, 0)
+  const room = Math.max(0, MAX_QUEUED_BACKFILL - queued)
   const limit = Math.min(room, ctx.config.backfillAdmitPerMinute)
   if (limit === 0) return { admitted: 0, paused: false }
 
@@ -29,6 +35,7 @@ export async function admitBackfill(ctx: WorkerContext) {
     )
     .orderBy(desc(schema.article.publishedAt))
     .limit(limit)
+  let count = 0
   for (const a of pending) {
     const job: AnalysisJob = {
       targetId: a.id,
@@ -36,14 +43,27 @@ export async function admitBackfill(ctx: WorkerContext) {
       pipelineVersion: PIPELINE_VERSION,
       priorityClass: 'backfill',
     }
-    await ctx.workerBoss.send(QUEUES.embedArticle, job, {
-      singletonKey: `${a.id}:${a.revisionId}:${PIPELINE_VERSION}`,
-      priority: PRIORITY.backfill,
+    // Admit only if ingest hasn't revised the article since we read it; job and state commit together.
+    const admitted = await withTransaction(ctx.pool, async (tx) => {
+      const updated = await tx.db
+        .update(schema.article)
+        .set({ pipelineState: 'queued' })
+        .where(
+          and(
+            eq(schema.article.id, a.id),
+            eq(schema.article.pipelineState, 'pending_backfill'),
+            eq(schema.article.latestRevisionId, a.revisionId ?? ''),
+          ),
+        )
+        .returning({ id: schema.article.id })
+      if (updated.length === 0) return false
+      await sendInTx(ctx, tx, QUEUES.embedArticle, job, {
+        singletonKey: `${a.id}:${a.revisionId}:${PIPELINE_VERSION}`,
+        priority: PRIORITY.backfill,
+      })
+      return true
     })
-    await ctx.db
-      .update(schema.article)
-      .set({ pipelineState: 'queued' })
-      .where(eq(schema.article.id, a.id))
+    if (admitted) count++
   }
-  return { admitted: pending.length, paused: false }
+  return { admitted: count, paused: false }
 }

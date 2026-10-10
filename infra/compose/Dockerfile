@@ -1,6 +1,7 @@
 # One image for web, worker, indexer and migrations; Compose picks the command.
 FROM node:24-slim AS base
-ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true
+# COREPACK_HOME outside /root so the non-root runtime user can use the pre-fetched pnpm.
+ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true COREPACK_HOME=/corepack
 RUN corepack enable && corepack prepare pnpm@11.8.0 --activate
 WORKDIR /app
 

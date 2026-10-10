@@ -86,6 +86,12 @@ export function createLocalEmbeddings(config: LocalConfig): EmbeddingProvider {
         ),
       )
       const sorted = [...json.data].sort((a, b) => a.index - b.index)
+      // A short or misindexed response would attach vectors to the wrong articles.
+      if (sorted.length !== batch.length || sorted.some((d, j) => d.index !== j)) {
+        throw new InvalidModelOutputError(
+          `embeddings: expected ${batch.length} vectors, got ${sorted.length}`,
+        )
+      }
       out.push(...sorted.map((d) => d.embedding))
     }
     return out

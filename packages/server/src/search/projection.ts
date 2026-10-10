@@ -191,23 +191,31 @@ export async function processOutboxBatch(db: Db, ts: Typesense, limit = 50) {
       const key = `${event.aggregateType}:${event.aggregateId}`
       if (!done.has(key)) {
         try {
-          const [state] = await tx
-            .select()
-            .from(schema.searchProjectionState)
-            .where(
-              and(
-                eq(schema.searchProjectionState.aggregateType, event.aggregateType),
-                eq(schema.searchProjectionState.aggregateId, event.aggregateId),
-              ),
-            )
-          const alreadyApplied =
-            event.aggregateType !== 'article' &&
-            state !== undefined &&
-            !state.deleted &&
-            state.indexedVersion > event.aggregateVersion
-          if (!alreadyApplied) {
-            await projectAggregate(tx, ts, event.aggregateType as AggregateType, event.aggregateId)
-          }
+          // Savepoint: a failed statement must not abort the batch transaction.
+          await tx.transaction(async (sp) => {
+            const [state] = await sp
+              .select()
+              .from(schema.searchProjectionState)
+              .where(
+                and(
+                  eq(schema.searchProjectionState.aggregateType, event.aggregateType),
+                  eq(schema.searchProjectionState.aggregateId, event.aggregateId),
+                ),
+              )
+            const alreadyApplied =
+              event.aggregateType !== 'article' &&
+              state !== undefined &&
+              !state.deleted &&
+              state.indexedVersion > event.aggregateVersion
+            if (!alreadyApplied) {
+              await projectAggregate(
+                sp,
+                ts,
+                event.aggregateType as AggregateType,
+                event.aggregateId,
+              )
+            }
+          })
           done.set(key, null)
         } catch (error) {
           done.set(key, String(error).slice(0, 500))
@@ -247,6 +255,7 @@ export async function processOutboxBatch(db: Db, ts: Typesense, limit = 50) {
  * The live index keeps serving until the swap.
  */
 export async function rebuildSearchIndex(db: Db, ts: Typesense, log = console.log) {
+  const startedAt = new Date()
   for (const alias of ALIASES) {
     const collection = await createCollection(ts, alias)
     const ids =
@@ -267,12 +276,10 @@ export async function rebuildSearchIndex(db: Db, ts: Typesense, log = console.lo
     }
     log(`rebuilt ${alias}: ${ids.length} aggregates -> ${collection}`)
   }
-}
-
-export async function pendingOutboxCount(db: Db) {
-  const [row] = await db
-    .select({ n: sql<number>`count(*)::int` })
+  // The live indexer kept writing to the old collections during the rebuild; re-apply those.
+  const touched = await db
+    .selectDistinct({ type: schema.outboxEvent.aggregateType, id: schema.outboxEvent.aggregateId })
     .from(schema.outboxEvent)
-    .where(and(isNull(schema.outboxEvent.processedAt), isNull(schema.outboxEvent.deadAt)))
-  return row?.n ?? 0
+    .where(sql`${schema.outboxEvent.processedAt} >= ${startedAt}`)
+  for (const t of touched) await projectAggregate(db, ts, t.type as AggregateType, t.id)
 }

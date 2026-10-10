@@ -7,6 +7,7 @@ import {
   PIPELINE_VERSION,
   PRIORITY,
   QUEUES,
+  refreshFingerprint,
 } from '@dn/server'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
@@ -79,6 +80,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
         .update(schema.article)
         .set({ pipelineState: 'matched' })
         .where(eq(schema.article.id, job.targetId))
+      await refreshFingerprint(tx.db, existing.storyId)
       await enqueueSummary(ctx, tx, existing.storyId, job.priorityClass)
     })
     return { status: 'already_matched', storyId: existing.storyId }

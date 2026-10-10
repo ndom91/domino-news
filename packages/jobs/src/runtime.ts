@@ -33,7 +33,13 @@ const POLL_ALL = 'poll_all_feeds'
 export async function createQueues(boss: PgBoss) {
   for (const name of [...Object.values(QUEUES), POLL_ALL]) {
     const existing = await boss.getQueue(name)
-    if (!existing) await boss.createQueue(name, QUEUE_OPTIONS)
+    if (existing) continue
+    // A rebuild re-creates collections; retrying a still-running one would orphan them.
+    const options =
+      name === QUEUES.rebuildSearch
+        ? { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
+        : QUEUE_OPTIONS
+    await boss.createQueue(name, options)
   }
 }
 

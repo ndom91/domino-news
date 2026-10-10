@@ -90,16 +90,13 @@ export async function createTestContext() {
 /** Removes all domain rows between tests (keeps the schema). */
 export async function truncateAll(ctx: { pool: { query: (q: string) => Promise<unknown> } }) {
   await ctx.pool.query(`begin;
-    set local dn.allow_observation_delete = 'on';
-    alter table story_summary_version disable trigger story_summary_version_immutable;
-    alter table article_revision disable trigger article_revision_immutable;
     truncate story_summary_source, story_summary_version, story_source_reference, source_reference,
       narrative_story, narrative, story_relationship, story_lineage_event, story_alias, story_article,
       story, interpretation_evidence, interpretation, analysis_run, article_embedding, feed_entry,
       ingest_run, outbox_event, inbox_event, search_projection_state, observation, article_revision,
       article, pipeline_control, feed, publisher, auth_session, auth_account, auth_user, auth_verification cascade;
-    alter table story_summary_version enable trigger story_summary_version_immutable;
-    alter table article_revision enable trigger article_revision_immutable;
     commit;`)
-  await ctx.pool.query('delete from pgboss.job').catch(() => {})
+  await ctx.pool.query('delete from pgboss.job').catch((error: { code?: string }) => {
+    if (error.code !== '42P01') throw error // undefined_table: pg-boss not installed yet
+  })
 }
