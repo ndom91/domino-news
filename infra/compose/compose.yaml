@@ -12,8 +12,8 @@ x-app: &app
   environment:
     DATABASE_URL: postgres://dn:dn@postgres:5432/dn
     TYPESENSE_URL: http://typesense:8108
-    # Private CA for the inference endpoint, if any (drop the PEM into infra/compose/certs/).
-    INFERENCE_CA_CERT: /certs/inference-ca.pem
+  # Private CA for the inference endpoint, if any: drop the PEM into infra/compose/certs/
+  # and set INFERENCE_CA_CERT=/certs/inference-ca.pem in .env.
   volumes:
     - ./certs:/certs:ro
   depends_on:
@@ -51,9 +51,12 @@ services:
       - tsdata:/data
     restart: unless-stopped
 
+  # Commands call tsx directly: Compose already injects .env, and the pnpm scripts'
+  # --env-file-if-exists would only log that the file is missing in the image.
   migrate:
     <<: *app
-    command: ["pnpm", "db:migrate"]
+    working_dir: /app/packages/db
+    command: ["node_modules/.bin/tsx", "src/migrate.ts"]
     restart: "no"
 
   web:
@@ -62,7 +65,6 @@ services:
     environment:
       DATABASE_URL: postgres://dn:dn@postgres:5432/dn
       TYPESENSE_URL: http://typesense:8108
-      INFERENCE_CA_CERT: /certs/inference-ca.pem
       PORT: "4000"
     ports:
       - "${WEB_BIND:-127.0.0.1}:${WEB_PORT:-4000}:4000"
@@ -72,14 +74,16 @@ services:
 
   worker:
     <<: *app
-    command: ["pnpm", "--filter", "@dn/worker", "start"]
+    working_dir: /app/apps/worker
+    command: ["node_modules/.bin/tsx", "src/worker.ts"]
     depends_on:
       migrate:
         condition: service_completed_successfully
 
   indexer:
     <<: *app
-    command: ["pnpm", "--filter", "@dn/worker", "start:indexer"]
+    working_dir: /app/apps/worker
+    command: ["node_modules/.bin/tsx", "src/indexer.ts"]
     depends_on:
       migrate:
         condition: service_completed_successfully

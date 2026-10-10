@@ -80,7 +80,7 @@ Create an OAuth client (type "Web application") in Google Cloud and add `${BETTE
 
 ```bash
 cp .env.example .env    # set BETTER_AUTH_SECRET, BETTER_AUTH_URL (public origin), inference settings
-# optional private CA: put it at infra/compose/certs/inference-ca.pem
+# optional private CA: put it at infra/compose/certs/inference-ca.pem and set INFERENCE_CA_CERT=/certs/inference-ca.pem
 scripts/deploy.sh up            # compose up --build (migrate runs first), then cli seed
 scripts/deploy.sh user you      # cli user:create, prompts for the password
 scripts/deploy.sh update        # git pull --ff-only, then the same as up

@@ -4,7 +4,7 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 compose() { docker compose -f infra/compose/compose.yaml --profile app "$@"; }
-cli() { compose run --rm worker pnpm cli "$@"; }
+cli() { compose run --rm worker node_modules/.bin/tsx src/cli.ts "$@"; }
 
 usage() {
   cat <<'EOF'
@@ -15,7 +15,7 @@ Usage: scripts/deploy.sh <command>
   user <username>    Create a login (prompts for the password)
   status             Container state and pipeline status
   logs [service]     Follow logs (all services, or one: web, worker, indexer, ...)
-  cli <args...>      Run any `pnpm cli` command inside the worker image
+  cli <args...>      Run any CLI command (see AGENTS.md) inside the worker image
   down               Stop containers (data volumes are kept)
 EOF
 }
