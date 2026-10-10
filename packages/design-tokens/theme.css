@@ -288,6 +288,32 @@
   }
 
   /* The masthead orange, with dark text (5.7:1), so selections read on every key fill. */
+  /* Thin, quiet scrollbars: a muted thumb on no track. scrollbar-color inherits;
+     scrollbar-width doesn't, so it goes on every scroller. */
+  html {
+    scrollbar-color: var(--dn-border-strong) transparent;
+  }
+
+  * {
+    scrollbar-width: thin;
+  }
+
+  /* Safari ignores scrollbar-color; browsers that support it ignore these. */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--dn-border-strong);
+    background-clip: padding-box;
+    border: 3px solid transparent;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
   ::selection {
     background: var(--dn-accent);
     color: var(--dn-accent-contrast);

@@ -8,7 +8,7 @@ import {
   regionSchema,
   searchQuerySchema,
 } from '@dn/schemas'
-import { Badge, Button, cx, deskKey, Notice, Skeleton, TextInput } from '@dn/ui'
+import { Badge, Button, cx, deskKey, Notice, Select, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
@@ -28,12 +28,17 @@ export const Route = createFileRoute('/search')({
   component: SearchPage,
 })
 
-const SINCE_LABELS = {
-  all: 'Any time',
-  '24h': 'Past day',
-  '7d': 'Past week',
-  '30d': 'Past month',
-} as const
+const SINCE_OPTIONS = [
+  { value: 'all', label: 'Any time' },
+  { value: '24h', label: 'Past day' },
+  { value: '7d', label: 'Past week' },
+  { value: '30d', label: 'Past month' },
+] as const
+
+const REGION_OPTIONS = [
+  { value: null, label: 'Any region' },
+  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
+]
 
 function SearchPage() {
   const search = Route.useSearch()
@@ -57,9 +62,6 @@ function SearchPage() {
       },
     })
   }
-
-  const selectClass =
-    'min-h-10 border-2 border-text bg-canvas px-2 text-label font-semibold text-text'
 
   return (
     <Page>
@@ -87,45 +89,28 @@ function SearchPage() {
             <label htmlFor={sinceId} className="type-label">
               Updated
             </label>
-            <select id={sinceId} name="since" defaultValue={search.since} className={selectClass}>
-              {Object.entries(SINCE_LABELS).map(([value, label]) => (
-                <option key={value} value={value}>
-                  {label}
-                </option>
-              ))}
-            </select>
+            <Select id={sinceId} name="since" options={SINCE_OPTIONS} defaultValue={search.since} />
             <label htmlFor={pubId} className="type-label">
               Publisher
             </label>
-            <select
+            <Select
               id={pubId}
               name="publisher"
-              defaultValue={search.publisher ?? ''}
-              className={selectClass}
-            >
-              <option value="">Any publisher</option>
-              {publishers.data?.items.map((p) => (
-                <option key={p.id} value={p.slug}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+              options={[
+                { value: null, label: 'Any publisher' },
+                ...(publishers.data?.items.map((p) => ({ value: p.slug, label: p.name })) ?? []),
+              ]}
+              defaultValue={search.publisher ?? null}
+            />
             <label htmlFor={regionId} className="type-label">
               Region
             </label>
-            <select
+            <Select
               id={regionId}
               name="region"
-              defaultValue={search.region ?? ''}
-              className={selectClass}
-            >
-              <option value="">Any region</option>
-              {REGIONS.map((r) => (
-                <option key={r} value={r}>
-                  {REGION_LABELS[r]}
-                </option>
-              ))}
-            </select>
+              options={REGION_OPTIONS}
+              defaultValue={search.region ?? null}
+            />
           </div>
         </form>
       </search>

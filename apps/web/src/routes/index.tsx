@@ -6,6 +6,7 @@ import {
   NarrativeColumn,
   PeriodBar,
   SectionHeader,
+  Select,
   StoryItem,
   StoryItemSkeleton,
 } from '@dn/ui'
@@ -16,7 +17,6 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { useId } from 'react'
 import { z } from 'zod'
 import { RouterLink } from '../components/link.tsx'
 import { queries } from '../lib/api.ts'
@@ -151,31 +151,23 @@ function FeedPage() {
   )
 }
 
-/** Region filter as a square native select in the Latest header (works without JS-heavy UI). */
+const REGION_FILTER_OPTIONS = [
+  { value: null, label: 'All regions' },
+  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
+]
+
+/** Region filter in the Latest header. */
 function RegionFilter({ active }: { active: Region | null }) {
   const navigate = useNavigate({ from: '/' })
-  const id = useId()
   return (
     <span className="inline-flex items-center gap-2">
       <span className="max-md:hidden">Newest report first ·</span>
-      <label htmlFor={id} className="sr-only">
-        Region
-      </label>
-      <select
-        id={id}
-        value={active ?? ''}
-        onChange={(e) =>
-          navigate({ search: e.target.value ? { region: e.target.value as Region } : {} })
-        }
-        className="min-h-9 border-2 border-text bg-canvas px-2 text-label font-semibold text-text"
-      >
-        <option value="">All regions</option>
-        {REGIONS.map((r) => (
-          <option key={r} value={r}>
-            {REGION_LABELS[r]}
-          </option>
-        ))}
-      </select>
+      <Select
+        aria-label="Region"
+        options={REGION_FILTER_OPTIONS}
+        value={active}
+        onValueChange={(region) => navigate({ search: region ? { region } : {} })}
+      />
     </span>
   )
 }

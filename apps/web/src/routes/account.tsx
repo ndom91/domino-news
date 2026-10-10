@@ -1,7 +1,7 @@
 import { formatDateTime } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
-import { REGION_LABELS, REGIONS, regionSchema } from '@dn/schemas'
-import { Button, ConfirmDialog, Notice, TextInput } from '@dn/ui'
+import { REGION_LABELS, REGIONS } from '@dn/schemas'
+import { Button, ConfirmDialog, Notice, Select, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useId, useState } from 'react'
@@ -166,6 +166,11 @@ function SignOutButton() {
   )
 }
 
+const EDITION_OPTIONS = [
+  { value: null, label: 'No preference' },
+  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
+]
+
 function EditionSection() {
   const queryClient = useQueryClient()
   const prefs = useQuery(queries.preferences())
@@ -182,23 +187,13 @@ function EditionSection() {
         <label htmlFor={selectId} className="type-label">
           Region
         </label>
-        <select
+        <Select
           id={selectId}
-          value={prefs.data?.edition ?? ''}
+          options={EDITION_OPTIONS}
+          value={prefs.data?.edition ?? null}
           disabled={prefs.isPending || save.isPending}
-          onChange={(e) => {
-            const parsed = regionSchema.safeParse(e.target.value)
-            save.mutate({ edition: parsed.success ? parsed.data : null })
-          }}
-          className="min-h-10 border-2 border-text bg-canvas px-2 text-label font-semibold text-text"
-        >
-          <option value="">No preference</option>
-          {REGIONS.map((r) => (
-            <option key={r} value={r}>
-              {REGION_LABELS[r]}
-            </option>
-          ))}
-        </select>
+          onValueChange={(edition) => save.mutate({ edition })}
+        />
       </div>
       {save.isError ? (
         <Notice tone="error" title="Edition not saved" className="mt-4">
