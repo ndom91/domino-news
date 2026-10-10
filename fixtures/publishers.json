@@ -308,11 +308,11 @@
     "kind": "official",
     "license": "public-domain",
     "articleBodyProcessingPolicy": "transient_body_allowed",
-    "policyNote": "Most CDC content is public domain (cdc.gov/other/agencymaterials.html); requires 'Source: CDC' attribution, a no-endorsement disclaimer and no change to substantive content; contractor, third-party and stock items excluded. robots.txt does not restrict AI agents; edge blocks some user agents. Feed is large (1,800+ items since 2006).",
+    "policyNote": "Most CDC content is public domain (cdc.gov/other/agencymaterials.html); requires 'Source: CDC' attribution, a no-endorsement disclaimer and no change to substantive content; contractor, third-party and stock items excluded. robots.txt does not restrict AI agents; edge blocks some user agents. The unparameterised feed returns its whole archive (1,800+ items since 2006); `?max=25` limits it to the latest items.",
     "policyReviewedAt": "2026-10-10",
     "feeds": [
       {
-        "url": "https://tools.cdc.gov/api/v2/resources/media/132608.rss",
+        "url": "https://tools.cdc.gov/api/v2/resources/media/132608.rss?max=25",
         "title": "CDC Online Newsroom"
       }
     ]

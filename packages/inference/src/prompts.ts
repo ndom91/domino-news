@@ -3,7 +3,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@3',
-  summarizeStory: 'summarize-story@2',
+  summarizeStory: 'summarize-story@3',
   classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
   explainContext: 'explain-context@2',
@@ -67,7 +67,9 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
 - summary: 2-4 short sentences. Attribute claims to sources ("according to X", "X reports") where they are not established facts. No speculation.
 - sourceArticleIds: the articleId of every article you relied on.
 - observationIds: the observationId of every article you relied on.
-- regions: 1-3 regions where the events take place or that they directly affect. Not where the publishers are based. Use "global" only when the story truly spans many regions.
+- regions: 1-3 regions where the events take place or that they directly affect, most relevant first. Not where the publishers are based. Pick from:
+  north-america (US, Canada), latin-america (Mexico, Central and South America, Caribbean), europe (incl. UK, Ukraine, Russia), middle-east (Gulf, Levant, Iran, Israel, Turkey, Egypt), africa (excl. Egypt), south-asia (India, Pakistan, Bangladesh, Sri Lanka, Nepal, Afghanistan), east-asia (China, Japan, Koreas, Taiwan, Mongolia), southeast-asia (Indonesia, Philippines, Vietnam, Thailand, Malaysia, Singapore, Myanmar), oceania (Australia, New Zealand, Pacific islands), central-asia (Kazakhstan, Uzbekistan and neighbours).
+  Use "global" only when no single region fits: worldwide events, or more than three regions equally involved.
 Do not copy sentences from the sources.
 
 SOURCE ARTICLES:
