@@ -46,7 +46,7 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
 }
 
 const menuItemClass =
-  'flex min-h-tap w-full cursor-default items-center px-4 text-base font-semibold outline-none select-none data-highlighted:bg-text data-highlighted:text-canvas'
+  'flex min-h-tap w-full cursor-pointer items-center px-4 text-base font-semibold outline-none select-none data-highlighted:bg-text data-highlighted:text-canvas'
 
 /** Click/keyboard menu of actions, anchored to its trigger. Arrow keys move between items. */
 export function Menu({
