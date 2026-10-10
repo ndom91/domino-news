@@ -11,7 +11,7 @@ import {
 } from '@dn/server'
 import { eq } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
-import { loadStoryInput, withTransientBodies } from './inputs.ts'
+import { type LoadedArticle, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { withAnalysisRun } from './provenance.ts'
 
 /**
@@ -77,7 +77,14 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     if (recorded.status !== 'recorded') return recorded
 
     for (const [articleId, links] of primaryLinks) {
-      await recordPrimarySources(tx.db, story.id, articleId, links)
+      const refs = links.map((url) => ({ url, kind: 'primary_document' as const }))
+      await recordPrimarySources(tx.db, story.id, articleId, refs)
+    }
+    // An official body's own article is a primary source: claims can cite it as evidence.
+    for (const a of input.articles as LoadedArticle[]) {
+      if (a.publisherKind !== 'official') continue
+      const ref = { url: a.url, title: a.title, kind: 'official_statement' as const }
+      await recordPrimarySources(tx.db, story.id, a.articleId, [ref])
     }
     // Enrichment keyed on the new summary version: relationships, context and claims.
     const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
@@ -89,9 +96,26 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
   return outcome
 }
 
-async function recordPrimarySources(db: Db, storyId: string, articleId: string, links: string[]) {
+type SourceRef = {
+  url: string
+  title?: string
+  kind: 'primary_document' | 'official_statement'
+}
+
+/** Link sources to a Story. URLs it already has are skipped, so re-summaries add nothing. */
+async function recordPrimarySources(db: Db, storyId: string, articleId: string, refs: SourceRef[]) {
+  const linked = await db
+    .select({ url: schema.sourceReference.url })
+    .from(schema.storySourceReference)
+    .innerJoin(
+      schema.sourceReference,
+      eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+    )
+    .where(eq(schema.storySourceReference.storyId, storyId))
+  const known = new Set(linked.map((l) => l.url))
   const now = new Date()
-  for (const url of links) {
+  for (const { url, title, kind } of refs) {
+    if (known.has(url)) continue
     const observationId = newId(ID_PREFIX.observation)
     await db.insert(schema.observation).values({
       id: observationId,
@@ -109,7 +133,8 @@ async function recordPrimarySources(db: Db, storyId: string, articleId: string, 
       .values({
         id: newId(ID_PREFIX.sourceReference),
         url,
-        kind: 'primary_document',
+        title,
+        kind,
         discoveredAt: now,
       })
       .onConflictDoUpdate({ target: schema.sourceReference.url, set: { url } })

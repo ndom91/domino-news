@@ -591,6 +591,64 @@ describe('publish threshold', () => {
   })
 })
 
+describe('official sources as evidence', () => {
+  it('links official articles to their Story as primary sources', async () => {
+    const { summarizeStory } = await import('@dn/jobs')
+    const { rows } = await h.ctx.pool.query(
+      `select s.id, min(a.publisher_id) as publisher_id
+       from story s join story_article sa on sa.story_id = s.id and sa.removed_at is null
+       join article a on a.id = sa.article_id
+       where s.published_at is not null
+       group by s.id having count(distinct a.publisher_id) = 2 limit 1`,
+    )
+    const story = rows[0] as { id: string; publisher_id: string }
+    if (!story) throw new Error('no two-outlet story')
+    await h.ctx.pool.query(`update publisher set kind = 'official' where id = $1`, [
+      story.publisher_id,
+    ])
+    try {
+      // New inputs, so the job records a fresh summary version.
+      await h.ctx.pool.query(`update story set input_fingerprint = 'fp_official' where id = $1`, [
+        story.id,
+      ])
+      const job = {
+        targetId: story.id,
+        inputFingerprint: 'fp_official',
+        pipelineVersion: 'p2',
+        priorityClass: 'fresh' as const,
+      }
+      expect((await summarizeStory(h.ctx, job)).status).toBe('recorded')
+      const refs = async () =>
+        (
+          await h.ctx.pool.query(
+            `select sr.url from story_source_reference ssr
+             join source_reference sr on sr.id = ssr.source_reference_id
+             where ssr.story_id = $1 and sr.kind = 'official_statement'`,
+            [story.id],
+          )
+        ).rows.map((r) => r.url)
+      const { rows: official } = await h.ctx.pool.query(
+        `select a.canonical_url as url from story_article sa join article a on a.id = sa.article_id
+         where sa.story_id = $1 and sa.removed_at is null and a.publisher_id = $2`,
+        [story.id, story.publisher_id],
+      )
+      const expected = official.map((r) => r.url).sort()
+      expect((await refs()).sort()).toEqual(expected)
+
+      // Summarising again adds no duplicate links.
+      await h.ctx.pool.query(`update story set input_fingerprint = 'fp_official_2' where id = $1`, [
+        story.id,
+      ])
+      await summarizeStory(h.ctx, { ...job, inputFingerprint: 'fp_official_2' })
+      expect((await refs()).sort()).toEqual(expected)
+    } finally {
+      await h.ctx.pool.query(`update publisher set kind = 'newsroom' where id = $1`, [
+        story.publisher_id,
+      ])
+    }
+  })
+})
+
 describe('backfill admission', () => {
   it('admits nothing while paused and admits pending articles when resumed', async () => {
     const { db } = h.ctx
