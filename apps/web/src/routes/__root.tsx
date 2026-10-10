@@ -9,7 +9,7 @@ import {
   Scripts,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { SiteHeader } from '../components/site-header.tsx'
+import { SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { getSessionInfo } from '../lib/session.ts'
 import appCss from '../styles.css?url'
 
@@ -54,6 +54,7 @@ function RootLayout() {
       <main id="main">
         <Outlet />
       </main>
+      {session.user ? <SiteFooter user={session.user} /> : null}
     </TooltipProvider>
   )
 }

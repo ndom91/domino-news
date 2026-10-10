@@ -90,8 +90,9 @@ function FeedPage() {
         </div>
       </div>
 
+      {/* -mb-24 cancels the footer's top margin so the two dark bands join. */}
       {front.developing.length > 0 ? (
-        <section aria-labelledby="developing-heading" className="bg-band text-band-text">
+        <section aria-labelledby="developing-heading" className="-mb-24 bg-band text-band-text">
           <div className="mx-auto max-w-page px-gutter pt-2 pb-15">
             <SectionHeader
               title="Developing"

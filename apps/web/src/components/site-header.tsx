@@ -80,3 +80,41 @@ export function SiteHeader({
     </>
   )
 }
+
+/** Always-dark footer: what Domino is, how summaries are made, and the main pages again. */
+export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
+  return (
+    <footer className="mt-24 bg-band text-band-text">
+      <div className="mx-auto max-w-page px-gutter pb-[calc(3rem+var(--dn-safe-bottom))]">
+        <div className="grid gap-x-14 gap-y-8 border-t border-band-line pt-12 md:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+          <div>
+            <Link to="/" className="type-section" aria-label="Domino, front page">
+              Domino<span className="text-accent">.</span>
+            </Link>
+            <p className="mt-4 max-w-reading text-base leading-normal text-band-muted">
+              Stories assembled from the feeds of many outlets, with every source linked. Summaries
+              are written by a language model and say what outlets report, not what Domino has
+              verified.
+            </p>
+          </div>
+          <nav aria-label="Footer" className="border-t-2 border-band-text pt-3">
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-base font-semibold">
+              {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
+                <li key={item.to}>
+                  <Link to={item.to} className="hover:underline underline-offset-3">
+                    {item.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                <Link to="/account" className="hover:underline underline-offset-3">
+                  Account
+                </Link>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  )
+}
