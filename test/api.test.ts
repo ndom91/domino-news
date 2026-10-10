@@ -1,5 +1,7 @@
+import { schema } from '@dn/db'
 import {
   apiErrorSchema,
+  frontPageSchema,
   narrativeListResponseSchema,
   searchResponseSchema,
   storyDetailSchema,
@@ -50,6 +52,7 @@ afterAll(async () => {
 describe('/api/v1 contracts', () => {
   it('requires authentication on every route', async () => {
     const routes: [string, string][] = [
+      ['GET', '/api/v1/front'],
       ['GET', '/api/v1/stories'],
       ['GET', '/api/v1/stories/x'],
       ['POST', '/api/v1/stories/x/summary'],
@@ -440,5 +443,22 @@ describe('publisher coverage', () => {
     expect(bbc.recentStories.length).toBe(bbc.storiesCovered)
     expect(bbc.coCoverage.every((c) => c.publisher.slug !== 'bbc')).toBe(true)
     expect((await call('/api/v1/publishers/nope')).status).toBe(404)
+  })
+})
+
+describe('front page and citation numbers', () => {
+  it('serves the front page', async () => {
+    const front = frontPageSchema.parse(await (await call('/api/v1/front')).json())
+    expect(front.lead).not.toBeNull()
+    expect(front.stats.stories).toBeGreaterThan(0)
+  })
+
+  it('accepts cited sources without a number (summaries from before citation numbers)', async () => {
+    await h.ctx.db.update(schema.storySummarySource).set({ citation: null })
+    const list = storyListResponseSchema.parse(await (await call('/api/v1/stories')).json())
+    const cited = list.items.flatMap((s) => s.trace).filter((t) => t.citation !== null)
+    expect(cited.length).toBeGreaterThan(0)
+    expect(cited.every((t) => t.citation === 0)).toBe(true)
+    frontPageSchema.parse(await (await call('/api/v1/front')).json())
   })
 })

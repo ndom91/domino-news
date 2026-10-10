@@ -123,7 +123,8 @@ export const storyListItemSchema = z.object({
       id: z.string(),
       publisherName: z.string(),
       at: z.string(),
-      citation: z.number().int().positive().nullable(),
+      // 0 = cited without a number (summaries written before citation numbers); null = not cited.
+      citation: z.number().int().nonnegative().nullable(),
     }),
   ),
   // The Story's main typed link to an earlier Story, if any (shown as "Follows …").
