@@ -4,7 +4,6 @@ import { cx } from '../cx.ts'
 import { Skeleton } from '../primitives/surface.tsx'
 import type { CitedSource } from './citation.tsx'
 import { SummaryText } from './citation.tsx'
-import { deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { relationLabel } from './relations.ts'
 import { SourceTrace } from './source-trace.tsx'
@@ -31,7 +30,7 @@ export function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
   return map
 }
 
-/** Feed entry: Narrative bar, headline, cited summary, relation, primary source and Source Trace. No card. */
+/** Feed entry: desk bar, headline, cited summary, relation, primary source and Source Trace. No card. */
 export function StoryItem({
   story,
   size = 'standard',
@@ -56,8 +55,9 @@ export function StoryItem({
     >
       <StoryBar
         desk={story.desk}
-        label={deskLabel(story.desk, narrative?.title)}
-        href={narrative ? `/narratives/${narrative.slug}` : undefined}
+        narrative={
+          narrative ? { title: narrative.title, href: `/narratives/${narrative.slug}` } : undefined
+        }
         timestamp={latest}
         Link={Link}
       />

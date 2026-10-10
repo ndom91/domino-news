@@ -1,21 +1,22 @@
 import type { Desk } from '@dn/schemas'
 import { cx } from '../cx.ts'
-import { deskKey } from './desk-key.ts'
+import { deskKey, deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { Timestamp } from './time.tsx'
 
-/** Bar above a story in its desk's colour: its Narrative or desk, and when it was last reported. */
+/**
+ * Bar above a story in its desk's colour: the desk, then its Narrative (if any) as a link,
+ * and when it was last reported. The colour always matches the desk name, never the Narrative.
+ */
 export function StoryBar({
   desk,
-  label,
-  href,
+  narrative,
   timestamp,
   Link = DefaultLink,
   className,
 }: {
   desk: Desk | null
-  label: string
-  href?: string
+  narrative?: { title: string; href: string }
   timestamp: string
   Link?: LinkLike
   className?: string
@@ -28,13 +29,19 @@ export function StoryBar({
         className,
       )}
     >
-      {href ? (
-        <Link to={href} className="min-w-0 truncate hover:underline">
-          {label}
-        </Link>
-      ) : (
-        <span className="min-w-0 truncate">{label}</span>
-      )}
+      <span className="flex min-w-0 gap-1.5">
+        <span className="flex-none">{deskLabel(desk)}</span>
+        {narrative ? (
+          <>
+            <span aria-hidden className="flex-none">
+              ·
+            </span>
+            <Link to={narrative.href} className="min-w-0 truncate font-semibold hover:underline">
+              {narrative.title}
+            </Link>
+          </>
+        ) : null}
+      </span>
       <Timestamp at={timestamp} className="flex-none font-semibold" />
     </div>
   )

@@ -22,7 +22,7 @@ export function positionKey(position: number) {
   return KEYS[1 + (position % (KEYS.length - 1))] ?? 'narrative-1'
 }
 
-/** Story-bar label: the Narrative's title, else the desk, else "Single story". */
-export function deskLabel(desk: Desk | null | undefined, narrativeTitle?: string) {
-  return narrativeTitle ?? (desk ? DESK_LABELS[desk] : 'Single story')
+/** Desk name for labels; "News" for Stories summarised before desks existed. */
+export function deskLabel(desk: Desk | null | undefined) {
+  return desk ? DESK_LABELS[desk] : 'News'
 }
