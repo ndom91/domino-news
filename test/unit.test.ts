@@ -297,3 +297,29 @@ describe('date grouping', () => {
     expect(recencyPeriod('2026-08-01T12:00:00Z', now)).toBe('older')
   })
 })
+
+describe('prompt inputs', () => {
+  it('tell the model which sources are official', async () => {
+    const { summarizeStoryPrompt } = await import('@dn/inference')
+    const article = (id: string, publisherKind?: 'newsroom' | 'official') => ({
+      articleId: id,
+      observationId: `obs_${id}`,
+      publisher: id,
+      publisherKind,
+      title: 't',
+      description: null,
+      publishedAt: null,
+    })
+    const prompt = summarizeStoryPrompt({
+      story: {
+        storyId: 's',
+        title: 't',
+        summary: null,
+        firstObservedAt: '2026-10-10T00:00:00Z',
+        articles: [article('cdc', 'official'), article('bbc')],
+      },
+    })
+    expect(prompt).toContain('"sourceType": "official"')
+    expect(prompt).toContain('"sourceType": "newsroom"')
+  })
+})

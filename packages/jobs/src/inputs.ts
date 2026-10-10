@@ -24,6 +24,7 @@ export async function loadArticles(db: Db, articleIds: string[]): Promise<Loaded
       description: schema.articleRevision.description,
       publisher: schema.publisher.name,
       publisherCountry: schema.publisher.countryCode,
+      publisherKind: schema.publisher.kind,
       bodyPolicy: schema.publisher.articleBodyPolicy,
       observationId: schema.observation.id,
     })
@@ -47,6 +48,7 @@ export async function loadArticles(db: Db, articleIds: string[]): Promise<Loaded
     observationId: r.observationId,
     publisher: r.publisher,
     publisherCountry: r.publisherCountry,
+    publisherKind: r.publisherKind,
     title: r.title,
     description: r.description,
     publishedAt: r.publishedAt?.toISOString() ?? null,

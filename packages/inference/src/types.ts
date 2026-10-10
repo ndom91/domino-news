@@ -14,6 +14,8 @@ export interface ArticleInput {
   publisher: string
   /** Publisher's home country. Not sent to models; fixture inference derives regions from it. */
   publisherCountry?: string | null
+  /** "official" = government, court, regulator or IGO; its articles are statements, not reporting. */
+  publisherKind?: 'newsroom' | 'official'
   title: string
   description: string | null
   publishedAt: string | null
