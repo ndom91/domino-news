@@ -100,6 +100,8 @@ export async function createTestContext() {
   await createQueues(workerBoss)
   const ctx: WorkerContext & { ts: ReturnType<typeof createFakeTypesense> } = {
     ...base,
+    // Fixture stories are mostly single-outlet; tests opt in to the publish threshold.
+    config: { ...base.config, minPublishOutlets: 1 },
     ts,
     boss: async () => workerBoss,
     workerBoss,

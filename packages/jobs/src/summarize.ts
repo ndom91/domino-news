@@ -5,6 +5,7 @@ import {
   type AnalysisJob,
   analysisJob,
   DomainError,
+  newsroomOutletCount,
   QUEUES,
   recordGeneratedSummary,
 } from '@dn/server'
@@ -29,6 +30,12 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     ageHours > ctx.config.summaryMaxAgeHours
   ) {
     return { status: 'skipped_old' }
+  }
+
+  // Only Stories covered by enough newsrooms are worth summarising and publishing. When
+  // another outlet joins, the fingerprint changes and a new job comes through here.
+  if ((await newsroomOutletCount(ctx.db, story.id)) < ctx.config.minPublishOutlets) {
+    return { status: 'below_outlet_threshold' }
   }
 
   const input = await loadStoryInput(ctx.db, story.id)

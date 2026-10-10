@@ -156,6 +156,8 @@ export async function searchAll(
         lastUpdatedAt: s.lastUpdatedAt,
         sourceCount: s.sourceCount,
         publisherNames: s.publishers.map((p) => p.name),
+        desk: s.desk,
+        regions: s.regions,
         score: storyScore.get(s.id) ?? null,
       }),
     ),

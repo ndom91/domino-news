@@ -42,11 +42,10 @@ function PublisherPage() {
             {p.languages.length ? ` · ${p.languages.join(', ')}` : ''}
           </p>
 
-          <dl className="mt-8 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+          <dl className="mt-8 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-3">
             {[
               ['Stories', p.storiesCovered],
               ['First to report', p.firstReports],
-              ['Only source', p.exclusives],
               ['Articles seen', p.articleCount],
             ].map(([label, value]) => (
               <div key={label} className="border-b border-border py-4 pr-4">

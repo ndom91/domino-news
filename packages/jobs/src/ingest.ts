@@ -48,6 +48,15 @@ async function fetchFeedXml(
   }
 }
 
+/**
+ * Items published longer ago than `maxAgeDays` are archive content, not news (some feeds
+ * return years of history). Undated items count as new.
+ */
+export function isStaleItem(publishedAt: string | null, now: Date, maxAgeDays: number) {
+  if (!publishedAt) return false
+  return now.getTime() - new Date(publishedAt).getTime() > maxAgeDays * 24 * 3_600_000
+}
+
 function priorityClassFor(ctx: WorkerContext, item: ArticleMetadata, now: Date) {
   if (!item.publishedAt) return 'fresh' as const
   const ageHours = (now.getTime() - new Date(item.publishedAt).getTime()) / 3_600_000
@@ -178,7 +187,16 @@ export async function pollFeed(
     let created = 0
     let revised = 0
     let failed = 0
+    let stale = 0
     for (const item of items) {
+      // Fixture feeds are frozen captures, so the age cutoff only applies to live feeds.
+      if (
+        ctx.config.ingestMode === 'live' &&
+        isStaleItem(item.publishedAt, now, ctx.config.maxArticleAgeDays)
+      ) {
+        stale++
+        continue
+      }
       try {
         const result = await ingestItem(ctx, feed, item, now)
         if (result.created) created++
@@ -201,7 +219,7 @@ export async function pollFeed(
         lastModified: fetched.lastModified ?? feed.lastModified,
       })
       .where(eq(schema.feed.id, feed.id))
-    return { items: items.length, created, revised, skipped, failed }
+    return { items: items.length, created, revised, skipped, stale, failed }
   } catch (error) {
     // Feed errors are isolated: record and move on; the next scheduled poll retries.
     const message = String(error).slice(0, 300)

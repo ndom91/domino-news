@@ -1,6 +1,14 @@
 import { plural, relativeTime } from '@dn/domain'
-import { REGION_LABELS, REGIONS, regionSchema, searchQuerySchema } from '@dn/schemas'
-import { Badge, Button, Notice, Skeleton, TextInput } from '@dn/ui'
+import {
+  DESK_LABELS,
+  type Desk,
+  REGION_LABELS,
+  REGIONS,
+  type Region,
+  regionSchema,
+  searchQuerySchema,
+} from '@dn/schemas'
+import { Badge, Button, cx, deskKey, Notice, Skeleton, TextInput } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
@@ -175,6 +183,7 @@ function SearchPage() {
                     </>
                   ) : (
                     <>
+                      <StoryTags desk={hit.desk} regions={hit.regions} />
                       <Link
                         to="/stories/$slug"
                         params={{ slug: hit.slug }}
@@ -199,5 +208,22 @@ function SearchPage() {
         )}
       </div>
     </Page>
+  )
+}
+
+/** Desk chip in its desk colour (as on story bars), then muted region chips. */
+function StoryTags({ desk, regions }: { desk: Desk | null; regions: Region[] }) {
+  if (!desk && regions.length === 0) return null
+  return (
+    <div className="mb-2 flex flex-wrap items-center gap-1.5 text-xs font-bold">
+      {desk ? (
+        <span className={cx(deskKey(desk), 'key-fill px-1.5 py-0.5')}>{DESK_LABELS[desk]}</span>
+      ) : null}
+      {regions.map((r) => (
+        <span key={r} className="border border-border-strong px-1.5 py-0.5 text-text-secondary">
+          {REGION_LABELS[r]}
+        </span>
+      ))}
+    </div>
   )
 }

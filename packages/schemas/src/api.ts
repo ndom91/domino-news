@@ -297,6 +297,8 @@ export const searchHitSchema = z.discriminatedUnion('type', [
     lastUpdatedAt: z.string(),
     sourceCount: z.number().int().nonnegative(),
     publisherNames: z.array(z.string()),
+    desk: deskSchema.nullable(),
+    regions: z.array(regionSchema),
     score: z.number().nullable(),
   }),
   z.object({

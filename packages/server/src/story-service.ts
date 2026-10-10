@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId, renumberCitations, slugify } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
-import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { and, countDistinct, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
 
 export function sha256(input: string) {
@@ -121,6 +121,23 @@ export async function attachArticleToStory(
   }
   await refreshFingerprint(db, input.storyId)
   await touchStory(db, input.storyId, 'story.article_added', now)
+}
+
+/** Distinct newsroom publishers among a Story's active articles (official sources excluded). */
+export async function newsroomOutletCount(db: Db, storyId: string): Promise<number> {
+  const [row] = await db
+    .select({ n: countDistinct(schema.article.publisherId) })
+    .from(schema.storyArticle)
+    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+    .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+    .where(
+      and(
+        eq(schema.storyArticle.storyId, storyId),
+        isNull(schema.storyArticle.removedAt),
+        eq(schema.publisher.kind, 'newsroom'),
+      ),
+    )
+  return row?.n ?? 0
 }
 
 /**

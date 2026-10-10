@@ -1,12 +1,14 @@
 import {
+  dayLabel,
   hostnameOf,
   normalizeArticleUrl,
   pickLead,
   plural,
+  recencyPeriod,
   regionForCountry,
   validateNewEdge,
 } from '@dn/domain'
-import { isWireCopy, parseFeed } from '@dn/jobs'
+import { isStaleItem, isWireCopy, parseFeed } from '@dn/jobs'
 import { layoutNarrative } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
@@ -268,5 +270,30 @@ describe('fixtureDesk', () => {
     expect(fixtureDesk('Central bank holds rates')).toBe('economy')
     expect(fixtureDesk('Wildfire smoke triggers alerts')).toBe('science')
     expect(fixtureDesk('Parliament committee advances bill')).toBe('politics')
+  })
+})
+
+describe('isStaleItem', () => {
+  it('drops items older than the max age and keeps undated ones', () => {
+    const now = new Date('2026-10-10T12:00:00Z')
+    expect(isStaleItem('2016-03-04T10:15:00Z', now, 3)).toBe(true)
+    expect(isStaleItem('2026-10-06T12:00:00Z', now, 3)).toBe(true)
+    expect(isStaleItem('2026-10-08T12:00:00Z', now, 3)).toBe(false)
+    expect(isStaleItem(null, now, 3)).toBe(false)
+  })
+})
+
+describe('date grouping', () => {
+  const now = '2026-10-10T08:00:00Z'
+  it('labels feed days in UTC', () => {
+    expect(dayLabel('2026-10-10T00:30:00Z', now)).toBe('Today')
+    expect(dayLabel('2026-10-09T23:59:00Z', now)).toBe('Yesterday')
+    expect(dayLabel('2026-10-08T12:00:00Z', now)).toBe('Thursday 8 Oct')
+  })
+  it('buckets by recency', () => {
+    expect(recencyPeriod('2026-10-10T01:00:00Z', now)).toBe('today')
+    expect(recencyPeriod('2026-10-04T12:00:00Z', now)).toBe('week')
+    expect(recencyPeriod('2026-09-20T12:00:00Z', now)).toBe('month')
+    expect(recencyPeriod('2026-08-01T12:00:00Z', now)).toBe('older')
   })
 })

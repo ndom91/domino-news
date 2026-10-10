@@ -1,9 +1,10 @@
-import { plural } from '@dn/domain'
+import { dayLabel, plural } from '@dn/domain'
 import { REGION_LABELS, REGIONS, type Region, regionSchema, type StoryListItem } from '@dn/schemas'
 import {
   Button,
   HeroStory,
   NarrativeColumn,
+  PeriodBar,
   SectionHeader,
   StoryItem,
   StoryItemSkeleton,
@@ -36,9 +37,37 @@ export const Route = createFileRoute('/')({
 // Two wide, four narrow, repeating: rows always fill the 4-column grid.
 const isWide = (i: number) => i % 6 < 2
 
+/**
+ * Latest, split into UTC day sections. The list is already newest first, so a section
+ * starts wherever the day changes. Colours stay mixed inside each section.
+ */
+function DaySections({ stories, now }: { stories: StoryListItem[]; now: string }) {
+  const days: { label: string; stories: StoryListItem[] }[] = []
+  for (const story of stories) {
+    const label = dayLabel(story.lastUpdatedAt, now)
+    const last = days[days.length - 1]
+    if (last?.label === label) last.stories.push(story)
+    else days.push({ label, stories: [story] })
+  }
+  return (
+    <div className="flex flex-col gap-10">
+      {days.map((day, i) => (
+        <section key={day.label} aria-label={day.label} className="flex flex-col gap-8">
+          <PeriodBar
+            position={i}
+            title={day.label}
+            meta={plural(day.stories.length, 'story', 'stories')}
+          />
+          <StoryGrid stories={day.stories} now={now} />
+        </section>
+      ))}
+    </div>
+  )
+}
+
 function StoryGrid({ stories, now }: { stories: StoryListItem[]; now: string }) {
   return (
-    <section className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+    <div className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
       {stories.map((story, i) => (
         <StoryItem
           key={story.id}
@@ -48,7 +77,7 @@ function StoryGrid({ stories, now }: { stories: StoryListItem[]; now: string }) 
           Link={RouterLink}
         />
       ))}
-    </section>
+    </div>
   )
 }
 
@@ -83,7 +112,7 @@ function FeedPage() {
               : 'No stories in the last 24 hours. New stories usually arrive within 15 minutes.'}
           </p>
         ) : (
-          <StoryGrid stories={latest} now={now} />
+          <DaySections stories={latest} now={now} />
         )}
         <div className="pt-12 pb-16">
           {list.hasNextPage ? (

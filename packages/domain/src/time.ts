@@ -68,3 +68,31 @@ export function longDate(iso: string): string {
     timeZone: 'UTC',
   }).format(new Date(iso))
 }
+
+const DAY = 24 * 3_600_000
+const utcDay = (ms: number) => Math.floor(ms / DAY)
+
+/** Feed day heading in UTC: "Today", "Yesterday", else "Thursday 8 Oct". */
+export function dayLabel(iso: string, now: string | Date = new Date()): string {
+  const diff = utcDay(new Date(now).getTime()) - utcDay(new Date(iso).getTime())
+  if (diff <= 0) return 'Today'
+  if (diff === 1) return 'Yesterday'
+  return new Intl.DateTimeFormat('en-GB', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'short',
+    timeZone: 'UTC',
+  }).format(new Date(iso))
+}
+
+export const RECENCY_PERIODS = ['today', 'week', 'month', 'older'] as const
+export type RecencyPeriod = (typeof RECENCY_PERIODS)[number]
+
+/** Period for grouping lists by age: same UTC day, last 7 days, last 30 days, older. */
+export function recencyPeriod(iso: string, now: string | Date = new Date()): RecencyPeriod {
+  const diff = utcDay(new Date(now).getTime()) - utcDay(new Date(iso).getTime())
+  if (diff <= 0) return 'today'
+  if (diff < 7) return 'week'
+  if (diff < 30) return 'month'
+  return 'older'
+}

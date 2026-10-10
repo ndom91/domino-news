@@ -521,6 +521,10 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
   }
 }
 
+// Smaller Narratives still exist (and show on Story pages) but aren't listed: every Story
+// already needs 2+ outlets, so 4 Stories marks a real thread rather than a pair.
+export const MIN_NARRATIVE_STORIES = 4
+
 export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
   const rows = await db
     .select({
@@ -545,8 +549,10 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
       and(eq(schema.story.id, schema.narrativeStory.storyId), isNotNull(schema.story.publishedAt)),
     )
     .groupBy(schema.narrative.id)
+    .having(sql`count(${schema.story.id}) >= ${MIN_NARRATIVE_STORIES}`)
     .orderBy(desc(schema.narrative.updatedAt))
-    .limit(50)
+    // Grouped by period on the page, with older periods collapsed.
+    .limit(300)
   return {
     items: rows.map((r) => ({ ...r, updatedAt: iso(r.updatedAt) })),
   }

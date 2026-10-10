@@ -2,7 +2,7 @@ import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
 import type { Desk, DevelopingNarrative, FrontPage, Region } from '@dn/schemas'
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { getStory, listStories, narrativeDesk } from './reader.ts'
+import { getStory, listStories, MIN_NARRATIVE_STORIES, narrativeDesk } from './reader.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
@@ -60,8 +60,8 @@ export async function getFrontPage(
     })
     .from(schema.narrative)
     .where(
-      sql`exists (select 1 from ${schema.narrativeStory} ns join ${schema.story} s on s.id = ns.story_id
-        where ns.narrative_id = ${schema.narrative.id} and ns.removed_at is null and s.published_at is not null)`,
+      sql`(select count(*) from ${schema.narrativeStory} ns join ${schema.story} s on s.id = ns.story_id
+        where ns.narrative_id = ${schema.narrative.id} and ns.removed_at is null and s.published_at is not null) >= ${MIN_NARRATIVE_STORIES}`,
     )
     .orderBy(desc(schema.narrative.updatedAt))
   const developing = await developingNarratives(db, recent.slice(0, DEVELOPING_COUNT))

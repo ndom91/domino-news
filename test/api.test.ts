@@ -139,10 +139,18 @@ describe('/api/v1 contracts', () => {
     expect(apiErrorSchema.parse(await bad.json()).error.issues?.length).toBeGreaterThan(0)
   })
 
-  it('lists narratives', async () => {
+  it('lists only narratives with enough published stories', async () => {
     const res = await call('/api/v1/narratives')
     expect(res.status).toBe(200)
-    narrativeListResponseSchema.parse(await res.json())
+    const body = narrativeListResponseSchema.parse(await res.json())
+    expect(body.items.every((n) => n.storyCount >= 4)).toBe(true)
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from (
+         select ns.narrative_id from narrative_story ns join story s on s.id = ns.story_id
+         where ns.removed_at is null and s.published_at is not null
+         group by ns.narrative_id having count(*) >= 4) x`,
+    )
+    expect(body.items.length).toBe(rows[0].n)
   })
 })
 
