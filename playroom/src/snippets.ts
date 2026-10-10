@@ -68,7 +68,7 @@ export default [
   {
     group: 'Editorial',
     name: 'StoryRow lead',
-    code: '<StoryRow lead story={fixtureStory} traceTimes={fixtureTrace} />',
+    code: '<StoryRow lead story={fixtureStory} />',
   },
   {
     group: 'Editorial',

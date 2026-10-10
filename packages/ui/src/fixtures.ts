@@ -41,6 +41,12 @@ export const fixtureStory: StoryListItem = {
     fixturePublishers.france24,
   ],
   narratives: [narrativeRef],
+  trace: [
+    { id: 'a1', publisherName: 'The New York Times', at: '2026-10-09T09:05:00.000Z' },
+    { id: 'a2', publisherName: 'The Guardian', at: '2026-10-09T09:20:00.000Z' },
+    { id: 'a3', publisherName: 'France 24', at: '2026-10-09T11:02:00.000Z' },
+    { id: 'a4', publisherName: 'The Washington Post', at: '2026-10-09T15:40:00.000Z' },
+  ],
 }
 
 export const fixtureStorySingle: StoryListItem = {
@@ -55,6 +61,7 @@ export const fixtureStorySingle: StoryListItem = {
   sourceCount: 1,
   publishers: [fixturePublishers.bbc],
   narratives: [],
+  trace: [{ id: 'b1', publisherName: 'BBC News', at: '2026-10-10T02:10:00.000Z' }],
 }
 
 export const fixtureTrace = [

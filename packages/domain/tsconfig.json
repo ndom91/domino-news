@@ -1,4 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
+  // Uses only `URL` and `crypto.getRandomValues` from the platform. Both exist in browsers
+  // and Node; React Native needs react-native-url-polyfill and react-native-get-random-values.
+  "compilerOptions": { "lib": ["ES2023", "DOM"] },
   "include": ["src"]
 }

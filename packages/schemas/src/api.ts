@@ -74,6 +74,8 @@ export const storyListItemSchema = z.object({
   sourceCount: z.number().int().nonnegative(),
   publishers: z.array(publisherRefSchema),
   narratives: z.array(narrativeRefSchema),
+  // When each source reported (publishedAt, else first seen), for coverage traces.
+  trace: z.array(z.object({ id: z.string(), publisherName: z.string(), at: z.string() })),
 })
 export type StoryListItem = z.infer<typeof storyListItemSchema>
 

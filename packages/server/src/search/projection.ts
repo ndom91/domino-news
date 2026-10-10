@@ -10,7 +10,7 @@ const seconds = (d: Date | null) => (d ? Math.floor(d.getTime() / 1000) : 0)
 
 async function storyDocument(db: Db, storyId: string) {
   const [story] = await db.select().from(schema.story).where(eq(schema.story.id, storyId))
-  if (!story || !story.publishedAt || story.mergedIntoStoryId) return null
+  if (!story?.publishedAt || story.mergedIntoStoryId) return null
   const summary = story.currentSummaryId
     ? (
         await db

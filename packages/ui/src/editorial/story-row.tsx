@@ -15,28 +15,13 @@ const DefaultLink: LinkLike = ({ to, className, children }) => (
 
 export interface StoryRowProps {
   story: StoryListItem
-  /** Report times per source, for the trace. Falls back to first/last observed. */
-  traceTimes?: { id: string; publisherName: string; at: string }[]
   Link?: LinkLike
   lead?: boolean
   className?: string
 }
 
 /** A feed entry. The headline is the link; publishers and narrative are secondary routes. */
-export function StoryRow({
-  story,
-  traceTimes,
-  Link = DefaultLink,
-  lead = false,
-  className,
-}: StoryRowProps) {
-  const trace =
-    traceTimes ??
-    story.publishers.map((p, i) => ({
-      id: p.id,
-      publisherName: p.name,
-      at: i === 0 ? story.firstObservedAt : story.lastUpdatedAt,
-    }))
+export function StoryRow({ story, Link = DefaultLink, lead = false, className }: StoryRowProps) {
   const narrative = story.narratives[0]
   return (
     <article className={cx('group relative flex flex-col gap-2.5', className)}>
@@ -72,7 +57,7 @@ export function StoryRow({
         </p>
       ) : null}
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <SourceTrace sources={trace} />
+        <SourceTrace sources={story.trace} />
         <span className="text-xs text-text-muted">
           {story.publishers
             .slice(0, 4)

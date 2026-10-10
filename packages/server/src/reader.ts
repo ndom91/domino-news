@@ -77,6 +77,31 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
   return map
 }
 
+async function tracesByStory(db: Db, storyIds: string[]) {
+  const map = new Map<string, StoryListItem['trace']>()
+  if (storyIds.length === 0) return map
+  const rows = await db
+    .select({
+      storyId: schema.storyArticle.storyId,
+      id: schema.article.id,
+      publisherName: schema.publisher.name,
+      publishedAt: schema.article.publishedAt,
+      firstSeenAt: schema.article.firstSeenAt,
+    })
+    .from(schema.storyArticle)
+    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+    .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+    .where(
+      and(inArray(schema.storyArticle.storyId, storyIds), isNull(schema.storyArticle.removedAt)),
+    )
+  for (const r of rows) {
+    const list = map.get(r.storyId) ?? []
+    list.push({ id: r.id, publisherName: r.publisherName, at: iso(r.publishedAt ?? r.firstSeenAt) })
+    map.set(r.storyId, list)
+  }
+  return map
+}
+
 async function sourceCounts(db: Db, storyIds: string[]) {
   if (storyIds.length === 0) return new Map<string, number>()
   const rows = await db
@@ -99,10 +124,11 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
       eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
     )
     .where(inArray(schema.story.id, storyIds))
-  const [publishers, narratives, counts] = await Promise.all([
+  const [publishers, narratives, counts, traces] = await Promise.all([
     publishersByStory(db, storyIds),
     narrativesByStory(db, storyIds),
     sourceCounts(db, storyIds),
+    tracesByStory(db, storyIds),
   ])
   const byId = new Map(rows.map((r) => [r.story.id, r]))
   return storyIds.flatMap((id) => {
@@ -121,6 +147,7 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
         sourceCount: counts.get(s.id) ?? 0,
         publishers: publishers.get(s.id) ?? [],
         narratives: narratives.get(s.id) ?? [],
+        trace: traces.get(s.id) ?? [],
       },
     ]
   })
@@ -173,7 +200,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
   const id = await resolveStoryId(db, idOrSlug)
   if (!id) return null
   const [story] = await db.select().from(schema.story).where(eq(schema.story.id, id))
-  if (!story || !story.publishedAt) return null
+  if (!story?.publishedAt) return null
 
   const versions = await db
     .select({

@@ -178,7 +178,7 @@ export async function pollFeed(
     .from(schema.feed)
     .innerJoin(schema.publisher, eq(schema.publisher.id, schema.feed.publisherId))
     .where(eq(schema.feed.id, feedId))
-  if (!row || !row.feed.enabled) return { skipped: true }
+  if (!row?.feed.enabled) return { skipped: true }
   const { feed, publisherSlug } = row
   const now = new Date()
   const runId = newId(ID_PREFIX.ingestRun)
