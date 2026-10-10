@@ -28,7 +28,7 @@ export default [
   {
     group: 'Textarea',
     name: 'Summary editor',
-    code: '<Textarea label="Summary" description="Saving creates a new version. Earlier versions are kept." defaultValue={fixtureStoryDetail.summary.body} />',
+    code: '<Textarea label="Summary" description="Saving creates a new version. Earlier versions are kept." defaultValue={fixtureLead.summary.body} />',
   },
   {
     group: 'Card',
@@ -38,7 +38,7 @@ export default [
   {
     group: 'Badge',
     name: 'Tones',
-    code: '<div className="flex gap-2"><Badge>Fixture</Badge><Badge tone="accent">Edited</Badge><Badge tone="success">OK</Badge><Badge tone="warning">Paused</Badge><Badge tone="error">Failed</Badge></div>',
+    code: '<div className="flex gap-2"><Badge>Fixture</Badge><Badge tone="ink">Edited</Badge><Badge tone="success">OK</Badge><Badge tone="warning">Paused</Badge><Badge tone="error">Failed</Badge></div>',
   },
   {
     group: 'Popover',
@@ -48,7 +48,7 @@ export default [
   {
     group: 'Tooltip',
     name: 'Label',
-    code: '<Tooltip content="Exact time: 9 Oct 2026, 09:05 UTC"><button className="font-mono text-xs">2 hours ago</button></Tooltip>',
+    code: '<Tooltip content="Exact time: 9 Oct 2026, 09:05 UTC"><button className="type-meta">2 h ago</button></Tooltip>',
   },
   {
     group: 'Notice',
@@ -57,33 +57,38 @@ export default [
   },
   {
     group: 'Editorial',
+    name: 'HeroStory',
+    code: '<HeroStory story={fixtureLead} position={{ index: 3, total: 6 }} now={fixtureNow} />',
+  },
+  {
+    group: 'Editorial',
+    name: 'StoryItem wide',
+    code: '<div className="grid gap-8 md:grid-cols-2"><StoryItem size="wide" story={fixtureLatest[0]} now={fixtureNow} /></div>',
+  },
+  {
+    group: 'Editorial',
+    name: 'StoryItem grid',
+    code: '<div className="grid gap-x-8 gap-y-11 md:grid-cols-2 lg:grid-cols-4">{fixtureLatest.slice(2, 6).map((s) => <StoryItem key={s.id} story={s} now={fixtureNow} />)}</div>',
+  },
+  {
+    group: 'Editorial',
     name: 'SourceTrace compact',
-    code: '<SourceTrace sources={fixtureTrace} />',
+    code: '<SourceTrace now={fixtureNow} sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, citation: s.citation }))} />',
   },
   {
     group: 'Editorial',
-    name: 'SourceTrace full',
-    code: '<div className="max-w-xl"><SourceTrace size="full" sources={fixtureTrace} /></div>',
+    name: 'SourceBoard',
+    code: '<div className="max-w-md"><SourceBoard sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, href: s.url, citation: s.citation }))} /></div>',
   },
   {
     group: 'Editorial',
-    name: 'StoryRow lead',
-    code: '<StoryRow lead story={fixtureStory} />',
-  },
-  {
-    group: 'Editorial',
-    name: 'StoryRow single source',
-    code: '<StoryRow story={fixtureStorySingle} />',
-  },
-  {
-    group: 'Editorial',
-    name: 'SummaryBlock',
-    code: '<div className="max-w-reading"><SummaryBlock summary={fixtureStoryDetail.summary} sourceCount={4} /></div>',
+    name: 'Developing band',
+    code: '<div className="bg-band p-8 text-band-text"><div className="grid gap-8 lg:grid-cols-3">{fixtureDeveloping.map((n) => <NarrativeColumn key={n.id} narrative={n} />)}</div></div>',
   },
   {
     group: 'Editorial',
     name: 'SourceList',
-    code: '<div className="max-w-reading"><SourceList sources={fixtureStoryDetail.sources} /></div>',
+    code: '<div className="max-w-reading"><SourceList sources={fixtureLead.sources} /></div>',
   },
   {
     group: 'Editorial',
@@ -97,12 +102,7 @@ export default [
   },
   {
     group: 'Editorial',
-    name: 'SummaryBlock with context',
-    code: '<div className="max-w-reading"><SummaryBlock summary={fixtureStoryDetail.summary} sourceCount={4} context={fixtureStoryDetail.context} /></div>',
-  },
-  {
-    group: 'Editorial',
     name: 'ClaimList',
-    code: '<div className="max-w-reading"><ClaimList claims={fixtureStoryDetail.claims} /></div>',
+    code: '<div className="max-w-reading"><ClaimList claims={fixtureLead.claims} /></div>',
   },
 ]

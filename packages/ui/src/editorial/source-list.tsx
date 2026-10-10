@@ -1,15 +1,12 @@
 import type { StorySource } from '@dn/schemas'
-import { cx } from '../cx.ts'
-import type { LinkLike } from './story-row.tsx'
+import { Badge } from '../primitives/surface.tsx'
+import { DefaultLink, type LinkLike } from './link.tsx'
 import { Timestamp } from './time.tsx'
 
-/** Original reporting for a Story. Links open the publisher's article; no text is reproduced beyond the feed description. */
-const DefaultLink: LinkLike = ({ to, className, children }) => (
-  <a href={to} className={className}>
-    {children}
-  </a>
-)
-
+/**
+ * Original reporting for a Story, in publishing order. Links open the publisher's article;
+ * no text is reproduced beyond the feed's own headline and description.
+ */
 export function SourceList({
   sources,
   Link = DefaultLink,
@@ -17,50 +14,41 @@ export function SourceList({
   sources: StorySource[]
   Link?: LinkLike
 }) {
+  const ordered = [...sources].sort((a, b) =>
+    (a.publishedAt ?? a.observedAt).localeCompare(b.publishedAt ?? b.observedAt),
+  )
   return (
-    <ol className="flex flex-col divide-y divide-border border-y border-border">
-      {sources.map((s) => (
+    <ol className="flex flex-col border-t-2 border-rule">
+      {ordered.map((s) => (
         <li
           key={s.articleId}
-          id={`source-${s.articleId}`}
-          className="scroll-mt-24 py-4 target:bg-accent-subtle"
+          id={`report-${s.articleId}`}
+          className="scroll-mt-24 border-b border-border py-4"
         >
-          <div className="mb-1 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+          <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
             <Link
               to={`/publishers/${s.publisher.slug}`}
-              className="text-sm font-semibold text-text hover:underline underline-offset-4"
+              className="text-base font-bold hover:underline"
             >
               {s.publisher.name}
             </Link>
-            {s.official ? (
-              <span className="font-mono text-2xs uppercase tracking-label text-accent">
-                Official source
-              </span>
-            ) : null}
-            <Timestamp iso={s.publishedAt ?? s.observedAt} />
-            <span
-              className={cx(
-                'font-mono text-2xs uppercase tracking-label',
-                s.citedInSummary ? 'text-text-secondary' : 'text-text-muted',
-              )}
-            >
-              {s.citedInSummary ? 'Cited' : 'Not cited'}
+            {s.official ? <Badge>Official source</Badge> : null}
+            <span className="type-meta">
+              <Timestamp at={s.publishedAt ?? s.observedAt} format="clock" /> UTC ·{' '}
+              {s.citation ? `cited [${s.citation}]` : s.citedInSummary ? 'cited' : 'not cited'}
             </span>
           </div>
           <a
             href={s.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="group inline font-serif text-md leading-snug text-text hover:text-accent"
+            className="type-headline text-[1.375rem] link-headline"
           >
             {s.title}
-            <span aria-hidden className="ml-1 inline-block text-text-muted group-hover:text-accent">
-              ↗
-            </span>
             <span className="sr-only"> (opens {s.publisher.domain})</span>
           </a>
           {s.description && s.description !== s.title ? (
-            <p className="mt-1 max-w-reading text-sm leading-normal text-text-secondary line-clamp-3">
+            <p className="mt-1.5 line-clamp-3 max-w-reading text-base leading-normal text-text-secondary">
               {s.description}
             </p>
           ) : null}

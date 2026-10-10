@@ -1,102 +1,122 @@
-import { formatDate } from '@dn/domain'
+import { clockTime, formatDate, formatDateTime } from '@dn/domain'
 import { cx } from '../cx.ts'
 
 export interface TraceSource {
   id: string
-  publisherName: string
+  outlet: string
   at: string
-  /** Cited by the current summary. */
-  cited?: boolean
+  /** Citation number in the summary; null if reported but not cited (0 = cited, unnumbered). */
+  citation: number | null
 }
 
+const citationLabel = (n: number | null) =>
+  n === null ? 'reported, not cited' : n ? `cited [${n}]` : 'cited'
+
+const HOUR = 3_600_000
+const CELLS = 24
+
 /**
- * Signature element: every outlet that reported a Story, placed on a time axis at the
- * moment it reported. Filled marks were cited by the summary; hollow marks were observed
- * but not cited. Encodes coverage and grounding, never credibility.
+ * Hour-cell Source Trace: 24 cells ending at `now` (or at the latest report if everything is
+ * older). Each outlet is a mark in the hour it reported: filled if cited, ring if only reported.
+ * Shape carries the meaning, not colour. `onKey` switches to the hero's key-text colour.
  */
 export function SourceTrace({
   sources,
-  size = 'compact',
+  variant = 'compact',
+  now,
+  width = variant === 'full' ? 492 : 216,
+  onKey = false,
   className,
 }: {
   sources: TraceSource[]
-  size?: 'compact' | 'full'
+  variant?: 'compact' | 'full'
+  /** Window end; pass a server-provided time so SSR and the client agree. */
+  now: string
+  width?: number
+  onKey?: boolean
   className?: string
 }) {
-  if (sources.length === 0) return null
-  const times = sources.map((s) => new Date(s.at).getTime())
-  const min = Math.min(...times)
-  const max = Math.max(...times)
-  const span = Math.max(max - min, 1)
-  const position = (t: number) => (sources.length === 1 ? 0 : ((t - min) / span) * 100)
-  const outlets = new Set(sources.map((s) => s.publisherName)).size
-  const label = `Reported by ${outlets} outlet${outlets === 1 ? '' : 's'}${
-    sources.length > 1
-      ? ` between ${formatDate(new Date(min).toISOString())} and ${formatDate(new Date(max).toISOString())}`
-      : ''
-  }`
-
-  if (size === 'compact') {
-    return (
-      <div className={cx('flex items-center gap-3', className)}>
-        <div role="img" aria-label={label} className="relative h-3 w-24 shrink-0 sm:w-32">
-          <span className="absolute inset-x-0 top-1/2 h-px bg-border-strong" />
-          {sources.map((s) => (
-            <span
-              key={s.id}
-              style={{ left: `${position(new Date(s.at).getTime())}%` }}
-              className={cx(
-                'absolute top-1/2 h-3 w-[3px] -translate-x-1/2 -translate-y-1/2 rounded-full',
-                s.cited === false ? 'border border-text-muted bg-canvas' : 'bg-text',
-              )}
-            />
-          ))}
-        </div>
-        <span className="font-mono text-xs text-text-muted">
-          {outlets} {outlets === 1 ? 'source' : 'sources'}
-        </span>
-      </div>
-    )
+  const latest = Math.max(...sources.map((s) => Date.parse(s.at)))
+  const nowMs = Date.parse(now)
+  const end = latest < nowMs - CELLS * HOUR ? latest : nowMs
+  const stale = end !== nowMs
+  const cw = width / CELLS
+  const r = Math.min(3.8, cw / 2 - 1.3)
+  const rh = r * 2 + 3
+  const columns = Array.from({ length: CELLS }, () => [] as TraceSource[])
+  for (const s of sources) {
+    const hoursAgo = (end - Date.parse(s.at)) / HOUR
+    const cell = Math.min(CELLS - 1, Math.max(0, Math.floor(CELLS - hoursAgo)))
+    columns[cell]?.push(s)
+  }
+  for (const col of columns)
+    col.sort((a, b) => Number(b.citation !== null) - Number(a.citation !== null))
+  const rows = Math.max(variant === 'full' ? 2 : 3, ...columns.map((c) => c.length))
+  const h = rows * rh + 4
+  const H = h + (variant === 'full' ? 18 : 0)
+  const cited = sources.filter((s) => s.citation !== null).length
+  const label = (hoursAgo: number) => {
+    const at = new Date(end - hoursAgo * HOUR).toISOString()
+    if (hoursAgo === 0) return stale ? formatDate(at) : 'now'
+    return stale ? `${formatDate(at)} ${clockTime(at)}` : clockTime(at)
   }
 
-  // Full: a dot plot, one row per report on a shared time axis. Rows link to the source list.
-  const ordered = [...sources].sort((a, b) => a.at.localeCompare(b.at))
   return (
-    <figure className={cx('w-full', className)} aria-label={label}>
-      <div className="mb-2 grid grid-cols-[minmax(6rem,9rem)_1fr] gap-x-3 font-mono text-2xs text-text-muted">
-        <span />
-        <span className="flex justify-between">
-          <span>{formatDate(new Date(min).toISOString())}</span>
-          {sources.length > 1 ? <span>{formatDate(new Date(max).toISOString())}</span> : null}
-        </span>
-      </div>
-      <ol className="flex flex-col">
-        {ordered.map((s) => (
-          <li key={s.id}>
-            <a
-              href={`#source-${s.id}`}
-              className="group grid grid-cols-[minmax(6rem,9rem)_1fr] items-center gap-x-3 rounded-sm py-1 hover:bg-sunken"
+    <svg
+      viewBox={`0 0 ${width} ${H}`}
+      width={width}
+      height={H}
+      role="img"
+      aria-label={`${sources.length} outlets by hour, ${cited} cited`}
+      className={cx('block h-auto max-w-full', className)}
+    >
+      {columns.map((_, i) => (
+        <rect
+          // biome-ignore lint/suspicious/noArrayIndexKey: cells are fixed hour slots
+          key={i}
+          x={i * cw + 0.5}
+          y={0.5}
+          width={cw - 1}
+          height={h - 1}
+          className={cx('fill-none', onKey ? 'stroke-key-text/40' : 'stroke-trace-cell')}
+        />
+      ))}
+      {columns.flatMap((col, i) =>
+        col.map((s, j) => (
+          <circle
+            key={s.id}
+            cx={i * cw + cw / 2}
+            cy={h - 2 - rh / 2 - j * rh}
+            r={r}
+            strokeWidth={s.citation === null ? 1.5 : 0}
+            className={
+              s.citation === null
+                ? onKey
+                  ? 'fill-key stroke-key-text'
+                  : 'fill-canvas stroke-trace-observed'
+                : onKey
+                  ? 'fill-key-text'
+                  : 'fill-trace-cited'
+            }
+          >
+            {/* One string: React SSR drops multi-part text inside an SVG <title>. */}
+            <title>{`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}</title>
+          </circle>
+        )),
+      )}
+      {variant === 'full'
+        ? [24, 18, 12, 6, 0].map((hr) => (
+            <text
+              key={hr}
+              x={(CELLS - hr) * cw}
+              y={h + 14}
+              textAnchor={hr === 24 ? 'start' : hr === 0 ? 'end' : 'middle'}
+              className={cx('text-2xs font-semibold', onKey ? 'fill-key-text' : 'fill-text-muted')}
             >
-              <span className="truncate text-xs text-text-secondary group-hover:text-text">
-                {s.publisherName}
-              </span>
-              <span className="relative h-3">
-                <span className="absolute inset-x-0 top-1/2 h-px bg-border" />
-                <span
-                  style={{ left: `${position(new Date(s.at).getTime())}%` }}
-                  className={cx(
-                    'absolute top-1/2 size-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full',
-                    s.cited === false ? 'border-2 border-text-muted bg-canvas' : 'bg-text',
-                  )}
-                />
-              </span>
-            </a>
-          </li>
-        ))}
-      </ol>
-      <figcaption className="mt-2 text-xs text-text-muted">
-        {label}. Filled marks are cited in the summary; hollow marks were observed but not cited.
-      </figcaption>
-    </figure>
+              {label(hr)}
+            </text>
+          ))
+        : null}
+    </svg>
   )
 }

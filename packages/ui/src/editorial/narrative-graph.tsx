@@ -1,24 +1,19 @@
 import { formatDate } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { DefaultLink, type LinkLike } from './link.tsx'
+import { narrativeKey } from './narrative-key.ts'
 import { layoutNarrative } from './narrative-layout.ts'
 import { relationLabel } from './relations.ts'
-import type { LinkLike } from './story-row.tsx'
 
 const LANE = 22 // px between lane centres
 const DOT_Y = 26 // px from row top to node centre (aligned with the title's first line)
-const LANE_COLORS = ['bg-viz-1', 'bg-viz-2', 'bg-viz-3', 'bg-viz-4', 'bg-viz-5', 'bg-viz-6']
-const laneColor = (lane: number) => LANE_COLORS[lane % LANE_COLORS.length]
-
-const DefaultLink: LinkLike = ({ to, className, children }) => (
-  <a href={to} className={className}>
-    {children}
-  </a>
-)
+// Every lane is the Narrative's key colour: colour means "this Narrative", position shows branches.
+const laneColor = (_lane: number) => 'bg-key'
 
 /**
- * Branching history of a Narrative. Each row is one Story; coloured lanes show how
- * developments continue (same lane) or branch (new lane). Colours only separate lanes.
+ * Branching history of a Narrative. Each row is one Story; lanes show how developments
+ * continue (same lane) or branch (new lane). Lines use the Narrative's key colour.
  */
 export function NarrativeGraph({
   narrative,
@@ -36,7 +31,7 @@ export function NarrativeGraph({
   return (
     <ol
       aria-label={`${narrative.stories.length} developments, oldest first`}
-      className="flex flex-col"
+      className={cx(narrativeKey(narrative.colorSlot), 'flex flex-col border-t-2 border-rule')}
     >
       {layout.rows.map(({ node, row, lane, primary, secondary }) => {
         const isCurrent = node.id === currentStoryId
@@ -74,47 +69,49 @@ export function NarrativeGraph({
                 })}
               <span
                 className={cx(
-                  'absolute size-3 -translate-x-1/2 -translate-y-1/2 rounded-full ring-4 ring-canvas',
-                  isCurrent ? 'bg-text' : laneColor(lane),
+                  'absolute -translate-x-1/2 -translate-y-1/2 ring-4 ring-canvas',
+                  isCurrent ? 'size-3.5 bg-text' : cx('size-3', laneColor(lane)),
                 )}
                 style={{ left: lane * LANE + 11, top: DOT_Y }}
               />
             </div>
             <div
               className={cx(
-                'flex w-full flex-col gap-1 rounded-md px-3 pt-2.5 pb-5',
+                'flex w-full flex-col gap-1 border-b border-border px-3 pt-2.5 pb-5',
                 isCurrent && 'bg-sunken',
               )}
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                <time dateTime={node.firstObservedAt} className="font-mono text-xs text-text-muted">
+                <time dateTime={node.firstObservedAt} className="type-meta font-semibold">
                   {formatDate(node.firstObservedAt)}
                 </time>
                 {primary ? (
-                  <span className="text-xs text-text-muted">
-                    {relationLabel(primary.relation, 'outgoing')}:{' '}
-                    <span className="text-text-secondary">{titleById.get(primary.parentId)}</span>
+                  <span className="text-xs font-semibold tracking-label text-text-muted uppercase">
+                    {relationLabel(primary.relation, 'outgoing')}{' '}
+                    <span className="normal-case tracking-normal">
+                      {titleById.get(primary.parentId)}
+                    </span>
                   </span>
                 ) : null}
               </div>
-              <h3 className="font-serif text-lg leading-snug text-text text-balance">
+              <h3 className="type-headline text-[1.5rem]">
                 {isCurrent ? (
                   <span>
                     {node.title} <span className="sr-only">(current story)</span>
                   </span>
                 ) : (
-                  <Link to={`/stories/${node.slug}`} className="underline-offset-4 hover:underline">
+                  <Link to={`/stories/${node.slug}`} className="link-headline">
                     {node.title}
                   </Link>
                 )}
               </h3>
               {node.summary ? (
-                <p className="line-clamp-2 max-w-reading text-sm leading-normal text-text-secondary">
-                  {node.summary}
+                <p className="line-clamp-2 max-w-reading text-base leading-normal text-text-secondary">
+                  {node.summary.replace(/\[\d+\]/g, '')}
                 </p>
               ) : null}
               {secondary.length > 0 ? (
-                <ul className="mt-1 flex flex-col gap-0.5 text-xs text-text-muted">
+                <ul className="mt-1 flex flex-col gap-0.5 text-label text-text-muted">
                   {secondary.map((s) => (
                     <li key={`${s.otherId}-${s.relation}`}>
                       {relationLabel(s.relation, s.direction)}: {titleById.get(s.otherId)}
@@ -122,7 +119,7 @@ export function NarrativeGraph({
                   ))}
                 </ul>
               ) : null}
-              <span className="font-mono text-2xs text-text-muted">
+              <span className="type-meta">
                 {node.sourceCount} {node.sourceCount === 1 ? 'source' : 'sources'}
               </span>
             </div>

@@ -1,19 +1,18 @@
 import type { ComponentProps, ReactNode } from 'react'
 import { cx } from '../cx.ts'
 
-export interface CardProps extends ComponentProps<'div'> {
-  /** `plain` = surface with border; `sunken` = inset panel for secondary content. */
-  tone?: 'plain' | 'sunken'
-  padded?: boolean
-}
-
-export function Card({ tone = 'plain', padded = true, className, ...props }: CardProps) {
+/** Plain grouping block: a hairline box or a sunken panel. No radius, no shadow. */
+export function Card({
+  tone = 'plain',
+  padded = true,
+  className,
+  ...props
+}: ComponentProps<'div'> & { tone?: 'plain' | 'sunken'; padded?: boolean }) {
   return (
     <div
       {...props}
       className={cx(
-        'rounded-lg border',
-        tone === 'plain' ? 'border-border bg-surface' : 'border-transparent bg-sunken',
+        tone === 'plain' ? 'border border-border' : 'bg-sunken',
         padded && 'p-4 md:p-5',
         className,
       )}
@@ -21,17 +20,17 @@ export function Card({ tone = 'plain', padded = true, className, ...props }: Car
   )
 }
 
-type BadgeTone = 'neutral' | 'accent' | 'success' | 'warning' | 'error'
+type BadgeTone = 'neutral' | 'ink' | 'success' | 'warning' | 'error'
 
 const badgeTones: Record<BadgeTone, string> = {
-  neutral: 'bg-sunken text-text-secondary',
-  accent: 'bg-accent-subtle text-accent',
+  neutral: 'bg-sunken text-text',
+  ink: 'bg-text text-canvas',
   success: 'bg-success-subtle text-success',
   warning: 'bg-warning-subtle text-warning',
   error: 'bg-error-subtle text-error',
 }
 
-/** Small status label. Use only for real state (e.g. "Edited", "Failed"), not decoration. */
+/** Small uppercase status flag. Only for real states (Correction, Failed, Paused), never decoration. */
 export function Badge({
   tone = 'neutral',
   className,
@@ -44,7 +43,7 @@ export function Badge({
   return (
     <span
       className={cx(
-        'inline-flex h-fit self-center items-center rounded-sm px-1.5 py-0.5 font-mono text-2xs uppercase tracking-label',
+        'inline-flex h-fit items-center self-center px-1.5 py-0.5 text-2xs font-extrabold tracking-[0.05em] uppercase',
         badgeTones[tone],
         className,
       )}
@@ -55,18 +54,10 @@ export function Badge({
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cx(
-        'block animate-pulse rounded-sm bg-sunken motion-reduce:animate-none',
-        className,
-      )}
-    />
-  )
+  return <span aria-hidden className={cx('block bg-sunken', className)} />
 }
 
-/** Inline message block for empty, error and info states. Always says what to do next. */
+/** Empty, error and info states: one plain line of direction, no illustration. */
 export function Notice({
   tone = 'neutral',
   title,
@@ -85,13 +76,13 @@ export function Notice({
       role={tone === 'error' ? 'alert' : 'status'}
       className={cx(
         'flex flex-col items-start gap-2 border-l-2 py-1 pl-4',
-        tone === 'error' ? 'border-error' : 'border-border-strong',
+        tone === 'error' ? 'border-error' : 'border-rule',
         className,
       )}
     >
-      <p className="font-medium text-text">{title}</p>
+      <p className={cx('font-bold', tone === 'error' ? 'text-error' : 'text-text')}>{title}</p>
       {children ? (
-        <div className="max-w-reading text-sm text-text-secondary">{children}</div>
+        <div className="max-w-reading text-base text-text-secondary">{children}</div>
       ) : null}
       {action}
     </div>

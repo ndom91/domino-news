@@ -20,6 +20,10 @@ const INCOMING: Record<StoryRelation, string> = {
   related_to: 'Related to',
 }
 
-export function relationLabel(relation: StoryRelation, direction: 'outgoing' | 'incoming') {
+/** Text only; relation types are never colour-coded. */
+export function relationLabel(
+  relation: StoryRelation,
+  direction: 'outgoing' | 'incoming' = 'outgoing',
+) {
   return direction === 'outgoing' ? OUTGOING[relation] : INCOMING[relation]
 }

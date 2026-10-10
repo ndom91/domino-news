@@ -1,245 +1,506 @@
-import type { CoverageMatrix, NarrativeDetail, StoryDetail, StoryListItem } from '@dn/schemas'
+import type {
+  CoverageMatrix,
+  DevelopingNarrative,
+  NarrativeDetail,
+  StoryDetail,
+  StoryListItem,
+} from '@dn/schemas'
 
-// Deterministic view-model fixtures for Playroom and component tests. Headlines mirror the
-// RSS fixture set; summaries are illustrative.
+// Deterministic Playroom/test fixtures mirroring the design handoff's reference page
+// (fictional publishers and stories). Times are hours before fixtureNow.
 
-const pub = (slug: string, name: string, domain: string) => ({
+export const fixtureNow = '2026-10-10T13:50:00.000Z'
+const ago = (h: number) => new Date(Date.parse(fixtureNow) - h * 3_600_000).toISOString()
+
+const pub = (slug: string, name: string) => ({
   id: `pub_${slug}`,
   slug,
   name,
-  domain,
+  domain: `${slug}.example`,
 })
-export const fixturePublishers = {
-  guardian: pub('guardian', 'The Guardian', 'theguardian.com'),
-  nyt: pub('nytimes', 'The New York Times', 'nytimes.com'),
-  wapo: pub('washingtonpost', 'The Washington Post', 'washingtonpost.com'),
-  france24: pub('france24', 'France 24', 'france24.com'),
-  bbc: pub('bbc', 'BBC News', 'bbc.co.uk'),
-  aljazeera: pub('aljazeera', 'Al Jazeera', 'aljazeera.com'),
+const P = {
+  meridian: pub('meridian', 'Meridian Wire'),
+  halden: pub('halden', 'Halden Post'),
+  southbank: pub('southbank', 'Southbank Herald'),
+  brightwater: pub('brightwater', 'Brightwater Public Radio'),
+  civic: pub('civic', 'The Civic Record'),
+  lakeshore: pub('lakeshore', 'Lakeshore Times'),
+  calder: pub('calder', 'Calder Review'),
+  ostend: pub('ostend', 'Ostend Daily'),
+  eastline: pub('eastline', 'Eastline News'),
+}
+type Pub = (typeof P)[keyof typeof P]
+
+const NARR = {
+  harrowgate: {
+    id: 'nar_harrowgate',
+    slug: 'harrowgate-transit-dispute',
+    title: 'Harrowgate transit dispute',
+    colorSlot: 1,
+  },
+  rates: {
+    id: 'nar_rates',
+    slug: 'rate-path',
+    title: 'Rate path after the summer inflation spike',
+    colorSlot: 2,
+  },
+  dataBill: {
+    id: 'nar_data_bill',
+    slug: 'data-retention-bill',
+    title: 'Data-retention bill',
+    colorSlot: 3,
+  },
 }
 
-const narrativeRef = {
-  id: 'nar_nobel',
-  slug: 'nobel-peace-prize-2026',
-  title: 'Nobel Peace Prize 2026',
+type Src = [Pub, number, number | null] // outlet, hours ago, citation
+const S = (p: Pub, h: number, cite: number | null = null): Src => [p, h, cite]
+
+function story(
+  id: string,
+  title: string,
+  summary: string,
+  sources: Src[],
+  extra: Partial<StoryListItem> = {},
+): StoryListItem {
+  const times = sources.map(([, h]) => h)
+  return {
+    id: `sty_${id}`,
+    slug: id,
+    title,
+    summary,
+    status: 'developing',
+    firstObservedAt: ago(Math.max(...times)),
+    lastUpdatedAt: ago(Math.min(...times)),
+    sourceCount: sources.length,
+    regions: ['europe'],
+    publishers: sources.map(([p]) => p),
+    narratives: [],
+    trace: sources.map(([p, h, cite], i) => ({
+      id: `art_${id}_${i}`,
+      publisherName: p.name,
+      at: ago(h),
+      citation: cite,
+    })),
+    relation: null,
+    primarySource: null,
+    correction: false,
+    ...extra,
+  }
 }
 
-export const fixtureStory: StoryListItem = {
-  id: 'sty_pillay',
-  slug: 'navi-pillay-wins-nobel-peace-prize',
-  title: 'Navi Pillay, former UN rights chief, awarded the Nobel Peace Prize',
-  summary:
-    'The Norwegian Nobel Committee awarded the 2026 Peace Prize to Navi Pillay, the South African jurist and former UN High Commissioner for Human Rights, according to The Guardian and The New York Times. France 24 reports the committee cited her work on accountability for war crimes.',
-  status: 'developing',
-  firstObservedAt: '2026-10-09T09:05:00.000Z',
-  lastUpdatedAt: '2026-10-09T15:40:00.000Z',
-  sourceCount: 4,
-  regions: ['europe', 'africa'],
-  publishers: [
-    fixturePublishers.nyt,
-    fixturePublishers.wapo,
-    fixturePublishers.guardian,
-    fixturePublishers.france24,
-  ],
-  narratives: [narrativeRef],
-  trace: [
-    { id: 'a1', publisherName: 'The New York Times', at: '2026-10-09T09:05:00.000Z' },
-    { id: 'a2', publisherName: 'The Guardian', at: '2026-10-09T09:20:00.000Z' },
-    { id: 'a3', publisherName: 'France 24', at: '2026-10-09T11:02:00.000Z' },
-    { id: 'a4', publisherName: 'The Washington Post', at: '2026-10-09T15:40:00.000Z' },
-  ],
-}
-
-export const fixtureStorySingle: StoryListItem = {
-  id: 'sty_quake',
-  slug: 'panama-earthquake',
-  title: 'Magnitude 7.7 earthquake strikes off Panama',
-  summary:
-    'A strong earthquake struck off the coast of Panama on Friday, the BBC reports. There were no immediate reports of casualties.',
-  status: 'developing',
-  firstObservedAt: '2026-10-10T02:10:00.000Z',
-  lastUpdatedAt: '2026-10-10T02:10:00.000Z',
-  sourceCount: 1,
-  regions: ['latin-america'],
-  publishers: [fixturePublishers.bbc],
-  narratives: [],
-  trace: [{ id: 'b1', publisherName: 'BBC News', at: '2026-10-10T02:10:00.000Z' }],
-}
-
-export const fixtureTrace = [
-  { id: 'a1', publisherName: 'The New York Times', at: '2026-10-09T09:05:00.000Z', cited: true },
-  { id: 'a2', publisherName: 'The Guardian', at: '2026-10-09T09:20:00.000Z', cited: true },
-  { id: 'a3', publisherName: 'France 24', at: '2026-10-09T11:02:00.000Z', cited: true },
-  { id: 'a4', publisherName: 'The Washington Post', at: '2026-10-09T15:40:00.000Z', cited: false },
+export const fixtureLatest: StoryListItem[] = [
+  story(
+    'union-files-appeal',
+    'Union files emergency appeal against strike injunction',
+    'The Rail & Signal Workers’ Union lodged an appeal on Saturday morning, arguing the injunction was granted without hearing its safety evidence, Southbank Herald reports[1]. No hearing date has been set[2].',
+    [S(P.southbank, 1.4, 1), S(P.meridian, 0.9, 2), S(P.lakeshore, 0.4)],
+    {
+      narratives: [NARR.harrowgate],
+      relation: {
+        type: 'branches_from',
+        slug: 'court-halts-harrowgate-rail-strike',
+        title: 'Court halts Harrowgate rail strike…',
+      },
+    },
+  ),
+  story(
+    'port-workers-vote',
+    'Port workers schedule vote on solidarity action',
+    'Dockworkers at Harrowgate port will vote on Tuesday on whether to join rail staff in industrial action, Lakeshore Times reports[1].',
+    [S(P.lakeshore, 1.1, 1)],
+    {
+      narratives: [NARR.harrowgate],
+      relation: {
+        type: 'related_to',
+        slug: 'court-halts-harrowgate-rail-strike',
+        title: 'Court halts Harrowgate rail strike…',
+      },
+    },
+  ),
+  story(
+    'central-bank-holds',
+    'Central bank holds rates, signals possible cut in December',
+    'The central bank kept its policy rate at 3.75 percent and said a December cut was “on the table” if core inflation keeps easing, according to Meridian Wire[1] and Ostend Daily[2].',
+    [
+      S(P.meridian, 5.2, 1),
+      S(P.ostend, 5.0, 2),
+      S(P.halden, 4.6),
+      S(P.calder, 4.1, 3),
+      S(P.civic, 3.8),
+      S(P.southbank, 3.3),
+      S(P.eastline, 3.0, 4),
+      S(P.lakeshore, 2.6),
+      S(P.brightwater, 2.2, 5),
+    ],
+    {
+      narratives: [NARR.rates],
+      relation: {
+        type: 'follows',
+        slug: 'core-inflation-falls',
+        title: 'Core inflation falls for a third month',
+      },
+    },
+  ),
+  story(
+    'ridership-revised',
+    'Transit authority revises ridership figures cited in strike talks',
+    'Harrowgate Transit cut its 2025 ridership estimate by 12 percent, The Civic Record reports[1]. The earlier figure appeared in a Story from 2 October, now marked as corrected.',
+    [S(P.civic, 3.6, 1), S(P.halden, 3.1)],
+    {
+      narratives: [NARR.harrowgate],
+      relation: {
+        type: 'corrects',
+        slug: 'ridership-recovered',
+        title: 'Ridership has fully recovered, authority says',
+      },
+      correction: true,
+    },
+  ),
+  story(
+    'wildfire-smoke-alerts',
+    'Wildfire smoke triggers air-quality alerts in three provinces',
+    'Environment agencies issued alerts across the northern provinces as smoke from 40 active fires drifted south, according to Brightwater Public Radio[1] and Eastline News[2].',
+    [
+      S(P.brightwater, 7.9, 1),
+      S(P.eastline, 7.1, 2),
+      S(P.lakeshore, 6.0, 3),
+      S(P.halden, 5.5),
+      S(P.ostend, 4.4),
+    ],
+  ),
+  story(
+    'data-retention-committee',
+    'Parliament committee advances data-retention bill',
+    'The justice committee approved Bill C-41 with two amendments narrowing access by local police, The Civic Record reports[1]; Calder Review says a final vote could come next month[2].',
+    [S(P.civic, 6.2, 1), S(P.calder, 4.9, 2)],
+    {
+      narratives: [NARR.dataBill],
+      relation: {
+        type: 'follows',
+        slug: 'privacy-regulator',
+        title: 'Privacy regulator criticises draft bill',
+      },
+      primarySource: {
+        title: 'Bill C-41, as amended in committee',
+        url: 'https://parliament.example/c-41',
+      },
+    },
+  ),
+  story(
+    'hydropower-curbs',
+    'Drought forces hydropower curbs across the northern grid',
+    'Grid operator Nordvolt cut hydro output by a fifth after the driest September on record, according to Ostend Daily[1] and Eastline News[2].',
+    [S(P.ostend, 11.3, 1), S(P.eastline, 10.2, 2), S(P.meridian, 8.8), S(P.halden, 6.9)],
+  ),
+  story(
+    'hospital-it-outage',
+    'Hospital network delays elective surgeries after IT outage',
+    'Riverside Health postponed about 300 procedures after its scheduling system went offline on Friday, Halden Post reports[1]. The network says patient records were not affected[2].',
+    [
+      S(P.halden, 15.5, 1),
+      S(P.southbank, 13.2, 2),
+      S(P.meridian, 12.8),
+      S(P.civic, 9.1, 3),
+      S(P.brightwater, 8.4),
+      S(P.eastline, 7.7),
+    ],
+  ),
 ]
 
-export const fixtureStoryDetail: StoryDetail = {
-  ...fixtureStory,
-  publishedAt: '2026-10-09T09:30:00.000Z',
+const leadSources: Src[] = [
+  S(P.meridian, 19.75, 1),
+  S(P.halden, 19.05),
+  S(P.southbank, 17.45, 2),
+  S(P.brightwater, 14.25),
+  S(P.civic, 9.95, 3),
+  S(P.lakeshore, 6.65),
+  S(P.calder, 2.15, 4),
+]
+
+export const fixtureLead: StoryDetail = {
+  id: 'sty_court_halts',
+  slug: 'court-halts-harrowgate-rail-strike',
+  title: 'Court halts Harrowgate rail strike hours before walkout',
+  status: 'developing',
+  firstObservedAt: ago(19.75),
+  lastUpdatedAt: ago(2.15),
+  publishedAt: ago(19),
+  regions: ['europe'],
   summary: {
-    versionId: 'sum_2',
-    headline: fixtureStory.title,
-    body: fixtureStory.summary ?? '',
+    versionId: 'sum_lead',
+    headline: 'Court halts Harrowgate rail strike hours before walkout',
+    body: 'A regional court granted Harrowgate Transit an injunction suspending a 48-hour strike by the Rail & Signal Workers’ Union, according to Meridian Wire[1] and The Civic Record[3]. The union said it would appeal[2]. Calder Review reports the ruling cites unresolved safety-staffing talks[4]; the ruling text has not yet been published.',
     format: 'paragraph',
-    createdAt: '2026-10-09T15:42:00.000Z',
+    createdAt: ago(1.1),
     origin: 'generated',
     modelId: 'gemma-4-26B-A4B',
-    citedArticleIds: ['a1', 'a2', 'a3'],
+    citedArticleIds: leadSources.flatMap(([, , c], i) => (c ? [`art_lead_${i}`] : [])),
   },
-  summaryHistory: [
-    { versionId: 'sum_2', createdAt: '2026-10-09T15:42:00.000Z', origin: 'generated' },
-    { versionId: 'sum_1', createdAt: '2026-10-09T09:30:00.000Z', origin: 'generated' },
-  ],
-  sources: fixtureTrace.map((t, i) => ({
-    articleId: t.id,
-    title: [
-      'Navi Pillay Wins Nobel Peace Prize',
-      'Navi Pillay, former UN human rights chief, wins Nobel peace prize',
-      'Former UN rights chief Navi Pillay awarded Nobel Peace Prize',
-      'Nobel Peace Prize goes to Navi Pillay, a champion of international justice',
-    ][i] as string,
-    description: 'The South African jurist led the UN human rights office from 2008 to 2014.',
-    url: `https://example.com/${t.id}`,
-    publishedAt: t.at,
-    observedAt: t.at,
-    publisher:
-      Object.values(fixturePublishers).find((p) => p.name === t.publisherName) ??
-      fixturePublishers.guardian,
+  summaryHistory: [{ versionId: 'sum_lead', createdAt: ago(1.1), origin: 'generated' }],
+  sources: leadSources.map(([p, h, cite], i) => ({
+    articleId: `art_lead_${i}`,
+    title: 'Court halts Harrowgate rail strike hours before walkout',
+    description: 'A regional court granted an injunction suspending the 48-hour strike.',
+    url: `https://${p.domain}/harrowgate-${i}`,
+    publishedAt: ago(h),
+    observedAt: ago(h),
+    publisher: p,
     official: false,
-    citedInSummary: t.cited,
+    citedInSummary: cite !== null,
+    citation: cite,
   })),
   related: [
     {
-      id: 'sty_trump',
-      slug: 'trump-attacks-norway',
-      title: 'Trump attacks Norway over Nobel snub',
-      relation: 'responds_to',
+      id: 'sty_union-files-appeal',
+      slug: 'union-files-appeal',
+      title: 'Union files emergency appeal against strike injunction',
+      relation: 'branches_from',
       direction: 'incoming',
-      lastUpdatedAt: '2026-10-10T07:00:00.000Z',
+      lastUpdatedAt: ago(0.4),
     },
   ],
+  narratives: [NARR.harrowgate],
   primarySources: [],
+  context: [
+    {
+      id: 'ctx_rsw',
+      title: 'Rail & Signal Workers’ Union',
+      kind: 'background',
+      anchorText: 'Rail & Signal Workers’ Union',
+      explanation: 'The largest union of train drivers and signal staff in the Harrowgate region.',
+      sources: [
+        {
+          articleId: 'art_lead_0',
+          publisherName: 'Meridian Wire',
+          title: 'Court halts…',
+          url: 'https://meridian.example/1',
+        },
+      ],
+    },
+  ],
   claims: [
     {
       id: 'clm_1',
-      proposition: 'The Norwegian Nobel Committee awarded the 2026 Peace Prize to Navi Pillay.',
+      proposition: 'A regional court suspended the 48-hour rail strike.',
       mentions: [
-        { stance: 'asserts', articleId: 'a1', publisher: fixturePublishers.nyt },
-        { stance: 'asserts', articleId: 'a2', publisher: fixturePublishers.guardian },
-        { stance: 'asserts', articleId: 'a3', publisher: fixturePublishers.france24 },
+        { stance: 'asserts', articleId: 'art_lead_0', publisher: P.meridian },
+        { stance: 'asserts', articleId: 'art_lead_4', publisher: P.civic },
       ],
       evidence: [],
     },
     {
       id: 'clm_2',
-      proposition: "The committee cited Pillay's work on accountability for war crimes.",
-      mentions: [
-        { stance: 'quotes', articleId: 'a3', publisher: fixturePublishers.france24 },
-        { stance: 'discusses', articleId: 'a4', publisher: fixturePublishers.wapo },
-      ],
+      proposition: 'The union will appeal the injunction.',
+      mentions: [{ stance: 'quotes', articleId: 'art_lead_2', publisher: P.southbank }],
       evidence: [],
-    },
-  ],
-  context: [
-    {
-      id: 'ctx_icc',
-      title: 'UN High Commissioner for Human Rights',
-      kind: 'background',
-      anchorText: 'UN High Commissioner for Human Rights',
-      explanation:
-        'The United Nations official who leads its human rights office in Geneva. Pillay held the post from 2008 to 2014.',
-      sources: [
-        {
-          articleId: 'a2',
-          publisherName: 'The Guardian',
-          title: 'Navi Pillay wins Nobel peace prize',
-          url: 'https://example.com/a2',
-        },
-      ],
     },
   ],
 }
 
+export const fixtureDeveloping: DevelopingNarrative[] = [
+  {
+    ...NARR.harrowgate,
+    storyCount: 6,
+    since: '2026-10-02T09:00:00.000Z',
+    updatedAt: ago(0.4),
+    steps: [
+      {
+        storyId: 'h1',
+        slug: 'ridership-recovered',
+        title: 'Ridership has fully recovered, authority says',
+        firstObservedAt: '2026-10-02T09:00:00.000Z',
+        relation: null,
+        correctedAt: '2026-10-10T10:00:00.000Z',
+      },
+      {
+        storyId: 'h2',
+        slug: 'talks-collapse',
+        title: 'Talks collapse over safety staffing',
+        firstObservedAt: '2026-10-06T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'h3',
+        slug: 'court-halts-harrowgate-rail-strike',
+        title: 'Court halts rail strike hours before walkout',
+        firstObservedAt: '2026-10-09T18:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'h4',
+        slug: 'union-files-appeal',
+        title: 'Union files emergency appeal',
+        firstObservedAt: '2026-10-10T12:00:00.000Z',
+        relation: { type: 'branches_from', title: 'the ruling', at: '2026-10-09T18:00:00.000Z' },
+        correctedAt: null,
+      },
+      {
+        storyId: 'h5',
+        slug: 'ridership-revised',
+        title: 'Authority revises ridership figures',
+        firstObservedAt: '2026-10-10T10:00:00.000Z',
+        relation: {
+          type: 'corrects',
+          title: 'Ridership has fully recovered',
+          at: '2026-10-02T09:00:00.000Z',
+        },
+        correctedAt: null,
+      },
+    ],
+  },
+  {
+    ...NARR.rates,
+    storyCount: 5,
+    since: '2026-08-14T09:00:00.000Z',
+    updatedAt: ago(2.2),
+    steps: [
+      {
+        storyId: 'r1',
+        slug: 'inflation-hits',
+        title: 'Inflation hits 4.1%, highest in two years',
+        firstObservedAt: '2026-08-14T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'r2',
+        slug: 'bank-raises',
+        title: 'Central bank raises rate to 3.75%',
+        firstObservedAt: '2026-09-11T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'r3',
+        slug: 'core-inflation-falls',
+        title: 'Core inflation falls for a third month',
+        firstObservedAt: '2026-10-08T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'r4',
+        slug: 'central-bank-holds',
+        title: 'Central bank holds, signals December cut',
+        firstObservedAt: '2026-10-10T09:00:00.000Z',
+        relation: {
+          type: 'follows',
+          title: 'Core inflation falls',
+          at: '2026-10-08T09:00:00.000Z',
+        },
+        correctedAt: null,
+      },
+    ],
+  },
+  {
+    ...NARR.dataBill,
+    storyCount: 4,
+    since: '2026-09-19T09:00:00.000Z',
+    updatedAt: ago(4.8),
+    steps: [
+      {
+        storyId: 'd1',
+        slug: 'bill-published',
+        title: 'Government publishes Bill C-41',
+        firstObservedAt: '2026-09-19T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'd2',
+        slug: 'telecoms-warn',
+        title: 'Telecoms warn of storage costs',
+        firstObservedAt: '2026-09-26T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'd3',
+        slug: 'privacy-regulator',
+        title: 'Privacy regulator criticises draft',
+        firstObservedAt: '2026-10-03T09:00:00.000Z',
+        relation: null,
+        correctedAt: null,
+      },
+      {
+        storyId: 'd4',
+        slug: 'data-retention-committee',
+        title: 'Committee advances bill with amendments',
+        firstObservedAt: '2026-10-10T09:00:00.000Z',
+        relation: {
+          type: 'follows',
+          title: 'Privacy regulator criticises draft',
+          at: '2026-10-03T09:00:00.000Z',
+        },
+        correctedAt: null,
+      },
+    ],
+  },
+]
+
 export const fixtureNarrative: NarrativeDetail = {
-  id: narrativeRef.id,
-  slug: narrativeRef.slug,
-  title: narrativeRef.title,
+  ...NARR.harrowgate,
   description:
-    'Tracks the 2026 Peace Prize, reactions to it, and the related fight over the International Criminal Court.',
-  createdAt: '2026-10-09T10:00:00.000Z',
-  updatedAt: '2026-10-10T07:00:00.000Z',
+    'Tracks the Harrowgate rail strike, the court injunction and the disputed ridership figures.',
+  createdAt: '2026-10-02T09:00:00.000Z',
+  updatedAt: ago(0.4),
   stories: [
     {
       id: 'sty_icc',
-      slug: 'us-sanctions-icc',
-      title: 'US expands sanctions on International Criminal Court officials',
-      summary: 'Washington widened sanctions on ICC judges, the BBC and DW report.',
-      firstObservedAt: '2026-10-08T18:00:00.000Z',
-      lastUpdatedAt: '2026-10-08T20:00:00.000Z',
+      slug: 'talks-collapse',
+      title: 'Talks collapse over safety staffing',
+      summary: 'Negotiations ended without agreement, Meridian Wire reports[1].',
+      firstObservedAt: '2026-10-06T09:00:00.000Z',
+      lastUpdatedAt: '2026-10-06T12:00:00.000Z',
       sourceCount: 3,
     },
     {
-      id: fixtureStory.id,
-      slug: fixtureStory.slug,
-      title: fixtureStory.title,
-      summary: fixtureStory.summary,
-      firstObservedAt: fixtureStory.firstObservedAt,
-      lastUpdatedAt: fixtureStory.lastUpdatedAt,
-      sourceCount: 4,
+      id: 'sty_pillay',
+      slug: 'court-halts-harrowgate-rail-strike',
+      title: 'Court halts Harrowgate rail strike hours before walkout',
+      summary: 'A regional court granted an injunction[1].',
+      firstObservedAt: ago(19.75),
+      lastUpdatedAt: ago(2.15),
+      sourceCount: 7,
     },
     {
       id: 'sty_trump',
-      slug: 'trump-attacks-norway',
-      title: 'Trump attacks Norway over Nobel snub',
-      summary:
-        'The US president criticised Norway after the prize went to Pillay, according to the BBC.',
-      firstObservedAt: '2026-10-10T06:30:00.000Z',
-      lastUpdatedAt: '2026-10-10T07:00:00.000Z',
-      sourceCount: 4,
+      slug: 'ridership-revised',
+      title: 'Transit authority revises ridership figures cited in strike talks',
+      summary: 'Harrowgate Transit cut its ridership estimate[1].',
+      firstObservedAt: ago(3.6),
+      lastUpdatedAt: ago(3.1),
+      sourceCount: 2,
     },
     {
       id: 'sty_reax',
-      slug: 'icc-welcomes-prize',
-      title: 'ICC judges welcome prize as a rebuke to sanctions',
+      slug: 'union-files-appeal',
+      title: 'Union files emergency appeal against strike injunction',
       summary: null,
-      firstObservedAt: '2026-10-10T09:00:00.000Z',
-      lastUpdatedAt: '2026-10-10T09:00:00.000Z',
-      sourceCount: 1,
+      firstObservedAt: ago(1.4),
+      lastUpdatedAt: ago(0.4),
+      sourceCount: 3,
     },
   ],
   edges: [
-    { id: 'e1', fromStoryId: 'sty_trump', toStoryId: fixtureStory.id, relation: 'responds_to' },
-    { id: 'e2', fromStoryId: fixtureStory.id, toStoryId: 'sty_icc', relation: 'related_to' },
-    { id: 'e3', fromStoryId: 'sty_reax', toStoryId: fixtureStory.id, relation: 'branches_from' },
-    { id: 'e4', fromStoryId: 'sty_reax', toStoryId: 'sty_icc', relation: 'responds_to' },
+    { id: 'e1', fromStoryId: 'sty_pillay', toStoryId: 'sty_icc', relation: 'follows' },
+    { id: 'e2', fromStoryId: 'sty_trump', toStoryId: 'sty_pillay', relation: 'related_to' },
+    { id: 'e3', fromStoryId: 'sty_reax', toStoryId: 'sty_pillay', relation: 'branches_from' },
   ],
 }
 
 export const fixtureCoverage: CoverageMatrix = {
-  publishers: Object.values(fixturePublishers),
-  stories: [
-    {
-      id: fixtureStory.id,
-      slug: fixtureStory.slug,
-      title: fixtureStory.title,
-      lastUpdatedAt: fixtureStory.lastUpdatedAt,
-      coverage: [
-        { publisherId: 'pub_nytimes', first: true },
-        { publisherId: 'pub_guardian', first: false },
-        { publisherId: 'pub_france24', first: false },
-        { publisherId: 'pub_washingtonpost', first: false },
-      ],
-    },
-    {
-      id: 'sty_trump',
-      slug: 'trump-attacks-norway',
-      title: 'Trump attacks Norway over Nobel snub',
-      lastUpdatedAt: '2026-10-10T07:00:00.000Z',
-      coverage: [
-        { publisherId: 'pub_bbc', first: true },
-        { publisherId: 'pub_guardian', first: false },
-        { publisherId: 'pub_aljazeera', first: false },
-      ],
-    },
-  ],
+  publishers: [P.meridian, P.southbank, P.civic, P.calder, P.lakeshore, P.halden],
+  stories: fixtureLatest.slice(0, 4).map((s) => ({
+    id: s.id,
+    slug: s.slug,
+    title: s.title,
+    lastUpdatedAt: s.lastUpdatedAt,
+    coverage: s.publishers.map((p, i) => ({
+      publisherId: p.id,
+      first: i === s.publishers.length - 1,
+    })),
+  })),
 }

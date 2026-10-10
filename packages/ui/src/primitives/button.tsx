@@ -5,27 +5,29 @@ import { cx } from '../cx.ts'
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
 
+// Square. Primary = ink fill, secondary = 2px ink border; hover inverts. Orange is never a button colour.
 const base =
-  'inline-flex items-center justify-center gap-2 font-sans font-medium whitespace-nowrap select-none rounded-md border transition-colors duration-[var(--dn-duration-fast)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus data-disabled:opacity-50 data-disabled:cursor-not-allowed'
+  'inline-flex items-center justify-center gap-2 border-2 font-semibold whitespace-nowrap select-none transition-colors duration-[var(--dn-duration-fast)] data-disabled:cursor-not-allowed data-disabled:opacity-40'
 
 const variants: Record<Variant, string> = {
   primary:
-    'bg-accent border-accent text-accent-contrast hover:not-data-disabled:bg-accent-hover hover:not-data-disabled:border-accent-hover',
-  secondary: 'bg-surface border-border-strong text-text hover:not-data-disabled:bg-sunken',
-  ghost:
-    'bg-transparent border-transparent text-text-secondary hover:not-data-disabled:bg-sunken hover:not-data-disabled:text-text',
-  danger: 'bg-surface border-error text-error hover:not-data-disabled:bg-error-subtle',
+    'border-text bg-text text-canvas hover:not-data-disabled:bg-canvas hover:not-data-disabled:text-text',
+  secondary:
+    'border-text bg-transparent text-text hover:not-data-disabled:bg-text hover:not-data-disabled:text-canvas',
+  ghost: 'border-transparent bg-transparent text-text hover:not-data-disabled:border-text',
+  danger:
+    'border-error bg-transparent text-error hover:not-data-disabled:bg-error hover:not-data-disabled:text-canvas',
 }
 
 const sizes: Record<Size, string> = {
-  // Both sizes meet the 44px touch target on coarse pointers.
-  sm: 'h-8 px-3 text-sm pointer-coarse:min-h-tap',
-  md: 'h-10 px-4 text-sm pointer-coarse:min-h-tap',
+  sm: 'min-h-9 px-3 text-sm pointer-coarse:min-h-tap',
+  md: 'min-h-tap px-4 text-base',
 }
 
 export interface ButtonProps extends Omit<ComponentProps<typeof BaseButton>, 'className'> {
   variant?: Variant
   size?: Size
+  /** Keeps the label and appends "…" while busy; no spinner. */
   loading?: boolean
   className?: string
   children?: ReactNode
@@ -48,8 +50,8 @@ export function Button({
       aria-busy={loading || undefined}
       className={cx(base, variants[variant], sizes[size], className)}
     >
-      {loading ? <Spinner /> : null}
       {children}
+      {loading ? <span aria-hidden>…</span> : null}
     </BaseButton>
   )
 }
@@ -73,18 +75,9 @@ export function IconButton({
       variant={variant}
       aria-label={label}
       title={label}
-      className={cx('size-10 px-0 pointer-coarse:size-tap', className)}
+      className={cx('size-tap px-0', className)}
     >
       {icon}
     </Button>
-  )
-}
-
-function Spinner() {
-  return (
-    <span
-      aria-hidden
-      className="size-3.5 animate-spin rounded-full border-2 border-current border-r-transparent motion-reduce:animate-none"
-    />
   )
 }

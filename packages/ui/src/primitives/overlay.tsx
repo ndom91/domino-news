@@ -3,8 +3,9 @@ import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import type { ReactElement, ReactNode } from 'react'
 import { cx } from '../cx.ts'
 
+// Popovers are the only element with a shadow.
 const popupBase =
-  'origin-(--transform-origin) rounded-md border border-border bg-elevated text-text shadow-md outline-none transition-[opacity,scale] duration-[var(--dn-duration-fast)] data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0'
+  'origin-(--transform-origin) bg-elevated text-text shadow-popover outline-none transition-[opacity,scale] duration-[var(--dn-duration-fast)] data-starting-style:scale-[0.98] data-starting-style:opacity-0 data-ending-style:scale-[0.98] data-ending-style:opacity-0'
 
 export interface PopoverProps {
   /** Element that opens the popover. Rendered via Base UI so it stays keyboard/touch accessible. */
@@ -26,13 +27,11 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
             className={cx(popupBase, 'w-[min(22rem,calc(100vw-1.5rem))] p-4', className)}
           >
             {title ? (
-              <BasePopover.Title className="mb-1.5 font-serif text-md font-semibold leading-snug">
-                {title}
-              </BasePopover.Title>
+              <BasePopover.Title className="mb-2 type-label">{title}</BasePopover.Title>
             ) : null}
             <BasePopover.Description
               render={<div />}
-              className="text-sm leading-normal text-text-secondary"
+              className="text-base leading-normal text-text"
             >
               {children}
             </BasePopover.Description>
@@ -54,9 +53,7 @@ export function Tooltip({ content, children }: { content: ReactNode; children: R
       <BaseTooltip.Trigger render={children} />
       <BaseTooltip.Portal>
         <BaseTooltip.Positioner sideOffset={6} className="z-50">
-          <BaseTooltip.Popup
-            className={cx(popupBase, 'max-w-64 px-2 py-1 text-xs text-text-secondary')}
-          >
+          <BaseTooltip.Popup className={cx(popupBase, 'max-w-64 px-2 py-1 text-sm')}>
             {content}
           </BaseTooltip.Popup>
         </BaseTooltip.Positioner>

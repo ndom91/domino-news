@@ -1,24 +1,39 @@
-import { formatDateTime, relativeTime } from '@dn/domain'
+import { clockTime, formatDateTime, shortRelative } from '@dn/domain'
+import { useEffect, useState } from 'react'
 import { cx } from '../cx.ts'
 
-/** Relative time with the exact UTC time available to all users (title + datetime). */
+/**
+ * `<time>` with the absolute UTC time in the title. Relative text refreshes each minute on
+ * the client (tabular figures, so it doesn't shift layout).
+ */
 export function Timestamp({
-  iso,
+  at,
+  format = 'relative',
   prefix,
   className,
 }: {
-  iso: string
+  at: string
+  format?: 'relative' | 'clock'
   prefix?: string
   className?: string
 }) {
+  const [now, setNow] = useState<Date | null>(null)
+  useEffect(() => {
+    if (format !== 'relative') return
+    setNow(new Date())
+    const timer = setInterval(() => setNow(new Date()), 60_000)
+    return () => clearInterval(timer)
+  }, [format])
+  const text = format === 'clock' ? clockTime(at) : shortRelative(at, now ?? undefined)
   return (
     <time
-      dateTime={iso}
-      title={formatDateTime(iso)}
-      className={cx('font-mono text-xs text-text-muted', className)}
+      dateTime={at}
+      title={formatDateTime(at)}
+      className={cx('tabular-nums', className)}
+      suppressHydrationWarning
     >
       {prefix ? `${prefix} ` : null}
-      {relativeTime(iso)}
+      {text}
     </time>
   )
 }
