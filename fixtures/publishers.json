@@ -1,0 +1,156 @@
+[
+  {
+    "slug": "nytimes",
+    "name": "The New York Times",
+    "domain": "nytimes.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Hard paywall; robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and other AI agents from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://rss.nytimes.com/services/xml/rss/nyt/World.xml",
+        "title": "NYT > World News"
+      }
+    ]
+  },
+  {
+    "slug": "washingtonpost",
+    "name": "The Washington Post",
+    "domain": "washingtonpost.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Metered/hard paywall; robots.txt disallows ClaudeBot, anthropic-ai, CCBot and other AI agents from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://feeds.washingtonpost.com/rss/world", "title": "World" }]
+  },
+  {
+    "slug": "politico",
+    "name": "Politico",
+    "domain": "politico.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt returned 403 to a browser-like client, so permissions could not be verified; Politico Pro content is paywalled. Conservative default.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://rss.politico.com/politics-news.xml", "title": "Politics" }]
+  },
+  {
+    "slug": "npr",
+    "name": "NPR",
+    "domain": "npr.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and other AI agents from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://feeds.npr.org/1001/rss.xml", "title": "NPR Topics: News" }]
+  },
+  {
+    "slug": "guardian",
+    "name": "The Guardian",
+    "domain": "theguardian.com",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall, but robots.txt header states use for LLMs, machine learning or AI purposes is not permitted (licensing@theguardian.com) and blocks ClaudeBot/CCBot. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      { "url": "https://www.theguardian.com/world/rss", "title": "World news | The Guardian" }
+    ]
+  },
+  {
+    "slug": "bbc",
+    "name": "BBC News",
+    "domain": "bbc.co.uk",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall for UK, but robots.txt on bbc.co.uk and bbc.com disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "title": "BBC News" }]
+  },
+  {
+    "slug": "404media",
+    "name": "404 Media",
+    "domain": "404media.co",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt only blocks GPTBot, but many articles sit behind a free-account/subscriber wall that the publisher has said exists to deter AI scraping; no explicit permission found. Conservative default.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://www.404media.co/rss/", "title": "404 Media" }]
+  },
+  {
+    "slug": "theverge",
+    "name": "The Verge",
+    "domain": "theverge.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Partial paywall; robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only. Feed is Atom.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://www.theverge.com/rss/index.xml", "title": "The Verge" }]
+  },
+  {
+    "slug": "dw",
+    "name": "Deutsche Welle (English)",
+    "domain": "dw.com",
+    "countryCode": "DE",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only. Feed is RSS 1.0 (RDF).",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [{ "url": "https://rss.dw.com/rdf/rss-en-all", "title": "Deutsche Welle" }]
+  },
+  {
+    "slug": "france24",
+    "name": "France 24 (English)",
+    "domain": "france24.com",
+    "countryCode": "FR",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and others from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.france24.com/en/rss",
+        "title": "France 24 - International breaking news, top stories and headlines"
+      }
+    ]
+  },
+  {
+    "slug": "aljazeera",
+    "name": "Al Jazeera (English)",
+    "domain": "aljazeera.com",
+    "countryCode": "QA",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No paywall, but robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, ChatGPT-User and others from /. Metadata only.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.aljazeera.com/xml/rss/all.xml",
+        "title": "Al Jazeera – Breaking News, World News and Video from Al Jazeera"
+      }
+    ]
+  },
+  {
+    "slug": "euronews",
+    "name": "Euronews (English)",
+    "domain": "euronews.com",
+    "countryCode": "FR",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt blocks GPTBot/CCBot but allows some AI retrieval agents; however the terms limit downloads to personal, non-commercial use and forbid exploiting content in any way without permission. Conservative default.",
+    "policyReviewedAt": "2026-10-10",
+    "feeds": [
+      {
+        "url": "https://www.euronews.com/rss?format=mrss&level=theme&name=news",
+        "title": "News | Euronews RSS"
+      }
+    ]
+  }
+]

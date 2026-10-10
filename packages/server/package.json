@@ -1,0 +1,28 @@
+{
+  "name": "@dn/server",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth": "./src/auth.ts",
+    "./api": "./src/api/router.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@dn/db": "workspace:*",
+    "@dn/domain": "workspace:*",
+    "@dn/inference": "workspace:*",
+    "@dn/schemas": "workspace:*",
+    "better-auth": "1.7.7",
+    "drizzle-orm": "0.45.4",
+    "pg": "8.23.1",
+    "pg-boss": "12.37.1",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/pg": "^8"
+  }
+}

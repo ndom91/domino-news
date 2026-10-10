@@ -1,0 +1,17 @@
+{
+  "name": "@dn/inference",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@dn/domain": "workspace:*",
+    "@dn/schemas": "workspace:*",
+    "zod": "4.6.5"
+  }
+}
