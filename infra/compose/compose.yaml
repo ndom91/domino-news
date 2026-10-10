@@ -4,6 +4,7 @@
 name: domino-news
 
 x-app: &app
+  image: domino-news-app:local
   build:
     context: ../..
     dockerfile: infra/compose/Dockerfile
@@ -11,8 +12,8 @@ x-app: &app
   environment:
     DATABASE_URL: postgres://dn:dn@postgres:5432/dn
     TYPESENSE_URL: http://typesense:8108
-    # Private CA for the inference endpoint, if any (see README).
-    NODE_EXTRA_CA_CERTS: /certs/inference-ca.pem
+    # Private CA for the inference endpoint, if any (drop the PEM into infra/compose/certs/).
+    INFERENCE_CA_CERT: /certs/inference-ca.pem
   volumes:
     - ./certs:/certs:ro
   depends_on:
@@ -57,11 +58,11 @@ services:
 
   web:
     <<: *app
-    command: ["node", "apps/web/.output/server/index.mjs"]
+    command: ["node", "apps/web/server.mjs"]
     environment:
       DATABASE_URL: postgres://dn:dn@postgres:5432/dn
       TYPESENSE_URL: http://typesense:8108
-      NODE_EXTRA_CA_CERTS: /certs/inference-ca.pem
+      INFERENCE_CA_CERT: /certs/inference-ca.pem
       PORT: "3000"
     ports:
       - "${WEB_PORT:-3000}:3000"

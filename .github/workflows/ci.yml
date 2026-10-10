@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg17-trixie
+        env:
+          POSTGRES_USER: dn
+          POSTGRES_PASSWORD: dn
+          POSTGRES_DB: dn_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U dn" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      TEST_DATABASE_URL: postgres://dn:dn@localhost:5432/dn_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm typecheck
+      - run: pnpm test
+
+  e2e:
+    runs-on: ubuntu-latest
+    needs: checks
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: cp .env.example .env
+      - run: docker compose -f infra/compose/compose.yaml up -d --wait postgres typesense
+      - run: pnpm db:migrate
+      - run: pnpm cli seed
+      - run: pnpm cli user:create --username dev --password dev-password-change-me
+      # Fixture mode: deterministic, no GPU. Worker + indexer run the pipeline in the background.
+      - run: |
+          (cd apps/worker && pnpm start > ../../worker.log 2>&1 &)
+          (cd apps/worker && pnpm start:indexer > ../../indexer.log 2>&1 &)
+          pnpm cli ingest
+          for i in $(seq 1 60); do
+            published=$(pnpm --silent cli status | jq '.pipeline.storiesPublished' || echo 0)
+            [ "${published:-0}" -gt 5 ] && break
+            sleep 5
+          done
+      - run: pnpm build && (cd apps/web && pnpm start > ../../web.log 2>&1 &) && sleep 5
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:e2e
+      - if: failure()
+        run: tail -n 100 worker.log indexer.log web.log

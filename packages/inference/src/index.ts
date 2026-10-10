@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import tls from 'node:tls'
 import { createFixtureEmbeddings, createFixtureGeneration } from './fixture.ts'
 import { createLocalEmbeddings, createLocalGeneration } from './local.ts'
@@ -35,6 +35,11 @@ export function createInferenceFromEnv(env = process.env): InferenceProviders {
 let caLoaded = false
 function trustExtraCa(path: string) {
   if (caLoaded) return
+  if (!existsSync(path)) {
+    console.warn(`[inference] INFERENCE_CA_CERT not found at ${path}; using system CAs only`)
+    caLoaded = true
+    return
+  }
   tls.setDefaultCACertificates([...tls.getCACertificates('default'), readFileSync(path, 'utf8')])
   caLoaded = true
 }

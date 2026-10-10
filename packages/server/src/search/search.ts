@@ -13,6 +13,26 @@ interface TsResult {
   }[]
 }
 
+// When the embedding endpoint fails, skip it for a while so keyword search stays fast.
+const BREAKER_COOLDOWN_MS = 60_000
+const QUERY_EMBED_TIMEOUT_MS = 2500
+let embeddingsDownUntil = 0
+
+async function embedQueryWithBreaker(embeddings: EmbeddingProvider, q: string) {
+  if (Date.now() < embeddingsDownUntil) return null
+  try {
+    const vector = await Promise.race([
+      embeddings.embedQuery(q),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), QUERY_EMBED_TIMEOUT_MS)),
+    ])
+    if (!vector) embeddingsDownUntil = Date.now() + BREAKER_COOLDOWN_MS
+    return vector
+  } catch {
+    embeddingsDownUntil = Date.now() + BREAKER_COOLDOWN_MS
+    return null
+  }
+}
+
 const SINCE_SECONDS = { '24h': 86_400, '7d': 7 * 86_400, '30d': 30 * 86_400 } as const
 
 /**
@@ -26,15 +46,7 @@ export async function searchAll(
   embeddings: EmbeddingProvider,
   query: SearchQuery,
 ): Promise<SearchResponse> {
-  let vector: number[] | null = null
-  try {
-    vector = await Promise.race([
-      embeddings.embedQuery(query.q),
-      new Promise<null>((resolve) => setTimeout(() => resolve(null), 4000)),
-    ])
-  } catch {
-    vector = null
-  }
+  const vector = await embedQueryWithBreaker(embeddings, query.q)
 
   const filters: string[] = []
   if (query.since !== 'all') {

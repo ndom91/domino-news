@@ -72,8 +72,14 @@ const each =
   (fn: (job: AnalysisJob) => Promise<unknown>): Handler =>
   async (jobs) => {
     for (const job of jobs) {
-      const result = await fn(job.data)
-      console.log(`[${job.name}] ${job.data.targetId} ${JSON.stringify(result)}`)
+      try {
+        const result = await fn(job.data)
+        console.log(`[${job.name}] ${job.data.targetId} ${JSON.stringify(result)}`)
+      } catch (error) {
+        // Message only: errors never include transient article text.
+        console.error(`[${job.name}] ${job.data.targetId} failed: ${(error as Error).message}`)
+        throw error
+      }
     }
   }
 
