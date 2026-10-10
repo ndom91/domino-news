@@ -140,3 +140,17 @@ describe('PriorityLimiter', () => {
     expect(maxActive).toBe(1)
   })
 })
+
+describe('parseFeed reported update times', () => {
+  it('captures Atom <updated> separately from the publish date', () => {
+    const xml = `<feed xmlns="http://www.w3.org/2005/Atom"><entry>
+      <title>Atom item</title><link href="https://ex.com/atom"/><id>urn:1</id>
+      <published>2026-10-09T08:00:00Z</published><updated>2026-10-09T11:30:00Z</updated>
+      <summary>Short</summary></entry></feed>`
+    const { items } = parseFeed(xml)
+    expect(items[0]).toMatchObject({
+      publishedAt: '2026-10-09T08:00:00.000Z',
+      updatedAt: '2026-10-09T11:30:00.000Z',
+    })
+  })
+})

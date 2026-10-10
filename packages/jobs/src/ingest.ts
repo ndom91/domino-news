@@ -4,7 +4,7 @@ import { schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import type { ArticleMetadata } from '@dn/schemas'
 import { analysisJob, QUEUES, sha256 } from '@dn/server'
-import { and, eq, sql } from 'drizzle-orm'
+import { eq } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { parseFeed } from './rss.ts'
 
@@ -75,7 +75,6 @@ async function ingestItem(
         canonicalUrl: item.canonicalUrl,
         firstSeenAt: now,
         publishedAt: item.publishedAt ? new Date(item.publishedAt) : null,
-        priorityClass: cls,
         pipelineState: cls === 'backfill' ? 'pending_backfill' : 'queued',
       })
       .onConflictDoNothing({ target: schema.article.canonicalUrl })
@@ -119,6 +118,7 @@ async function ingestItem(
       id: revisionId,
       articleId: article.id,
       observedAt: now,
+      reportedUpdatedAt: item.updatedAt ? new Date(item.updatedAt) : null,
       title: item.title,
       description: item.description,
       contentHash,
@@ -172,11 +172,6 @@ export async function pollFeed(
   if (!row?.feed.enabled) return { skipped: true }
   const { feed, publisherSlug } = row
   const now = new Date()
-  const runId = newId(ID_PREFIX.ingestRun)
-  await ctx.db
-    .insert(schema.ingestRun)
-    .values({ id: runId, feedId, startedAt: now, status: 'running' })
-
   try {
     const fetched = await fetchFeedXml(ctx, feed, publisherSlug, variant)
     const { items, skipped } = fetched.xml ? parseFeed(fetched.xml) : { items: [], skipped: 0 }
@@ -202,21 +197,10 @@ export async function pollFeed(
         lastPolledAt: now,
         lastStatus: failed > 0 ? 'partial' : 'ok',
         lastError: failed > 0 ? `${failed} item(s) failed, ${skipped} invalid` : null,
-        consecutiveFailures: 0,
         etag: fetched.etag ?? feed.etag,
         lastModified: fetched.lastModified ?? feed.lastModified,
       })
       .where(eq(schema.feed.id, feed.id))
-    await ctx.db
-      .update(schema.ingestRun)
-      .set({
-        finishedAt: new Date(),
-        status: 'succeeded',
-        itemsSeen: items.length,
-        articlesCreated: created,
-        revisionsCreated: revised,
-      })
-      .where(eq(schema.ingestRun.id, runId))
     return { items: items.length, created, revised, skipped, failed }
   } catch (error) {
     // Feed errors are isolated: record and move on; the next scheduled poll retries.
@@ -227,13 +211,8 @@ export async function pollFeed(
         lastPolledAt: now,
         lastStatus: 'error',
         lastError: message,
-        consecutiveFailures: sql`${schema.feed.consecutiveFailures} + 1`,
       })
       .where(eq(schema.feed.id, feed.id))
-    await ctx.db
-      .update(schema.ingestRun)
-      .set({ finishedAt: new Date(), status: 'failed', error: message })
-      .where(and(eq(schema.ingestRun.id, runId)))
     return { error: message }
   }
 }

@@ -25,25 +25,15 @@ async function storyDocument(db: Db, storyId: string) {
     .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
     .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
     .where(and(eq(schema.storyArticle.storyId, storyId), isNull(schema.storyArticle.removedAt)))
-  const [count] = await db
-    .select({ n: sql<number>`count(*)::int` })
-    .from(schema.storyArticle)
-    .where(and(eq(schema.storyArticle.storyId, storyId), isNull(schema.storyArticle.removedAt)))
-  const narratives = await db
-    .select({ id: schema.narrativeStory.narrativeId })
-    .from(schema.narrativeStory)
-    .where(and(eq(schema.narrativeStory.storyId, storyId), isNull(schema.narrativeStory.removedAt)))
+  // Only searchable/filterable fields: results are hydrated from Postgres.
   return {
     version: story.version,
     doc: {
       id: story.id,
-      slug: story.slug,
       title: story.title,
       summary: summary?.body,
       publisher_ids: publishers.map((p) => p.id),
       publisher_names: publishers.map((p) => p.name),
-      narrative_ids: narratives.map((n) => n.id),
-      source_count: count?.n ?? 0,
       last_updated_at: seconds(story.lastUpdatedAt),
       ...(story.embedding ? { embedding: story.embedding } : {}),
     },
@@ -72,10 +62,8 @@ async function narrativeDocument(db: Db, narrativeId: string) {
     version: narrative.version,
     doc: {
       id: narrative.id,
-      slug: narrative.slug,
       title: narrative.title,
       description: narrative.description ?? undefined,
-      story_count: count.n,
       updated_at: seconds(narrative.updatedAt),
     },
   }

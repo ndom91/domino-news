@@ -59,6 +59,8 @@ export const articleMetadataSchema = z.object({
   description: z.string().nullable(),
   canonicalUrl: z.url(),
   publishedAt: z.iso.datetime().nullable(),
+  // Publisher-reported modification time (Atom <updated>, dc:modified), when present.
+  updatedAt: z.iso.datetime().nullable(),
   externalGuid: z.string().nullable(),
 })
 export type ArticleMetadata = z.infer<typeof articleMetadataSchema>

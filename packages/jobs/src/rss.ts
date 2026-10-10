@@ -58,6 +58,7 @@ export function parseFeed(xml: string): { items: ArticleMetadata[]; skipped: num
       description: description ? stripHtml(description) || null : null,
       canonicalUrl: href ? safeNormalize(decodeEntities(href.trim())) : '',
       publishedAt: toIso(item.pubDate ?? item['dc:date'] ?? item.published ?? item.updated),
+      updatedAt: toIso(item.updated ?? item['atom:updated'] ?? item['dc:modified']),
       externalGuid: guid ? decodeEntities(guid) : null,
     }
     const parsed = articleMetadataSchema.safeParse(candidate)

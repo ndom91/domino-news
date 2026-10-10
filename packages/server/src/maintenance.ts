@@ -20,7 +20,6 @@ const INGESTED_TABLES = [
   'analysis_run',
   'article_embedding',
   'feed_entry',
-  'ingest_run',
   'outbox_event',
   'inbox_event',
   'search_projection_state',

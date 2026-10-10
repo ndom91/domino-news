@@ -88,13 +88,10 @@ export function collectionSchema(alias: Alias, name: string) {
       return {
         name,
         fields: [
-          { name: 'slug', type: 'string', index: false, optional: true },
           { name: 'title', type: 'string' },
           { name: 'summary', type: 'string', optional: true },
           { name: 'publisher_ids', type: 'string[]', facet: true },
           { name: 'publisher_names', type: 'string[]' },
-          { name: 'narrative_ids', type: 'string[]', facet: true },
-          { name: 'source_count', type: 'int32' },
           { name: 'last_updated_at', type: 'int64', sort: true },
           embedding,
         ],
@@ -104,10 +101,8 @@ export function collectionSchema(alias: Alias, name: string) {
       return {
         name,
         fields: [
-          { name: 'slug', type: 'string', index: false, optional: true },
           { name: 'title', type: 'string' },
           { name: 'description', type: 'string', optional: true },
-          { name: 'story_count', type: 'int32' },
           { name: 'updated_at', type: 'int64', sort: true },
         ],
         default_sorting_field: 'updated_at',

@@ -4,6 +4,8 @@ import type { PgBoss, SendOptions } from 'pg-boss'
 import type { Gpu } from './dispatcher.ts'
 
 export interface WorkerContext extends ServerContext {
+  // Same instance `boss()` resolves to. Ops code shared with the web app uses the lazy
+  // `boss()`; pipeline code needs this already-started handle synchronously.
   workerBoss: PgBoss
   gpu: Gpu
 }

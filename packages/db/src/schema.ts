@@ -91,7 +91,6 @@ export const feed = pgTable('feed', {
   lastPolledAt: ts('last_polled_at'),
   lastStatus: text('last_status'),
   lastError: text('last_error'),
-  consecutiveFailures: integer('consecutive_failures').notNull().default(0),
   etag: text('etag'),
   lastModified: text('last_modified'),
   createdAt: createdAt(),
@@ -109,7 +108,6 @@ export const article = pgTable(
     publishedAt: ts('published_at'),
     latestRevisionId: text('latest_revision_id'),
     // Pipeline bookkeeping, not domain truth.
-    priorityClass: text('priority_class').notNull().default('fresh'),
     pipelineState: text('pipeline_state').notNull().default('discovered'),
   },
   (t) => [
@@ -150,24 +148,6 @@ export const feedEntry = pgTable(
     lastSeenAt: ts('last_seen_at').notNull(),
   },
   (t) => [uniqueIndex('feed_entry_feed_article_uq').on(t.feedId, t.articleId)],
-)
-
-export const ingestRun = pgTable(
-  'ingest_run',
-  {
-    id: text('id').primaryKey(),
-    feedId: text('feed_id')
-      .notNull()
-      .references(() => feed.id),
-    startedAt: ts('started_at').notNull(),
-    finishedAt: ts('finished_at'),
-    status: text('status').notNull(),
-    itemsSeen: integer('items_seen').notNull().default(0),
-    articlesCreated: integer('articles_created').notNull().default(0),
-    revisionsCreated: integer('revisions_created').notNull().default(0),
-    error: text('error'),
-  },
-  (t) => [index('ingest_run_feed_idx').on(t.feedId, t.startedAt)],
 )
 
 export const articleEmbedding = pgTable('article_embedding', {

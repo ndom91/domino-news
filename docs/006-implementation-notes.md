@@ -82,7 +82,7 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - Typesense collections are versioned (`stories_<ts>`) behind aliases (`stories`, `narratives`, `articles`). `pnpm cli search:rebuild` (or the ops button) builds fresh collections from Postgres and swaps the aliases.
 - The indexer never trusts event payloads: it re-reads Postgres for the aggregate, so duplicates, replays and out-of-order events converge. `search_projection_state` records applied versions; withdrawn or unpublished aggregates are deleted.
 - Search is hybrid (keyword + query embedding, `alpha 0.4`). Gotcha: with externally supplied vectors, `embedding` must **not** be listed in `query_by`; the vector part comes only from `vector_query`. Typesense `multi_search` returns HTTP 200 even when an individual search fails, so the client checks each result's `error` and throws (otherwise failures look like "no results"). If the embedding call fails or takes over 2.5s, it falls back to keyword-only and skips embedding for 60s (circuit breaker). Results report `mode: hybrid | keyword`.
-- Typesense only returns candidate IDs and scores; result data is hydrated from Postgres.
+- Typesense only returns candidate IDs and scores; result data is hydrated from Postgres. Documents therefore hold only searchable/filterable fields. Changing a collection schema (`collectionSchema` in `typesense.ts`) requires `pnpm cli search:rebuild` after deploying.
 - A minimal `fetch` client replaces the Typesense SDK (five calls, simpler types).
 
 ## Web
