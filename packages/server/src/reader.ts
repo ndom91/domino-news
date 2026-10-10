@@ -339,6 +339,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       ]
     }),
     narratives: (await narrativesByStory(db, [id])).get(id) ?? [],
+    context: await storyContext(db, id),
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,
       url: ref.url,
@@ -437,4 +438,55 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
     .orderBy(desc(schema.narrative.updatedAt))
     .limit(50)
   return { items: rows.map((r) => ({ ...r, updatedAt: iso(r.updatedAt) })) }
+}
+
+async function storyContext(db: Db, storyId: string): Promise<StoryDetail['context']> {
+  const rows = await db
+    .select({
+      id: schema.contextEntry.id,
+      title: schema.contextEntry.title,
+      kind: schema.contextEntry.kind,
+      anchorText: schema.storyContext.anchorText,
+      explanation: schema.contextEntryVersion.explanation,
+      interpretationId: schema.contextEntryVersion.interpretationId,
+    })
+    .from(schema.storyContext)
+    .innerJoin(schema.contextEntry, eq(schema.contextEntry.id, schema.storyContext.contextEntryId))
+    .innerJoin(
+      schema.contextEntryVersion,
+      eq(schema.contextEntryVersion.id, schema.contextEntry.currentVersionId),
+    )
+    .where(eq(schema.storyContext.storyId, storyId))
+  if (rows.length === 0) return []
+  const sources = await db
+    .selectDistinct({
+      interpretationId: schema.interpretationEvidence.interpretationId,
+      articleId: schema.article.id,
+      url: schema.article.canonicalUrl,
+      title: schema.articleRevision.title,
+      publisherName: schema.publisher.name,
+    })
+    .from(schema.interpretationEvidence)
+    .innerJoin(
+      schema.observation,
+      eq(schema.observation.id, schema.interpretationEvidence.observationId),
+    )
+    .innerJoin(schema.article, eq(schema.article.id, schema.observation.subjectId))
+    .innerJoin(
+      schema.articleRevision,
+      eq(schema.articleRevision.id, schema.article.latestRevisionId),
+    )
+    .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+    .where(
+      inArray(
+        schema.interpretationEvidence.interpretationId,
+        rows.map((r) => r.interpretationId),
+      ),
+    )
+  return rows.map(({ interpretationId, ...entry }) => ({
+    ...entry,
+    sources: sources
+      .filter((s) => s.interpretationId === interpretationId)
+      .map(({ interpretationId: _, ...s }) => s),
+  }))
 }

@@ -29,6 +29,21 @@ export const contextEntrySchema = z.object({
 })
 export type ContextEntryOutput = z.infer<typeof contextEntrySchema>
 
+export const contextKindSchema = z.enum(['definition', 'background', 'prerequisite'])
+
+// Context for one Story summary. `anchorText` must appear verbatim in the summary.
+export const storyContextOutputSchema = z.object({
+  entries: z
+    .array(
+      contextEntrySchema.extend({
+        anchorText: z.string().min(2).max(80),
+        kind: contextKindSchema,
+      }),
+    )
+    .max(4),
+})
+export type StoryContextOutput = z.infer<typeof storyContextOutputSchema>
+
 export const storyRelationValues = [
   'follows',
   'branches_from',

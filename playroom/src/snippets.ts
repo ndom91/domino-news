@@ -95,4 +95,9 @@ export default [
     name: 'CoverageMatrix',
     code: '<CoverageMatrix matrix={fixtureCoverage} />',
   },
+  {
+    group: 'Editorial',
+    name: 'SummaryBlock with context',
+    code: '<div className="max-w-reading"><SummaryBlock summary={fixtureStoryDetail.summary} sourceCount={4} context={fixtureStoryDetail.context} /></div>',
+  },
 ]

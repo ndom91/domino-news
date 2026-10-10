@@ -116,6 +116,24 @@ export const fixtureStoryDetail: StoryDetail = {
     },
   ],
   primarySources: [],
+  context: [
+    {
+      id: 'ctx_icc',
+      title: 'UN High Commissioner for Human Rights',
+      kind: 'background',
+      anchorText: 'UN High Commissioner for Human Rights',
+      explanation:
+        'The United Nations official who leads its human rights office in Geneva. Pillay held the post from 2008 to 2014.',
+      sources: [
+        {
+          articleId: 'a2',
+          publisherName: 'The Guardian',
+          title: 'Navi Pillay wins Nobel peace prize',
+          url: 'https://example.com/a2',
+        },
+      ],
+    },
+  ],
 }
 
 export const fixtureNarrative: NarrativeDetail = {

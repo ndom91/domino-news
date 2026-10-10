@@ -36,6 +36,20 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(
     page.locator('section[aria-labelledby="sources-heading"] a[target="_blank"]').first(),
   ).toBeVisible()
+  // Context popovers: open the first one found among the first few stories.
+  const term = page.locator('#summary-heading ~ div button')
+  for (let i = 0; i < 6 && (await term.count()) === 0; i++) {
+    await page.goto('/')
+    await page
+      .locator('main article h2 a')
+      .nth(i + 1)
+      .click()
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  }
+  await expect(term.first()).toBeVisible()
+  await term.first().click()
+  await expect(page.getByText(/Written by a language model/).first()).toBeVisible()
+  await page.keyboard.press('Escape')
   await page.getByRole('button', { name: 'About this summary' }).click()
   await expect(page.getByText('How this summary is made')).toBeVisible()
   await page.keyboard.press('Escape')

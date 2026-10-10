@@ -64,6 +64,8 @@ export const evidenceRelationship = pgEnum('evidence_relationship', [
 
 export const summaryFormat = pgEnum('summary_format', ['paragraph', 'bullets'])
 
+export const contextKind = pgEnum('context_kind', ['definition', 'background', 'prerequisite'])
+
 // Sources and ingest
 
 export const publisher = pgTable('publisher', {
@@ -418,6 +420,54 @@ export const storySourceReference = pgTable(
     addedAt: ts('added_at').notNull(),
   },
   (t) => [primaryKey({ columns: [t.storyId, t.sourceReferenceId] })],
+)
+
+// Context entries: reusable background explanations shown as popovers on Story summaries.
+// Explanations are versioned (append-only trigger); entries are shared across Stories.
+
+export const contextEntry = pgTable('context_entry', {
+  id: text('id').primaryKey(),
+  kind: contextKind('kind').notNull(),
+  title: text('title').notNull(),
+  // Lowercased slug of the title; the same subject is explained once and reused.
+  normalizedKey: text('normalized_key').notNull().unique(),
+  currentVersionId: text('current_version_id'),
+  createdAt: createdAt(),
+})
+
+export const contextEntryVersion = pgTable(
+  'context_entry_version',
+  {
+    id: text('id').primaryKey(),
+    contextEntryId: text('context_entry_id')
+      .notNull()
+      .references(() => contextEntry.id),
+    explanation: text('explanation').notNull(),
+    interpretationId: text('interpretation_id')
+      .notNull()
+      .references(() => interpretation.id),
+    createdAt: createdAt(),
+  },
+  (t) => [index('context_entry_version_entry_idx').on(t.contextEntryId)],
+)
+
+// Which entries annotate which Story summary, and the exact text they anchor to.
+export const storyContext = pgTable(
+  'story_context',
+  {
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    contextEntryId: text('context_entry_id')
+      .notNull()
+      .references(() => contextEntry.id),
+    anchorText: text('anchor_text').notNull(),
+    interpretationId: text('interpretation_id')
+      .notNull()
+      .references(() => interpretation.id),
+    addedAt: ts('added_at').notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.storyId, t.contextEntryId] })],
 )
 
 // Outbox / inbox / search projection state

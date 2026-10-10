@@ -19,7 +19,8 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
   backfill:pause | backfill:resume
-  relate:all [--reset]              Re-run story relationship + narrative detection (--reset clears edges/narratives first)
+  enrich:all [--reset-graph]        Re-run relationships, narratives and context for published stories
+                                    (--reset-graph clears relationships/narratives first)
   status                            Print pipeline/queue status as JSON
   dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
 
@@ -29,9 +30,12 @@ const { positionals, values } = parseArgs({
     username: { type: 'string' },
     password: { type: 'string' },
     variant: { type: 'string', default: 'rss' },
-    reset: { type: 'boolean', default: false },
+    'reset-graph': { type: 'boolean', default: false },
   },
 })
+
+// Everything keyed on a Story's current summary version.
+const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext]
 
 const ctx = await bootWorkerContext()
 try {
@@ -69,16 +73,17 @@ try {
       await rebuildSearchIndex(ctx.db, ctx.ts, () => {})
       console.log('reset complete')
       break
-    case 'relate:all': {
-      if (values.reset) await resetStoryGraph(ctx.db)
+    case 'enrich:all': {
+      if (values['reset-graph']) await resetStoryGraph(ctx.db)
       const { rows } = await ctx.pool.query<{ id: string; current_summary_id: string }>(
         'select id, current_summary_id from story where published_at is not null order by first_observed_at',
       )
       for (const r of rows) {
         const job = analysisJob(r.id, r.current_summary_id, 'backfill')
-        await ctx.workerBoss.send(QUEUES.relateStory, job.data, job.options)
+        for (const queue of ENRICHMENT_QUEUES)
+          await ctx.workerBoss.send(queue, job.data, job.options)
       }
-      console.log(`enqueued ${rows.length} relate jobs`)
+      console.log(`enqueued enrichment for ${rows.length} stories`)
       break
     }
     case 'status':

@@ -1,6 +1,7 @@
 import type {
   NarrativeTitle,
   RelationshipCandidate,
+  StoryContextOutput,
   StoryMatch,
   StorySummaryOutput,
 } from '@dn/schemas'
@@ -46,6 +47,10 @@ export interface GenerationProvider {
     older: StoryInput
   }): Promise<Generated<RelationshipCandidate>>
   titleNarrative(input: { stories: StoryInput[] }): Promise<Generated<NarrativeTitle>>
+  explainContext(input: {
+    story: StoryInput
+    summary: string
+  }): Promise<Generated<StoryContextOutput>>
 }
 
 export interface InferenceProviders {

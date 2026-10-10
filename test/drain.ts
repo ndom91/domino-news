@@ -1,6 +1,7 @@
 import {
   createQueues,
   embedArticles,
+  explainStoryContext,
   matchArticle,
   relateStory,
   summarizeStory,
@@ -15,12 +16,13 @@ export async function drainPipeline(ctx: WorkerContext, maxRounds = 50) {
   for (let round = 0; round < maxRounds; round++) {
     let worked = false
     await processOutboxBatch(ctx.db, ctx.ts, 500)
-    for (const name of [
-      QUEUES.embedArticle,
-      QUEUES.matchArticle,
-      QUEUES.summarizeStory,
-      QUEUES.relateStory,
-    ]) {
+    const perJob: Record<string, (job: AnalysisJob) => Promise<unknown>> = {
+      [QUEUES.matchArticle]: (job) => matchArticle(ctx, job),
+      [QUEUES.summarizeStory]: (job) => summarizeStory(ctx, job),
+      [QUEUES.relateStory]: (job) => relateStory(ctx, job),
+      [QUEUES.generateContext]: (job) => explainStoryContext(ctx, job),
+    }
+    for (const name of [QUEUES.embedArticle, ...Object.keys(perJob)]) {
       const jobs = (await ctx.workerBoss.fetch<AnalysisJob>(name, {
         batchSize: 50,
         ignoreStartAfter: true,
@@ -32,9 +34,7 @@ export async function drainPipeline(ctx: WorkerContext, maxRounds = 50) {
         await processOutboxBatch(ctx.db, ctx.ts, 500)
       }
       for (const job of name === QUEUES.embedArticle ? [] : jobs) {
-        if (name === QUEUES.matchArticle) await matchArticle(ctx, job.data)
-        if (name === QUEUES.summarizeStory) await summarizeStory(ctx, job.data)
-        if (name === QUEUES.relateStory) await relateStory(ctx, job.data)
+        await perJob[name]?.(job.data)
         await processOutboxBatch(ctx.db, ctx.ts, 500)
       }
       await ctx.workerBoss.complete(

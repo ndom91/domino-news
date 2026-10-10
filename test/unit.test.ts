@@ -154,3 +154,25 @@ describe('parseFeed reported update times', () => {
     })
   })
 })
+
+describe('annotateText', () => {
+  it('marks the first occurrence of each anchor and skips overlaps', async () => {
+    const { annotateText } = await import('@dn/ui')
+    const item = (id: string, anchorText: string) => ({
+      id,
+      anchorText,
+      title: anchorText,
+      kind: 'background' as const,
+      explanation: '',
+      sources: [],
+    })
+    const parts = annotateText('The ICC said the ICC Prosecutor would appeal.', [
+      item('a', 'ICC'),
+      item('b', 'ICC Prosecutor'),
+      item('c', 'missing'),
+    ])
+    expect(parts.map((p) => ('item' in p ? `[${p.text}]` : p.text)).join('')).toBe(
+      'The [ICC] said the [ICC Prosecutor] would appeal.',
+    )
+  })
+})

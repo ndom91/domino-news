@@ -1,11 +1,37 @@
-import type { Summary } from '@dn/schemas'
+import type { StoryContextItem, Summary } from '@dn/schemas'
 import { Popover } from '../primitives/overlay.tsx'
 import { Badge } from '../primitives/surface.tsx'
+import { annotateText, ContextTerm } from './context-term.tsx'
 import { Timestamp } from './time.tsx'
 
 /** AI summary with its provenance. Distinguishes what sources report from established fact. */
-export function SummaryBlock({ summary, sourceCount }: { summary: Summary; sourceCount: number }) {
+export function SummaryBlock({
+  summary,
+  sourceCount,
+  context = [],
+}: {
+  summary: Summary
+  sourceCount: number
+  /** Background entries; the first occurrence of each anchor becomes a popover. */
+  context?: StoryContextItem[]
+}) {
   const paragraphs = summary.body.split(/\n{2,}/)
+  // Each entry annotates only its first occurrence across the whole summary.
+  let remaining = context
+  const annotate = (text: string) => {
+    const parts = annotateText(text, remaining)
+    const used = new Set(parts.flatMap((p) => ('item' in p ? [p.item.id] : [])))
+    remaining = remaining.filter((c) => !used.has(c.id))
+    return parts.map((p, i) =>
+      'item' in p ? (
+        <ContextTerm key={`${p.item.id}-${i}`} item={p.item}>
+          {p.text}
+        </ContextTerm>
+      ) : (
+        p.text
+      ),
+    )
+  }
   return (
     <section aria-labelledby="summary-heading" className="flex flex-col gap-4">
       <h2 id="summary-heading" className="sr-only">
@@ -18,11 +44,11 @@ export function SummaryBlock({ summary, sourceCount }: { summary: Summary; sourc
               .split('\n')
               .filter(Boolean)
               .map((line) => (
-                <li key={line}>{line.replace(/^[-•]\s*/, '')}</li>
+                <li key={line}>{annotate(line.replace(/^[-•]\s*/, ''))}</li>
               ))}
           </ul>
         ) : (
-          paragraphs.map((p) => <p key={p}>{p}</p>)
+          paragraphs.map((p) => <p key={p}>{annotate(p)}</p>)
         )}
       </div>
       <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-xs text-text-muted">

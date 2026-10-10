@@ -10,6 +10,7 @@ import type { Job, PgBoss, Queue } from 'pg-boss'
 import { admitBackfill } from './backfill.ts'
 import type { WorkerContext } from './context.ts'
 import { embedArticles } from './embed.ts'
+import { explainStoryContext } from './explain-context.ts'
 import { pollFeed } from './ingest.ts'
 import { matchArticle } from './match.ts'
 import { relateStory } from './relate.ts'
@@ -145,6 +146,12 @@ export async function startWorkers(ctx: WorkerContext) {
     QUEUES.summarizeStory,
     genSlots,
     each((job) => summarizeStory(ctx, job)),
+  )
+  await workWithReservedSlots(
+    boss,
+    QUEUES.generateContext,
+    genSlots,
+    each((job) => explainStoryContext(ctx, job)),
   )
   // Relating is serialised: it reads and extends the shared story graph.
   await boss.work<AnalysisJob>(

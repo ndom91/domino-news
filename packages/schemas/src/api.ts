@@ -139,6 +139,24 @@ export const primarySourceSchema = z.object({
 })
 export type PrimarySource = z.infer<typeof primarySourceSchema>
 
+export const storyContextItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  kind: z.enum(['definition', 'background', 'prerequisite']),
+  anchorText: z.string(),
+  explanation: z.string(),
+  // Articles the explanation was grounded in (may come from an earlier Story).
+  sources: z.array(
+    z.object({
+      articleId: z.string(),
+      publisherName: z.string(),
+      title: z.string(),
+      url: z.string(),
+    }),
+  ),
+})
+export type StoryContextItem = z.infer<typeof storyContextItemSchema>
+
 export const storyDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -159,6 +177,7 @@ export const storyDetailSchema = z.object({
   related: z.array(relatedStorySchema),
   narratives: z.array(narrativeRefSchema),
   primarySources: z.array(primarySourceSchema),
+  context: z.array(storyContextItemSchema),
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 

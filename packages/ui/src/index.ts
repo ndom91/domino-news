@@ -1,4 +1,5 @@
 export { cx } from './cx.ts'
+export * from './editorial/context-term.tsx'
 export * from './editorial/coverage-matrix.tsx'
 export * from './editorial/narrative-graph.tsx'
 export * from './editorial/narrative-layout.ts'

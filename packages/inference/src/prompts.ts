@@ -6,6 +6,7 @@ export const PROMPT_VERSIONS = {
   summarizeStory: 'summarize-story@1',
   classifyRelationship: 'classify-relationship@3',
   titleNarrative: 'title-narrative@1',
+  explainContext: 'explain-context@2',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -101,4 +102,25 @@ export function titleNarrativePrompt(input: { stories: StoryInput[] }) {
 
 STORIES:
 ${data(input.stories.map((s) => ({ title: s.title, summary: s.summary, firstObservedAt: s.firstObservedAt })))}`
+}
+
+export function explainContextPrompt(input: { story: StoryInput; summary: string }) {
+  return `A general reader sees this news SUMMARY. Pick at most 4 names, organisations, places, terms or earlier
+events in it that such a reader may not know and that matter for understanding the story. Skip obvious ones:
+countries, major political parties, household-name institutions (e.g. "European Union", "United Nations"),
+generic words (e.g. "sanctions", "president"), and news outlets or publishers.
+For each:
+- anchorText: the exact words as they appear in SUMMARY (case-sensitive, verbatim).
+- title: the canonical name of the subject (e.g. "International Criminal Court").
+- kind: "definition" (what a term means), "background" (who/what an entity is), or "prerequisite" (an earlier event needed to follow this one).
+- explanation: one or two neutral sentences: what it is and why it matters here. Stick to well-established
+  background; do not add new claims about current events that the source articles do not report.
+- sourceObservationIds: observationId values of the source articles that mention the subject.
+Return an empty list if nothing needs explaining.
+
+SUMMARY:
+${data(input.summary)}
+
+SOURCE ARTICLES:
+${data(storyData(input.story).articles)}`
 }

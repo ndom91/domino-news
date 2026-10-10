@@ -779,3 +779,51 @@ describe('story graph reset', () => {
     expect(narratives()?.size ?? 0).toBe(0)
   })
 })
+
+describe('context popovers', () => {
+  it('annotates summaries with grounded, reusable context entries', async () => {
+    const { db } = h.ctx
+    const links = await db.select().from(schema.storyContext)
+    expect(links.length).toBeGreaterThan(0)
+    for (const link of links) {
+      const [story] = await db
+        .select({ summary: schema.storySummaryVersion.body })
+        .from(schema.story)
+        .innerJoin(
+          schema.storySummaryVersion,
+          eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+        )
+        .where(eq(schema.story.id, link.storyId))
+      expect(story?.summary).toContain(link.anchorText)
+    }
+    // Shared subjects are stored once.
+    const keys = await db
+      .select({ key: schema.contextEntry.normalizedKey })
+      .from(schema.contextEntry)
+    expect(new Set(keys.map((k) => k.key)).size).toBe(keys.length)
+  })
+
+  it('drops entries whose anchor or sources are not grounded', async () => {
+    const { validContextEntries } = await import('@dn/jobs')
+    const entry = {
+      anchorText: 'International Criminal Court',
+      title: 'International Criminal Court',
+      kind: 'background' as const,
+      explanation: 'A court.',
+      sourceObservationIds: ['obs_1'],
+    }
+    const summary = 'The International Criminal Court was sanctioned.'
+    expect(validContextEntries([entry], summary, new Set(['obs_1']))).toHaveLength(1)
+    expect(
+      validContextEntries([{ ...entry, anchorText: 'The Hague' }], summary, new Set(['obs_1'])),
+    ).toHaveLength(0)
+    expect(validContextEntries([entry], summary, new Set(['obs_other']))).toHaveLength(0)
+    expect(validContextEntries([entry, { ...entry }], summary, new Set(['obs_1']))).toHaveLength(1)
+  })
+
+  it('keeps explanation versions append-only', async () => {
+    await expect(
+      h.ctx.pool.query(`update context_entry_version set explanation = 'x'`),
+    ).rejects.toThrow(/append-only/)
+  })
+})

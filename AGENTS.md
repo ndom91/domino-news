@@ -38,7 +38,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
 | `pnpm cli user:create --username u --password p` | Create an account (public sign-up is disabled) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
-| `pnpm cli relate:all [--reset]` | Re-run relationship + narrative detection |
+| `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
 | `pnpm cli status` | Pipeline and queue status as JSON |
 | `pnpm cli dev:reset` | Delete all ingested and derived data (keeps users and publishers) |

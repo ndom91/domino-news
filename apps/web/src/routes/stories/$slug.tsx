@@ -2,6 +2,7 @@ import { formatDateTime, hostnameOf } from '@dn/domain'
 import {
   Badge,
   Button,
+  ContextExplanation,
   NarrativeGraph,
   relationLabel,
   Skeleton,
@@ -91,7 +92,11 @@ function StoryPage() {
             />
           ) : story.summary ? (
             <>
-              <SummaryBlock summary={story.summary} sourceCount={story.sources.length} />
+              <SummaryBlock
+                summary={story.summary}
+                sourceCount={story.sources.length}
+                context={story.context}
+              />
               {session.features.summaryEditing ? (
                 <div className="mt-4">
                   <Button size="sm" onClick={() => setEditing(true)}>
@@ -147,6 +152,24 @@ function StoryPage() {
         </div>
 
         <aside className="flex flex-col gap-10 lg:pt-16">
+          {story.context.length > 0 ? (
+            <section aria-labelledby="background-heading">
+              <SectionLabel>
+                <span id="background-heading">Background</span>
+              </SectionLabel>
+              <dl className="flex flex-col gap-5 text-sm">
+                {story.context.map((item) => (
+                  <div key={item.id}>
+                    <dt className="font-serif text-md leading-snug text-text">{item.title}</dt>
+                    <dd className="mt-1 leading-normal text-text-secondary">
+                      <ContextExplanation item={item} />
+                    </dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ) : null}
+
           <section aria-labelledby="related-heading">
             <SectionLabel>
               <span id="related-heading">Connected stories</span>

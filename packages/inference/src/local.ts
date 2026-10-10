@@ -1,12 +1,14 @@
 import {
   narrativeTitleSchema,
   relationshipCandidateSchema,
+  storyContextOutputSchema,
   storyMatchSchema,
   storySummarySchema,
 } from '@dn/schemas'
 import { z } from 'zod'
 import {
   classifyRelationshipPrompt,
+  explainContextPrompt,
   matchStoryPrompt,
   PROMPT_VERSIONS,
   SYSTEM_PROMPT,
@@ -170,6 +172,13 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         relationshipCandidateSchema,
         classifyRelationshipPrompt(input),
         PROMPT_VERSIONS.classifyRelationship,
+      ),
+    explainContext: (input) =>
+      generate(
+        'story_context',
+        storyContextOutputSchema,
+        explainContextPrompt(input),
+        PROMPT_VERSIONS.explainContext,
       ),
     titleNarrative: (input) =>
       generate(

@@ -71,8 +71,10 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     for (const [articleId, links] of primaryLinks) {
       await recordPrimarySources(tx.db, story.id, articleId, links)
     }
-    const relate = analysisJob(story.id, recorded.versionId, job.priorityClass)
-    await sendInTx(ctx, tx, QUEUES.relateStory, relate.data, relate.options)
+    // Enrichment keyed on the new summary version: relationships and context popovers.
+    const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
+    await sendInTx(ctx, tx, QUEUES.relateStory, next.data, next.options)
+    await sendInTx(ctx, tx, QUEUES.generateContext, next.data, next.options)
     return recorded
   })
   return outcome

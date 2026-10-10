@@ -1,0 +1,79 @@
+import type { StoryContextItem } from '@dn/schemas'
+import type { ReactNode } from 'react'
+import { Popover } from '../primitives/overlay.tsx'
+
+// "Background" is the default and goes unlabelled.
+const KIND_LABEL: Record<Exclude<StoryContextItem['kind'], 'background'>, string> = {
+  definition: 'Definition',
+  prerequisite: 'Earlier development',
+}
+
+/** Inline term that opens a background explanation. Click, tap or keyboard; never hover-only. */
+export function ContextTerm({ item, children }: { item: StoryContextItem; children: ReactNode }) {
+  return (
+    <Popover
+      title={item.title}
+      trigger={
+        <button
+          type="button"
+          className="cursor-help rounded-sm text-inherit underline decoration-text-muted decoration-dotted decoration-1 underline-offset-4 hover:decoration-accent focus-visible:decoration-accent"
+        >
+          {children}
+        </button>
+      }
+    >
+      <ContextExplanation item={item} />
+    </Popover>
+  )
+}
+
+export function ContextExplanation({ item }: { item: StoryContextItem }) {
+  return (
+    <div className="flex flex-col gap-2">
+      {item.kind !== 'background' ? (
+        <p className="text-2xs uppercase tracking-label text-text-muted">{KIND_LABEL[item.kind]}</p>
+      ) : null}
+      <p>{item.explanation}</p>
+      {item.sources.length > 0 ? (
+        <p className="text-xs text-text-muted">
+          Based on{' '}
+          {item.sources.map((s, i) => (
+            <span key={s.articleId}>
+              {i > 0 ? ', ' : ''}
+              <a
+                href={s.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-2 hover:text-text"
+              >
+                {s.publisherName}
+              </a>
+            </span>
+          ))}
+          . Written by a language model.
+        </p>
+      ) : null}
+    </div>
+  )
+}
+
+/**
+ * Split text into plain runs and context anchors (first occurrence of each, no overlaps).
+ * Pure so it can be unit-tested.
+ */
+export function annotateText(text: string, items: StoryContextItem[]) {
+  const hits = items
+    .map((item) => ({ item, at: text.indexOf(item.anchorText) }))
+    .filter((h) => h.at >= 0)
+    .sort((a, b) => a.at - b.at)
+  const parts: ({ text: string } | { text: string; item: StoryContextItem })[] = []
+  let cursor = 0
+  for (const { item, at } of hits) {
+    if (at < cursor) continue // overlaps a previous anchor
+    if (at > cursor) parts.push({ text: text.slice(cursor, at) })
+    parts.push({ text: item.anchorText, item })
+    cursor = at + item.anchorText.length
+  }
+  if (cursor < text.length) parts.push({ text: text.slice(cursor) })
+  return parts
+}

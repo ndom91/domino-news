@@ -97,6 +97,30 @@ export function createFixtureGeneration(): GenerationProvider {
         promptVersion: PROMPT_VERSIONS.classifyRelationship,
       }
     },
+    async explainContext({ story, summary }) {
+      // Capitalised multi-word phrases from the summary that sources also mention.
+      const phrases = [...new Set(summary.match(/\b(?:[A-Z][a-z]+ ){1,3}[A-Z][a-z]+\b/g) ?? [])]
+      const entries = phrases.flatMap((phrase) => {
+        const sources = story.articles.filter((a) =>
+          `${a.title} ${a.description ?? ''}`.includes(phrase),
+        )
+        if (sources.length === 0) return []
+        return [
+          {
+            anchorText: phrase,
+            title: phrase,
+            kind: 'background' as const,
+            explanation: `${phrase} is mentioned in coverage by ${[...new Set(sources.map((a) => a.publisher))].join(', ')}.`,
+            sourceObservationIds: sources.map((a) => a.observationId),
+          },
+        ]
+      })
+      return {
+        output: { entries: entries.slice(0, 3) },
+        modelId,
+        promptVersion: PROMPT_VERSIONS.explainContext,
+      }
+    },
     async titleNarrative({ stories }) {
       const counts = new Map<string, number>()
       for (const s of stories) {

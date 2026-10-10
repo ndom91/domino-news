@@ -4,6 +4,9 @@ import { touchNarrative, touchStory } from './outbox.ts'
 
 // Everything produced by ingestion and analysis. Users, publishers and feeds are kept.
 const INGESTED_TABLES = [
+  'story_context',
+  'context_entry_version',
+  'context_entry',
   'story_summary_source',
   'story_summary_version',
   'story_source_reference',
