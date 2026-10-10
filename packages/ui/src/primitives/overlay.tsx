@@ -91,6 +91,31 @@ export function MenuLinkItem({ children, render }: { children: ReactNode; render
   )
 }
 
+/** Menu on/off setting. Stays open on click so the change is visible. */
+export function MenuCheckboxItem({
+  children,
+  checked,
+  onCheckedChange,
+}: {
+  children: ReactNode
+  checked: boolean
+  onCheckedChange: (checked: boolean) => void
+}) {
+  return (
+    <BaseMenu.CheckboxItem
+      className={cx(menuItemClass, 'group justify-between gap-4')}
+      checked={checked}
+      onCheckedChange={onCheckedChange}
+    >
+      {children}
+      <span
+        aria-hidden
+        className="size-3.5 flex-none border-2 border-current group-data-checked:bg-accent group-data-checked:border-accent"
+      />
+    </BaseMenu.CheckboxItem>
+  )
+}
+
 export function TooltipProvider({ children }: { children: ReactNode }) {
   return <BaseTooltip.Provider delay={350}>{children}</BaseTooltip.Provider>
 }

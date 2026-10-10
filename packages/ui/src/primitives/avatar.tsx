@@ -1,10 +1,9 @@
-import { NARRATIVE_COLORS } from '@dn/design-tokens'
 import BoringAvatar from 'boring-avatars'
 import { cx } from '../cx.ts'
 
-// The desk colours (slots 1–6), so avatars belong to the same palette as the story bars.
-// SVG fills need literal hex values, not CSS variables.
-const AVATAR_COLORS = NARRATIVE_COLORS.slice(1).map(([fill]) => fill)
+// Theme colours as CSS variables, so the avatar follows light/dark without a re-render:
+// the brand orange and the text colour (dark on light, near-white on dark).
+const AVATAR_COLORS = ['var(--dn-accent)', 'var(--dn-text)']
 
 /** Generated "marble" avatar for a user. Decorative: pair it with a visible or sr-only name. */
 export function UserAvatar({

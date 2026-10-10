@@ -1,9 +1,11 @@
 import { clockTime, longDate } from '@dn/domain'
-import { cx, Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { cx, Menu, MenuCheckboxItem, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import { useState } from 'react'
 import { queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
+import { currentTheme, setTheme } from '../lib/theme.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
@@ -87,7 +89,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         <button
           type="button"
           aria-label={`Account menu for ${user.username ?? user.name}`}
-          className="inline-flex size-tap flex-none items-center justify-center"
+          className="inline-flex size-tap flex-none items-end justify-end"
         >
           <UserAvatar name={user.email || user.name} />
         </button>
@@ -97,6 +99,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         Signed in as <b className="font-semibold text-text">{user.username ?? user.name}</b>
       </p>
       <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>
+      <ThemeItem />
       <MenuItem
         onClick={async () => {
           await authClient.signOut()
@@ -107,6 +110,22 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         Sign out
       </MenuItem>
     </Menu>
+  )
+}
+
+/** Menu content only mounts when open, on the client, so reading the DOM here is safe. */
+function ThemeItem() {
+  const [dark, setDark] = useState(() => currentTheme() === 'dark')
+  return (
+    <MenuCheckboxItem
+      checked={dark}
+      onCheckedChange={(checked) => {
+        setTheme(checked ? 'dark' : 'light')
+        setDark(checked)
+      }}
+    >
+      Dark theme
+    </MenuCheckboxItem>
   )
 }
 

@@ -11,6 +11,7 @@ import {
 import type { ReactNode } from 'react'
 import { SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { getSessionInfo } from '../lib/session.ts'
+import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
@@ -63,8 +64,11 @@ function RootLayout() {
 
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    // The theme script sets data-theme before hydration.
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static script, no user input */}
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
       </head>
       <body className="flex min-h-dvh flex-col bg-canvas text-text antialiased">
