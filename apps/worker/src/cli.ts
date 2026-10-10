@@ -24,6 +24,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
+  summaries:refresh                 Re-summarise published stories that have no desk yet (backfill priority)
   status                            Print pipeline/queue status as JSON
   dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
 
@@ -100,6 +101,19 @@ try {
           await ctx.workerBoss.send(queue, job.data, job.options)
       }
       console.log(`enqueued enrichment for ${rows.length} stories`)
+      break
+    }
+    case 'summaries:refresh': {
+      // Same inputs, so the job's fingerprint is unchanged; recordGeneratedSummary allows
+      // the new version because the Story has no desk.
+      const { rows } = await ctx.pool.query<{ id: string; input_fingerprint: string }>(
+        'select id, input_fingerprint from story where published_at is not null and desk is null and input_fingerprint is not null order by last_updated_at desc',
+      )
+      for (const r of rows) {
+        const job = analysisJob(r.id, r.input_fingerprint, 'backfill')
+        await ctx.workerBoss.send(QUEUES.summarizeStory, job.data, job.options)
+      }
+      console.log(`enqueued summaries for ${rows.length} stories without a desk`)
       break
     }
     case 'status':

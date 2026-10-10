@@ -1,8 +1,8 @@
 import { formatDate, plural, truncate } from '@dn/domain'
 import type { DevelopingNarrative, NarrativeStep } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
-import { narrativeKey } from './narrative-key.ts'
 import { Timestamp } from './time.tsx'
 
 function stepRelation(step: NarrativeStep) {
@@ -105,7 +105,7 @@ export function NarrativeColumn({
   Link?: LinkLike
 }) {
   return (
-    <div className={cx(narrativeKey(narrative.colorSlot), 'min-w-0 border-t-6 border-key pt-4')}>
+    <div className={cx(deskKey(narrative.desk), 'min-w-0 border-t-6 border-key pt-4')}>
       <h3 className="mb-1.5 type-narrative-title">
         <Link
           to={`/narratives/${narrative.slug}`}

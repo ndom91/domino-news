@@ -1,5 +1,5 @@
 import { formatDate, plural } from '@dn/domain'
-import { cx, NarrativeGraph, narrativeKey } from '@dn/ui'
+import { cx, deskKey, NarrativeGraph } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { RouterLink } from '../../components/link.tsx'
@@ -25,7 +25,7 @@ function NarrativePage() {
   return (
     <Page>
       <div className="max-w-4xl">
-        <header className={cx(narrativeKey(narrative.colorSlot), 'border-t-6 border-key pt-4')}>
+        <header className={cx(deskKey(narrative.desk), 'border-t-6 border-key pt-4')}>
           <p className="type-label text-text-muted">Narrative</p>
           <h1 className="mt-2 type-headline-lg text-balance">{narrative.title}</h1>
         </header>

@@ -1,4 +1,4 @@
-import { EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
+import { type Desk, EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import {
   bigserial,
@@ -279,6 +279,8 @@ export const story = pgTable(
     embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
     // Macro-regions the Story concerns (`REGIONS` in @dn/schemas), set by generated summaries.
     regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
+    // Desk (`DESKS` in @dn/schemas), set by generated summaries; null until then.
+    desk: text('desk').$type<Desk>(),
   },
   (t) => [
     index('story_published_idx').on(t.publishedAt),
@@ -365,9 +367,6 @@ export const narrative = pgTable('narrative', {
   updatedAt: ts('updated_at').notNull(),
   version: integer('version').notNull().default(1),
   titleInterpretationId: text('title_interpretation_id'),
-  // Narrative colour key 1–6 (null = none, rendered as slot 0). Kept for the Narrative's
-  // lifetime so its colour is stable everywhere; see claimColorSlot.
-  colorSlot: integer('color_slot'),
 })
 
 export const narrativeStory = pgTable(

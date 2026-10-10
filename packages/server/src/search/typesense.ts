@@ -93,6 +93,7 @@ export function collectionSchema(alias: Alias, name: string) {
           { name: 'publisher_ids', type: 'string[]', facet: true },
           { name: 'publisher_names', type: 'string[]' },
           { name: 'regions', type: 'string[]', facet: true, optional: true },
+          { name: 'desk', type: 'string', facet: true, optional: true },
           { name: 'last_updated_at', type: 'int64', sort: true },
           embedding,
         ],

@@ -1,5 +1,5 @@
 import { plural, relativeTime } from '@dn/domain'
-import { cx, Notice, narrativeKey } from '@dn/ui'
+import { cx, deskKey, Notice } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Page, PageTitle } from '../../components/page.tsx'
@@ -27,7 +27,7 @@ function NarrativesPage() {
       ) : (
         <ol className="grid gap-x-8 gap-y-12 md:grid-cols-2 lg:grid-cols-3">
           {data.items.map((n) => (
-            <li key={n.id} className={cx(narrativeKey(n.colorSlot), 'border-t-6 border-key pt-4')}>
+            <li key={n.id} className={cx(deskKey(n.desk), 'border-t-6 border-key pt-4')}>
               <Link
                 to="/narratives/$slug"
                 params={{ slug: n.slug }}

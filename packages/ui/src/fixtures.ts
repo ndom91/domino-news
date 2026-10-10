@@ -1,5 +1,6 @@
 import type {
   CoverageMatrix,
+  Desk,
   DevelopingNarrative,
   NarrativeDetail,
   StoryDetail,
@@ -31,24 +32,35 @@ const P = {
 }
 type Pub = (typeof P)[keyof typeof P]
 
+// Desk per fixture Story id; the rest are politics.
+const DESK: Record<string, Desk> = {
+  'union-files-appeal': 'justice',
+  'port-workers-vote': 'economy',
+  'central-bank-holds': 'economy',
+  'ridership-revised': 'justice',
+  'wildfire-smoke-alerts': 'science',
+  'hydropower-curbs': 'science',
+  'hospital-it-outage': 'science',
+}
+
 const NARR = {
   harrowgate: {
     id: 'nar_harrowgate',
     slug: 'harrowgate-transit-dispute',
     title: 'Harrowgate transit dispute',
-    colorSlot: 1,
+    desk: 'justice' as const,
   },
   rates: {
     id: 'nar_rates',
     slug: 'rate-path',
     title: 'Rate path after the summer inflation spike',
-    colorSlot: 2,
+    desk: 'economy' as const,
   },
   dataBill: {
     id: 'nar_data_bill',
     slug: 'data-retention-bill',
     title: 'Data-retention bill',
-    colorSlot: 3,
+    desk: 'politics' as const,
   },
 }
 
@@ -73,6 +85,7 @@ function story(
     lastUpdatedAt: ago(Math.min(...times)),
     sourceCount: sources.length,
     regions: ['europe'],
+    desk: DESK[id] ?? 'politics',
     publishers: sources.map(([p]) => p),
     narratives: [],
     trace: sources.map(([p, h, cite], i) => ({
@@ -226,6 +239,7 @@ export const fixtureLead: StoryDetail = {
   lastUpdatedAt: ago(2.15),
   publishedAt: ago(19),
   regions: ['europe'],
+  desk: 'justice',
   summary: {
     versionId: 'sum_lead',
     headline: 'Court halts Harrowgate rail strike hours before walkout',

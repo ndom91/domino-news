@@ -1,5 +1,6 @@
 import { type Db, schema } from '@dn/db'
 import type {
+  Desk,
   NarrativeDetail,
   NarrativeListResponse,
   NarrativeRef,
@@ -52,6 +53,15 @@ async function publishersByStory(db: Db, storyIds: string[]) {
   return map
 }
 
+/**
+ * A Narrative's desk: that of its most recently updated Story with one. Used as a select
+ * column so the Narrative takes the colour of where it currently stands.
+ */
+export const narrativeDesk = sql<Desk | null>`(
+  select s.desk from narrative_story ns join story s on s.id = ns.story_id
+  where ns.narrative_id = ${schema.narrative.id} and ns.removed_at is null and s.desk is not null
+  order by s.last_updated_at desc limit 1)`
+
 async function narrativesByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, NarrativeRef[]>()
   if (storyIds.length === 0) return map
@@ -61,7 +71,7 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
-      colorSlot: schema.narrative.colorSlot,
+      desk: narrativeDesk,
     })
     .from(schema.narrativeStory)
     .innerJoin(schema.narrative, eq(schema.narrative.id, schema.narrativeStory.narrativeId))
@@ -71,9 +81,9 @@ async function narrativesByStory(db: Db, storyIds: string[]) {
         isNull(schema.narrativeStory.removedAt),
       ),
     )
-  for (const { storyId, colorSlot, ...ref } of rows) {
+  for (const { storyId, ...ref } of rows) {
     const list = map.get(storyId) ?? []
-    list.push({ ...ref, colorSlot: colorSlot ?? 0 })
+    list.push(ref)
     map.set(storyId, list)
   }
   return map
@@ -233,6 +243,7 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
         lastUpdatedAt: iso(s.lastUpdatedAt),
         sourceCount: counts.get(s.id) ?? 0,
         regions: s.regions,
+        desk: s.desk,
         publishers: publishers.get(s.id) ?? [],
         narratives: narratives.get(s.id) ?? [],
         trace: traces.get(s.id) ?? [],
@@ -385,6 +396,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
     lastUpdatedAt: iso(story.lastUpdatedAt),
     publishedAt: iso(story.publishedAt),
     regions: story.regions,
+    desk: story.desk,
     summary: current
       ? {
           versionId: current.version.id,
@@ -446,11 +458,12 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
 }
 
 export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeDetail | null> {
-  const [narrative] = await db
-    .select()
+  const [row] = await db
+    .select({ narrative: schema.narrative, desk: narrativeDesk })
     .from(schema.narrative)
     .where(or(eq(schema.narrative.id, idOrSlug), eq(schema.narrative.slug, idOrSlug)))
-  if (!narrative) return null
+  if (!row) return null
+  const { narrative, desk } = row
   const stories = await db
     .select({ story: schema.story, summary: schema.storySummaryVersion.body })
     .from(schema.narrativeStory)
@@ -486,7 +499,7 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
     id: narrative.id,
     slug: narrative.slug,
     title: narrative.title,
-    colorSlot: narrative.colorSlot ?? 0,
+    desk,
     description: narrative.description,
     createdAt: iso(narrative.createdAt),
     updatedAt: iso(narrative.updatedAt),
@@ -515,7 +528,7 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
       slug: schema.narrative.slug,
       title: schema.narrative.title,
       description: schema.narrative.description,
-      colorSlot: schema.narrative.colorSlot,
+      desk: narrativeDesk,
       updatedAt: schema.narrative.updatedAt,
       storyCount: sql<number>`count(${schema.story.id})::int`,
     })
@@ -535,7 +548,7 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
     .orderBy(desc(schema.narrative.updatedAt))
     .limit(50)
   return {
-    items: rows.map((r) => ({ ...r, colorSlot: r.colorSlot ?? 0, updatedAt: iso(r.updatedAt) })),
+    items: rows.map((r) => ({ ...r, updatedAt: iso(r.updatedAt) })),
   }
 }
 

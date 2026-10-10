@@ -253,3 +253,14 @@ describe('display helpers', () => {
     expect(hostnameOf('not a url')).toBeNull()
   })
 })
+
+describe('fixtureDesk', () => {
+  it('tags the first matching desk and falls back to politics', async () => {
+    const { fixtureDesk } = await import('@dn/inference')
+    expect(fixtureDesk('Missile strike hits Kyiv power station')).toBe('conflict')
+    expect(fixtureDesk('Court halts rail strike')).toBe('justice')
+    expect(fixtureDesk('Central bank holds rates')).toBe('economy')
+    expect(fixtureDesk('Wildfire smoke triggers alerts')).toBe('science')
+    expect(fixtureDesk('Parliament committee advances bill')).toBe('politics')
+  })
+})

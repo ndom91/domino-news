@@ -1,5 +1,5 @@
 import { contentTokens, jaccard, regionForCountry, truncate } from '@dn/domain'
-import { EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
+import { type Desk, EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
 import { PROMPT_VERSIONS } from './prompts.ts'
 import type { ArticleInput, EmbeddingProvider, GenerationProvider, StoryInput } from './types.ts'
 
@@ -38,6 +38,20 @@ function fixtureRegions(s: StoryInput): Region[] {
     if (region) regions.add(region)
   }
   return regions.size > 0 ? [...regions].slice(0, 3) : ['global']
+}
+
+// Stand-in for model tagging: the first desk whose keywords appear in the lead headline.
+// Justice comes first so "court halts strike" is a ruling, not a war story.
+const DESK_KEYWORDS: [Desk, RegExp][] = [
+  ['justice', /\b(court|trial|judge|police|prison|sentenced|execution|injunction|sanctions)\b/i],
+  ['conflict', /\b(war|strike|strikes|attack|missile|drone|military|troops|army|ceasefire)\b/i],
+  ['economy', /\b(bank|rate|rates|market|trade|tariff|prices|jobs|company|deal)\b/i],
+  ['science', /\b(climate|health|virus|disease|space|wildfire|drought|study|scientists)\b/i],
+  ['culture', /\b(prize|film|book|music|festival|sport|church|art)\b/i],
+]
+
+export function fixtureDesk(headline: string): Desk {
+  return DESK_KEYWORDS.find(([, re]) => re.test(headline))?.[0] ?? 'politics'
 }
 
 export const FIXTURE_EMBEDDING_MODEL = 'fixture-embedding@1'
@@ -91,6 +105,7 @@ export function createFixtureGeneration(): GenerationProvider {
           sourceArticleIds: story.articles.map((a) => a.articleId),
           observationIds: story.articles.map((a) => a.observationId),
           regions: fixtureRegions(story),
+          desk: fixtureDesk(lead.title),
         },
         modelId,
         promptVersion: PROMPT_VERSIONS.summarizeStory,

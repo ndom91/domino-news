@@ -147,11 +147,14 @@ export async function recordGeneratedSummary(
   if (story.inputFingerprint !== input.inputFingerprint) return { status: 'stale' }
   if (story.currentSummaryId) {
     // Same inputs already summarised (retry/duplicate) or a human edit on these inputs wins.
+    // Exception: a generated summary from before desk tagging may be refreshed to get one.
     const [current] = await db
       .select()
       .from(schema.storySummaryVersion)
       .where(eq(schema.storySummaryVersion.id, story.currentSummaryId))
-    if (current?.inputFingerprint === input.inputFingerprint) return { status: 'stale' }
+    const refreshForDesk = story.desk === null && current?.editedByUserId === null
+    if (current?.inputFingerprint === input.inputFingerprint && !refreshForDesk)
+      return { status: 'stale' }
   }
 
   // Grounding: every cited article must be actively linked to this Story, and every
@@ -231,6 +234,7 @@ export async function recordGeneratedSummary(
       currentSummaryId: versionId,
       title: input.output.headline,
       regions: [...new Set(input.output.regions)],
+      desk: input.output.desk,
       publishedAt: story.publishedAt ?? new Date(),
     })
     .where(eq(schema.story.id, story.id))

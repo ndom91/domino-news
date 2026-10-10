@@ -53,13 +53,13 @@
   --dn-error-subtle: #f7dbe0;
 
   /*
-   * ── Narrative colours ────────────────────────────────────
-   * Categorical keys: "this Story belongs to that Narrative". Never truth, credibility, politics or importance.
+   * ── Desk colours (narrative-0…6 utilities) ─────────────
+   * Categorical keys: "this Story is on that desk" (politics, science, economy, culture,
+   * justice, conflict; DESK_SLOT in @dn/schemas). A Narrative takes its latest Story's desk.
+   * Never truth, credibility, political leaning or importance.
    * Each pair is a fill and the text that sits on it (all ≥ 5.7:1).
-   * 0 = not part of a Narrative ("Single story").
-   * Assignment: a Narrative gets the lowest free slot when it becomes active and keeps it for its lifetime
-   * (store the slot on the Narrative). With more than six active, the oldest-updated reuse slots.
-   * Never use orange or a near-orange as a Narrative colour; orange is the brand.
+   * 0 = no desk yet (Stories summarised before desks existed).
+   * Never use orange or a near-orange as a desk colour; orange is the brand.
    */
   --dn-narrative-0: #e3dfd6;
   --dn-narrative-0-text: #121212;

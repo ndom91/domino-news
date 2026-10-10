@@ -4,6 +4,7 @@ import { cx } from '../cx.ts'
 import { Skeleton } from '../primitives/surface.tsx'
 import type { CitedSource } from './citation.tsx'
 import { SummaryText } from './citation.tsx'
+import { deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { relationLabel } from './relations.ts'
 import { SourceTrace } from './source-trace.tsx'
@@ -54,8 +55,8 @@ export function StoryItem({
       className={cx('flex min-w-0 flex-col', wide && 'lg:col-span-2 md:col-span-2', className)}
     >
       <StoryBar
-        slot={narrative?.colorSlot ?? 0}
-        label={narrative?.title ?? 'Single story'}
+        desk={story.desk}
+        label={deskLabel(story.desk, narrative?.title)}
         href={narrative ? `/narratives/${narrative.slug}` : undefined}
         timestamp={latest}
         Link={Link}

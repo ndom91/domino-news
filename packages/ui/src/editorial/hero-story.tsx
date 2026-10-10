@@ -2,8 +2,8 @@ import type { StoryDetail } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { Popover } from '../primitives/overlay.tsx'
 import { type CitedSource, SummaryText } from './citation.tsx'
+import { deskKey, deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
-import { narrativeKey } from './narrative-key.ts'
 import { SourceBoard } from './source-board.tsx'
 import { SourceTrace } from './source-trace.tsx'
 import { Timestamp } from './time.tsx'
@@ -61,7 +61,7 @@ export function HeroStory({
     <section
       aria-labelledby="lead-heading"
       className={cx(
-        narrativeKey(narrative?.colorSlot),
+        deskKey(story.desk),
         'mt-8 grid grid-cols-[minmax(0,7fr)_minmax(0,5fr)] gap-x-14 key-fill px-10 pt-9 pb-10',
         'max-lg:grid-cols-1 max-lg:gap-y-8',
         'max-md:-mx-gutter max-md:mt-4 max-md:px-gutter max-md:pt-5 max-md:pb-8',
@@ -73,7 +73,7 @@ export function HeroStory({
             {narrative.title}
           </Link>
         ) : (
-          <span className="type-label">Single story</span>
+          <span className="type-label">{deskLabel(story.desk)}</span>
         )}
         <span className="text-base font-semibold">
           {kicker}

@@ -451,6 +451,7 @@ describe('front page and citation numbers', () => {
     const front = frontPageSchema.parse(await (await call('/api/v1/front')).json())
     expect(front.lead).not.toBeNull()
     expect(front.stats.stories).toBeGreaterThan(0)
+    expect(front.lead?.desk).not.toBeNull()
   })
 
   it('accepts cited sources without a number (summaries from before citation numbers)', async () => {

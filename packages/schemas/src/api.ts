@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { deskSchema } from './desks.ts'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
 import { regionSchema } from './regions.ts'
 
@@ -94,14 +95,12 @@ export const summarySchema = z.object({
 })
 export type Summary = z.infer<typeof summarySchema>
 
-// Narrative colour key: 1–6 while the Narrative holds a slot, 0 = none.
-export const colorSlotSchema = z.number().int().min(0).max(6)
-
 export const narrativeRefSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  colorSlot: colorSlotSchema,
+  // Desk of its most recently updated Story; drives the Narrative's colour.
+  desk: deskSchema.nullable(),
 })
 export type NarrativeRef = z.infer<typeof narrativeRefSchema>
 
@@ -115,6 +114,8 @@ export const storyListItemSchema = z.object({
   lastUpdatedAt: z.string(),
   sourceCount: z.number().int().nonnegative(),
   regions: z.array(regionSchema),
+  // Null until the Story is summarised with a desk.
+  desk: deskSchema.nullable(),
   publishers: z.array(publisherRefSchema),
   narratives: z.array(narrativeRefSchema),
   // When each source reported (publishedAt, else first seen), for coverage traces.
@@ -211,6 +212,8 @@ export const storyDetailSchema = z.object({
   lastUpdatedAt: z.string(),
   publishedAt: z.string().nullable(),
   regions: z.array(regionSchema),
+  // Null until the Story is summarised with a desk.
+  desk: deskSchema.nullable(),
   summary: summarySchema.nullable(),
   summaryHistory: z.array(
     z.object({
@@ -251,7 +254,7 @@ export const narrativeDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  colorSlot: colorSlotSchema,
+  desk: deskSchema.nullable(),
   description: z.string().nullable(),
   createdAt: z.string(),
   updatedAt: z.string(),
@@ -267,7 +270,7 @@ export const narrativeListResponseSchema = z.object({
       slug: z.string(),
       title: z.string(),
       description: z.string().nullable(),
-      colorSlot: colorSlotSchema,
+      desk: deskSchema.nullable(),
       storyCount: z.number().int().nonnegative(),
       updatedAt: z.string(),
     }),
@@ -417,7 +420,7 @@ export const developingNarrativeSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  colorSlot: colorSlotSchema,
+  desk: deskSchema.nullable(),
   storyCount: z.number().int().nonnegative(),
   since: z.string(),
   updatedAt: z.string(),

@@ -1,18 +1,19 @@
+import type { Desk } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
-import { narrativeKey } from './narrative-key.ts'
 import { Timestamp } from './time.tsx'
 
-/** Coloured bar above a story: its Narrative (or "Single story") and when it was last reported. */
+/** Bar above a story in its desk's colour: its Narrative or desk, and when it was last reported. */
 export function StoryBar({
-  slot,
+  desk,
   label,
   href,
   timestamp,
   Link = DefaultLink,
   className,
 }: {
-  slot: number
+  desk: Desk | null
   label: string
   href?: string
   timestamp: string
@@ -22,7 +23,7 @@ export function StoryBar({
   return (
     <div
       className={cx(
-        narrativeKey(slot),
+        deskKey(desk),
         'flex h-bar items-center justify-between gap-3 key-fill px-2.5 text-sm font-bold',
         className,
       )}

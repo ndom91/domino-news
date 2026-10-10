@@ -1,8 +1,8 @@
 import { formatDate, plural } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
-import { narrativeKey } from './narrative-key.ts'
 import { layoutNarrative } from './narrative-layout.ts'
 import { relationLabel } from './relations.ts'
 
@@ -31,7 +31,7 @@ export function NarrativeGraph({
   return (
     <ol
       aria-label={`${plural(narrative.stories.length, 'development')}, oldest first`}
-      className={cx(narrativeKey(narrative.colorSlot), 'flex flex-col border-t-2 border-rule')}
+      className={cx(deskKey(narrative.desk), 'flex flex-col border-t-2 border-rule')}
     >
       {layout.rows.map(({ node, row, lane, primary, secondary }) => {
         const isCurrent = node.id === currentStoryId

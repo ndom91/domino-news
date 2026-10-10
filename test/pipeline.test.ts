@@ -244,6 +244,7 @@ describe('summary versioning', () => {
           sourceArticleIds: [link?.articleId ?? ''],
           observationIds: ['obs_x'],
           regions: ['global'],
+          desk: 'politics',
         },
         analysisRunId: 'run_none',
         inputFingerprint: 'outdated-fingerprint',
@@ -285,12 +286,75 @@ describe('summary versioning', () => {
             sourceArticleIds: ['art_elsewhere'],
             observationIds: ['obs_x'],
             regions: ['global'],
+            desk: 'politics',
           },
           analysisRunId: 'run_none',
           inputFingerprint: 'fp_new',
         })
       }),
     ).rejects.toThrow(/unlinked articles/)
+  })
+})
+
+describe('desks', () => {
+  it('stores a desk on every generated summary', async () => {
+    const missing = await n(
+      h.ctx.db
+        .select({ n: count() })
+        .from(schema.story)
+        .where(and(isNotNull(schema.story.publishedAt), isNull(schema.story.desk))),
+    )
+    expect(missing).toBe(0)
+  })
+
+  it('re-summarises unchanged inputs only while the Story has no desk', async () => {
+    const { db } = h.ctx
+    const [story] = await db
+      .select()
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story?.inputFingerprint) throw new Error('no story')
+    const links = await db
+      .select({ articleId: schema.storyArticle.articleId })
+      .from(schema.storyArticle)
+      .where(and(eq(schema.storyArticle.storyId, story.id), isNull(schema.storyArticle.removedAt)))
+    const articleIds = links.map((l) => l.articleId)
+    const observations = await db
+      .select({ id: schema.observation.id })
+      .from(schema.observation)
+      .where(inArray(schema.observation.subjectId, articleIds))
+    const [run] = await db.select({ id: schema.analysisRun.id }).from(schema.analysisRun).limit(1)
+    const statuses: string[] = []
+    // Rolled back at the end so later tests see the original summary.
+    await expect(
+      db.transaction(async (tx) => {
+        const record = async () =>
+          (
+            await recordGeneratedSummary(tx, {
+              storyId: story.id,
+              output: {
+                headline: story.title,
+                summary: 'Refreshed.',
+                sourceArticleIds: articleIds,
+                observationIds: observations.map((o) => o.id),
+                regions: ['global'],
+                desk: 'science',
+              },
+              analysisRunId: run?.id,
+              inputFingerprint: story.inputFingerprint ?? '',
+            })
+          ).status
+        statuses.push(await record())
+        await tx.update(schema.story).set({ desk: null }).where(eq(schema.story.id, story.id))
+        statuses.push(await record())
+        const [after] = await tx.select().from(schema.story).where(eq(schema.story.id, story.id))
+        statuses.push(after?.desk ?? 'none')
+        statuses.push(await record())
+        tx.rollback()
+      }),
+    ).rejects.toThrow()
+    expect(statuses).toEqual(['stale', 'recorded', 'science', 'stale'])
   })
 })
 

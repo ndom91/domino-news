@@ -1,8 +1,8 @@
 import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
-import type { DevelopingNarrative, FrontPage, Region } from '@dn/schemas'
+import type { Desk, DevelopingNarrative, FrontPage, Region } from '@dn/schemas'
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { getStory, listStories } from './reader.ts'
+import { getStory, listStories, narrativeDesk } from './reader.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
@@ -55,7 +55,7 @@ export async function getFrontPage(
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
-      colorSlot: schema.narrative.colorSlot,
+      desk: narrativeDesk,
       updatedAt: schema.narrative.updatedAt,
     })
     .from(schema.narrative)
@@ -102,7 +102,7 @@ async function developingNarratives(
     id: string
     slug: string
     title: string
-    colorSlot: number | null
+    desk: Desk | null
     updatedAt: Date
   }[],
 ): Promise<DevelopingNarrative[]> {
@@ -172,7 +172,7 @@ async function developingNarratives(
       id: n.id,
       slug: n.slug,
       title: n.title,
-      colorSlot: n.colorSlot ?? 0,
+      desk: n.desk,
       storyCount: ids.length,
       since: (first?.firstObservedAt ?? n.updatedAt).toISOString(),
       updatedAt: n.updatedAt.toISOString(),
