@@ -106,6 +106,12 @@
   --dn-text-section: clamp(1.75rem, 2.8vw, 2.5rem); /* 40 — LATEST / DEVELOPING, narrative titles */
   --dn-text-masthead: clamp(2.75rem, 5.3vw, 4.75rem); /* 76 */
   --dn-text-display: clamp(3.25rem, 7.8vw, 7rem); /* 112 — hero headline */
+  --dn-text-display-md: clamp(
+    2.5rem,
+    5.6vw,
+    5rem
+  ); /* 80 — long hero headline, Story page headline */
+  --dn-text-display-sm: clamp(2.125rem, 4.2vw, 3.75rem); /* 60 — long Story page headline */
 
   --dn-leading-display: 0.88;
   --dn-leading-headline: 0.98;

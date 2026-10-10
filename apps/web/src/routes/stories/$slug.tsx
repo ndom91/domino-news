@@ -16,7 +16,7 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import { RouterLink } from '../../components/link.tsx'
-import { Page, SectionLabel } from '../../components/page.tsx'
+import { SectionLabel } from '../../components/page.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { queries } from '../../lib/api.ts'
 
@@ -47,7 +47,8 @@ function StoryPage() {
   const regions = story.regions.map((r) => REGION_LABELS[r]).join(', ')
 
   return (
-    <Page className="pt-0 md:pt-0">
+    // No Page wrapper: the lead block sets its own top spacing, as on the front page.
+    <div className="mx-auto max-w-page px-gutter">
       <HeroStory
         story={story}
         now={now}
@@ -211,6 +212,6 @@ function StoryPage() {
           </section>
         </aside>
       </div>
-    </Page>
+    </div>
   )
 }

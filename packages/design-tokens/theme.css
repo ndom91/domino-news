@@ -138,10 +138,27 @@
   letter-spacing: var(--dn-tracking-masthead);
   text-transform: uppercase;
 }
+/* Hero headline in three steps; HeroStory picks one from the page and the title length. */
 @utility type-display {
   font-stretch: var(--dn-width-display);
   font-weight: var(--dn-weight-extrabold);
   font-size: var(--dn-text-display);
+  line-height: var(--dn-leading-display);
+  letter-spacing: var(--dn-tracking-display);
+  text-wrap: balance;
+}
+@utility type-display-md {
+  font-stretch: var(--dn-width-display);
+  font-weight: var(--dn-weight-extrabold);
+  font-size: var(--dn-text-display-md);
+  line-height: var(--dn-leading-display);
+  letter-spacing: var(--dn-tracking-display);
+  text-wrap: balance;
+}
+@utility type-display-sm {
+  font-stretch: var(--dn-width-display);
+  font-weight: var(--dn-weight-extrabold);
+  font-size: var(--dn-text-display-sm);
   line-height: var(--dn-leading-display);
   letter-spacing: var(--dn-tracking-display);
   text-wrap: balance;

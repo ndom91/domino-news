@@ -8,6 +8,8 @@ import { SourceBoard } from './source-board.tsx'
 import { SourceTrace } from './source-trace.tsx'
 import { Timestamp } from './time.tsx'
 
+const LONG_TITLE = 60 // characters
+
 /**
  * The lead Story as a block in its Narrative's colour: display headline, cited summary with a
  * provenance note, and "Who reported it" (hour-cell trace + board). Also the Story page header.
@@ -45,6 +47,15 @@ export function HeroStory({
     ? Math.round((Math.max(...times) - Math.min(...times)) / 3_600_000)
     : 0
   const outlets = story.sources.length
+  // Long titles step down a size. An unlinked headline is the Story page's own title, one step smaller.
+  const long = story.title.length > LONG_TITLE
+  const display = linkHeadline
+    ? long
+      ? 'type-display-md'
+      : 'type-display'
+    : long
+      ? 'type-display-sm'
+      : 'type-display-md'
 
   return (
     <section
@@ -71,7 +82,7 @@ export function HeroStory({
       </div>
 
       <div className="min-w-0">
-        <Heading id="lead-heading" className="mb-6.5 type-display">
+        <Heading id="lead-heading" className={cx('mb-6.5', display)}>
           {linkHeadline ? (
             <Link
               to={`/stories/${story.slug}`}
