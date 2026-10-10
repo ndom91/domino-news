@@ -1,19 +1,20 @@
-import { formatDate, plural } from '@dn/domain'
+import { clockTime, formatDate, plural } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
+import type { CSSProperties } from 'react'
 import { cx } from '../cx.ts'
 import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { layoutNarrative } from './narrative-layout.ts'
 import { relationLabel } from './relations.ts'
 
-const LANE = 22 // px between lane centres
-const DOT_Y = 26 // px from row top to node centre (aligned with the title's first line)
-// Every lane is the Narrative's key colour: colour means "this Narrative", position shows branches.
-const laneColor = (_lane: number) => 'bg-key'
+// Marker centre from the row top, level with the date line. The line and marker share the
+// gutter's centre (12px), so markers always sit on the line.
+const MARK_Y = 19
 
 /**
- * Branching history of a Narrative. Each row is one Story; lanes show how developments
- * continue (same lane) or branch (new lane). Lines use the Narrative's key colour.
+ * A Narrative as one timeline, oldest first: one marker per Story on a single line in the
+ * Narrative's colour. How Stories connect is written out (Responds to, Follows…), not drawn.
+ * The current Story (on a Story page), or else the latest, gets a filled marker.
  */
 export function NarrativeGraph({
   narrative,
@@ -24,72 +25,72 @@ export function NarrativeGraph({
   currentStoryId?: string
   Link?: LinkLike
 }) {
-  const layout = layoutNarrative(narrative.stories, narrative.edges)
-  const titleById = new Map(narrative.stories.map((s) => [s.id, s.title]))
-  const gutter = layout.laneCount * LANE + 8
+  const { rows } = layoutNarrative(narrative.stories, narrative.edges)
+  const byId = new Map(narrative.stories.map((s) => [s.id, s]))
+  const highlightId = currentStoryId ?? rows.at(-1)?.node.id
+  const storyLink = (id: string) => {
+    const story = byId.get(id)
+    return story ? (
+      <Link to={`/stories/${story.slug}`} className="hover:underline">
+        {story.title}
+      </Link>
+    ) : null
+  }
 
   return (
     <ol
-      aria-label={`${plural(narrative.stories.length, 'development')}, oldest first`}
+      aria-label={`${plural(narrative.stories.length, 'story', 'stories')}, oldest first`}
       className={cx(deskKey(narrative.desk), 'flex flex-col border-t-2 border-rule')}
+      // Desk colour for the line and markers; without a desk the neutral key nearly vanishes
+      // on the dark canvas, so use the strong border colour instead.
+      style={
+        { '--line': narrative.desk ? 'var(--dn-key)' : 'var(--dn-border-strong)' } as CSSProperties
+      }
     >
-      {layout.rows.map(({ node, row, lane, primary, secondary }) => {
+      {rows.map(({ node, primary, secondary }, i) => {
         const isCurrent = node.id === currentStoryId
+        const filled = node.id === highlightId
         return (
-          <li key={node.id} className="relative flex min-h-24" style={{ paddingLeft: gutter }}>
-            <div aria-hidden className="absolute inset-y-0 left-0" style={{ width: gutter }}>
-              {layout.laneSpans.map((span) => {
-                if (row < span.start || row > span.end || span.start === span.end) return null
-                const top = row === span.start ? DOT_Y : 0
-                const bottom = row === span.end ? `calc(100% - ${DOT_Y}px)` : 0
-                return (
-                  <span
-                    key={span.lane}
-                    className={cx('absolute w-0.5', laneColor(span.lane))}
-                    style={{ left: span.lane * LANE + 10, top, bottom }}
-                  />
-                )
-              })}
-              {layout.laneSpans
-                .filter((s) => s.branchFromLane !== null && s.start === row)
-                .map((span) => {
-                  const from = (span.branchFromLane ?? 0) * LANE + 11
-                  const to = span.lane * LANE + 11
-                  return (
-                    <span
-                      key={`elbow-${span.lane}`}
-                      className={cx('absolute h-0.5', laneColor(span.lane))}
-                      style={{
-                        left: Math.min(from, to),
-                        width: Math.abs(to - from),
-                        top: DOT_Y - 1,
-                      }}
-                    />
-                  )
-                })}
+          <li key={node.id} className="relative grid grid-cols-[1.5rem_minmax(0,1fr)] gap-x-2">
+            <span aria-hidden className="relative">
+              {i > 0 ? (
+                <span
+                  className="absolute top-0 left-[11px] w-0.5 bg-(--line)"
+                  style={{ height: MARK_Y }}
+                />
+              ) : null}
+              {i < rows.length - 1 ? (
+                <span
+                  className="absolute bottom-0 left-[11px] w-0.5 bg-(--line)"
+                  style={{ top: MARK_Y }}
+                />
+              ) : null}
               <span
                 className={cx(
-                  'absolute -translate-x-1/2 -translate-y-1/2 ring-4 ring-canvas',
-                  isCurrent ? 'size-3.5 bg-text' : cx('size-3', laneColor(lane)),
+                  'absolute left-1.5 size-3',
+                  filled ? 'bg-(--line)' : 'bg-canvas shadow-[inset_0_0_0_2px_var(--line)]',
                 )}
-                style={{ left: lane * LANE + 11, top: DOT_Y }}
+                style={{ top: MARK_Y - 6 }}
               />
-            </div>
+            </span>
             <div
               className={cx(
-                'flex w-full flex-col gap-1 border-b border-border px-3 pt-2.5 pb-5',
+                'flex min-w-0 flex-col gap-1 border-b border-border px-3 pt-2.5 pb-5',
                 isCurrent && 'bg-sunken',
               )}
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                <time dateTime={node.firstObservedAt} className="type-meta font-semibold">
-                  {formatDate(node.firstObservedAt)}
+                <time
+                  dateTime={node.firstObservedAt}
+                  className="type-meta font-semibold whitespace-nowrap tabular-nums"
+                >
+                  {formatDate(node.firstObservedAt)} · {clockTime(node.firstObservedAt)} UTC
                 </time>
                 {primary ? (
                   <span className="text-xs font-semibold tracking-label text-text-muted uppercase">
                     {relationLabel(primary.relation, 'outgoing')}{' '}
                     <span className="normal-case tracking-normal">
-                      {titleById.get(primary.parentId)}
+                      {storyLink(primary.parentId)}
                     </span>
                   </span>
                 ) : null}
@@ -107,21 +108,19 @@ export function NarrativeGraph({
               </h3>
               {node.summary ? (
                 <p className="line-clamp-2 max-w-reading text-base leading-normal text-text-secondary">
-                  {node.summary.replace(/\[\d+\]/g, '')}
+                  {node.summary.replace(/\[\d+(?:,\s*\d+)*\]/g, '')}
                 </p>
               ) : null}
               {secondary.length > 0 ? (
                 <ul className="mt-1 flex flex-col gap-0.5 text-label text-text-muted">
                   {secondary.map((s) => (
                     <li key={`${s.otherId}-${s.relation}`}>
-                      {relationLabel(s.relation, s.direction)}: {titleById.get(s.otherId)}
+                      {relationLabel(s.relation, s.direction)}: {storyLink(s.otherId)}
                     </li>
                   ))}
                 </ul>
               ) : null}
-              <span className="type-meta">
-                {node.sourceCount} {node.sourceCount === 1 ? 'source' : 'sources'}
-              </span>
+              <span className="type-meta">{plural(node.sourceCount, 'publisher')}</span>
             </div>
           </li>
         )

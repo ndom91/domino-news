@@ -43,7 +43,7 @@ function NarrativePage() {
         <NarrativeGraph narrative={narrative} Link={RouterLink} />
         <p className="mt-8 max-w-reading text-xs text-text-muted">
           Links between stories are proposed by a language model from the stories' summaries and
-          checked for consistent ordering. A new lane marks a branch.
+          checked for consistent ordering.
         </p>
       </div>
     </Page>

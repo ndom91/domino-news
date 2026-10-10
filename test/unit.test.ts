@@ -105,17 +105,23 @@ describe('parseFeed', () => {
 })
 
 describe('layoutNarrative', () => {
-  it('continues lanes for follow-ups and opens new lanes for branches', () => {
-    const layout = layoutNarrative(fixtureNarrative.stories, fixtureNarrative.edges)
-    const lane = (id: string) => layout.rows.find((r) => r.node.id === id)?.lane
-    expect(layout.rows.map((r) => r.node.id)).toEqual([
-      'sty_icc',
-      'sty_pillay',
-      'sty_trump',
-      'sty_reax',
+  it('orders Stories in time and writes their links as primary and secondary relations', () => {
+    const edges = [
+      ...fixtureNarrative.edges,
+      // A weaker extra link from sty_trump to sty_icc must not replace its primary.
+      { id: 'e4', fromStoryId: 'sty_trump', toStoryId: 'sty_icc', relation: 'follows' as const },
+    ]
+    const { rows } = layoutNarrative(fixtureNarrative.stories, edges)
+    const row = (id: string) => rows.find((r) => r.node.id === id)
+    expect(rows.map((r) => r.node.id)).toEqual(['sty_icc', 'sty_pillay', 'sty_trump', 'sty_reax'])
+    expect(row('sty_icc')?.primary).toBeNull()
+    // follows is preferred over related_to as the line shown above the headline.
+    expect(row('sty_trump')?.primary).toEqual({ parentId: 'sty_icc', relation: 'follows' })
+    expect(row('sty_trump')?.secondary).toEqual([
+      { otherId: 'sty_pillay', relation: 'related_to', direction: 'outgoing' },
     ])
-    expect(lane('sty_trump')).toBe(lane('sty_pillay'))
-    expect(lane('sty_reax')).not.toBe(lane('sty_pillay'))
+    // sty_reax's branch is its own primary, so sty_pillay does not list it again.
+    expect(row('sty_pillay')?.secondary.map((s) => s.otherId)).not.toContain('sty_reax')
   })
 })
 
