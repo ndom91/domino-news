@@ -91,7 +91,10 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - **One API path for SSR and browser:** the shared `api-client` gets an isomorphic fetcher. On the server it calls `handleApiRequest` in-process with the user's cookies (no loopback HTTP); in the browser it is plain `fetch`. Loaders prefetch with the shared `@dn/queries` definitions, dehydrated via `@tanstack/react-router-ssr-query`.
 - The `/api/v1` router is framework-independent (`URLPattern`), mounted by a catch-all Start server route, and contract-tested without the web app.
 - Narrative graph: hand-built HTML/CSS lane layout (`layoutNarrative`, unit-tested), not a graph library. It scrolls vertically and works at 375px.
-- Visual direction: cool neutral paper, Newsreader (headlines only), Instrument Sans (UI/body), JetBrains Mono (times/data), one teal accent. Signature element: the **source trace**, which places each outlet's report on a time axis (filled = cited in the summary, hollow = observed but not cited).
+- Visual direction ("Signal × Index", from the Claude Design handoff, 10 Oct 2026): one font, Archivo Variable (weight and width axes) used through `type-*` role utilities; square, ruled and flat surfaces (only popovers have a shadow); signal orange is decoration only, never a button or text colour (`accent-text` for text). Each Narrative owns one of six key colours, stored as `narrative.color_slot` so it never changes between page loads; Stories outside a Narrative use the neutral slot 0.
+- Signature elements: the hour-cell **Source Trace** (24 cells, one mark per outlet in the hour it reported; filled = cited, ring = reported only) and the "Who reported it" **board**, whose numbers match the `[n]` markers in the summary.
+- Citation numbers: the summarize prompt numbers sources in publishing order; `renumberCitations` rewrites the model's markers to cited-source order (unknown numbers are dropped) and the number is stored per `story_summary_source`, so markers and board always agree. Edited summaries keep the numbers.
+- The front page is one request, `GET /api/v1/front` (stats, lead Story with its position in its Narrative, Developing narratives), so a mobile client can render it the same way.
 
 ## Playroom
 
