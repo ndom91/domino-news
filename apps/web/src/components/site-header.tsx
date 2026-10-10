@@ -1,8 +1,9 @@
 import { clockTime, longDate } from '@dn/domain'
-import { cx } from '@dn/ui'
+import { cx, Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate, useRouter } from '@tanstack/react-router'
 import { queries } from '../lib/api.ts'
+import { authClient } from '../lib/auth-client.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
@@ -39,7 +40,7 @@ function Strip() {
 export function SiteHeader({
   user,
 }: {
-  user: { name: string; username: string | null; isAdmin: boolean }
+  user: { name: string; email: string; username: string | null; isAdmin: boolean }
 }) {
   return (
     <>
@@ -51,7 +52,7 @@ export function SiteHeader({
           </Link>
           <nav
             aria-label="Primary"
-            className="flex gap-7 text-base font-semibold [scrollbar-width:none] max-md:w-full max-md:gap-6 max-md:overflow-x-auto"
+            className="ml-auto flex gap-7 text-base font-semibold [scrollbar-width:none] max-md:order-last max-md:ml-0 max-md:w-full max-md:gap-6 max-md:overflow-x-auto"
           >
             {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
               <Link
@@ -67,17 +68,45 @@ export function SiteHeader({
                 {item.label}
               </Link>
             ))}
-            <Link
-              to="/account"
-              className="inline-flex min-h-tap flex-none items-end pb-0.5 font-medium whitespace-nowrap text-text-muted hover:text-accent-text"
-              activeProps={{ className: cx('shadow-[inset_0_-3px_0_var(--dn-accent)]') }}
-            >
-              {user.username ?? user.name}
-            </Link>
           </nav>
+          {/* After the nav on wide screens; beside the masthead on narrow ones (nav wraps below). */}
+          <UserMenu user={user} />
         </header>
       </div>
     </>
+  )
+}
+
+/** Avatar button that opens Settings and Sign out. */
+function UserMenu({ user }: { user: { name: string; email: string; username: string | null } }) {
+  const router = useRouter()
+  const navigate = useNavigate()
+  return (
+    <Menu
+      trigger={
+        <button
+          type="button"
+          aria-label={`Account menu for ${user.username ?? user.name}`}
+          className="inline-flex size-tap flex-none items-center justify-center"
+        >
+          <UserAvatar name={user.email || user.name} />
+        </button>
+      }
+    >
+      <p className="border-b border-border px-4 pt-1.5 pb-2.5 type-meta">
+        Signed in as <b className="font-semibold text-text">{user.username ?? user.name}</b>
+      </p>
+      <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>
+      <MenuItem
+        onClick={async () => {
+          await authClient.signOut()
+          await router.invalidate()
+          await navigate({ to: '/login' })
+        }}
+      >
+        Sign out
+      </MenuItem>
+    </Menu>
   )
 }
 

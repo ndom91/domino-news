@@ -12,8 +12,10 @@
   },
   "dependencies": {
     "@base-ui/react": "1.8.0",
+    "@dn/design-tokens": "workspace:*",
     "@dn/domain": "workspace:*",
-    "@dn/schemas": "workspace:*"
+    "@dn/schemas": "workspace:*",
+    "boring-avatars": "2.0.4"
   },
   "peerDependencies": {
     "react": "^19",

@@ -1,4 +1,5 @@
 import { AlertDialog as BaseAlertDialog } from '@base-ui/react/alert-dialog'
+import { Menu as BaseMenu } from '@base-ui/react/menu'
 import { Popover as BasePopover } from '@base-ui/react/popover'
 import { Tooltip as BaseTooltip } from '@base-ui/react/tooltip'
 import { type ReactElement, type ReactNode, useRef, useState } from 'react'
@@ -41,6 +42,52 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
         </BasePopover.Positioner>
       </BasePopover.Portal>
     </BasePopover.Root>
+  )
+}
+
+const menuItemClass =
+  'flex min-h-tap w-full cursor-default items-center px-4 text-base font-semibold outline-none select-none data-highlighted:bg-text data-highlighted:text-canvas'
+
+/** Click/keyboard menu of actions, anchored to its trigger. Arrow keys move between items. */
+export function Menu({
+  trigger,
+  children,
+  align = 'end',
+}: {
+  trigger: ReactElement
+  children: ReactNode
+  align?: 'start' | 'center' | 'end'
+}) {
+  return (
+    <BaseMenu.Root>
+      <BaseMenu.Trigger render={trigger} />
+      <BaseMenu.Portal>
+        <BaseMenu.Positioner align={align} sideOffset={8} collisionPadding={12} className="z-50">
+          <BaseMenu.Popup className={cx(popupBase, 'min-w-44 border-2 border-rule py-1')}>
+            {children}
+          </BaseMenu.Popup>
+        </BaseMenu.Positioner>
+      </BaseMenu.Portal>
+    </BaseMenu.Root>
+  )
+}
+
+/** Menu action. */
+export function MenuItem({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+  return (
+    <BaseMenu.Item className={menuItemClass} onClick={onClick}>
+      {children}
+    </BaseMenu.Item>
+  )
+}
+
+/** Menu entry that navigates. `render` is the router's link, e.g. <Link to="/account" />. */
+export function MenuLinkItem({ children, render }: { children: ReactNode; render: ReactElement }) {
+  return (
+    // Link items stay open by default; close so the menu is gone after navigating.
+    <BaseMenu.LinkItem className={menuItemClass} render={render} closeOnClick>
+      {children}
+    </BaseMenu.LinkItem>
   )
 }
 
