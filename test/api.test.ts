@@ -228,3 +228,19 @@ describe('search hydration', () => {
     expect(hit?.storyCount).toBe(rows[0].n)
   })
 })
+
+describe('passkey endpoints', () => {
+  it('require a session to manage passkeys', async () => {
+    const res = await h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/passkey/list-user-passkeys'),
+    )
+    expect(res.status).toBe(401)
+    const authed = await h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/passkey/list-user-passkeys', {
+        headers: { authorization: `Bearer ${token}` },
+      }),
+    )
+    expect(authed.status).toBe(200)
+    expect(await authed.json()).toEqual([])
+  })
+})

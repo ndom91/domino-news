@@ -30,7 +30,9 @@ export function SiteHeader({ user }: { user: { name: string; username: string | 
           <span className="hidden font-mono text-xs text-text-muted sm:inline">{today}</span>
         </div>
         <div className="flex items-center gap-3 text-sm">
-          <span className="hidden text-text-muted md:inline">{user.username ?? user.name}</span>
+          <Link to="/account" className="text-text-muted hover:text-text">
+            {user.username ?? user.name}
+          </Link>
           <Button
             size="sm"
             variant="ghost"

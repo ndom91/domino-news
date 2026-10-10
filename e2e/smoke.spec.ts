@@ -4,7 +4,7 @@ async function signIn(page: Page) {
   await page.goto('/login', { waitUntil: 'networkidle' })
   await page.getByLabel('Username').fill(process.env.DEV_USERNAME ?? '')
   await page.getByLabel('Password').fill(process.env.DEV_PASSWORD ?? '')
-  await page.getByRole('button', { name: 'Sign in' }).click()
+  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
   await page.waitForURL('/')
 }
 
@@ -18,7 +18,7 @@ async function expectNoHorizontalOverflow(page: Page) {
 test('unauthenticated visitors are sent to sign in', async ({ page }) => {
   await page.goto('/')
   await expect(page).toHaveURL(/\/login/)
-  await expect(page.getByRole('button', { name: 'Sign in' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
 test('feed → story → narrative → search', async ({ page }) => {

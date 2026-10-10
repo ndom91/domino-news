@@ -211,7 +211,7 @@ Added 2026-10-10 by founder decision: **the entire application sits behind a log
 - **Library:** [better-auth](https://www.better-auth.com) with the Drizzle adapter. Auth tables (`auth_user`, `auth_session`, `auth_account`, `auth_verification`) live in PostgreSQL next to domain data.
 - **Methods now:** username + password (`username` plugin). Public sign-up is **disabled**; accounts are created server-side with `pnpm cli user:create`.
 - **API clients:** the `bearer` plugin issues a token on sign-in (`set-auth-token` header) that clients send as `Authorization: Bearer <token>`. The web app uses the same session via cookies. This keeps the API usable by the future Expo app without browser cookies.
-- **Planned:** passkeys (WebAuthn) via the better-auth passkey plugin. It needs one extra table and client wiring; no change to the API boundary.
+- **Passkeys (implemented):** `@better-auth/passkey`. Signed-in users add passkeys on `/account`; the login page offers "Sign in with a passkey" and browser autofill. `rpID`/`origin` come from `BETTER_AUTH_URL`, so it must be the real public origin (HTTPS in production; `localhost` works for development).
 - **Boundary:** `/api/auth/*` is served by better-auth; every `/api/v1/*` handler resolves the session first and returns a typed `401 unauthorized` error otherwise. Web route guards use a web-only server function to read the session, which the HTTP-first rule allows.
 - **Secrets:** `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` are required configuration; `BETTER_AUTH_URL` must match the public origin.
 

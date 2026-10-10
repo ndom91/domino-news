@@ -29,6 +29,13 @@
       "when": 1791641264355,
       "tag": "0003_drop_write_only_columns",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1791641784315,
+      "tag": "0004_auth_passkey",
+      "breakpoints": true
     }
   ]
 }

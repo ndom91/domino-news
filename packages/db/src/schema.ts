@@ -528,3 +528,27 @@ export const authVerification = pgTable('auth_verification', {
   createdAt: ts('created_at').notNull().defaultNow(),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
+
+// better-auth passkey plugin (WebAuthn credentials).
+export const authPasskey = pgTable(
+  'auth_passkey',
+  {
+    id: text('id').primaryKey(),
+    name: text('name'),
+    publicKey: text('public_key').notNull(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    credentialID: text('credential_id').notNull(),
+    counter: integer('counter').notNull(),
+    deviceType: text('device_type').notNull(),
+    backedUp: boolean('backed_up').notNull(),
+    transports: text('transports'),
+    aaguid: text('aaguid'),
+    createdAt: ts('created_at'),
+  },
+  (t) => [
+    index('auth_passkey_user_idx').on(t.userId),
+    index('auth_passkey_credential_idx').on(t.credentialID),
+  ],
+)
