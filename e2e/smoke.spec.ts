@@ -57,6 +57,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   // Search (hybrid or keyword fallback)
   await page.goto('/search?q=nobel')
   await expect(page.getByText(/results ·/)).toBeVisible()
+  await expect(page.locator('main a[href^="/stories/"]').first()).toBeVisible()
   await expectNoHorizontalOverflow(page)
 })
 

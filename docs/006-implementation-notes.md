@@ -69,11 +69,18 @@ Chosen bands (`THRESHOLDS` in `packages/jobs/src/match.ts`):
 
 The model makes nearly all matching decisions; embeddings only shortlist. Fixture mode uses separate, coarser thresholds over hashed bag-of-words vectors.
 
+Prompt lessons from the real-model runs (current versions: `match-story@3`, `classify-relationship@3`):
+
+- **Reactions are separate developments, in both directions.** Backfill admits newest first, so a reaction ("Trump attacks Norway over the Nobel snub") can create a Story before the event it reacts to arrives. The match prompt must say that event-vs-reaction is `related_development` regardless of order; otherwise the original event gets absorbed into the reaction Story.
+- **Shared actors are not a link.** A loose relationship prompt connected anything involving Donald Trump. The prompt now requires a specific event, decision or dispute that a reader could name.
+- **Known conservative miss:** "Ukraine strikes Russian fuel site after the diesel deal" is not linked to the diesel-deal Story. This is acceptable for now (the spec prefers misses over false links); revisit with a larger evaluation set before tuning further.
+- Gemma sometimes answers `related` with a null relation; this is stored as `related_to`.
+
 ## Search
 
 - Typesense collections are versioned (`stories_<ts>`) behind aliases (`stories`, `narratives`, `articles`). `pnpm cli search:rebuild` (or the ops button) builds fresh collections from Postgres and swaps the aliases.
 - The indexer never trusts event payloads: it re-reads Postgres for the aggregate, so duplicates, replays and out-of-order events converge. `search_projection_state` records applied versions; withdrawn or unpublished aggregates are deleted.
-- Search is hybrid (keyword + query embedding, `alpha 0.4`). If the embedding call fails or takes over 2.5s, it falls back to keyword-only and skips embedding for 60s (circuit breaker). Results report `mode: hybrid | keyword`.
+- Search is hybrid (keyword + query embedding, `alpha 0.4`). Gotcha: with externally supplied vectors, `embedding` must **not** be listed in `query_by`; the vector part comes only from `vector_query`. Typesense `multi_search` returns HTTP 200 even when an individual search fails, so the client checks each result's `error` and throws (otherwise failures look like "no results"). If the embedding call fails or takes over 2.5s, it falls back to keyword-only and skips embedding for 60s (circuit breaker). Results report `mode: hybrid | keyword`.
 - Typesense only returns candidate IDs and scores; result data is hydrated from Postgres.
 - A minimal `fetch` client replaces the Typesense SDK (five calls, simpler types).
 

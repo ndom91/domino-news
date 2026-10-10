@@ -26,8 +26,17 @@ export function createTypesense(baseUrl: string, apiKey: string) {
         if (!(error instanceof TypesenseError && error.status === 404)) throw error
       }
     },
-    multiSearch: <T>(searches: Record<string, unknown>[]) =>
-      request<{ results: T[] }>('POST', '/multi_search', { searches }),
+    // multi_search answers 200 even when individual searches fail; surface those failures.
+    multiSearch: async <T>(searches: Record<string, unknown>[]) => {
+      const body = await request<{ results: (T & { error?: string; code?: number })[] }>(
+        'POST',
+        '/multi_search',
+        { searches },
+      )
+      const failed = body.results.find((r) => r.error)
+      if (failed) throw new TypesenseError(failed.code ?? 500, `multi_search: ${failed.error}`)
+      return body as { results: T[] }
+    },
   }
 }
 

@@ -65,9 +65,8 @@ export async function searchAll(
     searches.push({
       collection: 'stories',
       q: query.q,
-      query_by: vector
-        ? 'title,summary,publisher_names,embedding'
-        : 'title,summary,publisher_names',
+      // The vector part comes from vector_query; `embedding` must not appear in query_by.
+      query_by: 'title,summary,publisher_names',
       ...(vector ? { vector_query: `embedding:([${vector.join(',')}], k:50, alpha:0.4)` } : {}),
       exclude_fields: 'embedding',
       filter_by: filters.join(' && ') || undefined,
