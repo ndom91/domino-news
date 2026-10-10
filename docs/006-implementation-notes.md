@@ -104,3 +104,19 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - `NODE_EXTRA_CA_CERTS` is ignored when set through `--env-file` (Node reads it before). Use `INFERENCE_CA_CERT=/path/ca.pem` instead; the inference package registers it at runtime.
 - `BETTER_AUTH_URL` must match the origin users load the app from, or sign-in fails the origin check.
 - Feeds are messy: entity-encoded links (BBC), tracking params (`maca`, `traffic_source`, `utm_*`), duplicate items per feed (France 24), zero-width characters. All handled in `rss.ts` / `url.ts` and covered by unit tests.
+
+## Feature round 2 (passkeys, publishers, context, claims)
+
+- **Passkeys:** `@better-auth/passkey`, table `auth_passkey`. `rpID` is the hostname of `BETTER_AUTH_URL` and `origin` is the URL itself, so passkeys created on one host don't work on another. Users add passkeys after a password sign-in on `/account`; login offers a button and WebAuthn autofill. Tested end-to-end with Chromium's virtual authenticator (`e2e/passkey.spec.ts`).
+- **Publisher coverage** is computed at read time from `story_article` (published Stories, active links). "First to report" uses `coalesce(published_at, first_seen_at)`, so a feed with missing dates can look slower than it was. No pipeline or schema changes.
+- **Enrichment after each summary version:** `build_story_summary` enqueues `relate_story`, `generate_context` and `extract_claims`, all keyed on the new summary version id, so a newer summary makes older enrichment jobs stale. `pnpm cli enrich:all` re-queues all three for existing data.
+- **Context entries** (`context_entry`, `context_entry_version` (append-only), `story_context`):
+  - Validation drops entries whose `anchorText` isn't verbatim in the summary or which cite observations outside the Story.
+  - One interpretation per entry, so each explanation's evidence is exactly its own sources.
+  - Entries are reused by `normalized_key` (slug of the title) without regeneration.
+  - The reader hides anchors missing from the current text; editing a summary queues regeneration.
+  - Prompt `explain-context@2` skips countries, major parties, household-name institutions, generic words and news outlets; `@1` explained "Politico" and "European Union".
+- **Claims** (`claim`, `claim_mention`, `claim_evidence`):
+  - Validation keeps only mentions of the Story's active articles and evidence pointing at the Story's own primary sources; claims with no mention are dropped.
+  - Re-extraction sets `superseded_at` on earlier claims; nothing is edited.
+  - Prompt `extract-claims@1` produced specific, attributable claims with sensible stances on the real model (e.g. Trump's "never heard of her" remark is *quoted*, the prize itself *asserted*), with zero claims dropped by validation on the fixture set.

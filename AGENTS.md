@@ -11,7 +11,7 @@ packages/schemas  Zod API + inference contracts
 packages/domain   pure utilities (ids, URL normalisation, story-graph rules)
 packages/db       Drizzle schema, migrations (incl. invariant triggers)
 packages/server   server-only services: auth, reads, writes, outbox, search, API router
-packages/jobs     pipeline: ingest, embed, match, summarise, relate, backfill, worker runtime
+packages/jobs     pipeline: ingest, embed, match, summarise, relate, context, claims, backfill, worker runtime
 packages/inference fixture / local (OpenAI-compatible) / disabled cloud adapters
 packages/api-client, packages/queries   shared HTTP client + TanStack Query options
 packages/design-tokens, packages/ui      tokens, primitives and editorial components
@@ -80,16 +80,17 @@ Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (port `
 
 ## API
 
-All routes require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`).
+All routes require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`). Passkeys are managed through better-auth's own `/api/auth/passkey/*` endpoints (web: `/account`).
 
 ```text
 GET  /api/v1/stories?cursor=&limit=
-GET  /api/v1/stories/:idOrSlug
+GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related
 POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE_SUMMARY_EDITING)
 GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=
-GET  /api/v1/publishers
+GET  /api/v1/publishers                  # outlet stats + who-covered-what matrix
+GET  /api/v1/publishers/:slug            # stats, source-use policy, recent stories, co-coverage
 GET  /api/v1/ops/status
 POST /api/v1/ops/actions                  # pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
 ```
@@ -103,8 +104,12 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - Conservative Story matching (EmbeddingGemma shortlist, Gemma 4 decision, `uncertain` supported) and typed Story relationships with temporal and cycle validation.
 - Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones.
 - Narratives from connected Stories, with model-written titles.
+- **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
+- **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
+- **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
-- Web: feed, Story, Narrative (branching lane graph), search, and pipeline pages, plus login. Desktop-first and checked at 375px.
+- Web: feed, Story, Narrative (branching lane graph), publishers, search, pipeline and account pages. Desktop-first and checked at 375px.
+- Auth: username/password and passkeys (better-auth), bearer tokens for API clients; sign-up closed.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited
@@ -114,8 +119,8 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Matching thresholds** are calibrated on about 34 articles only (see doc 006).
 - **Merge/split:** the data model and alias resolution exist; there is no operation or UI.
 - **Ops page** is a diagnostics view, not an admin product.
-- The **CI e2e job** was written but has not run on GitHub yet.
+- **Claims evidence** needs primary sources, which are only discovered from publishers that allow body processing. All seeded publishers are `metadata_only`, so evidence links stay empty for now.
 
 ## Deferred (per doc 005)
 
-Claims/evidence graph, publisher bias assessment, personal blindspots, context popovers beyond the summary explainer, passkeys (planned better-auth plugin), Expo app, notifications, billing, Caddy/TLS, backups, OpenTofu/Ansible.
+Full claims/evidence graph (cross-story claim linking, verification), publisher bias assessment, personal blindspots, Expo app, notifications, billing, Caddy/TLS, backups, OpenTofu/Ansible.
