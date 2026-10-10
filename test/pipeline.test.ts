@@ -504,3 +504,36 @@ describe('backfill admission', () => {
     await drainPipeline(h.ctx)
   })
 })
+
+describe('event retention', () => {
+  it('prunes delivered events past retention and keeps pending ones', async () => {
+    const { db } = h.ctx
+    const { pruneDeliveredEvents } = await import('@dn/server')
+    const old = new Date(Date.now() - 30 * 86_400_000)
+    const [delivered, pending] = await db
+      .insert(schema.outboxEvent)
+      .values([
+        {
+          aggregateType: 'story',
+          aggregateId: 'x',
+          eventType: 'old',
+          aggregateVersion: 1,
+          processedAt: old,
+        },
+        {
+          aggregateType: 'story',
+          aggregateId: 'y',
+          eventType: 'pending',
+          aggregateVersion: 1,
+          createdAt: old,
+        },
+      ])
+      .returning()
+    await pruneDeliveredEvents(db, 7)
+    const remaining = await db.select({ id: schema.outboxEvent.id }).from(schema.outboxEvent)
+    const ids = remaining.map((r) => r.id)
+    expect(ids).not.toContain(delivered?.id)
+    expect(ids).toContain(pending?.id)
+    await db.delete(schema.outboxEvent).where(eq(schema.outboxEvent.id, pending?.id ?? 0))
+  })
+})

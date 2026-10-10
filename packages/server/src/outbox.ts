@@ -3,6 +3,23 @@ import { eq, sql } from 'drizzle-orm'
 
 export type AggregateType = 'story' | 'narrative' | 'article'
 
+/**
+ * Delete delivered outbox events and their inbox records after `days`. Pending and
+ * dead-lettered events are kept so they stay visible and replayable.
+ */
+export async function pruneDeliveredEvents(db: Db, days: number) {
+  const cutoff = sql`now() - make_interval(days => ${days})`
+  const outbox = await db
+    .delete(schema.outboxEvent)
+    .where(sql`${schema.outboxEvent.processedAt} < ${cutoff}`)
+    .returning({ id: schema.outboxEvent.id })
+  const inbox = await db
+    .delete(schema.inboxEvent)
+    .where(sql`${schema.inboxEvent.processedAt} < ${cutoff}`)
+    .returning({ eventId: schema.inboxEvent.eventId })
+  return { outbox: outbox.length, inbox: inbox.length }
+}
+
 /** Insert an outbox event. Must be called inside the same transaction as the canonical write. */
 export async function writeOutbox(
   db: Db,

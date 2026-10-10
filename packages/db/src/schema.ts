@@ -465,6 +465,7 @@ export const outboxEvent = pgTable(
     index('outbox_pending_idx')
       .on(t.nextAttemptAt)
       .where(sql`${t.processedAt} is null and ${t.deadAt} is null`),
+    index('outbox_dead_idx').on(t.id).where(sql`${t.deadAt} is not null`),
   ],
 )
 

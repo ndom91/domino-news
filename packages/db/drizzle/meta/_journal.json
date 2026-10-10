@@ -15,6 +15,13 @@
       "when": 1791632289640,
       "tag": "0001_invariants",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791640295242,
+      "tag": "0002_outbox_dead_index",
+      "breakpoints": true
     }
   ]
 }

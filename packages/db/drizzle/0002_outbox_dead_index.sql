@@ -1,0 +1,1 @@
+CREATE INDEX "outbox_dead_idx" ON "outbox_event" USING btree ("id") WHERE "outbox_event"."dead_at" is not null;

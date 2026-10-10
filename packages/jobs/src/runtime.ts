@@ -2,6 +2,7 @@ import {
   type AnalysisJob,
   PRIORITY,
   processOutboxBatch,
+  pruneDeliveredEvents,
   QUEUES,
   rebuildSearchIndex,
 } from '@dn/server'
@@ -115,6 +116,10 @@ export async function startWorkers(ctx: WorkerContext) {
     const result = await admitBackfill(ctx)
     if (result.admitted > 0) console.log(`[admit_backfill] ${JSON.stringify(result)}`)
   })
+  await boss.work(QUEUES.pruneEvents, async () => {
+    const result = await pruneDeliveredEvents(ctx.db, ctx.config.eventRetentionDays)
+    console.log(`[prune_delivered_events] ${JSON.stringify(result)}`)
+  })
   await boss.work(QUEUES.rebuildSearch, async () => {
     await rebuildSearchIndex(ctx.db, ctx.ts)
   })
@@ -151,6 +156,7 @@ export async function startWorkers(ctx: WorkerContext) {
 
   await boss.schedule(POLL_ALL, ctx.config.feedPollCron, null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.admitBackfill, '* * * * *', null, { singletonKey: 'cron' })
+  await boss.schedule(QUEUES.pruneEvents, '17 3 * * *', null, { singletonKey: 'cron' })
 }
 
 /** Outbox -> Typesense loop for the separate indexer process. */

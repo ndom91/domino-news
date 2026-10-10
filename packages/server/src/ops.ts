@@ -1,6 +1,6 @@
 import { schema } from '@dn/db'
 import type { OpsAction, OpsStatus } from '@dn/schemas'
-import { desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { ServerContext } from './context.ts'
 import { PRIORITY, QUEUES } from './queues.ts'
 
@@ -60,7 +60,8 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
       s: sql<number | null>`extract(epoch from now() - min(${schema.outboxEvent.createdAt}))::int`,
     })
     .from(schema.outboxEvent)
-    .where(isNull(schema.outboxEvent.processedAt))
+    // Matches the outbox_pending_idx partial index (no full-table scan).
+    .where(and(isNull(schema.outboxEvent.processedAt), isNull(schema.outboxEvent.deadAt)))
   const runs = await db
     .select()
     .from(schema.analysisRun)
