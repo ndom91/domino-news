@@ -90,6 +90,46 @@ scripts/deploy.sh update        # git pull --ff-only, then the same as up
 
 Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) and backups are not included yet.
 
+## Frontend guidelines
+
+Follow these for any UI work in `apps/web` and `packages/ui`. They come from the [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines) and the issues a full review found here.
+
+**Build with what exists**
+- Use the `@dn/ui` primitives (`Button`, `TextInput`, `Popover`, `Menu`, `Tooltip`, `ConfirmDialog`, `Notice`) and the type roles (`type-label`, `type-meta`, `type-section` …) before writing new markup or raw text sizes.
+- Colours come from tokens only. On a Narrative or desk fill use `key-fill`. It also switches the focus ring to a colour that stays visible on the fill.
+- For muted text on a fill, use a solid token (`text-key-text-muted`). Never use `opacity-*`, which drops below contrast AA.
+
+**Accessibility**
+- Every page has exactly one `h1`, including empty, error and login states (use `sr-only` if it shouldn't show).
+- Use `<button>` for actions and `<a>`/`<Link>` for navigation. Never put `onClick` on a `div` or `span`.
+- Icon-only and repeated controls need an `aria-label` that names the item ("Remove Work laptop", "Source 2: Reuters").
+- Keep the global `:focus-visible` outline. Don't remove outlines.
+- Anything clickable shows the pointer cursor. The base layer sets it for buttons, `role="button"`, selects and `summary`; set `cursor-pointer` on other custom clickables.
+- Tap targets are at least 44px (`min-h-tap`). Small inline controls such as citations get an invisible enlarged hit area.
+- In-page anchor targets get `scroll-mt-*` and a `:target` style.
+- Mark decorative SVGs and icons `aria-hidden`. Charts need a text alternative.
+- Put `aria-live="polite"` on a short status line (e.g. a result count), never on a whole list.
+
+**Forms and actions**
+- Inputs get `name`, `autoComplete`, the right `type`, and a visible label. Usernames, emails and codes also get `spellCheck={false}` and `autoCapitalize="none"`.
+- Give pending state to the button that was pressed, and keep it until navigation finishes. Re-enable buttons only on error.
+- Destructive or expensive actions (removing a passkey, pausing backfill, rebuilding search) go through `ConfirmDialog`.
+- Guard unsaved edits on cancel, route change and tab close.
+- Errors say what happened and what to do next.
+
+**State and data**
+- Filters, search and pagination live in the URL. Form fields must follow the URL on back and forward (key the form on the search params). Options a field needs come from the route loader.
+- Expect empty lists, missing data and bad URLs. Every list has an empty state. Never call `new URL()` unguarded in render (use `hostnameOf`). Guard maths against empty arrays.
+- Format dates and times with the `@dn/domain` helpers (`Intl`-based). Relative times can differ between server and client, so pass a loader-fixed `now` or render them client-side.
+
+**Copy**
+- Write for readers, not operators. No pipeline terms (poll, backfill, embedding, outbox, CLI commands) outside `/ops`.
+- One name per thing: **publisher** (not outlet or source), **story** (not development), **narrative**.
+- Pluralise counts with `plural()`. Use "…" (not "...") and curly quotes in UI text. Button labels say exactly what happens ("Remove passkey", not "Submit").
+
+**Motion**
+- Animate only `transform` and `opacity`, using the duration tokens. Those tokens drop to 0 under `prefers-reduced-motion`. Never use `transition-all`.
+
 ## API
 
 All routes require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`). Passkeys are managed through better-auth's own `/api/auth/passkey/*` endpoints (web: `/account`).

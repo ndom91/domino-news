@@ -291,4 +291,13 @@
   ::selection {
     background: var(--dn-accent-subtle);
   }
+
+  /* Tailwind v4's preflight gives buttons the default cursor; anything clickable should show
+     the pointer. A utility like cursor-not-allowed still wins. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
 }
