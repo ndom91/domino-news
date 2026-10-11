@@ -37,7 +37,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
       lastPolledAt: schema.feed.lastPolledAt,
       lastStatus: schema.feed.lastStatus,
       lastError: schema.feed.lastError,
-      articleCount: sql<number>`(select count(*)::int from ${schema.feedEntry} where ${schema.feedEntry.feedId} = ${schema.feed.id})`,
+      articleCount: sql<number>`(select count(*)::int from feed_entry where feed_entry.feed_id = feed.id)`,
     })
     .from(schema.feed)
     .innerJoin(schema.publisher, eq(schema.publisher.id, schema.feed.publisherId))

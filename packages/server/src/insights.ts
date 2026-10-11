@@ -64,10 +64,11 @@ async function missedDevelopments(db: Db, userId: string) {
   const byNarrative = new Map<string, { narrative: NarrativeRef; ids: string[] }>()
   for (const r of rows) {
     const entry = byNarrative.get(r.narrative_id) ?? {
-      // Rows are newest first, so the first desk seen is the Narrative's desk.
       narrative: { id: r.narrative_id, slug: r.slug, title: r.title, desk: r.desk },
       ids: [],
     }
+    // Rows are newest first: the Narrative takes the newest desk, skipping untagged Stories.
+    entry.narrative.desk ??= r.desk
     entry.ids.push(r.story_id)
     byNarrative.set(r.narrative_id, entry)
   }

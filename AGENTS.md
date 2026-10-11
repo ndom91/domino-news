@@ -93,6 +93,10 @@ scripts/deploy.sh update        # git pull --ff-only, then the same as up
 
 Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) and backups are not included yet.
 
+## Server guidelines
+
+- In a correlated `sql` subquery, write outer columns literally (`narrative.id`), not as `${schema.narrative.id}`. Drizzle drops the table name from select-list columns when the query has no joins, and a bare `"id"` then binds to the subquery's own tables.
+
 ## Frontend guidelines
 
 Follow these for any UI work in `apps/web` and `packages/ui`. They come from the [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines) and the issues a full review found here.
@@ -180,7 +184,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 ## Fixture-only or limited
 
 - **Fixture inference** is a deterministic stand-in (bag-of-words vectors, token-overlap decisions). Its grouping is noticeably coarser than the real models'.
-- **Article bodies:** 10 of 41 seeded publishers allow transient bodies (open licences or public domain, commercial use allowed). Federal Register and EU Commission pages need an API or a JS-capable fetcher, so they fall back to metadata for now. Fixture mode only has captured RSS for the original 12 publishers. The policy review was best-effort, not legal advice; get permission before production ingestion.
+- **Article bodies:** 10 of 53 seeded publishers allow transient bodies (open licences or public domain, commercial use allowed). Federal Register and EU Commission pages need an API or a JS-capable fetcher, so they fall back to metadata for now. Fixture mode only has captured RSS for the original 12 publishers. The policy review was best-effort, not legal advice; get permission before production ingestion.
 - **Matching thresholds** are calibrated on about 34 articles only (see doc 006).
 - **Merge/split:** the data model and alias resolution exist; there is no operation or UI.
 - **Ops page** is a diagnostics view for admins (`role = admin`), not an admin product.

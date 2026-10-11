@@ -25,7 +25,7 @@ export function ClaimList({
       <span key={m.publisher.id}>
         {i > 0 ? ', ' : ''}
         <Link
-          to={`#source-${m.articleId}`}
+          to={`#report-${m.articleId}`}
           className="hover:text-text hover:underline underline-offset-2"
         >
           {m.publisher.name}

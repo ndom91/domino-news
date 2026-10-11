@@ -61,7 +61,7 @@ export async function getFrontPage(
     .from(schema.narrative)
     .where(
       sql`(select count(*) from ${schema.narrativeStory} ns join ${schema.story} s on s.id = ns.story_id
-        where ns.narrative_id = ${schema.narrative.id} and ns.removed_at is null and s.published_at is not null) >= ${MIN_NARRATIVE_STORIES}`,
+        where ns.narrative_id = narrative.id and ns.removed_at is null and s.published_at is not null) >= ${MIN_NARRATIVE_STORIES}`,
     )
     .orderBy(desc(schema.narrative.updatedAt))
   const developing = await developingNarratives(db, recent.slice(0, DEVELOPING_COUNT))

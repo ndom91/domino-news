@@ -25,7 +25,7 @@ export function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
     if (t.citation)
       map.set(t.citation, {
         outlet: t.publisherName,
-        href: `/stories/${story.slug}#source-${t.id}`,
+        href: `/stories/${story.slug}#report-${t.id}`,
       })
   }
   return map
