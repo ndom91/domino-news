@@ -34,19 +34,8 @@ export const Route = createFileRoute('/')({
   component: FeedPage,
 })
 
-// Two wide, four narrow, repeating, on a 12-column grid (wide = half, narrow = a quarter).
+// Two wide, four narrow, repeating: rows always fill the 4-column grid.
 const isWide = (i: number) => i % 6 < 2
-
-// Column span for story i of count. A short last narrow row stretches so it doesn't leave a
-// gap: one story takes 2/3 of the row, two take 1/3 each, three go back to quarters.
-function spanClass(i: number, count: number) {
-  if (isWide(i)) return 'md:col-span-2 lg:col-span-6'
-  const rowStart = i - (i % 6) + 2
-  const inRow = Math.min(4, count - rowStart)
-  if (inRow === 1) return 'lg:col-span-8'
-  if (inRow === 2) return 'lg:col-span-4'
-  return 'lg:col-span-3'
-}
 
 /**
  * Latest, split into UTC day sections. The list is already newest first, so a section
@@ -81,13 +70,12 @@ function DaySections({ stories, now }: { stories: StoryListItem[]; now: string }
 
 function StoryGrid({ stories, now }: { stories: StoryListItem[]; now: string }) {
   return (
-    <div className="grid grid-cols-12 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+    <div className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
       {stories.map((story, i) => (
         <StoryItem
           key={story.id}
           story={story}
           size={isWide(i) ? 'wide' : 'standard'}
-          className={spanClass(i, stories.length)}
           now={now}
           Link={RouterLink}
         />

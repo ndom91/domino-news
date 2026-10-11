@@ -31,10 +31,7 @@ export function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
   return map
 }
 
-/**
- * Feed entry: desk bar, headline, cited summary, relation, primary source and Source Trace. No card.
- * `size` sets the type scale only; the grid it sits in sets the column span via `className`.
- */
+/** Feed entry: desk bar, headline, cited summary, relation, primary source and Source Trace. No card. */
 export function StoryItem({
   story,
   size = 'standard',
@@ -56,7 +53,12 @@ export function StoryItem({
   const reveal = useReveal()
   return (
     <article
-      className={cx('flex min-w-0 flex-col', reveal.className, className)}
+      className={cx(
+        'flex min-w-0 flex-col',
+        wide && 'lg:col-span-2 md:col-span-2',
+        reveal.className,
+        className,
+      )}
       style={reveal.style}
     >
       <StoryBar
