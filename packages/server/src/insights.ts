@@ -2,7 +2,7 @@ import type { Db } from '@dn/db'
 import type { Desk, Insights, NarrativeRef, Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import { getPreferences, READ_RETENTION_DAYS } from './preferences.ts'
-import { storyListItems } from './reader.ts'
+import { narrativeDesk, storyListItems } from './reader.ts'
 
 // Below this many reads, a reading mix says nothing, so no gaps are shown.
 const MIN_READS_FOR_GAPS = 5
@@ -52,9 +52,10 @@ async function missedDevelopments(db: Db, userId: string) {
       from reads r join narrative_story ns on ns.story_id = r.story_id and ns.removed_at is null
       group by ns.narrative_id
     )
-    select n.id as narrative_id, n.slug, n.title, s.id as story_id, s.desk
+    select narrative.id as narrative_id, narrative.slug, narrative.title, s.id as story_id,
+      ${narrativeDesk} as desk
     from followed f
-    join narrative n on n.id = f.narrative_id
+    join narrative on narrative.id = f.narrative_id
     join narrative_story ns on ns.narrative_id = f.narrative_id and ns.removed_at is null
     join story s on s.id = ns.story_id
     where s.published_at > f.last_read and s.merged_into_story_id is null
@@ -67,8 +68,6 @@ async function missedDevelopments(db: Db, userId: string) {
       narrative: { id: r.narrative_id, slug: r.slug, title: r.title, desk: r.desk },
       ids: [],
     }
-    // Rows are newest first: the Narrative takes the newest desk, skipping untagged Stories.
-    entry.narrative.desk ??= r.desk
     entry.ids.push(r.story_id)
     byNarrative.set(r.narrative_id, entry)
   }

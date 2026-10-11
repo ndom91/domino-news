@@ -54,15 +54,15 @@ async function publishersByStory(db: Db, storyIds: string[]) {
 }
 
 /**
- * A Narrative's desk: that of its most recently updated Story with one. Used as a select
- * column so the Narrative takes the colour of where it currently stands.
+ * A Narrative's desk: the one most of its Stories share (ties go to the most recently
+ * updated), so its colour doesn't flip each time a single Story updates. Used as a select column.
  * `narrative.id` is written out: drizzle renders the column unqualified in a query without
  * joins, and a bare "id" would bind to the subquery's own tables.
  */
 export const narrativeDesk = sql<Desk | null>`(
   select s.desk from narrative_story ns join story s on s.id = ns.story_id
   where ns.narrative_id = narrative.id and ns.removed_at is null and s.desk is not null
-  order by s.last_updated_at desc limit 1)`
+  group by s.desk order by count(*) desc, max(s.last_updated_at) desc limit 1)`
 
 async function narrativesByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, NarrativeRef[]>()
