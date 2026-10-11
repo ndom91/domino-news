@@ -1,6 +1,6 @@
 import { feedbackMutation } from '@dn/queries'
-import { DESK_LABELS, type ForYouReason, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
-import { Button, cx, IconButton, Notice, Skeleton, StoryItem } from '@dn/ui'
+import { DESK_LABELS, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
+import { Button, cx, IconButton, Notice, Skeleton, StoryItem, Timestamp } from '@dn/ui'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -15,22 +15,6 @@ export const Route = createFileRoute('/for-you')({
   head: () => ({ meta: [{ title: 'For You · Domino News' }] }),
   component: ForYouPage,
 })
-
-const REASON_PREFIX: Record<ForYouReason['kind'], string> = {
-  narrative: 'You follow',
-  publisher: 'From',
-  topic: '',
-  region: '',
-  desk: '',
-  learned: 'You asked for more',
-}
-
-/** "You follow Sudan's civil war · Europe · Science": why this card is here. */
-function reasonLine(reasons: ForYouReason[]) {
-  return reasons
-    .map((r) => (REASON_PREFIX[r.kind] ? `${REASON_PREFIX[r.kind]} ${r.label}` : r.label))
-    .join(' · ')
-}
 
 // Per user and client-only, like Blindspot.
 function ForYouPage() {
@@ -106,6 +90,25 @@ function ForYouPage() {
 }
 
 type Item = ForYouResponse['items'][number]
+
+// Updates within this of the first report are the same moment; showing both is noise.
+const SAME_MOMENT_MS = 60_000
+
+/** "First 11 Oct, 09:47 UTC · Updated 11 Oct, 13:05 UTC": every Story has at least the first. */
+function StoryDates({ first, updated }: { first: string; updated: string }) {
+  const changed = Date.parse(updated) - Date.parse(first) >= SAME_MOMENT_MS
+  return (
+    <p className="type-meta">
+      <Timestamp at={first} format="short" prefix="First" />
+      {changed ? (
+        <>
+          {' · '}
+          <Timestamp at={updated} format="short" prefix="Updated" />
+        </>
+      ) : null}
+    </p>
+  )
+}
 
 /** A motion token in ms (0 under reduced motion, where the tokens are zeroed). */
 function tokenMs(name: string) {
@@ -246,7 +249,7 @@ function ForYouCard({
     >
       <StoryItem story={story} now={now} Link={RouterLink} />
       <div className="flex items-center justify-between gap-3">
-        <p className="type-meta">{item.reasons.length > 0 ? reasonLine(item.reasons) : null}</p>
+        <StoryDates first={story.firstObservedAt} updated={story.lastUpdatedAt} />
         <div className="flex flex-none">
           <IconButton
             label="More like this"

@@ -18,7 +18,8 @@ export function Timestamp({
   className,
 }: {
   at: string
-  format?: 'relative' | 'clock' | 'date' | 'datetime'
+  // short = "11 Oct, 09:47 UTC": datetime without its inner dot, for use inside dotted lines.
+  format?: 'relative' | 'clock' | 'date' | 'datetime' | 'short'
   local?: boolean
   prefix?: string
   className?: string
@@ -42,7 +43,9 @@ export function Timestamp({
         ? clock()
         : format === 'date'
           ? formatDate(at, zone)
-          : `${formatDate(at, zone)} · ${clock()}`
+          : format === 'short'
+            ? `${formatDate(at, zone)}, ${clock()}`
+            : `${formatDate(at, zone)} · ${clock()}`
   // Tooltips only render on the client, so reading the reader's zone here is safe.
   const tooltip = formatDateTime(at, local ? 'UTC' : (readerZone ?? localZone()))
 
