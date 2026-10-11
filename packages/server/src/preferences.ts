@@ -1,6 +1,6 @@
 import { type Db, schema } from '@dn/db'
 import type { UserPreferences, UserPreferencesUpdate } from '@dn/schemas'
-import { and, eq, sql } from 'drizzle-orm'
+import { eq, sql } from 'drizzle-orm'
 
 // Reading history is short-lived: insights only look back this far.
 export const READ_RETENTION_DAYS = 30
@@ -59,7 +59,7 @@ export async function recordRead(db: Db, userId: string, storyId: string): Promi
 export async function pruneReadingEvents(db: Db, days = READ_RETENTION_DAYS) {
   const deleted = await db
     .delete(schema.readingEvent)
-    .where(and(sql`${schema.readingEvent.readAt} < now() - make_interval(days => ${days})`))
+    .where(sql`${schema.readingEvent.readAt} < now() - make_interval(days => ${days})`)
     .returning({ userId: schema.readingEvent.userId })
   return { readingEvents: deleted.length }
 }

@@ -25,7 +25,7 @@ export const THRESHOLDS = {
 const CANDIDATE_WINDOW_SECONDS = 4 * 86_400
 const MAX_LLM_CANDIDATES = 3
 
-export class NotIndexedYetError extends Error {}
+class NotIndexedYetError extends Error {}
 export class CandidatesChangedError extends Error {}
 
 /** Best similarity per Story among the neighbours, using canonical membership from Postgres. */
@@ -238,7 +238,7 @@ async function recordMatchInterpretation(
   })
 }
 
-export async function enqueueSummary(
+async function enqueueSummary(
   ctx: WorkerContext,
   tx: TxContext,
   storyId: string,

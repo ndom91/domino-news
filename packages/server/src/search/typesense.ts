@@ -61,7 +61,7 @@ export function createTypesense(baseUrl: string, apiKey: string) {
 
 export type Typesense = ReturnType<typeof createTypesense>
 
-export class TypesenseError extends Error {
+class TypesenseError extends Error {
   constructor(
     readonly status: number,
     message: string,
@@ -82,7 +82,7 @@ const embedding = {
   optional: true,
 }
 
-export function collectionSchema(alias: Alias, name: string) {
+function collectionSchema(alias: Alias, name: string) {
   switch (alias) {
     case 'stories':
       return {

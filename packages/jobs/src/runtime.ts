@@ -95,15 +95,11 @@ export async function startWorkers(ctx: WorkerContext) {
   const boss = ctx.workerBoss
   await createQueues(boss)
 
-  await boss.work<{ feedId: string; variant?: 'rss' | 'rss-update' }>(
-    QUEUES.pollFeed,
-    { localConcurrency: 4 },
-    async ([job]) => {
-      if (!job) return
-      const result = await pollFeed(ctx, job.data.feedId, job.data.variant)
-      console.log(`[poll_feed] ${job.data.feedId} ${JSON.stringify(result)}`)
-    },
-  )
+  await boss.work<{ feedId: string }>(QUEUES.pollFeed, { localConcurrency: 4 }, async ([job]) => {
+    if (!job) return
+    const result = await pollFeed(ctx, job.data.feedId)
+    console.log(`[poll_feed] ${job.data.feedId} ${JSON.stringify(result)}`)
+  })
   await boss.work(QUEUES.pollAllFeeds, async () => {
     for (const feedId of await feedIds(ctx.db)) {
       await boss.send(

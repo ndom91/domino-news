@@ -105,7 +105,7 @@ export async function extractStoryClaims(ctx: WorkerContext, job: AnalysisJob) {
           relationship: 'derived_from' as const,
         })),
       )
-      const claimId = newId('clm')
+      const claimId = newId(ID_PREFIX.claim)
       await tx.db.insert(schema.claim).values({
         id: claimId,
         storyId: story.id,

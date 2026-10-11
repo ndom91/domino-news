@@ -5,7 +5,7 @@ import type { StoryRelation } from '@dn/schemas'
  * "A follows B" => { from: A, to: B, relation: 'follows' }.
  * Temporal relations require from.firstObservedAt >= to.firstObservedAt and must stay acyclic.
  */
-export const TEMPORAL_RELATIONS: ReadonlySet<StoryRelation> = new Set([
+const TEMPORAL_RELATIONS: ReadonlySet<StoryRelation> = new Set([
   'follows',
   'branches_from',
   'responds_to',
@@ -18,7 +18,7 @@ export interface GraphEdge {
   relation: StoryRelation
 }
 
-export type EdgeValidation = { ok: true } | { ok: false; reason: string }
+type EdgeValidation = { ok: true } | { ok: false; reason: string }
 
 export function validateNewEdge(
   edge: GraphEdge,

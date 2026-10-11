@@ -108,8 +108,6 @@ export function createQueries(api: ApiClient) {
   }
 }
 
-export type Queries = ReturnType<typeof createQueries>
-
 export function editSummaryMutation(api: ApiClient, queryClient: QueryClient, storyId: string) {
   return {
     mutationFn: (body: SummaryEditRequest) => api.editSummary(storyId, body),

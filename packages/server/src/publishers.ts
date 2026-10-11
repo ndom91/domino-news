@@ -194,7 +194,7 @@ const PROFILE_DAYS = 30
 const MAJOR_OUTLETS = 4
 
 /** What an outlet covers compared with everyone, over the last PROFILE_DAYS. Facts only. */
-export async function coverageProfile(db: Db, publisherId: string): Promise<CoverageProfile> {
+async function coverageProfile(db: Db, publisherId: string): Promise<CoverageProfile> {
   const window = sql`now() - make_interval(days => ${PROFILE_DAYS})`
   const { rows: stories } = await db.execute<{
     desk: string | null

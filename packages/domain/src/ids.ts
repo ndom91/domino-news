@@ -25,7 +25,6 @@ export const ID_PREFIX = {
   story: 'sty',
   storyArticle: 'sa',
   storyRelationship: 'rel',
-  lineage: 'lin',
   narrative: 'nar',
   sourceReference: 'src',
   analysisRun: 'run',
@@ -33,4 +32,7 @@ export const ID_PREFIX = {
   summaryVersion: 'sum',
   publisherEvidence: 'pev',
   publisherAssessment: 'pas',
+  claim: 'clm',
+  contextEntry: 'ctx',
+  contextEntryVersion: 'ctxv',
 } as const

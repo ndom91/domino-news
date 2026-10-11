@@ -14,7 +14,7 @@ const UA = 'DominoNews/0.1 (https://github.com/ndom91/domino-news; publisher ass
 const RSP_PAGE = 'Wikipedia:Reliable sources/Perennial sources'
 const RSP_URL = 'https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources'
 
-export type EvidenceRow = {
+type EvidenceRow = {
   source: 'wikidata' | 'wp_rsp'
   dimension: 'ownership' | 'reliability' | 'lean'
   value: string
@@ -30,7 +30,7 @@ const RSP_STATUS: Record<string, string> = {
   b: 'Blacklisted',
 }
 
-export type RspEntry = { name: string; status: string; domains: string[] }
+type RspEntry = { name: string; status: string; domains: string[] }
 
 /** Rows of the perennial sources table: status from the row class, domains from RSPUSES. */
 export function parseRspWikitext(wikitext: string): RspEntry[] {
@@ -68,7 +68,7 @@ async function getJson(url: string, attempt = 1): Promise<Record<string, unknown
 const wikiApi = (params: Record<string, string>) =>
   `https://en.wikipedia.org/w/api.php?${new URLSearchParams({ format: 'json', formatversion: '2', ...params })}`
 
-export async function fetchRspEntries(): Promise<RspEntry[]> {
+async function fetchRspEntries(): Promise<RspEntry[]> {
   const index = (await getJson(
     wikiApi({ action: 'parse', page: RSP_PAGE, prop: 'templates' }),
   )) as {
@@ -188,7 +188,7 @@ export function wikidataEvidence(item: WdEntity, related: Record<string, WdEntit
   return rows
 }
 
-export async function publisherWikidataEvidence(name: string, domain: string) {
+async function publisherWikidataEvidence(name: string, domain: string) {
   const item = await findWikidataEntity(name, domain)
   if (!item) return []
   const owners = claimIds(item, 'P127')

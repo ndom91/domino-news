@@ -154,7 +154,6 @@ export const relatedStorySchema = z.object({
   direction: z.enum(['outgoing', 'incoming']),
   lastUpdatedAt: z.string(),
 })
-export type RelatedStory = z.infer<typeof relatedStorySchema>
 
 export const primarySourceSchema = z.object({
   id: z.string(),
@@ -163,7 +162,6 @@ export const primarySourceSchema = z.object({
   kind: sourceReferenceKindSchema,
   discoveredAt: z.string(),
 })
-export type PrimarySource = z.infer<typeof primarySourceSchema>
 
 export const storyContextItemSchema = z.object({
   id: z.string(),
@@ -450,7 +448,6 @@ export const assessmentEvidenceSchema = z.object({
   value: z.string(),
   url: z.string(),
 })
-export type AssessmentEvidence = z.infer<typeof assessmentEvidenceSchema>
 
 // A reviewed snapshot. Only reviewed assessments are ever shown to readers.
 export const publisherAssessmentSchema = z.object({

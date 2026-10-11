@@ -118,8 +118,8 @@ async function upsertEntry(db: Db, entry: Entry, interpretationId: string, onCre
     .where(eq(schema.contextEntry.normalizedKey, normalizedKey))
   if (existing) return existing.id
   onCreate()
-  const id = newId('ctx')
-  const versionId = newId('ctxv')
+  const id = newId(ID_PREFIX.contextEntry)
+  const versionId = newId(ID_PREFIX.contextEntryVersion)
   await db
     .insert(schema.contextEntry)
     .values({ id, kind: entry.kind, title: entry.title, normalizedKey })
