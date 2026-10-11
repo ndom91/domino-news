@@ -157,7 +157,9 @@ function OpsPage() {
                         ? 'error'
                         : r.status === 'running'
                           ? 'warning'
-                          : 'neutral'
+                          : r.status === 'succeeded'
+                            ? 'success'
+                            : 'neutral'
                     }
                   >
                     {r.status}
