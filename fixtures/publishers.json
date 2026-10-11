@@ -960,5 +960,225 @@
         "title": "Latest articles"
       }
     ]
+  },
+  {
+    "slug": "dawn",
+    "name": "Dawn",
+    "domain": "dawn.com",
+    "countryCode": "PK",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names no AI agents and does not restrict the feed path. Terms allow personal, non-commercial use only; other use needs DAWN's written permission. No RSS- or AI-specific clause found. Metadata only. Ownership: Private: published by Pakistan Herald Publications (Dawn Media Group). No state ownership found. https://en.wikipedia.org/wiki/Dawn_(newspaper)",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.dawn.com/feeds/home",
+        "title": "Dawn - Home"
+      }
+    ]
+  },
+  {
+    "slug": "thedailystar-bd",
+    "name": "The Daily Star (Bangladesh)",
+    "domain": "thedailystar.net",
+    "countryCode": "BD",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names no AI agents and does not restrict the feed path. Terms page not located; no RSS- or AI-specific clause reviewed. Feed holds only 10 items. Metadata only. Ownership: Private: owned by Transcom Group (via Mediaworld). No state ownership found. https://en.wikipedia.org/wiki/The_Daily_Star_(Bangladesh)",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.thedailystar.net/top-news/rss.xml",
+        "title": "Top News"
+      }
+    ]
+  },
+  {
+    "slug": "koreaherald",
+    "name": "The Korea Herald",
+    "domain": "koreaherald.com",
+    "countryCode": "KR",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt allows / for all agents and names no AI agents. Herald Corporation copyright/terms page has no RSS- or AI-specific clause. Metadata only. Ownership: Private: published by Herald Corporation. No state ownership found. https://en.wikipedia.org/wiki/The_Korea_Herald",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.koreaherald.com/rss/newsAll",
+        "title": "All News"
+      }
+    ]
+  },
+  {
+    "slug": "taipeitimes",
+    "name": "Taipei Times",
+    "domain": "taipeitimes.com",
+    "countryCode": "TW",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai and CCBot from /, including the feed path; the * group does not restrict it. Terms page not located. Feed publishes as a daily batch. Metadata only. Ownership: Private: published by the Liberty Times Group. No state ownership found. https://en.wikipedia.org/wiki/Taipei_Times",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.taipeitimes.com/xml/index.rss",
+        "title": "Taipei Times"
+      }
+    ]
+  },
+  {
+    "slug": "cna",
+    "name": "CNA",
+    "domain": "channelnewsasia.com",
+    "countryCode": "SG",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt explicitly allows /api/v1/rss-outbound-feed for all agents and does not block named AI agents. Terms page not retrievable by automated clients; no RSS- or AI-specific clause reviewed. Metadata only. Ownership: State-owned: CNA is run by Mediacorp, which is owned by Temasek Holdings, the Singapore government's investment company. https://en.wikipedia.org/wiki/Mediacorp",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.channelnewsasia.com/api/v1/rss-outbound-feed?_format=xml",
+        "title": "Latest News"
+      }
+    ]
+  },
+  {
+    "slug": "straitstimes",
+    "name": "The Straits Times",
+    "domain": "straitstimes.com",
+    "countryCode": "SG",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows Google-Extended only; GPTBot, ClaudeBot, anthropic-ai and CCBot are not restricted on the feed path. SPH Media terms allow personal, non-commercial use only and bar bots, scraping and automated access without written permission. Metadata only. Ownership: State-funded: published by SPH Media Trust, a company limited by guarantee that receives up to S$900m in Singapore government funding (2022-2027). https://en.wikipedia.org/wiki/SPH_Media_Trust ; https://www.marketing-interactive.com/sph-media-trust-900m-govt-funding",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.straitstimes.com/news/asia/rss.xml",
+        "title": "Asia"
+      },
+      {
+        "url": "https://www.straitstimes.com/news/world/rss.xml",
+        "title": "World"
+      }
+    ]
+  },
+  {
+    "slug": "al-monitor",
+    "name": "Al-Monitor",
+    "domain": "al-monitor.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names no AI agents and does not restrict the feed path. Terms page not located; no RSS- or AI-specific clause reviewed. Metadata only. Ownership: Private: founded and owned by Jamal Daniel; based in Washington, D.C. No state ownership found. https://en.wikipedia.org/wiki/Al-Monitor",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.al-monitor.com/rss",
+        "title": "Al-Monitor"
+      }
+    ]
+  },
+  {
+    "slug": "thenational",
+    "name": "The National",
+    "domain": "thenationalnews.com",
+    "countryCode": "AE",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names no AI agents and does not restrict the feed path. Terms limit material to personal, non-commercial use and prohibit use on any other website or networked environment. Metadata only. Ownership: State-linked: Wikipedia describes it as UAE state-owned; owned by International Media Investments (Abu Dhabi Media Investment Corporation), owned by Sheikh Mansour bin Zayed Al Nahyan, UAE Vice President. https://en.wikipedia.org/wiki/The_National_(Abu_Dhabi)",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.thenationalnews.com/arc/outboundfeeds/rss/?outputType=xml",
+        "title": "The National"
+      }
+    ]
+  },
+  {
+    "slug": "mg",
+    "name": "Mail & Guardian",
+    "domain": "mg.co.za",
+    "countryCode": "ZA",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt allows / for all agents; only Google-Extended is named (allowed). Terms page not located; no RSS- or AI-specific clause reviewed. Metadata only. Ownership: Private: published by M&G Media; majority-owned by the Media Development Investment Fund (non-profit investor). No state ownership found. https://en.wikipedia.org/wiki/Mail_%26_Guardian",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://mg.co.za/rss/",
+        "title": "Mail & Guardian"
+      }
+    ]
+  },
+  {
+    "slug": "premiumtimes",
+    "name": "Premium Times",
+    "domain": "premiumtimesng.com",
+    "countryCode": "NG",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names Meta agents only; GPTBot, ClaudeBot, anthropic-ai, CCBot and Google-Extended are not restricted on the feed path. Terms page not located. Metadata only. Ownership: Private: independent Abuja-based online newspaper (Premium Times Services Ltd). No state ownership found. https://en.wikipedia.org/wiki/Premium_Times",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.premiumtimesng.com/feed",
+        "title": "Premium Times Nigeria"
+      }
+    ]
+  },
+  {
+    "slug": "batimes",
+    "name": "Buenos Aires Times",
+    "domain": "batimes.com.ar",
+    "countryCode": "AR",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt allows / for all agents and names no AI agents. Terms page not located. Metadata only. Ownership: Private: English-language weekly of Editorial Perfil (Perfil group). No state ownership found. https://en.wikipedia.org/wiki/Buenos_Aires_Times",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.batimes.com.ar/feed",
+        "title": "Buenos Aires Times"
+      }
+    ]
+  },
+  {
+    "slug": "elpais-en",
+    "name": "EL PAÍS English",
+    "domain": "english.elpais.com",
+    "countryCode": "ES",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "english.elpais.com robots.txt allows / and does not block GPTBot, ClaudeBot, anthropic-ai, CCBot or Google-Extended. Feed host feeds.elpais.com returns 403 for robots.txt. Legal notice not located. Metadata only. Ownership: Private: published by Grupo PRISA. No state ownership found. https://en.wikipedia.org/wiki/El_País",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://feeds.elpais.com/mrss-s/pages/ep/site/english.elpais.com/portada",
+        "title": "EL PAÍS in English"
+      }
+    ]
   }
 ]
