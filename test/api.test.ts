@@ -2,6 +2,8 @@ import { schema } from '@dn/db'
 import {
   apiErrorSchema,
   evidenceResponseSchema,
+  followListSchema,
+  forYouResponseSchema,
   frontPageSchema,
   insightsSchema,
   narrativeListResponseSchema,
@@ -65,6 +67,9 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/ops/status'],
       ['POST', '/api/v1/ops/actions'],
       ['GET', '/api/v1/me/preferences'],
+      ['GET', '/api/v1/me/follows'],
+      ['POST', '/api/v1/me/follows'],
+      ['GET', '/api/v1/for-you'],
       ['POST', '/api/v1/me/preferences'],
     ]
     for (const [method, path] of routes) {
@@ -293,13 +298,15 @@ describe('preferences', () => {
       }),
     )
 
-  it('round-trips the edition per user', async () => {
+  it('round-trips feed picks per user, saving only what was sent', async () => {
     const empty = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
-    expect(empty.edition).toBeNull()
+    expect(empty).toMatchObject({ regions: [], desks: [] })
 
-    const saved = await save(token, { edition: 'europe' })
+    const saved = await save(token, { regions: ['europe', 'africa'] })
     expect(saved.status).toBe(200)
-    expect(userPreferencesSchema.parse(await saved.json()).edition).toBe('europe')
+    await save(token, { desks: ['science'] })
+    const both = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect(both).toMatchObject({ regions: ['europe', 'africa'], desks: ['science'] })
 
     await createUserAccount(h.ctx.auth, { username: 'other', password: 'other-password' })
     const res = await h.ctx.auth.handler(
@@ -316,11 +323,72 @@ describe('preferences', () => {
         headers: { authorization: `Bearer ${otherToken}` },
       }),
     )
-    expect(userPreferencesSchema.parse(await other.json()).edition).toBeNull()
+    expect(userPreferencesSchema.parse(await other.json()).regions).toEqual([])
 
-    expect((await save(token, { edition: 'atlantis' })).status).toBe(400)
-    const cleared = await save(token, { edition: null })
-    expect(userPreferencesSchema.parse(await cleared.json()).edition).toBeNull()
+    expect((await save(token, { regions: ['atlantis'] })).status).toBe(400)
+    await save(token, { regions: [], desks: [] })
+  })
+})
+
+describe('For You', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+  const feed = async () => forYouResponseSchema.parse(await (await call('/api/v1/for-you')).json())
+
+  it('ranks followed narratives first, explains why, and hides nothing', async () => {
+    // Fixture stories are days old; bring them into the 72-hour window.
+    await h.ctx.pool.query(
+      `update story set last_updated_at = now() where published_at is not null`,
+    )
+    const before = await feed()
+    expect(before.personalised).toBe(false)
+    const total = before.items.length
+
+    const { rows } = await h.ctx.pool.query(
+      `select ns.narrative_id, n.title from narrative_story ns join narrative n on n.id = ns.narrative_id
+       join story s on s.id = ns.story_id
+       where ns.removed_at is null and s.published_at is not null limit 1`,
+    )
+    const { narrative_id: narrativeId, title } = rows[0]
+    const followed = followListSchema.parse(
+      await (
+        await post('/api/v1/me/follows', {
+          targetType: 'narrative',
+          targetId: narrativeId,
+          follow: true,
+        })
+      ).json(),
+    )
+    expect(followed.items).toEqual([
+      expect.objectContaining({ targetType: 'narrative', id: narrativeId, title }),
+    ])
+
+    const after = await feed()
+    expect(after.personalised).toBe(true)
+    expect(after.items.length).toBe(total)
+    expect(after.items[0]?.reasons).toContainEqual({ kind: 'narrative', label: title })
+
+    expect(
+      (
+        await post('/api/v1/me/follows', {
+          targetType: 'narrative',
+          targetId: 'nar_missing',
+          follow: true,
+        })
+      ).status,
+    ).toBe(404)
+    await post('/api/v1/me/follows', {
+      targetType: 'narrative',
+      targetId: narrativeId,
+      follow: false,
+    })
+    expect(followListSchema.parse(await (await call('/api/v1/me/follows')).json()).items).toEqual(
+      [],
+    )
   })
 })
 

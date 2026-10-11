@@ -1,6 +1,8 @@
 import type { ApiClient } from '@dn/api-client'
 import type {
   AssessmentRequest,
+  FollowList,
+  FollowRequest,
   Region,
   SearchQuery,
   SummaryEditRequest,
@@ -25,6 +27,8 @@ export const queryKeys = {
   ops: () => ['ops', 'status'] as const,
   preferences: () => ['me', 'preferences'] as const,
   insights: () => ['me', 'insights'] as const,
+  follows: () => ['me', 'follows'] as const,
+  forYou: () => ['for-you'] as const,
   evidence: (slug: string) => ['publishers', 'evidence', slug] as const,
 }
 
@@ -93,6 +97,20 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.evidence(slug),
         queryFn: ({ signal }) => api.getEvidence(slug, signal),
       }),
+    follows: () =>
+      queryOptions({
+        queryKey: queryKeys.follows(),
+        queryFn: ({ signal }) => api.getFollows(signal),
+        staleTime: 5 * 60_000,
+      }),
+    forYou: () =>
+      infiniteQueryOptions({
+        queryKey: queryKeys.forYou(),
+        queryFn: ({ pageParam, signal }) => api.getForYou(pageParam, signal),
+        initialPageParam: null as string | null,
+        getNextPageParam: (last) => last.pageInfo.nextCursor,
+        staleTime: 60_000,
+      }),
     insights: () =>
       queryOptions({
         queryKey: queryKeys.insights(),
@@ -122,7 +140,10 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
     mutationFn: (body: UserPreferencesUpdate) => api.savePreferences(body),
     onSuccess: async (prefs: UserPreferences) => {
       queryClient.setQueryData(queryKeys.preferences(), prefs)
-      await queryClient.invalidateQueries({ queryKey: queryKeys.insights() })
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.insights() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
+      ])
     },
   }
 }
@@ -132,6 +153,16 @@ export function saveAssessmentMutation(api: ApiClient, queryClient: QueryClient,
     mutationFn: (body: AssessmentRequest) => api.saveAssessment(slug, body),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: queryKeys.publisher(slug) })
+    },
+  }
+}
+
+export function setFollowMutation(api: ApiClient, queryClient: QueryClient) {
+  return {
+    mutationFn: (body: FollowRequest) => api.setFollow(body),
+    onSuccess: async (follows: FollowList) => {
+      queryClient.setQueryData(queryKeys.follows(), follows)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.forYou() })
     },
   }
 }

@@ -71,17 +71,17 @@ type LeadCandidate = { lastUpdatedAt: string; sourceCount: number; regions: read
 
 /**
  * Lead = the most widely reported Story updated in the last 48 hours (else the newest).
- * With an edition, a recent Story tagged with that region wins over the rest.
+ * With the reader's regions, a recent Story tagged with one of them wins over the rest.
  */
 export function pickLead<T extends LeadCandidate>(
   stories: T[],
-  edition: Region | null = null,
+  regions: readonly Region[] = [],
   now = Date.now(),
 ): T | undefined {
   const cutoff = now - 48 * 3_600_000
   const recent = stories.filter((s) => new Date(s.lastUpdatedAt).getTime() >= cutoff)
-  const inEdition = edition ? recent.filter((s) => s.regions.includes(edition)) : []
-  const pool = inEdition.length > 0 ? inEdition : recent.length > 0 ? recent : stories
+  const inRegions = recent.filter((s) => s.regions.some((r) => regions.includes(r as Region)))
+  const pool = inRegions.length > 0 ? inRegions : recent.length > 0 ? recent : stories
   return pool.reduce<T | undefined>(
     (best, s) => (!best || s.sourceCount > best.sourceCount ? s : best),
     undefined,

@@ -154,7 +154,10 @@ GET  /api/v1/publishers/:slug/evidence   # admin: imported, unreviewed evidence
 POST /api/v1/publishers/:slug/assessment # admin: publish a reviewed assessment (new version)
 GET  /api/v1/ops/status                  # admin only
 POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
-GET  /api/v1/me/preferences              # { edition: region | null, rememberReads }
+GET  /api/v1/me/preferences              # { regions, desks, rememberReads }
+GET  /api/v1/me/follows                  # followed narratives and publishers
+POST /api/v1/me/follows                  # { targetType, targetId, follow: boolean }
+GET  /api/v1/for-you?cursor=             # ranked personal feed with reasons
 POST /api/v1/me/preferences              # partial update; rememberReads=false deletes history
 POST /api/v1/me/reads                    # { storyId }; recorded only if rememberReads
 GET  /api/v1/me/insights                 # Blindspot: newer stories in narratives you read, region/desk gaps
@@ -171,7 +174,8 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - Narratives from connected Stories, with model-written titles.
 - **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
-- **Regions and editions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region; a reader's edition (`/account`) picks the lead and adds an "In {region}" rail without re-ranking the chronological feed. After upgrading, existing Stories have no regions until re-summarised, and Typesense needs `pnpm cli search:rebuild`.
+- **Regions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region, and the lead prefers a Story in one of the reader's regions.
+- **For You (`/for-you`):** readers pick regions and desks (on `/account` or the page itself) and follow narratives or publishers. Stories from the last 72 hours are ranked, not filtered: followed narrative +3, followed outlet, region and desk +1 each, plus wider coverage, minus age. Every card says why it's there. Paging is an offset into the ranked window. The front page shows the top 4 as a "For you" rail once a reader has picks or follows.
 - **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored.
 - **Publisher assessments:** evidence is imported from open sources only: Wikidata for ownership (CC0), and Wikipedia's perennial sources list for reliability (CC BY-SA). An admin reviews it on the publisher page and publishes an append-only, versioned assessment that freezes the evidence used. Political lean is entered by hand, relative to the outlet's own country, and must cite a source such as the Reuters Institute's audience data; otherwise it shows "Not assessed". Licensed ratings (AllSides, MBFC, NewsGuard) are not used: they're non-commercial or paid.
 - **Publisher coverage:** publisher stats (stories, first to report), a who-covered-what matrix, and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.

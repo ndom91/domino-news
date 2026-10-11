@@ -4,7 +4,12 @@ import {
   apiErrorSchema,
   type EvidenceResponse,
   evidenceResponseSchema,
+  type FollowList,
+  type FollowRequest,
+  type ForYouResponse,
   type FrontPage,
+  followListSchema,
+  forYouResponseSchema,
   frontPageSchema,
   type Insights,
   insightsSchema,
@@ -150,6 +155,12 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
         `/publishers/${encodeURIComponent(slug)}/assessment`,
         { method: 'POST', body },
       ),
+    getFollows: (signal?: AbortSignalLike) =>
+      request<FollowList>(followListSchema, '/me/follows', { signal }),
+    setFollow: (body: FollowRequest) =>
+      request<FollowList>(followListSchema, '/me/follows', { method: 'POST', body }),
+    getForYou: (cursor: string | null, signal?: AbortSignalLike) =>
+      request<ForYouResponse>(forYouResponseSchema, `/for-you${qs({ cursor })}`, { signal }),
     getInsights: (signal?: AbortSignalLike) =>
       request<Insights>(insightsSchema, '/me/insights', { signal }),
     runOpsAction: (action: OpsAction['action']) =>

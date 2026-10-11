@@ -40,6 +40,7 @@ const SOURCE_AND_ACCOUNT_TABLES = [
   'publisher_assessment',
   'publisher_evidence',
   'publisher',
+  'user_follow',
   'user_preference',
   'auth_passkey',
   'auth_session',

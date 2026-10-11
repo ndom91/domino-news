@@ -749,12 +749,27 @@ export const userPreference = pgTable('user_preference', {
   userId: text('user_id')
     .primaryKey()
     .references(() => authUser.id, { onDelete: 'cascade' }),
-  // A region from `REGIONS` that boosts the feed; null = no preference.
-  edition: text('edition').$type<Region>(),
+  // For You picks (`REGIONS`, `DESKS`). Empty = no preference; they boost, never hide.
+  regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
+  desks: text('desks').array().$type<Desk[]>().notNull().default(sql`'{}'::text[]`),
   // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
   rememberReads: boolean('remember_reads').notNull().default(false),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
+
+// Narratives and publishers a reader follows; the strongest For You signal.
+export const userFollow = pgTable(
+  'user_follow',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    targetType: text('target_type').$type<'narrative' | 'publisher'>().notNull(),
+    targetId: text('target_id').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.targetType, t.targetId] })],
+)
 
 // One row per user and Story (latest read wins), kept for READ_RETENTION_DAYS. Only
 // written while the user has opted in; insights are computed from it on request.

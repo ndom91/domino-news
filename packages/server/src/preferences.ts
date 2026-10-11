@@ -8,12 +8,17 @@ export const READ_RETENTION_DAYS = 30
 export async function getPreferences(db: Db, userId: string): Promise<UserPreferences> {
   const [row] = await db
     .select({
-      edition: schema.userPreference.edition,
+      regions: schema.userPreference.regions,
+      desks: schema.userPreference.desks,
       rememberReads: schema.userPreference.rememberReads,
     })
     .from(schema.userPreference)
     .where(eq(schema.userPreference.userId, userId))
-  return { edition: row?.edition ?? null, rememberReads: row?.rememberReads ?? false }
+  return {
+    regions: row?.regions ?? [],
+    desks: row?.desks ?? [],
+    rememberReads: row?.rememberReads ?? false,
+  }
 }
 
 /** Saves only the fields given. Turning reading history off deletes it. */

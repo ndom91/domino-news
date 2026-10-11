@@ -532,7 +532,9 @@ export const publisherDetailSchema = publisherStatsSchema.extend({
 export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 
 export const userPreferencesSchema = z.object({
-  edition: regionSchema.nullable(),
+  // For You picks. Empty = no preference. They rank Stories up, never hide others.
+  regions: z.array(regionSchema).max(11),
+  desks: z.array(deskSchema).max(6),
   rememberReads: z.boolean(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
@@ -542,6 +544,42 @@ export const userPreferencesUpdateSchema = userPreferencesSchema.partial()
 export type UserPreferencesUpdate = z.infer<typeof userPreferencesUpdateSchema>
 
 export const readRequestSchema = z.object({ storyId: z.string().min(1) })
+
+export const followTargetTypeSchema = z.enum(['narrative', 'publisher'])
+export type FollowTargetType = z.infer<typeof followTargetTypeSchema>
+
+export const followSchema = z.object({
+  targetType: followTargetTypeSchema,
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+})
+export type Follow = z.infer<typeof followSchema>
+export const followListSchema = z.object({ items: z.array(followSchema) })
+export type FollowList = z.infer<typeof followListSchema>
+
+// follow: false unfollows (the API router only supports GET and POST).
+export const followRequestSchema = z.object({
+  targetType: followTargetTypeSchema,
+  targetId: z.string().min(1),
+  follow: z.boolean(),
+})
+export type FollowRequest = z.infer<typeof followRequestSchema>
+
+// Why a Story is on your For You page, shown on the card.
+export const forYouReasonSchema = z.object({
+  kind: z.enum(['narrative', 'publisher', 'region', 'desk']),
+  label: z.string(),
+})
+export type ForYouReason = z.infer<typeof forYouReasonSchema>
+
+export const forYouResponseSchema = z.object({
+  // False when the reader has no picks and no follows; the page then offers setup.
+  personalised: z.boolean(),
+  items: z.array(z.object({ story: storyListItemSchema, reasons: z.array(forYouReasonSchema) })),
+  pageInfo: pageInfoSchema,
+})
+export type ForYouResponse = z.infer<typeof forYouResponseSchema>
 
 const deskOrRegion = z.union([deskSchema, regionSchema])
 

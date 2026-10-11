@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlindspotRouteImport } from './routes/blindspot'
+import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as SearchRouteImport } from './routes/search'
@@ -36,6 +37,11 @@ const AccountRoute = AccountRouteImport.update({
 const BlindspotRoute = BlindspotRouteImport.update({
   id: '/blindspot',
   path: '/blindspot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ForYouRoute = ForYouRouteImport.update({
+  id: '/for-you',
+  path: '/for-you',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -93,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
@@ -108,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
@@ -124,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
@@ -141,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/blindspot'
+    | '/for-you'
     | '/login'
     | '/ops'
     | '/search'
@@ -156,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/blindspot'
+    | '/for-you'
     | '/login'
     | '/ops'
     | '/search'
@@ -171,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/account'
     | '/blindspot'
+    | '/for-you'
     | '/login'
     | '/ops'
     | '/search'
@@ -187,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AccountRoute: typeof AccountRoute
   BlindspotRoute: typeof BlindspotRoute
+  ForYouRoute: typeof ForYouRoute
   LoginRoute: typeof LoginRoute
   OpsRoute: typeof OpsRoute
   SearchRoute: typeof SearchRoute
@@ -220,6 +233,13 @@ declare module '@tanstack/react-router' {
       path: '/blindspot'
       fullPath: '/blindspot'
       preLoaderRoute: typeof BlindspotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/for-you': {
+      id: '/for-you'
+      path: '/for-you'
+      fullPath: '/for-you'
+      preLoaderRoute: typeof ForYouRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -299,6 +319,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AccountRoute: AccountRoute,
   BlindspotRoute: BlindspotRoute,
+  ForYouRoute: ForYouRoute,
   LoginRoute: LoginRoute,
   OpsRoute: OpsRoute,
   SearchRoute: SearchRoute,

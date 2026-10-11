@@ -10,12 +10,7 @@ import {
   StoryItem,
   StoryItemSkeleton,
 } from '@dn/ui'
-import {
-  useInfiniteQuery,
-  useQuery,
-  useSuspenseInfiniteQuery,
-  useSuspenseQuery,
-} from '@tanstack/react-query'
+import { useInfiniteQuery, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { RouterLink } from '../components/link.tsx'
@@ -89,8 +84,7 @@ function FeedPage() {
   const { region = null } = Route.useSearch()
   const { data: front } = useSuspenseQuery(queries.front(region))
   const list = useSuspenseInfiniteQuery(queries.storyList(region))
-  // Client-only: the edition section appears once preferences load.
-  const edition = useQuery(queries.preferences()).data?.edition ?? null
+  // Client-only: the For You rail appears once the reader's feed loads.
   const now = front.editionAt
   const latest = list.data.pages.flatMap((p) => p.items).filter((s) => s.id !== front.lead?.id)
 
@@ -104,9 +98,7 @@ function FeedPage() {
           <h1 className="sr-only">Domino News</h1>
         )}
 
-        {edition && !region ? (
-          <EditionSection edition={edition} excludeId={front.lead?.id} now={now} />
-        ) : null}
+        {!region ? <ForYouRail excludeId={front.lead?.id} now={now} /> : null}
 
         <SectionHeader title="Latest" meta={<RegionFilter active={region} />} id="latest-heading" />
         {latest.length === 0 ? (
@@ -173,32 +165,25 @@ function RegionFilter({ active }: { active: Region | null }) {
   )
 }
 
-/** Latest Stories in the reader's edition, above the chronological grid. */
-function EditionSection({
-  edition,
-  excludeId,
-  now,
-}: {
-  edition: Region
-  excludeId?: string
-  now: string
-}) {
-  const list = useInfiniteQuery(queries.storyList(edition))
-  const items = (list.data?.pages[0]?.items ?? []).filter((s) => s.id !== excludeId).slice(0, 4)
-  if (items.length === 0) return null
+/** The top of the reader's For You feed, above the chronological grid. Hidden until they pick or follow something. */
+function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
+  const feed = useInfiniteQuery(queries.forYou())
+  const first = feed.data?.pages[0]
+  const items = (first?.items ?? []).filter((i) => i.story.id !== excludeId).slice(0, 4)
+  if (!first?.personalised || items.length === 0) return null
   return (
-    <section aria-labelledby="edition-heading">
+    <section aria-labelledby="for-you-heading">
       <SectionHeader
-        title={`In ${REGION_LABELS[edition]}`}
-        id="edition-heading"
+        title="For you"
+        id="for-you-heading"
         meta={
-          <Link to="/" search={{ region: edition }} className="link-inline font-semibold">
-            More from {REGION_LABELS[edition]}
+          <Link to="/for-you" className="link-inline font-semibold">
+            More for you
           </Link>
         }
       />
       <section className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
-        {items.map((story) => (
+        {items.map(({ story }) => (
           <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
         ))}
       </section>

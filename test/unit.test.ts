@@ -16,6 +16,7 @@ import {
   parseRspWikitext,
   wikidataEvidence,
 } from '@dn/jobs'
+import { scoreStory } from '@dn/server'
 import { layoutNarrative } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
@@ -207,7 +208,7 @@ describe('regions', () => {
     expect(regionForCountry(null)).toBeNull()
   })
 
-  it('prefers recent edition stories for the lead, else the most-sourced recent story', () => {
+  it("prefers recent stories in the reader's regions for the lead, else the most-sourced", () => {
     const now = Date.parse('2026-10-10T12:00:00Z')
     const at = (hoursAgo: number) => new Date(now - hoursAgo * 3_600_000).toISOString()
     const stories = [
@@ -215,9 +216,10 @@ describe('regions', () => {
       { id: 'eu', lastUpdatedAt: at(2), sourceCount: 3, regions: ['europe'] },
       { id: 'old-eu', lastUpdatedAt: at(72), sourceCount: 12, regions: ['europe'] },
     ]
-    expect(pickLead(stories, null, now)?.id).toBe('big')
-    expect(pickLead(stories, 'europe', now)?.id).toBe('eu')
-    expect(pickLead(stories, 'africa', now)?.id).toBe('big')
+    expect(pickLead(stories, [], now)?.id).toBe('big')
+    expect(pickLead(stories, ['europe'], now)?.id).toBe('eu')
+    expect(pickLead(stories, ['africa', 'europe'], now)?.id).toBe('eu')
+    expect(pickLead(stories, ['africa'], now)?.id).toBe('big')
   })
 })
 
@@ -374,5 +376,43 @@ describe('assessment evidence parsing', () => {
       'ownership: Owned by Netz GmbH (business), itself owned by Government of Exampleland',
       'lean: Political alignment (community-edited, unsourced): centrism',
     ])
+  })
+})
+
+describe('For You scoring', () => {
+  const picks = {
+    regions: ['europe'] as const,
+    desks: ['science'] as const,
+    narratives: new Map([['nar_sudan', "Sudan's civil war"]]),
+    publishers: new Map([['pub_bbc', 'BBC News']]),
+  }
+  const story = (over: Partial<Parameters<typeof scoreStory>[0]> = {}) => ({
+    id: 's',
+    desk: null,
+    regions: [],
+    ageHours: 2,
+    outlets: 2,
+    narrativeIds: [],
+    publisherIds: [],
+    ...over,
+  })
+
+  it('ranks follows above picks above everything else, and explains why', () => {
+    const followed = scoreStory(story({ narrativeIds: ['nar_sudan'] }), picks)
+    const picked = scoreStory(story({ regions: ['europe'], desk: 'science' }), picks)
+    const other = scoreStory(story(), picks)
+    expect(followed.score).toBeGreaterThan(picked.score)
+    expect(picked.score).toBeGreaterThan(other.score)
+    expect(followed.reasons).toEqual([{ kind: 'narrative', label: "Sudan's civil war" }])
+    expect(picked.reasons.map((r) => r.label)).toEqual(['Europe', 'Science'])
+    expect(other.reasons).toEqual([])
+  })
+
+  it('keeps big stories outside your picks, but newer and wider coverage wins', () => {
+    const big = scoreStory(story({ outlets: 15 }), picks)
+    const small = scoreStory(story({ outlets: 2 }), picks)
+    const stale = scoreStory(story({ outlets: 2, ageHours: 60 }), picks)
+    expect(big.score).toBeGreaterThan(small.score)
+    expect(small.score).toBeGreaterThan(stale.score)
   })
 })

@@ -16,11 +16,11 @@ const MAX_STEPS = 6
 
 /**
  * Everything on the front page above the Latest grid. The lead is the most widely reported
- * recent Story (in the reader's edition when they set one); Latest is the regular story list.
+ * recent Story (in one of the reader's regions when they picked some); Latest is the regular story list.
  */
 export async function getFrontPage(
   db: Db,
-  opts: { region?: Region; edition?: Region | null; now?: Date } = {},
+  opts: { region?: Region; regions?: readonly Region[]; now?: Date } = {},
 ): Promise<FrontPage> {
   const now = opts.now ?? new Date()
   const since = new Date(now.getTime() - DAY_MS)
@@ -44,7 +44,7 @@ export async function getFrontPage(
   const candidates = await listStories(db, { limit: 30, region: opts.region })
   const leadItem = pickLead(
     candidates.items,
-    opts.region ? null : (opts.edition ?? null),
+    opts.region ? [] : (opts.regions ?? []),
     now.getTime(),
   )
   const lead = leadItem ? await getStory(db, leadItem.id) : null

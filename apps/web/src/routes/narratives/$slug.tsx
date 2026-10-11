@@ -2,6 +2,7 @@ import { formatDate, plural } from '@dn/domain'
 import { cx, deskKey, NarrativeGraph } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
+import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
@@ -27,7 +28,10 @@ function NarrativePage() {
       <div className="max-w-4xl">
         <header className={cx(deskKey(narrative.desk), 'border-t-6 border-key pt-4')}>
           <p className="type-label text-text-muted">Narrative</p>
-          <h1 className="mt-2 type-headline-lg text-balance">{narrative.title}</h1>
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
+            <h1 className="type-headline-lg text-balance">{narrative.title}</h1>
+            <FollowButton targetType="narrative" targetId={narrative.id} name={narrative.title} />
+          </div>
         </header>
         {narrative.description ? (
           <p className="mt-3 max-w-reading text-md leading-normal text-text-secondary">

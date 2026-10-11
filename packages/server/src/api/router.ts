@@ -2,6 +2,7 @@ import {
   type ApiErrorBody,
   type ApiErrorCode,
   assessmentRequestSchema,
+  followRequestSchema,
   opsActionSchema,
   readRequestSchema,
   regionSchema,
@@ -12,6 +13,8 @@ import {
 import { ZodError, z } from 'zod'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import type { ServerContext } from '../context.ts'
+import { listFollows, setFollow } from '../follows.ts'
+import { getForYou } from '../for-you.ts'
 import { getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
@@ -122,8 +125,8 @@ const frontQuery = z.object({ region: regionSchema.optional() })
 const routes: Route[] = [
   route('GET', '/api/v1/front', async ({ ctx, url, userId }) => {
     const { region } = frontQuery.parse(Object.fromEntries(url.searchParams))
-    const { edition } = await getPreferences(ctx.db, userId)
-    return json(await getFrontPage(ctx.db, { region, edition }))
+    const { regions } = await getPreferences(ctx.db, userId)
+    return json(await getFrontPage(ctx.db, { region, regions }))
   }),
   route('GET', '/api/v1/stories', async ({ ctx, url }) =>
     json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
@@ -176,6 +179,15 @@ const routes: Route[] = [
     json(
       await savePreferences(ctx.db, userId, await readJson(request, userPreferencesUpdateSchema)),
     ),
+  ),
+  route('GET', '/api/v1/me/follows', async ({ ctx, userId }) =>
+    json(await listFollows(ctx.db, userId)),
+  ),
+  route('POST', '/api/v1/me/follows', async ({ ctx, request, userId }) =>
+    json(await setFollow(ctx.db, userId, await readJson(request, followRequestSchema))),
+  ),
+  route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
+    json(await getForYou(ctx.db, userId, { cursor: url.searchParams.get('cursor') })),
   ),
   route('POST', '/api/v1/me/reads', async ({ ctx, request, userId }) => {
     const { storyId } = await readJson(request, readRequestSchema)

@@ -35,6 +35,7 @@ import {
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import type { FormEvent } from 'react'
+import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
 import { api, queries } from '../../lib/api.ts'
@@ -61,7 +62,10 @@ function PublisherPage() {
       <div className="grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
           <p className="type-label text-text-muted">Publisher</p>
-          <h1 className="mt-2 type-headline-lg">{p.name}</h1>
+          <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
+            <h1 className="type-headline-lg">{p.name}</h1>
+            <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
+          </div>
           <p className="mt-2 type-meta">
             <a
               href={`https://${p.domain}`}

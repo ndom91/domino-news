@@ -120,6 +120,20 @@
       "when": 1791681631752,
       "tag": "0016_assessment_levels",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "7",
+      "when": 1791704545877,
+      "tag": "0017_for_you",
+      "breakpoints": true
+    },
+    {
+      "idx": 18,
+      "version": "7",
+      "when": 1791704546265,
+      "tag": "0018_drop_edition",
+      "breakpoints": true
     }
   ]
 }

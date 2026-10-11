@@ -1,14 +1,14 @@
 import { formatDateTime } from '@dn/domain'
-import { savePreferencesMutation } from '@dn/queries'
-import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, Select, TextInput } from '@dn/ui'
+import { setFollowMutation } from '@dn/queries'
+import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { type FormEvent, useId } from 'react'
+import type { FormEvent } from 'react'
+import { FeedPicks } from '../components/feed-picks.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
-import { regionOptions } from '../lib/regions.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 
 export const Route = createFileRoute('/account')({
@@ -67,7 +67,7 @@ function AccountPage() {
           <SignOutButton />
         </div>
 
-        <EditionSection />
+        <FeedSection />
         <ReadingHistorySection />
 
         <section aria-labelledby="passkeys-heading" className="mt-10">
@@ -166,8 +166,6 @@ function SignOutButton() {
   )
 }
 
-const EDITION_OPTIONS = regionOptions('No preference')
-
 function ReadingHistorySection() {
   return (
     <section aria-labelledby="history-heading" className="mt-10">
@@ -177,35 +175,50 @@ function ReadingHistorySection() {
   )
 }
 
-function EditionSection() {
+function FeedSection() {
   const queryClient = useQueryClient()
-  const prefs = useQuery(queries.preferences())
-  const save = useMutation(savePreferencesMutation(api, queryClient))
-  const selectId = useId()
-
+  const follows = useQuery(queries.follows())
+  const unfollow = useMutation(setFollowMutation(api, queryClient))
   return (
-    <section aria-labelledby="edition-heading" className="mt-10">
-      <SectionLabel id="edition-heading">News edition</SectionLabel>
-      <p className="mb-4 max-w-reading text-sm text-text-secondary">
-        Stories about this region lead your feed. Everything else still appears.
+    <section id="your-feed" aria-labelledby="feed-heading" className="mt-10 scroll-mt-24">
+      <SectionLabel id="feed-heading">Your feed</SectionLabel>
+      <p className="mb-5 max-w-reading text-sm text-text-secondary">
+        Stories matching these move to the top of For You, and your regions lead the front page.
+        Nothing else is hidden.
       </p>
-      <div className="flex flex-wrap items-center gap-3 text-sm">
-        <label htmlFor={selectId} className="type-label">
-          Region
-        </label>
-        <Select
-          id={selectId}
-          options={EDITION_OPTIONS}
-          value={prefs.data?.edition ?? null}
-          disabled={prefs.isPending || save.isPending}
-          onValueChange={(edition) => save.mutate({ edition })}
-        />
-      </div>
-      {save.isError ? (
-        <Notice tone="error" title="Edition not saved" className="mt-4">
-          {save.error.message}
-        </Notice>
-      ) : null}
+      <FeedPicks />
+      <h3 className="mt-8 mb-2 type-label">Following</h3>
+      {follows.data?.items.length ? (
+        <ul className="flex flex-col divide-y divide-border border-y border-border">
+          {follows.data.items.map((f) => (
+            <li
+              key={`${f.targetType}-${f.id}`}
+              className="flex items-center justify-between gap-3 py-2.5"
+            >
+              <span>
+                {f.title}{' '}
+                <span className="type-meta">
+                  {f.targetType === 'narrative' ? 'Narrative' : 'Outlet'}
+                </span>
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
+                onClick={() =>
+                  unfollow.mutate({ targetType: f.targetType, targetId: f.id, follow: false })
+                }
+              >
+                Unfollow
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-text-muted">
+          Nothing yet. Use Follow on a narrative or outlet page.
+        </p>
+      )}
     </section>
   )
 }
