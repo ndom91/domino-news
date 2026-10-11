@@ -117,6 +117,8 @@ export function StoryItem({
           }))}
           now={now}
           width="fill"
+          // Fixed height so cards in a row line up: 3 marks on standard cards, 4 on wide.
+          rows={wide ? 4 : 3}
         />
         <span>
           {plural(story.sourceCount, 'publisher')} · {cited} cited

@@ -28,6 +28,7 @@ export function SourceTrace({
   variant = 'compact',
   now,
   width: widthProp = variant === 'full' ? 492 : 216,
+  rows: fixedRows,
   onKey = false,
   active,
   onActiveChange,
@@ -39,6 +40,11 @@ export function SourceTrace({
   now: string
   /** Pixels, or 'fill' to span the container (redrawn on resize; cells widen, marks don't). */
   width?: number | 'fill'
+  /**
+   * Fixed height in marks, so neighbouring cards line up. A busier hour shows rows-1 marks
+   * and a "+" (with the rest in its tooltip). Omit to grow with the data.
+   */
+  rows?: number
   onKey?: boolean
   active?: string | null
   onActiveChange?: (id: string | null) => void
@@ -80,7 +86,7 @@ export function SourceTrace({
   }
   for (const col of columns)
     col.sort((a, b) => Number(b.citation !== null) - Number(a.citation !== null))
-  const rows = Math.max(variant === 'full' ? 2 : 3, ...columns.map((c) => c.length))
+  const rows = fixedRows ?? Math.max(variant === 'full' ? 2 : 3, ...columns.map((c) => c.length))
   const h = rows * rh + 4
   const H = h + (variant === 'full' ? 18 : 0)
   const cited = sources.filter((s) => s.citation !== null).length
@@ -110,46 +116,80 @@ export function SourceTrace({
           className={cx('fill-none', onKey ? 'stroke-key-text/40' : 'stroke-trace-cell')}
         />
       ))}
-      {columns.flatMap((col, i) =>
-        col.map((s, j) => {
-          const x = i * cw + cw / 2
-          const y = h - 2 - rh / 2 - j * rh
-          return (
-            <Tooltip
-              key={s.id}
-              delay={60}
-              content={`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}
-            >
-              <g
-                onPointerEnter={() => setActive(s.id)}
-                onPointerLeave={() => setActive(null)}
-                className="cursor-default"
+      {columns.flatMap((col, i) => {
+        const overflow = col.length > rows
+        // Cited marks sort first (bottom), so the "+" stands in for uncited ones where possible.
+        const shown = overflow ? col.slice(0, rows - 1) : col
+        const hidden = overflow ? col.slice(rows - 1) : []
+        const x = i * cw + cw / 2
+        const yAt = (j: number) => h - 2 - rh / 2 - j * rh
+        const more = overflow ? (
+          <Tooltip
+            key={`more-${hidden[0]?.id}`}
+            delay={60}
+            content={`${hidden.length} more: ${hidden.map((s) => s.outlet).join(', ')}`}
+          >
+            <g className="cursor-default">
+              <rect
+                x={i * cw}
+                y={yAt(rows - 1) - rh / 2}
+                width={cw}
+                height={rh}
+                fill="transparent"
+              />
+              <text
+                x={x}
+                y={yAt(rows - 1)}
+                textAnchor="middle"
+                dominantBaseline="central"
+                className={cx('text-xs font-bold', onKey ? 'fill-key-text' : 'fill-trace-cited')}
               >
-                {/* Cell-sized hit area: the mark is only ~7px across. */}
-                <rect x={i * cw} y={y - rh / 2} width={cw} height={rh} fill="transparent" />
-                <circle
-                  cx={x}
-                  cy={y}
-                  r={r}
-                  strokeWidth={s.citation === null ? 1.5 : 0}
-                  className={cx(
-                    'origin-center transition-[scale,opacity] [transform-box:fill-box]',
-                    current === s.id && 'scale-150',
-                    current && current !== s.id && 'opacity-35',
-                    s.citation === null
-                      ? onKey
-                        ? 'fill-key stroke-key-text'
-                        : 'fill-canvas stroke-trace-observed'
-                      : onKey
-                        ? 'fill-key-text'
-                        : 'fill-trace-cited',
-                  )}
-                />
-              </g>
-            </Tooltip>
-          )
-        }),
-      )}
+                +
+              </text>
+            </g>
+          </Tooltip>
+        ) : null
+        return [
+          ...shown.map((s, j) => {
+            const y = yAt(j)
+            return (
+              <Tooltip
+                key={s.id}
+                delay={60}
+                content={`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}
+              >
+                <g
+                  onPointerEnter={() => setActive(s.id)}
+                  onPointerLeave={() => setActive(null)}
+                  className="cursor-default"
+                >
+                  {/* Cell-sized hit area: the mark is only ~7px across. */}
+                  <rect x={i * cw} y={y - rh / 2} width={cw} height={rh} fill="transparent" />
+                  <circle
+                    cx={x}
+                    cy={y}
+                    r={r}
+                    strokeWidth={s.citation === null ? 1.5 : 0}
+                    className={cx(
+                      'origin-center transition-[scale,opacity] [transform-box:fill-box]',
+                      current === s.id && 'scale-150',
+                      current && current !== s.id && 'opacity-35',
+                      s.citation === null
+                        ? onKey
+                          ? 'fill-key stroke-key-text'
+                          : 'fill-canvas stroke-trace-observed'
+                        : onKey
+                          ? 'fill-key-text'
+                          : 'fill-trace-cited',
+                    )}
+                  />
+                </g>
+              </Tooltip>
+            )
+          }),
+          more,
+        ]
+      })}
       {variant === 'full'
         ? [24, 18, 12, 6, 0].map((hr) => (
             <text
