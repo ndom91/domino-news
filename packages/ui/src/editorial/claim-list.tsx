@@ -1,7 +1,8 @@
-import { clockTime, formatDate, formatDateTime, hostnameOf } from '@dn/domain'
+import { hostnameOf } from '@dn/domain'
 import type { StoryClaim } from '@dn/schemas'
 import { Tooltip } from '../primitives/overlay.tsx'
 import { DefaultLink, type LinkLike } from './link.tsx'
+import { Timestamp } from './time.tsx'
 
 type Mention = StoryClaim['mentions'][number]
 
@@ -43,14 +44,11 @@ export function ClaimList({
             <p className="mt-1.5 flex min-w-0 items-baseline gap-x-2 text-label text-text-muted">
               {claim.firstReportedAt ? (
                 <>
-                  <Tooltip content={`First reported ${formatDateTime(claim.firstReportedAt)}`}>
-                    <time
-                      dateTime={claim.firstReportedAt}
-                      className="flex-none font-semibold text-text"
-                    >
-                      {formatDate(claim.firstReportedAt)}, {clockTime(claim.firstReportedAt)}
-                    </time>
-                  </Tooltip>
+                  <Timestamp
+                    at={claim.firstReportedAt}
+                    format="datetime"
+                    className="flex-none font-semibold text-text"
+                  />
                   <span aria-hidden className="flex-none text-border-strong">
                     |
                   </span>

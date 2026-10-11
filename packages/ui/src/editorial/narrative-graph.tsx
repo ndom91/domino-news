@@ -1,4 +1,4 @@
-import { clockTime, formatDate, plural, stripCitations } from '@dn/domain'
+import { plural, stripCitations } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import type { CSSProperties } from 'react'
 import { cx } from '../cx.ts'
@@ -6,6 +6,7 @@ import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { layoutNarrative } from './narrative-layout.ts'
 import { relationLabel } from './relations.ts'
+import { Timestamp } from './time.tsx'
 
 // Marker centre from the row top, level with the date line. The line and marker share the
 // gutter's centre (12px), so markers always sit on the line.
@@ -80,12 +81,11 @@ export function NarrativeGraph({
               )}
             >
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
-                <time
-                  dateTime={node.firstObservedAt}
+                <Timestamp
+                  at={node.firstObservedAt}
+                  format="datetime"
                   className="type-meta font-semibold whitespace-nowrap"
-                >
-                  {formatDate(node.firstObservedAt)} · {clockTime(node.firstObservedAt)} UTC
-                </time>
+                />
                 {primary ? (
                   <span className="text-xs font-semibold tracking-label text-text-muted uppercase">
                     {relationLabel(primary.relation, 'outgoing')}{' '}

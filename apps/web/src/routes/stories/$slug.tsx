@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime, hostnameOf, plural } from '@dn/domain'
+import { formatDate, hostnameOf, plural } from '@dn/domain'
 import { REGION_LABELS } from '@dn/schemas'
 import {
   Badge,
@@ -228,9 +228,7 @@ function StoryPage() {
               <ol className="flex flex-col gap-2 text-sm">
                 {story.summaryHistory.map((v, i) => (
                   <li key={v.versionId} className="flex items-center justify-between gap-3">
-                    <time dateTime={v.createdAt} className="type-meta">
-                      {formatDateTime(v.createdAt)}
-                    </time>
+                    <Timestamp at={v.createdAt} format="datetime" className="type-meta" />
                     <span className="flex items-center gap-2">
                       {i === 0 ? <Badge tone="ink">Current</Badge> : null}
                       <span className="type-meta">

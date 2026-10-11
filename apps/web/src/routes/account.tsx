@@ -1,6 +1,5 @@
-import { formatDateTime } from '@dn/domain'
 import { setFollowMutation, updateSignalsMutation } from '@dn/queries'
-import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, TextInput } from '@dn/ui'
+import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, TextInput, Timestamp } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { FormEvent } from 'react'
@@ -102,10 +101,15 @@ function AccountPage() {
                   <div>
                     <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
                     <p className="type-meta">
-                      Added{' '}
-                      {p.createdAt
-                        ? formatDateTime(new Date(p.createdAt).toISOString())
-                        : 'earlier'}
+                      {p.createdAt ? (
+                        <Timestamp
+                          at={new Date(p.createdAt).toISOString()}
+                          format="datetime"
+                          prefix="Added"
+                        />
+                      ) : (
+                        'Added earlier'
+                      )}
                       {p.backedUp ? ' · synced' : ''}
                     </p>
                   </div>

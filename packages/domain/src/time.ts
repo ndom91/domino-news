@@ -18,27 +18,25 @@ export function relativeTime(iso: string, now = new Date(), locale = 'en'): stri
   return 'just now'
 }
 
-export function formatDateTime(iso: string, locale = 'en-GB'): string {
-  return new Intl.DateTimeFormat(locale, {
+/** "10 Oct 2026, 14:06 UTC", in UTC unless another IANA time zone is given. */
+export function formatDateTime(iso: string, timeZone = 'UTC'): string {
+  return new Intl.DateTimeFormat('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    timeZone: 'UTC',
+    timeZone,
     timeZoneName: 'short',
   }).format(new Date(iso))
 }
 
-export function formatDate(iso: string, locale = 'en-GB'): string {
-  return new Intl.DateTimeFormat(locale, {
-    day: 'numeric',
-    month: 'short',
-    timeZone: 'UTC',
-  }).format(new Date(iso))
+/** "10 Oct", in UTC unless another IANA time zone is given. */
+export function formatDate(iso: string, timeZone = 'UTC'): string {
+  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone }).format(
+    new Date(iso),
+  )
 }
-
-const pad = (n: number) => String(n).padStart(2, '0')
 
 /** Compact relative time used across the design: "just now", "24 min ago", "5 h ago", "3 d ago", else "9 Oct". */
 export function shortRelative(iso: string, now = new Date()): string {
@@ -52,10 +50,23 @@ export function shortRelative(iso: string, now = new Date()): string {
   return formatDate(iso)
 }
 
-/** 24-hour UTC clock time, e.g. "18:05". */
-export function clockTime(iso: string): string {
-  const d = new Date(iso)
-  return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`
+/** 24-hour clock time, e.g. "18:05", in UTC unless another IANA time zone is given. */
+export function clockTime(iso: string, timeZone = 'UTC'): string {
+  return new Intl.DateTimeFormat('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hourCycle: 'h23',
+    timeZone,
+  }).format(new Date(iso))
+}
+
+/** Short name of the time zone at that moment: "UTC", "CEST", or "GMT-4" where there's no abbreviation. */
+export function zoneName(iso: string, timeZone = 'UTC'): string {
+  return (
+    new Intl.DateTimeFormat('en-GB', { timeZone, timeZoneName: 'short' })
+      .formatToParts(new Date(iso))
+      .find((p) => p.type === 'timeZoneName')?.value ?? timeZone
+  )
 }
 
 /** "Saturday 10 October 2026" in UTC (the strip's edition date). */

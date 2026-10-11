@@ -60,7 +60,7 @@ export function SourceList({
               </Link>
               {s.official ? <Badge>Official source</Badge> : null}
               <span className="type-meta">
-                <Timestamp at={s.publishedAt ?? s.observedAt} format="clock" /> UTC ·{' '}
+                <Timestamp at={s.publishedAt ?? s.observedAt} format="clock" /> ·{' '}
                 {s.citation ? `cited [${s.citation}]` : s.citedInSummary ? 'cited' : 'not cited'}
               </span>
             </div>

@@ -1,4 +1,4 @@
-import { clockTime, hostnameOf, plural } from '@dn/domain'
+import { hostnameOf, plural } from '@dn/domain'
 import type { StoryListItem } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { useReveal } from '../primitives/reveal.tsx'
@@ -9,6 +9,7 @@ import { DefaultLink, type LinkLike } from './link.tsx'
 import { relationLabel } from './relations.ts'
 import { SourceTrace } from './source-trace.tsx'
 import { StoryBar } from './story-bar.tsx'
+import { Timestamp } from './time.tsx'
 
 /** Black uppercase flag before a correcting Story's headline. */
 function CorrectionFlag() {
@@ -115,7 +116,8 @@ export function StoryItem({
           width={wide ? 336 : 216}
         />
         <span>
-          {plural(story.sourceCount, 'publisher')} · {cited} cited · first {clockTime(first)} UTC
+          {plural(story.sourceCount, 'publisher')} · {cited} cited · first{' '}
+          <Timestamp at={first} format="clock" />
         </span>
       </div>
     </article>

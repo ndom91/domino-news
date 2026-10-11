@@ -1,5 +1,5 @@
-import { clockTime, longDate, plural } from '@dn/domain'
-import { Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { longDate, plural } from '@dn/domain'
+import { Menu, MenuItem, MenuLinkItem, Timestamp, UserAvatar } from '@dn/ui'
 import { CaretDownIcon, MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useMatchRoute } from '@tanstack/react-router'
@@ -32,7 +32,12 @@ function Strip() {
       <div className="mx-auto flex h-strip max-w-page items-center justify-between gap-4 px-gutter">
         <span suppressHydrationWarning>
           <b className="font-bold">{longDate(editionAt ?? new Date().toISOString())}</b>
-          {editionAt ? ` · Edition ${clockTime(editionAt)} UTC` : null}
+          {editionAt ? (
+            <>
+              {' · '}
+              <Timestamp at={editionAt} format="clock" prefix="Edition" />
+            </>
+          ) : null}
         </span>
         {front ? (
           <span className="max-md:hidden">

@@ -1,5 +1,8 @@
 import {
+  clockTime,
   dayLabel,
+  formatDate,
+  formatDateTime,
   hostnameOf,
   normalizeArticleUrl,
   pickLead,
@@ -7,6 +10,7 @@ import {
   recencyPeriod,
   regionForCountry,
   validateNewEdge,
+  zoneName,
 } from '@dn/domain'
 import {
   findRspEntry,
@@ -288,6 +292,20 @@ describe('display helpers', () => {
   it('returns null for a malformed URL instead of throwing', () => {
     expect(hostnameOf('https://www.example.com/a?b=1')).toBe('example.com')
     expect(hostnameOf('not a url')).toBeNull()
+  })
+
+  it('formats times in UTC by default and in a given zone', () => {
+    const at = '2026-10-10T22:30:00Z'
+    expect(clockTime(at)).toBe('22:30')
+    expect(formatDate(at)).toBe('10 Oct')
+    expect(formatDateTime(at)).toBe('10 Oct 2026, 22:30 UTC')
+    expect(zoneName(at)).toBe('UTC')
+    // Berlin is UTC+2 in October, which also moves the date.
+    expect(clockTime(at, 'Europe/Berlin')).toBe('00:30')
+    expect(formatDate(at, 'Europe/Berlin')).toBe('11 Oct')
+    expect(formatDateTime(at, 'Europe/Berlin')).toBe('11 Oct 2026, 00:30 CEST')
+    expect(zoneName(at, 'Europe/Berlin')).toBe('CEST')
+    expect(zoneName(at, 'America/Bogota')).toBe('GMT-5')
   })
 })
 
