@@ -43,6 +43,8 @@ function StoryPage() {
   const { slug } = Route.useParams()
   const { now } = Route.useLoaderData()
   const { session } = Route.useRouteContext()
+  // Summary versions are an editorial detail; readers only see the current summary.
+  const isAdmin = session.user?.isAdmin ?? false
   const { data: story } = useSuspenseQuery(queries.story(slug))
   // Opt-in reading history, recorded from the browser so SSR and prefetches don't count.
   // Best effort: a lost read only makes the Blindspot insights slightly less complete.
@@ -98,6 +100,7 @@ function StoryPage() {
             <section aria-labelledby="claims-heading">
               <SectionHeader
                 id="claims-heading"
+                rule
                 title="Claims"
                 meta={
                   <>
@@ -113,6 +116,7 @@ function StoryPage() {
           <section aria-labelledby="sources-heading">
             <SectionHeader
               id="sources-heading"
+              rule
               title="Original reporting"
               meta={`${plural(story.sources.length, 'report')} from ${plural(publisherCount, 'publisher')}`}
             />
@@ -127,6 +131,7 @@ function StoryPage() {
             <section aria-labelledby="development-heading">
               <SectionHeader
                 id="development-heading"
+                rule
                 title="How this developed"
                 meta={
                   <Link
@@ -217,24 +222,26 @@ function StoryPage() {
             )}
           </section>
 
-          <section aria-labelledby="history-heading">
-            <SectionLabel id="history-heading">Summary versions</SectionLabel>
-            <ol className="flex flex-col gap-2 text-sm">
-              {story.summaryHistory.map((v, i) => (
-                <li key={v.versionId} className="flex items-center justify-between gap-3">
-                  <time dateTime={v.createdAt} className="type-meta">
-                    {formatDateTime(v.createdAt)}
-                  </time>
-                  <span className="flex items-center gap-2">
-                    {i === 0 ? <Badge tone="ink">Current</Badge> : null}
-                    <span className="type-meta">
-                      {v.origin === 'edited' ? 'Edited' : 'Generated'}
+          {isAdmin ? (
+            <section aria-labelledby="history-heading">
+              <SectionLabel id="history-heading">Summary versions</SectionLabel>
+              <ol className="flex flex-col gap-2 text-sm">
+                {story.summaryHistory.map((v, i) => (
+                  <li key={v.versionId} className="flex items-center justify-between gap-3">
+                    <time dateTime={v.createdAt} className="type-meta">
+                      {formatDateTime(v.createdAt)}
+                    </time>
+                    <span className="flex items-center gap-2">
+                      {i === 0 ? <Badge tone="ink">Current</Badge> : null}
+                      <span className="type-meta">
+                        {v.origin === 'edited' ? 'Edited' : 'Generated'}
+                      </span>
                     </span>
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
+                  </li>
+                ))}
+              </ol>
+            </section>
+          ) : null}
         </aside>
       </div>
     </div>
