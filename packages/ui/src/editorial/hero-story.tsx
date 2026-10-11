@@ -134,6 +134,7 @@ export function HeroStory({
         </h2>
         <SourceTrace
           variant="full"
+          rows={5}
           onKey
           now={now}
           active={activeSource}
