@@ -82,14 +82,8 @@ export function NarrativeActivity({ times }: { times: string[] }) {
             content={`${plural(d.count, 'story', 'stories')} published on ${formatDate(d.day)}`}
           >
             <g className="group cursor-default">
-              {/* Column-wide hit area: the marker itself is only 10px. */}
-              <rect
-                x={x(i) - Math.min(18, (W - M.left - M.right) / data.length / 2)}
-                y={M.top}
-                width={Math.min(36, (W - M.left - M.right) / data.length)}
-                height={H - M.top - M.bottom}
-                fill="transparent"
-              />
+              {/* 28px hit area around the 10px marker; the tooltip anchors to it, so keep it tight. */}
+              <rect x={x(i) - 14} y={y(d.count) - 14} width={28} height={28} fill="transparent" />
               <rect
                 x={x(i) - 5}
                 y={y(d.count) - 5}
