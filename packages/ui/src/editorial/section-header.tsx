@@ -23,15 +23,17 @@ export function SectionHeader({
   return (
     <div
       className={cx(
-        'flex items-baseline justify-between gap-4 pt-10 pb-4',
+        'flex items-end justify-between gap-4 pt-10 pb-4',
         rule && 'mb-5 border-b-4 border-accent',
         className,
       )}
     >
-      <h2 id={id} className="type-section">
+      {/* Trimmed to cap height so its box ends at the baseline: the meta's underline or
+          select border then lines up with the bottom of the title. */}
+      <h2 id={id} className="shrink-0 type-section [text-box:trim-both_cap_alphabetic]">
         {title}
       </h2>
-      {meta ? <span className={cx('text-label', muted)}>{meta}</span> : null}
+      {meta ? <span className={cx('min-w-0 text-label', muted)}>{meta}</span> : null}
     </div>
   )
 }

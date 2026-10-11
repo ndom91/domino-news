@@ -79,7 +79,7 @@ export function HeroStory({
         'max-md:-mx-gutter max-md:mt-4 max-md:px-gutter max-md:pt-5 max-md:pb-8',
       )}
     >
-      <div className="col-span-full mb-7 flex items-baseline justify-between gap-x-4 border-b-2 border-key-text pb-3.5 max-md:mb-5 max-md:flex-col max-md:gap-1">
+      <div className="col-span-full mb-7 flex items-baseline justify-between gap-x-4 border-b-2 border-key-text pb-3.5 max-lg:mb-0 max-md:flex-col max-md:gap-1">
         {narrative ? (
           <Link to={`/narratives/${narrative.slug}`} className="type-label hover:underline">
             {narrative.title}
