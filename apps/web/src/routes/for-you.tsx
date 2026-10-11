@@ -4,7 +4,7 @@ import { Button, IconButton, Notice, Skeleton, StoryItem } from '@dn/ui'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RouterLink } from '../components/link.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
@@ -96,6 +96,8 @@ function ForYouPage() {
 
 type Item = ForYouResponse['items'][number]
 
+const HIDDEN_NOTICE_MS = 10_000
+
 /**
  * A For You card with "more / less like this". Less hides the card in place behind an
  * undo notice; the list re-ranks on the next visit rather than jumping under the reader.
@@ -104,6 +106,28 @@ function ForYouCard({ item, now }: { item: Item; now: string }) {
   const queryClient = useQueryClient()
   const save = useMutation(feedbackMutation(api, queryClient))
   const [feedback, setFeedback] = useState(item.feedback)
+  // While the pointer or focus is on the notice, it stays put (time to reach Undo).
+  const [paused, setPaused] = useState(false)
+
+  // A hidden card stays as an undo notice for a while, then leaves the list so the grid
+  // reflows. The server already leaves it out of later fetches.
+  useEffect(() => {
+    if (feedback !== 'less' || save.isPending || paused) return
+    const timer = setTimeout(() => {
+      queryClient.setQueryData(queries.forYou().queryKey, (data) =>
+        data
+          ? {
+              ...data,
+              pages: data.pages.map((page) => ({
+                ...page,
+                items: page.items.filter((i) => i.story.id !== item.story.id),
+              })),
+            }
+          : data,
+      )
+    }, HIDDEN_NOTICE_MS)
+    return () => clearTimeout(timer)
+  }, [feedback, save.isPending, paused, queryClient, item.story.id])
 
   function send(signal: 'more' | 'less' | null) {
     const previous = feedback
@@ -113,14 +137,23 @@ function ForYouCard({ item, now }: { item: Item; now: string }) {
 
   if (feedback === 'less') {
     return (
-      <div className="flex min-h-24 flex-col justify-center gap-1 border-t-6 border-border p-3 text-sm">
+      <div
+        className="flex min-h-24 flex-col justify-center gap-1 border-t-6 border-border p-3 text-sm"
+        onPointerEnter={() => setPaused(true)}
+        onPointerLeave={() => setPaused(false)}
+        onFocus={() => setPaused(true)}
+        onBlur={() => setPaused(false)}
+      >
         <p className="font-semibold">Hidden. We'll show fewer stories like this.</p>
         <p className="text-text-secondary">
           <button
             type="button"
             className="link-inline font-semibold"
             disabled={save.isPending}
-            onClick={() => send(null)}
+            onClick={() => {
+              setPaused(false)
+              send(null)
+            }}
           >
             Undo
           </button>
