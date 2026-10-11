@@ -2,7 +2,13 @@ import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
 import type { Desk, DevelopingNarrative, FrontPage, Region } from '@dn/schemas'
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { getStory, listStories, MIN_NARRATIVE_STORIES, narrativeDesk } from './reader.ts'
+import {
+  edgesWithin,
+  getStory,
+  listStories,
+  MIN_NARRATIVE_STORIES,
+  narrativeDesk,
+} from './reader.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
@@ -122,16 +128,7 @@ async function developingNarratives(
       })
       .from(schema.story)
       .where(inArray(schema.story.id, allIds)),
-    db
-      .select()
-      .from(schema.storyRelationship)
-      .where(
-        and(
-          isNull(schema.storyRelationship.supersededAt),
-          inArray(schema.storyRelationship.fromStoryId, allIds),
-          inArray(schema.storyRelationship.toStoryId, allIds),
-        ),
-      ),
+    edgesWithin(db, allIds),
   ])
   const byId = new Map(stories.map((s) => [s.id, s]))
   return narratives.map((n) => {

@@ -13,6 +13,9 @@ export const QUEUES = {
   pruneEvents: 'prune_delivered_events',
 } as const
 
+// Everything keyed on a Story's current summary version.
+export const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
+
 export type JobClass = 'interactive' | 'fresh' | 'backfill'
 
 // pg-boss: higher number = fetched first.

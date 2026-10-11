@@ -7,7 +7,7 @@ import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
 import { THRESHOLDS } from './match.ts'
-import { withAnalysisRun } from './provenance.ts'
+import { runStoryGeneration, withAnalysisRun } from './provenance.ts'
 
 const MAX_CANDIDATES = 4
 const MAX_NARRATIVE_COMPONENT = 40
@@ -83,19 +83,15 @@ async function createEdgeIfRelated(
   const selfIsNewer = selfFirstObservedAt >= other.firstObservedAt
   const newer = selfIsNewer ? self : otherInput
   const older = selfIsNewer ? otherInput : self
-  const { runId, result } = await withAnalysisRun(
-    ctx.db,
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
     {
       operation: 'story_relationship',
-      targetType: 'story',
-      targetId: newer.storyId,
+      storyId: newer.storyId,
       inputFingerprint: `${newer.storyId}|${older.storyId}|${job.inputFingerprint}`,
-      modelId: ctx.inference.generation.modelId,
     },
-    () =>
-      ctx.gpu.generation.run(job.priorityClass, () =>
-        ctx.inference.generation.classifyRelationship({ newer, older }),
-      ),
+    () => ctx.inference.generation.classifyRelationship({ newer, older }),
   )
   await ctx.db.insert(schema.interpretation).values({
     id: newId(ID_PREFIX.interpretation),

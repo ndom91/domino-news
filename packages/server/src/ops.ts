@@ -55,18 +55,49 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
   )
 
   const scalar = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
+  // Matches the outbox_pending_idx partial index (no full-table scan).
+  const outboxPending = and(
+    isNull(schema.outboxEvent.processedAt),
+    isNull(schema.outboxEvent.deadAt),
+  )
   const [oldestOutbox] = await db
     .select({
       s: sql<number | null>`extract(epoch from now() - min(${schema.outboxEvent.createdAt}))::int`,
     })
     .from(schema.outboxEvent)
-    // Matches the outbox_pending_idx partial index (no full-table scan).
-    .where(and(isNull(schema.outboxEvent.processedAt), isNull(schema.outboxEvent.deadAt)))
+    .where(outboxPending)
   const runs = await db
     .select()
     .from(schema.analysisRun)
     .orderBy(desc(schema.analysisRun.startedAt))
     .limit(12)
+
+  const [
+    articles,
+    articlesEmbedded,
+    articlesMatched,
+    stories,
+    storiesPublished,
+    narratives,
+    outboxPendingCount,
+    outboxFailed,
+  ] = await Promise.all([
+    scalar(db.select({ n: count }).from(schema.article)),
+    scalar(db.select({ n: count }).from(schema.articleEmbedding)),
+    scalar(
+      db
+        .select({ n: count })
+        .from(schema.storyArticle)
+        .where(isNull(schema.storyArticle.removedAt)),
+    ),
+    scalar(db.select({ n: count }).from(schema.story)),
+    scalar(db.select({ n: count }).from(schema.story).where(isNotNull(schema.story.publishedAt))),
+    scalar(db.select({ n: count }).from(schema.narrative)),
+    scalar(db.select({ n: count }).from(schema.outboxEvent).where(outboxPending)),
+    scalar(
+      db.select({ n: count }).from(schema.outboxEvent).where(isNotNull(schema.outboxEvent.deadAt)),
+    ),
+  ])
 
   return {
     inferenceMode: ctx.inference.mode,
@@ -83,33 +114,14 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
       oldestQueuedAgeSeconds: q.readyOldestSeconds,
     })),
     pipeline: {
-      articles: await scalar(db.select({ n: count }).from(schema.article)),
-      articlesEmbedded: await scalar(db.select({ n: count }).from(schema.articleEmbedding)),
-      articlesMatched: await scalar(
-        db
-          .select({ n: count })
-          .from(schema.storyArticle)
-          .where(isNull(schema.storyArticle.removedAt)),
-      ),
-      stories: await scalar(db.select({ n: count }).from(schema.story)),
-      storiesPublished: await scalar(
-        db.select({ n: count }).from(schema.story).where(isNotNull(schema.story.publishedAt)),
-      ),
-      narratives: await scalar(db.select({ n: count }).from(schema.narrative)),
-      outboxPending: await scalar(
-        db
-          .select({ n: count })
-          .from(schema.outboxEvent)
-          .where(
-            sql`${schema.outboxEvent.processedAt} is null and ${schema.outboxEvent.deadAt} is null`,
-          ),
-      ),
-      outboxFailed: await scalar(
-        db
-          .select({ n: count })
-          .from(schema.outboxEvent)
-          .where(isNotNull(schema.outboxEvent.deadAt)),
-      ),
+      articles,
+      articlesEmbedded,
+      articlesMatched,
+      stories,
+      storiesPublished,
+      narratives,
+      outboxPending: outboxPendingCount,
+      outboxFailed,
       oldestOutboxAgeSeconds: oldestOutbox?.s ?? null,
     },
     recentFailures: failures.rows.map((f) => ({

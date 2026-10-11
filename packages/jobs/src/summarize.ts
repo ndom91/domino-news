@@ -5,14 +5,14 @@ import {
   type AnalysisJob,
   analysisJob,
   DomainError,
+  ENRICHMENT_QUEUES,
   newsroomOutletCount,
-  QUEUES,
   recordGeneratedSummary,
 } from '@dn/server'
 import { eq } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadStoryInput, withTransientBodies } from './inputs.ts'
-import { withAnalysisRun } from './provenance.ts'
+import { runStoryGeneration } from './provenance.ts'
 
 /**
  * Generate, validate and record a grounded summary. Stale jobs (story inputs changed)
@@ -42,19 +42,11 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
   if (!input || input.articles.length === 0) return { status: 'no_articles' }
   const { story: withBodies, primaryLinks } = await withTransientBodies(input)
 
-  const { runId, result } = await withAnalysisRun(
-    ctx.db,
-    {
-      operation: 'story_summary',
-      targetType: 'story',
-      targetId: story.id,
-      inputFingerprint: job.inputFingerprint,
-      modelId: ctx.inference.generation.modelId,
-    },
-    () =>
-      ctx.gpu.generation.run(job.priorityClass, () =>
-        ctx.inference.generation.summarizeStory({ story: withBodies }),
-      ),
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
+    { operation: 'story_summary', storyId: story.id, inputFingerprint: job.inputFingerprint },
+    () => ctx.inference.generation.summarizeStory({ story: withBodies }),
   )
 
   const outcome = await withTransaction(ctx.pool, async (tx) => {
@@ -88,9 +80,7 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     }
     // Enrichment keyed on the new summary version: relationships, context and claims.
     const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
-    await sendInTx(ctx, tx, QUEUES.relateStory, next.data, next.options)
-    await sendInTx(ctx, tx, QUEUES.generateContext, next.data, next.options)
-    await sendInTx(ctx, tx, QUEUES.extractClaims, next.data, next.options)
+    for (const queue of ENRICHMENT_QUEUES) await sendInTx(ctx, tx, queue, next.data, next.options)
     return recorded
   })
   return outcome

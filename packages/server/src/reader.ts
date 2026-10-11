@@ -179,6 +179,20 @@ async function relationsByStory(db: Db, storyIds: string[]) {
   return map
 }
 
+/** Active relationships with both ends in `storyIds`. */
+export function edgesWithin(db: Db, storyIds: string[]) {
+  return db
+    .select()
+    .from(schema.storyRelationship)
+    .where(
+      and(
+        isNull(schema.storyRelationship.supersededAt),
+        inArray(schema.storyRelationship.fromStoryId, storyIds),
+        inArray(schema.storyRelationship.toStoryId, storyIds),
+      ),
+    )
+}
+
 async function primarySourceByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, StoryListItem['primarySource']>()
   if (storyIds.length === 0) return map
@@ -484,19 +498,7 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
     .orderBy(schema.story.firstObservedAt)
   if (stories.length === 0) return null
   const ids = stories.map((s) => s.story.id)
-  const [counts, edges] = await Promise.all([
-    sourceCounts(db, ids),
-    db
-      .select()
-      .from(schema.storyRelationship)
-      .where(
-        and(
-          isNull(schema.storyRelationship.supersededAt),
-          inArray(schema.storyRelationship.fromStoryId, ids),
-          inArray(schema.storyRelationship.toStoryId, ids),
-        ),
-      ),
-  ])
+  const [counts, edges] = await Promise.all([sourceCounts(db, ids), edgesWithin(db, ids)])
   return {
     id: narrative.id,
     slug: narrative.slug,

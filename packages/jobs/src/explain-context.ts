@@ -5,7 +5,7 @@ import type { AnalysisJob } from '@dn/server'
 import { eq } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
-import { withAnalysisRun } from './provenance.ts'
+import { lockCurrentSummary, runStoryGeneration } from './provenance.ts'
 
 type Entry = StoryContextOutput['entries'][number]
 
@@ -47,30 +47,18 @@ export async function explainStoryContext(ctx: WorkerContext, job: AnalysisJob) 
   const input = await loadStoryInput(ctx.db, row.story.id)
   if (!input) return { status: 'stale' }
 
-  const { runId, result } = await withAnalysisRun(
-    ctx.db,
-    {
-      operation: 'story_context',
-      targetType: 'story',
-      targetId: row.story.id,
-      inputFingerprint: job.inputFingerprint,
-      modelId: ctx.inference.generation.modelId,
-    },
-    () =>
-      ctx.gpu.generation.run(job.priorityClass, () =>
-        ctx.inference.generation.explainContext({ story: input, summary: row.summary }),
-      ),
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
+    { operation: 'story_context', storyId: row.story.id, inputFingerprint: job.inputFingerprint },
+    () => ctx.inference.generation.explainContext({ story: input, summary: row.summary }),
   )
   const observationIds = new Set(input.articles.map((a) => a.observationId))
   const entries = validContextEntries(result.output.entries, row.summary, observationIds)
 
   return withTransaction(ctx.pool, async (tx) => {
-    const [current] = await tx.db
-      .select({ summaryId: schema.story.currentSummaryId })
-      .from(schema.story)
-      .where(eq(schema.story.id, row.story.id))
-      .for('update')
-    if (current?.summaryId !== job.inputFingerprint) return { status: 'stale' }
+    if (!(await lockCurrentSummary(tx.db, row.story.id, job.inputFingerprint)))
+      return { status: 'stale' }
     // Context is derived per summary: replace this Story's links.
     await tx.db.delete(schema.storyContext).where(eq(schema.storyContext.storyId, row.story.id))
     let created = 0

@@ -10,6 +10,7 @@ import {
 import {
   analysisJob,
   createUserAccount,
+  ENRICHMENT_QUEUES,
   getOpsStatus,
   QUEUES,
   rebuildSearchIndex,
@@ -51,9 +52,6 @@ function parseRole(role: string): UserRole {
   if (role !== 'admin' && role !== 'user') throw new Error('--role must be admin or user')
   return role
 }
-
-// Everything keyed on a Story's current summary version.
-const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
 
 const ctx = await bootWorkerContext()
 try {

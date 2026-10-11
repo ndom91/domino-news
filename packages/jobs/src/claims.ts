@@ -5,7 +5,7 @@ import type { AnalysisJob } from '@dn/server'
 import { and, eq, isNull } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { type LoadedArticle, loadStoryInput } from './inputs.ts'
-import { withAnalysisRun } from './provenance.ts'
+import { lockCurrentSummary, runStoryGeneration } from './provenance.ts'
 
 type Claim = ClaimsOutput['claims'][number]
 
@@ -50,19 +50,11 @@ export async function extractStoryClaims(ctx: WorkerContext, job: AnalysisJob) {
     )
     .where(eq(schema.storySourceReference.storyId, story.id))
 
-  const { runId, result } = await withAnalysisRun(
-    ctx.db,
-    {
-      operation: 'story_claims',
-      targetType: 'story',
-      targetId: story.id,
-      inputFingerprint: job.inputFingerprint,
-      modelId: ctx.inference.generation.modelId,
-    },
-    () =>
-      ctx.gpu.generation.run(job.priorityClass, () =>
-        ctx.inference.generation.extractClaims({ story: input, primarySources: primary }),
-      ),
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
+    { operation: 'story_claims', storyId: story.id, inputFingerprint: job.inputFingerprint },
+    () => ctx.inference.generation.extractClaims({ story: input, primarySources: primary }),
   )
   const articles = new Map((input.articles as LoadedArticle[]).map((a) => [a.articleId, a]))
   const claims = validClaims(
@@ -72,12 +64,8 @@ export async function extractStoryClaims(ctx: WorkerContext, job: AnalysisJob) {
   )
 
   return withTransaction(ctx.pool, async (tx) => {
-    const [current] = await tx.db
-      .select({ summaryId: schema.story.currentSummaryId })
-      .from(schema.story)
-      .where(eq(schema.story.id, story.id))
-      .for('update')
-    if (current?.summaryId !== job.inputFingerprint) return { status: 'stale' }
+    if (!(await lockCurrentSummary(tx.db, story.id, job.inputFingerprint)))
+      return { status: 'stale' }
 
     await tx.db
       .update(schema.claim)

@@ -138,51 +138,57 @@ export async function listPublishers(db: Db): Promise<PublisherListResponse> {
 }
 
 export async function getPublisher(db: Db, slug: string): Promise<PublisherDetail | null> {
-  const [stats] = await statsRows(db, slug)
-  if (!stats) return null
-  const [publisher] = await db
-    .select()
-    .from(schema.publisher)
-    .where(eq(schema.publisher.slug, slug))
-  if (!publisher) return null
+  const [[stats], [publisher]] = await Promise.all([
+    statsRows(db, slug),
+    db.select().from(schema.publisher).where(eq(schema.publisher.slug, slug)),
+  ])
+  if (!stats || !publisher) return null
 
-  const { rows: recent } = await db.execute<{ id: string }>(sql`
-    select s.id from story s
-    where s.published_at is not null and exists (
-      select 1 from story_article sa join article a on a.id = sa.article_id
-      where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisher.id}
-    )
-    order by s.last_updated_at desc
-    limit 20`)
-  const { rows: shared } = await db.execute<{
-    id: string
-    slug: string
-    name: string
-    domain: string
-    shared: number
-  }>(sql`
-    with ${LINKS}
-    select p.id, p.slug, p.name, p.domain, count(distinct l1.story_id)::int as shared
-    from links l1
-    join links l2 on l2.story_id = l1.story_id and l2.publisher_id <> l1.publisher_id
-    join publisher p on p.id = l2.publisher_id
-    where l1.publisher_id = ${publisher.id}
-    group by p.id
-    order by shared desc, p.name
-    limit 8`)
+  const [recentStories, shared, profile, assessment] = await Promise.all([
+    db
+      .execute<{ id: string }>(sql`
+        select s.id from story s
+        where s.published_at is not null and exists (
+          select 1 from story_article sa join article a on a.id = sa.article_id
+          where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisher.id}
+        )
+        order by s.last_updated_at desc
+        limit 20`)
+      .then(({ rows }) =>
+        storyListItems(
+          db,
+          rows.map((r) => r.id),
+        ),
+      ),
+    db.execute<{
+      id: string
+      slug: string
+      name: string
+      domain: string
+      shared: number
+    }>(sql`
+      with ${LINKS}
+      select p.id, p.slug, p.name, p.domain, count(distinct l1.story_id)::int as shared
+      from links l1
+      join links l2 on l2.story_id = l1.story_id and l2.publisher_id <> l1.publisher_id
+      join publisher p on p.id = l2.publisher_id
+      where l1.publisher_id = ${publisher.id}
+      group by p.id
+      order by shared desc, p.name
+      limit 8`),
+    coverageProfile(db, publisher.id),
+    latestAssessment(db, publisher.id),
+  ])
 
   return {
     ...stats,
-    profile: await coverageProfile(db, publisher.id),
-    assessment: await latestAssessment(db, publisher.id),
+    profile,
+    assessment,
     languages: publisher.languages,
     policyNote: publisher.policyNote,
     policyReviewedAt: publisher.policyReviewedAt?.toISOString() ?? null,
-    recentStories: await storyListItems(
-      db,
-      recent.map((r) => r.id),
-    ),
-    coCoverage: shared.map(({ shared: sharedStories, ...ref }) => ({
+    recentStories,
+    coCoverage: shared.rows.map(({ shared: sharedStories, ...ref }) => ({
       publisher: ref,
       sharedStories,
     })),

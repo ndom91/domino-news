@@ -1,7 +1,8 @@
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
-import { PIPELINE_VERSION } from '@dn/server'
+import { type AnalysisJob, PIPELINE_VERSION } from '@dn/server'
 import { eq } from 'drizzle-orm'
+import type { WorkerContext } from './context.ts'
 
 /** Records an AnalysisRun around an inference call; failures are kept for inspection. */
 export async function withAnalysisRun<T extends { modelId: string; promptVersion: string }>(
@@ -47,4 +48,34 @@ export async function withAnalysisRun<T extends { modelId: string; promptVersion
       .where(eq(schema.analysisRun.id, runId))
     throw error
   }
+}
+
+/** A generation call about one Story: queued on the GPU at the job's priority and recorded. */
+export function runStoryGeneration<T extends { modelId: string; promptVersion: string }>(
+  ctx: WorkerContext,
+  job: AnalysisJob,
+  run: { operation: string; storyId: string; inputFingerprint: string },
+  fn: () => Promise<T>,
+) {
+  return withAnalysisRun(
+    ctx.db,
+    {
+      operation: run.operation,
+      targetType: 'story',
+      targetId: run.storyId,
+      inputFingerprint: run.inputFingerprint,
+      modelId: ctx.inference.generation.modelId,
+    },
+    () => ctx.gpu.generation.run(job.priorityClass, fn),
+  )
+}
+
+/** Locks the Story row (call inside a transaction): is `summaryId` still its current summary? */
+export async function lockCurrentSummary(db: Db, storyId: string, summaryId: string) {
+  const [current] = await db
+    .select({ summaryId: schema.story.currentSummaryId })
+    .from(schema.story)
+    .where(eq(schema.story.id, storyId))
+    .for('update')
+  return current?.summaryId === summaryId
 }
