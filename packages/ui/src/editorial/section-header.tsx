@@ -41,7 +41,7 @@ export function SectionHeader({
 /** Small uppercase label over an accent rule, used to open page sections. */
 export function SectionLabel({ children, id }: { children: ReactNode; id?: string }) {
   return (
-    <h2 id={id} className="mb-4 border-b-2 border-accent pb-2 type-label">
+    <h2 id={id} className="mb-4 border-b-4 border-accent pb-2 type-label">
       {children}
     </h2>
   )
