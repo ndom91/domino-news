@@ -767,6 +767,13 @@ describe('publisher coverage', () => {
 
 describe('front page and citation numbers', () => {
   it('serves the front page', async () => {
+    // The stats strip counts the last 24 hours; fixture articles are dated days ago, so
+    // move one linked article to now to keep this independent of the wall clock.
+    await h.ctx.pool.query(
+      `update article set published_at = now() where id = (
+         select sa.article_id from story_article sa join story s on s.id = sa.story_id
+         where sa.removed_at is null and s.published_at is not null limit 1)`,
+    )
     const front = frontPageSchema.parse(await (await call('/api/v1/front')).json())
     expect(front.lead).not.toBeNull()
     expect(front.stats.stories).toBeGreaterThan(0)
