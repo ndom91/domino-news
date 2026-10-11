@@ -42,6 +42,9 @@
   --dn-accent-text: #c7330b; /* orange when it must be read as text: citation markers (4.8:1) */
   --dn-accent-contrast: #121212; /* text on an --dn-accent fill (5.7:1) */
   --dn-focus-ring: #c7330b;
+  /* Marble illustration on the sign-in page, with --dn-accent. Decoration only, never a key. */
+  --dn-marble-amber: #ffb81c;
+  --dn-marble-cream: #ffe9dc;
 
   /* ── Status (real states only) ────────────────────────── */
   --dn-success: #1f7a3e;

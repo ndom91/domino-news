@@ -20,3 +20,22 @@ export function UserAvatar({
     </span>
   )
 }
+
+const MARBLE_COLORS = ['var(--dn-marble-cream)', 'var(--dn-accent)', 'var(--dn-marble-amber)']
+
+/** Large decorative marble that fills its box (cropped, never stretched). */
+export function Marble({ seed, className }: { seed: string; className?: string }) {
+  return (
+    <span aria-hidden className={cx('block overflow-hidden', className)}>
+      <BoringAvatar
+        name={seed}
+        variant="marble"
+        square
+        colors={MARBLE_COLORS}
+        title={false}
+        preserveAspectRatio="xMidYMid slice"
+        style={{ width: '100%', height: '100%' }}
+      />
+    </span>
+  )
+}
