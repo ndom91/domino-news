@@ -121,21 +121,25 @@ function FeedPage() {
           <div className="mx-auto max-w-page px-gutter pt-2 pb-15">
             <SectionHeader
               title="Developing"
-              meta="Stories linked over time"
+              meta={
+                <Link to="/narratives" className="link-inline font-semibold text-band-text">
+                  {front.narrativeCount > front.developing.length
+                    ? 'View more narratives'
+                    : 'View all narratives'}
+                </Link>
+              }
               id="developing-heading"
               muted="text-band-muted"
             />
+            <p className="mb-8 max-w-reading text-base text-band-muted">
+              Narratives still unfolding: stories that follow on from, respond to or branch off one
+              another. Each column traces one narrative from its first report to its latest story.
+            </p>
             <div className="grid grid-cols-3 gap-8 max-lg:grid-cols-2 max-md:grid-cols-1">
               {front.developing.map((n, i) => (
                 <NarrativeColumn key={n.id} narrative={n} position={i} Link={RouterLink} />
               ))}
             </div>
-            <Link
-              to="/narratives"
-              className="mt-7 inline-flex min-h-tap items-center link-inline text-base font-bold"
-            >
-              All {plural(front.narrativeCount, 'narrative')}
-            </Link>
           </div>
         </section>
       ) : null}
