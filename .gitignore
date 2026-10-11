@@ -8,7 +8,6 @@ dist
 *.tsbuildinfo
 .env
 .env.local
-backup.env
 backups/
 infra/compose/certs/*.pem
 playwright-report

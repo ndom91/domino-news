@@ -18,7 +18,7 @@ Usage: scripts/deploy.sh <command>
   status             Container state and pipeline status
   logs [service]     Follow logs (all services, or one: web, worker, indexer, ...)
   cli <args...>      Run any CLI command (see AGENTS.md) inside the worker image
-  backup             Dump Postgres to backups/, prune old dumps, push offsite with restic if configured
+  backup             Dump Postgres to backups/ on the host and prune old dumps
   restore <file>     Restore a dump (asks first; takes a safety dump), then rebuild search
   down               Stop containers (data volumes are kept)
 EOF
@@ -27,14 +27,7 @@ EOF
 # Backups. Typesense is not backed up: it's rebuilt from Postgres (`cli search:rebuild`).
 BACKUP_DIR=backups
 BACKUP_KEEP_DAYS=${BACKUP_KEEP_DAYS:-14}
-# Optional offsite copy: put RESTIC_REPOSITORY and RESTIC_PASSWORD_FILE (or RESTIC_PASSWORD)
-# in backup.env, plus any backend credentials (e.g. AWS_ACCESS_KEY_ID for S3 or B2).
-if [[ -f backup.env ]]; then
-  set -a
-  # shellcheck disable=SC1091
-  source backup.env
-  set +a
-fi
+# Dumps land in backups/ on the host; copying them offsite is up to the operator.
 
 pg() { compose exec -T postgres "$@"; }
 
@@ -51,13 +44,6 @@ backup() {
   mv "$file.tmp" "$file"
   echo "backup: $file ($(du -h "$file" | cut -f1))"
   find "$BACKUP_DIR" -name 'dn-*.dump' -mtime +"$BACKUP_KEEP_DAYS" -delete
-
-  if [[ -n "${RESTIC_REPOSITORY:-}" ]]; then
-    command -v restic > /dev/null || { echo "restic is not installed" >&2; exit 1; }
-    restic cat config > /dev/null 2>&1 || restic init
-    restic backup --tag domino-news "$file"
-    restic forget --tag domino-news --keep-daily 7 --keep-weekly 4 --keep-monthly 6 --prune
-  fi
 }
 
 restore() {

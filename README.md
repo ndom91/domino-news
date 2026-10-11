@@ -65,7 +65,7 @@ scripts/deploy.sh restore backups/dn-<time>.dump # asks first, takes a safety du
 
 - `backup` uses `pg_dump`, which is consistent while Postgres runs. Copying the data directory is not.
 - Typesense isn't backed up: `restore` rebuilds it from Postgres.
-- **Offsite:** copy `backup.env.example` to `backup.env` and set a restic repository (SFTP or S3-compatible). Each backup is then also pushed there, encrypted, keeping 7 daily, 4 weekly and 6 monthly copies. Install `restic` on the host.
+- Dumps are written to `backups/` in the repo on the host. **Copying them offsite is up to you** (rsync, restic, your provider's snapshots…): a backup that only lives on the same machine doesn't survive losing it.
 - **Also keep `.env` somewhere safe** (e.g. a password manager): restored data needs the same `BETTER_AUTH_SECRET`.
 
 Nightly at 03:15, with a log:
