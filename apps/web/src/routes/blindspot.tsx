@@ -66,7 +66,7 @@ function InsightSections({ data }: { data: Insights }) {
     <div className="flex flex-col gap-12">
       {data.missedDevelopments.length > 0 ? (
         <section aria-labelledby="missed-heading" className="flex flex-col gap-8">
-          <PeriodBar position={0} id="missed-heading" title="Since you last read" />
+          <PeriodBar id="missed-heading" title="Since you last read" />
           {data.missedDevelopments.map((m) => (
             <div key={m.narrative.id}>
               <Link
@@ -91,7 +91,7 @@ function InsightSections({ data }: { data: Insights }) {
 
       {data.gaps.length > 0 ? (
         <section aria-labelledby="gaps-heading" className="flex flex-col gap-6">
-          <PeriodBar position={1} id="gaps-heading" title="You rarely read" />
+          <PeriodBar id="gaps-heading" title="You rarely read" />
           <ul className="grid gap-6 md:grid-cols-3">
             {data.gaps.map((g) => (
               <li key={`${g.kind}-${g.key}`} className="border-t-2 border-rule pt-3">

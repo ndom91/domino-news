@@ -1,31 +1,32 @@
 import type { ReactNode } from 'react'
 import { cx } from '../cx.ts'
-import { positionKey } from './desk-key.ts'
-import { barClass } from './story-bar.tsx'
 
 /**
- * Section heading in the story-bar style (a solid key-colour band). Coloured by position,
- * not desk, so neighbouring sections differ and the colour carries no meaning.
+ * Heading for a period or group inside a section (Today, Yesterday, This week): a smaller
+ * LATEST over a heavy ink rule. Deliberately uncoloured, so it never reads as a desk bar.
  */
 export function PeriodBar({
   title,
   meta,
-  position,
   id,
   className,
 }: {
   title: ReactNode
   meta?: ReactNode
-  position: number
   id?: string
   className?: string
 }) {
   return (
-    <div className={cx(positionKey(position), barClass, className)}>
-      <h2 id={id} className="min-w-0 truncate">
+    <div
+      className={cx(
+        'flex items-baseline justify-between gap-4 border-b-4 border-rule pb-2',
+        className,
+      )}
+    >
+      <h2 id={id} className="min-w-0 type-period">
         {title}
       </h2>
-      {meta ? <span className="flex-none font-semibold">{meta}</span> : null}
+      {meta ? <span className="flex-none text-label text-text-muted">{meta}</span> : null}
     </div>
   )
 }

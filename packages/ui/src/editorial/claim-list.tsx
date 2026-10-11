@@ -38,7 +38,7 @@ export function ClaimList({
         const carrying = publishers(claim.mentions.filter((m) => m.stance !== 'denies'))
         const disputing = publishers(claim.mentions.filter((m) => m.stance === 'denies'))
         return (
-          <li key={claim.id} className="border-t border-border pt-3">
+          <li key={claim.id} className="border-t border-border pt-3 first:border-t-0 first:pt-0">
             <p className="text-md font-semibold leading-snug text-text">{claim.proposition}</p>
             <p className="mt-1.5 flex min-w-0 items-baseline gap-x-2 text-label text-text-muted">
               {claim.firstReportedAt ? (

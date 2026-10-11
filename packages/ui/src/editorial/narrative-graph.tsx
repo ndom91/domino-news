@@ -40,7 +40,7 @@ export function NarrativeGraph({
   return (
     <ol
       aria-label={`${plural(narrative.stories.length, 'story', 'stories')}, oldest first`}
-      className={cx(deskKey(narrative.desk), 'flex flex-col border-t-2 border-rule')}
+      className={cx(deskKey(narrative.desk), 'flex flex-col')}
       // Desk colour for the line and markers; without a desk the neutral key nearly vanishes
       // on the dark canvas, so use the strong border colour instead.
       style={

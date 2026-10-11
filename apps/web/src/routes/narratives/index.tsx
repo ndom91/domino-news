@@ -53,7 +53,6 @@ function NarrativesPage() {
             <details key={g.period} open={i === 0} className="t-acc">
               <summary className="cursor-pointer list-none [&::-webkit-details-marker]:hidden">
                 <PeriodBar
-                  position={i}
                   title={
                     <>
                       <span aria-hidden className="t-acc-chevron mr-2">

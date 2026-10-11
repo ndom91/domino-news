@@ -18,7 +18,7 @@ export function SourceList({
     (a.publishedAt ?? a.observedAt).localeCompare(b.publishedAt ?? b.observedAt),
   )
   return (
-    <ol className="flex flex-col border-t-2 border-rule">
+    <ol className="flex flex-col">
       {ordered.map((s) => (
         <li
           key={s.articleId}

@@ -44,7 +44,9 @@ function NarrativePage() {
             ? ` · ${formatDate(first.firstObservedAt)} to ${formatDate(last.firstObservedAt)}`
             : ''}
         </p>
-        <NarrativeGraph narrative={narrative} Link={RouterLink} />
+        <div className="border-t-2 border-rule">
+          <NarrativeGraph narrative={narrative} Link={RouterLink} />
+        </div>
         <p className="mt-8 max-w-reading text-xs text-text-muted">
           Links between stories are proposed by a language model from the stories' summaries and
           checked for consistent ordering.

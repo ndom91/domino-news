@@ -80,6 +80,7 @@
   --text-headline: var(--dn-text-headline);
   --text-headline-lg: var(--dn-text-headline-lg);
   --text-section: var(--dn-text-section);
+  --text-period: var(--dn-text-period);
   --text-masthead: var(--dn-text-masthead);
   --text-display: var(--dn-text-display);
 
@@ -171,6 +172,14 @@
   font-stretch: var(--dn-width-masthead);
   font-weight: var(--dn-weight-black);
   font-size: var(--dn-text-section);
+  line-height: 1;
+  letter-spacing: var(--dn-tracking-headline);
+  text-transform: uppercase;
+}
+@utility type-period {
+  font-stretch: var(--dn-width-masthead);
+  font-weight: var(--dn-weight-black);
+  font-size: var(--dn-text-period);
   line-height: 1;
   letter-spacing: var(--dn-tracking-headline);
   text-transform: uppercase;

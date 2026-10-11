@@ -102,6 +102,7 @@
   --dn-text-headline: 2rem; /* 32 — story headline */
   --dn-text-headline-lg: clamp(2rem, 3.2vw, 2.875rem); /* 46 — wide-story headline */
   --dn-text-section: clamp(1.75rem, 2.8vw, 2.5rem); /* 40 — LATEST / DEVELOPING, narrative titles */
+  --dn-text-period: clamp(1.5rem, 2vw, 1.75rem); /* 28 — day and period headings under a section */
   --dn-text-masthead: clamp(2.75rem, 5.3vw, 4.75rem); /* 76 */
   --dn-text-display: clamp(3.25rem, 7.8vw, 7rem); /* 112 — hero headline */
   --dn-text-display-md: clamp(
