@@ -51,3 +51,8 @@ export function hostnameOf(input: string): string | null {
     return null
   }
 }
+
+/** Our cached copy of a publisher's logo (served by the API, 404 when there is none). */
+export function logoUrl(slug: string): string {
+  return `/api/v1/logos/${encodeURIComponent(slug)}.webp`
+}

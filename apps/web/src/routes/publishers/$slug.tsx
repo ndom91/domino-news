@@ -28,6 +28,7 @@ import {
   Meter,
   MixBars,
   Notice,
+  PublisherLogo,
   SectionLabel,
   Select,
   StoryItem,
@@ -63,24 +64,30 @@ function PublisherPage() {
     <Page>
       <div className="grid gap-x-14 gap-y-12 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
-          <p className="type-label text-text-muted">Publisher</p>
-          <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
-            <h1 className="type-headline-lg">{p.name}</h1>
-            <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
+          {/* The logo spans the label, name and meta lines; it hides itself if there's none. */}
+          <div className="flex items-start gap-5">
+            <PublisherLogo slug={p.slug} size={88} />
+            <div className="min-w-0 flex-1">
+              <p className="type-label text-text-muted">Publisher</p>
+              <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
+                <h1 className="type-headline-lg">{p.name}</h1>
+                <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
+              </div>
+              <p className="mt-2 type-meta">
+                <a
+                  href={`https://${p.domain}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="underline underline-offset-3 hover:text-text"
+                >
+                  {p.domain} ↗
+                </a>
+                {p.countryCode ? ` · ${p.countryCode}` : ''}
+                {p.kind === 'official' ? ' · Official source' : ''}
+                {p.languages.length ? ` · ${p.languages.join(', ')}` : ''}
+              </p>
+            </div>
           </div>
-          <p className="mt-2 type-meta">
-            <a
-              href={`https://${p.domain}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline underline-offset-3 hover:text-text"
-            >
-              {p.domain} ↗
-            </a>
-            {p.countryCode ? ` · ${p.countryCode}` : ''}
-            {p.kind === 'official' ? ' · Official source' : ''}
-            {p.languages.length ? ` · ${p.languages.join(', ')}` : ''}
-          </p>
 
           <dl className="mt-8 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-3">
             {[

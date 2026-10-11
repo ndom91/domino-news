@@ -1,5 +1,10 @@
 import { createQueues, PriorityLimiter, type WorkerContext } from '@dn/jobs'
-import { createServerContext, resetIngestedData, type Typesense } from '@dn/server'
+import {
+  createLogoSource,
+  createServerContext,
+  resetIngestedData,
+  type Typesense,
+} from '@dn/server'
 import { PgBoss } from 'pg-boss'
 
 /** In-memory stand-in for Typesense: enough for upserts, deletes and vector lookups. */
@@ -103,6 +108,8 @@ export async function createTestContext() {
     // Fixture stories are mostly single-outlet; tests opt in to the publish threshold.
     config: { ...base.config, minPublishOutlets: 1 },
     ts,
+    // Never call logo.dev from tests, even if the shell has a key.
+    logos: createLogoSource({ apiKey: undefined }),
     boss: async () => workerBoss,
     workerBoss,
     gpu: { embeddings: new PriorityLimiter(2), generation: new PriorityLimiter(2) },

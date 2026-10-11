@@ -23,7 +23,7 @@ import { getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
-import { getPublisher, listPublishers } from '../publishers.ts'
+import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
@@ -103,6 +103,8 @@ interface Route {
   method: 'GET' | 'POST'
   pattern: URLPattern
   adminOnly: boolean
+  /** No session needed (and none read), so shared caches can store the response. */
+  public: boolean
   handler: (args: {
     ctx: ServerContext
     request: Request
@@ -116,17 +118,38 @@ const route = (
   method: Route['method'],
   pathname: string,
   handler: Route['handler'],
-  { adminOnly = false } = {},
+  { adminOnly = false, public: isPublic = false } = {},
 ): Route => ({
   method,
   pattern: new URLPattern({ pathname }),
   adminOnly,
+  public: isPublic,
   handler,
 })
+
+// Logos rarely change, so browsers and Cloudflare may keep them for a year (see logos.ts).
+const LOGO_CACHE = 'public, max-age=31536000, immutable'
+const NO_LOGO_CACHE = 'public, max-age=86400'
 
 const frontQuery = z.object({ region: regionSchema.optional() })
 
 const routes: Route[] = [
+  // Public: keyed by our publisher slug, never a domain, so it can't be used as a general
+  // logo service. Unknown slugs never reach logo.dev.
+  route(
+    'GET',
+    '/api/v1/logos/:slug.webp',
+    async ({ ctx, params }) => {
+      const domain = await publisherDomainBySlug(ctx.db, params.slug ?? '')
+      const logo = domain ? await ctx.logos.get(domain) : null
+      if (!logo)
+        return new Response(null, { status: 404, headers: { 'cache-control': NO_LOGO_CACHE } })
+      return new Response(logo.bytes, {
+        headers: { 'content-type': logo.contentType, 'cache-control': LOGO_CACHE },
+      })
+    },
+    { public: true },
+  ),
   route('GET', '/api/v1/front', async ({ ctx, url, userId }) => {
     const { region } = frontQuery.parse(Object.fromEntries(url.searchParams))
     const { regions } = await getPreferences(ctx.db, userId)
@@ -244,7 +267,8 @@ const routes: Route[] = [
 
 /**
  * Versioned JSON API, independent of TanStack Start so it can be mounted anywhere and
- * exercised directly in contract tests. Every route requires a session (cookie or bearer).
+ * exercised directly in contract tests. Every route requires a session (cookie or bearer),
+ * except the few marked public.
  */
 export async function handleApiRequest(ctx: ServerContext, request: Request): Promise<Response> {
   try {
@@ -254,12 +278,14 @@ export async function handleApiRequest(ctx: ServerContext, request: Request): Pr
     const match = candidates.find((r) => r.method === request.method)
     if (!match) throw new HttpError('bad_request', `method ${request.method} not allowed`)
 
+    const params = match.pattern.exec({ pathname: url.pathname })?.pathname.groups ?? {}
+    if (match.public) return await match.handler({ ctx, request, url, params, userId: '' })
+
     const session = await ctx.auth.api.getSession({ headers: request.headers })
     if (!session) throw new HttpError('unauthorized', 'sign in required')
     if (match.adminOnly && session.user.role !== 'admin')
       throw new HttpError('forbidden', 'admin only')
 
-    const params = match.pattern.exec({ pathname: url.pathname })?.pathname.groups ?? {}
     return await match.handler({ ctx, request, url, params, userId: session.user.id })
   } catch (error) {
     return errorResponse(error)

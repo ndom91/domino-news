@@ -77,6 +77,14 @@ GOOGLE_CLIENT_SECRET=...
 
 Create an OAuth client (type "Web application") in Google Cloud and add `${BETTER_AUTH_URL}/api/auth/callback/google` as an authorised redirect URI. The login page shows the Google button only when both client values are set. Any Google account can sign up. It does not link to existing `user:create` accounts.
 
+### Publisher logos (optional)
+
+```bash
+LOGO_DEV_API_KEY=sk_...   # logo.dev secret key
+```
+
+The web server fetches each publisher's logo once through the logo.dev API, keeps it in memory, and serves it at `/api/v1/logos/<slug>.webp` without a session. It's cached for a year in browsers and at Cloudflare. logo.dev's fair use forbids proxying its CDN (`img.logo.dev`), so only the API is used. Without the key, publishers show no logo.
+
 ### Live RSS
 
 `INGEST_MODE=live` polls the real feeds in `fixtures/publishers.json` on `FEED_POLL_CRON` (default every 15 minutes), or once with `pnpm cli ingest`. Conditional requests (ETag / Last-Modified) avoid refetching unchanged feeds.
@@ -214,7 +222,7 @@ Follow these for any UI work in `apps/web` and `packages/ui`. They come from the
 
 ## API
 
-All routes require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`). Passkeys are managed through better-auth's own `/api/auth/passkey/*` endpoints (web: `/account`).
+All routes except the logo route require a session: the cookie from the web app, or `Authorization: Bearer <token>` from `POST /api/auth/sign-in/username` (response header `set-auth-token`). Passkeys are managed through better-auth's own `/api/auth/passkey/*` endpoints (web: `/account`).
 
 ```text
 GET  /api/v1/front?region=                # lead (prefers the reader's regions), stats, developing narratives
@@ -226,6 +234,7 @@ GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=&region=
 GET  /api/v1/publishers                  # publisher stats + who-covered-what matrix
 GET  /api/v1/publishers/:slug            # stats, source-use policy, coverage profile, assessment, co-coverage
+GET  /api/v1/logos/:slug.webp         # public (no session): publisher logo, 404 when none
 GET  /api/v1/publishers/:slug/evidence   # admin: imported, unreviewed evidence
 POST /api/v1/publishers/:slug/assessment # admin: publish a reviewed assessment (new version)
 GET  /api/v1/ops/status                  # admin only

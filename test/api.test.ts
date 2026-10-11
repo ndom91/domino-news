@@ -86,6 +86,15 @@ describe('/api/v1 contracts', () => {
     }
   })
 
+  it('serves logos without a session, cached publicly', async () => {
+    // Tests run without a logo.dev key, so a known publisher has no logo either.
+    for (const slug of ['nytimes', 'no-such-publisher']) {
+      const res = await call(`/api/v1/logos/${slug}.webp`, {}, false)
+      expect(res.status, slug).toBe(404)
+      expect(res.headers.get('cache-control')).toBe('public, max-age=86400')
+    }
+  })
+
   it('lists stories and fetches one by slug', async () => {
     const res = await call('/api/v1/stories?limit=5')
     expect(res.status).toBe(200)
@@ -979,9 +988,9 @@ describe('assessments:publish', () => {
       password: 'notadmin-password',
       role: 'user',
     })
-    await expect(
-      publishAssessments(ctx, { username: 'notadmin', dryRun: true }),
-    ).rejects.toThrow(/not an admin/)
+    await expect(publishAssessments(ctx, { username: 'notadmin', dryRun: true })).rejects.toThrow(
+      /not an admin/,
+    )
 
     const dry = await publishAssessments(ctx, { username: 'contract', dryRun: true })
     expect(dry.published).toBeGreaterThan(0)

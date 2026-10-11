@@ -147,6 +147,14 @@ export async function listPublishers(db: Db): Promise<PublisherListResponse> {
   return { items, matrix: await coverageMatrix(db, refs) }
 }
 
+export async function publisherDomainBySlug(db: Db, slug: string): Promise<string | null> {
+  const [p] = await db
+    .select({ domain: schema.publisher.domain })
+    .from(schema.publisher)
+    .where(eq(schema.publisher.slug, slug))
+  return p?.domain ?? null
+}
+
 export async function getPublisher(db: Db, slug: string): Promise<PublisherDetail | null> {
   const [[stats], [publisher]] = await Promise.all([
     statsRows(db, slug),

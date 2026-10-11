@@ -4,6 +4,7 @@ import type pg from 'pg'
 import { PgBoss } from 'pg-boss'
 import { type Auth, createAuth } from './auth.ts'
 import { type Config, readConfig } from './config.ts'
+import { createLogoSource, type LogoSource } from './logos.ts'
 import { createTypesense, type Typesense } from './search/typesense.ts'
 
 export interface ServerContext {
@@ -13,6 +14,8 @@ export interface ServerContext {
   ts: Typesense
   inference: InferenceProviders
   auth: Auth
+  /** Publisher logos, cached in memory for the life of the process. */
+  logos: LogoSource
   /** Producer-only pg-boss handle (no workers, no maintenance). */
   boss: () => Promise<PgBoss>
 }
@@ -29,6 +32,7 @@ export function createServerContext(env = process.env): ServerContext {
     ts: createTypesense(config.typesenseUrl, config.typesenseApiKey),
     inference: createInferenceFromEnv(env),
     auth: createAuth(db, env),
+    logos: createLogoSource({ apiKey: config.logoDevApiKey }),
     boss: () => {
       bossPromise ??= (async () => {
         const boss = new PgBoss({

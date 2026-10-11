@@ -7,7 +7,15 @@ import {
   REGIONS,
   type Region,
 } from '@dn/schemas'
-import { CoverageMatrix, Notice, positionKey, SectionLabel, Select, Timestamp } from '@dn/ui'
+import {
+  CoverageMatrix,
+  Notice,
+  PublisherLogo,
+  positionKey,
+  SectionLabel,
+  Select,
+  Timestamp,
+} from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
@@ -187,23 +195,28 @@ function PublisherCard({ publisher: p }: { publisher: PublisherStats }) {
       params={{ slug: p.slug }}
       className="group flex h-full flex-col border-t-4 border-key pt-3"
     >
-      <span className="flex items-baseline justify-between gap-3">
-        <span className="text-md font-bold leading-snug group-hover:underline underline-offset-4">
-          {p.name}
+      <span className="flex items-start gap-3">
+        <PublisherLogo slug={p.slug} size={52} />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="flex items-baseline justify-between gap-3">
+            <span className="text-md font-bold leading-snug group-hover:underline underline-offset-4">
+              {p.name}
+            </span>
+            {p.countryCode ? <span className="flex-none type-meta">{p.countryCode}</span> : null}
+          </span>
+          <span className="truncate type-meta">
+            {p.domain}
+            {p.kind === 'official' ? ' · Official source' : ''}
+          </span>
+          {p.kind === 'newsroom' ? (
+            <span className="mt-1 type-meta">
+              {p.lean
+                ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}`
+                : 'Lean not assessed'}
+            </span>
+          ) : null}
         </span>
-        {p.countryCode ? <span className="flex-none type-meta">{p.countryCode}</span> : null}
       </span>
-      <span className="truncate type-meta">
-        {p.domain}
-        {p.kind === 'official' ? ' · Official source' : ''}
-      </span>
-      {p.kind === 'newsroom' ? (
-        <span className="mt-1 type-meta">
-          {p.lean
-            ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}`
-            : 'Lean not assessed'}
-        </span>
-      ) : null}
       <span className="mt-4 grid grid-cols-2 gap-3">
         <span>
           <span className="block type-numeral">{p.storiesCovered}</span>
