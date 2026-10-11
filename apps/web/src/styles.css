@@ -7,7 +7,17 @@
 /*
  * Theme switch (see switchTheme): the new theme grows as a circle from the control that was
  * used, while the old view dims slightly underneath. switchTheme skips it under reduced motion.
+ *
+ * The circle is a radial-gradient mask driven by a registered property, not an animated
+ * clip-path: Chromium on Android ran the clip-path version (composited clip-path animation)
+ * with a visible slow-down partway through.
  */
+@property --theme-reveal-r {
+  syntax: "<length>";
+  inherits: false;
+  initial-value: 0px;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation-duration: var(--dn-duration-reveal);
@@ -24,6 +34,16 @@
   animation-name: theme-reveal;
 }
 
+/* Not during the For You reflow (below): its root doesn't animate, so r would stay 0. */
+html:not(.vt-feed)::view-transition-new(root) {
+  /* 1px soft edge so the circle isn't jagged. */
+  mask-image: radial-gradient(
+    circle at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh),
+    #000 var(--theme-reveal-r),
+    transparent calc(var(--theme-reveal-r) + 1px)
+  );
+}
+
 @keyframes theme-reveal-fade {
   to {
     opacity: 0.72;
@@ -32,12 +52,10 @@
 
 @keyframes theme-reveal {
   from {
-    clip-path: circle(0 at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh));
+    --theme-reveal-r: 0px;
   }
   to {
-    clip-path: circle(
-      var(--theme-reveal-radius, 150vmax) at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh)
-    );
+    --theme-reveal-r: var(--theme-reveal-radius, 150vmax);
   }
 }
 
