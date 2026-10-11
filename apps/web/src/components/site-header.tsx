@@ -94,7 +94,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         <button
           type="button"
           aria-label={`Account menu for ${user.username ?? user.name}`}
-          className="inline-flex size-tap flex-none items-end justify-end"
+          className="inline-flex size-tap flex-none items-center justify-end"
         >
           <UserAvatar name={user.email || user.name} />
         </button>
