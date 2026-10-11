@@ -728,5 +728,237 @@
         "title": "All news"
       }
     ]
+  },
+  {
+    "slug": "cbsnews",
+    "name": "CBS News",
+    "domain": "cbsnews.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot from /, including the feed path; ClaudeBot, anthropic-ai, CCBot and Google-Extended are not named. Paramount terms limit content to personal, non-commercial use and bar unauthorised scraping and data mining. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.cbsnews.com/latest/rss/main",
+        "title": "Top stories"
+      },
+      {
+        "url": "https://www.cbsnews.com/latest/rss/world",
+        "title": "World"
+      }
+    ]
+  },
+  {
+    "slug": "abcnews",
+    "name": "ABC News",
+    "domain": "abcnews.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, anthropic-ai, CCBot and Google-Extended from /, including the feed path; ClaudeBot is not named. ABC's RSS page says headlines are offered 'to facilitate reading our stories via news aggregators'. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://abcnews.com/abcnews/topstories",
+        "title": "Top Stories"
+      },
+      {
+        "url": "https://abcnews.com/abcnews/internationalheadlines",
+        "title": "International"
+      }
+    ]
+  },
+  {
+    "slug": "nbcnews",
+    "name": "NBC News",
+    "domain": "nbcnews.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "nbcnews.com robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude-User from /. The feed host feeds.nbcnews.com serves no robots.txt. NBCUniversal terms grant a personal-use licence only. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://feeds.nbcnews.com/nbcnews/public/news",
+        "title": "NBC News Top Stories"
+      }
+    ]
+  },
+  {
+    "slug": "pbs-newshour",
+    "name": "PBS News Hour",
+    "domain": "pbs.org",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot and CCBot from /, including the feed path; ClaudeBot, anthropic-ai and Google-Extended are not named. PBS terms of use have no RSS- or AI-specific clause. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.pbs.org/newshour/feeds/rss/headlines",
+        "title": "PBS News Hour - The Latest"
+      }
+    ]
+  },
+  {
+    "slug": "economist",
+    "name": "The Economist",
+    "domain": "economist.com",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Paywalled. robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude-User from /, including the feed path. Terms page returned 403 to automated clients and was not reviewed. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.economist.com/latest/rss.xml",
+        "title": "Latest Updates"
+      }
+    ]
+  },
+  {
+    "slug": "skynews",
+    "name": "Sky News",
+    "domain": "news.sky.com",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "news.sky.com robots.txt disallows AI training crawlers (GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended) from /, allows user-initiated AI agents, and limits news aggregators to RSS. Feed host feeds.skynews.com allows */feed for all. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://feeds.skynews.com/feeds/rss/home.xml",
+        "title": "Home"
+      },
+      {
+        "url": "https://feeds.skynews.com/feeds/rss/world.xml",
+        "title": "World"
+      }
+    ]
+  },
+  {
+    "slug": "spiegel-international",
+    "name": "DER SPIEGEL International",
+    "domain": "spiegel.de",
+    "countryCode": "DE",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot and Claude-User from /, including the feed path. Impressum and robots.txt reserve commercial text and data mining under § 44b UrhG and prohibit automated access without permission. Low volume (a few items a week). Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.spiegel.de/international/index.rss",
+        "title": "DER SPIEGEL - International"
+      }
+    ]
+  },
+  {
+    "slug": "politico-eu",
+    "name": "Politico Europe",
+    "domain": "politico.eu",
+    "countryCode": "BE",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot, Google-Extended and Claude-User from /, including /feed/. Terms allow personal, non-commercial use only and bar commercial exploitation of content. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.politico.eu/feed/",
+        "title": "POLITICO Europe"
+      }
+    ]
+  },
+  {
+    "slug": "cbc",
+    "name": "CBC News",
+    "domain": "cbc.ca",
+    "countryCode": "CA",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, anthropic-ai and CCBot from /, including the feed path; ClaudeBot and Google-Extended are not named. The CBC RSS page invites integrating feeds into other interfaces and has no usage restriction. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.cbc.ca/webfeed/rss/rss-topstories",
+        "title": "Top Stories"
+      },
+      {
+        "url": "https://www.cbc.ca/webfeed/rss/rss-world",
+        "title": "World"
+      }
+    ]
+  },
+  {
+    "slug": "abc-au",
+    "name": "ABC News (Australia)",
+    "domain": "abc.net.au",
+    "countryCode": "AU",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot and Google-Extended from /, including the feed path. ABC terms of use returned 403 to automated clients and were not reviewed. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.abc.net.au/news/feed/45910/rss.xml",
+        "title": "Top Stories"
+      }
+    ]
+  },
+  {
+    "slug": "zdfheute",
+    "name": "ZDFheute",
+    "domain": "zdfheute.de",
+    "countryCode": "DE",
+    "languages": ["de"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt names GPTBot, CCBot and Google-Extended but only disallows two Bundesliga paths; no AI agent is blocked from the feed or site. RSS terms not reviewed. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.zdfheute.de/rss/zdf/nachrichten",
+        "title": "ZDFheute"
+      }
+    ]
+  },
+  {
+    "slug": "japantimes",
+    "name": "The Japan Times",
+    "domain": "japantimes.co.jp",
+    "countryCode": "JP",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Suggested replacement for NHK World, which has no current English feed. robots.txt names no AI agents and allows /feed/. Terms of use not reviewed. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.japantimes.co.jp/feed/",
+        "title": "Latest articles"
+      }
+    ]
   }
 ]
