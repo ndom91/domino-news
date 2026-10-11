@@ -92,6 +92,78 @@ scripts/deploy.sh update        # git pull --ff-only, then the same as up
 
 Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) is not included yet. Backups: `scripts/deploy.sh backup` (pg_dump into `backups/` on the host; offsite copies are left to the operator; see README).
 
+## Operations
+
+Recipes for running and maintaining the stack. `scripts/deploy.sh cli <command>` runs any `pnpm cli` command inside the worker image.
+
+### Frontend work with hot reload
+
+Run the web app on the host and everything else in Docker. `.env` already points at the published ports (Postgres `localhost:5442`, Typesense `localhost:8108`).
+
+```bash
+docker compose --env-file .env -f infra/compose/compose.yaml --profile app stop web   # frees port 4000
+pnpm dev
+```
+
+- Hot reload covers the shared packages too (`ui`, `queries`, `schemas`, `server`).
+- The pipeline does not reload: for worker changes, stop the `worker` container and run `pnpm dev:worker`.
+- Mounting the source into containers is not supported: macOS-built `node_modules` don't run in the Linux image.
+- `scripts/deploy.sh up` starts the `web` container again; stop it before `pnpm dev`.
+
+### Full reset (switching modes, or starting clean)
+
+```bash
+# 1. Set INGEST_MODE / INFERENCE_MODE in .env
+scripts/deploy.sh up                  # rebuild and recreate containers with the new .env
+scripts/deploy.sh cli dev:reset       # delete stories, articles, jobs (keeps users and publishers)
+scripts/deploy.sh cli search:rebuild  # fresh, empty search collections
+scripts/deploy.sh cli ingest          # poll every feed now
+```
+
+- The order matters: `dev:reset` does not touch Typesense, so rebuild search after it.
+- Switching `INFERENCE_MODE` always needs a reset: fixture and model embeddings live in different vector spaces.
+- `up` builds from the **working tree, not git**: uncommitted changes end up in the image.
+
+### Deploying to prod
+
+```bash
+scripts/deploy.sh backup     # before any update that has migrations
+scripts/deploy.sh update     # git pull, rebuild, migrate, restart, re-seed publishers
+```
+
+- **Migrations only go forward.** There are no down migrations, so rolling back code does not undo the schema; restore a backup instead.
+- After a change to the search schema (a new field on the story collection), run `scripts/deploy.sh cli search:rebuild`.
+- New model-written fields (desk, regions, topics) are only set when a Story is summarised. Existing Stories stay without them until re-summarised or a full reset.
+- After adding publishers, run `scripts/deploy.sh cli assessments:import` once so they get ownership and reliability evidence. It is not scheduled: evidence changes rarely, and only reviewed assessments are shown.
+
+### Backups and restore
+
+```bash
+scripts/deploy.sh backup                          # pg_dump into backups/, prunes dumps older than 14 days
+scripts/deploy.sh restore backups/dn-<time>.dump  # asks first, takes a safety dump, restores, rebuilds search
+```
+
+Nightly cron (adjust the path):
+
+```cron
+15 3 * * * cd /opt/domino-news && scripts/deploy.sh backup >> /var/log/domino-backup.log 2>&1
+```
+
+- `pg_dump` runs inside the Postgres container, so the host needs no Postgres tools.
+- Typesense is not backed up; `restore` rebuilds it.
+- Copying `backups/` offsite is up to the operator. Keep `.env` safe too: restored data needs the same `BETTER_AUTH_SECRET`.
+
+### Known issues
+
+- **"pg-boss database requires migrations" on the Pipeline page.** The pg-boss schema in the database is newer than the pg-boss package (a newer pg-boss ran against it once). The worker still starts (it runs with `migrate: true`), but the web server checks for an exact match. Set the version back to what the package expects (`schema` in `node_modules/pg-boss/package.json`, currently 44):
+
+  ```bash
+  docker compose --env-file .env -f infra/compose/compose.yaml exec -T postgres \
+    psql -U dn -d dn -c "update pgboss.version set version = 44;"
+  ```
+
+- **Tests and the clock.** Fixture articles carry fixed dates. Assertions about "the last 24 hours" or the For You 72-hour window must move data to `now()` first, or they break as the fixtures age.
+
 ## Server guidelines
 
 - In a correlated `sql` subquery, write outer columns literally (`narrative.id`), not as `${schema.narrative.id}`. Drizzle drops the table name from select-list columns when the query has no joins, and a bare `"id"` then binds to the subquery's own tables.
