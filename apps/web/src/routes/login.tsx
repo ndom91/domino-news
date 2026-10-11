@@ -5,6 +5,7 @@ import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
 import { authClient } from '../lib/auth-client.ts'
+import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/login')({
   validateSearch: z.object({ next: z.string().optional(), error: z.string().optional() }),
@@ -37,8 +38,7 @@ function LoginPage() {
     void el.offsetWidth
     el.classList.add('t-shake')
   }
-  // Only follow same-origin relative paths.
-  const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
+  const target = safeNext(next, '/')
 
   async function finishSignIn() {
     // An expired session lands here without signing out: drop the last user's data.

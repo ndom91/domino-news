@@ -201,13 +201,36 @@
   }
 }
 
+/* A card or notice rises in, e.g. For You's "less like this" notice and an undone card. */
+.t-feedback-in {
+  animation: t-feedback-in var(--dn-duration-enter) var(--dn-ease-smooth) both;
+}
+@keyframes t-feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+/* A bar that drains over 3s; listen for animationend. It's a timer, so it keeps running
+   under reduced motion (it's left out of the guard below). */
+.t-countdown {
+  animation: t-countdown 3s linear forwards;
+}
+@keyframes t-countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .t-topple,
   .t-skel,
   .t-reveal,
   .t-pop,
   .t-shimmer::before,
-  .t-shake {
+  .t-shake,
+  .t-feedback-in {
     animation: none;
   }
 }

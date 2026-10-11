@@ -1,4 +1,4 @@
-import { formatDate, plural } from '@dn/domain'
+import { formatDate, plural, pluralWord } from '@dn/domain'
 import { saveAssessmentMutation } from '@dn/queries'
 import {
   type CoverageProfile,
@@ -196,8 +196,8 @@ function CoverageProfileSection({ profile }: { profile: CoverageProfile }) {
         <div>
           <p className="type-numeral">{profile.missedMajor.count}</p>
           <p className="mt-2 text-sm text-text-secondary">
-            widely reported {profile.missedMajor.count === 1 ? 'story' : 'stories'} (4+ publishers)
-            this week it didn't cover
+            widely reported {pluralWord(profile.missedMajor.count, 'story', 'stories')} (4+
+            publishers) this week it didn't cover
           </p>
           {profile.missedMajor.examples.length > 0 ? (
             <ul className="mt-3 flex flex-col gap-1.5">

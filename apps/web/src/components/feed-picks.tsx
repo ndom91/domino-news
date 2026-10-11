@@ -18,7 +18,7 @@ import { api, queries } from '../lib/api.ts'
 const toggle = <T,>(list: readonly T[], item: T) =>
   list.includes(item) ? list.filter((x) => x !== item) : [...list, item]
 
-function Chips<T extends string>({
+export function Chips<T extends string>({
   label,
   options,
   selected,
@@ -62,15 +62,15 @@ function Chips<T extends string>({
   )
 }
 
-/** Regions, desks and topics that rank Stories up on For You. Each tap saves. */
 type Section = 'regions' | 'desks' | 'topics'
 
+/** Regions, desks and topics that rank Stories up on For You. Each tap saves. */
 export function FeedPicks({
-  sections = ['regions', 'desks', 'topics'],
+  sections,
 }: {
   /** Which pickers to show; onboarding shows them a step at a time. */
-  sections?: readonly Section[]
-} = {}) {
+  sections: readonly Section[]
+}) {
   const queryClient = useQueryClient()
   const prefs = useQuery(queries.preferences())
   const save = useMutation(savePreferencesMutation(api, queryClient))

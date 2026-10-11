@@ -1,14 +1,15 @@
 import { regionForCountry } from '@dn/domain'
 import { savePreferencesMutation, setFollowMutation } from '@dn/queries'
 import { REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
-import { Button, cx, Notice } from '@dn/ui'
+import { Button, Notice } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import { z } from 'zod'
-import { FeedPicks } from '../components/feed-picks.tsx'
+import { Chips, FeedPicks } from '../components/feed-picks.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
+import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/onboarding')({
   validateSearch: z.object({ next: z.string().optional() }),
@@ -26,7 +27,7 @@ const STEPS = [
     text: 'Pick broad desks, specific topics, or both. You can change these any time on your account page.',
   },
   {
-    title: 'Follow a few outlets',
+    title: 'Follow a few publishers',
     text: 'Stories they cover rank higher in For You. Nothing else is hidden.',
   },
 ] as const
@@ -40,8 +41,7 @@ function OnboardingPage() {
   const [step, setStep] = useState(0)
   const last = step === STEPS.length - 1
   const current = STEPS[step] ?? STEPS[0]
-  // Only same-site paths, never a redirect to another host.
-  const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/for-you'
+  const target = safeNext(next, '/for-you')
 
   function done() {
     finish.mutate({ onboarded: true }, { onSuccess: () => navigate({ to: target, replace: true }) })
@@ -57,7 +57,7 @@ function OnboardingPage() {
 
       {step === 0 ? <FeedPicks sections={['regions']} /> : null}
       {step === 1 ? <FeedPicks sections={['desks', 'topics']} /> : null}
-      {step === 2 ? <OutletPicker /> : null}
+      {step === 2 ? <PublisherPicker /> : null}
 
       <div className="mt-10 flex flex-wrap items-center gap-4 border-t-2 border-rule pt-6">
         {step > 0 ? (
@@ -88,63 +88,47 @@ function OnboardingPage() {
 }
 
 /** Newsrooms grouped by region as follow chips, like the other steps. Official sources are left out. */
-function OutletPicker() {
+function PublisherPicker() {
   const queryClient = useQueryClient()
   const publishers = useQuery(queries.publishers())
   const follows = useQuery(queries.follows())
   const save = useMutation(setFollowMutation(api, queryClient))
-  if (publishers.isPending) return <p className="text-text-muted">Loading outlets…</p>
+  if (publishers.isPending) return <p className="text-text-muted">Loading publishers…</p>
   if (publishers.isError) {
     return (
-      <Notice tone="error" title="Outlets could not be loaded">
-        You can follow outlets later from their pages.
+      <Notice tone="error" title="Publishers could not be loaded">
+        You can follow publishers later from their pages.
       </Notice>
     )
   }
-  const followed = new Set(
-    follows.data?.items.filter((f) => f.targetType === 'publisher').map((f) => f.id),
-  )
+  const followed = (follows.data?.items ?? [])
+    .filter((f) => f.targetType === 'publisher')
+    .map((f) => f.id)
   const newsrooms = publishers.data.items.filter((p) => p.kind === 'newsroom')
-  const byRegion = new Map<Region | 'other', typeof newsrooms>()
-  for (const p of newsrooms) {
-    const region = regionForCountry(p.countryCode) ?? 'other'
-    byRegion.set(region, [...(byRegion.get(region) ?? []), p])
+  const nameOf = new Map(newsrooms.map((p) => [p.id, p.name]))
+  const byRegion = new Map<Region | 'global', string[]>()
+  for (const p of newsrooms.toSorted((a, b) => a.name.localeCompare(b.name))) {
+    const region = regionForCountry(p.countryCode) ?? 'global'
+    byRegion.set(region, [...(byRegion.get(region) ?? []), p.id])
   }
-  const groups = [...REGIONS, 'other' as const].filter((r) => byRegion.has(r))
+  // 'global' is in REGIONS; move it last so "International" closes the list.
+  const groups = [...REGIONS.filter((r) => r !== 'global'), 'global' as const].filter((r) =>
+    byRegion.has(r),
+  )
   return (
     <div className="flex flex-col gap-6">
       {groups.map((region) => (
-        <fieldset key={region}>
-          <legend className="mb-2 type-label text-text-muted">
-            {region === 'other' ? 'Other' : REGION_LABELS[region]}
-          </legend>
-          <div className="flex flex-wrap gap-2">
-            {(byRegion.get(region) ?? [])
-              .sort((a, b) => a.name.localeCompare(b.name))
-              .map((p) => {
-                const on = followed.has(p.id)
-                return (
-                  <button
-                    key={p.id}
-                    type="button"
-                    aria-pressed={on}
-                    disabled={follows.isPending || save.isPending}
-                    onClick={() =>
-                      save.mutate({ targetType: 'publisher', targetId: p.id, follow: !on })
-                    }
-                    className={cx(
-                      'min-h-tap border px-3 text-sm font-semibold',
-                      on
-                        ? 'border-text bg-text text-canvas'
-                        : 'border-border-strong text-text-secondary hover:text-text',
-                    )}
-                  >
-                    {p.name}
-                  </button>
-                )
-              })}
-          </div>
-        </fieldset>
+        <Chips
+          key={region}
+          label={region === 'global' ? 'International' : REGION_LABELS[region]}
+          options={byRegion.get(region) ?? []}
+          labelOf={(id) => nameOf.get(id) ?? id}
+          selected={followed}
+          disabled={follows.isPending || save.isPending}
+          onToggle={(id) =>
+            save.mutate({ targetType: 'publisher', targetId: id, follow: !followed.includes(id) })
+          }
+        />
       ))}
       {save.isError ? (
         <Notice tone="error" title="Not saved">

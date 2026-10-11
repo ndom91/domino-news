@@ -7,10 +7,7 @@
 /*
  * Theme switch (see switchTheme): the new theme grows as a circle from the control that was
  * used, while the old view dims slightly underneath. switchTheme skips it under reduced motion.
- *
- * The circle is a radial-gradient mask driven by a registered property, not an animated
- * clip-path: Chromium on Android ran the clip-path version (composited clip-path animation)
- * with a visible slow-down partway through.
+ * A mask on a registered property, not clip-path: animated clip-path stuttered on Android Chromium.
  */
 @property --theme-reveal-r {
   syntax: "<length>";
@@ -57,32 +54,6 @@ html:not(.vt-feed)::view-transition-new(root) {
   to {
     --theme-reveal-r: var(--theme-reveal-radius, 150vmax);
   }
-}
-
-/*
- * For You "less like this": the notice (and a restored card) rises in; the countdown bar
- * drains over 3s and its animationend removes the notice. Durations are motion tokens, so
- * reduced motion makes the transitions instant (the countdown still runs: it's a timer).
- */
-@keyframes feedback-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px) scale(0.98);
-  }
-}
-
-.t-feedback-in {
-  animation: feedback-in var(--dn-duration-enter) var(--dn-ease-smooth) both;
-}
-
-@keyframes countdown {
-  to {
-    transform: scaleX(0);
-  }
-}
-
-.t-countdown {
-  animation: countdown 3s linear forwards;
 }
 
 /*

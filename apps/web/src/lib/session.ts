@@ -39,3 +39,8 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
     }
   },
 )
+
+// Only same-site paths: "//host" and absolute URLs would redirect off-site.
+export function safeNext(next: string | undefined, fallback: string): string {
+  return next?.startsWith('/') && !next.startsWith('//') ? next : fallback
+}

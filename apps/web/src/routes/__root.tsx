@@ -51,16 +51,16 @@ function RootLayout() {
   const { session } = Route.useRouteContext()
   // Onboarding is a focused flow: its nav links would only redirect back to it.
   const { pathname } = useLocation()
-  const chrome = Boolean(session.user) && pathname !== '/onboarding'
+  const user = pathname !== '/onboarding' ? session.user : null
   return (
     <TooltipProvider>
       {/* Block wrapper: as flex items, the header's mx-auto rows would shrink to fit. */}
-      <div>{chrome && session.user ? <SiteHeader user={session.user} /> : null}</div>
+      <div>{user ? <SiteHeader user={user} /> : null}</div>
       {/* flex-1 pins the footer to the bottom when the page is short. */}
       <main id="main" className="flex-1">
         <Outlet />
       </main>
-      {chrome && session.user ? <SiteFooter user={session.user} /> : null}
+      {user ? <SiteFooter user={user} /> : null}
     </TooltipProvider>
   )
 }

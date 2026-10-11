@@ -1,4 +1,4 @@
-import { plural, relativeTime } from '@dn/domain'
+import { plural, pluralWord, regionForCountry, relativeTime } from '@dn/domain'
 import { type PublisherStats, REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
 import { CoverageMatrix, Notice, positionKey, SectionLabel, Timestamp } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
@@ -13,32 +13,12 @@ export const Route = createFileRoute('/publishers/')({
   component: PublishersPage,
 })
 
-// Where each seeded publisher is based. Publishers without a country (UN, EU bodies) are
-// "International"; an unknown code also lands there until it's added here.
-const COUNTRY_REGION: Record<string, Region> = {
-  US: 'north-america',
-  CA: 'north-america',
-  BR: 'latin-america',
-  GB: 'europe',
-  DE: 'europe',
-  FR: 'europe',
-  NL: 'europe',
-  BE: 'europe',
-  LV: 'europe',
-  UA: 'europe',
-  QA: 'middle-east',
-  ZA: 'africa',
-  IN: 'south-asia',
-  JP: 'east-asia',
-  PH: 'southeast-asia',
-  AU: 'oceania',
-}
-
 /** Groups in REGIONS order, keeping the API's order (most stories first) inside each. */
 function byRegion(items: PublisherStats[]) {
   const groups = new Map<Region, PublisherStats[]>()
   for (const p of items) {
-    const region = (p.countryCode && COUNTRY_REGION[p.countryCode]) || 'global'
+    // Publishers without a country (UN, EU bodies) are "International".
+    const region = regionForCountry(p.countryCode) ?? 'global'
     groups.set(region, [...(groups.get(region) ?? []), p])
   }
   return REGIONS.filter((r) => groups.has(r))
@@ -170,7 +150,7 @@ function PublisherCard({ publisher: p }: { publisher: PublisherStats }) {
       <span className="mt-4 grid grid-cols-2 gap-3">
         <span>
           <span className="block type-numeral">{p.storiesCovered}</span>
-          <span className="type-meta">{p.storiesCovered === 1 ? 'story' : 'stories'}</span>
+          <span className="type-meta">{pluralWord(p.storiesCovered, 'story', 'stories')}</span>
         </span>
         <span>
           <span className="block type-numeral">{p.firstReports}</span>

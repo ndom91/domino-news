@@ -23,7 +23,6 @@ export const Route = createFileRoute('/account')({
 
 const passkeysKey = ['account', 'passkeys'] as const
 
-// Web-only page: passkey ceremonies need the browser's WebAuthn API.
 function AccountPage() {
   const { session } = Route.useRouteContext()
   const queryClient = useQueryClient()
@@ -230,6 +229,7 @@ function FollowingSection() {
               <Button
                 size="sm"
                 variant="ghost"
+                aria-label={`Unfollow ${f.title}`}
                 loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
                 onClick={() =>
                   unfollow.mutate({ targetType: f.targetType, targetId: f.id, follow: false })
@@ -285,7 +285,7 @@ function LearnedSignals() {
                       aria-label={`Forget ${s.label}`}
                       disabled={update.isPending}
                       onClick={() => update.mutate({ remove: { kind: s.kind, key: s.key } })}
-                      className="min-h-6 px-1.5 text-text-muted hover:text-text"
+                      className="relative min-h-6 px-1.5 text-text-muted after:absolute after:-inset-2.5 after:content-[''] hover:text-text"
                     >
                       ×
                     </button>
@@ -296,7 +296,7 @@ function LearnedSignals() {
           )}
           <ConfirmDialog
             trigger={
-              <Button size="sm" variant="danger" loading={update.isPending}>
+              <Button size="sm" variant="danger" disabled={update.isPending}>
                 Reset all
               </Button>
             }

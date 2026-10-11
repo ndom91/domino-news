@@ -11,13 +11,16 @@ import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/for-you')({
-  loader: ({ context }) => context.queryClient.prefetchInfiniteQuery(queries.forYou()),
+  loader: async ({ context }) => {
+    await context.queryClient.prefetchInfiniteQuery(queries.forYou())
+    return { now: new Date().toISOString() }
+  },
   head: () => ({ meta: [{ title: 'For You · Domino News' }] }),
   component: ForYouPage,
 })
 
-// Per user and client-only, like Blindspot.
 function ForYouPage() {
+  const { now } = Route.useLoaderData()
   const feed = useInfiniteQuery(queries.forYou())
   const first = feed.data?.pages[0]
   // Hidden cards leave the grid once their notice times out (the server leaves them out of
@@ -26,7 +29,6 @@ function ForYouPage() {
   const items = (feed.data?.pages.flatMap((p) => p.items) ?? []).filter(
     (i) => !removed.has(i.story.id),
   )
-  const now = new Date().toISOString()
 
   return (
     <Page>
@@ -45,14 +47,14 @@ function ForYouPage() {
           {!first?.personalised ? (
             <section className="mb-12 max-w-reading">
               <p className="text-md text-text-secondary">
-                Pick the regions, desks and topics you care about, and follow narratives or outlets
-                from their pages. Matching stories move to the top here. Nothing is hidden: big
-                stories still show, just lower down.
+                Pick the regions, desks and topics you care about, and follow narratives or
+                publishers from their pages. Matching stories move to the top here. Nothing is
+                hidden: big stories still show, just lower down.
               </p>
               <Link
                 to="/account"
                 hash="your-feed"
-                className="mt-4 inline-block text-base font-bold underline decoration-accent decoration-2 underline-offset-4"
+                className="mt-4 inline-block link-inline text-base font-bold"
               >
                 Set up your feed
               </Link>
@@ -117,8 +119,7 @@ function WhyButton({ reasons }: { reasons: ForYouReason[] }) {
       side="top"
       title="Why you're seeing this"
       trigger={
-        // Not a Button: it only reveals info, so no border or fill on hover, just the icon
-        // darkening. Still a <button> so tap and keyboard can open it.
+        // Plain <button>, not Button: info only, so no hover fill.
         <button
           type="button"
           aria-label="Why you're seeing this"
@@ -151,9 +152,8 @@ function tokenMs(name: string) {
 }
 
 /**
- * Remove a card and let the rest glide into place (View Transitions). Scoped with a class on
- * <html> so the theme switch's root animation doesn't play, and card names only exist for
- * the duration. Falls back to an instant reflow.
+ * Remove a card and let the rest glide into place (View Transition, scoped by html.vt-feed).
+ * Instant without support or with reduced motion.
  */
 function reflowWithout(remove: () => void) {
   const root = document.documentElement
@@ -232,7 +232,7 @@ function ForYouCard({
     return (
       <div
         role="status"
-        style={{ minHeight: height, viewTransitionName: 'none' }}
+        style={{ minHeight: height }}
         className={cx(
           'group relative flex flex-col justify-center gap-4 overflow-hidden border-t-6 border-border-strong bg-text/[0.03] px-6 py-8',
           't-feedback-in transition-[opacity,scale] duration-(--dn-duration-exit) ease-out',
@@ -258,7 +258,6 @@ function ForYouCard({
             Undo
           </Button>
         </div>
-        {/* The countdown: when it finishes, the notice leaves. Hover or focus pauses it. */}
         <span
           aria-hidden
           className="t-countdown absolute inset-x-0 bottom-0 h-1 origin-left bg-text/40 group-focus-within:[animation-play-state:paused] group-hover:[animation-play-state:paused]"
@@ -281,11 +280,9 @@ function ForYouCard({
         restored && 't-feedback-in',
       )}
     >
-      {/* The card's own dates line below already says when it was first reported. */}
+      {/* First/updated times are in the story bar's tooltip, so no "first" line. */}
       <StoryItem story={story} now={now} Link={RouterLink} showFirstReport={false} />
-      {/* First and updated times live in the story bar's timestamp tooltip. The row is pulled
-          up beside the trace caption: the 44px tap areas pad ~11px above each icon. Leave a
-          couple of px under the hover border so it clears the trace. */}
+      {/* Pulled up beside the trace caption; 44px tap areas pad ~11px above each icon. */}
       <div className="-mt-5.5 flex justify-end">
         <div className="flex">
           <WhyButton reasons={item.reasons} />

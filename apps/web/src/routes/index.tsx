@@ -80,7 +80,6 @@ function FeedPage() {
   const { region = null } = Route.useSearch()
   const { data: front } = useSuspenseQuery(queries.front(region))
   const list = useSuspenseInfiniteQuery(queries.storyList(region))
-  // Client-only: the For You rail appears once the reader's feed loads.
   const now = front.editionAt
   const latest = list.data.pages.flatMap((p) => p.items).filter((s) => s.id !== front.lead?.id)
 
@@ -165,7 +164,10 @@ function RegionFilter({ active }: { active: Region | null }) {
   )
 }
 
-/** The top of the reader's For You feed, above the chronological grid. Hidden until they pick or follow something. */
+/**
+ * The top of the reader's For You feed, above the chronological grid. Client-only: it appears
+ * once the feed loads, and stays hidden until the reader picks or follows something.
+ */
 function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
   const feed = useInfiniteQuery(queries.forYou())
   const first = feed.data?.pages[0]
@@ -182,11 +184,11 @@ function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
           </Link>
         }
       />
-      <section className="grid grid-cols-4 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+      <div className="grid grid-cols-4 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {items.map(({ story }) => (
           <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
         ))}
-      </section>
+      </div>
     </section>
   )
 }
