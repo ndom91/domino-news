@@ -309,7 +309,7 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
   }
 
   return (
-    <section aria-labelledby="review-heading" className="mt-10 border-t-2 border-rule pt-6">
+    <section aria-labelledby="review-heading" className="mt-16">
       <SectionLabel id="review-heading">Review assessment (admin)</SectionLabel>
       <p className="mb-3 text-sm text-text-secondary">
         Imported evidence. Wikidata ownership can be incomplete, so check it before publishing.
