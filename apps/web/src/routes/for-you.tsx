@@ -53,6 +53,7 @@ function ForYouPage() {
               </p>
               <Link
                 to="/account"
+                search={{ tab: 'preferences' }}
                 hash="your-feed"
                 className="mt-4 inline-block link-inline text-base font-bold"
               >
@@ -80,7 +81,12 @@ function ForYouPage() {
               </Button>
             ) : null}
             {first?.personalised ? (
-              <Link to="/account" hash="your-feed" className="link-inline font-semibold">
+              <Link
+                to="/account"
+                search={{ tab: 'preferences' }}
+                hash="your-feed"
+                className="link-inline font-semibold"
+              >
                 Change your picks
               </Link>
             ) : null}

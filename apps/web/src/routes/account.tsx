@@ -7,12 +7,14 @@ import {
   Reveal,
   SectionLabel,
   Select,
+  Tabs,
   TextInput,
   Timestamp,
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import type { FormEvent } from 'react'
+import type { FormEvent, ReactNode } from 'react'
+import { z } from 'zod'
 import { FeedPicks } from '../components/feed-picks.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { ReadingHistoryToggle } from '../components/reading-history.tsx'
@@ -20,7 +22,11 @@ import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 
+const TABS = ['preferences', 'following', 'security'] as const
+
 export const Route = createFileRoute('/account')({
+  // An unknown tab falls back to Preferences instead of erroring.
+  validateSearch: z.object({ tab: z.enum(TABS).optional().catch(undefined) }),
   // Passkeys load in the browser only (WebAuthn client); the rest renders on the server.
   loader: ({ context }) =>
     Promise.all([
@@ -31,10 +37,101 @@ export const Route = createFileRoute('/account')({
   component: AccountPage,
 })
 
-const passkeysKey = ['account', 'passkeys'] as const
+const TAB_LABELS = {
+  preferences: 'Preferences',
+  following: 'Following',
+  security: 'Privacy & security',
+} as const
 
 function AccountPage() {
   const { session } = Route.useRouteContext()
+  const { tab = 'preferences' } = Route.useSearch()
+  const navigate = Route.useNavigate()
+
+  const content = {
+    preferences: (
+      <>
+        <FeedSection />
+        <CountrySection />
+      </>
+    ),
+    following: (
+      <>
+        <FollowingSection />
+        <LearnedSignals />
+      </>
+    ),
+    security: (
+      <>
+        <PasskeysSection />
+        <ReadingHistorySection />
+      </>
+    ),
+  }
+
+  return (
+    <Page>
+      <PageTitle>Account</PageTitle>
+      <div className="mb-10 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-text-secondary">
+          Signed in as{' '}
+          <span className="font-semibold text-text">
+            {session.user?.username ?? session.user?.name}
+          </span>
+        </p>
+        <SignOutButton />
+      </div>
+
+      <Tabs
+        aria-label="Account settings"
+        value={tab}
+        // replace: switching tabs shouldn't fill the back stack.
+        onValueChange={(next) => navigate({ search: { tab: next }, replace: true })}
+        tabs={TABS.map((value) => ({
+          value,
+          label: TAB_LABELS[value],
+          content: <div className="flex flex-col divide-y divide-border">{content[value]}</div>,
+        }))}
+      />
+    </Page>
+  )
+}
+
+/**
+ * One setting per row: heading and explanation on the left, controls on the right. Stacks
+ * below md.
+ */
+function SettingsRow({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string
+  title: string
+  description?: ReactNode
+  children: ReactNode
+}) {
+  return (
+    <section
+      id={id}
+      aria-labelledby={`${id}-heading`}
+      className="grid scroll-mt-24 grid-cols-3 gap-x-column gap-y-4 py-10 first:pt-2 max-md:grid-cols-1"
+    >
+      <div>
+        <SectionLabel id={`${id}-heading`}>{title}</SectionLabel>
+        {description ? (
+          <p className="max-w-reading text-sm text-text-secondary">{description}</p>
+        ) : null}
+      </div>
+      <div className="col-span-2 max-md:col-span-1">{children}</div>
+    </section>
+  )
+}
+
+const passkeysKey = ['account', 'passkeys'] as const
+
+function PasskeysSection() {
   const queryClient = useQueryClient()
   const passkeys = useQuery({
     queryKey: passkeysKey,
@@ -68,115 +165,91 @@ function AccountPage() {
   }
 
   return (
-    <Page>
-      <PageTitle>Account</PageTitle>
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-text-secondary">
-          Signed in as{' '}
-          <span className="font-semibold text-text">
-            {session.user?.username ?? session.user?.name}
-          </span>
-        </p>
-        <SignOutButton />
-      </div>
-
-      {/* Feed picks span two columns (picks | topics); everything else takes one or two. */}
-      <div className="mt-10 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
-        <FeedSection />
-        <FollowingSection />
-        <ReadingHistorySection />
-
-        <section aria-labelledby="passkeys-heading" className="col-span-2 max-md:col-span-1">
-          <SectionLabel id="passkeys-heading">Passkeys</SectionLabel>
-          <p className="mb-6 max-w-reading text-sm text-text-secondary">
-            Sign in with your device's screen lock or a security key instead of a password. Your
-            password keeps working.
-          </p>
-
-          {passkeys.isPending ? null : passkeys.isError ? (
-            <Notice tone="error" title="Passkeys could not be loaded">
-              {passkeys.error.message}
-            </Notice>
-          ) : passkeys.data.length === 0 ? (
-            <p className="mb-6 text-sm text-text-muted">No passkeys yet.</p>
-          ) : (
-            <ul className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule">
-              {passkeys.data.map((p) => (
-                <Reveal
-                  as="li"
-                  key={p.id}
-                  className="flex flex-wrap items-center justify-between gap-3 py-3"
-                >
-                  <div>
-                    <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
-                    <p className="type-meta">
-                      {p.createdAt ? (
-                        <Timestamp
-                          at={new Date(p.createdAt).toISOString()}
-                          format="datetime"
-                          prefix="Added"
-                        />
-                      ) : (
-                        'Added earlier'
-                      )}
-                      {p.backedUp ? ' · synced' : ''}
-                    </p>
-                  </div>
-                  <ConfirmDialog
-                    trigger={
-                      <Button
-                        size="sm"
-                        variant="danger"
-                        loading={remove.isPending && remove.variables === p.id}
-                        aria-label={`Remove ${p.name || 'unnamed passkey'}`}
-                      >
-                        Remove
-                      </Button>
-                    }
-                    title="Remove this passkey?"
-                    confirmLabel="Remove passkey"
-                    destructive
-                    onConfirm={() => remove.mutate(p.id)}
+    <SettingsRow
+      id="passkeys"
+      title="Passkeys"
+      description="Sign in with your device's screen lock or a security key instead of a password. Your password keeps working."
+    >
+      {passkeys.isPending ? null : passkeys.isError ? (
+        <Notice tone="error" title="Passkeys could not be loaded">
+          {passkeys.error.message}
+        </Notice>
+      ) : passkeys.data.length === 0 ? (
+        <p className="mb-6 text-sm text-text-muted">No passkeys yet.</p>
+      ) : (
+        <ul className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule">
+          {passkeys.data.map((p) => (
+            <Reveal
+              as="li"
+              key={p.id}
+              className="flex flex-wrap items-center justify-between gap-3 py-3"
+            >
+              <div>
+                <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
+                <p className="type-meta">
+                  {p.createdAt ? (
+                    <Timestamp
+                      at={new Date(p.createdAt).toISOString()}
+                      format="datetime"
+                      prefix="Added"
+                    />
+                  ) : (
+                    'Added earlier'
+                  )}
+                  {p.backedUp ? ' · synced' : ''}
+                </p>
+              </div>
+              <ConfirmDialog
+                trigger={
+                  <Button
+                    size="sm"
+                    variant="danger"
+                    loading={remove.isPending && remove.variables === p.id}
+                    aria-label={`Remove ${p.name || 'unnamed passkey'}`}
                   >
-                    You will no longer be able to sign in with {p.name || 'this passkey'}. Your
-                    password keeps working.
-                  </ConfirmDialog>
-                </Reveal>
-              ))}
-            </ul>
-          )}
-
-          <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
-            <TextInput
-              label="Name (optional)"
-              name="name"
-              placeholder="e.g. Work laptop"
-              maxLength={60}
-              className="min-w-48 flex-1"
-            />
-            <Button type="submit" variant="primary" loading={add.isPending}>
-              Add a passkey
-            </Button>
-          </form>
-          {add.isError ? (
-            <Reveal className="mt-4">
-              <Notice tone="error" title="Passkey not added">
-                {add.error.message}
-              </Notice>
+                    Remove
+                  </Button>
+                }
+                title="Remove this passkey?"
+                confirmLabel="Remove passkey"
+                destructive
+                onConfirm={() => remove.mutate(p.id)}
+              >
+                You will no longer be able to sign in with {p.name || 'this passkey'}. Your password
+                keeps working.
+              </ConfirmDialog>
             </Reveal>
-          ) : null}
-          {remove.isError ? (
-            <Reveal className="mt-4">
-              <Notice tone="error" title="Passkey not removed">
-                {remove.error.message}
-              </Notice>
-            </Reveal>
-          ) : null}
-        </section>
+          ))}
+        </ul>
+      )}
 
-        <CountrySection />
-      </div>
-    </Page>
+      <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
+        <TextInput
+          label="Name (optional)"
+          name="name"
+          placeholder="e.g. Work laptop"
+          maxLength={60}
+          className="min-w-48 flex-1"
+        />
+        <Button type="submit" variant="primary" loading={add.isPending}>
+          Add a passkey
+        </Button>
+      </form>
+      {add.isError ? (
+        <Reveal className="mt-4">
+          <Notice tone="error" title="Passkey not added">
+            {add.error.message}
+          </Notice>
+        </Reveal>
+      ) : null}
+      {remove.isError ? (
+        <Reveal className="mt-4">
+          <Notice tone="error" title="Passkey not removed">
+            {remove.error.message}
+          </Notice>
+        </Reveal>
+      ) : null}
+    </SettingsRow>
   )
 }
 
@@ -191,10 +264,9 @@ function SignOutButton() {
 
 function ReadingHistorySection() {
   return (
-    <section aria-labelledby="history-heading">
-      <SectionLabel id="history-heading">Reading history</SectionLabel>
+    <SettingsRow id="reading-history" title="Reading history">
       <ReadingHistoryToggle />
-    </section>
+    </SettingsRow>
   )
 }
 
@@ -211,12 +283,11 @@ function CountrySection() {
   const prefs = useQuery(queries.preferences())
   const save = useMutation(savePreferencesMutation(api, queryClient))
   return (
-    <section aria-labelledby="country-heading">
-      <SectionLabel id="country-heading">Your country</SectionLabel>
-      <p className="mb-4 max-w-reading text-sm text-text-secondary">
-        Stories show the political lean of publishers in this country first, and Blindspot lists
-        stories that one side of its media barely covers.
-      </p>
+    <SettingsRow
+      id="country"
+      title="Your country"
+      description="Stories show the political lean of publishers in this country first, and Blindspot lists stories that one side of its media barely covers."
+    >
       <Select
         aria-label="Your country"
         name="country"
@@ -230,27 +301,22 @@ function CountrySection() {
           {save.error.message} Try again.
         </Notice>
       ) : null}
-    </section>
+    </SettingsRow>
   )
 }
 
 function FeedSection() {
   return (
-    <section
+    <SettingsRow
       id="your-feed"
-      aria-labelledby="feed-heading"
-      className="col-span-2 scroll-mt-24 max-md:col-span-1"
+      title="Your feed"
+      description="Stories matching these move to the top of For You, and your regions lead the front page. Nothing else is hidden."
     >
-      <SectionLabel id="feed-heading">Your feed</SectionLabel>
-      <p className="mb-5 max-w-reading text-sm text-text-secondary">
-        Stories matching these move to the top of For You, and your regions lead the front page.
-        Nothing else is hidden.
-      </p>
       <div className="grid grid-cols-2 gap-x-column gap-y-6 max-md:grid-cols-1">
         <FeedPicks sections={['regions', 'desks']} />
         <FeedPicks sections={['topics']} />
       </div>
-    </section>
+    </SettingsRow>
   )
 }
 
@@ -259,8 +325,11 @@ function FollowingSection() {
   const follows = useQuery(queries.follows())
   const unfollow = useMutation(setFollowMutation(api, queryClient))
   return (
-    <section aria-labelledby="following-heading">
-      <SectionLabel id="following-heading">Following</SectionLabel>
+    <SettingsRow
+      id="following"
+      title="Following"
+      description="Stories from narratives and publishers you follow rank higher in For You."
+    >
       {follows.data?.items.length ? (
         <ul className="flex flex-col divide-y divide-border border-y border-border">
           {follows.data.items.map((f) => (
@@ -293,8 +362,7 @@ function FollowingSection() {
           Nothing yet. Use Follow on a narrative or publisher page.
         </p>
       )}
-      <LearnedSignals />
-    </section>
+    </SettingsRow>
   )
 }
 
@@ -307,8 +375,11 @@ function LearnedSignals() {
   const more = items.filter((s) => s.weight > 0)
   const less = items.filter((s) => s.weight < 0)
   return (
-    <>
-      <h3 className="mt-8 mb-2 type-label">Learned from your feedback</h3>
+    <SettingsRow
+      id="learned"
+      title="Learned from your feedback"
+      description="Your thumbs up and down on For You nudge these. Remove one, or reset them all."
+    >
       {items.length === 0 ? (
         <p className="text-sm text-text-muted">
           Nothing yet. Use the thumbs on For You cards to see more or less like a story.
@@ -358,6 +429,6 @@ function LearnedSignals() {
           </ConfirmDialog>
         </>
       )}
-    </>
+    </SettingsRow>
   )
 }

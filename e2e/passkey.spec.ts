@@ -26,7 +26,7 @@ test('register a passkey, sign out, and sign back in with it', async ({
 
   await signIn(page)
 
-  await page.goto('/account', { waitUntil: 'networkidle' })
+  await page.goto('/account?tab=security', { waitUntil: 'networkidle' })
   const name = `e2e-${Date.now()}`
   await page.getByLabel('Name (optional)').fill(name)
   await page.getByRole('button', { name: 'Add a passkey' }).click()
@@ -40,7 +40,7 @@ test('register a passkey, sign out, and sign back in with it', async ({
   await page.waitForURL('/')
 
   // Clean up so repeated runs don't accumulate credentials.
-  await page.goto('/account', { waitUntil: 'networkidle' })
+  await page.goto('/account?tab=security', { waitUntil: 'networkidle' })
   await row.getByRole('button', { name: 'Remove' }).click()
   await expect(row).toHaveCount(0)
 })

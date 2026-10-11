@@ -126,7 +126,12 @@ function InsightSections({ data }: { data: Insights }) {
 
       <p className="max-w-reading type-meta">
         Based on stories you opened in the last 30 days. Manage reading history on your{' '}
-        <Link to="/account" className="underline underline-offset-4">
+        <Link
+          to="/account"
+          search={{ tab: 'security' }}
+          hash="reading-history"
+          className="underline underline-offset-4"
+        >
           account page
         </Link>
         .
@@ -152,7 +157,12 @@ function OneSidedSection({ data }: { data: Insights['oneSided'] }) {
         Stories from this week where at least {ONE_SIDED_MIN_RATED} of the covering publishers are
         rated and {Math.round(ONE_SIDED_SHARE * 100)}% or more of them lean the same way. Lean is
         relative to that country’s media.{' '}
-        <Link to="/account" className="underline underline-offset-4">
+        <Link
+          to="/account"
+          search={{ tab: 'preferences' }}
+          hash="country"
+          className="underline underline-offset-4"
+        >
           Change your country
         </Link>
         .
