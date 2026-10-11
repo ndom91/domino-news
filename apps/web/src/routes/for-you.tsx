@@ -139,13 +139,13 @@ function ForYouCard({ item, now }: { item: Item; now: string }) {
             label="More like this"
             aria-pressed={feedback === 'more'}
             disabled={save.isPending}
-            icon={<ThumbsUpIcon size={18} weight={feedback === 'more' ? 'fill' : 'regular'} />}
+            icon={<ThumbsUpIcon size={22} weight={feedback === 'more' ? 'fill' : 'regular'} />}
             onClick={() => send(feedback === 'more' ? null : 'more')}
           />
           <IconButton
             label="Less like this"
             disabled={save.isPending}
-            icon={<ThumbsDownIcon size={18} />}
+            icon={<ThumbsDownIcon size={22} />}
             onClick={() => send('less')}
           />
         </div>
