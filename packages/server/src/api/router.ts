@@ -129,6 +129,7 @@ const route = (
 
 // Logos rarely change, so browsers and Cloudflare may keep them for a year (see logos.ts).
 const LOGO_CACHE = 'public, max-age=31536000, immutable'
+// logo.dev has no logo for this publisher (or the slug is unknown): keep the 404 for a day.
 const NO_LOGO_CACHE = 'public, max-age=86400'
 
 const frontQuery = z.object({ region: regionSchema.optional() })
@@ -141,12 +142,14 @@ const routes: Route[] = [
     '/api/v1/logos/:slug.webp',
     async ({ ctx, params }) => {
       const domain = await publisherDomainBySlug(ctx.db, params.slug ?? '')
-      const logo = domain ? await ctx.logos.get(domain) : null
-      if (!logo)
-        return new Response(null, { status: 404, headers: { 'cache-control': NO_LOGO_CACHE } })
-      return new Response(logo.bytes, {
-        headers: { 'content-type': logo.contentType, 'cache-control': LOGO_CACHE },
-      })
+      const result = domain ? await ctx.logos.get(domain) : null
+      if (result?.logo)
+        return new Response(result.logo.bytes, {
+          headers: { 'content-type': result.logo.contentType, 'cache-control': LOGO_CACHE },
+        })
+      // A passing failure (rate limit, outage, no key) must not be pinned at Cloudflare.
+      const cache = !result || result.missing === 'none' ? NO_LOGO_CACHE : 'no-store'
+      return new Response(null, { status: 404, headers: { 'cache-control': cache } })
     },
     { public: true },
   ),

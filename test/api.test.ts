@@ -87,11 +87,16 @@ describe('/api/v1 contracts', () => {
   })
 
   it('serves logos without a session, cached publicly', async () => {
-    // Tests run without a logo.dev key, so a known publisher has no logo either.
-    for (const slug of ['nytimes', 'no-such-publisher']) {
+    // An unknown slug is a lasting miss. Tests run without a logo.dev key, which is a passing
+    // one: it must not be cached, or adding the key later would change nothing for a day.
+    const cases = [
+      ['no-such-publisher', 'public, max-age=86400'],
+      ['nytimes', 'no-store'],
+    ]
+    for (const [slug, cache] of cases) {
       const res = await call(`/api/v1/logos/${slug}.webp`, {}, false)
       expect(res.status, slug).toBe(404)
-      expect(res.headers.get('cache-control')).toBe('public, max-age=86400')
+      expect(res.headers.get('cache-control'), slug).toBe(cache)
     }
   })
 

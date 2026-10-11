@@ -21,7 +21,7 @@ describe('logo source', () => {
     const logos = createLogoSource({ apiKey: 'sk_test', fetch })
     const [a, b] = await Promise.all([logos.get('nytimes.com'), logos.get('nytimes.com')])
     const c = await logos.get('nytimes.com')
-    expect(a?.contentType).toBe('image/webp')
+    expect(a.logo?.contentType).toBe('image/webp')
     expect(b).toBe(a)
     expect(c).toBe(a)
     expect(apiCalls(fetch)).toBe(1)
@@ -37,7 +37,7 @@ describe('logo source', () => {
   it('makes no calls without a key', async () => {
     const fetch = stub(API_OK)
     const logos = createLogoSource({ apiKey: undefined, fetch })
-    expect(await logos.get('nytimes.com')).toBeNull()
+    expect(await logos.get('nytimes.com')).toEqual({ logo: null, missing: 'retry' })
     expect(fetch).not.toHaveBeenCalled()
   })
 
@@ -45,7 +45,7 @@ describe('logo source', () => {
     let t = 0
     const fetch = stub(() => new Response(null, { status: 202 }))
     const logos = createLogoSource({ apiKey: 'sk_test', fetch, now: () => t })
-    expect(await logos.get('new.example')).toBeNull()
+    expect(await logos.get('new.example')).toEqual({ logo: null, missing: 'retry' })
     t += 9 * 60_000
     await logos.get('new.example')
     expect(apiCalls(fetch)).toBe(1)
@@ -60,7 +60,38 @@ describe('logo source', () => {
       () => new Response('<html>', { headers: { 'content-type': 'text/html' } }),
     )
     const logos = createLogoSource({ apiKey: 'sk_test', fetch })
-    expect(await logos.get('nytimes.com')).toBeNull()
+    expect((await logos.get('nytimes.com')).logo).toBeNull()
+  })
+
+  it('reports a missing logo as cacheable and a rate limit as passing', async () => {
+    const none = createLogoSource({
+      apiKey: 'sk_test',
+      fetch: stub(() => new Response(null, { status: 404 })),
+    })
+    expect(await none.get('a.example')).toEqual({ logo: null, missing: 'none' })
+    const limited = createLogoSource({
+      apiKey: 'sk_test',
+      fetch: stub(() => new Response(null, { status: 429 })),
+    })
+    expect(await limited.get('a.example')).toEqual({ logo: null, missing: 'retry' })
+  })
+
+  it('keeps at most 4 logo.dev requests open', async () => {
+    let open = 0
+    let maxOpen = 0
+    const fetch = vi.fn(async (input: string | URL | Request) => {
+      open++
+      maxOpen = Math.max(maxOpen, open)
+      await new Promise((r) => setTimeout(r, 5))
+      open--
+      return String(input).startsWith('https://api.logo.dev/') ? API_OK() : IMAGE()
+    })
+    const logos = createLogoSource({ apiKey: 'sk_test', fetch })
+    const results = await Promise.all(
+      ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'].map((d) => logos.get(`${d}.example`)),
+    )
+    expect(results.every((r) => r.logo)).toBe(true)
+    expect(maxOpen).toBe(4)
   })
 
   it('stops calling logo.dev past the hourly ceiling', async () => {

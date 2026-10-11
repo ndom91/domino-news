@@ -15,15 +15,24 @@ const HOUR = 60 * MINUTE
 const RETRY_SOON = 10 * MINUTE
 const RETRY_LATER = 24 * HOUR
 
+/**
+ * A logo, or why there isn't one. `none`: logo.dev has no logo for the domain, so callers may
+ * cache the miss. `retry`: a passing failure (rate limit, still indexing, outage), never to be
+ * cached beyond this process.
+ */
+export type LogoResult = { logo: Logo } | { logo: null; missing: 'none' | 'retry' }
+
+const NONE: LogoResult = { logo: null, missing: 'none' }
+const RETRY: LogoResult = { logo: null, missing: 'retry' }
+
 interface Entry {
-  logo: Logo | null
+  result: LogoResult
   /** Hits never expire; misses are retried after this time. */
   until: number
 }
 
 export interface LogoSource {
-  /** The logo for a publisher domain, or null when there isn't one (yet). */
-  get(domain: string): Promise<Logo | null>
+  get(domain: string): Promise<LogoResult>
 }
 
 export function createLogoSource({
@@ -39,11 +48,26 @@ export function createLogoSource({
   hourlyLimit?: number
 }): LogoSource {
   const cache = new Map<string, Entry>()
-  const inFlight = new Map<string, Promise<Logo | null>>()
+  const inFlight = new Map<string, Promise<LogoResult>>()
+  // logo.dev caps open requests per account: a page of 60+ logos sent at once got 429s past
+  // about 8. Four at a time stays under it.
+  const MAX_OPEN = 4
+  let open = 0
+  const waiting: (() => void)[] = []
+  async function limited<T>(task: () => Promise<T>): Promise<T> {
+    if (open >= MAX_OPEN) await new Promise<void>((resolve) => waiting.push(resolve))
+    open++
+    try {
+      return await task()
+    } finally {
+      open--
+      waiting.shift()?.()
+    }
+  }
   let windowStart = 0
   let callsThisHour = 0
 
-  // Returns the logo and how long to keep a miss, or null when the ceiling is hit (not cached).
+  // Null when the hourly ceiling is hit (not cached, so it's retried after the hour).
   async function load(domain: string): Promise<Entry | null> {
     if (now() - windowStart >= HOUR) {
       windowStart = now()
@@ -55,45 +79,48 @@ export function createLogoSource({
     }
     callsThisHour++
 
+    const retry = { result: RETRY, until: now() + RETRY_SOON }
     try {
       const res = await fetch(`${API}?domain=${encodeURIComponent(domain)}`, {
         headers: { authorization: `Bearer ${apiKey}` },
       })
-      if (res.status === 202) return { logo: null, until: now() + RETRY_SOON }
-      if (res.status === 404) return { logo: null, until: now() + RETRY_LATER }
-      if (!res.ok) return { logo: null, until: now() + RETRY_SOON }
+      if (res.status === 404) return { result: NONE, until: now() + RETRY_LATER }
+      // 202 (still indexing), 429 (rate limited) and 5xx all pass.
+      if (res.status !== 200) {
+        if (res.status !== 202) console.warn(`[logos] ${domain}: logo.dev ${res.status}`)
+        return retry
+      }
 
       const body = (await res.json()) as { data?: { url?: string } }
-      if (!body.data?.url) return { logo: null, until: now() + RETRY_LATER }
+      if (!body.data?.url) return { result: NONE, until: now() + RETRY_LATER }
       // The download URL is temporary; size and format are set on it, as in logo.dev's docs.
       const url = new URL(body.data.url)
       url.searchParams.set('format', 'webp')
       url.searchParams.set('size', '128')
       const image = await fetch(url)
       const contentType = image.headers.get('content-type') ?? ''
-      if (!image.ok || !contentType.startsWith('image/'))
-        return { logo: null, until: now() + RETRY_SOON }
+      if (!image.ok || !contentType.startsWith('image/')) return retry
       const bytes = new Uint8Array(await image.arrayBuffer())
-      return { logo: { bytes, contentType }, until: Number.POSITIVE_INFINITY }
+      return { result: { logo: { bytes, contentType } }, until: Number.POSITIVE_INFINITY }
     } catch (error) {
       console.warn(`[logos] ${domain}:`, error)
-      return { logo: null, until: now() + RETRY_SOON }
+      return retry
     }
   }
 
   return {
     async get(domain) {
-      if (!apiKey) return null
+      if (!apiKey) return RETRY
       const cached = cache.get(domain)
-      if (cached && cached.until > now()) return cached.logo
+      if (cached && cached.until > now()) return cached.result
 
       // Parallel misses for one domain share a single call.
       let pending = inFlight.get(domain)
       if (!pending) {
-        pending = load(domain)
+        pending = limited(() => load(domain))
           .then((entry) => {
             if (entry) cache.set(domain, entry)
-            return entry?.logo ?? null
+            return entry?.result ?? RETRY
           })
           .finally(() => inFlight.delete(domain))
         inFlight.set(domain, pending)
