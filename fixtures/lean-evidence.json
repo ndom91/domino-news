@@ -228,6 +228,42 @@
       "edition": 2022,
       "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
       "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "foxnews",
+      "source": "allsides",
+      "rating": "Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/fox-news-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "thedispatch",
+      "source": "allsides",
+      "rating": "Lean Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/dispatch-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "foxnews",
+      "source": "reuters_dnr",
+      "score": 0.26,
+      "lean": "right",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "telegraph",
+      "source": "reuters_dnr",
+      "score": 0.14,
+      "lean": "centre_right",
+      "countryContext": "GB",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
     }
   ]
 }

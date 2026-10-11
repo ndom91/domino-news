@@ -1180,5 +1180,57 @@
         "title": "EL PAÍS in English"
       }
     ]
+  },
+  {
+    "slug": "foxnews",
+    "name": "Fox News",
+    "domain": "foxnews.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "No public reuse licence; robots.txt does not single out AI agents, but no permission to process article bodies has been granted. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://moxie.foxnews.com/google-publisher/world.xml",
+        "title": "Fox News World"
+      },
+      {
+        "url": "https://moxie.foxnews.com/google-publisher/politics.xml",
+        "title": "Fox News Politics"
+      }
+    ]
+  },
+  {
+    "slug": "telegraph",
+    "name": "The Telegraph",
+    "domain": "telegraph.co.uk",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Metered paywall; robots.txt disallows GPTBot, ClaudeBot, anthropic-ai, CCBot and Google-Extended from /. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://www.telegraph.co.uk/news/rss.xml",
+        "title": "The Telegraph News"
+      }
+    ]
+  },
+  {
+    "slug": "thedispatch",
+    "name": "The Dispatch",
+    "domain": "thedispatch.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Subscription publication (many articles members-only); robots.txt does not restrict AI agents, but no reuse licence is offered. Metadata only.",
+    "policyReviewedAt": "2026-10-11",
+    "feeds": [
+      {
+        "url": "https://thedispatch.com/feed/",
+        "title": "The Dispatch"
+      }
+    ]
   }
 ]

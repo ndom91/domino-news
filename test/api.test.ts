@@ -752,7 +752,7 @@ describe('publisher coverage', () => {
     expect(res.status).toBe(200)
     const { publisherListResponseSchema } = await import('@dn/schemas')
     const body = publisherListResponseSchema.parse(await res.json())
-    expect(body.items.length).toBe(65)
+    expect(body.items.length).toBe(68)
     for (const p of body.items) {
       const { rows } = await h.ctx.pool.query(
         `select count(distinct sa.story_id)::int as n from story_article sa
