@@ -2,6 +2,7 @@ import { z } from 'zod'
 import { deskSchema } from './desks.ts'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
 import { regionSchema } from './regions.ts'
+import { topicSchema } from './topics.ts'
 
 // Versioned HTTP contracts (/api/v1). Shared by web and future native clients;
 // keep this file free of DOM, Node and framework imports.
@@ -114,6 +115,7 @@ export const storyListItemSchema = z.object({
   lastUpdatedAt: z.string(),
   sourceCount: z.number().int().nonnegative(),
   regions: z.array(regionSchema),
+  topics: z.array(topicSchema),
   // Null until the Story is summarised with a desk.
   desk: deskSchema.nullable(),
   publishers: z.array(publisherRefSchema),
@@ -214,6 +216,7 @@ export const storyDetailSchema = z.object({
   lastUpdatedAt: z.string(),
   publishedAt: z.string().nullable(),
   regions: z.array(regionSchema),
+  topics: z.array(topicSchema),
   // Null until the Story is summarised with a desk.
   desk: deskSchema.nullable(),
   summary: summarySchema.nullable(),
@@ -535,6 +538,7 @@ export const userPreferencesSchema = z.object({
   // For You picks. Empty = no preference. They rank Stories up, never hide others.
   regions: z.array(regionSchema).max(11),
   desks: z.array(deskSchema).max(6),
+  topics: z.array(topicSchema).max(25),
   rememberReads: z.boolean(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
@@ -568,7 +572,7 @@ export type FollowRequest = z.infer<typeof followRequestSchema>
 
 // Why a Story is on your For You page, shown on the card.
 export const forYouReasonSchema = z.object({
-  kind: z.enum(['narrative', 'publisher', 'region', 'desk']),
+  kind: z.enum(['narrative', 'publisher', 'topic', 'region', 'desk']),
   label: z.string(),
 })
 export type ForYouReason = z.infer<typeof forYouReasonSchema>

@@ -1,4 +1,4 @@
-import { type Desk, EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
+import { type Desk, EMBEDDING_DIMENSIONS, type Region, type Topic } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import {
   bigserial,
@@ -361,11 +361,14 @@ export const story = pgTable(
     regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
     // Desk (`DESKS` in @dn/schemas), set by generated summaries; null until then.
     desk: text('desk').$type<Desk>(),
+    // Specific subjects (`TOPICS` in @dn/schemas), set by generated summaries; drives For You.
+    topics: text('topics').array().$type<Topic[]>().notNull().default(sql`'{}'::text[]`),
   },
   (t) => [
     index('story_published_idx').on(t.publishedAt),
     index('story_last_updated_idx').on(t.lastUpdatedAt),
     index('story_regions_idx').using('gin', t.regions),
+    index('story_topics_idx').using('gin', t.topics),
   ],
 )
 
@@ -752,6 +755,7 @@ export const userPreference = pgTable('user_preference', {
   // For You picks (`REGIONS`, `DESKS`). Empty = no preference; they boost, never hide.
   regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
   desks: text('desks').array().$type<Desk[]>().notNull().default(sql`'{}'::text[]`),
+  topics: text('topics').array().$type<Topic[]>().notNull().default(sql`'{}'::text[]`),
   // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
   rememberReads: boolean('remember_reads').notNull().default(false),
   updatedAt: ts('updated_at').notNull().defaultNow(),

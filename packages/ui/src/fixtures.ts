@@ -87,6 +87,7 @@ function story(
     lastUpdatedAt: ago(Math.min(...times)),
     sourceCount: sources.length,
     regions: ['europe'],
+    topics: [],
     desk: DESK[id] ?? 'politics',
     publishers: sources.map(([p]) => p),
     narratives: [],
@@ -241,6 +242,7 @@ export const fixtureLead: StoryDetail = {
   lastUpdatedAt: ago(2.15),
   publishedAt: ago(19),
   regions: ['europe'],
+  topics: ['courts', 'rights'],
   desk: 'justice',
   summary: {
     versionId: 'sum_lead',

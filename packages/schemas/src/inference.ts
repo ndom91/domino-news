@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { deskSchema } from './desks.ts'
 import { regionSchema } from './regions.ts'
+import { topicSchema } from './topics.ts'
 
 // Vector size of EmbeddingGemma 2 (and the fixture adapter). Changing it needs a DB
 // migration and a search-index rebuild.
@@ -23,6 +24,7 @@ export const storySummarySchema = z.object({
   observationIds: z.array(z.string()).min(1),
   regions: z.array(regionSchema).min(1).max(3),
   desk: deskSchema,
+  topics: z.array(topicSchema).max(3),
 })
 export type StorySummaryOutput = z.infer<typeof storySummarySchema>
 

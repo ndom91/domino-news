@@ -1,5 +1,5 @@
 import { contentTokens, jaccard, regionForCountry, truncate } from '@dn/domain'
-import { type Desk, EMBEDDING_DIMENSIONS, type Region } from '@dn/schemas'
+import { type Desk, EMBEDDING_DIMENSIONS, type Region, type Topic } from '@dn/schemas'
 import { PROMPT_VERSIONS } from './prompts.ts'
 import type { ArticleInput, EmbeddingProvider, GenerationProvider, StoryInput } from './types.ts'
 
@@ -49,6 +49,33 @@ const DESK_KEYWORDS: [Desk, RegExp][] = [
   ['science', /\b(climate|health|virus|disease|space|wildfire|drought|study|scientists)\b/i],
   ['culture', /\b(prize|film|book|music|festival|sport|church|art)\b/i],
 ]
+
+// Stand-in for model topic tagging: keyword hits in the lead headline, at most 3.
+const TOPIC_KEYWORDS: [Topic, RegExp][] = [
+  ['elections', /\b(election|vote|voters|ballot|poll|polls|campaign)\b/i],
+  ['diplomacy', /\b(summit|talks|envoy|diplomat|treaty|minister)\b/i],
+  ['migration', /\b(migrants?|refugees?|asylum|border)\b/i],
+  ['climate', /\b(climate|emissions|warming|carbon)\b/i],
+  ['public-health', /\b(health|virus|outbreak|disease|vaccine|hospital)\b/i],
+  ['space', /\b(space|nasa|rocket|satellite|moon|mars)\b/i],
+  ['disasters', /\b(earthquake|flood|hurricane|wildfire|storm|drought)\b/i],
+  ['markets', /\b(market|stocks|shares|bank|rates?)\b/i],
+  ['trade', /\b(trade|tariffs?|exports?|imports?)\b/i],
+  ['energy', /\b(oil|gas|energy|diesel|power)\b/i],
+  ['ai', /\b(ai|artificial intelligence|chatbot)\b/i],
+  ['courts', /\b(court|judge|trial|ruling|lawsuit)\b/i],
+  ['crime', /\b(police|arrested|murder|shooting|prison)\b/i],
+  ['ukraine-war', /\b(ukraine|kyiv|zelensky)\b/i],
+  ['middle-east-conflict', /\b(gaza|israel|hamas|hezbollah|iran)\b/i],
+  ['sport', /\b(match|league|cup|olympic|football|tennis)\b/i],
+  ['arts', /\b(film|book|novel|music|festival|prize)\b/i],
+]
+
+export function fixtureTopics(headline: string): Topic[] {
+  return TOPIC_KEYWORDS.filter(([, re]) => re.test(headline))
+    .map(([t]) => t)
+    .slice(0, 3)
+}
 
 export function fixtureDesk(headline: string): Desk {
   return DESK_KEYWORDS.find(([, re]) => re.test(headline))?.[0] ?? 'politics'
@@ -106,6 +133,7 @@ export function createFixtureGeneration(): GenerationProvider {
           observationIds: story.articles.map((a) => a.observationId),
           regions: fixtureRegions(story),
           desk: fixtureDesk(lead.title),
+          topics: fixtureTopics(lead.title),
         },
         modelId,
         promptVersion: PROMPT_VERSIONS.summarizeStory,

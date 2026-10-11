@@ -555,32 +555,39 @@ describe('publish threshold', () => {
   it('summarises only Stories covered by enough newsrooms; official sources do not count', async () => {
     const { summarizeStory } = await import('@dn/jobs')
     const { newsroomOutletCount } = await import('@dn/server')
-    // A published Story covered by exactly two newsrooms.
+    // Any published Story with several newsrooms. Fixture grouping varies from run to run,
+    // so the threshold is set to this Story's own outlet count rather than a fixed 2.
     const { rows } = await h.ctx.pool.query(
-      `select s.id, s.input_fingerprint, min(a.publisher_id) as publisher_id
+      `select s.id, s.input_fingerprint, min(a.publisher_id) as publisher_id,
+         count(distinct a.publisher_id)::int as outlets
        from story s join story_article sa on sa.story_id = s.id and sa.removed_at is null
        join article a on a.id = sa.article_id
        where s.published_at is not null
-       group by s.id having count(distinct a.publisher_id) = 2 limit 1`,
+       group by s.id having count(distinct a.publisher_id) >= 2 limit 1`,
     )
-    const story = rows[0] as { id: string; input_fingerprint: string; publisher_id: string }
-    if (!story) throw new Error('no two-outlet story')
+    const story = rows[0] as {
+      id: string
+      input_fingerprint: string
+      publisher_id: string
+      outlets: number
+    }
+    if (!story) throw new Error('no multi-outlet story')
     const job = {
       targetId: story.id,
       inputFingerprint: story.input_fingerprint,
       pipelineVersion: 'p2',
       priorityClass: 'fresh' as const,
     }
-    expect(await newsroomOutletCount(h.ctx.db, story.id)).toBe(2)
+    expect(await newsroomOutletCount(h.ctx.db, story.id)).toBe(story.outlets)
 
-    h.ctx.config.minPublishOutlets = 2
+    h.ctx.config.minPublishOutlets = story.outlets
     try {
       // Already summarised for these inputs, so it passes the gate and is then a no-op.
       expect(await summarizeStory(h.ctx, job)).toEqual({ status: 'stale' })
       await h.ctx.pool.query(`update publisher set kind = 'official' where id = $1`, [
         story.publisher_id,
       ])
-      expect(await newsroomOutletCount(h.ctx.db, story.id)).toBe(1)
+      expect(await newsroomOutletCount(h.ctx.db, story.id)).toBe(story.outlets - 1)
       expect(await summarizeStory(h.ctx, job)).toEqual({ status: 'below_outlet_threshold' })
     } finally {
       h.ctx.config.minPublishOutlets = 1
@@ -599,10 +606,10 @@ describe('official sources as evidence', () => {
        from story s join story_article sa on sa.story_id = s.id and sa.removed_at is null
        join article a on a.id = sa.article_id
        where s.published_at is not null
-       group by s.id having count(distinct a.publisher_id) = 2 limit 1`,
+       group by s.id having count(distinct a.publisher_id) >= 2 limit 1`,
     )
     const story = rows[0] as { id: string; publisher_id: string }
-    if (!story) throw new Error('no two-outlet story')
+    if (!story) throw new Error('no multi-outlet story')
     await h.ctx.pool.query(`update publisher set kind = 'official' where id = $1`, [
       story.publisher_id,
     ])

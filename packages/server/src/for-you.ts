@@ -6,6 +6,8 @@ import {
   type ForYouResponse,
   REGION_LABELS,
   type Region,
+  TOPIC_LABELS,
+  type Topic,
 } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import { listFollows } from './follows.ts'
@@ -17,12 +19,13 @@ const WINDOW_HOURS = 72
 const PAGE_SIZE = 30
 
 // Boosts, strongest first. A follow says more than a broad pick.
-const WEIGHT = { narrative: 3, publisher: 1, region: 1, desk: 1 } as const
+const WEIGHT = { narrative: 3, topic: 2, publisher: 1, region: 1, desk: 1 } as const
 
 type Candidate = {
   id: string
   desk: Desk | null
   regions: Region[]
+  topics: Topic[]
   ageHours: number
   outlets: number
   narrativeIds: string[]
@@ -39,6 +42,7 @@ export function scoreStory(
   picks: {
     regions: readonly Region[]
     desks: readonly Desk[]
+    topics: readonly Topic[]
     narratives: ReadonlyMap<string, string>
     publishers: ReadonlyMap<string, string>
   },
@@ -57,6 +61,11 @@ export function scoreStory(
   if (followedOutlets.length) {
     score += WEIGHT.publisher
     reasons.push({ kind: 'publisher', label: followedOutlets.slice(0, 2).join(', ') })
+  }
+  const topic = c.topics.find((t) => picks.topics.includes(t))
+  if (topic) {
+    score += WEIGHT.topic
+    reasons.push({ kind: 'topic', label: TOPIC_LABELS[topic] })
   }
   const region = c.regions.find((r) => picks.regions.includes(r))
   if (region) {
@@ -80,6 +89,7 @@ export async function getForYou(
   const picks = {
     regions: prefs.regions,
     desks: prefs.desks,
+    topics: prefs.topics,
     narratives: new Map(
       follows.items.filter((f) => f.targetType === 'narrative').map((f) => [f.id, f.title]),
     ),
@@ -87,18 +97,20 @@ export async function getForYou(
       follows.items.filter((f) => f.targetType === 'publisher').map((f) => [f.id, f.title]),
     ),
   }
-  const personalised = prefs.regions.length + prefs.desks.length + follows.items.length > 0
+  const personalised =
+    prefs.regions.length + prefs.desks.length + prefs.topics.length + follows.items.length > 0
 
   const { rows } = await db.execute<{
     id: string
     desk: Desk | null
     regions: Region[]
+    topics: Topic[]
     age_hours: number
     outlets: number
     narrative_ids: string[]
     publisher_ids: string[]
   }>(sql`
-    select s.id, s.desk, s.regions,
+    select s.id, s.desk, s.regions, s.topics,
       extract(epoch from now() - s.last_updated_at) / 3600 as age_hours,
       (select count(distinct a.publisher_id)::int from story_article sa
         join article a on a.id = sa.article_id join publisher p on p.id = a.publisher_id
@@ -119,6 +131,7 @@ export async function getForYou(
           id: r.id,
           desk: r.desk,
           regions: r.regions,
+          topics: r.topics,
           ageHours: Number(r.age_hours),
           outlets: r.outlets,
           narrativeIds: r.narrative_ids,

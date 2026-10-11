@@ -1,0 +1,92 @@
+import { z } from 'zod'
+import type { Desk } from './desks.ts'
+
+// Finer subjects than desks, for For You picks. A Story gets 0-3, tagged by generated
+// summaries. Fixed list so picks stay stable; grouped by the desk they usually fall under.
+export const TOPICS = [
+  'elections',
+  'diplomacy',
+  'migration',
+  'public-policy',
+  'climate',
+  'environment',
+  'public-health',
+  'space',
+  'research',
+  'disasters',
+  'markets',
+  'trade',
+  'jobs',
+  'energy',
+  'tech',
+  'ai',
+  'courts',
+  'crime',
+  'rights',
+  'ukraine-war',
+  'middle-east-conflict',
+  'terrorism',
+  'media',
+  'sport',
+  'arts',
+] as const
+
+export const topicSchema = z.enum(TOPICS)
+export type Topic = z.infer<typeof topicSchema>
+
+export const TOPIC_LABELS: Record<Topic, string> = {
+  elections: 'Elections',
+  diplomacy: 'Diplomacy',
+  migration: 'Migration',
+  'public-policy': 'Public policy',
+  climate: 'Climate',
+  environment: 'Environment',
+  'public-health': 'Public health',
+  space: 'Space',
+  research: 'Research',
+  disasters: 'Disasters',
+  markets: 'Markets',
+  trade: 'Trade',
+  jobs: 'Jobs & labour',
+  energy: 'Energy',
+  tech: 'Tech industry',
+  ai: 'AI',
+  courts: 'Courts',
+  crime: 'Crime & policing',
+  rights: 'Rights',
+  'ukraine-war': 'War in Ukraine',
+  'middle-east-conflict': 'Middle East conflict',
+  terrorism: 'Terrorism',
+  media: 'Media',
+  sport: 'Sport',
+  arts: 'Arts & books',
+}
+
+/** Desk each topic sits under, for grouping the picker. Not a rule for tagging. */
+export const TOPIC_DESK: Record<Topic, Desk> = {
+  elections: 'politics',
+  diplomacy: 'politics',
+  migration: 'politics',
+  'public-policy': 'politics',
+  climate: 'science',
+  environment: 'science',
+  'public-health': 'science',
+  space: 'science',
+  research: 'science',
+  disasters: 'science',
+  markets: 'economy',
+  trade: 'economy',
+  jobs: 'economy',
+  energy: 'economy',
+  tech: 'economy',
+  ai: 'economy',
+  courts: 'justice',
+  crime: 'justice',
+  rights: 'justice',
+  'ukraine-war': 'conflict',
+  'middle-east-conflict': 'conflict',
+  terrorism: 'conflict',
+  media: 'culture',
+  sport: 'culture',
+  arts: 'culture',
+}

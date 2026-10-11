@@ -271,6 +271,20 @@ describe('display helpers', () => {
   })
 })
 
+describe('fixtureTopics', () => {
+  it('tags up to three topics from the headline', async () => {
+    const { fixtureTopics } = await import('@dn/inference')
+    expect(fixtureTopics('Missile strike hits Kyiv power station')).toEqual([
+      'energy',
+      'ukraine-war',
+    ])
+    expect(fixtureTopics('Quiet day')).toEqual([])
+    expect(
+      fixtureTopics('Court rules on election ballot and border asylum and tariffs').length,
+    ).toBe(3)
+  })
+})
+
 describe('fixtureDesk', () => {
   it('tags the first matching desk and falls back to politics', async () => {
     const { fixtureDesk } = await import('@dn/inference')
@@ -383,6 +397,7 @@ describe('For You scoring', () => {
   const picks = {
     regions: ['europe'] as const,
     desks: ['science'] as const,
+    topics: ['climate'] as const,
     narratives: new Map([['nar_sudan', "Sudan's civil war"]]),
     publishers: new Map([['pub_bbc', 'BBC News']]),
   }
@@ -390,6 +405,7 @@ describe('For You scoring', () => {
     id: 's',
     desk: null,
     regions: [],
+    topics: [],
     ageHours: 2,
     outlets: 2,
     narrativeIds: [],
@@ -406,6 +422,13 @@ describe('For You scoring', () => {
     expect(followed.reasons).toEqual([{ kind: 'narrative', label: "Sudan's civil war" }])
     expect(picked.reasons.map((r) => r.label)).toEqual(['Europe', 'Science'])
     expect(other.reasons).toEqual([])
+  })
+
+  it('ranks a picked topic above a picked region or desk', () => {
+    const topic = scoreStory(story({ topics: ['climate'] }), picks)
+    const region = scoreStory(story({ regions: ['europe'] }), picks)
+    expect(topic.score).toBeGreaterThan(region.score)
+    expect(topic.reasons).toEqual([{ kind: 'topic', label: 'Climate' }])
   })
 
   it('keeps big stories outside your picks, but newer and wider coverage wins', () => {

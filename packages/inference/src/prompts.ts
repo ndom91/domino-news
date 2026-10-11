@@ -1,10 +1,10 @@
-import { DESK_SCOPES, DESKS } from '@dn/schemas'
+import { DESK_SCOPES, DESKS, TOPIC_LABELS, TOPICS } from '@dn/schemas'
 import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@4',
-  summarizeStory: 'summarize-story@6',
+  summarizeStory: 'summarize-story@7',
   classifyRelationship: 'classify-relationship@4',
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@3',
@@ -86,6 +86,8 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
 - desk: the one desk that fits the main event best. Pick from:
 ${DESKS.map((d) => `  ${d} (${DESK_SCOPES[d]})`).join('\n')}
   Choose by what happened, not who was involved: a court ruling on a politician is justice, a war's economic cost is economy. Use politics only when the main actor is a government, party or election. Public-health agencies, outbreaks and medical findings are science; regulators' enforcement actions are justice or economy by subject.
+- topics: 0-3 specific subjects the story is mainly about, most relevant first. Only tag what the story is centrally about, not passing mentions; [] if none fit. Pick from:
+${TOPICS.map((t) => `  ${t} (${TOPIC_LABELS[t]})`).join('\n')}
 Do not copy sentences from the sources.
 
 SOURCE ARTICLES (numbered, in publishing order):

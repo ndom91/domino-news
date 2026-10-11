@@ -259,6 +259,7 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
         lastUpdatedAt: iso(s.lastUpdatedAt),
         sourceCount: counts.get(s.id) ?? 0,
         regions: s.regions,
+        topics: s.topics,
         desk: s.desk,
         publishers: publishers.get(s.id) ?? [],
         narratives: narratives.get(s.id) ?? [],
@@ -412,6 +413,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
     lastUpdatedAt: iso(story.lastUpdatedAt),
     publishedAt: iso(story.publishedAt),
     regions: story.regions,
+    topics: story.topics,
     desk: story.desk,
     summary: current
       ? {

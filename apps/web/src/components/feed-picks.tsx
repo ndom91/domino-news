@@ -1,5 +1,16 @@
 import { savePreferencesMutation } from '@dn/queries'
-import { DESK_LABELS, DESKS, type Desk, REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
+import {
+  DESK_LABELS,
+  DESKS,
+  type Desk,
+  REGION_LABELS,
+  REGIONS,
+  type Region,
+  TOPIC_DESK,
+  TOPIC_LABELS,
+  TOPICS,
+  type Topic,
+} from '@dn/schemas'
 import { cx, Notice } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, queries } from '../lib/api.ts'
@@ -24,7 +35,7 @@ function Chips<T extends string>({
 }) {
   return (
     <fieldset>
-      <legend className="mb-2 type-label">{label}</legend>
+      <legend className="mb-2 type-label text-text-muted">{label}</legend>
       <div className="flex flex-wrap gap-2">
         {options.map((o) => {
           const on = selected.includes(o)
@@ -51,13 +62,14 @@ function Chips<T extends string>({
   )
 }
 
-/** Regions and desks that rank Stories up on For You. Each tap saves. */
+/** Regions, desks and topics that rank Stories up on For You. Each tap saves. */
 export function FeedPicks() {
   const queryClient = useQueryClient()
   const prefs = useQuery(queries.preferences())
   const save = useMutation(savePreferencesMutation(api, queryClient))
   const regions = prefs.data?.regions ?? []
   const desks = prefs.data?.desks ?? []
+  const topics = prefs.data?.topics ?? []
   const busy = prefs.isPending || save.isPending
   return (
     <div className="flex flex-col gap-6">
@@ -77,6 +89,20 @@ export function FeedPicks() {
         disabled={busy}
         onToggle={(d) => save.mutate({ desks: toggle(desks, d) })}
       />
+      <div className="flex flex-col gap-4">
+        <p className="type-label">Topics</p>
+        {DESKS.map((d) => (
+          <Chips
+            key={d}
+            label={DESK_LABELS[d]}
+            options={TOPICS.filter((t) => TOPIC_DESK[t] === d)}
+            labelOf={(t: Topic) => TOPIC_LABELS[t]}
+            selected={topics}
+            disabled={busy}
+            onToggle={(t) => save.mutate({ topics: toggle(topics, t) })}
+          />
+        ))}
+      </div>
       {save.isError ? (
         <Notice tone="error" title="Not saved">
           {save.error.message}

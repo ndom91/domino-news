@@ -10,6 +10,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
     .select({
       regions: schema.userPreference.regions,
       desks: schema.userPreference.desks,
+      topics: schema.userPreference.topics,
       rememberReads: schema.userPreference.rememberReads,
     })
     .from(schema.userPreference)
@@ -17,6 +18,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
   return {
     regions: row?.regions ?? [],
     desks: row?.desks ?? [],
+    topics: row?.topics ?? [],
     rememberReads: row?.rememberReads ?? false,
   }
 }

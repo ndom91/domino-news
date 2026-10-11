@@ -15,6 +15,7 @@ export const Route = createFileRoute('/for-you')({
 const REASON_PREFIX: Record<ForYouReason['kind'], string> = {
   narrative: 'You follow',
   publisher: 'From',
+  topic: '',
   region: '',
   desk: '',
 }
@@ -50,9 +51,9 @@ function ForYouPage() {
           {!first?.personalised ? (
             <section className="mb-12 max-w-reading">
               <p className="mb-6 text-md text-text-secondary">
-                Pick the regions and desks you care about, and follow narratives or outlets from
-                their pages. Matching stories move to the top here. Nothing is hidden: big stories
-                still show, just lower down.
+                Pick the regions, desks and topics you care about, and follow narratives or outlets
+                from their pages. Matching stories move to the top here. Nothing is hidden: big
+                stories still show, just lower down.
               </p>
               <FeedPicks />
             </section>
