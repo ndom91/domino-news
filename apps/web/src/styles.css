@@ -33,13 +33,11 @@
 @keyframes theme-reveal {
   from {
     clip-path: circle(0 at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh));
-    filter: saturate(0.78) contrast(0.94);
   }
   to {
     clip-path: circle(
       var(--theme-reveal-radius, 150vmax) at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh)
     );
-    filter: none;
   }
 }
 
