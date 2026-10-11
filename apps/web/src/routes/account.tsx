@@ -292,7 +292,7 @@ function LearnedSignals() {
           )}
           <ConfirmDialog
             trigger={
-              <Button size="sm" variant="ghost" loading={update.isPending}>
+              <Button size="sm" variant="danger" loading={update.isPending}>
                 Reset all
               </Button>
             }
