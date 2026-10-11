@@ -61,22 +61,24 @@ function AccountPage() {
 
   return (
     <Page>
-      <div className="max-w-2xl">
-        <PageTitle>Account</PageTitle>
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="text-text-secondary">
-            Signed in as{' '}
-            <span className="font-semibold text-text">
-              {session.user?.username ?? session.user?.name}
-            </span>
-          </p>
-          <SignOutButton />
-        </div>
+      <PageTitle>Account</PageTitle>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-text-secondary">
+          Signed in as{' '}
+          <span className="font-semibold text-text">
+            {session.user?.username ?? session.user?.name}
+          </span>
+        </p>
+        <SignOutButton />
+      </div>
 
+      {/* Feed picks span two columns (picks | topics); everything else takes one or two. */}
+      <div className="mt-10 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         <FeedSection />
+        <FollowingSection />
         <ReadingHistorySection />
 
-        <section aria-labelledby="passkeys-heading" className="mt-10">
+        <section aria-labelledby="passkeys-heading" className="col-span-2 max-md:col-span-1">
           <SectionLabel id="passkeys-heading">Passkeys</SectionLabel>
           <p className="mb-6 max-w-reading text-sm text-text-secondary">
             Sign in with your device's screen lock or a security key instead of a password. Your
@@ -174,7 +176,7 @@ function SignOutButton() {
 
 function ReadingHistorySection() {
   return (
-    <section aria-labelledby="history-heading" className="mt-10">
+    <section aria-labelledby="history-heading">
       <SectionLabel id="history-heading">Reading history</SectionLabel>
       <ReadingHistoryToggle />
     </section>
@@ -182,18 +184,32 @@ function ReadingHistorySection() {
 }
 
 function FeedSection() {
-  const queryClient = useQueryClient()
-  const follows = useQuery(queries.follows())
-  const unfollow = useMutation(setFollowMutation(api, queryClient))
   return (
-    <section id="your-feed" aria-labelledby="feed-heading" className="mt-10 scroll-mt-24">
+    <section
+      id="your-feed"
+      aria-labelledby="feed-heading"
+      className="col-span-2 scroll-mt-24 max-md:col-span-1"
+    >
       <SectionLabel id="feed-heading">Your feed</SectionLabel>
       <p className="mb-5 max-w-reading text-sm text-text-secondary">
         Stories matching these move to the top of For You, and your regions lead the front page.
         Nothing else is hidden.
       </p>
-      <FeedPicks />
-      <h3 className="mt-8 mb-2 type-label">Following</h3>
+      <div className="grid grid-cols-2 gap-x-column gap-y-6 max-md:grid-cols-1">
+        <FeedPicks sections={['regions', 'desks']} />
+        <FeedPicks sections={['topics']} />
+      </div>
+    </section>
+  )
+}
+
+function FollowingSection() {
+  const queryClient = useQueryClient()
+  const follows = useQuery(queries.follows())
+  const unfollow = useMutation(setFollowMutation(api, queryClient))
+  return (
+    <section aria-labelledby="following-heading">
+      <SectionLabel id="following-heading">Following</SectionLabel>
       {follows.data?.items.length ? (
         <ul className="flex flex-col divide-y divide-border border-y border-border">
           {follows.data.items.map((f) => (
@@ -204,7 +220,7 @@ function FeedSection() {
               <span>
                 {f.title}{' '}
                 <span className="type-meta">
-                  {f.targetType === 'narrative' ? 'Narrative' : 'Outlet'}
+                  {f.targetType === 'narrative' ? 'Narrative' : 'Publisher'}
                 </span>
               </span>
               <Button
@@ -222,7 +238,7 @@ function FeedSection() {
         </ul>
       ) : (
         <p className="text-sm text-text-muted">
-          Nothing yet. Use Follow on a narrative or outlet page.
+          Nothing yet. Use Follow on a narrative or publisher page.
         </p>
       )}
       <LearnedSignals />
