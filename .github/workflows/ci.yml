@@ -40,6 +40,9 @@ jobs:
     env:
       # Fixture pubDates are fixed; treat them all as fresh so CI doesn't depend on today's date.
       FRESH_WINDOW_HOURS: "100000"
+      # Only 3 fixture stories have two newsroom publishers; publish single-outlet ones too so
+      # the feed, narratives and context popovers have enough stories to test.
+      MIN_PUBLISH_OUTLETS: "1"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -60,10 +63,11 @@ jobs:
           (cd apps/worker && pnpm start > ../../worker.log 2>&1 &)
           (cd apps/worker && pnpm start:indexer > ../../indexer.log 2>&1 &)
           pnpm cli ingest
-          for i in $(seq 1 60); do
+          # Fixture data settles in about 15s; fail fast instead of burning minutes.
+          for i in $(seq 1 30); do
             published=$(pnpm --silent cli status | jq '.pipeline.storiesPublished' || echo 0)
             [ "${published:-0}" -gt 5 ] && exit 0
-            sleep 5
+            sleep 2
           done
           echo "pipeline did not publish stories in time" && exit 1
       - run: |
