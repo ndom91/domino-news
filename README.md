@@ -54,7 +54,25 @@ The web app listens on `WEB_BIND:WEB_PORT` (default `127.0.0.1:4000`). Point you
 scripts/deploy.sh update        # git pull, rebuild, migrate, restart, re-seed publishers
 ```
 
-Data lives in Docker volumes and survives updates. Run `scripts/deploy.sh` with no arguments for the other commands (`status`, `logs`, `cli`, `down`).
+Data lives in Docker volumes and survives updates. Run `scripts/deploy.sh` with no arguments for the other commands (`status`, `logs`, `cli`, `backup`, `restore`, `down`).
+
+### Backups
+
+```bash
+scripts/deploy.sh backup                        # dump Postgres to backups/, prune dumps older than 14 days
+scripts/deploy.sh restore backups/dn-<time>.dump # asks first, takes a safety dump, then rebuilds search
+```
+
+- `backup` uses `pg_dump`, which is consistent while Postgres runs. Copying the data directory is not.
+- Typesense isn't backed up: `restore` rebuilds it from Postgres.
+- **Offsite:** copy `backup.env.example` to `backup.env` and set a restic repository (SFTP or S3-compatible). Each backup is then also pushed there, encrypted, keeping 7 daily, 4 weekly and 6 monthly copies. Install `restic` on the host.
+- **Also keep `.env` somewhere safe** (e.g. a password manager): restored data needs the same `BETTER_AUTH_SECRET`.
+
+Nightly at 03:15, with a log:
+
+```cron
+15 3 * * * cd /opt/domino-news && scripts/deploy.sh backup >> /var/log/domino-backup.log 2>&1
+```
 
 ## Learn more
 

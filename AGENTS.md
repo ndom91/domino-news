@@ -90,7 +90,7 @@ scripts/deploy.sh user you      # cli user:create, prompts for the password
 scripts/deploy.sh update        # git pull --ff-only, then the same as up
 ```
 
-Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) and backups are not included yet.
+Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) is not included yet. Backups: `scripts/deploy.sh backup` (pg_dump, optional restic offsite; see README).
 
 ## Server guidelines
 
@@ -196,4 +196,4 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 
 ## Deferred (per doc 005)
 
-Full claims/evidence graph (cross-story claim linking, verification), automated political-lean ratings, Expo app, notifications, billing, Caddy/TLS, backups, OpenTofu/Ansible.
+Full claims/evidence graph (cross-story claim linking, verification), automated political-lean ratings, Expo app, notifications, billing, Caddy/TLS, OpenTofu/Ansible.
