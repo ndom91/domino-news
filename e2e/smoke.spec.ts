@@ -53,9 +53,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   // Claims: grounded statements with the outlets that make them.
   await expect(page.getByRole('heading', { name: 'Claims' })).toBeVisible()
   await expect(page.getByText(/not verified facts/)).toBeVisible()
-  await page.getByRole('button', { name: "How it's made" }).click()
-  await expect(page.getByText('How this summary is made')).toBeVisible()
-  await page.keyboard.press('Escape')
+  await expect(page.getByText(/summary from \d+ of \d+ publishers?/)).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
   // Narrative graph with clickable story nodes

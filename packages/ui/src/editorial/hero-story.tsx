@@ -2,7 +2,6 @@ import { plural } from '@dn/domain'
 import type { StoryDetail } from '@dn/schemas'
 import { useState } from 'react'
 import { cx } from '../cx.ts'
-import { Popover } from '../primitives/overlay.tsx'
 import { type CitedSource, SummaryText } from './citation.tsx'
 import { deskKey, deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
@@ -118,28 +117,9 @@ export function HeroStory({
               />
             </p>
             <p className="mt-5 max-w-reading border-t border-key-text/45 pt-2.5 text-label leading-normal">
-              A summary of what {citedCount} of {plural(outlets, 'publisher')} reported, not
-              verified by Domino. {story.summary.origin === 'edited' ? 'Edited' : 'Generated'}{' '}
-              <Timestamp at={story.summary.createdAt} />.{' '}
-              <Popover
-                title="How this summary is made"
-                trigger={
-                  <button type="button" className="underline underline-offset-3">
-                    How it's made
-                  </button>
-                }
-              >
-                <p>
-                  A language model running on our own hardware writes it from the headlines and
-                  descriptions that publishers put in their feeds. It doesn't read or store full
-                  articles unless the publisher allows it.
-                </p>
-                <p className="mt-2">
-                  It describes what publishers <em>report</em>. Reported claims are not confirmed
-                  facts. Numbers like [1] link to the publisher each statement comes from. Edits
-                  create a new version; earlier versions are kept.
-                </p>
-              </Popover>
+              {story.summary.origin === 'edited' ? 'Edited' : 'Machine-generated'} summary from{' '}
+              {citedCount} of {plural(outlets, 'publisher')} · Updated{' '}
+              <Timestamp at={story.summary.createdAt} />
             </p>
           </>
         ) : null}
