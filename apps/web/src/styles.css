@@ -42,3 +42,48 @@
     filter: none;
   }
 }
+
+/*
+ * For You "less like this": the notice (and a restored card) rises in; the countdown bar
+ * drains over 3s and its animationend removes the notice. Durations are motion tokens, so
+ * reduced motion makes the transitions instant (the countdown still runs: it's a timer).
+ */
+@keyframes feedback-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.98);
+  }
+}
+
+.t-feedback-in {
+  animation: feedback-in var(--dn-duration-enter) var(--dn-ease-smooth) both;
+}
+
+@keyframes countdown {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+.t-countdown {
+  animation: countdown 3s linear forwards;
+}
+
+/*
+ * Grid reflow after a hidden card leaves (reflowWithout in routes/for-you.tsx). Only while
+ * html.vt-feed is set: cards get names so they glide to their new places, and the root
+ * cross-fade is turned off so the theme switch's circle reveal doesn't play.
+ */
+html.vt-feed [data-feed-card] {
+  view-transition-name: var(--vt-name);
+}
+
+html.vt-feed::view-transition-old(root),
+html.vt-feed::view-transition-new(root) {
+  animation: none;
+}
+
+html.vt-feed::view-transition-group(*) {
+  animation-duration: var(--dn-duration-enter);
+  animation-timing-function: var(--dn-ease-smooth);
+}

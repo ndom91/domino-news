@@ -1,10 +1,11 @@
 import { feedbackMutation } from '@dn/queries'
-import type { ForYouReason, ForYouResponse } from '@dn/schemas'
-import { Button, IconButton, Notice, Skeleton, StoryItem } from '@dn/ui'
+import { DESK_LABELS, type ForYouReason, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
+import { Button, cx, IconButton, Notice, Skeleton, StoryItem } from '@dn/ui'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { type CSSProperties, useRef, useState } from 'react'
+import { flushSync } from 'react-dom'
 import { RouterLink } from '../components/link.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
@@ -35,7 +36,12 @@ function reasonLine(reasons: ForYouReason[]) {
 function ForYouPage() {
   const feed = useInfiniteQuery(queries.forYou())
   const first = feed.data?.pages[0]
-  const items = feed.data?.pages.flatMap((p) => p.items) ?? []
+  // Hidden cards leave the grid once their notice times out (the server leaves them out of
+  // later fetches anyway). Local state, so removal can render synchronously for the reflow.
+  const [removed, setRemoved] = useState<ReadonlySet<string>>(new Set())
+  const items = (feed.data?.pages.flatMap((p) => p.items) ?? []).filter(
+    (i) => !removed.has(i.story.id),
+  )
   const now = new Date().toISOString()
 
   return (
@@ -70,7 +76,12 @@ function ForYouPage() {
           ) : null}
           <div className="grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
             {items.map((item) => (
-              <ForYouCard key={item.story.id} item={item} now={now} />
+              <ForYouCard
+                key={item.story.id}
+                item={item}
+                now={now}
+                onRemove={(id) => setRemoved((prev) => new Set(prev).add(id))}
+              />
             ))}
           </div>
           {items.length === 0 ? (
@@ -96,75 +107,144 @@ function ForYouPage() {
 
 type Item = ForYouResponse['items'][number]
 
-const HIDDEN_NOTICE_MS = 10_000
+/** A motion token in ms (0 under reduced motion, where the tokens are zeroed). */
+function tokenMs(name: string) {
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  return Number.parseFloat(value) || 0
+}
 
 /**
- * A For You card with "more / less like this". Less hides the card in place behind an
- * undo notice; the list re-ranks on the next visit rather than jumping under the reader.
+ * Remove a card and let the rest glide into place (View Transitions). Scoped with a class on
+ * <html> so the theme switch's root animation doesn't play, and card names only exist for
+ * the duration. Falls back to an instant reflow.
  */
-function ForYouCard({ item, now }: { item: Item; now: string }) {
+function reflowWithout(remove: () => void) {
+  const root = document.documentElement
+  if (typeof document.startViewTransition !== 'function' || tokenMs('--dn-duration-enter') === 0) {
+    remove()
+    return
+  }
+  root.classList.add('vt-feed')
+  document
+    .startViewTransition(() => flushSync(remove))
+    .finished.finally(() => root.classList.remove('vt-feed'))
+}
+
+type Phase = 'card' | 'hiding' | 'notice' | 'leaving'
+
+/**
+ * A For You card with "more / less like this". Less fades the card into a notice of the same
+ * size; after a short countdown (paused on hover or focus) the notice fades and the grid
+ * reflows without it. Undo brings the card back.
+ */
+function ForYouCard({
+  item,
+  now,
+  onRemove,
+}: {
+  item: Item
+  now: string
+  onRemove: (storyId: string) => void
+}) {
   const queryClient = useQueryClient()
   const save = useMutation(feedbackMutation(api, queryClient))
   const [feedback, setFeedback] = useState(item.feedback)
-  // While the pointer or focus is on the notice, it stays put (time to reach Undo).
-  const [paused, setPaused] = useState(false)
+  const [phase, setPhase] = useState<Phase>('card')
+  const [restored, setRestored] = useState(false)
+  const [height, setHeight] = useState<number>()
+  const cardRef = useRef<HTMLDivElement>(null)
+  const { story } = item
 
-  // A hidden card stays as an undo notice for a while, then leaves the list so the grid
-  // reflows. The server already leaves it out of later fetches.
-  useEffect(() => {
-    if (feedback !== 'less' || save.isPending || paused) return
-    const timer = setTimeout(() => {
-      queryClient.setQueryData(queries.forYou().queryKey, (data) =>
-        data
-          ? {
-              ...data,
-              pages: data.pages.map((page) => ({
-                ...page,
-                items: page.items.filter((i) => i.story.id !== item.story.id),
-              })),
-            }
-          : data,
-      )
-    }, HIDDEN_NOTICE_MS)
-    return () => clearTimeout(timer)
-  }, [feedback, save.isPending, paused, queryClient, item.story.id])
-
-  function send(signal: 'more' | 'less' | null) {
+  function send(signal: 'more' | 'less' | null, onError?: () => void) {
     const previous = feedback
     setFeedback(signal)
-    save.mutate({ storyId: item.story.id, signal }, { onError: () => setFeedback(previous) })
+    save.mutate(
+      { storyId: story.id, signal },
+      {
+        onError: () => {
+          setFeedback(previous)
+          onError?.()
+        },
+      },
+    )
   }
 
-  if (feedback === 'less') {
+  function hide() {
+    setHeight(cardRef.current?.offsetHeight)
+    setPhase('hiding')
+    setTimeout(() => setPhase('notice'), tokenMs('--dn-duration-exit'))
+    send('less', () => setPhase('card'))
+  }
+
+  function undo() {
+    setRestored(true)
+    setPhase('card')
+    send(null)
+  }
+
+  function leave() {
+    setPhase('leaving')
+    setTimeout(() => reflowWithout(() => onRemove(story.id)), tokenMs('--dn-duration-exit'))
+  }
+
+  if (phase === 'notice' || phase === 'leaving') {
+    const fewer = [
+      ...story.topics.map((t) => TOPIC_LABELS[t]),
+      ...(story.desk ? [DESK_LABELS[story.desk]] : []),
+    ]
     return (
       <div
-        className="flex min-h-24 flex-col justify-center gap-1 border-t-6 border-border p-3 text-sm"
-        onPointerEnter={() => setPaused(true)}
-        onPointerLeave={() => setPaused(false)}
-        onFocus={() => setPaused(true)}
-        onBlur={() => setPaused(false)}
+        role="status"
+        style={{ minHeight: height, viewTransitionName: 'none' }}
+        className={cx(
+          'group relative flex flex-col justify-center gap-4 overflow-hidden border-t-6 border-border-strong bg-text/[0.03] px-6 py-8',
+          't-feedback-in transition-[opacity,scale] duration-(--dn-duration-exit) ease-out',
+          phase === 'leaving' && 'scale-[0.98] opacity-0',
+        )}
       >
-        <p className="font-semibold">Hidden. We'll show fewer stories like this.</p>
-        <p className="text-text-secondary">
-          <button
-            type="button"
-            className="link-inline font-semibold"
-            disabled={save.isPending}
-            onClick={() => {
-              setPaused(false)
-              send(null)
-            }}
-          >
+        <div className="flex items-start gap-3">
+          <span className="grid size-10 flex-none place-items-center border border-border-strong">
+            <ThumbsDownIcon size={20} weight="fill" aria-hidden />
+          </span>
+          <div>
+            <p className="text-md font-bold">Hidden from For You</p>
+            <p className="mt-0.5 text-sm text-text-secondary">
+              {fewer.length > 0
+                ? `You'll see fewer stories about ${fewer.join(', ')}.`
+                : "You'll see fewer stories like this."}
+            </p>
+          </div>
+        </div>
+        <p className="line-clamp-2 text-sm text-text-muted">{story.title}</p>
+        <div>
+          <Button size="sm" disabled={phase === 'leaving'} onClick={undo}>
             Undo
-          </button>
-        </p>
+          </Button>
+        </div>
+        {/* The countdown: when it finishes, the notice leaves. Hover or focus pauses it. */}
+        <span
+          aria-hidden
+          className="t-countdown absolute inset-x-0 bottom-0 h-1 origin-left bg-text/40 group-focus-within:[animation-play-state:paused] group-hover:[animation-play-state:paused]"
+          onAnimationEnd={() => {
+            if (phase === 'notice') leave()
+          }}
+        />
       </div>
     )
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <StoryItem story={item.story} now={now} Link={RouterLink} />
+    <div
+      ref={cardRef}
+      data-feed-card
+      style={{ '--vt-name': `card-${story.id}` } as CSSProperties}
+      className={cx(
+        'flex flex-col gap-2 transition-[opacity,scale] duration-(--dn-duration-exit) ease-out',
+        phase === 'hiding' && 'scale-[0.98] opacity-0',
+        restored && 't-feedback-in',
+      )}
+    >
+      <StoryItem story={story} now={now} Link={RouterLink} />
       <div className="flex items-center justify-between gap-3">
         <p className="type-meta">{item.reasons.length > 0 ? reasonLine(item.reasons) : null}</p>
         <div className="flex flex-none">
@@ -179,7 +259,7 @@ function ForYouCard({ item, now }: { item: Item; now: string }) {
             label="Less like this"
             disabled={save.isPending}
             icon={<ThumbsDownIcon size={22} />}
-            onClick={() => send('less')}
+            onClick={hide}
           />
         </div>
       </div>
