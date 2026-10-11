@@ -1,13 +1,34 @@
 import { plural, pluralWord, regionForCountry, relativeTime } from '@dn/domain'
-import { type PublisherStats, REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
-import { CoverageMatrix, Notice, positionKey, SectionLabel, Timestamp } from '@dn/ui'
+import {
+  LEAN_LABELS,
+  type PublisherStats,
+  publisherLeanSchema,
+  REGION_LABELS,
+  REGIONS,
+  type Region,
+} from '@dn/schemas'
+import { CoverageMatrix, Notice, positionKey, SectionLabel, Select, Timestamp } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { z } from 'zod'
 import { RouterLink } from '../../components/link.tsx'
 import { Page, PageTitle } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
 
+const leanFilterSchema = z.union([publisherLeanSchema, z.literal('not_assessed')])
+type LeanFilter = z.infer<typeof leanFilterSchema>
+
+const LEAN_FILTER_OPTIONS = [
+  { value: null, label: 'Any lean' },
+  ...publisherLeanSchema.options.map((l) => ({ value: l, label: LEAN_LABELS[l] })),
+  { value: 'not_assessed' as const, label: 'Not assessed' },
+]
+
+const matchesLean = (p: PublisherStats, lean: LeanFilter | undefined) =>
+  !lean || (lean === 'not_assessed' ? p.lean === null : p.lean === lean)
+
 export const Route = createFileRoute('/publishers/')({
+  validateSearch: z.object({ lean: leanFilterSchema.optional().catch(undefined) }),
   loader: ({ context }) => context.queryClient.ensureQueryData(queries.publishers()),
   head: () => ({ meta: [{ title: 'Publishers · Domino News' }] }),
   component: PublishersPage,
@@ -33,6 +54,9 @@ function byRegion(items: PublisherStats[]) {
 function PublishersPage() {
   const { data } = useSuspenseQuery(queries.publishers())
   const isAdmin = Route.useRouteContext().session.user?.isAdmin ?? false
+  const { lean } = Route.useSearch()
+  const navigate = useNavigate({ from: Route.fullPath })
+  const shown = data.items.filter((p) => matchesLean(p, lean))
   return (
     <Page>
       <PageTitle meta={plural(data.items.length, 'publisher')}>Publishers</PageTitle>
@@ -41,8 +65,34 @@ function PublishersPage() {
         and its reviewed assessment of funding, reliability and political lean.
       </p>
 
+      <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <Select
+          // Keyed on the URL so back and forward reset the field.
+          key={lean ?? 'any'}
+          aria-label="Filter by political lean"
+          name="lean"
+          options={LEAN_FILTER_OPTIONS}
+          value={lean ?? null}
+          onValueChange={(next) =>
+            navigate({ search: { lean: next ?? undefined }, replace: true, resetScroll: false })
+          }
+        />
+        <p className="type-meta" aria-live="polite">
+          {lean ? `${plural(shown.length, 'publisher')} shown` : null}
+        </p>
+      </div>
+
       <div className="flex flex-col gap-12">
-        {byRegion(data.items).map((group, i) => (
+        {shown.length === 0 ? (
+          <p className="text-text-secondary">
+            No publishers match.{' '}
+            <Link to="/publishers" search={{}} className="underline underline-offset-4">
+              Show all publishers
+            </Link>
+            .
+          </p>
+        ) : null}
+        {byRegion(shown).map((group, i) => (
           <section
             key={group.region}
             aria-labelledby={`region-${group.region}`}
@@ -147,6 +197,13 @@ function PublisherCard({ publisher: p }: { publisher: PublisherStats }) {
         {p.domain}
         {p.kind === 'official' ? ' · Official source' : ''}
       </span>
+      {p.kind === 'newsroom' ? (
+        <span className="mt-1 type-meta">
+          {p.lean
+            ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}`
+            : 'Lean not assessed'}
+        </span>
+      ) : null}
       <span className="mt-4 grid grid-cols-2 gap-3">
         <span>
           <span className="block type-numeral">{p.storiesCovered}</span>

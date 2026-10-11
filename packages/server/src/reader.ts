@@ -11,6 +11,7 @@ import type {
   StoryListResponse,
 } from '@dn/schemas'
 import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
+import { leanMixByStory } from './lean.ts'
 
 const iso = (d: Date) => d.toISOString()
 
@@ -463,6 +464,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       current?.version.body.includes(c.anchorText),
     ),
     claims: await storyClaims(db, id),
+    leanMix: (await leanMixByStory(db, [id])).get(id) ?? [],
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,
       url: ref.url,

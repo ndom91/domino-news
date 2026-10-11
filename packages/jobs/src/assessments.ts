@@ -1,12 +1,15 @@
 import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
+import type { PublisherLean } from '@dn/schemas'
 import { eq } from 'drizzle-orm'
 import type pg from 'pg'
+import { leanEvidenceRow, loadLeanEvidence } from './lean-evidence.ts'
 
 // Evidence for publisher assessments, from open sources only:
 // - Wikidata (CC0): owners and what kind of entity they are, plus the community-edited
 //   "political alignment" (P1387), kept as weak evidence for lean.
 // - Wikipedia's perennial sources list (CC BY-SA): the community reliability label.
+// - Hand-checked lean ratings from AllSides and the Reuters Institute (see lean-evidence.ts).
 // Nothing here is shown to readers until an admin reviews it into an assessment.
 
 // Wikimedia's API policy wants a descriptive user agent with a contact URL; generic ones get 429s.
@@ -15,10 +18,12 @@ const RSP_PAGE = 'Wikipedia:Reliable sources/Perennial sources'
 const RSP_URL = 'https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources'
 
 type EvidenceRow = {
-  source: 'wikidata' | 'wp_rsp'
+  source: 'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr'
   dimension: 'ownership' | 'reliability' | 'lean'
   value: string
   url: string
+  lean?: PublisherLean | null
+  countryContext?: string | null
 }
 
 const RSP_STATUS: Record<string, string> = {
@@ -203,13 +208,18 @@ async function publisherWikidataEvidence(name: string, domain: string) {
 
 /** Refresh imported evidence for every publisher. Each publisher is replaced atomically. */
 export async function importAssessmentEvidence(
-  ctx: { db: Db; pool: pg.Pool },
+  ctx: { db: Db; pool: pg.Pool; config: { fixtureDir: string } },
   log: (msg: string) => void = () => {},
 ) {
   const { db } = ctx
+  // Read the hand-checked file first, so a typo in it fails before any network calls.
+  const checked = await loadLeanEvidence(ctx.config.fixtureDir)
+  log(`hand-checked lean ratings: ${checked.length} entries`)
   const rsp = await fetchRspEntries()
   log(`perennial sources: ${rsp.length} entries`)
   const publishers = await db.select().from(schema.publisher)
+  const unknown = checked.filter((e) => !publishers.some((p) => p.slug === e.publisher))
+  for (const e of unknown) log(`lean-evidence.json: no publisher "${e.publisher}"`)
   const now = new Date()
   let rows = 0
   for (const p of publishers) {
@@ -223,6 +233,7 @@ export async function importAssessmentEvidence(
         url: RSP_URL,
       })
     }
+    evidence.push(...checked.filter((e) => e.publisher === p.slug).map(leanEvidenceRow))
     try {
       evidence.push(...(await publisherWikidataEvidence(p.name, p.domain)))
     } catch (error) {

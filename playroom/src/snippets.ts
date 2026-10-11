@@ -121,6 +121,16 @@ export default [
     code: '<div className="grid max-w-xl gap-8"><StatusScale steps={[{ key: "a", label: "Generally reliable", tone: "success" }, { key: "b", label: "No consensus", tone: "warning" }, { key: "c", label: "Generally unreliable", tone: "error" }, { key: "d", label: "Deprecated", tone: "error" }]} value="b" /><StatusScale steps={[{ key: "a", label: "Generally reliable", tone: "success" }, { key: "b", label: "No consensus", tone: "warning" }]} value={null} /><PositionScale steps={["Left", "Centre-left", "Centre", "Centre-right", "Right"]} value={1} startLabel="Left" endLabel="Right" /><PositionScale steps={["Left", "Centre-left", "Centre", "Centre-right", "Right"]} value={null} startLabel="Left" endLabel="Right" /></div>',
   },
   {
+    group: 'LeanSpread',
+    name: 'One-sided, with unrated publishers',
+    code: '<div className="max-w-sm"><LeanSpread lean={fixtureLead.leanMix[0]} countryLabel="United Kingdom" /></div>',
+  },
+  {
+    group: 'LeanSpread',
+    name: 'Too few rated',
+    code: '<div className="max-w-sm"><LeanSpread lean={fixtureLead.leanMix[1]} countryLabel="Ireland" /></div>',
+  },
+  {
     group: 'MixBars',
     name: 'Desk mix vs all outlets',
     code: '<MixBars title="Desks · 64 stories" entries={fixtureCoverageProfile.desks.map((d) => ({ ...d, label: d.key, fillClass: cx(deskKey(d.key), "bg-key") }))} />',

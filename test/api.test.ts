@@ -847,3 +847,125 @@ describe('front page and citation numbers', () => {
     frontPageSchema.parse(await (await call('/api/v1/front')).json())
   })
 })
+
+describe('political lean', () => {
+  it('saves a reader country and rejects anything but an ISO code', async () => {
+    const save = (body: unknown) =>
+      call('/api/v1/me/preferences', {
+        method: 'POST',
+        body: JSON.stringify(body),
+        headers: { 'content-type': 'application/json' },
+      })
+    expect((await save({ country: 'gb' })).status).toBe(400)
+    expect(userPreferencesSchema.parse(await (await save({ country: 'GB' })).json()).country).toBe(
+      'GB',
+    )
+    expect(userPreferencesSchema.parse(await (await save({ country: null })).json()).country).toBe(
+      null,
+    )
+  })
+
+  it('returns the lean and country of hand-checked evidence, but freezes only its text', async () => {
+    await h.ctx.pool.query(
+      `insert into publisher_evidence
+         (id, publisher_id, source, dimension, value, url, lean, country_context, retrieved_at)
+       select 'pev_allsides', id, 'allsides', 'lean', 'AllSides rating: Lean Left',
+         'https://www.allsides.com/news-source/new-york-times', 'centre_left', 'US', now()
+       from publisher where slug = 'nytimes'`,
+    )
+    const { evidence } = evidenceResponseSchema.parse(
+      await (await call('/api/v1/publishers/nytimes/evidence')).json(),
+    )
+    expect(evidence.find((e) => e.source === 'allsides')).toMatchObject({
+      lean: 'centre_left',
+      countryContext: 'US',
+    })
+    const published = await call('/api/v1/publishers/nytimes/assessment', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        fundingModel: 'commercial',
+        ownership: 'The New York Times Company',
+        reliabilityLevel: null,
+        reliability: 'Not rated',
+        countryContext: 'US',
+        lean: 'centre_left',
+        leanEvidenceUrl: 'https://www.allsides.com/news-source/new-york-times',
+        leanNote: null,
+      }),
+    })
+    expect(published.status).toBe(200)
+    const { rows } = await h.ctx.pool.query(
+      `select evidence, methodology_version from publisher_assessment a
+       join publisher p on p.id = a.publisher_id where p.slug = 'nytimes'
+       order by reviewed_at desc limit 1`,
+    )
+    expect(rows[0].methodology_version).toBe('assessment@2')
+    expect(rows[0].evidence).toEqual([
+      {
+        source: 'allsides',
+        dimension: 'lean',
+        value: 'AllSides rating: Lean Left',
+        url: 'https://www.allsides.com/news-source/new-york-times',
+      },
+    ])
+  })
+
+  it('groups a story by country and flags one-sided coverage', async () => {
+    // The published Story with the most newsrooms. Their leans are rated relative to the US,
+    // which also checks that a lean's country wins over the publisher's home country.
+    const { rows } = await h.ctx.pool.query<{ id: string; publisher_ids: string[] }>(`
+      select s.id, array_agg(distinct p.id) as publisher_ids
+      from story s
+      join story_article sa on sa.story_id = s.id and sa.removed_at is null
+      join article a on a.id = sa.article_id
+      join publisher p on p.id = a.publisher_id and p.kind = 'newsroom' and p.country_code is not null
+      where s.published_at is not null
+      group by s.id order by count(distinct p.id) desc limit 1`)
+    const target = rows[0]
+    expect(target?.publisher_ids.length).toBeGreaterThanOrEqual(3)
+    if (!target) return
+
+    await h.ctx.pool.query(
+      `insert into publisher_assessment
+         (id, publisher_id, methodology_version, country_context, ownership, reliability,
+          lean, lean_evidence_url, evidence, reviewed_by)
+       select 'pas_lean_' || p.id, p.id, 'assessment@1', 'US', 'test', 'test',
+         'centre_left', 'https://example.org/lean', '[]'::jsonb, u.id
+       from publisher p, auth_user u
+       where p.id = any($1) and u.username = 'contract'`,
+      [target.publisher_ids],
+    )
+    // Fixture dates are fixed; move the Story into this week's window.
+    await h.ctx.pool.query(
+      `update story set published_at = now(), last_updated_at = now() where id = $1`,
+      [target.id],
+    )
+
+    const story = storyDetailSchema.parse(await (await call(`/api/v1/stories/${target.id}`)).json())
+    const us = story.leanMix.find((m) => m.country === 'US')
+    expect(us?.publishers).toHaveLength(target.publisher_ids.length)
+    expect(us?.publishers.every((p) => p.lean === 'centre_left')).toBe(true)
+    expect(us?.oneSided).toBe('left')
+    // Most rated country first.
+    expect(story.leanMix[0]?.country).toBe('US')
+
+    const insights = insightsSchema.parse(
+      await (await call('/api/v1/me/insights', { headers: { 'cf-ipcountry': 'US' } })).json(),
+    )
+    expect(insights.oneSided.country).toBe('US')
+    expect(insights.oneSided.stories.map((s) => s.story.id)).toContain(target.id)
+
+    // A saved country wins over the request's.
+    await call('/api/v1/me/preferences', {
+      method: 'POST',
+      body: JSON.stringify({ country: 'FR' }),
+      headers: { 'content-type': 'application/json' },
+    })
+    const fr = insightsSchema.parse(
+      await (await call('/api/v1/me/insights', { headers: { 'cf-ipcountry': 'US' } })).json(),
+    )
+    expect(fr.oneSided.country).toBe('FR')
+    expect(fr.oneSided.stories.map((s) => s.story.id)).not.toContain(target.id)
+  })
+})

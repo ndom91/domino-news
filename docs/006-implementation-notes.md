@@ -140,3 +140,11 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - **Tooltips:** our `Tooltip` replaces the HTML `title` attribute everywhere (styled, consistent delay). Tooltips carry extra detail only; anything essential is also visible or in an accessible label.
 - **Source board:** the hero shows the latest 8 reports with a "See all" link; citation markers for older reports link to the article. The Source Trace and the board share hover state, so a mark and its row highlight together.
 
+## Political lean
+
+- **Story lean mix** is derived on read (`packages/server/src/lean.ts`): covering newsrooms grouped by the country their lean is relative to (assessment `country_context`, else the publisher's home country). Official sources and publishers with no country are left out. No table, nothing cached.
+- **Thresholds** live in `packages/domain/src/lean.ts`: a bar needs 2 rated publishers; "one-sided" needs 3 rated and 75% on one side, with centre counted as rated but on neither side.
+- **Ink only:** the bar follows the publisher page's `PositionScale` and uses no colour; darker means further from centre. Party colours would read as a judgement.
+- **Reader country:** `user_preference.country`, else `CF-IPCountry` (forwarded by the SSR API bridge). Cloudflare's `XX` and `T1` count as unknown. The header is never stored.
+- **Lean evidence import:** AllSides blocks automated fetches (403) and sends its CSV only on request; the Reuters Institute publishes outlet audience scores only as charts, with no licence statement. Hence a hand-checked file instead of a scraper. Evidence rows carry a structured `lean` and `country_context` for the form pre-fill; assessments still freeze only source, dimension, value and URL. Methodology is now `assessment@2`.
+

@@ -38,7 +38,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
 | `pnpm cli user:create --username u --password p [--role user]` | Create an account (public sign-up is disabled). CLI accounts are admins unless `--role user` |
 | `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
-| `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership) and Wikipedia's perennial sources (reliability) |
+| `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership), Wikipedia's perennial sources (reliability) and `fixtures/lean-evidence.json` (lean) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli summaries:refresh` | Re-summarise published stories that have no desk yet (one GPU call each, plus context, claims and relate for the new version) |
@@ -228,7 +228,7 @@ GET  /api/v1/publishers/:slug/evidence   # admin: imported, unreviewed evidence
 POST /api/v1/publishers/:slug/assessment # admin: publish a reviewed assessment (new version)
 GET  /api/v1/ops/status                  # admin only
 POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
-GET  /api/v1/me/preferences              # { regions, desks, topics, rememberReads, onboarded }
+GET  /api/v1/me/preferences              # { regions, desks, topics, rememberReads, country, onboarded }
 GET  /api/v1/me/follows                  # followed narratives and publishers
 POST /api/v1/me/follows                  # { targetType, targetId, follow: boolean }
 GET  /api/v1/for-you?cursor=             # ranked personal feed with reasons and the reader's tap
@@ -237,7 +237,7 @@ GET  /api/v1/me/signals                  # what For You learned from feedback
 POST /api/v1/me/signals                  # { reset: true } | { remove: { kind, key } }
 POST /api/v1/me/preferences              # partial update; rememberReads=false deletes history
 POST /api/v1/me/reads                    # { storyId }; recorded only if rememberReads
-GET  /api/v1/me/insights                 # Blindspot: newer stories in narratives you read, region/desk gaps
+GET  /api/v1/me/insights                 # Blindspot: newer stories in narratives you read, region/desk gaps, one-sided stories
 ```
 
 Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `packages/queries` are platform-neutral for a future Expo app.
@@ -253,8 +253,10 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
 - **Regions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region, and the lead prefers a Story in one of the reader's regions.
 - **For You (`/for-you`):** readers pick regions, desks and topics (on `/onboarding` at first sign-in, `/account` or the page itself) and follow narratives or publishers. Each generated summary tags 0-3 of 25 fixed topics (`TOPICS` in `packages/schemas`). Stories from the last 72 hours are ranked, not filtered: followed narrative +3, topic +2, followed outlet, region and desk +1 each, plus wider coverage, minus age. Every card says why it's there. Paging is an offset into the ranked window. The front page shows the top 4 as a "For you" rail once a reader has picks, follows or learned signals. Thumbs up / down on For You cards nudge learned weights for the Story's topics, desk, regions and narratives (never its publishers): ±1 per tap (regions ±0.5), clamped to ±3 and halved every 30 days. "Less" also hides the Story; undo reverses the tap (approximately, since weights are clamped). Readers see and reset what was learned on `/account`.
-- **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored.
-- **Publisher assessments:** evidence is imported from open sources only: Wikidata for ownership (CC0), and Wikipedia's perennial sources list for reliability (CC BY-SA). An admin reviews it on the publisher page and publishes an append-only, versioned assessment that freezes the evidence used. Political lean is entered by hand, relative to the outlet's own country, and must cite a source such as the Reuters Institute's audience data; otherwise it shows "Not assessed". Licensed ratings (AllSides, MBFC, NewsGuard) are not used: they're non-commercial or paid.
+- **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored. A "Covered mostly by one side" section shows even with history off: this week's Stories where at least 3 of the covering publishers in the reader's country are rated and 75% or more lean the same way.
+- **Publisher assessments:** evidence is imported from open sources only: Wikidata for ownership (CC0), and Wikipedia's perennial sources list for reliability (CC BY-SA). An admin reviews it on the publisher page and publishes an append-only, versioned assessment that freezes the evidence used. Political lean is entered by hand, relative to the outlet's own country, and must cite a source such as the Reuters Institute's audience data; otherwise it shows "Not assessed".
+- **Political lean on Stories:** each Story shows the reviewed lean of its newsroom publishers, one ink-only bar per country (leans aren't comparable across countries), with unrated publishers always shown as their own hatched segment. A country needs 2 rated publishers to get a bar. The reader's country comes from their `/account` setting, else Cloudflare's `CF-IPCountry` header. The publishers page shows each lean and filters by it (`?lean=`).
+- **Lean evidence:** `fixtures/lean-evidence.json` holds hand-checked ratings, loaded by `assessments:import`. Neither source has an open download, so each entry is copied by hand from the source page (or the chart data behind it), with its URL and date. AllSides (CC BY-NC 4.0, attribution shown with its evidence) rates on the US scale only, so it only pre-fills US publishers. Reuters Institute DNR audience scores are relative to the outlet's own country and win over AllSides. The review form pre-fills the lean from them; an admin still publishes it. Non-commercial sources are fine for now: **re-check every source's licence before any commercial use.** MBFC (terms unclear), Ad Fontes and NewsGuard (paid) are not used.
 - **Publisher coverage:** publisher stats (stories, first to report), a who-covered-what matrix, and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, For You, Story, Narrative (timeline), Blindspot, publishers, search, pipeline, account and onboarding pages, and a 404 page. Desktop-first and checked at 375px; below 1024px the header nav becomes a section menu.

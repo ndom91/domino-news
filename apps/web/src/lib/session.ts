@@ -10,6 +10,8 @@ interface SessionInfo {
     // False until onboarding is finished or skipped; the root route sends them there.
     onboarded: boolean
   } | null
+  // Saved preference, else the request's country (Cloudflare); null when neither is known.
+  country: string | null
   features: { summaryEditing: boolean; googleSignIn: boolean }
 }
 
@@ -17,9 +19,11 @@ interface SessionInfo {
 export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
   async (): Promise<SessionInfo> => {
     const { getPreferences, getServerContext } = await import('@dn/server')
+    const { countryFromHeader } = await import('@dn/domain')
     const { getRequestHeaders } = await import('@tanstack/react-start/server')
     const ctx = getServerContext()
-    const session = await ctx.auth.api.getSession({ headers: getRequestHeaders() })
+    const headers = getRequestHeaders()
+    const session = await ctx.auth.api.getSession({ headers })
     const prefs = session ? await getPreferences(ctx.db, session.user.id) : null
     return {
       user: session
@@ -32,6 +36,7 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
             onboarded: prefs?.onboarded ?? false,
           }
         : null,
+      country: prefs?.country ?? countryFromHeader(headers.get('cf-ipcountry')),
       features: {
         summaryEditing: ctx.config.enableSummaryEditing,
         googleSignIn: ctx.config.googleSignIn,

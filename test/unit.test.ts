@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs'
 import {
   clockTime,
+  countryFromHeader,
   dayLabel,
   formatDate,
   formatDateTime,
   hostnameOf,
+  leanSide,
   normalizeArticleUrl,
+  oneSidedCoverage,
   pickLead,
   plural,
   recencyPeriod,
@@ -18,6 +21,8 @@ import {
   findRspEntry,
   isStaleItem,
   isWireCopy,
+  leanEvidenceFileSchema,
+  leanEvidenceRow,
   parseFeed,
   parseRspWikitext,
   wikidataEvidence,
@@ -549,5 +554,73 @@ describe('cx (tailwind-merge with our tokens)', () => {
     expect(cx('text-sm', 'text-label')).toBe('text-label')
     expect(cx('h-bar', false, 'h-3')).toBe('h-3')
     expect(cx('type-meta key-fill')).toBe('type-meta key-fill')
+  })
+})
+
+describe('lean', () => {
+  it('puts centre on neither side', () => {
+    expect(leanSide('centre_left')).toBe('left')
+    expect(leanSide('right')).toBe('right')
+    expect(leanSide('centre')).toBeNull()
+    expect(leanSide(null)).toBeNull()
+  })
+
+  it('needs 3 rated publishers and a 75% share for one-sided coverage', () => {
+    // Unrated publishers don't count toward either threshold.
+    expect(oneSidedCoverage(['left', 'centre_left', null, null])).toBeNull()
+    expect(oneSidedCoverage(['left', 'centre_left', 'left'])).toBe('left')
+    // 3 of 4 is exactly 75%; centre still counts as rated.
+    expect(oneSidedCoverage(['right', 'centre_right', 'right', 'centre'])).toBe('right')
+    expect(oneSidedCoverage(['right', 'centre_right', 'centre', 'centre'])).toBeNull()
+    expect(oneSidedCoverage(['left', 'left', 'right', 'right'])).toBeNull()
+  })
+
+  it('reads a country from the Cloudflare header', () => {
+    expect(countryFromHeader('gb')).toBe('GB')
+    expect(countryFromHeader('XX')).toBeNull()
+    expect(countryFromHeader('T1')).toBeNull()
+    expect(countryFromHeader('USA')).toBeNull()
+    expect(countryFromHeader(null)).toBeNull()
+  })
+})
+
+describe('hand-checked lean evidence', () => {
+  const allsides = {
+    publisher: 'nytimes',
+    source: 'allsides',
+    rating: 'Lean Left',
+    countryContext: 'US',
+    url: 'https://www.allsides.com/news-source/new-york-times',
+    checkedAt: '2026-10-11',
+  }
+
+  it('maps AllSides ratings to our steps and names the scale', () => {
+    const [entry] = leanEvidenceFileSchema.parse({ entries: [allsides] }).entries
+    if (!entry) throw new Error('no entry')
+    expect(leanEvidenceRow(entry)).toMatchObject({
+      source: 'allsides',
+      dimension: 'lean',
+      lean: 'centre_left',
+      countryContext: 'US',
+      value: expect.stringContaining('US political scale'),
+    })
+  })
+
+  it('rejects AllSides outside the US scale, unknown ratings and out-of-range scores', () => {
+    const bad = (entry: unknown) => leanEvidenceFileSchema.safeParse({ entries: [entry] }).success
+    expect(bad({ ...allsides, countryContext: 'GB' })).toBe(false)
+    expect(bad({ ...allsides, rating: 'Mixed' })).toBe(false)
+    const dnr = {
+      publisher: 'guardian',
+      source: 'reuters_dnr',
+      score: -0.21,
+      lean: 'centre_left',
+      countryContext: 'GB',
+      edition: 2025,
+      url: 'https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2025',
+      checkedAt: '2026-10-11',
+    }
+    expect(bad(dnr)).toBe(true)
+    expect(bad({ ...dnr, score: 0.8 })).toBe(false)
   })
 })

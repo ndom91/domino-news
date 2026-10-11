@@ -5,6 +5,7 @@ import {
   DESK_LABELS,
   type Desk,
   EVIDENCE_SOURCE_LABELS,
+  type EvidenceResponse,
   FUNDING_LABELS,
   fundingModelSchema,
   LEAN_LABELS,
@@ -23,6 +24,7 @@ import {
   Button,
   cx,
   deskKey,
+  EvidenceAttribution,
   Meter,
   MixBars,
   Notice,
@@ -256,6 +258,21 @@ function importedReliability(
   return null
 }
 
+type ImportedEvidence = EvidenceResponse['evidence'][number]
+
+/**
+ * Pre-fill the lean from hand-checked evidence for the assessment's country. Audience data
+ * from the outlet's own country wins over AllSides, which only rates on the US scale.
+ */
+function importedLean(evidence: ImportedEvidence[], country: string | null) {
+  const usable = evidence.filter((e) => e.lean && e.countryContext === country)
+  return (
+    usable.find((e) => e.source === 'reuters_dnr') ??
+    usable.find((e) => e.source === 'allsides') ??
+    null
+  )
+}
+
 const LEAN_OPTIONS = [
   { value: null, label: 'Not assessed' },
   ...publisherLeanSchema.options.map((l) => ({ value: l, label: LEAN_LABELS[l] })),
@@ -268,6 +285,9 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
   const evidence = useQuery(queries.evidence(slug))
   const save = useMutation(saveAssessmentMutation(api, queryClient, slug))
   const current = publisher.assessment
+  const suggested = current?.lean
+    ? null
+    : importedLean(evidence.data?.evidence ?? [], current?.countryContext ?? publisher.countryCode)
   const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -313,6 +333,16 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
       ) : (
         <p className="mb-6 text-sm text-text-muted">No imported evidence.</p>
       )}
+      <EvidenceAttribution
+        sources={evidence.data?.evidence.map((e) => e.source) ?? []}
+        className="-mt-4 mb-6"
+      />
+      {suggested ? (
+        <p className="mb-6 text-sm text-text-secondary">
+          Lean pre-filled from {EVIDENCE_SOURCE_LABELS[suggested.source] ?? suggested.source}. Check
+          it before publishing.
+        </p>
+      ) : null}
       {/* Remount once evidence loads so the reliability pre-fill applies (uncontrolled form). */}
       <form
         key={evidence.isSuccess ? 'ready' : 'loading'}
@@ -354,7 +384,7 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
             label="Political lean"
             name="lean"
             options={LEAN_OPTIONS}
-            defaultValue={current?.lean ?? null}
+            defaultValue={current?.lean ?? suggested?.lean ?? null}
           />
           <TextInput
             label="Country context"
@@ -368,7 +398,7 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
           label="Lean source (required with a lean, e.g. Reuters Digital News Report)"
           name="leanEvidenceUrl"
           type="url"
-          defaultValue={current?.leanEvidenceUrl ?? ''}
+          defaultValue={current?.leanEvidenceUrl ?? suggested?.url ?? ''}
         />
         <TextInput
           label="Lean note (optional)"

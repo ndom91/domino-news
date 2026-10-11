@@ -47,6 +47,13 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Claims' })).toBeVisible()
   await expect(page.getByText(/not verified facts/)).toBeVisible()
   await expect(page.getByText(/summary from \d+ of \d+ publishers?/)).toBeVisible()
+  // Political lean of the covering publishers (a bar, or a note that too few are rated).
+  await expect(page.getByRole('heading', { name: 'Political lean' })).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+
+  // Blindspot: the one-sided section shows even with reading history off.
+  await page.goto('/blindspot')
+  await expect(page.getByRole('heading', { name: /Covered mostly by one side/ })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
   // Narrative graph with clickable story nodes

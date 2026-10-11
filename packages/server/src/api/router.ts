@@ -1,3 +1,4 @@
+import { countryFromHeader } from '@dn/domain'
 import {
   type ApiErrorBody,
   type ApiErrorCode,
@@ -205,8 +206,8 @@ const routes: Route[] = [
     const { storyId } = await readJson(request, readRequestSchema)
     return json({ recorded: await recordRead(ctx.db, userId, storyId) })
   }),
-  route('GET', '/api/v1/me/insights', async ({ ctx, userId }) =>
-    json(await getInsights(ctx.db, userId)),
+  route('GET', '/api/v1/me/insights', async ({ ctx, request, userId }) =>
+    json(await getInsights(ctx.db, userId, countryFromHeader(request.headers.get('cf-ipcountry')))),
   ),
   route(
     'GET',

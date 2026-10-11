@@ -12,6 +12,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
       desks: schema.userPreference.desks,
       topics: schema.userPreference.topics,
       rememberReads: schema.userPreference.rememberReads,
+      country: schema.userPreference.country,
       onboardedAt: schema.userPreference.onboardedAt,
     })
     .from(schema.userPreference)
@@ -21,6 +22,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
     desks: row?.desks ?? [],
     topics: row?.topics ?? [],
     rememberReads: row?.rememberReads ?? false,
+    country: row?.country ?? null,
     onboarded: Boolean(row?.onboardedAt),
   }
 }

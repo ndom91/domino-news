@@ -10,6 +10,9 @@ export async function serverApiFetch(url: string, init: RequestInit | undefined)
   if (cookie) forwarded.set('cookie', cookie)
   const authorization = headers.get('authorization')
   if (authorization) forwarded.set('authorization', authorization)
+  // Set by Cloudflare in prod; picks the default country for lean mixes.
+  const country = headers.get('cf-ipcountry')
+  if (country) forwarded.set('cf-ipcountry', country)
   const request = new Request(new URL(url, 'http://ssr.internal'), { ...init, headers: forwarded })
   return handleApiRequest(getServerContext(), request)
 }

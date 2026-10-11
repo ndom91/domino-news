@@ -1,5 +1,6 @@
 import { formatDate } from '@dn/domain'
 import {
+  EVIDENCE_ATTRIBUTION,
   EVIDENCE_SOURCE_LABELS,
   FUNDING_LABELS,
   type FundingModel,
@@ -147,6 +148,33 @@ export function AssessmentScorecard({
         Reviewed {formatDate(a.reviewedAt)} · {a.methodologyVersion}. Ownership from Wikidata (CC0),
         reliability from Wikipedia's perennial sources list (CC BY-SA 4.0).
       </p>
+      <EvidenceAttribution sources={a.evidence.map((e) => e.source)} className="mt-1" />
     </div>
+  )
+}
+
+/** Licence notices for the evidence sources that need one (e.g. AllSides' CC BY-NC). */
+export function EvidenceAttribution({
+  sources,
+  className,
+}: {
+  sources: string[]
+  className?: string
+}) {
+  const notices = [...new Set(sources)].flatMap((s) => EVIDENCE_ATTRIBUTION[s] ?? [])
+  if (notices.length === 0) return null
+  return (
+    <p className={cx('type-meta', className)}>
+      {notices.map((n, i) => (
+        <span key={n.url}>
+          {i > 0 ? ' · ' : null}
+          {n.text} (
+          <a href={n.url} target="_blank" rel="noopener noreferrer" className={external}>
+            licence
+          </a>
+          ).
+        </span>
+      ))}
+    </p>
   )
 }

@@ -317,6 +317,25 @@ export const fixtureLead: StoryDetail = {
       evidence: [],
     },
   ],
+  leanMix: [
+    {
+      country: 'GB',
+      publishers: [
+        { publisher: P.halden, lean: 'centre_left' },
+        { publisher: P.southbank, lean: 'left' },
+        { publisher: P.brightwater, lean: 'centre' },
+        { publisher: P.civic, lean: 'centre_left' },
+        { publisher: P.lakeshore, lean: null },
+        { publisher: P.calder, lean: null },
+      ],
+      oneSided: 'left',
+    },
+    {
+      country: 'IE',
+      publishers: [{ publisher: P.meridian, lean: null }],
+      oneSided: null,
+    },
+  ],
 }
 
 export const fixtureDeveloping: DevelopingNarrative[] = [

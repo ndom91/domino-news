@@ -70,6 +70,9 @@ const COUNTRY_REGION: Record<string, Region> = {
   UZ: 'central-asia',
 }
 
+// The countries we know a region for; also the choices for a reader's country.
+export const KNOWN_COUNTRIES = Object.keys(COUNTRY_REGION)
+
 export function regionForCountry(countryCode: string | null | undefined): Region | null {
   return countryCode ? (COUNTRY_REGION[countryCode.toUpperCase()] ?? null) : null
 }

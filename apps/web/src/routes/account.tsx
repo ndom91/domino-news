@@ -1,5 +1,15 @@
-import { setFollowMutation, updateSignalsMutation } from '@dn/queries'
-import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, TextInput, Timestamp } from '@dn/ui'
+import { countryName, KNOWN_COUNTRIES } from '@dn/domain'
+import { savePreferencesMutation, setFollowMutation, updateSignalsMutation } from '@dn/queries'
+import {
+  Button,
+  ConfirmDialog,
+  Notice,
+  Reveal,
+  SectionLabel,
+  Select,
+  TextInput,
+  Timestamp,
+} from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { FormEvent } from 'react'
@@ -163,6 +173,8 @@ function AccountPage() {
             </Reveal>
           ) : null}
         </section>
+
+        <CountrySection />
       </div>
     </Page>
   )
@@ -182,6 +194,42 @@ function ReadingHistorySection() {
     <section aria-labelledby="history-heading">
       <SectionLabel id="history-heading">Reading history</SectionLabel>
       <ReadingHistoryToggle />
+    </section>
+  )
+}
+
+// Country choices, sorted by name. Built once: Intl names don't change at runtime.
+const COUNTRY_OPTIONS = [
+  { value: null, label: 'Automatic (where you are)' },
+  ...KNOWN_COUNTRIES.map((code) => ({ value: code, label: countryName(code) })).sort((a, b) =>
+    a.label.localeCompare(b.label),
+  ),
+]
+
+function CountrySection() {
+  const queryClient = useQueryClient()
+  const prefs = useQuery(queries.preferences())
+  const save = useMutation(savePreferencesMutation(api, queryClient))
+  return (
+    <section aria-labelledby="country-heading">
+      <SectionLabel id="country-heading">Your country</SectionLabel>
+      <p className="mb-4 max-w-reading text-sm text-text-secondary">
+        Stories show the political lean of publishers in this country first, and Blindspot lists
+        stories that one side of its media barely covers.
+      </p>
+      <Select
+        aria-label="Your country"
+        name="country"
+        options={COUNTRY_OPTIONS}
+        value={prefs.data?.country ?? null}
+        disabled={prefs.isPending || save.isPending}
+        onValueChange={(country) => save.mutate({ country })}
+      />
+      {save.isError ? (
+        <Notice tone="error" title="Country not saved" className="mt-4">
+          {save.error.message} Try again.
+        </Notice>
+      ) : null}
     </section>
   )
 }

@@ -35,6 +35,28 @@ export const publisherRefSchema = z.object({
 })
 export type PublisherRef = z.infer<typeof publisherRefSchema>
 
+// Lean is always relative to one country's media (countryContext), never a global axis.
+export const publisherLeanSchema = z.enum([
+  'left',
+  'centre_left',
+  'centre',
+  'centre_right',
+  'right',
+])
+export type PublisherLean = z.infer<typeof publisherLeanSchema>
+
+export const LEAN_LABELS: Record<PublisherLean, string> = {
+  left: 'Left',
+  centre_left: 'Centre-left',
+  centre: 'Centre',
+  centre_right: 'Centre-right',
+  right: 'Right',
+}
+
+// Which side of centre a lean sits on. Centre is neither.
+export const leanSideSchema = z.enum(['left', 'right'])
+export type LeanSide = z.infer<typeof leanSideSchema>
+
 export const publisherStatsSchema = publisherRefSchema.extend({
   countryCode: z.string().nullable(),
   bodyPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
@@ -45,6 +67,9 @@ export const publisherStatsSchema = publisherRefSchema.extend({
   exclusives: z.number().int().nonnegative(),
   articleCount: z.number().int().nonnegative(),
   lastSeenAt: z.string().nullable(),
+  // From the latest reviewed assessment; null = not assessed.
+  lean: publisherLeanSchema.nullable(),
+  leanCountry: z.string().nullable(),
 })
 export type PublisherStats = z.infer<typeof publisherStatsSchema>
 
@@ -207,6 +232,18 @@ export const storyClaimSchema = z.object({
 })
 export type StoryClaim = z.infer<typeof storyClaimSchema>
 
+// The covering publishers in one country, with their reviewed lean. Leans are only
+// comparable within a country, so a Story gets one of these per country.
+export const storyLeanSchema = z.object({
+  country: z.string(),
+  publishers: z.array(
+    z.object({ publisher: publisherRefSchema, lean: publisherLeanSchema.nullable() }),
+  ),
+  // Set when enough rated publishers sit mostly on one side (see `oneSidedCoverage`).
+  oneSided: leanSideSchema.nullable(),
+})
+export type StoryLean = z.infer<typeof storyLeanSchema>
+
 export const storyDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -233,6 +270,8 @@ export const storyDetailSchema = z.object({
   primarySources: z.array(primarySourceSchema),
   context: z.array(storyContextItemSchema),
   claims: z.array(storyClaimSchema),
+  // Newsroom publishers only, most rated first. Publishers without a country are left out.
+  leanMix: z.array(storyLeanSchema),
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 
@@ -417,24 +456,6 @@ export const coverageProfileSchema = z.object({
 })
 export type CoverageProfile = z.infer<typeof coverageProfileSchema>
 
-// Lean is always relative to one country's media (countryContext), never a global axis.
-export const publisherLeanSchema = z.enum([
-  'left',
-  'centre_left',
-  'centre',
-  'centre_right',
-  'right',
-])
-export type PublisherLean = z.infer<typeof publisherLeanSchema>
-
-export const LEAN_LABELS: Record<PublisherLean, string> = {
-  left: 'Left',
-  centre_left: 'Centre-left',
-  centre: 'Centre',
-  centre_right: 'Centre-right',
-  right: 'Right',
-}
-
 export const fundingModelSchema = z.enum([
   'public_broadcaster',
   'state',
@@ -472,6 +493,16 @@ export const RELIABILITY_LABELS: Record<ReliabilityLevel, string> = {
 export const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
   wikidata: 'Wikidata',
   wp_rsp: 'Wikipedia perennial sources',
+  allsides: 'AllSides',
+  reuters_dnr: 'Reuters Institute Digital News Report',
+}
+
+// Licence notices that must travel with a source's evidence wherever it is shown.
+export const EVIDENCE_ATTRIBUTION: Record<string, { text: string; url: string }> = {
+  allsides: {
+    text: 'AllSides Media Bias Ratings™ by AllSides.com are licensed under CC BY-NC 4.0',
+    url: 'https://creativecommons.org/licenses/by-nc/4.0/',
+  },
 }
 
 export const assessmentEvidenceSchema = z.object({
@@ -517,7 +548,14 @@ export const assessmentRequestSchema = z
 export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>
 
 export const evidenceResponseSchema = z.object({
-  evidence: z.array(assessmentEvidenceSchema.extend({ retrievedAt: z.string() })),
+  evidence: z.array(
+    assessmentEvidenceSchema.extend({
+      retrievedAt: z.string(),
+      // Hand-checked lean evidence only: the rating on our steps and its country.
+      lean: publisherLeanSchema.nullable(),
+      countryContext: z.string().nullable(),
+    }),
+  ),
 })
 export type EvidenceResponse = z.infer<typeof evidenceResponseSchema>
 
@@ -540,6 +578,12 @@ export const userPreferencesSchema = z.object({
   desks: z.array(deskSchema).max(DESKS.length),
   topics: z.array(topicSchema).max(TOPICS.length),
   rememberReads: z.boolean(),
+  // ISO 3166-1 alpha-2. Picks which country's lean mix a Story shows first.
+  // Null = use the country the request comes from.
+  country: z
+    .string()
+    .regex(/^[A-Z]{2}$/)
+    .nullable(),
   // True once the reader has finished or skipped onboarding. Only ever set to true.
   onboarded: z.boolean(),
 })
@@ -642,6 +686,12 @@ export const insightsSchema = z.object({
       yourReads: z.number().int().nonnegative(),
     }),
   ),
+  // Recent Stories that one side of the reader's country barely covers. Shown even with
+  // reading history off: it is about coverage, not about the reader.
+  oneSided: z.object({
+    country: z.string().nullable(),
+    stories: z.array(z.object({ story: storyListItemSchema, lean: storyLeanSchema })),
+  }),
 })
 export type Insights = z.infer<typeof insightsSchema>
 

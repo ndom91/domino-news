@@ -1,6 +1,7 @@
 import type { Db } from '@dn/db'
 import type { Desk, Insights, NarrativeRef, Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
+import { leanMixByStory } from './lean.ts'
 import { getPreferences, READ_RETENTION_DAYS } from './preferences.ts'
 import { narrativeDesk, storyListItems } from './reader.ts'
 
@@ -8,14 +9,24 @@ import { narrativeDesk, storyListItems } from './reader.ts'
 const MIN_READS_FOR_GAPS = 5
 // A region or desk needs this many Stories this week to count as "big".
 const MIN_WEEK_STORIES = 5
+// One-sided Stories: how far back to look, how many to check and how many to show.
+const ONE_SIDED_DAYS = 7
+const ONE_SIDED_CANDIDATES = 300
+const ONE_SIDED_SHOWN = 6
 
 /**
  * Blindspot insights, computed on request from the last READ_RETENTION_DAYS of reads.
  * Nothing about the reader is stored or inferred beyond the reads themselves.
  */
-export async function getInsights(db: Db, userId: string): Promise<Insights> {
-  const { rememberReads } = await getPreferences(db, userId)
-  if (!rememberReads) return { enabled: false, readCount: 0, missedDevelopments: [], gaps: [] }
+export async function getInsights(
+  db: Db,
+  userId: string,
+  requestCountry: string | null,
+): Promise<Insights> {
+  const prefs = await getPreferences(db, userId)
+  const oneSided = await oneSidedStories(db, prefs.country ?? requestCountry)
+  if (!prefs.rememberReads)
+    return { enabled: false, readCount: 0, missedDevelopments: [], gaps: [], oneSided }
 
   const { rows: reads } = await db.execute<{
     story_id: string
@@ -31,6 +42,47 @@ export async function getInsights(db: Db, userId: string): Promise<Insights> {
     readCount: reads.length,
     missedDevelopments: await missedDevelopments(db, userId),
     gaps: reads.length >= MIN_READS_FOR_GAPS ? await gaps(db, reads) : [],
+    oneSided,
+  }
+}
+
+/**
+ * This week's Stories that one side of a country's media barely covers. With no country
+ * known (no preference, no request country), the country with the most such Stories wins.
+ */
+async function oneSidedStories(db: Db, country: string | null): Promise<Insights['oneSided']> {
+  const { rows } = await db.execute<{ id: string }>(sql`
+    select id from story
+    where published_at > now() - make_interval(days => ${ONE_SIDED_DAYS})
+      and merged_into_story_id is null
+    order by last_updated_at desc
+    limit ${ONE_SIDED_CANDIDATES}`)
+  const mixes = await leanMixByStory(
+    db,
+    rows.map((r) => r.id),
+  )
+  const found = rows.flatMap(({ id }) =>
+    (mixes.get(id) ?? []).filter((m) => m.oneSided).map((lean) => ({ id, lean })),
+  )
+  let target = country
+  if (!target) {
+    const counts = new Map<string, number>()
+    for (const f of found) counts.set(f.lean.country, (counts.get(f.lean.country) ?? 0) + 1)
+    target = [...counts].sort((a, b) => b[1] - a[1])[0]?.[0] ?? null
+  }
+  // Newest first (the candidate order), so the section follows the news.
+  const shown = found.filter((f) => f.lean.country === target).slice(0, ONE_SIDED_SHOWN)
+  const stories = await storyListItems(
+    db,
+    shown.map((s) => s.id),
+  )
+  const byId = new Map(stories.map((s) => [s.id, s]))
+  return {
+    country: target,
+    stories: shown.flatMap((s) => {
+      const story = byId.get(s.id)
+      return story ? [{ story, lean: s.lean }] : []
+    }),
   }
 }
 

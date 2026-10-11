@@ -20,6 +20,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
+import { StoryLean } from '../../components/story-lean.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
 
@@ -157,6 +158,8 @@ function StoryPage() {
         </div>
 
         <aside className="flex flex-col gap-10 pt-12">
+          <StoryLean mix={story.leanMix} country={session.country} />
+
           {story.context.length > 0 ? (
             <section aria-labelledby="background-heading">
               <SectionLabel id="background-heading">Background</SectionLabel>

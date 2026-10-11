@@ -268,22 +268,6 @@ export const interpretationEvidence = pgTable(
 // perennial sources list) and refreshed on every import. An assessment is a reviewed,
 // append-only snapshot: a new review is a new row, and it freezes the evidence it used.
 
-export const publisherEvidence = pgTable(
-  'publisher_evidence',
-  {
-    id: text('id').primaryKey(),
-    publisherId: text('publisher_id')
-      .notNull()
-      .references(() => publisher.id, { onDelete: 'cascade' }),
-    source: text('source').$type<'wikidata' | 'wp_rsp'>().notNull(),
-    dimension: text('dimension').$type<'ownership' | 'reliability' | 'lean'>().notNull(),
-    value: text('value').notNull(),
-    url: text('url').notNull(),
-    retrievedAt: ts('retrieved_at').notNull(),
-  },
-  (t) => [index('publisher_evidence_publisher_idx').on(t.publisherId)],
-)
-
 export const publisherLean = pgEnum('publisher_lean', [
   'left',
   'centre_left',
@@ -291,6 +275,26 @@ export const publisherLean = pgEnum('publisher_lean', [
   'centre_right',
   'right',
 ])
+
+export const publisherEvidence = pgTable(
+  'publisher_evidence',
+  {
+    id: text('id').primaryKey(),
+    publisherId: text('publisher_id')
+      .notNull()
+      .references(() => publisher.id, { onDelete: 'cascade' }),
+    source: text('source').$type<'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr'>().notNull(),
+    dimension: text('dimension').$type<'ownership' | 'reliability' | 'lean'>().notNull(),
+    value: text('value').notNull(),
+    url: text('url').notNull(),
+    // Hand-checked lean evidence only (fixtures/lean-evidence.json): the source's rating on
+    // our five steps, and the country it is relative to. Pre-fills the review form.
+    lean: publisherLean('lean'),
+    countryContext: text('country_context'),
+    retrievedAt: ts('retrieved_at').notNull(),
+  },
+  (t) => [index('publisher_evidence_publisher_idx').on(t.publisherId)],
+)
 
 export const publisherFundingModel = pgEnum('publisher_funding_model', [
   'public_broadcaster',
@@ -768,6 +772,8 @@ export const userPreference = pgTable('user_preference', {
   onboardedAt: ts('onboarded_at'),
   // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
   rememberReads: boolean('remember_reads').notNull().default(false),
+  // ISO 3166-1 alpha-2 for the Story lean mix. Null = use the request's country.
+  country: text('country'),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 

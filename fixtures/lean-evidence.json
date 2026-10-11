@@ -1,0 +1,233 @@
+{
+  "_about": [
+    "Hand-checked lean evidence, loaded by `pnpm cli assessments:import`. Nothing here is shown to readers until an admin publishes an assessment.",
+    "allsides: rating as shown on the source page (US political scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0.",
+    "reuters_dnr: audience score from the chart data behind the Reuters Institute DNR 2022 polarisation chapter (Datawrapper \"Get the data\"). -0.5 = all-left audience, +0.5 = all-right, 0 = matches the population.",
+    "DNR score to step: |score| < 0.05 centre; 0.05 to < 0.20 centre-left/right; >= 0.20 left/right.",
+    "DNR scores are for the domestic brand: spiegel-international uses Spiegel, zdfheute uses ZDF."
+  ],
+  "entries": [
+    {
+      "publisher": "nytimes",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/new-york-times-news-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "washingtonpost",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/washington-post-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "politico",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/politico-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "npr",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/npr-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "cbsnews",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/cbs-news-online-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "abcnews",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/abc-news-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "nbcnews",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/nbc-news-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "propublica",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/propublica-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "pbs-newshour",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/pbs-newshour-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "theverge",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/verge-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "grist",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/grist-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "texastribune",
+      "source": "allsides",
+      "rating": "Lean Left",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/texas-tribune-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "calmatters",
+      "source": "allsides",
+      "rating": "Center",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/calmatters-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "themarkup",
+      "source": "allsides",
+      "rating": "Center",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/markup-media-bias",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "bbc",
+      "source": "reuters_dnr",
+      "score": -0.02,
+      "lean": "centre",
+      "countryContext": "GB",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "guardian",
+      "source": "reuters_dnr",
+      "score": -0.24,
+      "lean": "left",
+      "countryContext": "GB",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "skynews",
+      "source": "reuters_dnr",
+      "score": 0.03,
+      "lean": "centre",
+      "countryContext": "GB",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "nytimes",
+      "source": "reuters_dnr",
+      "score": -0.21,
+      "lean": "left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "washingtonpost",
+      "source": "reuters_dnr",
+      "score": -0.24,
+      "lean": "left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "npr",
+      "source": "reuters_dnr",
+      "score": -0.3,
+      "lean": "left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "nbcnews",
+      "source": "reuters_dnr",
+      "score": -0.15,
+      "lean": "centre_left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "abcnews",
+      "source": "reuters_dnr",
+      "score": -0.08,
+      "lean": "centre_left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "cbsnews",
+      "source": "reuters_dnr",
+      "score": -0.09,
+      "lean": "centre_left",
+      "countryContext": "US",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "spiegel-international",
+      "source": "reuters_dnr",
+      "score": -0.04,
+      "lean": "centre",
+      "countryContext": "DE",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "zdfheute",
+      "source": "reuters_dnr",
+      "score": -0.01,
+      "lean": "centre",
+      "countryContext": "DE",
+      "edition": 2022,
+      "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+      "checkedAt": "2026-10-11"
+    }
+  ]
+}

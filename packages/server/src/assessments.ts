@@ -1,10 +1,16 @@
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
-import type { AssessmentRequest, EvidenceResponse, PublisherAssessment } from '@dn/schemas'
-import { desc, eq } from 'drizzle-orm'
+import type {
+  AssessmentRequest,
+  EvidenceResponse,
+  PublisherAssessment,
+  PublisherLean,
+} from '@dn/schemas'
+import { desc, eq, inArray } from 'drizzle-orm'
 
 // Bump when the rubric or evidence sources change; stored on every assessment.
-export const ASSESSMENT_METHODOLOGY = 'assessment@1'
+// @2: hand-checked lean evidence (AllSides, Reuters Institute DNR) joined the sources.
+export const ASSESSMENT_METHODOLOGY = 'assessment@2'
 
 export async function publisherIdBySlug(db: Db, slug: string): Promise<string | null> {
   const [p] = await db
@@ -42,6 +48,40 @@ export async function latestAssessment(
   }
 }
 
+export interface PublisherLeanInfo {
+  lean: PublisherLean | null
+  // The country the lean is relative to; falls back to the publisher's home country.
+  country: string | null
+}
+
+/** Lean and its country from each publisher's latest assessment, for many publishers. */
+export async function latestLeans(
+  db: Db,
+  publisherIds: string[],
+): Promise<Map<string, PublisherLeanInfo>> {
+  if (publisherIds.length === 0) return new Map()
+  const rows = await db
+    .selectDistinctOn([schema.publisher.id], {
+      publisherId: schema.publisher.id,
+      homeCountry: schema.publisher.countryCode,
+      lean: schema.publisherAssessment.lean,
+      countryContext: schema.publisherAssessment.countryContext,
+    })
+    .from(schema.publisher)
+    .leftJoin(
+      schema.publisherAssessment,
+      eq(schema.publisherAssessment.publisherId, schema.publisher.id),
+    )
+    .where(inArray(schema.publisher.id, publisherIds))
+    .orderBy(schema.publisher.id, desc(schema.publisherAssessment.reviewedAt))
+  return new Map(
+    rows.map((r) => [
+      r.publisherId,
+      { lean: r.lean ?? null, country: r.countryContext ?? r.homeCountry ?? null },
+    ]),
+  )
+}
+
 /** Imported, not yet reviewed evidence. Admin only. */
 export async function listEvidence(db: Db, publisherId: string): Promise<EvidenceResponse> {
   const rows = await db
@@ -55,6 +95,8 @@ export async function listEvidence(db: Db, publisherId: string): Promise<Evidenc
       value: r.value,
       url: r.url,
       retrievedAt: r.retrievedAt.toISOString(),
+      lean: r.lean,
+      countryContext: r.countryContext,
     })),
   }
 }
@@ -78,7 +120,12 @@ export async function createAssessment(
     lean: request.lean,
     leanEvidenceUrl: request.lean ? request.leanEvidenceUrl : null,
     leanNote: request.leanNote,
-    evidence: evidence.map(({ retrievedAt: _, ...e }) => e),
+    evidence: evidence.map(({ source, dimension, value, url }) => ({
+      source,
+      dimension,
+      value,
+      url,
+    })),
     reviewedBy: input.reviewedBy,
   })
   return latestAssessment(db, input.publisherId)
