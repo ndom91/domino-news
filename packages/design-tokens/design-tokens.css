@@ -56,6 +56,16 @@
   --dn-error-subtle: #f7dbe0;
 
   /*
+   * ── Political lean ─────────────────────────────────────
+   * Blue for left, red for right. The stronger the colour, the further from centre.
+   * Centre uses text-muted (grey).
+   */
+  --dn-lean-left: #1f4fd1;
+  --dn-lean-centre-left: #7f9be6;
+  --dn-lean-centre-right: #e4919b;
+  --dn-lean-right: #c8102e;
+
+  /*
    * ── Desk colours (narrative-0…6 utilities) ─────────────
    * Categorical keys: "this Story is on that desk" (politics, science, economy, culture,
    * justice, conflict; DESK_SLOT in @dn/schemas). A Narrative takes its latest Story's desk.
@@ -189,6 +199,11 @@
   --dn-warning-subtle: #33260f;
   --dn-error: #ff7088;
   --dn-error-subtle: #3a1219;
+  /* On dark, brighter reads as stronger: centre-leaning shades sink toward the canvas. */
+  --dn-lean-left: #5b8dff;
+  --dn-lean-centre-left: #3a5aa0;
+  --dn-lean-centre-right: #9a4250;
+  --dn-lean-right: #ff5c6c;
 
   --dn-narrative-0: #2a2926;
   --dn-narrative-0-text: #f3f1ec;
@@ -218,6 +233,10 @@
     --dn-warning-subtle: #33260f;
     --dn-error: #ff7088;
     --dn-error-subtle: #3a1219;
+    --dn-lean-left: #5b8dff;
+    --dn-lean-centre-left: #3a5aa0;
+    --dn-lean-centre-right: #9a4250;
+    --dn-lean-right: #ff5c6c;
     --dn-narrative-0: #2a2926;
     --dn-narrative-0-text: #f3f1ec;
   }

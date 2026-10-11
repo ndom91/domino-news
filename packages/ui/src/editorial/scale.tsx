@@ -65,8 +65,9 @@ export function StatusScale<T extends string>({
 }
 
 /**
- * A position on an ordered axis, in ink only. Used where colour would add a judgement
- * (political lean). With no value the track is hatched and nothing is marked.
+ * A position on an ordered axis (political lean). `stepFills` colours each tick and the
+ * marked dot; without it they are ink. With no value the track is hatched and nothing is
+ * marked.
  */
 export function PositionScale({
   steps,
@@ -74,9 +75,12 @@ export function PositionScale({
   startLabel,
   endLabel,
   emptyLabel = 'Not assessed',
+  stepFills,
   className,
 }: {
   steps: readonly string[]
+  /** One background class per step, e.g. `bg-lean-left`. */
+  stepFills?: readonly string[]
   value: number | null
   startLabel: string
   endLabel: string
@@ -100,7 +104,8 @@ export function PositionScale({
                 key={s}
                 className={cx(
                   'absolute top-1/2 -translate-x-1/2 -translate-y-1/2',
-                  i === value ? 'size-3.5 bg-text' : 'h-2.5 w-0.5 bg-text',
+                  i === value ? 'size-4 border-2 border-text' : 'h-3 w-1',
+                  stepFills?.[i] ?? 'bg-text',
                 )}
                 style={{ left: `${(i / (steps.length - 1)) * 100}%` }}
               />

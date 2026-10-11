@@ -36,6 +36,10 @@
   --color-warning-subtle: var(--dn-warning-subtle);
   --color-error: var(--dn-error);
   --color-error-subtle: var(--dn-error-subtle);
+  --color-lean-left: var(--dn-lean-left);
+  --color-lean-centre-left: var(--dn-lean-centre-left);
+  --color-lean-centre-right: var(--dn-lean-centre-right);
+  --color-lean-right: var(--dn-lean-right);
   --color-narrative-0: var(--dn-narrative-0);
   --color-narrative-0-text: var(--dn-narrative-0-text);
   --color-narrative-1: var(--dn-narrative-1);

@@ -12,6 +12,7 @@ import {
 } from '@dn/schemas'
 import type { ReactNode } from 'react'
 import { cx } from '../cx.ts'
+import { LEAN_FILL } from './lean-spread.tsx'
 import { PositionScale, StatusScale } from './scale.tsx'
 
 const FUNDING_ICONS: Record<FundingModel, ReactNode> = {
@@ -44,7 +45,7 @@ const external = 'underline underline-offset-4 hover:text-text'
 
 /**
  * A reviewed publisher assessment: funding model, reliability (status scale) and political
- * lean (ink-only position, relative to the outlet's own country). Evidence is one click away.
+ * lean (a coloured position, relative to the outlet's own country). Evidence is one click away.
  */
 export function AssessmentScorecard({
   assessment: a,
@@ -85,6 +86,7 @@ export function AssessmentScorecard({
         <Panel title="Political lean">
           <PositionScale
             steps={LEANS.map((l) => LEAN_LABELS[l])}
+            stepFills={LEANS.map((l) => LEAN_FILL[l])}
             value={leanIndex}
             startLabel="Left"
             endLabel="Right"

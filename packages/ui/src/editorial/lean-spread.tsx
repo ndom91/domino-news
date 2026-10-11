@@ -5,14 +5,14 @@ import { DefaultLink, type LinkLike } from './link.tsx'
 
 const LEANS = publisherLeanSchema.options
 
-// Ink only, like the publisher lean scale: colour would add a judgement. Darker = further
-// from centre; the bar's order (left to right) gives the direction.
-const FILL: Record<PublisherLean, string> = {
-  left: 'bg-text',
-  centre_left: 'bg-text-secondary',
+// Blue for left, red for right, stronger further from centre. The bar's order and the
+// labelled rows below still carry the meaning without colour.
+export const LEAN_FILL: Record<PublisherLean, string> = {
+  left: 'bg-lean-left',
+  centre_left: 'bg-lean-centre-left',
   centre: 'bg-text-muted',
-  centre_right: 'bg-text-secondary',
-  right: 'bg-text',
+  centre_right: 'bg-lean-centre-right',
+  right: 'bg-lean-right',
 }
 
 // Hatching for "not rated": shape, not colour, says it's empty (same as `PositionScale`).
@@ -60,7 +60,7 @@ export function LeanSpread({
               r.publishers.length ? (
                 <span
                   key={r.key}
-                  className={FILL[r.key]}
+                  className={LEAN_FILL[r.key]}
                   style={{ flexGrow: r.publishers.length }}
                 />
               ) : null,
@@ -78,7 +78,7 @@ export function LeanSpread({
               <LeanRow
                 key={r.key}
                 label={LEAN_LABELS[r.key]}
-                swatch={<span className={cx('size-3 flex-none', FILL[r.key])} />}
+                swatch={<span className={cx('size-3 flex-none', LEAN_FILL[r.key])} />}
                 publishers={r.publishers}
                 Link={Link}
               />
