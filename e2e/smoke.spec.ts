@@ -37,7 +37,7 @@ test('feed → story → narrative → search', async ({ page }) => {
     page.locator('section[aria-labelledby="sources-heading"] a[target="_blank"]').first(),
   ).toBeVisible()
   // Context popovers: open the first one found among the first few stories.
-  const term = page.locator('#lead-heading ~ p button.cursor-help')
+  const term = page.locator('#lead-heading ~ p button[data-context-term]')
   for (let i = 0; i < 6 && (await term.count()) === 0; i++) {
     await page.goto('/')
     await page

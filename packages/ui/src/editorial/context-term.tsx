@@ -16,6 +16,7 @@ export function ContextTerm({ item, children }: { item: StoryContextItem; childr
       trigger={
         <button
           type="button"
+          data-context-term
           className="cursor-pointer text-inherit underline decoration-current/50 decoration-dotted decoration-2 underline-offset-4 hover:decoration-accent hover:decoration-solid"
         >
           {children}
