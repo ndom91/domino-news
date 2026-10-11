@@ -21,11 +21,11 @@ import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
-import { api, queries } from '../../lib/api.ts'
+import { api, orNotFound, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/stories/$slug')({
   loader: async ({ context, params }) => {
-    const story = await context.queryClient.ensureQueryData(queries.story(params.slug))
+    const story = await orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug)))
     // Window end for the Source Trace, fixed at load so SSR and hydration agree.
     return { title: story.title, now: new Date().toISOString() }
   },

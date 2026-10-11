@@ -10,6 +10,7 @@ import {
   useLocation,
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import { NotFoundPage } from '../components/not-found.tsx'
 import { SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { getSessionInfo } from '../lib/session.ts'
 import { themeScript } from '../lib/theme.ts'
@@ -42,14 +43,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   }),
   shellComponent: RootDocument,
   component: RootLayout,
-  notFoundComponent: () => (
-    <div className="mx-auto max-w-page px-gutter py-16">
-      <h1 className="type-section">Page not found</h1>
-      <p className="mt-3 text-base text-text-muted">
-        The link may be out of date. Try the front page or search.
-      </p>
-    </div>
-  ),
+  // Global 404: unmatched URLs, and loaders that throw notFound() (see orNotFound).
+  notFoundComponent: NotFoundPage,
 })
 
 function RootLayout() {

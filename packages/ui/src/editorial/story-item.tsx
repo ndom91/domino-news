@@ -39,6 +39,7 @@ export function StoryItem({
   now,
   Link = DefaultLink,
   showFirstReport = true,
+  showTrace = true,
   className,
 }: {
   story: StoryListItem
@@ -47,6 +48,8 @@ export function StoryItem({
   Link?: LinkLike
   /** "first 13:39 UTC" under the trace; off where the page shows its own dates line. */
   showFirstReport?: boolean
+  /** The source trace chart; off for compact lists such as the 404 page. */
+  showTrace?: boolean
   className?: string
 }) {
   const wide = size === 'wide'
@@ -108,18 +111,20 @@ export function StoryItem({
         </p>
       ) : null}
       <div className="mt-4 flex flex-col gap-1.5 type-meta">
-        <SourceTrace
-          sources={story.trace.map((t) => ({
-            id: t.id,
-            outlet: t.publisherName,
-            at: t.at,
-            citation: t.citation,
-          }))}
-          now={now}
-          width="fill"
-          // Fixed height so cards in a row line up: 3 marks on standard cards, 4 on wide.
-          rows={wide ? 4 : 3}
-        />
+        {showTrace ? (
+          <SourceTrace
+            sources={story.trace.map((t) => ({
+              id: t.id,
+              outlet: t.publisherName,
+              at: t.at,
+              citation: t.citation,
+            }))}
+            now={now}
+            width="fill"
+            // Fixed height so cards in a row line up: 3 marks on standard cards, 4 on wide.
+            rows={wide ? 4 : 3}
+          />
+        ) : null}
         <span>
           {plural(story.sourceCount, 'publisher')} · {cited} cited
           {showFirstReport ? (

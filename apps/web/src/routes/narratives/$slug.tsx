@@ -5,11 +5,11 @@ import { createFileRoute } from '@tanstack/react-router'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
-import { queries } from '../../lib/api.ts'
+import { orNotFound, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/narratives/$slug')({
   loader: async ({ context, params }) => {
-    const n = await context.queryClient.ensureQueryData(queries.narrative(params.slug))
+    const n = await orNotFound(context.queryClient.ensureQueryData(queries.narrative(params.slug)))
     return { title: n.title }
   },
   head: ({ loaderData }) => ({

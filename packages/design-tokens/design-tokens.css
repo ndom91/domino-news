@@ -45,6 +45,8 @@
   /* Marble illustration on the sign-in page, with --dn-accent. Decoration only, never a key. */
   --dn-marble-amber: #ffb81c;
   --dn-marble-cream: #ffe9dc;
+  /* Drop shadow of the dominoes on the 404 page's orange panel. Decoration only. */
+  --dn-accent-shade: #c23a12;
 
   /* ── Status (real states only) ────────────────────────── */
   --dn-success: #1f7a3e;

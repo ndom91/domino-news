@@ -38,11 +38,11 @@ import type { FormEvent } from 'react'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
-import { api, queries } from '../../lib/api.ts'
+import { api, orNotFound, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/publishers/$slug')({
   loader: async ({ context, params }) => {
-    const p = await context.queryClient.ensureQueryData(queries.publisher(params.slug))
+    const p = await orNotFound(context.queryClient.ensureQueryData(queries.publisher(params.slug)))
     return { name: p.name, now: new Date().toISOString() }
   },
   head: ({ loaderData }) => ({

@@ -29,6 +29,7 @@
   --color-accent: var(--dn-accent);
   --color-accent-text: var(--dn-accent-text);
   --color-accent-contrast: var(--dn-accent-contrast);
+  --color-accent-shade: var(--dn-accent-shade);
   --color-focus: var(--dn-focus-ring);
   --color-success: var(--dn-success);
   --color-success-subtle: var(--dn-success-subtle);
