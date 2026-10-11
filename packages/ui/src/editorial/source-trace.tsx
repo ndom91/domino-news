@@ -1,5 +1,6 @@
 import { clockTime, formatDate, formatDateTime, plural } from '@dn/domain'
 import { cx } from '../cx.ts'
+import { Tooltip } from '../primitives/overlay.tsx'
 
 export interface TraceSource {
   id: string
@@ -85,25 +86,26 @@ export function SourceTrace({
       ))}
       {columns.flatMap((col, i) =>
         col.map((s, j) => (
-          <circle
+          <Tooltip
             key={s.id}
-            cx={i * cw + cw / 2}
-            cy={h - 2 - rh / 2 - j * rh}
-            r={r}
-            strokeWidth={s.citation === null ? 1.5 : 0}
-            className={
-              s.citation === null
-                ? onKey
-                  ? 'fill-key stroke-key-text'
-                  : 'fill-canvas stroke-trace-observed'
-                : onKey
-                  ? 'fill-key-text'
-                  : 'fill-trace-cited'
-            }
+            content={`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}
           >
-            {/* One string: React SSR drops multi-part text inside an SVG <title>. */}
-            <title>{`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}</title>
-          </circle>
+            <circle
+              cx={i * cw + cw / 2}
+              cy={h - 2 - rh / 2 - j * rh}
+              r={r}
+              strokeWidth={s.citation === null ? 1.5 : 0}
+              className={
+                s.citation === null
+                  ? onKey
+                    ? 'fill-key stroke-key-text'
+                    : 'fill-canvas stroke-trace-observed'
+                  : onKey
+                    ? 'fill-key-text'
+                    : 'fill-trace-cited'
+              }
+            />
+          </Tooltip>
         )),
       )}
       {variant === 'full'

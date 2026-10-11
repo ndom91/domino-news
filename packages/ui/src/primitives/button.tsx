@@ -1,6 +1,7 @@
 import { Button as BaseButton } from '@base-ui/react/button'
 import type { ComponentProps, ReactNode } from 'react'
 import { cx } from '../cx.ts'
+import { Tooltip } from './overlay.tsx'
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md'
@@ -76,14 +77,15 @@ export function IconButton({
   ...props
 }: IconButtonProps) {
   return (
-    <Button
-      {...props}
-      variant={variant}
-      aria-label={label}
-      title={label}
-      className={cx('size-tap px-0', className)}
-    >
-      {icon}
-    </Button>
+    <Tooltip content={label}>
+      <Button
+        {...props}
+        variant={variant}
+        aria-label={label}
+        className={cx('size-tap px-0', className)}
+      >
+        {icon}
+      </Button>
+    </Tooltip>
   )
 }

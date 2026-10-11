@@ -1,4 +1,4 @@
-import { clockTime, formatDate, formatDateTime } from '@dn/domain'
+import { clockTime, formatDate } from '@dn/domain'
 import { cx } from '../cx.ts'
 
 export interface BoardSource {
@@ -37,11 +37,7 @@ export function SourceBoard({
               onKey ? 'border-key-text/30' : 'border-border',
             )}
           >
-            <time
-              dateTime={s.at}
-              title={formatDateTime(s.at)}
-              className={cx('type-numeral', s.citation === null && muted)}
-            >
+            <time dateTime={s.at} className={cx('type-numeral', s.citation === null && muted)}>
               {clockTime(s.at)}
             </time>
             <a

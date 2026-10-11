@@ -1,6 +1,6 @@
 import { relativeTime } from '@dn/domain'
 import type { OpsAction } from '@dn/schemas'
-import { Badge, Button, Card, ConfirmDialog, Notice, Skeleton } from '@dn/ui'
+import { Badge, Button, Card, ConfirmDialog, Notice, Skeleton, Tooltip } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
@@ -181,9 +181,11 @@ function OpsPage() {
               </Td>
               <Td>
                 {f.lastStatus === 'error' ? (
-                  <span title={f.lastError ?? ''}>
-                    <Badge tone="error">error</Badge>
-                  </span>
+                  <Tooltip content={f.lastError ?? 'No error message'}>
+                    <span>
+                      <Badge tone="error">error</Badge>
+                    </span>
+                  </Tooltip>
                 ) : (
                   <Badge tone={f.lastStatus === 'ok' ? 'success' : 'neutral'}>
                     {f.lastStatus ?? 'never'}

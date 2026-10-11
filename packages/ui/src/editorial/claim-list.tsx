@@ -1,5 +1,6 @@
 import { clockTime, formatDate, formatDateTime, hostnameOf } from '@dn/domain'
 import type { StoryClaim } from '@dn/schemas'
+import { Tooltip } from '../primitives/overlay.tsx'
 import { DefaultLink, type LinkLike } from './link.tsx'
 
 type Mention = StoryClaim['mentions'][number]
@@ -45,29 +46,31 @@ export function ClaimList({
             <p className="mt-1.5 flex min-w-0 items-baseline gap-x-2 text-label text-text-muted">
               {claim.firstReportedAt ? (
                 <>
-                  <time
-                    dateTime={claim.firstReportedAt}
-                    title={`First reported ${formatDateTime(claim.firstReportedAt)}`}
-                    className="flex-none font-semibold text-text"
-                  >
-                    {formatDate(claim.firstReportedAt)}, {clockTime(claim.firstReportedAt)}
-                  </time>
+                  <Tooltip content={`First reported ${formatDateTime(claim.firstReportedAt)}`}>
+                    <time
+                      dateTime={claim.firstReportedAt}
+                      className="flex-none font-semibold text-text"
+                    >
+                      {formatDate(claim.firstReportedAt)}, {clockTime(claim.firstReportedAt)}
+                    </time>
+                  </Tooltip>
                   <span aria-hidden className="flex-none text-border-strong">
                     |
                   </span>
                 </>
               ) : null}
-              <span
-                className="min-w-0 truncate"
-                title={[...carrying, ...disputing].map((m) => m.publisher.name).join(', ')}
+              <Tooltip
+                content={[...carrying, ...disputing].map((m) => m.publisher.name).join(', ')}
               >
-                {names(carrying)}
-                {disputing.length > 0 ? (
-                  <span className="font-semibold text-error">
-                    {carrying.length > 0 ? ' · ' : ''}Disputed by {names(disputing)}
-                  </span>
-                ) : null}
-              </span>
+                <span className="min-w-0 truncate">
+                  {names(carrying)}
+                  {disputing.length > 0 ? (
+                    <span className="font-semibold text-error">
+                      {carrying.length > 0 ? ' · ' : ''}Disputed by {names(disputing)}
+                    </span>
+                  ) : null}
+                </span>
+              </Tooltip>
             </p>
             {claim.evidence.length > 0 ? (
               <dl className="mt-0.5 text-label">

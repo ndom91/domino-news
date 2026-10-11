@@ -2,6 +2,7 @@ import { splitCitations } from '@dn/domain'
 import type { StoryContextItem } from '@dn/schemas'
 import { Fragment } from 'react'
 import { cx } from '../cx.ts'
+import { Tooltip } from '../primitives/overlay.tsx'
 import { annotateText, ContextTerm } from './context-term.tsx'
 
 export interface CitedSource {
@@ -28,14 +29,15 @@ export function CitationMarker({
   const label = `Source ${n}: ${source.outlet}`
   return (
     // The marker is ~9px; the invisible ::before widens the hit area without moving text.
-    <a
-      href={source.href}
-      title={label}
-      aria-label={label}
-      className={cx(className, 'relative before:absolute before:-inset-x-1 before:-inset-y-2')}
-    >
-      [{n}]
-    </a>
+    <Tooltip content={label}>
+      <a
+        href={source.href}
+        aria-label={label}
+        className={cx(className, 'relative before:absolute before:-inset-x-1 before:-inset-y-2')}
+      >
+        [{n}]
+      </a>
+    </Tooltip>
   )
 }
 

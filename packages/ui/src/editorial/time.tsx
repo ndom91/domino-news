@@ -1,9 +1,10 @@
 import { clockTime, formatDateTime, shortRelative } from '@dn/domain'
 import { useEffect, useState } from 'react'
 import { cx } from '../cx.ts'
+import { Tooltip } from '../primitives/overlay.tsx'
 
 /**
- * `<time>` with the absolute UTC time in the title. Relative text refreshes each minute on
+ * `<time>` with the absolute UTC time in a tooltip. Relative text refreshes each minute on
  * the client (tabular figures, so it doesn't shift layout).
  */
 export function Timestamp({
@@ -26,14 +27,11 @@ export function Timestamp({
   }, [format])
   const text = format === 'clock' ? clockTime(at) : shortRelative(at, now ?? undefined)
   return (
-    <time
-      dateTime={at}
-      title={formatDateTime(at)}
-      className={cx('tabular-nums', className)}
-      suppressHydrationWarning
-    >
-      {prefix ? `${prefix} ` : null}
-      {text}
-    </time>
+    <Tooltip content={formatDateTime(at)}>
+      <time dateTime={at} className={cx('tabular-nums', className)} suppressHydrationWarning>
+        {prefix ? `${prefix} ` : null}
+        {text}
+      </time>
+    </Tooltip>
   )
 }
