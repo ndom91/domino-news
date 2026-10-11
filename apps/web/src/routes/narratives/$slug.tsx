@@ -26,7 +26,7 @@ function NarrativePage() {
   return (
     <Page>
       {/* Header, then the chart (beside it on desktop, under it on mobile), then the timeline. */}
-      <div className="grid gap-x-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <div className="grid gap-x-12 lg:grid-cols-[minmax(0,1fr)_26rem]">
         <div className="max-w-4xl">
           <header className={cx(deskKey(narrative.desk), 'border-t-6 border-key pt-4')}>
             <p className="type-label text-text-muted">Narrative</p>

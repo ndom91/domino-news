@@ -1,11 +1,12 @@
 import { formatDate, plural } from '@dn/domain'
 import { scaleLinear } from 'd3-scale'
 import { area, line } from 'd3-shape'
+import { Tooltip } from '../primitives/overlay.tsx'
 
 const DAY = 86_400_000
-const W = 320
-const H = 168
-const M = { top: 10, right: 8, bottom: 22, left: 24 }
+const W = 420
+const H = 300
+const M = { top: 12, right: 10, bottom: 26, left: 26 }
 
 /**
  * Stories per UTC day, from `leadIn` empty days before the first Story through the last one.
@@ -72,18 +73,33 @@ export function NarrativeActivity({ times }: { times: string[] }) {
         </g>
       ))}
       <path d={area().y0(base)(pts) ?? ''} className="fill-key/20" />
-      <path d={line()(pts) ?? ''} className="fill-none stroke-key" strokeWidth={2.5} />
+      <path d={line()(pts) ?? ''} className="fill-none stroke-key" strokeWidth={3} />
       {data.map((d, i) =>
         d.count > 0 ? (
-          <rect
+          <Tooltip
             key={d.day}
-            x={x(i) - 4}
-            y={y(d.count) - 4}
-            width={8}
-            height={8}
-            className="fill-key stroke-canvas"
-            strokeWidth={1.5}
-          />
+            delay={60}
+            content={`${plural(d.count, 'story', 'stories')} published on ${formatDate(d.day)}`}
+          >
+            <g className="group cursor-default">
+              {/* Column-wide hit area: the marker itself is only 10px. */}
+              <rect
+                x={x(i) - Math.min(18, (W - M.left - M.right) / data.length / 2)}
+                y={M.top}
+                width={Math.min(36, (W - M.left - M.right) / data.length)}
+                height={H - M.top - M.bottom}
+                fill="transparent"
+              />
+              <rect
+                x={x(i) - 5}
+                y={y(d.count) - 5}
+                width={10}
+                height={10}
+                strokeWidth={2}
+                className="origin-center fill-key stroke-canvas transition-[scale] [transform-box:fill-box] group-hover:scale-150"
+              />
+            </g>
+          </Tooltip>
         ) : null,
       )}
       {xTicks.map((i) => (
