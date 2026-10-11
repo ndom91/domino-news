@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import {
   clockTime,
   dayLabel,
@@ -21,7 +22,7 @@ import {
   wikidataEvidence,
 } from '@dn/jobs'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
-import { layoutNarrative, storiesPerDay } from '@dn/ui'
+import { cx, layoutNarrative, storiesPerDay, THEME_TOKENS } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
 
@@ -513,5 +514,41 @@ describe('learned feedback weights', () => {
     expect(disliked.score).toBeLessThan(neutral.score)
     expect(liked.reasons).toEqual([{ kind: 'learned', label: 'Climate' }])
     expect(disliked.reasons).toEqual([])
+  })
+})
+
+describe('cx (tailwind-merge with our tokens)', () => {
+  it('knows every theme token, so it never misreads one', () => {
+    const css = readFileSync(
+      new URL('../packages/design-tokens/theme.css', import.meta.url),
+      'utf8',
+    )
+    const prefixes = {
+      text: '--text-',
+      leading: '--leading-',
+      'font-weight': '--font-weight-',
+      tracking: '--tracking-',
+      spacing: '--spacing-',
+      container: '--container-',
+      radius: '--radius-',
+      shadow: '--shadow-',
+      breakpoint: '--breakpoint-',
+    } as const
+    for (const [group, prefix] of Object.entries(prefixes)) {
+      const names = [...css.matchAll(new RegExp(`^\\s*${prefix}([a-z0-9-]+):`, 'gm'))]
+        .map((m) => m[1])
+        .filter((n) => n !== undefined)
+      expect([...THEME_TOKENS[group as keyof typeof THEME_TOKENS]].sort(), group).toEqual(
+        [...new Set(names)].sort(),
+      )
+    }
+  })
+
+  it('lets the later class win, without dropping unrelated ones', () => {
+    expect(cx('size-tap px-4', 'px-0')).toBe('size-tap px-0')
+    expect(cx('text-label text-text-muted')).toBe('text-label text-text-muted')
+    expect(cx('text-sm', 'text-label')).toBe('text-label')
+    expect(cx('h-bar', false, 'h-3')).toBe('h-3')
+    expect(cx('type-meta key-fill')).toBe('type-meta key-fill')
   })
 })

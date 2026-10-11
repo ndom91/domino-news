@@ -84,7 +84,13 @@ export function StoryItem({
         </Link>
       </h3>
       {story.summary ? (
-        <p className={cx('leading-normal', wide ? 'max-w-[36rem] text-md' : 'text-base')}>
+        <p
+          className={cx(
+            wide ? 'max-w-[36rem] text-md' : 'text-base',
+            // After the font size: text-* also sets line-height, and cx keeps the later class.
+            'leading-normal',
+          )}
+        >
           <SummaryText text={story.summary} sources={citedSourcesOf(story)} />
         </p>
       ) : null}

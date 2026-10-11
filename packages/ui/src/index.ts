@@ -1,4 +1,4 @@
-export { cx } from './cx.ts'
+export { cx, THEME_TOKENS } from './cx.ts'
 export * from './editorial/assessment-scorecard.tsx'
 export * from './editorial/citation.tsx'
 export * from './editorial/claim-list.tsx'
