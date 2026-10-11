@@ -284,12 +284,14 @@ function ForYouCard({
       {/* The card's own dates line below already says when it was first reported. */}
       <StoryItem story={story} now={now} Link={RouterLink} showFirstReport={false} />
       {/* First and updated times live in the story bar's timestamp tooltip. The row is pulled
-          up beside the trace caption: the 44px tap areas pad ~11px above each icon. */}
-      <div className="-mt-6 flex justify-end">
+          up beside the trace caption: the 44px tap areas pad ~11px above each icon. Leave a
+          couple of px under the hover border so it clears the trace. */}
+      <div className="-mt-5.5 flex justify-end">
         <div className="flex">
           <WhyButton reasons={item.reasons} />
           <IconButton
             label="More like this"
+            className="text-text-muted hover:not-data-disabled:border-text-muted hover:not-data-disabled:text-text aria-pressed:text-text"
             aria-pressed={feedback === 'more'}
             disabled={save.isPending}
             icon={<ThumbsUpIcon size={22} weight={feedback === 'more' ? 'fill' : 'regular'} />}
@@ -297,6 +299,7 @@ function ForYouCard({
           />
           <IconButton
             label="Less like this"
+            className="text-text-muted hover:not-data-disabled:border-text-muted hover:not-data-disabled:text-text"
             disabled={save.isPending}
             icon={<ThumbsDownIcon size={22} />}
             onClick={hide}
