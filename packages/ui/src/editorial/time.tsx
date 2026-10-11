@@ -15,13 +15,15 @@ export function Timestamp({
   format = 'relative',
   local = false,
   prefix,
+  firstAt,
   className,
 }: {
   at: string
-  // short = "11 Oct, 09:47 UTC": datetime without its inner dot, for use inside dotted lines.
-  format?: 'relative' | 'clock' | 'date' | 'datetime' | 'short'
+  format?: 'relative' | 'clock' | 'date' | 'datetime'
   local?: boolean
   prefix?: string
+  /** When set, the tooltip shows "First reported …" and "Updated …" (at) instead of one time. */
+  firstAt?: string
   className?: string
 }) {
   const [now, setNow] = useState<Date | null>(null)
@@ -43,11 +45,17 @@ export function Timestamp({
         ? clock()
         : format === 'date'
           ? formatDate(at, zone)
-          : format === 'short'
-            ? `${formatDate(at, zone)}, ${clock()}`
-            : `${formatDate(at, zone)} · ${clock()}`
+          : `${formatDate(at, zone)} · ${clock()}`
   // Tooltips only render on the client, so reading the reader's zone here is safe.
-  const tooltip = formatDateTime(at, local ? 'UTC' : (readerZone ?? localZone()))
+  const tooltipZone = local ? 'UTC' : (readerZone ?? localZone())
+  const tooltip = firstAt ? (
+    <span className="flex flex-col">
+      <span>First reported {formatDateTime(firstAt, tooltipZone)}</span>
+      {firstAt !== at ? <span>Updated {formatDateTime(at, tooltipZone)}</span> : null}
+    </span>
+  ) : (
+    formatDateTime(at, tooltipZone)
+  )
 
   return (
     <Tooltip content={tooltip}>

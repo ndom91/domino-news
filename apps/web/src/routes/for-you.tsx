@@ -1,6 +1,6 @@
 import { feedbackMutation } from '@dn/queries'
 import { DESK_LABELS, type ForYouReason, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
-import { Button, cx, IconButton, Notice, Popover, Skeleton, StoryItem, Timestamp } from '@dn/ui'
+import { Button, cx, IconButton, Notice, Popover, Skeleton, StoryItem } from '@dn/ui'
 import { InfoIcon, ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -144,25 +144,6 @@ function WhyButton({ reasons }: { reasons: ForYouReason[] }) {
   )
 }
 
-// Updates within this of the first report are the same moment; showing both is noise.
-const SAME_MOMENT_MS = 60_000
-
-/** "First 11 Oct, 09:47 UTC · Updated 11 Oct, 13:05 UTC": every Story has at least the first. */
-function StoryDates({ first, updated }: { first: string; updated: string }) {
-  const changed = Date.parse(updated) - Date.parse(first) >= SAME_MOMENT_MS
-  return (
-    <p className="type-meta">
-      <Timestamp at={first} format="short" prefix="First" />
-      {changed ? (
-        <>
-          {' · '}
-          <Timestamp at={updated} format="short" prefix="Updated" />
-        </>
-      ) : null}
-    </p>
-  )
-}
-
 /** A motion token in ms (0 under reduced motion, where the tokens are zeroed). */
 function tokenMs(name: string) {
   const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim()
@@ -302,9 +283,9 @@ function ForYouCard({
     >
       {/* The card's own dates line below already says when it was first reported. */}
       <StoryItem story={story} now={now} Link={RouterLink} showFirstReport={false} />
-      <div className="flex items-center justify-between gap-3">
-        <StoryDates first={story.firstObservedAt} updated={story.lastUpdatedAt} />
-        <div className="flex flex-none">
+      {/* First and updated times live in the story bar's timestamp tooltip. */}
+      <div className="flex justify-end">
+        <div className="flex">
           <WhyButton reasons={item.reasons} />
           <IconButton
             label="More like this"

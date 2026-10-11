@@ -12,12 +12,15 @@ export function StoryBar({
   desk,
   narrative,
   timestamp,
+  firstAt,
   Link = DefaultLink,
   className,
 }: {
   desk: Desk | null
   narrative?: { title: string; href: string }
   timestamp: string
+  /** First report, shown with the timestamp in its tooltip. */
+  firstAt?: string
   Link?: LinkLike
   className?: string
 }) {
@@ -42,7 +45,7 @@ export function StoryBar({
           </>
         ) : null}
       </span>
-      <Timestamp at={timestamp} className="flex-none font-semibold" />
+      <Timestamp at={timestamp} firstAt={firstAt} className="flex-none font-semibold" />
     </div>
   )
 }

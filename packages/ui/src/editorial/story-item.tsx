@@ -69,6 +69,7 @@ export function StoryItem({
           narrative ? { title: narrative.title, href: `/narratives/${narrative.slug}` } : undefined
         }
         timestamp={latest}
+        firstAt={first}
         Link={Link}
       />
       <h3
