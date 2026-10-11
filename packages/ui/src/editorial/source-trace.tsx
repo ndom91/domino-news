@@ -80,7 +80,7 @@ export function SourceTrace({
       height={H}
       role="img"
       aria-label={`${plural(sources.length, 'publisher')} by hour, ${cited} cited`}
-      className={cx('block h-auto max-w-full', className)}
+      className={cx('block h-auto max-w-full overflow-visible', className)}
     >
       {columns.map((_, i) => (
         <rect

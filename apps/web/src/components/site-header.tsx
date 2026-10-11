@@ -131,7 +131,8 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         <button
           type="button"
           aria-label={`Account menu for ${user.username ?? user.name}`}
-          className="inline-flex size-tap flex-none items-center justify-end"
+          // Pulls the 44px tap target in so the visible gap matches the nav links.
+          className="inline-flex size-tap flex-none items-center justify-end lg:-ml-5.5"
         >
           <UserAvatar name={user.email || user.name} />
         </button>
