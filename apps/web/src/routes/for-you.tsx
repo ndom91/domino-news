@@ -7,6 +7,7 @@ import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/for-you')({
+  loader: ({ context }) => context.queryClient.prefetchInfiniteQuery(queries.forYou()),
   head: () => ({ meta: [{ title: 'For You · Domino News' }] }),
   component: ForYouPage,
 })

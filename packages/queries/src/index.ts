@@ -16,6 +16,7 @@ import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/
 
 export const queryKeys = {
   stories: () => ['stories'] as const,
+  fronts: () => ['front'] as const,
   front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
@@ -130,7 +131,11 @@ export function editSummaryMutation(api: ApiClient, queryClient: QueryClient, st
   return {
     mutationFn: (body: SummaryEditRequest) => api.editSummary(storyId, body),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: queryKeys.stories() })
+      // The front page embeds the lead Story's summary.
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.stories() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.fronts() }),
+      ])
     },
   }
 }
@@ -140,9 +145,11 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
     mutationFn: (body: UserPreferencesUpdate) => api.savePreferences(body),
     onSuccess: async (prefs: UserPreferences) => {
       queryClient.setQueryData(queryKeys.preferences(), prefs)
+      // The front page lead prefers the reader's regions.
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: queryKeys.insights() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.fronts() }),
       ])
     },
   }

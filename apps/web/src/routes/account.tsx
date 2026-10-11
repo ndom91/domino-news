@@ -12,6 +12,12 @@ import { authClient } from '../lib/auth-client.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 
 export const Route = createFileRoute('/account')({
+  // Passkeys load in the browser only (WebAuthn client); the rest renders on the server.
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.prefetchQuery(queries.preferences()),
+      context.queryClient.prefetchQuery(queries.follows()),
+    ]),
   head: () => ({ meta: [{ title: 'Account · Domino News' }] }),
   component: AccountPage,
 })

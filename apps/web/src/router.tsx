@@ -12,6 +12,8 @@ export function getRouter() {
     routeTree,
     context: { queryClient },
     defaultPreload: 'intent',
+    // Always run loaders on preload; Query's staleTime decides whether they fetch.
+    defaultPreloadStaleTime: 0,
     scrollRestoration: true,
     defaultErrorComponent: ({ error }) => <RouteError error={error as Error} />,
   })

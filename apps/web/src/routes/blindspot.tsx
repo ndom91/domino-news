@@ -9,11 +9,15 @@ import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/blindspot')({
+  loader: ({ context }) =>
+    Promise.all([
+      context.queryClient.prefetchQuery(queries.insights()),
+      context.queryClient.prefetchQuery(queries.preferences()),
+    ]),
   head: () => ({ meta: [{ title: 'Blindspot · Domino News' }] }),
   component: BlindspotPage,
 })
 
-// Per user and client-only, like the edition preference on the front page.
 function BlindspotPage() {
   const insights = useQuery(queries.insights())
   return (
@@ -57,8 +61,8 @@ function InsightSections({ data }: { data: Insights }) {
   if (data.missedDevelopments.length === 0 && data.gaps.length === 0) {
     return (
       <p className="max-w-reading text-text-secondary">
-        Nothing to show yet. Open a few stories, and this page fills in with new developments in
-        what you follow and regions or desks you rarely read.
+        Nothing to show yet. Open a few stories, and this page fills in with new stories in the
+        narratives you read and the regions or desks you rarely read.
       </p>
     )
   }

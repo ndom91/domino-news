@@ -1,5 +1,6 @@
 import { longDate } from '@dn/domain'
 import { Button, Marble, Notice, TextInput } from '@dn/ui'
+import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod'
@@ -18,6 +19,7 @@ export const Route = createFileRoute('/login')({
 const MARBLE_SEED = 'Ledger'
 
 function LoginPage() {
+  const queryClient = useQueryClient()
   const router = useRouter()
   const { next, error: oauthError } = Route.useSearch()
   const { session } = Route.useRouteContext()
@@ -39,6 +41,8 @@ function LoginPage() {
   const target = next?.startsWith('/') && !next.startsWith('//') ? next : '/'
 
   async function finishSignIn() {
+    // An expired session lands here without signing out: drop the last user's data.
+    queryClient.clear()
     await router.invalidate()
     await router.navigate({ href: target })
   }
