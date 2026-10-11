@@ -73,5 +73,10 @@ export async function pruneReadingEvents(db: Db, days = READ_RETENTION_DAYS) {
     .delete(schema.readingEvent)
     .where(sql`${schema.readingEvent.readAt} < now() - make_interval(days => ${days})`)
     .returning({ userId: schema.readingEvent.userId })
-  return { readingEvents: deleted.length }
+  // Taps on Stories long out of the For You window only matter for the weights they left.
+  const taps = await db
+    .delete(schema.userStoryFeedback)
+    .where(sql`${schema.userStoryFeedback.createdAt} < now() - make_interval(days => ${days})`)
+    .returning({ userId: schema.userStoryFeedback.userId })
+  return { readingEvents: deleted.length, storyFeedback: taps.length }
 }

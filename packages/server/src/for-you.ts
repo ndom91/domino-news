@@ -1,4 +1,4 @@
-import type { Db } from '@dn/db'
+import { type Db, schema } from '@dn/db'
 import {
   DESK_LABELS,
   type Desk,
@@ -6,10 +6,12 @@ import {
   type ForYouResponse,
   REGION_LABELS,
   type Region,
+  type SignalKind,
   TOPIC_LABELS,
   type Topic,
 } from '@dn/schemas'
-import { sql } from 'drizzle-orm'
+import { inArray, sql } from 'drizzle-orm'
+import { learnedWeights, signalLabel, storyFeedback } from './feedback.ts'
 import { listFollows } from './follows.ts'
 import { getPreferences } from './preferences.ts'
 import { storyListItems } from './reader.ts'
@@ -20,6 +22,8 @@ const PAGE_SIZE = 30
 
 // Boosts, strongest first. A follow says more than a broad pick.
 const WEIGHT = { narrative: 3, topic: 2, publisher: 1, region: 1, desk: 1 } as const
+// A learned weight shows as a reason ("More Climate") once it's this strong.
+const LEARNED_REASON_MIN = 0.5
 
 type Candidate = {
   id: string
@@ -45,6 +49,10 @@ export function scoreStory(
     topics: readonly Topic[]
     narratives: ReadonlyMap<string, string>
     publishers: ReadonlyMap<string, string>
+    /** Decayed weights from "more / less like this", keyed "kind:key". */
+    learned?: ReadonlyMap<string, number>
+    /** Display names for learned features (topic, desk, region or narrative). */
+    learnedLabel?: (kind: 'topic' | 'desk' | 'region' | 'narrative', key: string) => string
   },
 ): { score: number; reasons: ForYouReason[] } {
   const reasons: ForYouReason[] = []
@@ -76,6 +84,27 @@ export function scoreStory(
     score += WEIGHT.desk
     reasons.push({ kind: 'desk', label: DESK_LABELS[c.desk] })
   }
+  // Learned weights add on top (each already clamped). The strongest positive one that
+  // isn't already a reason is shown, so readers see their taps working.
+  if (picks.learned?.size) {
+    const features = [
+      ...c.topics.map((key) => ['topic', key] as const),
+      ...(c.desk ? [['desk', c.desk] as const] : []),
+      ...c.regions.map((key) => ['region', key] as const),
+      ...c.narrativeIds.map((key) => ['narrative', key] as const),
+    ]
+    let best: { kind: (typeof features)[number][0]; key: string; weight: number } | null = null
+    for (const [kind, key] of features) {
+      const weight = picks.learned.get(`${kind}:${key}`) ?? 0
+      score += weight
+      if (weight >= LEARNED_REASON_MIN && (!best || weight > best.weight))
+        best = { kind, key, weight }
+    }
+    const label = best && picks.learnedLabel?.(best.kind, best.key)
+    if (label && !reasons.some((r) => r.label === label)) {
+      reasons.push({ kind: 'learned', label })
+    }
+  }
   return { score, reasons }
 }
 
@@ -85,7 +114,25 @@ export async function getForYou(
   userId: string,
   opts: { cursor?: string | null } = {},
 ): Promise<ForYouResponse> {
-  const [prefs, follows] = await Promise.all([getPreferences(db, userId), listFollows(db, userId)])
+  const [prefs, follows, learned, feedback] = await Promise.all([
+    getPreferences(db, userId),
+    listFollows(db, userId),
+    learnedWeights(db, userId),
+    storyFeedback(db, userId),
+  ])
+  const learnedNarrativeIds = [...learned.keys()]
+    .filter((k) => k.startsWith('narrative:'))
+    .map((k) => k.slice('narrative:'.length))
+  const narrativeTitles = new Map(
+    learnedNarrativeIds.length
+      ? (
+          await db
+            .select({ id: schema.narrative.id, title: schema.narrative.title })
+            .from(schema.narrative)
+            .where(inArray(schema.narrative.id, learnedNarrativeIds))
+        ).map((n) => [n.id, n.title])
+      : [],
+  )
   const picks = {
     regions: prefs.regions,
     desks: prefs.desks,
@@ -96,9 +143,16 @@ export async function getForYou(
     publishers: new Map(
       follows.items.filter((f) => f.targetType === 'publisher').map((f) => [f.id, f.title]),
     ),
+    learned,
+    learnedLabel: (kind: SignalKind, key: string) => signalLabel(kind, key, narrativeTitles),
   }
   const personalised =
-    prefs.regions.length + prefs.desks.length + prefs.topics.length + follows.items.length > 0
+    prefs.regions.length +
+      prefs.desks.length +
+      prefs.topics.length +
+      follows.items.length +
+      learned.size >
+    0
 
   const { rows } = await db.execute<{
     id: string
@@ -123,7 +177,9 @@ export async function getForYou(
     where s.published_at is not null and s.merged_into_story_id is null
       and s.last_updated_at > now() - make_interval(hours => ${WINDOW_HOURS})`)
 
+  // "Less like this" Stories are hidden from the reader's feed until they undo it.
   const ranked = rows
+    .filter((r) => feedback.get(r.id) !== 'less')
     .map((r) => ({
       id: r.id,
       ...scoreStory(
@@ -153,7 +209,7 @@ export async function getForYou(
     personalised,
     items: page.flatMap((p) => {
       const story = byId.get(p.id)
-      return story ? [{ story, reasons: p.reasons }] : []
+      return story ? [{ story, reasons: p.reasons, feedback: feedback.get(p.id) ?? null }] : []
     }),
     pageInfo: {
       nextCursor: offset + PAGE_SIZE < ranked.length ? String(offset + PAGE_SIZE) : null,

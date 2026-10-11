@@ -1,10 +1,13 @@
 import type { ApiClient } from '@dn/api-client'
 import type {
   AssessmentRequest,
+  FeedbackRequest,
   FollowList,
   FollowRequest,
+  LearnedSignals,
   Region,
   SearchQuery,
+  SignalsRequest,
   SummaryEditRequest,
   UserPreferences,
   UserPreferencesUpdate,
@@ -30,6 +33,7 @@ export const queryKeys = {
   insights: () => ['me', 'insights'] as const,
   follows: () => ['me', 'follows'] as const,
   forYou: () => ['for-you'] as const,
+  signals: () => ['me', 'signals'] as const,
   evidence: (slug: string) => ['publishers', 'evidence', slug] as const,
 }
 
@@ -112,6 +116,11 @@ export function createQueries(api: ApiClient) {
         getNextPageParam: (last) => last.pageInfo.nextCursor,
         staleTime: 60_000,
       }),
+    signals: () =>
+      queryOptions({
+        queryKey: queryKeys.signals(),
+        queryFn: ({ signal }) => api.getSignals(signal),
+      }),
     insights: () =>
       queryOptions({
         queryKey: queryKeys.insights(),
@@ -169,6 +178,29 @@ export function setFollowMutation(api: ApiClient, queryClient: QueryClient) {
     mutationFn: (body: FollowRequest) => api.setFollow(body),
     onSuccess: async (follows: FollowList) => {
       queryClient.setQueryData(queryKeys.follows(), follows)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.forYou() })
+    },
+  }
+}
+
+/**
+ * "More / less like this". The For You list is not refetched here, so a hidden card can
+ * show its undo notice in place; it re-ranks on the next visit.
+ */
+export function feedbackMutation(api: ApiClient, queryClient: QueryClient) {
+  return {
+    mutationFn: (body: FeedbackRequest) => api.setFeedback(body),
+    onSuccess: (signals: LearnedSignals) => {
+      queryClient.setQueryData(queryKeys.signals(), signals)
+    },
+  }
+}
+
+export function updateSignalsMutation(api: ApiClient, queryClient: QueryClient) {
+  return {
+    mutationFn: (body: SignalsRequest) => api.updateSignals(body),
+    onSuccess: async (signals: LearnedSignals) => {
+      queryClient.setQueryData(queryKeys.signals(), signals)
       await queryClient.invalidateQueries({ queryKey: queryKeys.forYou() })
     },
   }

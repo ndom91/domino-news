@@ -16,7 +16,7 @@ import {
   parseRspWikitext,
   wikidataEvidence,
 } from '@dn/jobs'
-import { scoreStory } from '@dn/server'
+import { clampWeight, decayed, scoreStory } from '@dn/server'
 import { layoutNarrative, storiesPerDay } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
@@ -457,5 +457,43 @@ describe('For You scoring', () => {
     const stale = scoreStory(story({ outlets: 2, ageHours: 60 }), picks)
     expect(big.score).toBeGreaterThan(small.score)
     expect(small.score).toBeGreaterThan(stale.score)
+  })
+})
+
+describe('learned feedback weights', () => {
+  it('halve every 30 days and stay within ±3', () => {
+    const now = new Date('2026-10-11T00:00:00Z')
+    expect(decayed(2, now, now)).toBe(2)
+    expect(decayed(2, new Date('2026-09-11T00:00:00Z'), now)).toBeCloseTo(1)
+    expect(clampWeight(7)).toBe(3)
+    expect(clampWeight(-7)).toBe(-3)
+  })
+
+  it('move stories up or down and explain positive ones', () => {
+    const base = {
+      id: 's',
+      desk: 'science' as const,
+      regions: [],
+      topics: ['climate' as const],
+      ageHours: 2,
+      outlets: 2,
+      narrativeIds: [],
+      publisherIds: [],
+    }
+    const picks = {
+      regions: [],
+      desks: [],
+      topics: [],
+      narratives: new Map(),
+      publishers: new Map(),
+      learnedLabel: () => 'Climate',
+    }
+    const neutral = scoreStory(base, picks)
+    const liked = scoreStory(base, { ...picks, learned: new Map([['topic:climate', 2]]) })
+    const disliked = scoreStory(base, { ...picks, learned: new Map([['topic:climate', -2]]) })
+    expect(liked.score).toBeGreaterThan(neutral.score)
+    expect(disliked.score).toBeLessThan(neutral.score)
+    expect(liked.reasons).toEqual([{ kind: 'learned', label: 'Climate' }])
+    expect(disliked.reasons).toEqual([])
   })
 })

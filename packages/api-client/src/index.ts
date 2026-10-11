@@ -4,6 +4,7 @@ import {
   apiErrorSchema,
   type EvidenceResponse,
   evidenceResponseSchema,
+  type FeedbackRequest,
   type FollowList,
   type FollowRequest,
   type ForYouResponse,
@@ -13,6 +14,8 @@ import {
   frontPageSchema,
   type Insights,
   insightsSchema,
+  type LearnedSignals,
+  learnedSignalsSchema,
   type NarrativeDetail,
   type NarrativeListResponse,
   narrativeDetailSchema,
@@ -29,6 +32,7 @@ import {
   type Region,
   type SearchQuery,
   type SearchResponse,
+  type SignalsRequest,
   type StoryDetail,
   type StoryListResponse,
   type SummaryEditRequest,
@@ -161,6 +165,12 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       request<FollowList>(followListSchema, '/me/follows', { method: 'POST', body }),
     getForYou: (cursor: string | null, signal?: AbortSignalLike) =>
       request<ForYouResponse>(forYouResponseSchema, `/for-you${qs({ cursor })}`, { signal }),
+    setFeedback: (body: FeedbackRequest) =>
+      request<LearnedSignals>(learnedSignalsSchema, '/me/feedback', { method: 'POST', body }),
+    getSignals: (signal?: AbortSignalLike) =>
+      request<LearnedSignals>(learnedSignalsSchema, '/me/signals', { signal }),
+    updateSignals: (body: SignalsRequest) =>
+      request<LearnedSignals>(learnedSignalsSchema, '/me/signals', { method: 'POST', body }),
     getInsights: (signal?: AbortSignalLike) =>
       request<Insights>(insightsSchema, '/me/insights', { signal }),
     runOpsAction: (action: OpsAction['action']) =>

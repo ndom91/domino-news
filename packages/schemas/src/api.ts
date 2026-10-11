@@ -574,7 +574,7 @@ export type FollowRequest = z.infer<typeof followRequestSchema>
 
 // Why a Story is on your For You page, shown on the card.
 export const forYouReasonSchema = z.object({
-  kind: z.enum(['narrative', 'publisher', 'topic', 'region', 'desk']),
+  kind: z.enum(['narrative', 'publisher', 'topic', 'region', 'desk', 'learned']),
   label: z.string(),
 })
 export type ForYouReason = z.infer<typeof forYouReasonSchema>
@@ -582,10 +582,43 @@ export type ForYouReason = z.infer<typeof forYouReasonSchema>
 export const forYouResponseSchema = z.object({
   // False when the reader has no picks and no follows; the page then offers setup.
   personalised: z.boolean(),
-  items: z.array(z.object({ story: storyListItemSchema, reasons: z.array(forYouReasonSchema) })),
+  items: z.array(
+    z.object({
+      story: storyListItemSchema,
+      reasons: z.array(forYouReasonSchema),
+      // The reader's own tap on this card, if any ("less" cards are hidden).
+      feedback: z.enum(['more', 'less']).nullable(),
+    }),
+  ),
   pageInfo: pageInfoSchema,
 })
 export type ForYouResponse = z.infer<typeof forYouResponseSchema>
+
+export const signalKindSchema = z.enum(['topic', 'desk', 'region', 'narrative'])
+export type SignalKind = z.infer<typeof signalKindSchema>
+
+// null clears the tap and reverses what it applied (undo).
+export const feedbackRequestSchema = z.object({
+  storyId: z.string().min(1),
+  signal: z.enum(['more', 'less']).nullable(),
+})
+export type FeedbackRequest = z.infer<typeof feedbackRequestSchema>
+
+export const learnedSignalSchema = z.object({
+  kind: signalKindSchema,
+  key: z.string(),
+  label: z.string(),
+  // Current weight after decay; positive = more, negative = less.
+  weight: z.number(),
+})
+export const learnedSignalsSchema = z.object({ items: z.array(learnedSignalSchema) })
+export type LearnedSignals = z.infer<typeof learnedSignalsSchema>
+
+export const signalsRequestSchema = z.union([
+  z.object({ reset: z.literal(true) }),
+  z.object({ remove: z.object({ kind: signalKindSchema, key: z.string() }) }),
+])
+export type SignalsRequest = z.infer<typeof signalsRequestSchema>
 
 const deskOrRegion = z.union([deskSchema, regionSchema])
 

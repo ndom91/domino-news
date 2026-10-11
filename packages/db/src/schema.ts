@@ -763,6 +763,39 @@ export const userPreference = pgTable('user_preference', {
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 
+// Weights learned from "more / less like this" on For You, per feature. Decayed on read
+// (halved every 30 days) and clamped, so a few taps can't swamp explicit picks.
+export const userSignal = pgTable(
+  'user_signal',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    kind: text('kind').$type<'topic' | 'desk' | 'region' | 'narrative'>().notNull(),
+    key: text('key').notNull(),
+    weight: real('weight').notNull(),
+    updatedAt: ts('updated_at').notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.kind, t.key] })],
+)
+
+// The reader's last tap per Story: drives the pressed state, hides "less" Stories from
+// For You, and lets undo reverse exactly what was applied.
+export const userStoryFeedback = pgTable(
+  'user_story_feedback',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id, { onDelete: 'cascade' }),
+    signal: text('signal').$type<'more' | 'less'>().notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.storyId] })],
+)
+
 // Narratives and publishers a reader follows; the strongest For You signal.
 export const userFollow = pgTable(
   'user_follow',

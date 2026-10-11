@@ -2,17 +2,20 @@ import {
   type ApiErrorBody,
   type ApiErrorCode,
   assessmentRequestSchema,
+  feedbackRequestSchema,
   followRequestSchema,
   opsActionSchema,
   readRequestSchema,
   regionSchema,
   searchQuerySchema,
+  signalsRequestSchema,
   summaryEditRequestSchema,
   userPreferencesUpdateSchema,
 } from '@dn/schemas'
 import { ZodError, z } from 'zod'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import type { ServerContext } from '../context.ts'
+import { listSignals, setFeedback, updateSignals } from '../feedback.ts'
 import { listFollows, setFollow } from '../follows.ts'
 import { getForYou } from '../for-you.ts'
 import { getFrontPage } from '../front.ts'
@@ -185,6 +188,15 @@ const routes: Route[] = [
   ),
   route('POST', '/api/v1/me/follows', async ({ ctx, request, userId }) =>
     json(await setFollow(ctx.db, userId, await readJson(request, followRequestSchema))),
+  ),
+  route('POST', '/api/v1/me/feedback', async ({ ctx, request, userId }) =>
+    json(await setFeedback(ctx.db, userId, await readJson(request, feedbackRequestSchema))),
+  ),
+  route('GET', '/api/v1/me/signals', async ({ ctx, userId }) =>
+    json(await listSignals(ctx.db, userId)),
+  ),
+  route('POST', '/api/v1/me/signals', async ({ ctx, request, userId }) =>
+    json(await updateSignals(ctx.db, userId, await readJson(request, signalsRequestSchema))),
   ),
   route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
     json(await getForYou(ctx.db, userId, { cursor: url.searchParams.get('cursor') })),

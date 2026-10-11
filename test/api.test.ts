@@ -6,6 +6,7 @@ import {
   forYouResponseSchema,
   frontPageSchema,
   insightsSchema,
+  learnedSignalsSchema,
   narrativeListResponseSchema,
   searchResponseSchema,
   storyDetailSchema,
@@ -70,6 +71,8 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/me/follows'],
       ['POST', '/api/v1/me/follows'],
       ['GET', '/api/v1/for-you'],
+      ['POST', '/api/v1/me/feedback'],
+      ['GET', '/api/v1/me/signals'],
       ['POST', '/api/v1/me/preferences'],
     ]
     for (const [method, path] of routes) {
@@ -409,6 +412,58 @@ describe('For You', () => {
     expect(followListSchema.parse(await (await call('/api/v1/me/follows')).json()).items).toEqual(
       [],
     )
+  })
+})
+
+describe('For You feedback', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+  const feed = async () => forYouResponseSchema.parse(await (await call('/api/v1/for-you')).json())
+  const signals = async () =>
+    learnedSignalsSchema.parse(await (await call('/api/v1/me/signals')).json()).items
+
+  it('learns from thumbs, hides "less" stories, undoes exactly, and never touches outlets', async () => {
+    await h.ctx.pool.query(
+      `update story set last_updated_at = now() where published_at is not null`,
+    )
+    const { rows } = await h.ctx.pool.query(
+      `select id from story where published_at is not null and desk is not null limit 1`,
+    )
+    const storyId = rows[0].id as string
+    expect(await signals()).toEqual([])
+
+    const liked = learnedSignalsSchema.parse(
+      await (await post('/api/v1/me/feedback', { storyId, signal: 'more' })).json(),
+    )
+    expect(liked.items.length).toBeGreaterThan(0)
+    expect(liked.items.every((i) => i.weight > 0 && i.kind !== ('publisher' as string))).toBe(true)
+    expect((await feed()).items.find((i) => i.story.id === storyId)?.feedback).toBe('more')
+
+    // Switching to "less" reverses the "more" first, then pushes the other way.
+    const disliked = learnedSignalsSchema.parse(
+      await (await post('/api/v1/me/feedback', { storyId, signal: 'less' })).json(),
+    )
+    expect(disliked.items.every((i) => i.weight < 0)).toBe(true)
+    expect((await feed()).items.some((i) => i.story.id === storyId)).toBe(false)
+
+    // Undo puts everything back.
+    await post('/api/v1/me/feedback', { storyId, signal: null })
+    expect(await signals()).toEqual([])
+    expect((await feed()).items.some((i) => i.story.id === storyId)).toBe(true)
+
+    // Reset clears weights and taps.
+    await post('/api/v1/me/feedback', { storyId, signal: 'less' })
+    await post('/api/v1/me/signals', { reset: true })
+    expect(await signals()).toEqual([])
+    expect((await feed()).items.some((i) => i.story.id === storyId)).toBe(true)
+
+    expect(
+      (await post('/api/v1/me/feedback', { storyId: 'sty_missing', signal: 'more' })).status,
+    ).toBe(404)
   })
 })
 

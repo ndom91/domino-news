@@ -1,5 +1,5 @@
 import { formatDateTime } from '@dn/domain'
-import { setFollowMutation } from '@dn/queries'
+import { setFollowMutation, updateSignalsMutation } from '@dn/queries'
 import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
@@ -225,6 +225,71 @@ function FeedSection() {
           Nothing yet. Use Follow on a narrative or outlet page.
         </p>
       )}
+      <LearnedSignals />
     </section>
+  )
+}
+
+/** What For You learned from thumbs up / down. Every item can be removed, or all reset. */
+function LearnedSignals() {
+  const queryClient = useQueryClient()
+  const signals = useQuery(queries.signals())
+  const update = useMutation(updateSignalsMutation(api, queryClient))
+  const items = signals.data?.items ?? []
+  const more = items.filter((s) => s.weight > 0)
+  const less = items.filter((s) => s.weight < 0)
+  return (
+    <>
+      <h3 className="mt-8 mb-2 type-label">Learned from your feedback</h3>
+      {items.length === 0 ? (
+        <p className="text-sm text-text-muted">
+          Nothing yet. Use the thumbs on For You cards to see more or less like a story.
+        </p>
+      ) : (
+        <>
+          {[
+            { title: 'More', list: more },
+            { title: 'Less', list: less },
+          ].map(({ title, list }) =>
+            list.length > 0 ? (
+              <div key={title} className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+                <span className="w-12 font-semibold">{title}</span>
+                {list.map((s) => (
+                  <span
+                    key={`${s.kind}-${s.key}`}
+                    className="inline-flex items-center gap-1 border border-border-strong py-0.5 pl-2"
+                  >
+                    {s.label}
+                    <button
+                      type="button"
+                      aria-label={`Forget ${s.label}`}
+                      disabled={update.isPending}
+                      onClick={() => update.mutate({ remove: { kind: s.kind, key: s.key } })}
+                      className="min-h-6 px-1.5 text-text-muted hover:text-text"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            ) : null,
+          )}
+          <ConfirmDialog
+            trigger={
+              <Button size="sm" variant="ghost" loading={update.isPending}>
+                Reset all
+              </Button>
+            }
+            title="Reset what For You learned?"
+            confirmLabel="Reset"
+            destructive
+            onConfirm={() => update.mutate({ reset: true })}
+          >
+            Your thumbs up and down are forgotten and hidden stories come back. Your picks and
+            follows stay.
+          </ConfirmDialog>
+        </>
+      )}
+    </>
   )
 }
