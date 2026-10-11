@@ -9,6 +9,7 @@ import { SourceTrace } from './source-trace.tsx'
 import { Timestamp } from './time.tsx'
 
 const LONG_TITLE = 60 // characters
+const BOARD_ROWS = 8 // latest reports on the board; the rest are on the Story page
 
 /**
  * The lead Story as a block in its Narrative's colour: display headline, cited summary with a
@@ -34,10 +35,23 @@ export function HeroStory({
   const narrative = story.narratives[0]
   const Heading = headingLevel
   const reportedAt = (s: StoryDetail['sources'][number]) => s.publishedAt ?? s.observedAt
+  const board = [...story.sources]
+    .sort((a, b) => reportedAt(a).localeCompare(reportedAt(b)))
+    .slice(-BOARD_ROWS)
+  const onBoard = new Set(board.map((s) => s.articleId))
+  // Markers jump to the board row; a report too old for the board links to the article itself.
   const cited: Map<number, CitedSource> = new Map(
     story.sources.flatMap((s) =>
       s.citation
-        ? [[s.citation, { outlet: s.publisher.name, href: `#source-${s.articleId}` }]]
+        ? [
+            [
+              s.citation,
+              {
+                outlet: s.publisher.name,
+                href: onBoard.has(s.articleId) ? `#source-${s.articleId}` : s.url,
+              },
+            ],
+          ]
         : [],
     ),
   )
@@ -149,7 +163,7 @@ export function HeroStory({
         />
         <SourceBoard
           onKey
-          sources={story.sources.map((s) => ({
+          sources={board.map((s) => ({
             id: s.articleId,
             outlet: s.publisher.name,
             at: reportedAt(s),
@@ -157,6 +171,20 @@ export function HeroStory({
             citation: s.citedInSummary ? (s.citation ?? 0) : null,
           }))}
         />
+        {outlets > board.length ? (
+          <p className="mt-3 text-sm font-semibold">
+            {/* On the Story page the full list is further down; elsewhere, go to the Story. */}
+            {linkHeadline ? (
+              <Link to={`/stories/${story.slug}`} className="underline underline-offset-3">
+                See all {outlets} reports
+              </Link>
+            ) : (
+              <a href="#sources-heading" className="underline underline-offset-3">
+                See all {outlets} reports
+              </a>
+            )}
+          </p>
+        ) : null}
       </div>
     </section>
   )
