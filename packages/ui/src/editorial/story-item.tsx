@@ -38,12 +38,15 @@ export function StoryItem({
   size = 'standard',
   now,
   Link = DefaultLink,
+  showFirstReport = true,
   className,
 }: {
   story: StoryListItem
   size?: 'standard' | 'wide'
   now: string
   Link?: LinkLike
+  /** "first 13:39 UTC" under the trace; off where the page shows its own dates line. */
+  showFirstReport?: boolean
   className?: string
 }) {
   const wide = size === 'wide'
@@ -116,8 +119,13 @@ export function StoryItem({
           width={wide ? 336 : 216}
         />
         <span>
-          {plural(story.sourceCount, 'publisher')} · {cited} cited · first{' '}
-          <Timestamp at={first} format="clock" />
+          {plural(story.sourceCount, 'publisher')} · {cited} cited
+          {showFirstReport ? (
+            <>
+              {' · first '}
+              <Timestamp at={first} format="clock" />
+            </>
+          ) : null}
         </span>
       </div>
     </article>

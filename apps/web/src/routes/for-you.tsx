@@ -247,7 +247,8 @@ function ForYouCard({
         restored && 't-feedback-in',
       )}
     >
-      <StoryItem story={story} now={now} Link={RouterLink} />
+      {/* The card's own dates line below already says when it was first reported. */}
+      <StoryItem story={story} now={now} Link={RouterLink} showFirstReport={false} />
       <div className="flex items-center justify-between gap-3">
         <StoryDates first={story.firstObservedAt} updated={story.lastUpdatedAt} />
         <div className="flex flex-none">
