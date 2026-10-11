@@ -186,12 +186,11 @@
   }
 }
 
-/* A domino falls onto the next one, pivoting on its bottom-right corner. Ease-in reads as
-   gravity. --topple-i staggers a chain; re-key the row (React key) to knock it over again.
-   The resting angle is the element's own rotate, so reduced motion shows the fallen chain. */
+/* Domino fall, pivoting on the bottom-right corner. --topple-i staggers; re-key to replay.
+   Reduced motion shows the fallen end state. */
 .t-topple {
   transform-origin: 100% 100%;
-  rotate: var(--topple-to, 62deg);
+  rotate: 62deg;
   animation: t-topple 260ms cubic-bezier(0.55, 0, 1, 0.45) both;
   animation-delay: calc(var(--topple-i, 0) * 70ms);
 }

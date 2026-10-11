@@ -30,7 +30,6 @@
   --dn-text: #121212;
   --dn-text-secondary: #3a3833;
   --dn-text-muted: #625f59; /* 5.6:1 on canvas — the floor for meta text */
-  --dn-text-inverse: #f3f1ec;
 
   /* ── Lines ────────────────────────────────────────────── */
   --dn-border: #d6d2c9; /* hairlines between items */
@@ -109,7 +108,6 @@
   --dn-text-section: clamp(1.75rem, 2.8vw, 2.5rem); /* 40 — LATEST / DEVELOPING, narrative titles */
   --dn-text-period: clamp(1.5rem, 2vw, 1.75rem); /* 28 — day and period headings under a section */
   --dn-text-masthead: clamp(2.75rem, 5.3vw, 4.75rem); /* 76 */
-  --dn-text-display: clamp(3.25rem, 7.8vw, 7rem); /* 112 — hero headline */
   --dn-text-display-md: clamp(
     2.5rem,
     5.6vw,
@@ -177,7 +175,6 @@
   --dn-text: #f3f1ec;
   --dn-text-secondary: #cfcbc2;
   --dn-text-muted: #a29e96;
-  --dn-text-inverse: #121212;
 
   --dn-border: #33312d;
   --dn-border-strong: #737067;
@@ -210,7 +207,6 @@
     --dn-text: #f3f1ec;
     --dn-text-secondary: #cfcbc2;
     --dn-text-muted: #a29e96;
-    --dn-text-inverse: #121212;
     --dn-border: #33312d;
     --dn-border-strong: #737067;
     --dn-rule: #f3f1ec;

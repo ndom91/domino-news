@@ -31,8 +31,8 @@ export function SourceList({
   useEffect(() => {
     function reveal() {
       const id = decodeURIComponent(window.location.hash.slice(1))
-      const index = sources.toSorted(byPublished).findIndex((s) => `report-${s.articleId}` === id)
-      if (index < COLLAPSED_COUNT) return
+      if (!sources.some((s) => `report-${s.articleId}` === id) || document.getElementById(id))
+        return
       flushSync(() => setExpanded(true))
       document.getElementById(id)?.scrollIntoView()
     }

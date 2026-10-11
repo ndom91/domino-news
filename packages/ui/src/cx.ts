@@ -18,7 +18,6 @@ export const THEME_TOKENS = {
     'section',
     'period',
     'masthead',
-    'display',
   ],
   leading: ['display', 'headline', 'tight', 'snug', 'normal'],
   'font-weight': ['regular', 'medium', 'semibold', 'bold', 'heavy', 'extrabold', 'black'],

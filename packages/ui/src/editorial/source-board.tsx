@@ -1,14 +1,8 @@
 import { clockTime, formatDate } from '@dn/domain'
 import { cx } from '../cx.ts'
+import type { TraceSource } from './source-trace.tsx'
 
-export interface BoardSource {
-  id: string
-  outlet: string
-  at: string
-  href: string
-  /** null = reported but not cited; 0 = cited without a number (older summaries). */
-  citation: number | null
-}
+export type BoardSource = TraceSource & { href: string }
 
 /**
  * "Who reported it": one row per outlet in publishing order. Time, outlet (links to the

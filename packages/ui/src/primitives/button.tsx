@@ -82,8 +82,7 @@ export function IconButton({
         {...props}
         variant={variant}
         aria-label={label}
-        // px-0 overrides the size's px-4 (cx resolves the conflict); shrink-0 keeps the
-        // icon its own size inside the flex button.
+        // shrink-0 keeps the icon its own size inside the flex button.
         className={cx('size-tap px-0 [&_svg]:shrink-0', className)}
       >
         {icon}

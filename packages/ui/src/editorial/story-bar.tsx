@@ -14,7 +14,6 @@ export function StoryBar({
   timestamp,
   firstAt,
   Link = DefaultLink,
-  className,
 }: {
   desk: Desk | null
   narrative?: { title: string; href: string }
@@ -22,14 +21,12 @@ export function StoryBar({
   /** First report, shown with the timestamp in its tooltip. */
   firstAt?: string
   Link?: LinkLike
-  className?: string
 }) {
   return (
     <div
       className={cx(
         deskKey(desk),
         'flex h-bar items-center justify-between gap-3 key-fill px-2.5 text-sm font-bold',
-        className,
       )}
     >
       <span className="flex min-w-0 gap-1.5">

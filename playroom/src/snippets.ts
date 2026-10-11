@@ -73,12 +73,12 @@ export default [
   {
     group: 'Editorial',
     name: 'SourceTrace compact',
-    code: '<SourceTrace now={fixtureNow} sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, citation: s.citation }))} />',
+    code: '<SourceTrace now={fixtureNow} sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, citation: s.citedInSummary ? (s.citation ?? 0) : null }))} />',
   },
   {
     group: 'Editorial',
     name: 'SourceBoard',
-    code: '<div className="max-w-md"><SourceBoard sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, href: s.url, citation: s.citation }))} /></div>',
+    code: '<div className="max-w-md"><SourceBoard sources={fixtureLead.sources.map((s) => ({ id: s.articleId, outlet: s.publisher.name, at: s.publishedAt ?? s.observedAt, href: s.url, citation: s.citedInSummary ? (s.citation ?? 0) : null }))} /></div>',
   },
   {
     group: 'Editorial',

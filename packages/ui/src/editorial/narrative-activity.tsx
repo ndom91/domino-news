@@ -1,25 +1,11 @@
-import { formatDate, plural } from '@dn/domain'
+import { formatDate, plural, storiesPerDay } from '@dn/domain'
 import { scaleLinear } from 'd3-scale'
 import { area, line } from 'd3-shape'
 import { Tooltip } from '../primitives/overlay.tsx'
 
-const DAY = 86_400_000
 const W = 420
 const H = 300
 const M = { top: 12, right: 10, bottom: 26, left: 26 }
-
-/**
- * Stories per UTC day, from `leadIn` empty days before the first Story through the last one.
- * The lead-in gives the line a baseline to rise from.
- */
-export function storiesPerDay(times: string[], leadIn = 3) {
-  const days = times.map((t) => Math.floor(Date.parse(t) / DAY))
-  if (days.length === 0) return []
-  const first = Math.min(...days) - leadIn
-  const counts = Array.from({ length: Math.max(...days) - first + 1 }, () => 0)
-  for (const d of days) counts[d - first] = (counts[d - first] ?? 0) + 1
-  return counts.map((count, i) => ({ day: new Date((first + i) * DAY).toISOString(), count }))
-}
 
 /**
  * Line chart of a Narrative's Stories per day, in the surrounding key colour (set `deskKey`
@@ -43,12 +29,14 @@ export function NarrativeActivity({ times }: { times: string[] }) {
   const step = Math.max(1, Math.ceil((data.length - 1) / 3))
   const xTicks = data.map((_, i) => i).filter((i) => (data.length - 1 - i) % step === 0)
   const peak = data.reduce((a, b) => (b.count > a.count ? b : a))
+  // Skip the empty lead-in days.
+  const firstDay = data.find((d) => d.count > 0)?.day ?? ''
 
   return (
     <svg
       viewBox={`0 0 ${W} ${H}`}
       role="img"
-      aria-label={`Stories per day, ${formatDate(data[0]?.day ?? '')} to ${formatDate(data.at(-1)?.day ?? '')}: ${plural(times.length, 'story', 'stories')}, most on ${formatDate(peak.day)} (${peak.count})`}
+      aria-label={`Stories per day, ${formatDate(firstDay)} to ${formatDate(data.at(-1)?.day ?? '')}: ${plural(times.length, 'story', 'stories')}, most on ${formatDate(peak.day)} (${peak.count})`}
       className="block h-auto w-full overflow-visible"
     >
       {yTicks.map((t) => (

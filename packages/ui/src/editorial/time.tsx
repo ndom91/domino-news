@@ -19,7 +19,7 @@ export function Timestamp({
   className,
 }: {
   at: string
-  format?: 'relative' | 'clock' | 'date' | 'datetime'
+  format?: 'relative' | 'clock' | 'datetime'
   local?: boolean
   prefix?: string
   /** When set, the tooltip shows "First reported …" and "Updated …" (at) instead of one time. */
@@ -43,9 +43,7 @@ export function Timestamp({
       ? shortRelative(at, now ?? undefined)
       : format === 'clock'
         ? clock()
-        : format === 'date'
-          ? formatDate(at, zone)
-          : `${formatDate(at, zone)} · ${clock()}`
+        : `${formatDate(at, zone)} · ${clock()}`
   // Tooltips only render on the client, so reading the reader's zone here is safe.
   const tooltipZone = local ? 'UTC' : (readerZone ?? localZone())
   const tooltip = firstAt ? (

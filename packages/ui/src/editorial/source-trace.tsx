@@ -1,7 +1,8 @@
 import { clockTime, formatDate, formatDateTime, plural } from '@dn/domain'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { cx } from '../cx.ts'
 import { Tooltip } from '../primitives/overlay.tsx'
+import { useWidth } from '../primitives/use-width.ts'
 
 export interface TraceSource {
   id: string
@@ -18,10 +19,8 @@ const HOUR = 3_600_000
 const CELLS = 24
 
 /**
- * Hour-cell Source Trace: 24 cells ending at `now` (or at the latest report if everything is
- * older). Each outlet is a mark in the hour it reported: filled if cited, ring if only reported.
- * Shape carries the meaning, not colour. `onKey` switches to the hero's key-text colour.
- * Hovering a mark enlarges it and dims the rest; `active`/`onActiveChange` share that state.
+ * 24 hour cells ending at `now` (or the latest report if older), one mark per outlet: filled if
+ * cited, ring if only reported. `active`/`onActiveChange` share the hovered mark with a sibling.
  */
 export function SourceTrace({
   sources,
@@ -32,7 +31,6 @@ export function SourceTrace({
   onKey = false,
   active,
   onActiveChange,
-  className,
 }: {
   sources: TraceSource[]
   variant?: 'compact' | 'full'
@@ -48,24 +46,12 @@ export function SourceTrace({
   onKey?: boolean
   active?: string | null
   onActiveChange?: (id: string | null) => void
-  className?: string
 }) {
   const [ownActive, setOwnActive] = useState<string | null>(null)
   const fill = widthProp === 'fill'
   const box = useRef<HTMLDivElement>(null)
   // Server render (and the first client paint) use the compact width until measured.
-  const [measured, setMeasured] = useState<number | null>(null)
-  useEffect(() => {
-    const el = box.current
-    if (!fill || !el) return
-    // Measure now, not only on the observer's first callback (a frame later).
-    setMeasured(Math.floor(el.clientWidth))
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setMeasured(Math.floor(entry.contentRect.width))
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [fill])
+  const measured = useWidth(box)
   const width = fill ? (measured ?? 216) : widthProp
   const current = active === undefined ? ownActive : active
   const setActive = onActiveChange ?? setOwnActive
@@ -84,6 +70,7 @@ export function SourceTrace({
     const cell = Math.min(CELLS - 1, Math.max(0, Math.floor(CELLS - hoursAgo)))
     columns[cell]?.push(s)
   }
+  // Cited first (drawn at the bottom), so "+" hides uncited marks where possible.
   for (const col of columns)
     col.sort((a, b) => Number(b.citation !== null) - Number(a.citation !== null))
   const rows = fixedRows ?? Math.max(variant === 'full' ? 2 : 3, ...columns.map((c) => c.length))
@@ -103,7 +90,7 @@ export function SourceTrace({
       height={H}
       role="img"
       aria-label={`${plural(sources.length, 'publisher')} by hour, ${cited} cited`}
-      className={cx('block h-auto max-w-full overflow-visible', className)}
+      className="block h-auto max-w-full overflow-visible"
     >
       {columns.map((_, i) => (
         <rect
@@ -118,7 +105,6 @@ export function SourceTrace({
       ))}
       {columns.flatMap((col, i) => {
         const overflow = col.length > rows
-        // Cited marks sort first (bottom), so the "+" stands in for uncited ones where possible.
         const shown = overflow ? col.slice(0, rows - 1) : col
         const hidden = overflow ? col.slice(rows - 1) : []
         const x = i * cw + cw / 2

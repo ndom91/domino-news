@@ -1,5 +1,6 @@
-import { type CSSProperties, useEffect, useRef, useState } from 'react'
+import { type CSSProperties, useRef } from 'react'
 import { cx } from '../cx.ts'
+import { useWidth } from '../primitives/use-width.ts'
 
 /** Two dominoes on the accent panel, the lower one with its right half missing (404 page). */
 export function MissingPiece({ className }: { className?: string }) {
@@ -66,6 +67,7 @@ const PIECE = { width: 18, height: 72 }
 // Gap between pieces, and the space kept clear right of the two standing pieces.
 const SPACING = { wide: 44, narrow: 32 }
 const END_MARGIN = { wide: 88, narrow: 40 }
+// Keep in sync with .t-topple in motion.css.
 const FALL_MS = 260
 const STAGGER_MS = 70
 
@@ -76,20 +78,11 @@ const STAGGER_MS = 70
  */
 export function DominoRun({ run = 0, className }: { run?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null)
-  const [width, setWidth] = useState<number | null>(null)
-  useEffect(() => {
-    const el = ref.current
-    if (!el) return
-    const observer = new ResizeObserver(([entry]) => {
-      if (entry) setWidth(entry.contentRect.width)
-    })
-    observer.observe(el)
-    return () => observer.disconnect()
-  }, [])
+  const width = useWidth(ref)
 
   const size = width !== null && width < 640 ? 'narrow' : 'wide'
   const step = SPACING[size]
-  // Fallen pieces, then the gap and two standing pieces.
+  // Leave room for the gap and the two standing pieces (the -3).
   const fallen = width === null ? 0 : Math.max(3, Math.floor((width - END_MARGIN[size]) / step) - 3)
   const x = (i: number) => 16 + i * step
 

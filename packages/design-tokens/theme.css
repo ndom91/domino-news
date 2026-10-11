@@ -22,7 +22,6 @@
   --color-text: var(--dn-text);
   --color-text-secondary: var(--dn-text-secondary);
   --color-text-muted: var(--dn-text-muted);
-  --color-text-inverse: var(--dn-text-inverse);
   --color-border: var(--dn-border);
   --color-border-strong: var(--dn-border-strong);
   --color-rule: var(--dn-rule);
@@ -83,7 +82,6 @@
   --text-section: var(--dn-text-section);
   --text-period: var(--dn-text-period);
   --text-masthead: var(--dn-text-masthead);
-  --text-display: var(--dn-text-display);
 
   --leading-display: var(--dn-leading-display);
   --leading-headline: var(--dn-leading-headline);
@@ -144,15 +142,7 @@
   letter-spacing: var(--dn-tracking-masthead);
   text-transform: uppercase;
 }
-/* Hero headline in three steps; HeroStory picks one from the page and the title length. */
-@utility type-display {
-  font-stretch: var(--dn-width-display);
-  font-weight: var(--dn-weight-extrabold);
-  font-size: var(--dn-text-display);
-  line-height: var(--dn-leading-display);
-  letter-spacing: var(--dn-tracking-display);
-  text-wrap: balance;
-}
+/* Hero headline: HeroStory steps down to -sm for long titles. */
 @utility type-display-md {
   font-stretch: var(--dn-width-display);
   font-weight: var(--dn-weight-extrabold);
@@ -172,8 +162,7 @@
 @utility type-section {
   font-stretch: var(--dn-width-masthead);
   font-weight: var(--dn-weight-black);
-  /* Fixed 40px, not the shrinking --dn-text-section: on mobile the section must stay clearly
-     bigger than the 32px story headline below it. */
+  /* Fixed 40px so it stays bigger than the 32px mobile headline. */
   font-size: 2.5rem;
   line-height: 1;
   letter-spacing: var(--dn-tracking-headline);

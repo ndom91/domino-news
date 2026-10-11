@@ -96,6 +96,19 @@ export function dayLabel(iso: string, now: string | Date = new Date()): string {
   }).format(new Date(iso))
 }
 
+/**
+ * Stories per UTC day, from `leadIn` empty days before the first Story through the last one.
+ * The lead-in gives the line a baseline to rise from.
+ */
+export function storiesPerDay(times: string[], leadIn = 3) {
+  const days = times.map((t) => utcDay(Date.parse(t)))
+  if (days.length === 0) return []
+  const first = Math.min(...days) - leadIn
+  const counts = Array.from({ length: Math.max(...days) - first + 1 }, () => 0)
+  for (const d of days) counts[d - first] = (counts[d - first] ?? 0) + 1
+  return counts.map((count, i) => ({ day: new Date((first + i) * DAY).toISOString(), count }))
+}
+
 export const RECENCY_PERIODS = ['today', 'week', 'month', 'older'] as const
 export type RecencyPeriod = (typeof RECENCY_PERIODS)[number]
 

@@ -10,6 +10,7 @@ import {
   plural,
   recencyPeriod,
   regionForCountry,
+  storiesPerDay,
   validateNewEdge,
   zoneName,
 } from '@dn/domain'
@@ -22,7 +23,7 @@ import {
   wikidataEvidence,
 } from '@dn/jobs'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
-import { cx, layoutNarrative, storiesPerDay, THEME_TOKENS } from '@dn/ui'
+import { cx, layoutNarrative, THEME_TOKENS } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
 
