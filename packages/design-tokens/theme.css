@@ -171,7 +171,9 @@
 @utility type-section {
   font-stretch: var(--dn-width-masthead);
   font-weight: var(--dn-weight-black);
-  font-size: var(--dn-text-section);
+  /* Fixed 40px, not the shrinking --dn-text-section: on mobile the section must stay clearly
+     bigger than the 32px story headline below it. */
+  font-size: 2.5rem;
   line-height: 1;
   letter-spacing: var(--dn-tracking-headline);
   text-transform: uppercase;
