@@ -138,7 +138,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
         </button>
       }
     >
-      <p className="border-b border-border px-4 pt-1.5 pb-2.5 type-meta">
+      <p className="border-b border-border px-4 pt-2.5 pb-2.5 type-meta">
         Signed in as <b className="font-semibold text-text">{user.username ?? user.name}</b>
       </p>
       <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>

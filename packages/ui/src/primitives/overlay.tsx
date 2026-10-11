@@ -61,7 +61,7 @@ export function Menu({ trigger, children }: { trigger: ReactElement; children: R
       <BaseMenu.Trigger render={trigger} />
       <BaseMenu.Portal>
         <BaseMenu.Positioner align="end" sideOffset={8} collisionPadding={12} className="z-50">
-          <BaseMenu.Popup className={cx(popupBase, 't-popup min-w-44 border-2 border-rule py-1')}>
+          <BaseMenu.Popup className={cx(popupBase, 't-popup min-w-44 border-2 border-rule')}>
             {children}
           </BaseMenu.Popup>
         </BaseMenu.Positioner>
