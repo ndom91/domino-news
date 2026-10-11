@@ -1,7 +1,7 @@
 import { feedbackMutation } from '@dn/queries'
-import { DESK_LABELS, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
-import { Button, cx, IconButton, Notice, Skeleton, StoryItem, Timestamp } from '@dn/ui'
-import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
+import { DESK_LABELS, type ForYouReason, type ForYouResponse, TOPIC_LABELS } from '@dn/schemas'
+import { Button, cx, IconButton, Notice, Popover, Skeleton, StoryItem, Timestamp } from '@dn/ui'
+import { InfoIcon, ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { type CSSProperties, useRef, useState } from 'react'
@@ -90,6 +90,59 @@ function ForYouPage() {
 }
 
 type Item = ForYouResponse['items'][number]
+
+/** One line per reason, e.g. "You follow Sudan's civil war", "Topic you picked: Climate". */
+function reasonText(r: ForYouReason) {
+  switch (r.kind) {
+    case 'narrative':
+      return `You follow ${r.label}`
+    case 'publisher':
+      return `From ${r.label}, which you follow`
+    case 'topic':
+      return `Topic you picked: ${r.label}`
+    case 'region':
+      return `Region you picked: ${r.label}`
+    case 'desk':
+      return `Desk you picked: ${r.label}`
+    case 'learned':
+      return `You asked for more ${r.label}`
+  }
+}
+
+/** "i" button: why this Story is on For You. Hover on desktop; click or tap everywhere. */
+function WhyButton({ reasons }: { reasons: ForYouReason[] }) {
+  return (
+    <Popover
+      openOnHover
+      side="top"
+      title="Why you're seeing this"
+      trigger={
+        // Not a Button: it only reveals info, so no border or fill on hover, just the icon
+        // darkening. Still a <button> so tap and keyboard can open it.
+        <button
+          type="button"
+          aria-label="Why you're seeing this"
+          className="grid size-tap cursor-help place-items-center text-text-muted transition-colors duration-(--dn-duration-fast) hover:text-text"
+        >
+          <InfoIcon size={22} aria-hidden />
+        </button>
+      }
+    >
+      {reasons.length > 0 ? (
+        <ul className="flex flex-col gap-1.5">
+          {reasons.map((r) => (
+            <li key={`${r.kind}-${r.label}`}>{reasonText(r)}</li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          It's one of the most widely covered stories right now. Pick topics or follow narratives to
+          tailor For You.
+        </p>
+      )}
+    </Popover>
+  )
+}
 
 // Updates within this of the first report are the same moment; showing both is noise.
 const SAME_MOMENT_MS = 60_000
@@ -252,6 +305,7 @@ function ForYouCard({
       <div className="flex items-center justify-between gap-3">
         <StoryDates first={story.firstObservedAt} updated={story.lastUpdatedAt} />
         <div className="flex flex-none">
+          <WhyButton reasons={item.reasons} />
           <IconButton
             label="More like this"
             aria-pressed={feedback === 'more'}

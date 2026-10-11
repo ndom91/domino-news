@@ -15,14 +15,23 @@ export interface PopoverProps {
   title?: string
   children: ReactNode
   side?: 'top' | 'bottom' | 'left' | 'right'
+  /** Also open on hover (desktop). Click, tap and keyboard always work. */
+  openOnHover?: boolean
   className?: string
 }
 
 /** Click/tap/keyboard popover. Never hover-only, so it works on touch screens. */
-export function Popover({ trigger, title, children, side = 'bottom', className }: PopoverProps) {
+export function Popover({
+  trigger,
+  title,
+  children,
+  side = 'bottom',
+  openOnHover = false,
+  className,
+}: PopoverProps) {
   return (
     <BasePopover.Root>
-      <BasePopover.Trigger render={trigger} />
+      <BasePopover.Trigger render={trigger} openOnHover={openOnHover} delay={120} />
       <BasePopover.Portal>
         <BasePopover.Positioner side={side} sideOffset={8} collisionPadding={12} className="z-50">
           <BasePopover.Popup
