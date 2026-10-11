@@ -1,5 +1,5 @@
 import { clockTime, longDate } from '@dn/domain'
-import { cx, Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
+import { Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
 import { Link, useNavigate, useRouter } from '@tanstack/react-router'
@@ -56,16 +56,16 @@ export function SiteHeader({
           </Link>
           <nav
             aria-label="Primary"
-            className="ml-auto flex gap-7 text-base font-semibold [scrollbar-width:none] max-md:order-last max-md:ml-0 max-md:w-full max-md:gap-6 max-md:overflow-x-auto"
+            className="ml-auto flex gap-2 text-base font-semibold [scrollbar-width:none] max-md:order-last max-md:-ml-2.5 max-md:w-full max-md:gap-1 max-md:overflow-x-auto"
           >
             {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
                 activeOptions={{ exact: item.exact }}
-                className="inline-flex min-h-tap flex-none items-end pb-0.5 whitespace-nowrap hover:text-accent-text"
+                className="inline-flex min-h-tap flex-none items-center px-2.5 whitespace-nowrap hover:not-aria-[current=page]:text-accent-text"
                 activeProps={{
-                  className: cx('shadow-[inset_0_-3px_0_var(--dn-accent)]'),
+                  className: 'bg-accent text-accent-contrast',
                   'aria-current': 'page',
                 }}
               >
