@@ -1,11 +1,13 @@
-# News Intelligence Platform — implementation handoff
+# Domino News docs
 
-Current agreed architecture documents (2026-10-10). Read in numbered order. The original versioned document filenames are included alongside these consistent numbered filenames in the ZIP.
+Read in numbered order. 001–005 are the architecture agreed before building (2026-10-10); 006 records what was actually built and why, and wins where they differ.
 
-- `001-data-model.md` — original `news-intelligence-architecture-v0.3.md`
-- `002-infrastructure.md` — original `news-intelligence-infrastructure-v0.1.md`
-- `003-application-stack.md` — original `news-intelligence-application-stack-v0.1.md`
-- `004-frontend-platform.md` — original `news-intelligence-frontend-platform-v0.3.md`
-- `005-prototype-specification.md` — original `news-intelligence-prototype-specification-v0.3.md`
+- `001-data-model.md`: domain and data model
+- `002-infrastructure.md`: hosting, inference and operations; its production setup section is current
+- `003-application-stack.md`: services, pipeline and libraries
+- `004-frontend-platform.md`: web app, design system and API contracts
+- `005-prototype-specification.md`: scope of the first prototype
+- `006-implementation-notes.md`: decisions taken while building, kept current
+- `domino-design-handoff.zip`: the visual design handoff ("Signal × Index")
 
-Final visual decisions remain provisional. Use custom reusable UI components with Tailwind CSS v4, Base UI, semantic design tokens and Playroom; do not use shadcn/ui. The prototype is web-only, but HTTP API contracts must remain compatible with a later Expo/React Native app.
+Current status, commands and configuration live in [`AGENTS.md`](../AGENTS.md).

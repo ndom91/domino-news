@@ -1,10 +1,12 @@
 # 004 — Frontend Platform & API Boundary
 
+> **Historical plan.** Written before building. Where it differs from the code, [006](006-implementation-notes.md) and [`AGENTS.md`](../AGENTS.md) are current.
+
 **Project:** News Intelligence Platform  
 **Version:** 0.3  
 **Date:** 2026-10-10  
 **Status:** Agreed architecture; implementation details remain open  
-**Related:** `001-data-model.md`, `002-infrastructure.md`, `003-application-stack.md` (the previously created versioned architecture documents)
+**Related:** `001-data-model.md`, `002-infrastructure.md`, `003-application-stack.md`
 
 ## 1. Decision summary
 

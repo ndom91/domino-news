@@ -1,5 +1,7 @@
 # News Intelligence Platform — Architecture & Data Model
 
+> **Historical plan.** Written before building. Where it differs from the code, [006](006-implementation-notes.md) and [`AGENTS.md`](../AGENTS.md) are current.
+
 **Status:** Agreed working design (v0.3)  
 **Date:** 2026-10-10  
 **Scope:** Product data model and logical architecture. Physical infrastructure and deployment design are deliberately deferred.  

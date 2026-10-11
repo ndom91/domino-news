@@ -52,6 +52,8 @@ e2e/, test/       Playwright and Vitest suites
 
 The default `.env.example` runs fixture ingest and fixture inference. Older fixture items count as backfill and are admitted at `BACKFILL_ADMIT_PER_MINUTE` (20/min), so the full set settles in 2–3 minutes. Watch progress on **Pipeline** (`/ops`).
 
+A Story is published only once `MIN_PUBLISH_OUTLETS` (default 2) newsroom publishers cover it, so single-outlet fixture Stories stay hidden. CI sets it to 1 so e2e data settles quickly.
+
 ### Local inference (EmbeddingGemma 2 + Gemma 4)
 
 ```bash
@@ -143,7 +145,7 @@ POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE
 GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=&region=
-GET  /api/v1/publishers                  # outlet stats + who-covered-what matrix
+GET  /api/v1/publishers                  # publisher stats + who-covered-what matrix
 GET  /api/v1/publishers/:slug            # stats, source-use policy, coverage profile, assessment, co-coverage
 GET  /api/v1/publishers/:slug/evidence   # admin: imported, unreviewed evidence
 POST /api/v1/publishers/:slug/assessment # admin: publish a reviewed assessment (new version)
@@ -152,7 +154,7 @@ POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_
 GET  /api/v1/me/preferences              # { edition: region | null, rememberReads }
 POST /api/v1/me/preferences              # partial update; rememberReads=false deletes history
 POST /api/v1/me/reads                    # { storyId }; recorded only if rememberReads
-GET  /api/v1/me/insights                 # Blindspot: missed developments, region/desk gaps
+GET  /api/v1/me/insights                 # Blindspot: newer stories in narratives you read, region/desk gaps
 ```
 
 Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `packages/queries` are platform-neutral for a future Expo app.
@@ -169,11 +171,10 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Regions and editions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region; a reader's edition (`/account`) picks the lead and adds an "In {region}" rail without re-ranking the chronological feed. After upgrading, existing Stories have no regions until re-summarised, and Typesense needs `pnpm cli search:rebuild`.
 - **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored.
 - **Publisher assessments:** evidence is imported from open sources only: Wikidata for ownership (CC0), and Wikipedia's perennial sources list for reliability (CC BY-SA). An admin reviews it on the publisher page and publishes an append-only, versioned assessment that freezes the evidence used. Political lean is entered by hand, relative to the outlet's own country, and must cite a source such as the Reuters Institute's audience data; otherwise it shows "Not assessed". Licensed ratings (AllSides, MBFC, NewsGuard) are not used: they're non-commercial or paid.
-- **Coverage profile:** each publisher page shows its desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it didn't cover this week. Facts only; no ratings yet.
-- **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
+- **Publisher coverage:** publisher stats (stories, first to report), a who-covered-what matrix, and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
-- Web: feed, Story, Narrative (branching lane graph), publishers, search, pipeline and account pages. Desktop-first and checked at 375px.
-- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except Google for allowlisted emails.
+- Web: feed, Story, Narrative (timeline), Blindspot, publishers, search, pipeline and account pages. Desktop-first and checked at 375px; below 1024px the header nav becomes a section menu.
+- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except Google for allowlisted emails. An `admin` role gates the Pipeline page and assessment review.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited
@@ -187,4 +188,4 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 
 ## Deferred (per doc 005)
 
-Full claims/evidence graph (cross-story claim linking, verification), publisher bias assessment, personal blindspots, Expo app, notifications, billing, Caddy/TLS, backups, OpenTofu/Ansible.
+Full claims/evidence graph (cross-story claim linking, verification), automated political-lean ratings, Expo app, notifications, billing, Caddy/TLS, backups, OpenTofu/Ansible.

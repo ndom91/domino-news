@@ -1,9 +1,11 @@
 # News Intelligence Platform — Application Stack & Processing Architecture
 
+> **Historical plan.** Written before building. Where it differs from the code, [006](006-implementation-notes.md) and [`AGENTS.md`](../AGENTS.md) are current.
+
 **Status:** Agreed working stack; API and schema implementation details pending  
 **Version:** v0.1  
 **Date:** 2026-10-10  
-**Companion docs:** `news-intelligence-architecture-v0.3.md` (canonical data model), `news-intelligence-infrastructure-v0.1.md` (deployment topology)
+**Companion docs:** `001-data-model.md` (canonical data model), `002-infrastructure.md` (deployment topology)
 
 ## 1. Selected stack
 
@@ -22,7 +24,7 @@
 | AI generation and decisions | **One Gemma 4 variant** | Shared local model for summaries, extraction, decisions, framing, etc. |
 | Cloud LLM | Optional provider interface only | Disabled; no active escalation policy initially |
 | Deployment | **Docker Compose** | Core stack on app VM; separate inference Compose stack |
-| Authentication | **better-auth** | Whole app behind login; username/password now, bearer tokens for API clients, passkeys planned |
+| Authentication | **better-auth** | Whole app behind login; username/password, passkeys, optional Google, bearer tokens for API clients |
 
 **TanStack Pacer:** process-local throttling/queuing tool, **not** the durable job queue. No need to include it initially; add only if a specific in-process control benefits from it.
 
@@ -52,7 +54,7 @@ This is organizational guidance rather than a hard requirement that each package
 
 ## 3. Domain architecture (summary)
 
-The authoritative entity definitions, TypeScript drafts, publication rules and conceptual dependency diagrams live in **`news-intelligence-architecture-v0.3.md`**. Key invariants:
+The authoritative entity definitions, TypeScript drafts, publication rules and conceptual dependency diagrams live in **`001-data-model.md`**. Key invariants:
 
 - **Story** is the canonical publishable unit; every *published* Story has at least one traceable source Article.
 - **Narrative** groups related Stories; typed Story-to-Story edges represent the branching history. Merges and splits are supported with historical identities retained.
@@ -208,8 +210,9 @@ Constraints:
 
 Added 2026-10-10 by founder decision: **the entire application sits behind a login**, including Story and Narrative pages and every `/api/v1` route.
 
-- **Library:** [better-auth](https://www.better-auth.com) with the Drizzle adapter. Auth tables (`auth_user`, `auth_session`, `auth_account`, `auth_verification`) live in PostgreSQL next to domain data.
-- **Methods now:** username + password (`username` plugin). Public sign-up is **disabled**; accounts are created server-side with `pnpm cli user:create`.
+- **Library:** [better-auth](https://www.better-auth.com) with the Drizzle adapter. Auth tables (`auth_user`, `auth_session`, `auth_account`, `auth_verification`, `auth_passkey`) live in PostgreSQL next to domain data.
+- **Methods:** username + password (`username` plugin), passkeys, and optional Google sign-in. Public sign-up is **disabled**; accounts are created with `pnpm cli user:create`, and Google can only create accounts for emails in `GOOGLE_ALLOWED_EMAILS`.
+- **Roles:** `auth_user.role` is `admin` or `user`. CLI accounts are admins unless `--role user`; Google accounts are users. API routes marked `adminOnly` return `403` to users.
 - **API clients:** the `bearer` plugin issues a token on sign-in (`set-auth-token` header) that clients send as `Authorization: Bearer <token>`. The web app uses the same session via cookies. This keeps the API usable by the future Expo app without browser cookies.
 - **Passkeys (implemented):** `@better-auth/passkey`. Signed-in users add passkeys on `/account`; the login page offers "Sign in with a passkey" and browser autofill. `rpID`/`origin` come from `BETTER_AUTH_URL`, so it must be the real public origin (HTTPS in production; `localhost` works for development).
 - **Boundary:** `/api/auth/*` is served by better-auth; every `/api/v1/*` handler resolves the session first and returns a typed `401 unauthorized` error otherwise. Web route guards use a web-only server function to read the session, which the HTTP-first rule allows.

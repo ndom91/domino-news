@@ -1,10 +1,12 @@
 # 005 — Prototype Specification
 
+> **Historical plan.** Written before building. Where it differs from the code, [006](006-implementation-notes.md) and [`AGENTS.md`](../AGENTS.md) are current.
+
 **Project:** News Intelligence Platform  
 **Version:** v0.3  
 **Date:** 2026-10-10  
 **Status:** Implementation handoff — scoped first vertical slice  
-**Companion documents:** `news-intelligence-architecture-v0.3.md`, `news-intelligence-infrastructure-v0.1.md`, `news-intelligence-application-stack-v0.1.md`, `news-intelligence-frontend-platform-v0.3.md`
+**Companion documents:** `001-data-model.md`, `002-infrastructure.md`, `003-application-stack.md`, `004-frontend-platform.md`
 
 > **Implement a working web-only prototype, not the full product.** Follow the approved domain model and architectural invariants in the companion documents. If a detail is not specified, choose the smallest reversible implementation and document the decision. Do not replace agreed components with superficially simpler alternatives.
 

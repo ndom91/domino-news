@@ -1,9 +1,30 @@
 # News Intelligence Platform — Infrastructure & Deployment Architecture
 
+> **Current setup first.** [Production setup](#production-setup) below is canonical. Sections 1–10 are the plan written before building; where they differ, the production setup, [006](006-implementation-notes.md) and [`AGENTS.md`](../AGENTS.md) are current.
+
+## Production setup
+
+Live at **https://loombeat.ndo.dev** since 2026-10-10.
+
+```text
+Browser ──► Cloudflare (DNS, proxy, TLS) ──► Traefik (separate machine) ──► Docker host 10.0.22.64:4000
+                                                                             └─ Proxmox LXC running the Compose stack
+Docker host ──► inference server (plain HTTP over Tailscale)
+```
+
+- **Docker host:** a Proxmox LXC with Docker and git; no Node needed. It runs the whole Compose stack from `infra/compose/compose.yaml`: `postgres`, `typesense`, `migrate` (one-off), `web`, `worker`, `indexer`.
+- **Ingress:** Traefik on another machine receives the proxied traffic and forwards to the web container. So `.env` sets `WEB_BIND=10.0.22.64` (the LXC's LAN address); the default `127.0.0.1` would be unreachable from Traefik. Postgres and Typesense stay on `127.0.0.1`.
+- **Firewall:** the Proxmox firewall must allow port 4000 to the LXC. A block there shows up as a Cloudflare 504.
+- **Inference:** `INFERENCE_MODE=local`, with `INFERENCE_BASE_URL` pointing at the inference server over Tailscale. Tailscale encrypts the link, so plain HTTP is fine and `INFERENCE_CA_CERT` stays empty.
+- **Auth:** `BETTER_AUTH_URL=https://loombeat.ndo.dev`. Set `AUTH_IP_HEADERS=cf-connecting-ip` only if the origin accepts traffic from Cloudflare alone; otherwise the header can be spoofed.
+- **Deploy and update:** `scripts/deploy.sh up` the first time, then `scripts/deploy.sh update` (pull, rebuild, migrate, restart, re-seed). `scripts/deploy.sh user <name>` creates an admin login.
+- **Not set up yet:** off-host backups and monitoring.
+- **Troubleshooting order for a 5xx:** container status (`scripts/deploy.sh status`), `WEB_BIND`, the Proxmox firewall, then Traefik.
+
 **Status:** Agreed working architecture; operational details pending  
 **Version:** v0.1  
 **Date:** 2026-10-10  
-**Companion docs:** `news-intelligence-architecture-v0.3.md` (data model), `news-intelligence-application-stack-v0.1.md` (software architecture)
+**Companion docs:** `001-data-model.md` (data model), `003-application-stack.md` (software architecture)
 
 ## 1. Goals and constraints
 
