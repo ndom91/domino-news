@@ -115,7 +115,7 @@ function LoginPage() {
             Domino<span className="text-accent">.</span>
           </p>
           <p className="mt-2 font-semibold">
-            News stories assembled from many publishers, with every source linked.
+            Follow the news as it falls: one story, every source, and what came next.
           </p>
         </div>
       </aside>
