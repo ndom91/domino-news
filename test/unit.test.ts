@@ -17,7 +17,7 @@ import {
   wikidataEvidence,
 } from '@dn/jobs'
 import { scoreStory } from '@dn/server'
-import { layoutNarrative } from '@dn/ui'
+import { layoutNarrative, storiesPerDay } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
 
@@ -132,6 +132,26 @@ describe('layoutNarrative', () => {
     ])
     // sty_reax's branch is its own primary, so sty_pillay does not list it again.
     expect(row('sty_pillay')?.secondary.map((s) => s.otherId)).not.toContain('sty_reax')
+  })
+})
+
+describe('storiesPerDay', () => {
+  it('counts per UTC day with empty lead-in days and gaps', () => {
+    const days = storiesPerDay(
+      ['2026-10-08T23:59:00Z', '2026-10-08T01:00:00Z', '2026-10-10T00:00:00Z'],
+      2,
+    )
+    expect(days.map((d) => [d.day.slice(0, 10), d.count])).toEqual([
+      ['2026-10-06', 0],
+      ['2026-10-07', 0],
+      ['2026-10-08', 2],
+      ['2026-10-09', 0],
+      ['2026-10-10', 1],
+    ])
+  })
+
+  it('is empty without stories', () => {
+    expect(storiesPerDay([])).toEqual([])
   })
 })
 
