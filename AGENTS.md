@@ -39,6 +39,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli user:create --username u --password p [--role user]` | Create an account (public sign-up is disabled). CLI accounts are admins unless `--role user` |
 | `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
 | `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership), Wikipedia's perennial sources (reliability) and `fixtures/lean-evidence.json` (lean) |
+| `pnpm cli assessments:publish --username u [--dry-run]` | Publish the reviewed assessments in `fixtures/assessments.json` as admin `u`. Skips publishers whose latest assessment already matches. Run `assessments:import` first |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli summaries:refresh` | Re-summarise published stories that have no desk yet (one GPU call each, plus context, claims and relate for the new version) |
@@ -134,6 +135,7 @@ scripts/deploy.sh update     # git pull, rebuild, migrate, restart, re-seed publ
 - **Migrations only go forward.** There are no down migrations, so rolling back code does not undo the schema; restore a backup instead.
 - After a change to the search schema (a new field on the story collection), run `scripts/deploy.sh cli search:rebuild`.
 - New model-written fields (desk, regions, topics) are only set when a Story is summarised. Existing Stories stay without them until re-summarised or a full reset.
+- After `fixtures/assessments.json` changes, run `scripts/deploy.sh cli assessments:import`, then `scripts/deploy.sh cli assessments:publish --username <admin>` (try `--dry-run` first). Assessments are append-only, so each changed entry becomes a new version.
 - After adding publishers, run `scripts/deploy.sh cli assessments:import` once so they get ownership and reliability evidence. It is not scheduled: evidence changes rarely, and only reviewed assessments are shown.
 
 ### Backups and restore

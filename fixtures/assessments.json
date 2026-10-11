@@ -1,0 +1,1196 @@
+{
+  "_about": [
+    "Reviewed publisher assessments, published by `pnpm cli assessments:publish --username <admin>`. Run `assessments:import` first: each assessment freezes the evidence imported at publish time.",
+    "Each entry is the request the review form would send, plus the sources used and notes for the next reviewer.",
+    "Re-running publishes only entries that differ from the publisher's latest assessment. Assessments are append-only: a change is a new version.",
+    "Lean comes only from fixtures/lean-evidence.json (Reuters Institute DNR for the publisher's country, else AllSides for US publishers). Researched 2026-10-11."
+  ],
+  "assessments": [
+    {
+      "slug": "404media",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Owned by Dark Mode, LLC, which belongs to its four co-founding journalists (Jason Koebler, Sam Cole, Emanuel Maiberg, Joseph Cox), all formerly of Vice's Motherboard. Founded in 2023 and funded mainly by reader subscriptions; no outside investors are reported.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/404_Media"],
+      "notes": "Reporter-owned for-profit LLC; classed as commercial."
+    },
+    {
+      "slug": "abc-au",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "The news division of the Australian Broadcasting Corporation, Australia's national public broadcaster. The ABC is funded by the federal government and must keep an independent news service under the Australian Broadcasting Corporation Act 1983.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "AU",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/ABC_News_(Australia)"],
+      "notes": "No DNR polarisation data for Australia in the 2022 chapter; the University of Canberra's DNR Australia reports might have audience-lean data if a lean is wanted later."
+    },
+    {
+      "slug": "abcnews",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "The news division of the US television network ABC, part of Disney Entertainment Television, owned by The Walt Disney Company (publicly traded). Funded by advertising and distribution fees.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: ABC News (United States)).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.08, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/ABC_News_(United_States)",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "agenciabrasil",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Brazilian public news agency run by Empresa Brasil de Comunicação (EBC), a federal public media company created in 2007. Funded by the Brazilian federal government. Publishes under a CC BY licence.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "BR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Ag%C3%AAncia_Brasil"],
+      "notes": ""
+    },
+    {
+      "slug": "al-monitor",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Founded in 2012 by Arab-American businessman Jamal Daniel and wholly owned by Crest Media LLC, his US media investment company. Based in Washington, D.C.; funded by subscriptions (Al-Monitor Pro), advertising and events.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q4702909",
+        "https://en.wikipedia.org/wiki/Al-Monitor",
+        "https://www.new-levant.org/person/jamal-daniel/"
+      ],
+      "notes": "Crest Media LLC as holding entity comes from a secondary profile (New Levant Initiative); no 2025-26 sale found. Revenue mix (subscriptions/ads/events) is general knowledge, not verified on a primary page."
+    },
+    {
+      "slug": "aljazeera",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Run by Al Jazeera Media Network, chartered under Qatari law (2011) as a private foundation for public benefit. It is owned and mainly funded by the government of Qatar; a former acting director general put the state's share at about 90%. The network says its reporting is not directed by the Qatari government.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Al Jazeera).",
+        "countryContext": "QA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Al_Jazeera_English",
+        "https://en.wikipedia.org/wiki/Al_Jazeera_Media_Network",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "1) The imported wp_rsp row names the entry 'Al Jazeera Magazine', which looks like a mis-match; check the RSP entry for Al Jazeera itself (and any caveats it carries) before publishing. 2) fundingModel 'state' chosen because it is government-owned and mostly state-funded; reviewer may prefer 'other' given its formal foundation status."
+    },
+    {
+      "slug": "apublica",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Independent Brazilian investigative journalism agency founded in 2011 by Marina Amaral, Natália Viana and Tatiana Merlino. Run by the nonprofit association Centro de Jornalismo Investigativo. Funded by private foundations (named funders include the Ford Foundation and Oak Foundation), project grants and reader donations.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "BR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Ag%C3%AAncia_P%C3%BAblica",
+        "https://apublica.org/transparencia/",
+        "https://apublica.org/transparency/"
+      ],
+      "notes": "Named funders (Ford, Oak) come from the English transparency page, which may be out of date. Check the current Portuguese page."
+    },
+    {
+      "slug": "batimes",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published since 2017 by Editorial Perfil S.A., the Argentine media group co-founded and controlled by journalist Jorge Fontevecchia (publisher of Perfil, Noticias and Caras). Funded by advertising and sales.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "AR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Perfil",
+        "https://www.batimes.com.ar/authors/jfontevecchia",
+        "https://simple.wikipedia.org/wiki/Jorge_Fontevecchia"
+      ],
+      "notes": "No Wikidata evidence. Exact shareholding of Editorial Perfil not verified beyond Fontevecchia being co-founder/owner."
+    },
+    {
+      "slug": "bbc",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "Owned by the British Broadcasting Corporation, the UK's public service broadcaster, established by Royal Charter. Funded mainly by the UK television licence fee, plus commercial income from BBC Studios.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: BBC).",
+        "countryContext": "GB",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.02, Reuters Institute DNR 2022 (relative to UK audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q1160945",
+        "https://en.wikipedia.org/wiki/BBC",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "The imported wp_rsp row names the entry 'Collective', which looks like a mis-match; confirm the BBC's own RSP entry (generally reliable) before publishing."
+    },
+    {
+      "slug": "calmatters",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "CalMatters is an independent 501(c)(3) nonprofit newsroom based in Sacramento, launched in 2015, covering California politics and policy. Funded by individual donors and foundations. The Markup merged into it in 2024.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/calmatters-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Center (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/CalMatters",
+        "https://www.allsides.com/news-source/calmatters-media-bias"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "cbc",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "News division of the Canadian Broadcasting Corporation (CBC/Radio-Canada), a federal Crown corporation that operates at arm's length from government. Funded mainly by an annual parliamentary appropriation, plus advertising and subscriber revenue.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "CA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q2931014",
+        "https://en.wikipedia.org/wiki/CBC_News",
+        "https://cbc.radio-canada.ca/en/your-public-broadcaster/about-us/answers-to-common-questions",
+        "https://sencanada.ca/content/sen/committee/451/TRCM/Reports/TRCM_45-1_SS-1_CBC_Report_final_e.pdf"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "cbsnews",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Part of CBS News and Stations, a division of Paramount Skydance (publicly traded), formed when Skydance Media merged with Paramount Global in 2025. Funded by advertising and distribution fees.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: CBS News).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.09, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/CBS_News",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "No wp_rsp row was imported for CBS News, so reliabilityLevel is null per the rules. Check whether RSP has a CBS News entry the importer missed. The 2022 audience score predates the 2025 Skydance ownership change."
+    },
+    {
+      "slug": "cdc",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "The Centers for Disease Control and Prevention is a US federal agency within the Department of Health and Human Services, funded by congressional appropriations.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Centers_for_Disease_Control_and_Prevention"],
+      "notes": ""
+    },
+    {
+      "slug": "cna",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Owned by Mediacorp, Singapore's national media group, which is wholly owned by Temasek Holdings, itself owned by Singapore's Minister for Finance. Funded by a government allocation for public-service content plus advertising, subscriptions and content sales.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: CNA (TV network)).",
+        "countryContext": "SG",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://en.wikipedia.org/wiki/CNA_(TV_network)",
+        "https://en.wikipedia.org/wiki/Mediacorp",
+        "https://statemediamonitor.com/2026/08/mediacorp/"
+      ],
+      "notes": "fundingModel judgement call: 'state' (state-owned via Temasek, no independence charter) vs 'public_broadcaster' (receives public-service allocation). State Media Monitor does not classify Mediacorp as 'state-controlled' because state funding share is unknown. Reviewer should confirm."
+    },
+    {
+      "slug": "dailymaverick",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Owned by a privately held holding company with several shareholders, none holding more than 50%. The largest is the South African non-profit Inkululeko South Africa Media; others include trusts and co-founders Styli Charalambous and Branko Brkic. Funded by reader memberships (Maverick Insider), grants, events and advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "ZA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Daily_Maverick"],
+      "notes": "Privately owned company but largest shareholder is a non-profit and it takes grants; 'commercial' vs 'other' is a judgement call."
+    },
+    {
+      "slug": "dawn",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published by Pakistan Herald Publications (Pvt) Ltd, part of the Karachi-based Dawn Media Group (Pakistan Herald Limited), a private company controlled by the Haroon-Saigol family. Funded by advertising and sales.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "PK",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Dawn_(newspaper)",
+        "https://en.wikipedia.org/wiki/Dawn_Media_Group",
+        "https://pakistan.mom-gmr.org/en/media/detail/outlet/dawn/",
+        "https://pakistan.mom-gmr.org/en/owners/individual-owners/detail/owner/owner/show/the-haroon-saigol-family/"
+      ],
+      "notes": "Shareholding detail from Media Ownership Monitor is ~2019 data."
+    },
+    {
+      "slug": "dw",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "Germany's public international broadcaster, a public-law institution funded from the federal government budget. The Deutsche Welle Act requires its content to be independent of government influence; member of the European Broadcasting Union.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Deutsche Welle).",
+        "countryContext": "DE",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://en.wikipedia.org/wiki/Deutsche_Welle"
+      ],
+      "notes": "Funded by federal tax revenue, not a licence fee; classed public_broadcaster because of statutory editorial independence."
+    },
+    {
+      "slug": "ec-presscorner",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Official press service of the European Commission, the executive body of the European Union. Funded from the EU budget.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": null,
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://ec.europa.eu/commission/presscorner/home/en"],
+      "notes": ""
+    },
+    {
+      "slug": "ecb",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "The European Central Bank is an official EU institution and the central bank of the euro area. Its capital is held by the national central banks of the EU member states.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": null,
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/European_Central_Bank"],
+      "notes": ""
+    },
+    {
+      "slug": "economist",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published by The Economist Group, a privately held company. Exor (Agnelli family) holds about 43.4%. In 2026 the Rothschild family sold its roughly 27% stake to Canadian businessman Stephen Smith. Other holders include the Cadbury, Schroder and Layton families and staff. Independent trustees approve the editor. Funded by subscriptions and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Economist).",
+        "countryContext": "GB",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q180089",
+        "https://en.wikipedia.org/wiki/The_Economist_Group",
+        "https://www.axios.com/2026/03/17/economist-sale-rothschild-stephen-smith",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "Stephen Smith stake (about 26.9%) comes from Axios, March 2026. Wikipedia still lists the Rothschilds at 21%. Exact current percentages need a check against the latest Economist Group annual report."
+    },
+    {
+      "slug": "elpais-en",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "English edition of El País, owned by PRISA (Promotora de Informaciones S.A.), a Spanish media group listed on the Madrid stock exchange. Funded by subscriptions and advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "ES",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/El_Pa%C3%ADs",
+        "https://en.wikipedia.org/wiki/PRISA"
+      ],
+      "notes": "PRISA's major shareholders not listed; check whether wp_rsp has an El País entry under another name (none was imported)."
+    },
+    {
+      "slug": "euronews",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Majority-owned since 2022 by Alpac Capital, a Portuguese investment fund manager (reported 88% at acquisition). Investigations by Direkt36 and Le Monde reported that the purchase was partly financed by Hungarian state-linked capital. Funded by advertising and distribution.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "FR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Euronews",
+        "https://www.broadbandtvnews.com/2022/07/05/alpac-capital-completes-euronews-acquisition/",
+        "https://www.tvbeurope.com/business/alpac-capital-takes-majority-share-in-euronews",
+        "https://en.wikipedia.org/wiki/Alpac_Capital"
+      ],
+      "notes": "Stake size differs (88% at deal vs 98% per Wikipedia Alpac page). 'Historically EU contracts' is from general knowledge, not verified this session; reviewer may want to drop that clause."
+    },
+    {
+      "slug": "federalregister",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Official daily journal of the US federal government. Compiled by the Office of the Federal Register (National Archives and Records Administration) and printed by the Government Publishing Office. Funded by the federal government. Public domain.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Federal_Register"],
+      "notes": ""
+    },
+    {
+      "slug": "france24",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "French international news network, wholly owned since 2008 by the French state through the public holding company France Médias Monde (which also runs RFI and MCD). Funded by public money; France Médias Monde's budget is about €300 million a year.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "FR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/France_24"],
+      "notes": "Classed as public_broadcaster (French public audiovisual sector). Wikipedia calls it 'state-owned publicly funded'. A reviewer may prefer 'state'."
+    },
+    {
+      "slug": "globalvoices",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "International citizen-media community, registered in the Netherlands as the nonprofit foundation Stichting Global Voices. Began in 2004 at Harvard's Berkman Center. Funded by grants (largest: MacArthur Foundation; also Open Society Foundations and others), editorial commissions and donations. No ads or paywall.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "NL",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Global_Voices",
+        "https://globalvoices.org/about/faq-frequently-asked-questions/",
+        "https://globalvoices.org/special-thanks/",
+        "https://www.macfound.org/grantee/global-voices-41769/"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "govuk",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "GOV.UK is the UK Government's official website, run by the Government Digital Service and funded by the government. Departments and agencies publish their own content on it.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "GB",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q16982369",
+        "https://en.wikipedia.org/wiki/GOV.UK"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "grist",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Published by Grist Magazine, Inc., a US 501(c)(3) nonprofit founded in 1999 by Chip Giller, covering climate and environmental news. Funded by donations and grants (FY2022 revenue about $8.6M).",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/grist-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Grist_(magazine)",
+        "https://www.allsides.com/news-source/grist-media-bias"
+      ],
+      "notes": "Wikipedia gives no named funders; 'donations and grants' is the standard nonprofit description, not a verified breakdown."
+    },
+    {
+      "slug": "groundup",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "South African not-for-profit news agency founded in 2012 as a project of Community Media Trust and the University of Cape Town. An independent non-profit company since June 2020. Funded almost entirely by philanthropic donors, listed on its funding page.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "ZA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/GroundUp_(news_agency)",
+        "https://groundup.news/funders/",
+        "https://themediaonline.co.za/2020/11/journalism-from-the-ground-up/"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "guardian",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Part of Guardian Media Group, owned by the Scott Trust Limited, set up to secure the paper's financial and editorial independence; profits are reinvested in journalism. Funded by reader contributions, subscriptions and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Guardian).",
+        "countryContext": "GB",
+        "lean": "left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.24, Reuters Institute DNR 2022 (relative to UK audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q11148",
+        "https://en.wikipedia.org/wiki/The_Guardian",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "insideclimatenews",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Inside Climate News is an independent US 501(c)(3) nonprofit newsroom, co-founded in 2007 by publisher David Sassoon and Stacy Feldman. It publishes for free and is funded by donations and foundation grants.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Inside_Climate_News"],
+      "notes": "Wikipedia names no funders; 'donations and foundation grants' not verified against ICN's own funding page."
+    },
+    {
+      "slug": "japantimes",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published by The Japan Times, Ltd., a wholly owned subsidiary of News2u Holdings, Inc. (a Tokyo PR firm led by Minako Suematsu), which bought it from Nifco in 2017. Funded by subscriptions and advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "JP",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Japan_Times",
+        "https://www.japantimes.co.jp/2017/06/20/announcements/notice-change-shareholder-board-members/"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "kffhealthnews",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "An editorially independent program of KFF (formerly the Kaiser Family Foundation), an endowed US nonprofit not affiliated with Kaiser Permanente. Primarily funded by investment returns from KFF's endowment, with some additional grant funders.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://kffhealthnews.org/about-us/",
+        "https://kffhealthnews.org/faq/",
+        "https://en.wikipedia.org/wiki/KFF"
+      ],
+      "notes": "No AllSides row imported; lean left null."
+    },
+    {
+      "slug": "koreaherald",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "South Korean English-language daily published by Herald Corporation (Herald Media Group). Herald Corporation was acquired in 2019 by Jungheung Group, a Gwangju-based construction company chaired by Jung Chang-sun. Funded by sales and advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "KR",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Korea_Herald",
+        "https://en.wikipedia.org/wiki/Herald_Corporation",
+        "https://en.wikipedia.org/wiki/Jungheung_Group",
+        "https://www.theinvestor.co.kr/article/10668875"
+      ],
+      "notes": "Wikidata has no ownership row. Jungheung ownership comes from Wikipedia and a Herald-group article; check it is still current."
+    },
+    {
+      "slug": "kyivindependent",
+      "request": {
+        "fundingModel": "other",
+        "ownership": "Founded in 2021 by former Kyiv Post journalists; partly owned by its journalists, with no single controlling owner by design. About 70% of 2024 revenue came from reader memberships; the rest from donations, syndication, a shop and advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "UA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Kyiv_Independent",
+        "https://kyivindependent.com/who-funds-the-kyiv-independent/",
+        "https://jia.sipa.columbia.edu/content/reporting-war-feature-kyiv-independent"
+      ],
+      "notes": "fundingModel: for-profit company (Crunchbase) but reader-funded and employee-owned; chose 'other'. 'commercial' is also defensible. Exact shareholders not public in sources found."
+    },
+    {
+      "slug": "meduza",
+      "request": {
+        "fundingModel": "other",
+        "ownership": "Russian- and English-language outlet based in Riga, Latvia, founded in 2014 by former Lenta.ru staff. Published by Amond & Smith Ltd, with Galina Timchenko as owner and publisher. Funded by reader crowdfunding and international grants. Russia lists it as a foreign agent (2021) and undesirable organisation (2023).",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Meduza).",
+        "countryContext": "LV",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Meduza_(website)",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "Privately owned company funded mostly by donations and grants; 'other' chosen over 'nonprofit' because it is not a registered nonprofit as far as Wikipedia says. Latvia is its base, but its audience is mainly Russian; a country-relative lean would be hard to define."
+    },
+    {
+      "slug": "mg",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "South African weekly published by Mail & Guardian Media Ltd, a private company. Main shareholders are chair Hoosain Karjieker and director Thembisa Fakude, who bought the majority stake from the Media Development Investment Fund in 2024. A staff share trust and the founders hold minority stakes.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Mail & Guardian).",
+        "countryContext": "ZA",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://mg.co.za/about/",
+        "https://en.wikipedia.org/wiki/Mail_%26_Guardian",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "Ownership after 2024 comes from the M&G About page; no later change was found."
+    },
+    {
+      "slug": "mongabay",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Published by Mongabay.org Corp, a US 501(c)(3) public charity founded by Rhett Ayers Butler. About 94% of FY2024 revenue came from grants and donations, mostly foundations (e.g. Ford, Packard); no advertising on news content since 2017.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Mongabay",
+        "https://news.mongabay.com/funders/",
+        "https://philanthropy.org/990/report/453714703/mongabay-org-corp"
+      ],
+      "notes": "FY2024 revenue split from a third-party Form 990 summary."
+    },
+    {
+      "slug": "nasa",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "Independent agency of the US federal government (National Aeronautics and Space Administration). Funded by congressional appropriations.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://www.wikidata.org/wiki/Q23548", "https://en.wikipedia.org/wiki/NASA"],
+      "notes": ""
+    },
+    {
+      "slug": "nbcnews",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "News division of the US broadcast network NBC, part of NBCUniversal News Group within NBCUniversal, a subsidiary of Comcast. MSNBC and CNBC left the group in 2025 when they moved to Versant. Funded by advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: NBC News).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.15, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q2877626",
+        "https://en.wikipedia.org/wiki/NBC_News",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "noaa",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "The National Oceanic and Atmospheric Administration is a US federal agency within the Department of Commerce, funded by congressional appropriations.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/National_Oceanic_and_Atmospheric_Administration"],
+      "notes": ""
+    },
+    {
+      "slug": "npr",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "National Public Radio is an independent US nonprofit membership organisation. Funded by dues and fees from over 1,000 member stations and corporate underwriting; federal funding via the Corporation for Public Broadcasting ended in 2025.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: NPR).",
+        "countryContext": "US",
+        "lean": "left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.30, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/NPR",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "fundingModel: chose 'nonprofit' since CPB funding ended 2025; 'public_broadcaster' is the conventional label. AllSides says Lean Left (centre_left); DNR row takes precedence per rules and gives 'left'."
+    },
+    {
+      "slug": "nytimes",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published by The New York Times Company, a publicly traded company controlled by the Ochs-Sulzberger family through dual-class shares since 1896. Funded mainly by digital and print subscriptions, plus advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The New York Times).",
+        "countryContext": "US",
+        "lean": "left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.21, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q9684",
+        "https://en.wikipedia.org/wiki/The_New_York_Times",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "Dual-class share control is from general knowledge of the NYT Company; Wikipedia intro only says the family has chaired the company since 1896. AllSides says Lean Left; DNR -0.21 is just over the 0.20 'left' threshold."
+    },
+    {
+      "slug": "pbs-newshour",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "Produced by NewsHour Productions LLC, a subsidiary of the Washington PBS member station WETA, and distributed by PBS. Funded by corporate and foundation underwriters and viewer donations. Federal funding via the Corporation for Public Broadcasting ended in 2025.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Public Broadcasting Service).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/pbs-newshour-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/PBS_News_Hour",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://www.allsides.com/news-source/pbs-newshour-media-bias"
+      ],
+      "notes": "With CPB funding gone since 2025, 'public_broadcaster' vs 'nonprofit' is a judgement call. Wikipedia confirms CPB was no longer a sponsor from July 2025; the wider CPB defunding is from general knowledge, not from a cited source here."
+    },
+    {
+      "slug": "politico",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Owned since 2021 by Axel Springer SE, the German media group; after its 2025 split from KKR, Axel Springer's media business is almost entirely owned by CEO Mathias Döpfner and Friede Springer. Funded by Politico Pro subscriptions and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Politico).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/politico-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q3109740",
+        "https://en.wikipedia.org/wiki/Politico",
+        "https://www.axios.com/2024/09/19/axel-springer-kkr-break-up",
+        "https://germany.mom-gmr.org/en/owners/companies/company/axel-springer-verlag-112567/",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://www.allsides.com/news-source/politico-media-bias"
+      ],
+      "notes": "Wikidata lists both Capitol News Company and Axel Springer as owners; Capitol News Company is the Politico operating entity, Axel Springer the parent. Ignored the conflicting Wikidata 'political alignment' values per rules."
+    },
+    {
+      "slug": "politico-eu",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "European edition of Politico, based in Brussels. Launched in 2015 as a joint venture with Axel Springer, which bought all of Politico in 2021. After the 2024–25 split with KKR, Axel Springer's media business is held almost entirely by Friede Springer and Mathias Döpfner. Funded by subscriptions, advertising and events.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "BE",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q991826",
+        "https://en.wikipedia.org/wiki/Politico_Europe",
+        "https://www.axios.com/2024/09/19/axel-springer-kkr-break-up"
+      ],
+      "notes": "The Axel Springer/KKR split was announced in September 2024. I did not confirm the closing date. Politico (US) is on the perennial sources list, but Politico Europe has no separate wp_rsp row, so reliabilityLevel is null."
+    },
+    {
+      "slug": "premiumtimes",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Nigerian online newspaper launched in 2011 in Abuja, owned by the private company Premium Times Services Limited; co-founder Dapo Olorunyomi is publisher. Funded by advertising, subscriptions and grants. Its nonprofit arm, the Centre for Journalism Innovation and Development, receives foundation grants.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "NG",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Premium_Times",
+        "https://www.premiumtimesng.com/about",
+        "https://www.macfound.org/grantee/premium-times-centre-for-investigative-journalism-46007/"
+      ],
+      "notes": "Shareholders of Premium Times Services Limited are not public. Funding mix partly comes from a secondary summary; check the About page."
+    },
+    {
+      "slug": "propublica",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "American nonprofit investigative newsroom (ProPublica, Inc.) based in New York City. Funded by philanthropic donations from foundations and individuals. Stories are often co-published with news partners.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: ProPublica).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/propublica-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/ProPublica",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://www.allsides.com/news-source/propublica-media-bias"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "rappler",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Filipino online news site founded in 2012 by Maria Ressa and fellow journalists. Rappler Inc. is about 99% owned by Rappler Holdings Corporation, whose main shareholders are Dolphin Fire Group (Bitanga family), Maria Ressa, Hatchd Group and Benjamin So. It says it is 100% Filipino-owned.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Rappler).",
+        "countryContext": "PH",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Rappler",
+        "https://philippines.mom-gmr.org/en/owners/companies/detail/company/company/show/rappler-holdings-corporation/",
+        "https://business.inquirer.net/453375/real-estate-firm-to-become-rapplers-biggest-shareholder",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "Shareholding data is from Media Ownership Monitor and is several years old. In 2024 MRC Allied (Bitanga family) planned to take over Dolphin Fire's stake; I could not confirm whether that closed."
+    },
+    {
+      "slug": "restofworld",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "American nonprofit publication covering technology outside the West, founded in 2019 by Sophie Schmidt. Operated by Rest of World Media Inc., a 501(c)(3) private operating foundation. Funded mainly by Sophie Schmidt and the Schmidt family's philanthropy. No advertising.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Rest_of_World",
+        "https://restofworld.org/about/our-supporters/"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "scroll",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Owned by SCSN Pvt Ltd, part of Scroll Media (holding company incorporated in Delaware). Founded in 2014 by Samir Patil, with Naresh Fernandes as editor and Jennifer O'Brien. Early investors include the IPS Media Foundation, the Media Development Investment Fund and Omidyar Network. Funded by advertising, sponsored content and subscriptions.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "IN",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/Scroll.in"],
+      "notes": "Current shareholding not verified beyond early-stage investors listed on Wikipedia."
+    },
+    {
+      "slug": "sec",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "An independent agency of the US federal government, created by the Securities Exchange Act of 1934. Funded through congressional appropriations, offset by transaction fees collected from the securities industry.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/U.S._Securities_and_Exchange_Commission"],
+      "notes": "Fee-offset funding detail is general knowledge, not verified on a page this session."
+    },
+    {
+      "slug": "skynews",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "British news channel and news organisation owned by Sky Group, a division of Comcast. Funded by advertising and as part of Sky's commercial business.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Sky News).",
+        "countryContext": "GB",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score +0.03, Reuters Institute DNR 2022 (relative to UK audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q217228",
+        "https://en.wikipedia.org/wiki/Sky_News",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "spiegel-international",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "English edition of Der Spiegel. The SPIEGEL Group is 50.5% owned by its employees through a partnership (Mitarbeiter KG), 25.5% by Bertelsmann (formerly via Gruner + Jahr) and 24% by Rudolf Augstein's heirs. Funded by subscriptions, sales and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: Der Spiegel).",
+        "countryContext": "DE",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.04, Reuters Institute DNR 2022 (relative to German audiences)."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Der_Spiegel",
+        "https://germany.mom-gmr.org/en/owners/companies/company/spiegel-gruppe-112708/",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "DNR score is for German-language Spiegel audiences, applied to the English edition. Bertelsmann stake holder entity (RM Hamburg Holding vs RTL Deutschland after G+J merger) not confirmed."
+    },
+    {
+      "slug": "straitstimes",
+      "request": {
+        "fundingModel": "other",
+        "ownership": "Owned by SPH Media Trust, a company limited by guarantee formed in 2021 when Singapore Press Holdings spun off its media business. The Singapore government pledged up to S$900 million over five years from 2022, tied to reach targets. Also funded by subscriptions and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Straits Times).",
+        "countryContext": "SG",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q498921",
+        "https://en.wikipedia.org/wiki/The_Straits_Times",
+        "https://en.wikipedia.org/wiki/SPH_Media_Trust",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": "Wikidata says Singapore Press Holdings, which is stale: SPH Media Trust has owned it since December 2021. fundingModel 'other' because it is a not-for-profit guarantee company with large government funding; reviewer may prefer 'state' (some sources call it state-run) or 'nonprofit'."
+    },
+    {
+      "slug": "taipeitimes",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Published by the Liberty Times Group, a private Taiwanese media group founded by businessman Lin Rong-san (died 2015) and controlled by his family. Funded by advertising and sales.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "TW",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/Taipei_Times",
+        "https://en.wikipedia.org/wiki/Liberty_Times",
+        "https://en.wikipedia.org/wiki/Lin_Rong-San"
+      ],
+      "notes": "'Controlled by his family' after Lin Rong-san's death is not confirmed by a primary source."
+    },
+    {
+      "slug": "texastribune",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Nonprofit politics and public policy newsroom based in Austin, Texas. Funded by donors, foundations, members, sponsorships and events such as the Texas Tribune Festival.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/texas-tribune-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Texas_Tribune",
+        "https://www.allsides.com/news-source/texas-tribune-media-bias"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "the19th",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Independent nonprofit newsroom based in Austin, Texas, covering gender, politics and policy. Founded in 2020 by Emily Ramshaw and Amanda Zamora. Funded by philanthropy, members and sponsorships.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": ["https://en.wikipedia.org/wiki/The_19th"],
+      "notes": "Funding sources are stated generally; I did not check The 19th's own supporters page."
+    },
+    {
+      "slug": "theconversation",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "Not-for-profit network of news sites publishing articles by academics with professional editors, launched in Australia in 2011 (The Conversation Media Group). Each edition is an independent nonprofit or charity, funded by member universities and research bodies, grants, partners and reader donations.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Conversation).",
+        "countryContext": "AU",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Conversation_(website)",
+        "https://theconversation.com/au/who-we-are",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "thedailystar-bd",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Owned by Mediaworld Limited, in which the Transcom Group holds a major share. Mahfuz Anam is editor and publisher, and since 2023 chairman of Mediaworld. Founded in 1991 by Syed Mohammad Ali.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "BD",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q1586163",
+        "https://en.wikipedia.org/wiki/The_Daily_Star_(Bangladesh)"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "themarkup",
+      "request": {
+        "fundingModel": "nonprofit",
+        "ownership": "American nonprofit newsroom covering technology's impact on society, launched in 2020. Since 2024 part of CalMatters, a nonprofit California news organisation. Funded by philanthropy, including the MacArthur Foundation.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/markup-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Center (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Markup",
+        "https://themarkup.org/inside-the-markup/2024/04/18/the-markup-is-joining-forces-with-calmatters",
+        "https://calmatters.org/inside-the-newsroom/2024/04/calmatters-acquires-themarkup/",
+        "https://www.allsides.com/news-source/markup-media-bias"
+      ],
+      "notes": "The AllSides rating may predate the 2024 CalMatters acquisition."
+    },
+    {
+      "slug": "thenational",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "English-language daily in Abu Dhabi, founded in 2008 by state-owned Abu Dhabi Media. Since 2016 owned by International Media Investments (IMI), part of Abu Dhabi Media Investment Corporation, which is owned by Sheikh Mansour bin Zayed Al Nahyan, UAE Vice President and a member of the ruling family.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "AE",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_National_(Abu_Dhabi)",
+        "https://gulfnews.com/technology/media/international-media-investments-acquires-the-national-1.1930822",
+        "https://statemediamonitor.com/2026/06/international-media-investments-imi/"
+      ],
+      "notes": "Funding model is a judgement call. The owner is a private holding of a ruling-family member who is also UAE Vice President. Wikipedia calls the paper state-owned, and State Media Monitor classes IMI as state-managed. 'state' chosen; a reviewer may prefer 'other' or 'commercial'."
+    },
+    {
+      "slug": "theverge",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Operated by PMX Global, LLC, a unit of Penske Media Corporation, which bought The Verge with Vox Media's remaining brands in June 2026. Funded by advertising and subscriptions.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Verge).",
+        "countryContext": "US",
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://www.allsides.com/news-source/verge-media-bias",
+        "leanNote": "AllSides Media Bias Rating: Lean Left (US scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0."
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Verge",
+        "https://www.axios.com/2026/06/22/penske-vox-media",
+        "https://www.mediapost.com/publications/article/415925/penske-media-buys-the-verge-eater-sb-nation.html",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://www.allsides.com/news-source/verge-media-bias"
+      ],
+      "notes": "Wikidata evidence (Vox Media) is stale: Penske Media acquired The Verge in June 2026."
+    },
+    {
+      "slug": "unnews",
+      "request": {
+        "fundingModel": "state",
+        "ownership": "The official news service of the United Nations, run by the UN Department of Global Communications in the UN Secretariat. Funded from the UN regular budget, paid by member states.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": null,
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://en.wikipedia.org/wiki/United_Nations_Department_of_Global_Communications",
+        "https://news.un.org/en/about"
+      ],
+      "notes": ""
+    },
+    {
+      "slug": "washingtonpost",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "American daily newspaper owned since 2013 by Nash Holdings, a private holding company of Jeff Bezos, who bought it from the Graham family for US$250 million. Funded by subscriptions and advertising.",
+        "reliabilityLevel": "reliable",
+        "reliability": "Generally reliable (Wikipedia perennial sources: The Washington Post).",
+        "countryContext": "US",
+        "lean": "left",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.24, Reuters Institute DNR 2022 (relative to US audiences)."
+      },
+      "sources": [
+        "https://www.wikidata.org/wiki/Q166032",
+        "https://en.wikipedia.org/wiki/The_Washington_Post",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "DNR 2022 (left, -0.24) and AllSides (Lean Left) differ by one step. The rule prefers DNR. The audience data predates the Post's 2024–25 opinion-section changes."
+    },
+    {
+      "slug": "zdfheute",
+      "request": {
+        "fundingModel": "public_broadcaster",
+        "ownership": "News brand of ZDF, Germany's national public-service broadcaster, an independent public-law institution. Funded mainly by the household broadcasting fee (Rundfunkbeitrag), with limited advertising and sponsorship.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "DE",
+        "lean": "centre",
+        "leanEvidenceUrl": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
+        "leanNote": "Audience score -0.01, Reuters Institute DNR 2022 (relative to German audiences)."
+      },
+      "sources": [
+        "https://www.zdf.de/unternehmen/organisation/finanzen-110.html",
+        "https://en.wikipedia.org/wiki/ZDF",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time"
+      ],
+      "notes": "The DNR score is for the ZDF heute news brand, applied here to ZDFheute (zdfheute.de). Wikidata had no ownership row."
+    }
+  ]
+}

@@ -5,6 +5,7 @@ import {
   feedIds,
   importAssessmentEvidence,
   pollFeed,
+  publishAssessments,
   seedPublishers,
 } from '@dn/jobs'
 import {
@@ -29,7 +30,11 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p [--role admin|user]   (default admin)
   user:role --username u --role admin|user
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
-  assessments:import                Refresh publisher evidence from Wikidata and Wikipedia's perennial sources
+  assessments:import                Refresh publisher evidence from Wikidata, Wikipedia's perennial sources
+                                    and fixtures/lean-evidence.json
+  assessments:publish --username u [--dry-run]
+                                    Publish fixtures/assessments.json as admin u (skips unchanged ones;
+                                    run assessments:import first)
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
@@ -45,6 +50,7 @@ const { positionals, values } = parseArgs({
     role: { type: 'string' },
     variant: { type: 'string', default: 'rss' },
     'reset-graph': { type: 'boolean', default: false },
+    'dry-run': { type: 'boolean', default: false },
   },
 })
 
@@ -87,6 +93,16 @@ try {
       break
     case 'assessments:import':
       console.log(await importAssessmentEvidence(ctx, (msg) => console.log(`[assessments] ${msg}`)))
+      break
+    case 'assessments:publish':
+      if (!values.username) throw new Error('--username required (an admin)')
+      console.log(
+        await publishAssessments(
+          ctx,
+          { username: values.username, dryRun: values['dry-run'] },
+          (msg) => console.log(`[assessments] ${msg}`),
+        ),
+      )
       break
     case 'backfill:pause':
     case 'backfill:resume':

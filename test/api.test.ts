@@ -1,4 +1,5 @@
 import { schema } from '@dn/db'
+import { publishAssessments } from '@dn/jobs'
 import {
   apiErrorSchema,
   evidenceResponseSchema,
@@ -967,5 +968,35 @@ describe('political lean', () => {
     )
     expect(fr.oneSided.country).toBe('FR')
     expect(fr.oneSided.stories.map((s) => s.story.id)).not.toContain(target.id)
+  })
+})
+
+describe('assessments:publish', () => {
+  it('publishes the reviewed file once, then only what changed', async () => {
+    const ctx = { db: h.ctx.db, config: { fixtureDir: 'fixtures' } }
+    await createUserAccount(h.ctx.auth, {
+      username: 'notadmin',
+      password: 'notadmin-password',
+      role: 'user',
+    })
+    await expect(
+      publishAssessments(ctx, { username: 'notadmin', dryRun: true }),
+    ).rejects.toThrow(/not an admin/)
+
+    const dry = await publishAssessments(ctx, { username: 'contract', dryRun: true })
+    expect(dry.published).toBeGreaterThan(0)
+    const { rows: before } = await h.ctx.pool.query(
+      'select count(*)::int as n from publisher_assessment',
+    )
+
+    const first = await publishAssessments(ctx, { username: 'contract', dryRun: false })
+    expect(first.published).toBe(dry.published)
+    const { rows: after } = await h.ctx.pool.query(
+      'select count(*)::int as n from publisher_assessment',
+    )
+    expect(after[0].n - before[0].n).toBe(first.published)
+
+    const again = await publishAssessments(ctx, { username: 'contract', dryRun: false })
+    expect(again).toMatchObject({ published: 0, unchanged: first.published + first.unchanged })
   })
 })
