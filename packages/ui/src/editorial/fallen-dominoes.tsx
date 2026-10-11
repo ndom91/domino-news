@@ -36,12 +36,9 @@ export function MissingPiece({ className }: { className?: string }) {
         <g className="fill-accent-contrast">{half}</g>
         <g className="fill-band-text">{dots}</g>
         <line x1={0} x2={0} y1={-80} y2={80} strokeWidth={4} className="stroke-band-text" />
-        <rect
-          x={4}
-          y={-78}
-          width={153}
-          height={156}
-          rx={14}
+        {/* Square on the left, where it meets the divider; rounded like the piece on the right. */}
+        <path
+          d="M4 -78 H143 A14 14 0 0 1 157 -64 V64 A14 14 0 0 1 143 78 H4 Z"
           fill="none"
           strokeWidth={3}
           strokeDasharray="9 6"
