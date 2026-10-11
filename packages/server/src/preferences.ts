@@ -43,7 +43,7 @@ export async function savePreferences(
       target: schema.userPreference.userId,
       set: { ...columns, ...onboardedAt, updatedAt: new Date() },
     })
-  if (!next.rememberReads) {
+  if (update.rememberReads === false) {
     await db.delete(schema.readingEvent).where(eq(schema.readingEvent.userId, userId))
   }
   return next
@@ -68,15 +68,13 @@ export async function recordRead(db: Db, userId: string, storyId: string): Promi
   return true
 }
 
-export async function pruneReadingEvents(db: Db, days = READ_RETENTION_DAYS) {
-  const deleted = await db
+export async function pruneReaderHistory(db: Db, days = READ_RETENTION_DAYS) {
+  const reads = await db
     .delete(schema.readingEvent)
     .where(sql`${schema.readingEvent.readAt} < now() - make_interval(days => ${days})`)
-    .returning({ userId: schema.readingEvent.userId })
   // Taps on Stories long out of the For You window only matter for the weights they left.
   const taps = await db
     .delete(schema.userStoryFeedback)
     .where(sql`${schema.userStoryFeedback.createdAt} < now() - make_interval(days => ${days})`)
-    .returning({ userId: schema.userStoryFeedback.userId })
-  return { readingEvents: deleted.length, storyFeedback: taps.length }
+  return { readingEvents: reads.rowCount ?? 0, storyFeedback: taps.rowCount ?? 0 }
 }

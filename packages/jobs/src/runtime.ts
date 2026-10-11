@@ -3,7 +3,7 @@ import {
   PRIORITY,
   processOutboxBatch,
   pruneDeliveredEvents,
-  pruneReadingEvents,
+  pruneReaderHistory,
   QUEUES,
   rebuildSearchIndex,
 } from '@dn/server'
@@ -115,7 +115,7 @@ export async function startWorkers(ctx: WorkerContext) {
   })
   await boss.work(QUEUES.pruneEvents, async () => {
     const result = await pruneDeliveredEvents(ctx.db, ctx.config.eventRetentionDays)
-    const reads = await pruneReadingEvents(ctx.db)
+    const reads = await pruneReaderHistory(ctx.db)
     console.log(`[prune_delivered_events] ${JSON.stringify({ ...result, ...reads })}`)
   })
   await boss.work(QUEUES.rebuildSearch, async () => {

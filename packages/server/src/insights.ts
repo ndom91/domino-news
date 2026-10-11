@@ -47,14 +47,14 @@ async function missedDevelopments(db: Db, userId: string) {
       select story_id, read_at from reading_event
       where user_id = ${userId} and read_at > now() - make_interval(days => ${READ_RETENTION_DAYS})
     ),
-    followed as (
+    read_narratives as (
       select ns.narrative_id, max(r.read_at) as last_read
       from reads r join narrative_story ns on ns.story_id = r.story_id and ns.removed_at is null
       group by ns.narrative_id
     )
     select narrative.id as narrative_id, narrative.slug, narrative.title, s.id as story_id,
       ${narrativeDesk} as desk
-    from followed f
+    from read_narratives f
     join narrative on narrative.id = f.narrative_id
     join narrative_story ns on ns.narrative_id = f.narrative_id and ns.removed_at is null
     join story s on s.id = ns.story_id
@@ -72,12 +72,15 @@ async function missedDevelopments(db: Db, userId: string) {
     byNarrative.set(r.narrative_id, entry)
   }
   const top = [...byNarrative.values()].sort((a, b) => b.ids.length - a.ids.length).slice(0, 5)
-  return Promise.all(
-    top.map(async (t) => ({
-      narrative: t.narrative,
-      stories: await storyListItems(db, t.ids.slice(0, 3)),
-    })),
+  const stories = await storyListItems(
+    db,
+    top.flatMap((t) => t.ids.slice(0, 3)),
   )
+  const byId = new Map(stories.map((s) => [s.id, s]))
+  return top.map((t) => ({
+    narrative: t.narrative,
+    stories: t.ids.slice(0, 3).flatMap((id) => byId.get(id) ?? []),
+  }))
 }
 
 /** Regions and desks with many Stories this week that make up little of what you read. */

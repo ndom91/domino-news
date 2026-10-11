@@ -54,10 +54,8 @@ async function publishersByStory(db: Db, storyIds: string[]) {
 }
 
 /**
- * A Narrative's desk: the one most of its Stories share (ties go to the most recently
- * updated), so its colour doesn't flip each time a single Story updates. Used as a select column.
- * `narrative.id` is written out: drizzle renders the column unqualified in a query without
- * joins, and a bare "id" would bind to the subquery's own tables.
+ * A Narrative's desk: the one most of its Stories share (ties: most recently updated), so
+ * its colour is stable. Outer column written literally (see AGENTS.md).
  */
 export const narrativeDesk = sql<Desk | null>`(
   select s.desk from narrative_story ns join story s on s.id = ns.story_id

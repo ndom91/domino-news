@@ -1,35 +1,37 @@
 import { type Db, schema } from '@dn/db'
-import type { FollowList, FollowRequest } from '@dn/schemas'
+import type { FollowList, FollowRequest, FollowTargetType } from '@dn/schemas'
 import { and, eq, inArray } from 'drizzle-orm'
 import { DomainError } from './story-service.ts'
 
 /** Followed narratives and publishers, with display names. */
 export async function listFollows(db: Db, userId: string): Promise<FollowList> {
   const rows = await db.select().from(schema.userFollow).where(eq(schema.userFollow.userId, userId))
-  const ids = (type: 'narrative' | 'publisher') =>
+  const ids = (type: FollowTargetType) =>
     rows.filter((r) => r.targetType === type).map((r) => r.targetId)
   const narrativeIds = ids('narrative')
   const publisherIds = ids('publisher')
-  const narratives = narrativeIds.length
-    ? await db
-        .select({
-          id: schema.narrative.id,
-          slug: schema.narrative.slug,
-          title: schema.narrative.title,
-        })
-        .from(schema.narrative)
-        .where(inArray(schema.narrative.id, narrativeIds))
-    : []
-  const publishers = publisherIds.length
-    ? await db
-        .select({
-          id: schema.publisher.id,
-          slug: schema.publisher.slug,
-          title: schema.publisher.name,
-        })
-        .from(schema.publisher)
-        .where(inArray(schema.publisher.id, publisherIds))
-    : []
+  const [narratives, publishers] = await Promise.all([
+    narrativeIds.length
+      ? db
+          .select({
+            id: schema.narrative.id,
+            slug: schema.narrative.slug,
+            title: schema.narrative.title,
+          })
+          .from(schema.narrative)
+          .where(inArray(schema.narrative.id, narrativeIds))
+      : [],
+    publisherIds.length
+      ? db
+          .select({
+            id: schema.publisher.id,
+            slug: schema.publisher.slug,
+            title: schema.publisher.name,
+          })
+          .from(schema.publisher)
+          .where(inArray(schema.publisher.id, publisherIds))
+      : [],
+  ])
   return {
     items: [
       ...narratives.map((n) => ({ targetType: 'narrative' as const, ...n })),

@@ -1,4 +1,12 @@
-import { type Desk, EMBEDDING_DIMENSIONS, type Region, type Topic } from '@dn/schemas'
+import {
+  type Desk,
+  EMBEDDING_DIMENSIONS,
+  type FeedbackSignal,
+  type FollowTargetType,
+  type Region,
+  type SignalKind,
+  type Topic,
+} from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import {
   bigserial,
@@ -752,7 +760,7 @@ export const userPreference = pgTable('user_preference', {
   userId: text('user_id')
     .primaryKey()
     .references(() => authUser.id, { onDelete: 'cascade' }),
-  // For You picks (`REGIONS`, `DESKS`). Empty = no preference; they boost, never hide.
+  // For You picks (`REGIONS`, `DESKS`, `TOPICS`). Empty = no preference; they boost, never hide.
   regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
   desks: text('desks').array().$type<Desk[]>().notNull().default(sql`'{}'::text[]`),
   topics: text('topics').array().$type<Topic[]>().notNull().default(sql`'{}'::text[]`),
@@ -763,15 +771,14 @@ export const userPreference = pgTable('user_preference', {
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 
-// Weights learned from "more / less like this" on For You, per feature. Decayed on read
-// (halved every 30 days) and clamped, so a few taps can't swamp explicit picks.
+// Weights learned from For You taps, per feature; decayed on read and clamped.
 export const userSignal = pgTable(
   'user_signal',
   {
     userId: text('user_id')
       .notNull()
       .references(() => authUser.id, { onDelete: 'cascade' }),
-    kind: text('kind').$type<'topic' | 'desk' | 'region' | 'narrative'>().notNull(),
+    kind: text('kind').$type<SignalKind>().notNull(),
     key: text('key').notNull(),
     weight: real('weight').notNull(),
     updatedAt: ts('updated_at').notNull().defaultNow(),
@@ -780,7 +787,7 @@ export const userSignal = pgTable(
 )
 
 // The reader's last tap per Story: drives the pressed state, hides "less" Stories from
-// For You, and lets undo reverse exactly what was applied.
+// For You, and lets undo reverse it.
 export const userStoryFeedback = pgTable(
   'user_story_feedback',
   {
@@ -790,7 +797,7 @@ export const userStoryFeedback = pgTable(
     storyId: text('story_id')
       .notNull()
       .references(() => story.id, { onDelete: 'cascade' }),
-    signal: text('signal').$type<'more' | 'less'>().notNull(),
+    signal: text('signal').$type<FeedbackSignal>().notNull(),
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.storyId] })],
@@ -803,7 +810,7 @@ export const userFollow = pgTable(
     userId: text('user_id')
       .notNull()
       .references(() => authUser.id, { onDelete: 'cascade' }),
-    targetType: text('target_type').$type<'narrative' | 'publisher'>().notNull(),
+    targetType: text('target_type').$type<FollowTargetType>().notNull(),
     targetId: text('target_id').notNull(),
     createdAt: createdAt(),
   },

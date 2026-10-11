@@ -1,4 +1,5 @@
 import { type Db, schema } from '@dn/db'
+import { eq } from 'drizzle-orm'
 import type pg from 'pg'
 import { touchNarrative, touchStory } from './outbox.ts'
 
@@ -64,6 +65,9 @@ export async function resetIngestedData(
     : INGESTED_TABLES
   await pool.query(`truncate ${tables.join(', ')} cascade`)
   if (!opts.includeSourcesAndAccounts) {
+    // Follows and learned weights point at narratives without a foreign key.
+    await pool.query(`delete from user_follow where target_type = 'narrative'`)
+    await pool.query(`delete from user_signal where kind = 'narrative'`)
     await pool.query(
       'update feed set last_polled_at = null, last_status = null, last_error = null, etag = null, last_modified = null',
     )
@@ -85,6 +89,9 @@ export async function resetStoryGraph(db: Db) {
     for (const s of stories) await touchStory(tx, s.id, 'story.graph_reset', null)
     await tx.delete(schema.narrativeStory)
     await tx.delete(schema.narrative)
+    // Follows and learned weights point at narratives without a foreign key.
+    await tx.delete(schema.userFollow).where(eq(schema.userFollow.targetType, 'narrative'))
+    await tx.delete(schema.userSignal).where(eq(schema.userSignal.kind, 'narrative'))
     await tx.delete(schema.storyRelationship)
   })
 }

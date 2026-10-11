@@ -25,22 +25,41 @@ export async function getFrontPage(
   const now = opts.now ?? new Date()
   const since = new Date(now.getTime() - DAY_MS)
 
-  const [stats] = await db
-    .select({
-      stories: sql<number>`count(distinct ${schema.storyArticle.storyId})::int`,
-      publishers: sql<number>`count(distinct ${schema.article.publisherId})::int`,
-    })
-    .from(schema.storyArticle)
-    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
-    .innerJoin(schema.story, eq(schema.story.id, schema.storyArticle.storyId))
-    .where(
-      and(
-        isNull(schema.storyArticle.removedAt),
-        isNotNull(schema.story.publishedAt),
-        sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt}) >= ${since}`,
+  const [[stats], { lead, leadPosition }, { developing, narrativeCount }] = await Promise.all([
+    db
+      .select({
+        stories: sql<number>`count(distinct ${schema.storyArticle.storyId})::int`,
+        publishers: sql<number>`count(distinct ${schema.article.publisherId})::int`,
+      })
+      .from(schema.storyArticle)
+      .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+      .innerJoin(schema.story, eq(schema.story.id, schema.storyArticle.storyId))
+      .where(
+        and(
+          isNull(schema.storyArticle.removedAt),
+          isNotNull(schema.story.publishedAt),
+          sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt}) >= ${since}`,
+        ),
       ),
-    )
+    leadStory(db, opts, now),
+    developingSection(db),
+  ])
 
+  return {
+    editionAt: now.toISOString(),
+    stats: { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 },
+    lead,
+    leadPosition,
+    developing,
+    narrativeCount,
+  }
+}
+
+async function leadStory(
+  db: Db,
+  opts: { region?: Region; regions?: readonly Region[] },
+  now: Date,
+) {
   const candidates = await listStories(db, { limit: 30, region: opts.region })
   const leadItem = pickLead(
     candidates.items,
@@ -55,7 +74,10 @@ export async function getFrontPage(
     const ids = members.get(leadNarrative.id) ?? []
     leadPosition = { index: ids.indexOf(lead.id) + 1, total: ids.length }
   }
+  return { lead, leadPosition }
+}
 
+async function developingSection(db: Db) {
   const recent = await db
     .select({
       id: schema.narrative.id,
@@ -71,15 +93,7 @@ export async function getFrontPage(
     )
     .orderBy(desc(schema.narrative.updatedAt))
   const developing = await developingNarratives(db, recent.slice(0, DEVELOPING_COUNT))
-
-  return {
-    editionAt: now.toISOString(),
-    stats: { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 },
-    lead,
-    leadPosition,
-    developing,
-    narrativeCount: recent.length,
-  }
+  return { developing, narrativeCount: recent.length }
 }
 
 /** Published Story ids per Narrative, oldest first. */

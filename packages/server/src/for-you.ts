@@ -1,4 +1,4 @@
-import { type Db, schema } from '@dn/db'
+import type { Db } from '@dn/db'
 import {
   DESK_LABELS,
   type Desk,
@@ -10,8 +10,8 @@ import {
   TOPIC_LABELS,
   type Topic,
 } from '@dn/schemas'
-import { inArray, sql } from 'drizzle-orm'
-import { learnedWeights, signalLabel, storyFeedback } from './feedback.ts'
+import { sql } from 'drizzle-orm'
+import { learnedWeights, narrativeTitles, signalLabel, storyFeedback } from './feedback.ts'
 import { listFollows } from './follows.ts'
 import { getPreferences } from './preferences.ts'
 import { storyListItems } from './reader.ts'
@@ -26,7 +26,6 @@ const WEIGHT = { narrative: 3, topic: 2, publisher: 1, region: 1, desk: 1 } as c
 const LEARNED_REASON_MIN = 0.5
 
 type Candidate = {
-  id: string
   desk: Desk | null
   regions: Region[]
   topics: Topic[]
@@ -52,7 +51,7 @@ export function scoreStory(
     /** Decayed weights from "more / less like this", keyed "kind:key". */
     learned?: ReadonlyMap<string, number>
     /** Display names for learned features (topic, desk, region or narrative). */
-    learnedLabel?: (kind: 'topic' | 'desk' | 'region' | 'narrative', key: string) => string
+    learnedLabel?: (kind: SignalKind, key: string) => string
   },
 ): { score: number; reasons: ForYouReason[] } {
   const reasons: ForYouReason[] = []
@@ -93,7 +92,7 @@ export function scoreStory(
       ...c.regions.map((key) => ['region', key] as const),
       ...c.narrativeIds.map((key) => ['narrative', key] as const),
     ]
-    let best: { kind: (typeof features)[number][0]; key: string; weight: number } | null = null
+    let best: { kind: SignalKind; key: string; weight: number } | null = null
     for (const [kind, key] of features) {
       const weight = picks.learned.get(`${kind}:${key}`) ?? 0
       score += weight
@@ -114,25 +113,19 @@ export async function getForYou(
   userId: string,
   opts: { cursor?: string | null } = {},
 ): Promise<ForYouResponse> {
-  const [prefs, follows, learned, feedback] = await Promise.all([
+  const [prefs, follows, learned, feedback, rows] = await Promise.all([
     getPreferences(db, userId),
     listFollows(db, userId),
-    learnedWeights(db, userId),
+    learnedWeights(db, userId).then(async (signals) => ({
+      weights: new Map(signals.map((s) => [`${s.kind}:${s.key}`, s.weight])),
+      titles: await narrativeTitles(
+        db,
+        signals.filter((s) => s.kind === 'narrative').map((s) => s.key),
+      ),
+    })),
     storyFeedback(db, userId),
+    windowStories(db),
   ])
-  const learnedNarrativeIds = [...learned.keys()]
-    .filter((k) => k.startsWith('narrative:'))
-    .map((k) => k.slice('narrative:'.length))
-  const narrativeTitles = new Map(
-    learnedNarrativeIds.length
-      ? (
-          await db
-            .select({ id: schema.narrative.id, title: schema.narrative.title })
-            .from(schema.narrative)
-            .where(inArray(schema.narrative.id, learnedNarrativeIds))
-        ).map((n) => [n.id, n.title])
-      : [],
-  )
   const picks = {
     regions: prefs.regions,
     desks: prefs.desks,
@@ -143,39 +136,16 @@ export async function getForYou(
     publishers: new Map(
       follows.items.filter((f) => f.targetType === 'publisher').map((f) => [f.id, f.title]),
     ),
-    learned,
-    learnedLabel: (kind: SignalKind, key: string) => signalLabel(kind, key, narrativeTitles),
+    learned: learned.weights,
+    learnedLabel: (kind: SignalKind, key: string) => signalLabel(kind, key, learned.titles),
   }
   const personalised =
     prefs.regions.length +
       prefs.desks.length +
       prefs.topics.length +
       follows.items.length +
-      learned.size >
+      learned.weights.size >
     0
-
-  const { rows } = await db.execute<{
-    id: string
-    desk: Desk | null
-    regions: Region[]
-    topics: Topic[]
-    age_hours: number
-    outlets: number
-    narrative_ids: string[]
-    publisher_ids: string[]
-  }>(sql`
-    select s.id, s.desk, s.regions, s.topics,
-      extract(epoch from now() - s.last_updated_at) / 3600 as age_hours,
-      (select count(distinct a.publisher_id)::int from story_article sa
-        join article a on a.id = sa.article_id join publisher p on p.id = a.publisher_id
-        where sa.story_id = s.id and sa.removed_at is null and p.kind = 'newsroom') as outlets,
-      array(select ns.narrative_id from narrative_story ns
-        where ns.story_id = s.id and ns.removed_at is null) as narrative_ids,
-      array(select distinct a.publisher_id from story_article sa join article a on a.id = sa.article_id
-        where sa.story_id = s.id and sa.removed_at is null) as publisher_ids
-    from story s
-    where s.published_at is not null and s.merged_into_story_id is null
-      and s.last_updated_at > now() - make_interval(hours => ${WINDOW_HOURS})`)
 
   // "Less like this" Stories are hidden from the reader's feed until they undo it.
   const ranked = rows
@@ -184,7 +154,6 @@ export async function getForYou(
       id: r.id,
       ...scoreStory(
         {
-          id: r.id,
           desk: r.desk,
           regions: r.regions,
           topics: r.topics,
@@ -215,4 +184,31 @@ export async function getForYou(
       nextCursor: offset + PAGE_SIZE < ranked.length ? String(offset + PAGE_SIZE) : null,
     },
   }
+}
+
+/** Published Stories updated within the window, with what scoring needs. */
+async function windowStories(db: Db) {
+  const { rows } = await db.execute<{
+    id: string
+    desk: Desk | null
+    regions: Region[]
+    topics: Topic[]
+    age_hours: number
+    outlets: number
+    narrative_ids: string[]
+    publisher_ids: string[]
+  }>(sql`
+    select s.id, s.desk, s.regions, s.topics,
+      extract(epoch from now() - s.last_updated_at) / 3600 as age_hours,
+      (select count(distinct a.publisher_id)::int from story_article sa
+        join article a on a.id = sa.article_id join publisher p on p.id = a.publisher_id
+        where sa.story_id = s.id and sa.removed_at is null and p.kind = 'newsroom') as outlets,
+      array(select ns.narrative_id from narrative_story ns
+        where ns.story_id = s.id and ns.removed_at is null) as narrative_ids,
+      array(select distinct a.publisher_id from story_article sa join article a on a.id = sa.article_id
+        where sa.story_id = s.id and sa.removed_at is null) as publisher_ids
+    from story s
+    where s.published_at is not null and s.merged_into_story_id is null
+      and s.last_updated_at > now() - make_interval(hours => ${WINDOW_HOURS})`)
+  return rows
 }

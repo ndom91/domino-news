@@ -441,7 +441,6 @@ describe('For You scoring', () => {
     publishers: new Map([['pub_bbc', 'BBC News']]),
   }
   const story = (over: Partial<Parameters<typeof scoreStory>[0]> = {}) => ({
-    id: 's',
     desk: null,
     regions: [],
     topics: [],
@@ -490,7 +489,6 @@ describe('learned feedback weights', () => {
 
   it('move stories up or down and explain positive ones', () => {
     const base = {
-      id: 's',
       desk: 'science' as const,
       regions: [],
       topics: ['climate' as const],

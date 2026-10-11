@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { deskSchema } from './desks.ts'
+import { DESKS, deskSchema } from './desks.ts'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
-import { regionSchema } from './regions.ts'
-import { topicSchema } from './topics.ts'
+import { REGIONS, regionSchema } from './regions.ts'
+import { TOPICS, topicSchema } from './topics.ts'
 
 // Versioned HTTP contracts (/api/v1). Shared by web and future native clients;
 // keep this file free of DOM, Node and framework imports.
@@ -536,9 +536,9 @@ export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 
 export const userPreferencesSchema = z.object({
   // For You picks. Empty = no preference. They rank Stories up, never hide others.
-  regions: z.array(regionSchema).max(11),
-  desks: z.array(deskSchema).max(6),
-  topics: z.array(topicSchema).max(25),
+  regions: z.array(regionSchema).max(REGIONS.length),
+  desks: z.array(deskSchema).max(DESKS.length),
+  topics: z.array(topicSchema).max(TOPICS.length),
   rememberReads: z.boolean(),
   // True once the reader has finished or skipped onboarding. Only ever set to true.
   onboarded: z.boolean(),
@@ -560,7 +560,6 @@ export const followSchema = z.object({
   slug: z.string(),
   title: z.string(),
 })
-export type Follow = z.infer<typeof followSchema>
 export const followListSchema = z.object({ items: z.array(followSchema) })
 export type FollowList = z.infer<typeof followListSchema>
 
@@ -572,6 +571,10 @@ export const followRequestSchema = z.object({
 })
 export type FollowRequest = z.infer<typeof followRequestSchema>
 
+// A reader's tap on a For You card.
+export const feedbackSignalSchema = z.enum(['more', 'less'])
+export type FeedbackSignal = z.infer<typeof feedbackSignalSchema>
+
 // Why a Story is on your For You page, shown on the card.
 export const forYouReasonSchema = z.object({
   kind: z.enum(['narrative', 'publisher', 'topic', 'region', 'desk', 'learned']),
@@ -580,14 +583,14 @@ export const forYouReasonSchema = z.object({
 export type ForYouReason = z.infer<typeof forYouReasonSchema>
 
 export const forYouResponseSchema = z.object({
-  // False when the reader has no picks and no follows; the page then offers setup.
+  // False with no picks, follows or learned signals; the page then offers setup.
   personalised: z.boolean(),
   items: z.array(
     z.object({
       story: storyListItemSchema,
       reasons: z.array(forYouReasonSchema),
       // The reader's own tap on this card, if any ("less" cards are hidden).
-      feedback: z.enum(['more', 'less']).nullable(),
+      feedback: feedbackSignalSchema.nullable(),
     }),
   ),
   pageInfo: pageInfoSchema,
@@ -600,7 +603,7 @@ export type SignalKind = z.infer<typeof signalKindSchema>
 // null clears the tap and reverses what it applied (undo).
 export const feedbackRequestSchema = z.object({
   storyId: z.string().min(1),
-  signal: z.enum(['more', 'less']).nullable(),
+  signal: feedbackSignalSchema.nullable(),
 })
 export type FeedbackRequest = z.infer<typeof feedbackRequestSchema>
 

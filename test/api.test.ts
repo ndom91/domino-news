@@ -13,7 +13,7 @@ import {
   storyListResponseSchema,
   userPreferencesSchema,
 } from '@dn/schemas'
-import { createUserAccount } from '@dn/server'
+import { createUserAccount, setFeedback } from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedAndRunFixtures } from './drain.ts'
@@ -73,7 +73,10 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/for-you'],
       ['POST', '/api/v1/me/feedback'],
       ['GET', '/api/v1/me/signals'],
+      ['POST', '/api/v1/me/signals'],
       ['POST', '/api/v1/me/preferences'],
+      ['POST', '/api/v1/me/reads'],
+      ['GET', '/api/v1/me/insights'],
     ]
     for (const [method, path] of routes) {
       const res = await call(path, { method }, false)
@@ -464,6 +467,61 @@ describe('For You feedback', () => {
     expect(
       (await post('/api/v1/me/feedback', { storyId: 'sty_missing', signal: 'more' })).status,
     ).toBe(404)
+  })
+
+  it('does not nudge a narrative the Story has left', async () => {
+    const { rows } = await h.ctx.pool.query(
+      `select ns.story_id, ns.narrative_id from narrative_story ns join story s on s.id = ns.story_id
+       where ns.removed_at is null and s.published_at is not null limit 1`,
+    )
+    const { story_id: storyId, narrative_id: narrativeId } = rows[0]
+    const membership = 'where story_id = $1 and narrative_id = $2'
+    await h.ctx.pool.query(`update narrative_story set removed_at = now() ${membership}`, [
+      storyId,
+      narrativeId,
+    ])
+    await post('/api/v1/me/feedback', { storyId, signal: 'more' })
+    const { rows: nudged } = await h.ctx.pool.query(
+      `select 1 from user_signal where kind = 'narrative' and key = $1`,
+      [narrativeId],
+    )
+    expect(nudged).toEqual([])
+
+    await h.ctx.pool.query(`update narrative_story set removed_at = null ${membership}`, [
+      storyId,
+      narrativeId,
+    ])
+    await post('/api/v1/me/signals', { reset: true })
+  })
+
+  it('applies two quick taps one after the other', async () => {
+    const { rows } = await h.ctx.pool.query(
+      `select id from story where published_at is not null and desk is not null limit 1`,
+    )
+    const storyId = rows[0].id as string
+    const { rows: users } = await h.ctx.pool.query(
+      `select id from auth_user where username = 'contract'`,
+    )
+    const userId = users[0].id as string
+
+    await Promise.all([
+      setFeedback(h.ctx.db, userId, { storyId, signal: 'more' }),
+      setFeedback(h.ctx.db, userId, { storyId, signal: 'less' }),
+    ])
+    const { rows: taps } = await h.ctx.pool.query(
+      `select signal from user_story_feedback where user_id = $1 and story_id = $2`,
+      [userId, storyId],
+    )
+    const raced = await signals()
+
+    // Whichever tap ran second must leave exactly what that tap alone would.
+    await post('/api/v1/me/signals', { reset: true })
+    const alone = await setFeedback(h.ctx.db, userId, { storyId, signal: taps[0].signal })
+    // Rounded: weights decay a hair between the two reads.
+    const rounded = (items: typeof raced) =>
+      items.map((i) => ({ ...i, weight: Math.round(i.weight * 1000) / 1000 }))
+    expect(rounded(raced)).toEqual(rounded(alone.items))
+    await post('/api/v1/me/signals', { reset: true })
   })
 })
 
