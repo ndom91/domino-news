@@ -69,7 +69,9 @@ export function SourceBoard({
             <span
               aria-hidden
               className={cx(
-                'inline-grid h-6 w-8 place-items-center justify-self-end text-sm font-extrabold',
+                // Not inline-grid: with our `grid` spacing key, Tailwind also reads that as
+                // inline-size: var(--spacing-grid), which squeezes the box on small screens.
+                'grid h-6 w-8 place-items-center justify-self-end text-sm font-extrabold',
                 s.citation === null
                   ? onKey
                     ? 'shadow-[inset_0_0_0_2px_var(--dn-key-text)]'
