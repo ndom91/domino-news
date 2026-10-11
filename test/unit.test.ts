@@ -403,6 +403,15 @@ describe('assessment evidence parsing', () => {
 | ''[[Daily Mail]]''
 | {{WP:RSPSTATUS|d}}
 | {{WP:RSPUSES|dailymail.co.uk|mailonsunday.co.uk}}
+|- id="CBS News" class="s-gr"
+| ''[[CBS News]]''
+| {{WP:RSPSTATUS|gr}}
+| {{WP:RSPUSES|cbsnews.com}}
+|- class="s-gr" id="BBC"
+| [[BBC]]
+| {{WP:RSPSTATUS|gr}}
+| It excludes publications such as ''[[Collective (BBC)|Collective]]''.
+| {{WP:RSPUSES|bbc.co.uk|bbc.com}}
 |}`
     const entries = parseRspWikitext(wikitext)
     expect(entries).toEqual([
@@ -412,6 +421,9 @@ describe('assessment evidence parsing', () => {
         status: 'Deprecated',
         domains: ['dailymail.co.uk', 'mailonsunday.co.uk'],
       },
+      // Attributes in the other order, and a description that links another work.
+      { name: 'CBS News', status: 'Generally reliable', domains: ['cbsnews.com'] },
+      { name: 'BBC', status: 'Generally reliable', domains: ['bbc.co.uk', 'bbc.com'] },
     ])
     expect(findRspEntry(entries, 'www.nytimes.com')?.name).toBe('The New York Times')
     expect(findRspEntry(entries, 'mailonsunday.co.uk')?.status).toBe('Deprecated')

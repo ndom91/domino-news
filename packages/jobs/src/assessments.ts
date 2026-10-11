@@ -40,11 +40,18 @@ type RspEntry = { name: string; status: string; domains: string[] }
 /** Rows of the perennial sources table: status from the row class, domains from RSPUSES. */
 export function parseRspWikitext(wikitext: string): RspEntry[] {
   return wikitext.split(/^\|-/m).flatMap((row) => {
-    const status = row.match(/^\s*class="s-(\w+)/)?.[1]
+    // Attributes come in either order on the row's first line: class="s-gr" id="BBC".
+    const head = row.split('\n', 1)[0] ?? ''
+    const status = head.match(/class="s-(\w+)/)?.[1]
     const uses = row.match(/\{\{WP:RSPUSES\|([^}]*)\}\}/)?.[1]
     if (!status || !RSP_STATUS[status] || !uses) return []
+    // The id is the entry's name. Without one, take the first link, which the description
+    // can also contain (the BBC row mentions ''Collective''), so the id comes first.
     const name =
-      row.match(/''\[\[(?:[^\]|]*\|)?([^\]]+)\]\]''/)?.[1] ?? row.match(/\[\[([^\]|]+)/)?.[1] ?? ''
+      head.match(/id="([^"]+)"/)?.[1] ??
+      row.match(/''\[\[(?:[^\]|]*\|)?([^\]]+)\]\]''/)?.[1] ??
+      row.match(/\[\[([^\]|]+)/)?.[1] ??
+      ''
     return [{ name, status: RSP_STATUS[status], domains: uses.split('|').map((d) => d.trim()) }]
   })
 }
