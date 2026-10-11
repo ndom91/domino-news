@@ -1,12 +1,5 @@
 import { expect, type Page, test } from '@playwright/test'
-
-async function signIn(page: Page) {
-  await page.goto('/login', { waitUntil: 'networkidle' })
-  await page.getByLabel('Username').fill(process.env.DEV_USERNAME ?? '')
-  await page.getByLabel('Password').fill(process.env.DEV_PASSWORD ?? '')
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-  await page.waitForURL('/')
-}
+import { signIn } from './sign-in.ts'
 
 async function expectNoHorizontalOverflow(page: Page) {
   const overflow = await page.evaluate(

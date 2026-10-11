@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { signIn } from './sign-in.ts'
 
 // Full WebAuthn round trip with Chromium's virtual authenticator.
 test('register a passkey, sign out, and sign back in with it', async ({
@@ -23,11 +24,7 @@ test('register a passkey, sign out, and sign back in with it', async ({
     },
   })
 
-  await page.goto('/login', { waitUntil: 'networkidle' })
-  await page.getByLabel('Username').fill(process.env.DEV_USERNAME ?? '')
-  await page.getByLabel('Password').fill(process.env.DEV_PASSWORD ?? '')
-  await page.getByRole('button', { name: 'Sign in', exact: true }).click()
-  await page.waitForURL('/')
+  await signIn(page)
 
   await page.goto('/account', { waitUntil: 'networkidle' })
   const name = `e2e-${Date.now()}`
