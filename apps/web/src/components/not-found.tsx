@@ -7,14 +7,18 @@ import {
   StoryItemSkeleton,
 } from '@dn/ui'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { Link, useLocation } from '@tanstack/react-router'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { useState } from 'react'
 import { queries } from '../lib/api.ts'
 import { RouterLink } from './link.tsx'
 
 /** Global 404 (the root route's notFoundComponent): the missing piece in a chain of dominoes. */
 export function NotFoundPage() {
-  const { pathname } = useLocation()
+  // The resolved location, not the pending one: while "Back to the front page" loads, the
+  // path would otherwise flip to "/" and reflow the paragraph.
+  const pathname = useRouterState({
+    select: (s) => (s.resolvedLocation ?? s.location).pathname,
+  })
   // Bumping this re-keys the domino row, which knocks it over again.
   const [run, setRun] = useState(0)
 
