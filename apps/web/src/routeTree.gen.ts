@@ -14,6 +14,7 @@ import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlindspotRouteImport } from './routes/blindspot'
 import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as SearchRouteImport } from './routes/search'
 import { Route as NarrativesIndexRouteImport } from './routes/narratives/index'
@@ -47,6 +48,11 @@ const ForYouRoute = ForYouRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OpsRoute = OpsRouteImport.update({
@@ -101,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
@@ -117,6 +124,7 @@ export interface FileRoutesByTo {
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
@@ -134,6 +142,7 @@ export interface FileRoutesById {
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
   '/login': typeof LoginRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/search': typeof SearchRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
@@ -152,6 +161,7 @@ export interface FileRouteTypes {
     | '/blindspot'
     | '/for-you'
     | '/login'
+    | '/onboarding'
     | '/ops'
     | '/search'
     | '/narratives/$slug'
@@ -168,6 +178,7 @@ export interface FileRouteTypes {
     | '/blindspot'
     | '/for-you'
     | '/login'
+    | '/onboarding'
     | '/ops'
     | '/search'
     | '/narratives/$slug'
@@ -184,6 +195,7 @@ export interface FileRouteTypes {
     | '/blindspot'
     | '/for-you'
     | '/login'
+    | '/onboarding'
     | '/ops'
     | '/search'
     | '/narratives/$slug'
@@ -201,6 +213,7 @@ export interface RootRouteChildren {
   BlindspotRoute: typeof BlindspotRoute
   ForYouRoute: typeof ForYouRoute
   LoginRoute: typeof LoginRoute
+  OnboardingRoute: typeof OnboardingRoute
   OpsRoute: typeof OpsRoute
   SearchRoute: typeof SearchRoute
   NarrativesSlugRoute: typeof NarrativesSlugRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/ops': {
@@ -321,6 +341,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlindspotRoute: BlindspotRoute,
   ForYouRoute: ForYouRoute,
   LoginRoute: LoginRoute,
+  OnboardingRoute: OnboardingRoute,
   OpsRoute: OpsRoute,
   SearchRoute: SearchRoute,
   NarrativesSlugRoute: NarrativesSlugRoute,

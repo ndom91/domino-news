@@ -2,7 +2,6 @@ import type { ForYouReason } from '@dn/schemas'
 import { Button, Notice, Skeleton, StoryItem } from '@dn/ui'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { FeedPicks } from '../components/feed-picks.tsx'
 import { RouterLink } from '../components/link.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
@@ -50,12 +49,18 @@ function ForYouPage() {
         <>
           {!first?.personalised ? (
             <section className="mb-12 max-w-reading">
-              <p className="mb-6 text-md text-text-secondary">
+              <p className="text-md text-text-secondary">
                 Pick the regions, desks and topics you care about, and follow narratives or outlets
                 from their pages. Matching stories move to the top here. Nothing is hidden: big
                 stories still show, just lower down.
               </p>
-              <FeedPicks />
+              <Link
+                to="/account"
+                hash="your-feed"
+                className="mt-4 inline-block text-base font-bold underline decoration-accent decoration-2 underline-offset-4"
+              >
+                Set up your feed
+              </Link>
             </section>
           ) : null}
           <div className="grid grid-cols-3 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">

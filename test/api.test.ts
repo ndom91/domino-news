@@ -328,6 +328,26 @@ describe('preferences', () => {
     expect((await save(token, { regions: ['atlantis'] })).status).toBe(400)
     await save(token, { regions: [], desks: [] })
   })
+
+  it('marks onboarding done once, and never undoes it', async () => {
+    const prefs = async () =>
+      userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect((await prefs()).onboarded).toBe(false)
+    await save(token, { onboarded: true })
+    expect((await prefs()).onboarded).toBe(true)
+    const { rows } = await h.ctx.pool.query(
+      `select onboarded_at from user_preference p join auth_user u on u.id = p.user_id where u.username = 'contract'`,
+    )
+    const first = rows[0].onboarded_at
+    await save(token, { onboarded: false, regions: ['europe'] })
+    expect(await prefs()).toMatchObject({ onboarded: true, regions: ['europe'] })
+    await save(token, { onboarded: true })
+    const { rows: again } = await h.ctx.pool.query(
+      `select onboarded_at from user_preference p join auth_user u on u.id = p.user_id where u.username = 'contract'`,
+    )
+    expect(again[0].onboarded_at).toEqual(first)
+    await save(token, { regions: [] })
+  })
 })
 
 describe('For You', () => {

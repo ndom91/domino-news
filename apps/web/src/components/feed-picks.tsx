@@ -63,7 +63,14 @@ function Chips<T extends string>({
 }
 
 /** Regions, desks and topics that rank Stories up on For You. Each tap saves. */
-export function FeedPicks() {
+type Section = 'regions' | 'desks' | 'topics'
+
+export function FeedPicks({
+  sections = ['regions', 'desks', 'topics'],
+}: {
+  /** Which pickers to show; onboarding shows them a step at a time. */
+  sections?: readonly Section[]
+} = {}) {
   const queryClient = useQueryClient()
   const prefs = useQuery(queries.preferences())
   const save = useMutation(savePreferencesMutation(api, queryClient))
@@ -73,36 +80,42 @@ export function FeedPicks() {
   const busy = prefs.isPending || save.isPending
   return (
     <div className="flex flex-col gap-6">
-      <Chips
-        label="Regions"
-        options={REGIONS}
-        labelOf={(r: Region) => REGION_LABELS[r]}
-        selected={regions}
-        disabled={busy}
-        onToggle={(r) => save.mutate({ regions: toggle(regions, r) })}
-      />
-      <Chips
-        label="Desks"
-        options={DESKS}
-        labelOf={(d: Desk) => DESK_LABELS[d]}
-        selected={desks}
-        disabled={busy}
-        onToggle={(d) => save.mutate({ desks: toggle(desks, d) })}
-      />
-      <div className="flex flex-col gap-4">
-        <p className="type-label">Topics</p>
-        {DESKS.map((d) => (
-          <Chips
-            key={d}
-            label={DESK_LABELS[d]}
-            options={TOPICS.filter((t) => TOPIC_DESK[t] === d)}
-            labelOf={(t: Topic) => TOPIC_LABELS[t]}
-            selected={topics}
-            disabled={busy}
-            onToggle={(t) => save.mutate({ topics: toggle(topics, t) })}
-          />
-        ))}
-      </div>
+      {sections.includes('regions') ? (
+        <Chips
+          label="Regions"
+          options={REGIONS}
+          labelOf={(r: Region) => REGION_LABELS[r]}
+          selected={regions}
+          disabled={busy}
+          onToggle={(r) => save.mutate({ regions: toggle(regions, r) })}
+        />
+      ) : null}
+      {sections.includes('desks') ? (
+        <Chips
+          label="Desks"
+          options={DESKS}
+          labelOf={(d: Desk) => DESK_LABELS[d]}
+          selected={desks}
+          disabled={busy}
+          onToggle={(d) => save.mutate({ desks: toggle(desks, d) })}
+        />
+      ) : null}
+      {sections.includes('topics') ? (
+        <div className="flex flex-col gap-4">
+          <p className="type-label">Topics</p>
+          {DESKS.map((d) => (
+            <Chips
+              key={d}
+              label={DESK_LABELS[d]}
+              options={TOPICS.filter((t) => TOPIC_DESK[t] === d)}
+              labelOf={(t: Topic) => TOPIC_LABELS[t]}
+              selected={topics}
+              disabled={busy}
+              onToggle={(t) => save.mutate({ topics: toggle(topics, t) })}
+            />
+          ))}
+        </div>
+      ) : null}
       {save.isError ? (
         <Notice tone="error" title="Not saved">
           {save.error.message}

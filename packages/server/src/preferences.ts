@@ -12,6 +12,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
       desks: schema.userPreference.desks,
       topics: schema.userPreference.topics,
       rememberReads: schema.userPreference.rememberReads,
+      onboardedAt: schema.userPreference.onboardedAt,
     })
     .from(schema.userPreference)
     .where(eq(schema.userPreference.userId, userId))
@@ -20,6 +21,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
     desks: row?.desks ?? [],
     topics: row?.topics ?? [],
     rememberReads: row?.rememberReads ?? false,
+    onboarded: Boolean(row?.onboardedAt),
   }
 }
 
@@ -30,13 +32,16 @@ export async function savePreferences(
   update: UserPreferencesUpdate,
 ): Promise<UserPreferences> {
   const current = await getPreferences(db, userId)
-  const next = { ...current, ...update }
+  const next = { ...current, ...update, onboarded: current.onboarded || update.onboarded === true }
+  const { onboarded, ...columns } = next
+  // Onboarding is only ever marked done; finishing it again keeps the first timestamp.
+  const onboardedAt = onboarded && !current.onboarded ? { onboardedAt: new Date() } : {}
   await db
     .insert(schema.userPreference)
-    .values({ userId, ...next })
+    .values({ userId, ...columns, ...onboardedAt })
     .onConflictDoUpdate({
       target: schema.userPreference.userId,
-      set: { ...next, updatedAt: new Date() },
+      set: { ...columns, ...onboardedAt, updatedAt: new Date() },
     })
   if (!next.rememberReads) {
     await db.delete(schema.readingEvent).where(eq(schema.readingEvent.userId, userId))

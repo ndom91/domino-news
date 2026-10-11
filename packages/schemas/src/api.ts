@@ -540,6 +540,8 @@ export const userPreferencesSchema = z.object({
   desks: z.array(deskSchema).max(6),
   topics: z.array(topicSchema).max(25),
   rememberReads: z.boolean(),
+  // True once the reader has finished or skipped onboarding. Only ever set to true.
+  onboarded: z.boolean(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
 

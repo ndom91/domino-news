@@ -756,6 +756,8 @@ export const userPreference = pgTable('user_preference', {
   regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
   desks: text('desks').array().$type<Desk[]>().notNull().default(sql`'{}'::text[]`),
   topics: text('topics').array().$type<Topic[]>().notNull().default(sql`'{}'::text[]`),
+  // Set when the reader finishes or skips onboarding; null = show it on next visit.
+  onboardedAt: ts('onboarded_at'),
   // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
   rememberReads: boolean('remember_reads').notNull().default(false),
   updatedAt: ts('updated_at').notNull().defaultNow(),
