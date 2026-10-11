@@ -72,10 +72,9 @@ Fixture and model embeddings live in different vector spaces. When you switch mo
 ```bash
 GOOGLE_CLIENT_ID=...
 GOOGLE_CLIENT_SECRET=...
-GOOGLE_ALLOWED_EMAILS=you@gmail.com,someone@example.com
 ```
 
-Create an OAuth client (type "Web application") in Google Cloud and add `${BETTER_AUTH_URL}/api/auth/callback/google` as an authorised redirect URI. The login page shows the Google button only when both client values are set. Google can only create accounts for allowlisted emails. It does not link to existing `user:create` accounts.
+Create an OAuth client (type "Web application") in Google Cloud and add `${BETTER_AUTH_URL}/api/auth/callback/google` as an authorised redirect URI. The login page shows the Google button only when both client values are set. Any Google account can sign up. It does not link to existing `user:create` accounts.
 
 ### Live RSS
 
@@ -178,7 +177,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Publisher coverage:** publisher stats (stories, first to report), a who-covered-what matrix, and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, Story, Narrative (timeline), Blindspot, publishers, search, pipeline and account pages. Desktop-first and checked at 375px; below 1024px the header nav becomes a section menu.
-- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except Google for allowlisted emails. An `admin` role gates the Pipeline page and assessment review.
+- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except through Google. An `admin` role gates the Pipeline page and assessment review.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited

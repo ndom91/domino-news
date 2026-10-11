@@ -2,7 +2,6 @@ import { passkey } from '@better-auth/passkey'
 import { type Db, schema } from '@dn/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { APIError } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { eq } from 'drizzle-orm'
@@ -12,8 +11,8 @@ import { eq } from 'drizzle-orm'
  * sign-in, from the account page). Bearer tokens let API clients (and later the Expo app)
  * authenticate without cookies.
  * Public sign-up is disabled: create accounts with `pnpm cli user:create`.
- * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). It may only create
- * accounts for emails in GOOGLE_ALLOWED_EMAILS, because disableSignUp doesn't cover OAuth.
+ * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). disableSignUp doesn't
+ * cover OAuth, so any Google account can sign up.
  * Roles: CLI-created accounts are admins by default; Google sign-ups are plain users.
  */
 export function createAuth(db: Db, env = process.env) {
@@ -25,12 +24,6 @@ export function createAuth(db: Db, env = process.env) {
   const ipAddressHeaders = env.AUTH_IP_HEADERS?.split(',')
     .map((header) => header.trim().toLowerCase())
     .filter(Boolean)
-  const googleAllowedEmails = new Set(
-    (env.GOOGLE_ALLOWED_EMAILS ?? '')
-      .split(',')
-      .map((email) => email.trim().toLowerCase())
-      .filter(Boolean),
-  )
   return betterAuth({
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
@@ -49,19 +42,6 @@ export function createAuth(db: Db, env = process.env) {
       googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {},
-    databaseHooks: {
-      user: {
-        create: {
-          // Only OAuth callbacks are gated; the CLI creates users without a request context.
-          before: async (user, ctx) => {
-            if (!ctx?.path.startsWith('/callback/')) return
-            if (!googleAllowedEmails.has(user.email.toLowerCase())) {
-              throw new APIError('FORBIDDEN', { message: 'Email is not allowed to sign in' })
-            }
-          },
-        },
-      },
-    },
     // input: false keeps clients from setting their own role at sign-up or via update-user.
     user: { additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } } },
     session: { expiresIn: 60 * 60 * 24 * 30 },
