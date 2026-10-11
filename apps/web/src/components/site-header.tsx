@@ -1,4 +1,4 @@
-import { clockTime, longDate } from '@dn/domain'
+import { clockTime, longDate, plural } from '@dn/domain'
 import { Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
@@ -18,6 +18,9 @@ const NAV = [
   { to: '/ops', label: 'Pipeline', exact: false, adminOnly: true },
 ] as const
 
+const navFor = (user: { isAdmin: boolean }) =>
+  NAV.filter((item) => user.isAdmin || !('adminOnly' in item))
+
 /** Always-dark strip: edition date and time, and how much was reported in the last 24 hours. */
 function Strip() {
   // Shared with the front page loader; other pages fill it in after load.
@@ -32,9 +35,8 @@ function Strip() {
         </span>
         {front ? (
           <span className="max-md:hidden">
-            {front.stats.stories} {front.stats.stories === 1 ? 'story' : 'stories'} from{' '}
-            {front.stats.publishers} {front.stats.publishers === 1 ? 'publisher' : 'publishers'} in
-            the last 24 hours
+            {plural(front.stats.stories, 'story', 'stories')} from{' '}
+            {plural(front.stats.publishers, 'publisher')} in the last 24 hours
           </span>
         ) : null}
       </div>
@@ -59,7 +61,7 @@ export function SiteHeader({
             aria-label="Primary"
             className="ml-auto flex gap-2 text-base font-semibold [scrollbar-width:none] max-md:order-last max-md:-ml-2.5 max-md:w-full max-md:gap-1 max-md:overflow-x-auto"
           >
-            {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
+            {navFor(user).map((item) => (
               <Link
                 key={item.to}
                 to={item.to}
@@ -74,7 +76,7 @@ export function SiteHeader({
               </Link>
             ))}
           </nav>
-          {/* After the nav on wide screens; beside the masthead on narrow ones (nav wraps below). */}
+          {/* On narrow screens the nav wraps below, leaving this beside the masthead. */}
           <UserMenu user={user} />
         </header>
       </div>
@@ -118,12 +120,11 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
 }
 
 /**
- * One toggle: the icon shows the current theme and the new theme grows out of it. The menu
- * stays open so the flip is visible. Menu content only mounts on the client, so reading the
- * DOM here is safe.
+ * The icon shows the current theme; the new one grows out of it, with the menu kept open.
+ * Menu content only mounts on the client, so currentTheme() can read the DOM.
  */
 function ThemeItem() {
-  const [theme, setThemeState] = useState(currentTheme)
+  const [theme, setCurrent] = useState(currentTheme)
   const icon = useRef<HTMLSpanElement>(null)
   const next: Theme = theme === 'dark' ? 'light' : 'dark'
   return (
@@ -131,8 +132,8 @@ function ThemeItem() {
       closeOnClick={false}
       aria-label={`Switch to ${next} theme`}
       onClick={() => {
-        // Flip the icon first so the new snapshot already shows it.
-        flushSync(() => setThemeState(next))
+        // Flip the icon first so the transition's new snapshot shows it.
+        flushSync(() => setCurrent(next))
         switchTheme(next, icon.current)
       }}
     >
@@ -166,7 +167,7 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
           </div>
           <nav aria-label="Footer" className="border-t-2 border-band-text pt-3">
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-base font-semibold">
-              {NAV.filter((item) => user.isAdmin || !('adminOnly' in item)).map((item) => (
+              {navFor(user).map((item) => (
                 <li key={item.to}>
                   <Link to={item.to} className="hover:underline underline-offset-3">
                     {item.label}

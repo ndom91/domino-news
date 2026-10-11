@@ -1,3 +1,4 @@
+import { plural } from '@dn/domain'
 import type { StoryDetail } from '@dn/schemas'
 import { useState } from 'react'
 import { cx } from '../cx.ts'
@@ -10,7 +11,7 @@ import { SourceTrace } from './source-trace.tsx'
 import { Timestamp } from './time.tsx'
 
 const LONG_TITLE = 60 // characters
-const BOARD_ROWS = 8 // latest reports on the board; the rest are on the Story page
+const BOARD_ROWS = 8 // latest reports; the Story page lists them all
 
 /**
  * The lead Story as a block in its Narrative's colour: display headline, cited summary with a
@@ -33,36 +34,37 @@ export function HeroStory({
   linkHeadline?: boolean
   Link?: LinkLike
 }) {
-  // Report hovered in the trace or on the board; each highlights it in the other.
+  // Hovering a report in the trace or on the board highlights it in both.
   const [activeSource, setActiveSource] = useState<string | null>(null)
   const narrative = story.narratives[0]
   const Heading = headingLevel
   const reportedAt = (s: StoryDetail['sources'][number]) => s.publishedAt ?? s.observedAt
-  const board = [...story.sources]
-    .sort((a, b) => reportedAt(a).localeCompare(reportedAt(b)))
-    .slice(-BOARD_ROWS)
-  const onBoard = new Set(board.map((s) => s.articleId))
-  // Markers jump to the board row; a report too old for the board links to the article itself.
-  const cited: Map<number, CitedSource> = new Map(
-    story.sources.flatMap((s) =>
-      s.citation
-        ? [
-            [
-              s.citation,
-              {
-                outlet: s.publisher.name,
-                href: onBoard.has(s.articleId) ? `#source-${s.articleId}` : s.url,
-              },
-            ],
-          ]
-        : [],
-    ),
-  )
-  const citedCount = story.sources.filter((s) => s.citedInSummary).length
-  const times = story.sources.map((s) => Date.parse(reportedAt(s)))
-  const spanHours = times.length
-    ? Math.round((Math.max(...times) - Math.min(...times)) / 3_600_000)
-    : 0
+  const reports = story.sources
+    .map((s) => ({
+      id: s.articleId,
+      outlet: s.publisher.name,
+      at: reportedAt(s),
+      href: s.url,
+      citation: s.citedInSummary ? (s.citation ?? 0) : null,
+    }))
+    .sort((a, b) => a.at.localeCompare(b.at))
+  const board = reports.slice(-BOARD_ROWS)
+  const onBoard = new Set(board.map((r) => r.id))
+  // Markers jump to the board row, or to the article if it's too old for the board.
+  const cited = new Map<number, CitedSource>()
+  for (const r of reports) {
+    if (r.citation) {
+      cited.set(r.citation, {
+        outlet: r.outlet,
+        href: onBoard.has(r.id) ? `#source-${r.id}` : r.href,
+      })
+    }
+  }
+  const citedCount = reports.filter((r) => r.citation !== null).length
+  const first = reports[0]
+  const last = reports.at(-1)
+  const spanHours =
+    first && last ? Math.round((Date.parse(last.at) - Date.parse(first.at)) / 3_600_000) : 0
   const outlets = story.sources.length
   // Long titles step down a size. The front-page lead shares the Story page's scale: the
   // largest display size crowded out the summary and the source board beside it.
@@ -149,8 +151,8 @@ export function HeroStory({
         <h2 className="mb-3 flex justify-between gap-3 type-label">
           Who reported it
           <span className="font-medium tracking-normal normal-case">
-            {outlets} {outlets === 1 ? 'publisher' : 'publishers'}
-            {spanHours > 0 ? ` · ${spanHours} ${spanHours === 1 ? 'hour' : 'hours'}` : ''}
+            {plural(outlets, 'publisher')}
+            {spanHours > 0 ? ` · ${plural(spanHours, 'hour')}` : ''}
           </span>
         </h2>
         <SourceTrace
@@ -159,28 +161,12 @@ export function HeroStory({
           now={now}
           active={activeSource}
           onActiveChange={setActiveSource}
-          sources={story.sources.map((s) => ({
-            id: s.articleId,
-            outlet: s.publisher.name,
-            at: reportedAt(s),
-            citation: s.citedInSummary ? (s.citation ?? 0) : null,
-          }))}
+          sources={reports}
         />
-        <SourceBoard
-          onKey
-          active={activeSource}
-          onActiveChange={setActiveSource}
-          sources={board.map((s) => ({
-            id: s.articleId,
-            outlet: s.publisher.name,
-            at: reportedAt(s),
-            href: s.url,
-            citation: s.citedInSummary ? (s.citation ?? 0) : null,
-          }))}
-        />
+        <SourceBoard onKey active={activeSource} onActiveChange={setActiveSource} sources={board} />
         {outlets > board.length ? (
           <p className="mt-3 text-sm font-semibold">
-            {/* On the Story page the full list is further down; elsewhere, go to the Story. */}
+            {/* On the Story page the full list is further down. */}
             {linkHeadline ? (
               <Link to={`/stories/${story.slug}`} className="underline underline-offset-3">
                 See all {outlets} reports

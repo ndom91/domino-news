@@ -13,8 +13,7 @@ export interface BoardSource {
 /**
  * "Who reported it": one row per outlet in publishing order. Time, outlet (links to the
  * original article) and a marker: solid box with the citation number, or an outline box if
- * only reported. The accessible counterpart of the Source Trace; `active` highlights the
- * row hovered there, and hovering a row reports back through `onActiveChange`.
+ * only reported. The accessible counterpart of the Source Trace, sharing its hover state.
  */
 export function SourceBoard({
   sources,
@@ -40,9 +39,9 @@ export function SourceBoard({
             onPointerEnter={() => onActiveChange?.(s.id)}
             onPointerLeave={() => onActiveChange?.(null)}
             className={cx(
-              // Citation markers jump here; the outline shows which row was the target.
-              // The tint is a pseudo-element so only its opacity animates.
-              'relative isolate before:pointer-events-none before:absolute before:inset-0 before:-z-10 before:bg-current/12 before:opacity-0 before:transition-opacity before:duration-[var(--dn-duration-base)] data-active:before:opacity-100',
+              // Hover tint on a pseudo-element, so only opacity animates. The outline marks
+              // the row a citation marker jumped to.
+              'relative isolate before:absolute before:inset-0 before:-z-10 before:bg-current/12 before:opacity-0 before:transition-opacity before:duration-(--dn-duration-base) data-active:before:opacity-100',
               'grid min-h-12 scroll-mt-24 grid-cols-[4.75rem_minmax(0,1fr)_2.5rem] items-center border-b target:outline-2 target:outline-current max-md:grid-cols-[4rem_minmax(0,1fr)_2.5rem]',
               onKey ? 'border-key-text/30' : 'border-border',
             )}

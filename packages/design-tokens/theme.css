@@ -283,6 +283,7 @@
     font-variant-numeric: tabular-nums;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+    scrollbar-color: var(--dn-accent) transparent;
   }
 
   :focus-visible {
@@ -290,17 +291,12 @@
     outline-offset: 2px;
   }
 
-  /* Thin scrollbars: the masthead orange on no track. scrollbar-color inherits;
-     scrollbar-width doesn't, so it goes on every scroller. */
-  html {
-    scrollbar-color: var(--dn-accent) transparent;
-  }
-
+  /* Thin orange scrollbars. scrollbar-width doesn't inherit, so it goes on every element. */
   * {
     scrollbar-width: thin;
   }
 
-  /* Safari ignores scrollbar-color; browsers that support it ignore these. */
+  /* For Safari, which ignores scrollbar-color. */
   ::-webkit-scrollbar {
     width: 10px;
     height: 10px;
@@ -316,14 +312,13 @@
     background: transparent;
   }
 
-  /* The masthead orange, with dark text (5.7:1), so selections read on every key fill. */
+  /* Orange with dark text (5.7:1): readable on every key fill. */
   ::selection {
     background: var(--dn-accent);
     color: var(--dn-accent-contrast);
   }
 
-  /* Tailwind v4's preflight gives buttons the default cursor; anything clickable should show
-     the pointer. A utility like cursor-not-allowed still wins. */
+  /* Preflight resets the button cursor; restore the pointer. Utilities still win. */
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   select:not(:disabled),

@@ -47,8 +47,8 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
 const menuItemBase =
   'flex min-h-tap w-full cursor-pointer items-center px-4 text-base font-semibold outline-none select-none data-highlighted:text-canvas'
 const menuItemClass = `${menuItemBase} data-highlighted:bg-text`
-// Same colours as the danger Button: error text, error fill when highlighted. Separate strings,
-// because both highlight fills on one element would leave the winner to CSS order.
+// Matches the danger Button. Separate strings: two highlight fills on one element would
+// leave the winner to CSS order.
 const dangerItemClass = `${menuItemBase} text-error data-highlighted:bg-error`
 
 /** Click/keyboard menu of actions, anchored to its trigger. Arrow keys move between items. */
@@ -75,7 +75,6 @@ export function Menu({
   )
 }
 
-/** Menu action. */
 export function MenuItem({
   children,
   onClick,
@@ -85,10 +84,9 @@ export function MenuItem({
 }: {
   children: ReactNode
   onClick: () => void
-  /** "danger" for actions like Sign out, styled like the danger Button. */
+  /** Styled like the danger Button, e.g. Sign out. */
   tone?: 'danger'
-
-  /** false for toggles whose new state should stay visible in the open menu. */
+  /** false for toggles, so the new state stays visible. */
   closeOnClick?: boolean
   'aria-label'?: string
 }) {

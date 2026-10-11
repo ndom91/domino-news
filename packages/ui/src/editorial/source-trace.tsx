@@ -21,8 +21,7 @@ const CELLS = 24
  * Hour-cell Source Trace: 24 cells ending at `now` (or at the latest report if everything is
  * older). Each outlet is a mark in the hour it reported: filled if cited, ring if only reported.
  * Shape carries the meaning, not colour. `onKey` switches to the hero's key-text colour.
- * Hovering a mark enlarges it, dims the rest and shows its tooltip. Pass `active` and
- * `onActiveChange` to share the hovered report with another view (the hero's source board).
+ * Hovering a mark enlarges it and dims the rest; `active`/`onActiveChange` share that state.
  */
 export function SourceTrace({
   sources,
@@ -40,7 +39,6 @@ export function SourceTrace({
   now: string
   width?: number
   onKey?: boolean
-  /** Hovered report id, when controlled. */
   active?: string | null
   onActiveChange?: (id: string | null) => void
   className?: string
@@ -110,7 +108,7 @@ export function SourceTrace({
                 onPointerLeave={() => setActive(null)}
                 className="cursor-default"
               >
-                {/* Invisible hit area: the mark itself is only ~7px across. */}
+                {/* Cell-sized hit area: the mark is only ~7px across. */}
                 <rect x={i * cw} y={y - rh / 2} width={cw} height={rh} fill="transparent" />
                 <circle
                   cx={x}
@@ -118,7 +116,7 @@ export function SourceTrace({
                   r={r}
                   strokeWidth={s.citation === null ? 1.5 : 0}
                   className={cx(
-                    'origin-center transition-[scale,opacity] duration-[var(--dn-duration-base)] ease-(--dn-ease-out) [transform-box:fill-box]',
+                    'origin-center transition-[scale,opacity] duration-(--dn-duration-base) ease-(--dn-ease-out) [transform-box:fill-box]',
                     current === s.id && 'scale-150',
                     current && current !== s.id && 'opacity-35',
                     s.citation === null

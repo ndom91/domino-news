@@ -12,10 +12,7 @@ function publishers(mentions: Mention[]) {
   return [...seen.values()]
 }
 
-/**
- * Who says what: each claim with one meta line: when it was first reported, then the
- * publishers carrying it (truncated to fit). Disputes are called out; they change the meaning.
- */
+/** Each claim with one meta line: first reported, then who carries it. Disputes stand out. */
 export function ClaimList({
   claims,
   Link = DefaultLink,
