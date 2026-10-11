@@ -116,7 +116,7 @@ export function StoryItem({
             citation: t.citation,
           }))}
           now={now}
-          width={wide ? 336 : 216}
+          width="fill"
         />
         <span>
           {plural(story.sourceCount, 'publisher')} · {cited} cited

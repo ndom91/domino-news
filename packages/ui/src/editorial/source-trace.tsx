@@ -1,5 +1,5 @@
 import { clockTime, formatDate, formatDateTime, plural } from '@dn/domain'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cx } from '../cx.ts'
 import { Tooltip } from '../primitives/overlay.tsx'
 
@@ -27,7 +27,7 @@ export function SourceTrace({
   sources,
   variant = 'compact',
   now,
-  width = variant === 'full' ? 492 : 216,
+  width: widthProp = variant === 'full' ? 492 : 216,
   onKey = false,
   active,
   onActiveChange,
@@ -37,13 +37,30 @@ export function SourceTrace({
   variant?: 'compact' | 'full'
   /** Window end; pass a server-provided time so SSR and the client agree. */
   now: string
-  width?: number
+  /** Pixels, or 'fill' to span the container (redrawn on resize; cells widen, marks don't). */
+  width?: number | 'fill'
   onKey?: boolean
   active?: string | null
   onActiveChange?: (id: string | null) => void
   className?: string
 }) {
   const [ownActive, setOwnActive] = useState<string | null>(null)
+  const fill = widthProp === 'fill'
+  const box = useRef<HTMLDivElement>(null)
+  // Server render (and the first client paint) use the compact width until measured.
+  const [measured, setMeasured] = useState<number | null>(null)
+  useEffect(() => {
+    const el = box.current
+    if (!fill || !el) return
+    // Measure now, not only on the observer's first callback (a frame later).
+    setMeasured(Math.floor(el.clientWidth))
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) setMeasured(Math.floor(entry.contentRect.width))
+    })
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [fill])
+  const width = fill ? (measured ?? 216) : widthProp
   const current = active === undefined ? ownActive : active
   const setActive = onActiveChange ?? setOwnActive
   // No reports means no time window to draw (Math.max() of nothing is -Infinity).
@@ -73,7 +90,7 @@ export function SourceTrace({
     return stale ? `${formatDate(at)} ${clockTime(at)}` : clockTime(at)
   }
 
-  return (
+  const svg = (
     <svg
       viewBox={`0 0 ${width} ${H}`}
       width={width}
@@ -147,5 +164,12 @@ export function SourceTrace({
           ))
         : null}
     </svg>
+  )
+  return fill ? (
+    <div ref={box} className="w-full">
+      {svg}
+    </div>
+  ) : (
+    svg
   )
 }
