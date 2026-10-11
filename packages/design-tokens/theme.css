@@ -106,7 +106,7 @@
   --spacing: 0.25rem;
   --spacing-tap: var(--dn-tap-min);
   --spacing-gutter: var(--dn-gutter);
-  --spacing-grid: var(--dn-grid-gap);
+  --spacing-column: var(--dn-grid-gap);
   --spacing-strip: var(--dn-strip-height);
   --spacing-bar: var(--dn-story-bar-height);
 

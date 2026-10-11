@@ -79,7 +79,7 @@ function InsightSections({ data }: { data: Insights }) {
               <p className="mt-1 mb-5 type-meta">
                 {plural(m.stories.length, 'new development')} since you last read this narrative
               </p>
-              <div className="grid grid-cols-3 gap-x-grid gap-y-10 max-lg:grid-cols-2 max-md:grid-cols-1">
+              <div className="grid grid-cols-3 gap-x-column gap-y-10 max-lg:grid-cols-2 max-md:grid-cols-1">
                 {m.stories.map((story) => (
                   <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
                 ))}

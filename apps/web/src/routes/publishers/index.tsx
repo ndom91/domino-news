@@ -74,7 +74,7 @@ function PublishersPage() {
                 {plural(group.items.length, 'publisher')}
               </span>
             </h2>
-            <ul className="grid grid-cols-4 gap-x-grid gap-y-8 max-lg:grid-cols-2 max-sm:grid-cols-1">
+            <ul className="grid grid-cols-4 gap-x-column gap-y-8 max-lg:grid-cols-2 max-sm:grid-cols-1">
               {group.items.map((p) => (
                 <li key={p.id}>
                   <PublisherCard publisher={p} />

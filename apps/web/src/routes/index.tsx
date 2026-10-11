@@ -62,7 +62,7 @@ function DaySections({ stories, now }: { stories: StoryListItem[]; now: string }
 
 function StoryGrid({ stories, now }: { stories: StoryListItem[]; now: string }) {
   return (
-    <div className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+    <div className="grid grid-cols-4 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
       {stories.map((story, i) => (
         <StoryItem
           key={story.id}
@@ -178,7 +178,7 @@ function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
           </Link>
         }
       />
-      <section className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+      <section className="grid grid-cols-4 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {items.map(({ story }) => (
           <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
         ))}
@@ -197,7 +197,7 @@ function FeedSkeleton() {
     >
       <div className="mt-8 h-96 bg-sunken" />
       <SectionHeader title="Latest" />
-      <div className="grid grid-cols-4 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+      <div className="grid grid-cols-4 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         <StoryItemSkeleton size="wide" />
         <StoryItemSkeleton size="wide" />
         <StoryItemSkeleton />

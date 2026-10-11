@@ -63,7 +63,7 @@ function ForYouPage() {
               </Link>
             </section>
           ) : null}
-          <div className="grid grid-cols-3 gap-x-grid gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+          <div className="grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
             {items.map(({ story, reasons }) => (
               <div key={story.id} className="flex flex-col gap-2">
                 <StoryItem story={story} now={now} Link={RouterLink} />

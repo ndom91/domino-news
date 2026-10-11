@@ -104,6 +104,7 @@ Follow these for any UI work in `apps/web` and `packages/ui`. They come from the
 - Use the `@dn/ui` primitives (`Button`, `TextInput`, `Popover`, `Menu`, `Tooltip`, `ConfirmDialog`, `Notice`) and the type roles (`type-label`, `type-meta`, `type-section` …) before writing new markup or raw text sizes.
 - Colours come from tokens only. On a Narrative or desk fill use `key-fill`. It also switches the focus ring to a colour that stays visible on the fill.
 - For muted text on a fill, use a solid token (`text-key-text-muted`). Never use `opacity-*`, which drops below contrast AA.
+- Don't name a theme key after a CSS display value (`grid`, `flex`, `block`, `table`). Tailwind's `inline-*`/`block-*` size utilities would give classes like `inline-grid` a second meaning. `packages/design-tokens/theme.test.ts` guards this.
 
 **Accessibility**
 - Every page has exactly one `h1`, including empty, error and login states (use `sr-only` if it shouldn't show).
