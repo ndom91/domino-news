@@ -1,4 +1,5 @@
 import type { StoryDetail } from '@dn/schemas'
+import { useState } from 'react'
 import { cx } from '../cx.ts'
 import { Popover } from '../primitives/overlay.tsx'
 import { type CitedSource, SummaryText } from './citation.tsx'
@@ -32,6 +33,8 @@ export function HeroStory({
   linkHeadline?: boolean
   Link?: LinkLike
 }) {
+  // Report hovered in the trace or on the board; each highlights it in the other.
+  const [activeSource, setActiveSource] = useState<string | null>(null)
   const narrative = story.narratives[0]
   const Heading = headingLevel
   const reportedAt = (s: StoryDetail['sources'][number]) => s.publishedAt ?? s.observedAt
@@ -154,6 +157,8 @@ export function HeroStory({
           variant="full"
           onKey
           now={now}
+          active={activeSource}
+          onActiveChange={setActiveSource}
           sources={story.sources.map((s) => ({
             id: s.articleId,
             outlet: s.publisher.name,
@@ -163,6 +168,8 @@ export function HeroStory({
         />
         <SourceBoard
           onKey
+          active={activeSource}
+          onActiveChange={setActiveSource}
           sources={board.map((s) => ({
             id: s.articleId,
             outlet: s.publisher.name,

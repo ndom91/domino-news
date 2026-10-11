@@ -1,4 +1,5 @@
 import { clockTime, formatDate, formatDateTime, plural } from '@dn/domain'
+import { useState } from 'react'
 import { cx } from '../cx.ts'
 import { Tooltip } from '../primitives/overlay.tsx'
 
@@ -20,6 +21,8 @@ const CELLS = 24
  * Hour-cell Source Trace: 24 cells ending at `now` (or at the latest report if everything is
  * older). Each outlet is a mark in the hour it reported: filled if cited, ring if only reported.
  * Shape carries the meaning, not colour. `onKey` switches to the hero's key-text colour.
+ * Hovering a mark enlarges it, dims the rest and shows its tooltip. Pass `active` and
+ * `onActiveChange` to share the hovered report with another view (the hero's source board).
  */
 export function SourceTrace({
   sources,
@@ -27,6 +30,8 @@ export function SourceTrace({
   now,
   width = variant === 'full' ? 492 : 216,
   onKey = false,
+  active,
+  onActiveChange,
   className,
 }: {
   sources: TraceSource[]
@@ -35,8 +40,14 @@ export function SourceTrace({
   now: string
   width?: number
   onKey?: boolean
+  /** Hovered report id, when controlled. */
+  active?: string | null
+  onActiveChange?: (id: string | null) => void
   className?: string
 }) {
+  const [ownActive, setOwnActive] = useState<string | null>(null)
+  const current = active === undefined ? ownActive : active
+  const setActive = onActiveChange ?? setOwnActive
   // No reports means no time window to draw (Math.max() of nothing is -Infinity).
   if (sources.length === 0) return null
   const latest = Math.max(...sources.map((s) => Date.parse(s.at)))
@@ -85,28 +96,44 @@ export function SourceTrace({
         />
       ))}
       {columns.flatMap((col, i) =>
-        col.map((s, j) => (
-          <Tooltip
-            key={s.id}
-            content={`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}
-          >
-            <circle
-              cx={i * cw + cw / 2}
-              cy={h - 2 - rh / 2 - j * rh}
-              r={r}
-              strokeWidth={s.citation === null ? 1.5 : 0}
-              className={
-                s.citation === null
-                  ? onKey
-                    ? 'fill-key stroke-key-text'
-                    : 'fill-canvas stroke-trace-observed'
-                  : onKey
-                    ? 'fill-key-text'
-                    : 'fill-trace-cited'
-              }
-            />
-          </Tooltip>
-        )),
+        col.map((s, j) => {
+          const x = i * cw + cw / 2
+          const y = h - 2 - rh / 2 - j * rh
+          return (
+            <Tooltip
+              key={s.id}
+              delay={60}
+              content={`${s.outlet} · ${citationLabel(s.citation)} · ${formatDateTime(s.at)}`}
+            >
+              <g
+                onPointerEnter={() => setActive(s.id)}
+                onPointerLeave={() => setActive(null)}
+                className="cursor-default"
+              >
+                {/* Invisible hit area: the mark itself is only ~7px across. */}
+                <rect x={i * cw} y={y - rh / 2} width={cw} height={rh} fill="transparent" />
+                <circle
+                  cx={x}
+                  cy={y}
+                  r={r}
+                  strokeWidth={s.citation === null ? 1.5 : 0}
+                  className={cx(
+                    'origin-center transition-[scale,opacity] duration-[var(--dn-duration-base)] ease-(--dn-ease-out) [transform-box:fill-box]',
+                    current === s.id && 'scale-150',
+                    current && current !== s.id && 'opacity-35',
+                    s.citation === null
+                      ? onKey
+                        ? 'fill-key stroke-key-text'
+                        : 'fill-canvas stroke-trace-observed'
+                      : onKey
+                        ? 'fill-key-text'
+                        : 'fill-trace-cited',
+                  )}
+                />
+              </g>
+            </Tooltip>
+          )
+        }),
       )}
       {variant === 'full'
         ? [24, 18, 12, 6, 0].map((hr) => (

@@ -119,10 +119,19 @@ export function TooltipProvider({ children }: { children: ReactNode }) {
 }
 
 /** Supplementary label only: never put essential information or actions in a tooltip. */
-export function Tooltip({ content, children }: { content: ReactNode; children: ReactElement }) {
+export function Tooltip({
+  content,
+  delay,
+  children,
+}: {
+  content: ReactNode
+  /** Open delay in ms; defaults to the provider's. */
+  delay?: number
+  children: ReactElement
+}) {
   return (
     <BaseTooltip.Root>
-      <BaseTooltip.Trigger render={children} />
+      <BaseTooltip.Trigger delay={delay} render={children} />
       <BaseTooltip.Portal>
         <BaseTooltip.Positioner sideOffset={6} className="z-50">
           <BaseTooltip.Popup className={cx(popupBase, 't-tooltip max-w-64 px-2 py-1 text-sm')}>
