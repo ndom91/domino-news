@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { cx } from '../cx.ts'
 import { positionKey } from './desk-key.ts'
+import { barClass } from './story-bar.tsx'
 
 /**
  * Section heading in the story-bar style (a solid key-colour band). Coloured by position,
@@ -20,13 +21,7 @@ export function PeriodBar({
   className?: string
 }) {
   return (
-    <div
-      className={cx(
-        positionKey(position),
-        'flex h-bar items-center justify-between gap-3 key-fill px-2.5 text-sm font-bold',
-        className,
-      )}
-    >
+    <div className={cx(positionKey(position), barClass, className)}>
       <h2 id={id} className="min-w-0 truncate">
         {title}
       </h2>

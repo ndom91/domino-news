@@ -7,7 +7,7 @@ import { cx } from '../cx.ts'
 import { Button } from './button.tsx'
 
 // Popovers are the only element with a shadow. Motion comes from the t-* class each adds.
-const popupBase = 'bg-elevated text-text shadow-popover outline-none'
+export const popupBase = 'bg-elevated text-text shadow-popover outline-none'
 
 export interface PopoverProps {
   /** Element that opens the popover. Rendered via Base UI so it stays keyboard/touch accessible. */
@@ -44,10 +44,12 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
   )
 }
 
-const menuItemBase =
+// Shared with Select's options, so both lists highlight the same way.
+export const menuItemBase =
   'flex min-h-tap w-full cursor-pointer items-center px-4 text-base font-semibold outline-none select-none data-highlighted:text-canvas'
+export const menuItemHighlight = 'data-highlighted:bg-text'
 // aria-current marks the current page in a navigation menu, as in the header nav.
-const menuItemClass = `${menuItemBase} data-highlighted:bg-text aria-[current=page]:bg-accent aria-[current=page]:text-accent-contrast`
+const menuItemClass = `${menuItemBase} ${menuItemHighlight} aria-[current=page]:bg-accent aria-[current=page]:text-accent-contrast`
 // Matches the danger Button. Separate strings: two highlight fills on one element would
 // leave the winner to CSS order.
 const dangerItemClass = `${menuItemBase} text-error data-highlighted:bg-error`

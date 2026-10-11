@@ -424,6 +424,14 @@ export const publisherLeanSchema = z.enum([
 ])
 export type PublisherLean = z.infer<typeof publisherLeanSchema>
 
+export const LEAN_LABELS: Record<PublisherLean, string> = {
+  left: 'Left',
+  centre_left: 'Centre-left',
+  centre: 'Centre',
+  centre_right: 'Centre-right',
+  right: 'Right',
+}
+
 export const fundingModelSchema = z.enum([
   'public_broadcaster',
   'state',
@@ -433,6 +441,14 @@ export const fundingModelSchema = z.enum([
 ])
 export type FundingModel = z.infer<typeof fundingModelSchema>
 
+export const FUNDING_LABELS: Record<FundingModel, string> = {
+  public_broadcaster: 'Public broadcaster',
+  state: 'State-owned',
+  commercial: 'Commercial',
+  nonprofit: 'Nonprofit',
+  other: 'Other ownership',
+}
+
 // Ordinal, best to worst (Wikipedia's perennial-sources labels folded to four steps).
 export const reliabilityLevelSchema = z.enum([
   'reliable',
@@ -441,6 +457,19 @@ export const reliabilityLevelSchema = z.enum([
   'deprecated',
 ])
 export type ReliabilityLevel = z.infer<typeof reliabilityLevelSchema>
+
+export const RELIABILITY_LABELS: Record<ReliabilityLevel, string> = {
+  reliable: 'Generally reliable',
+  no_consensus: 'No consensus',
+  unreliable: 'Generally unreliable',
+  deprecated: 'Deprecated',
+}
+
+// Where imported assessment evidence comes from; unknown sources show their raw id.
+export const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
+  wikidata: 'Wikidata',
+  wp_rsp: 'Wikipedia perennial sources',
+}
 
 export const assessmentEvidenceSchema = z.object({
   source: z.string(),

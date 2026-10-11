@@ -104,7 +104,7 @@ function InsightSections({ data }: { data: Insights }) {
                   <Link
                     to="/"
                     search={{ region: g.key as Region }}
-                    className="mt-2 inline-block text-sm font-bold underline decoration-accent decoration-2 underline-offset-4"
+                    className="mt-2 inline-block link-inline text-sm font-bold"
                   >
                     See {REGION_LABELS[g.key as Region]} stories
                   </Link>

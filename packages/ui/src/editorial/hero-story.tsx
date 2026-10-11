@@ -119,9 +119,8 @@ export function HeroStory({
               />
             </p>
             <p className="mt-5 max-w-reading border-t border-key-text/45 pt-2.5 text-label leading-normal">
-              A summary of what {citedCount} of {outlets}{' '}
-              {outlets === 1 ? 'publisher' : 'publishers'} reported, not verified by Domino.{' '}
-              {story.summary.origin === 'edited' ? 'Edited' : 'Generated'}{' '}
+              A summary of what {citedCount} of {plural(outlets, 'publisher')} reported, not
+              verified by Domino. {story.summary.origin === 'edited' ? 'Edited' : 'Generated'}{' '}
               <Timestamp at={story.summary.createdAt} />.{' '}
               <Popover
                 title="How this summary is made"

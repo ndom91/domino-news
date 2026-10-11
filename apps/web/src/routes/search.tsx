@@ -3,7 +3,6 @@ import {
   DESK_LABELS,
   type Desk,
   REGION_LABELS,
-  REGIONS,
   type Region,
   regionSchema,
   searchQuerySchema,
@@ -15,6 +14,7 @@ import { type FormEvent, useId } from 'react'
 import { z } from 'zod'
 import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
+import { regionOptions } from '../lib/regions.ts'
 
 // Same filters as the API; the page also allows an empty query (no search yet).
 const searchParams = searchQuerySchema.extend({ q: z.string().optional().default('') })
@@ -35,10 +35,7 @@ const SINCE_OPTIONS = [
   { value: '30d', label: 'Past month' },
 ] as const
 
-const REGION_OPTIONS = [
-  { value: null, label: 'Any region' },
-  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
-]
+const REGION_OPTIONS = regionOptions('Any region')
 
 function SearchPage() {
   const search = Route.useSearch()

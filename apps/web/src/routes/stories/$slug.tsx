@@ -1,4 +1,4 @@
-import { formatDate, formatDateTime, hostnameOf } from '@dn/domain'
+import { formatDate, formatDateTime, hostnameOf, plural } from '@dn/domain'
 import { REGION_LABELS } from '@dn/schemas'
 import {
   Badge,
@@ -10,6 +10,7 @@ import {
   Reveal,
   relationLabel,
   SectionHeader,
+  SectionLabel,
   Skeleton,
   SourceList,
   Timestamp,
@@ -19,7 +20,6 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
-import { SectionLabel } from '../../components/page.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { api, queries } from '../../lib/api.ts'
 
@@ -114,7 +114,7 @@ function StoryPage() {
             <SectionHeader
               id="sources-heading"
               title="Original reporting"
-              meta={`${story.sources.length} ${story.sources.length === 1 ? 'report' : 'reports'} from ${outlets} ${outlets === 1 ? 'publisher' : 'publishers'}`}
+              meta={`${plural(story.sources.length, 'report')} from ${plural(outlets, 'publisher')}`}
             />
             <p className="mb-4 max-w-reading text-sm text-text-secondary">
               Headlines and descriptions as each publisher published them in its feed. Open a link
@@ -207,7 +207,7 @@ function StoryPage() {
                       href={p.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="font-semibold underline decoration-accent decoration-2 underline-offset-3"
+                      className="link-inline font-semibold"
                     >
                       {p.title ?? hostnameOf(p.url) ?? p.url} ↗
                     </a>

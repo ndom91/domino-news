@@ -1,8 +1,6 @@
 import { cx } from '@dn/ui'
 import type { ReactNode } from 'react'
 
-export { SectionLabel } from '@dn/ui'
-
 /** Page column: max 1440 including gutters. */
 export function Page({ children, className }: { children: ReactNode; className?: string }) {
   return (

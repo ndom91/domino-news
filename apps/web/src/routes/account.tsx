@@ -1,14 +1,15 @@
 import { formatDateTime } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
-import { REGION_LABELS, REGIONS } from '@dn/schemas'
-import { Button, ConfirmDialog, Notice, Reveal, Select, TextInput } from '@dn/ui'
+import { Button, ConfirmDialog, Notice, Reveal, SectionLabel, Select, TextInput } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
-import { type FormEvent, useId, useState } from 'react'
-import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
+import { createFileRoute } from '@tanstack/react-router'
+import { type FormEvent, useId } from 'react'
+import { Page, PageTitle } from '../components/page.tsx'
 import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
+import { regionOptions } from '../lib/regions.ts'
+import { useSignOut } from '../lib/sign-out.ts'
 
 export const Route = createFileRoute('/account')({
   head: () => ({ meta: [{ title: 'Account · Domino News' }] }),
@@ -157,30 +158,15 @@ function AccountPage() {
 }
 
 function SignOutButton() {
-  const router = useRouter()
-  const navigate = useNavigate()
-  const [signingOut, setSigningOut] = useState(false)
+  const { signOut, pending } = useSignOut()
   return (
-    <Button
-      size="sm"
-      variant="danger"
-      loading={signingOut}
-      onClick={async () => {
-        setSigningOut(true)
-        await authClient.signOut()
-        await router.invalidate()
-        await navigate({ to: '/login' })
-      }}
-    >
+    <Button size="sm" variant="danger" loading={pending} onClick={signOut}>
       Sign out
     </Button>
   )
 }
 
-const EDITION_OPTIONS = [
-  { value: null, label: 'No preference' },
-  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
-]
+const EDITION_OPTIONS = regionOptions('No preference')
 
 function ReadingHistorySection() {
   return (

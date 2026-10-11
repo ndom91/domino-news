@@ -1,4 +1,4 @@
-import { clockTime, formatDate, plural } from '@dn/domain'
+import { clockTime, formatDate, plural, stripCitations } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import type { CSSProperties } from 'react'
 import { cx } from '../cx.ts'
@@ -108,7 +108,7 @@ export function NarrativeGraph({
               </h3>
               {node.summary ? (
                 <p className="line-clamp-2 max-w-reading text-base leading-normal text-text-secondary">
-                  {node.summary.replace(/\[\d+(?:,\s*\d+)*\]/g, '')}
+                  {stripCitations(node.summary)}
                 </p>
               ) : null}
               {secondary.length > 0 ? (

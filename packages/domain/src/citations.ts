@@ -33,6 +33,11 @@ export function renumberCitations(text: string, shownIds: string[], citedIds: st
   return { body, citation }
 }
 
+/** Remove `[n]` / `[n, m]` citation markers, for plain-text previews. */
+export function stripCitations(text: string) {
+  return text.replace(MARKER, '')
+}
+
 export type SummaryPart = { text: string } | { citation: number }
 
 /** Split a stored summary into text and `[n]` citation markers for rendering. */

@@ -1,5 +1,7 @@
 import { Select as BaseSelect } from '@base-ui/react/select'
+import { useId } from 'react'
 import { cx } from '../cx.ts'
+import { menuItemBase, menuItemHighlight, popupBase } from './overlay.tsx'
 
 export interface SelectOption<T extends string> {
   /** null is the "no filter / no preference" choice; it submits as an empty string. */
@@ -15,7 +17,9 @@ export interface SelectProps<T extends string> {
   onValueChange?: (value: T | null) => void
   /** Form field name, for forms read with FormData. */
   name?: string
-  /** Pair with a <label htmlFor>, or pass aria-label. */
+  /** Visible label above the select, as on TextInput. */
+  label?: string
+  /** Without `label`: pair with a <label htmlFor>, or pass aria-label. */
   id?: string
   'aria-label'?: string
   disabled?: boolean
@@ -32,19 +36,21 @@ export function Select<T extends string>({
   defaultValue,
   onValueChange,
   name,
+  label,
   id,
   'aria-label': ariaLabel,
   disabled,
   className,
 }: SelectProps<T>) {
-  return (
+  const labelId = useId()
+  const select = (
     <BaseSelect.Root
       items={options}
       value={value}
       defaultValue={defaultValue}
       onValueChange={(next) => onValueChange?.(next as T | null)}
       name={name}
-      id={id}
+      id={label ? labelId : id}
       disabled={disabled}
     >
       <BaseSelect.Trigger
@@ -63,12 +69,17 @@ export function Select<T extends string>({
       </BaseSelect.Trigger>
       <BaseSelect.Portal>
         <BaseSelect.Positioner sideOffset={4} align="start" alignItemWithTrigger={false}>
-          <BaseSelect.Popup className="max-h-(--available-height) min-w-(--anchor-width) t-popup overflow-y-auto overscroll-contain bg-elevated py-1 text-text shadow-popover outline-none">
+          <BaseSelect.Popup
+            className={cx(
+              popupBase,
+              'max-h-(--available-height) min-w-(--anchor-width) t-popup overflow-y-auto overscroll-contain py-1',
+            )}
+          >
             {options.map((option) => (
               <BaseSelect.Item
                 key={option.value ?? ''}
                 value={option.value}
-                className="flex min-h-tap cursor-pointer items-center justify-between gap-6 px-4 text-base font-semibold outline-none select-none data-highlighted:bg-text data-highlighted:text-canvas"
+                className={cx(menuItemBase, menuItemHighlight, 'justify-between gap-6')}
               >
                 <BaseSelect.ItemText>{option.label}</BaseSelect.ItemText>
                 <BaseSelect.ItemIndicator>
@@ -82,5 +93,14 @@ export function Select<T extends string>({
         </BaseSelect.Positioner>
       </BaseSelect.Portal>
     </BaseSelect.Root>
+  )
+  if (!label) return select
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label htmlFor={labelId} className="type-label">
+        {label}
+      </label>
+      {select}
+    </div>
   )
 }

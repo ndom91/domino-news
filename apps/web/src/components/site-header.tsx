@@ -2,11 +2,11 @@ import { clockTime, longDate, plural } from '@dn/domain'
 import { Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
 import { CaretDownIcon, MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useMatchRoute, useNavigate, useRouter } from '@tanstack/react-router'
+import { Link, useMatchRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { queries } from '../lib/api.ts'
-import { authClient } from '../lib/auth-client.ts'
+import { useSignOut } from '../lib/sign-out.ts'
 import { currentTheme, switchTheme, type Theme } from '../lib/theme.ts'
 
 const NAV = [
@@ -123,8 +123,7 @@ function SectionMenu({ items }: { items: ReturnType<typeof navFor> }) {
 
 /** Avatar button that opens Settings and Sign out. */
 function UserMenu({ user }: { user: { name: string; email: string; username: string | null } }) {
-  const router = useRouter()
-  const navigate = useNavigate()
+  const { signOut } = useSignOut()
   return (
     <Menu
       trigger={
@@ -142,14 +141,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
       </p>
       <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>
       <ThemeItem />
-      <MenuItem
-        tone="danger"
-        onClick={async () => {
-          await authClient.signOut()
-          await router.invalidate()
-          await navigate({ to: '/login' })
-        }}
-      >
+      <MenuItem tone="danger" onClick={signOut}>
         Sign out
       </MenuItem>
     </Menu>

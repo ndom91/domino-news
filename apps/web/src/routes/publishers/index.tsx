@@ -1,9 +1,9 @@
 import { plural, relativeTime } from '@dn/domain'
-import { CoverageMatrix, Notice } from '@dn/ui'
+import { CoverageMatrix, Notice, SectionLabel } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { RouterLink } from '../../components/link.tsx'
-import { Page, PageTitle, SectionLabel } from '../../components/page.tsx'
+import { Page, PageTitle } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/publishers/')({

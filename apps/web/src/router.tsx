@@ -32,10 +32,7 @@ function RouteError({ error }: { error: Error }) {
         <Button size="sm" variant="primary" onClick={() => router.invalidate()}>
           Try again
         </Button>
-        <Link
-          to="/"
-          className="font-semibold underline decoration-accent decoration-2 underline-offset-4"
-        >
+        <Link to="/" className="link-inline font-semibold">
           Front page
         </Link>
       </div>

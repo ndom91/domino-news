@@ -271,6 +271,14 @@
   }
 }
 
+/* Inline text link with a solid accent underline (weight is set per site). */
+@utility link-inline {
+  text-decoration-line: underline;
+  text-decoration-color: var(--dn-accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
+}
+
 @layer base {
   html {
     background: var(--dn-canvas);

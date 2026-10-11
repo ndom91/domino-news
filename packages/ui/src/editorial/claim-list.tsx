@@ -81,7 +81,7 @@ export function ClaimList({
                           href={e.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="font-semibold text-text underline decoration-accent decoration-2 underline-offset-3"
+                          className="link-inline font-semibold text-text"
                         >
                           {e.title ?? hostnameOf(e.url) ?? e.url} ↗
                         </a>

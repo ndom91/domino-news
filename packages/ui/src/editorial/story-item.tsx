@@ -1,4 +1,4 @@
-import { clockTime, hostnameOf } from '@dn/domain'
+import { clockTime, hostnameOf, plural } from '@dn/domain'
 import type { StoryListItem } from '@dn/schemas'
 import { cx } from '../cx.ts'
 import { useReveal } from '../primitives/reveal.tsx'
@@ -95,7 +95,7 @@ export function StoryItem({
             href={story.primarySource.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="font-semibold underline decoration-accent decoration-2 underline-offset-3"
+            className="link-inline font-semibold"
           >
             {story.primarySource.title ??
               hostnameOf(story.primarySource.url) ??
@@ -115,8 +115,7 @@ export function StoryItem({
           width={wide ? 336 : 216}
         />
         <span>
-          {story.sourceCount} {story.sourceCount === 1 ? 'publisher' : 'publishers'} · {cited} cited
-          · first {clockTime(first)} UTC
+          {plural(story.sourceCount, 'publisher')} · {cited} cited · first {clockTime(first)} UTC
         </span>
       </div>
     </article>

@@ -1,5 +1,5 @@
 import { dayLabel, plural } from '@dn/domain'
-import { REGION_LABELS, REGIONS, type Region, regionSchema, type StoryListItem } from '@dn/schemas'
+import { REGION_LABELS, type Region, regionSchema, type StoryListItem } from '@dn/schemas'
 import {
   Button,
   HeroStory,
@@ -20,6 +20,7 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod'
 import { RouterLink } from '../components/link.tsx'
 import { queries } from '../lib/api.ts'
+import { regionOptions } from '../lib/regions.ts'
 
 export const Route = createFileRoute('/')({
   validateSearch: z.object({ region: regionSchema.optional() }),
@@ -143,7 +144,7 @@ function FeedPage() {
             </div>
             <Link
               to="/narratives"
-              className="mt-7 inline-flex min-h-tap items-center text-base font-bold underline decoration-accent decoration-2 underline-offset-4"
+              className="mt-7 inline-flex min-h-tap items-center link-inline text-base font-bold"
             >
               All {plural(front.narrativeCount, 'narrative')}
             </Link>
@@ -154,10 +155,7 @@ function FeedPage() {
   )
 }
 
-const REGION_FILTER_OPTIONS = [
-  { value: null, label: 'All regions' },
-  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
-]
+const REGION_FILTER_OPTIONS = regionOptions('All regions')
 
 /** Region filter in the Latest header. */
 function RegionFilter({ active }: { active: Region | null }) {
@@ -194,11 +192,7 @@ function EditionSection({
         title={`In ${REGION_LABELS[edition]}`}
         id="edition-heading"
         meta={
-          <Link
-            to="/"
-            search={{ region: edition }}
-            className="font-semibold underline decoration-accent decoration-2 underline-offset-4"
-          >
+          <Link to="/" search={{ region: edition }} className="link-inline font-semibold">
             More from {REGION_LABELS[edition]}
           </Link>
         }

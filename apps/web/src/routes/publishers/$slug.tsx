@@ -4,12 +4,15 @@ import {
   type CoverageProfile,
   DESK_LABELS,
   type Desk,
+  EVIDENCE_SOURCE_LABELS,
+  FUNDING_LABELS,
   fundingModelSchema,
+  LEAN_LABELS,
   type PublisherAssessment,
   type PublisherDetail,
-  type PublisherLean,
   publisherLeanSchema,
   REGION_LABELS,
+  RELIABILITY_LABELS,
   type Region,
   type ReliabilityLevel,
   reliabilityLevelSchema,
@@ -23,6 +26,7 @@ import {
   Meter,
   MixBars,
   Notice,
+  SectionLabel,
   Select,
   StoryItem,
   Textarea,
@@ -30,9 +34,9 @@ import {
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { type FormEvent, useId } from 'react'
+import type { FormEvent } from 'react'
 import { RouterLink } from '../../components/link.tsx'
-import { Page, SectionLabel } from '../../components/page.tsx'
+import { Page } from '../../components/page.tsx'
 import { api, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/publishers/$slug')({
@@ -87,7 +91,7 @@ function PublisherPage() {
 
           <CoverageProfileSection profile={p.profile} />
           <AssessmentSection assessment={p.assessment} />
-          {isAdmin ? <AssessmentEditor slug={p.slug} publisher={p} /> : null}
+          {isAdmin ? <AssessmentEditor publisher={p} /> : null}
 
           <section aria-labelledby="recent-heading" className="mt-12">
             <SectionLabel id="recent-heading">Recent stories with {p.name}</SectionLabel>
@@ -212,19 +216,6 @@ function CoverageProfileSection({ profile }: { profile: CoverageProfile }) {
   )
 }
 
-const LEAN_LABELS: Record<PublisherLean, string> = {
-  left: 'Left',
-  centre_left: 'Centre-left',
-  centre: 'Centre',
-  centre_right: 'Centre-right',
-  right: 'Right',
-}
-
-const SOURCE_LABELS: Record<string, string> = {
-  wikidata: 'Wikidata',
-  wp_rsp: 'Wikipedia perennial sources',
-}
-
 /** The latest reviewed assessment. Unreviewed evidence is never shown here. */
 function AssessmentSection({ assessment }: { assessment: PublisherAssessment | null }) {
   return (
@@ -239,21 +230,15 @@ function AssessmentSection({ assessment }: { assessment: PublisherAssessment | n
   )
 }
 
-const FUNDING_OPTIONS = [
-  { value: 'public_broadcaster', label: 'Public broadcaster' },
-  { value: 'state', label: 'State-owned' },
-  { value: 'commercial', label: 'Commercial' },
-  { value: 'nonprofit', label: 'Nonprofit' },
-  { value: 'other', label: 'Other' },
-] as const
+const FUNDING_OPTIONS = fundingModelSchema.options.map((f) => ({
+  value: f,
+  label: FUNDING_LABELS[f],
+}))
 
 const RELIABILITY_OPTIONS = [
   { value: null, label: 'Not rated' },
-  { value: 'reliable', label: 'Generally reliable' },
-  { value: 'no_consensus', label: 'No consensus / mixed' },
-  { value: 'unreliable', label: 'Generally unreliable' },
-  { value: 'deprecated', label: 'Deprecated / blacklisted' },
-] as const
+  ...reliabilityLevelSchema.options.map((r) => ({ value: r, label: RELIABILITY_LABELS[r] })),
+]
 
 /** Pre-fill the level from the imported Wikipedia label, when there is one. */
 function importedReliability(
@@ -273,13 +258,11 @@ const LEAN_OPTIONS = [
 ]
 
 /** Admin: review imported evidence and publish a new assessment version. */
-function AssessmentEditor({ slug, publisher }: { slug: string; publisher: PublisherDetail }) {
+function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
+  const { slug } = publisher
   const queryClient = useQueryClient()
   const evidence = useQuery(queries.evidence(slug))
   const save = useMutation(saveAssessmentMutation(api, queryClient, slug))
-  const leanId = useId()
-  const fundingId = useId()
-  const reliabilityId = useId()
   const current = publisher.assessment
   const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
@@ -319,7 +302,7 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
                 rel="noopener noreferrer"
                 className="underline underline-offset-4"
               >
-                {SOURCE_LABELS[e.source] ?? e.source}
+                {EVIDENCE_SOURCE_LABELS[e.source] ?? e.source}
               </a>
             </li>
           ))}
@@ -333,17 +316,12 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
         onSubmit={onSubmit}
         className="flex max-w-reading flex-col gap-4"
       >
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={fundingId} className="type-label">
-            Funding model
-          </label>
-          <Select
-            id={fundingId}
-            name="fundingModel"
-            options={FUNDING_OPTIONS}
-            defaultValue={current?.fundingModel ?? 'commercial'}
-          />
-        </div>
+        <Select
+          label="Funding model"
+          name="fundingModel"
+          options={FUNDING_OPTIONS}
+          defaultValue={current?.fundingModel ?? 'commercial'}
+        />
         <Textarea
           label="Ownership and funding"
           name="ownership"
@@ -360,31 +338,21 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
           maxLength={500}
           defaultValue={current?.reliability ?? ''}
         />
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor={reliabilityId} className="type-label">
-            Reliability level
-          </label>
-          <Select
-            id={reliabilityId}
-            name="reliabilityLevel"
-            options={RELIABILITY_OPTIONS}
-            defaultValue={
-              current?.reliabilityLevel ?? importedReliability(evidence.data?.evidence ?? [])
-            }
-          />
-        </div>
+        <Select
+          label="Reliability level"
+          name="reliabilityLevel"
+          options={RELIABILITY_OPTIONS}
+          defaultValue={
+            current?.reliabilityLevel ?? importedReliability(evidence.data?.evidence ?? [])
+          }
+        />
         <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor={leanId} className="type-label">
-              Political lean
-            </label>
-            <Select
-              id={leanId}
-              name="lean"
-              options={LEAN_OPTIONS}
-              defaultValue={current?.lean ?? null}
-            />
-          </div>
+          <Select
+            label="Political lean"
+            name="lean"
+            options={LEAN_OPTIONS}
+            defaultValue={current?.lean ?? null}
+          />
           <TextInput
             label="Country context"
             name="countryContext"

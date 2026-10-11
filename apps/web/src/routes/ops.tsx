@@ -1,10 +1,10 @@
 import { relativeTime } from '@dn/domain'
 import type { OpsAction } from '@dn/schemas'
-import { Badge, Button, Card, ConfirmDialog, Notice, Skeleton, Tooltip } from '@dn/ui'
+import { Badge, Button, Card, ConfirmDialog, Notice, SectionLabel, Skeleton, Tooltip } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
-import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
+import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/ops')({
