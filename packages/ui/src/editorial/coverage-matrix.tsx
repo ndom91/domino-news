@@ -3,9 +3,9 @@ import { cx } from '../cx.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 
 /**
- * Who covered what: Stories (rows) × outlets (columns). A dot means the outlet reported
- * the Story; a ringed dot means it reported first. Coverage only, never credibility.
- * Scrolls inside its own container on narrow screens.
+ * Who covered what: Stories (rows) × outlets (columns). A filled square means the outlet
+ * reported the Story; an outlined square means it reported first. Coverage only, never
+ * credibility. Scrolls inside its own container on narrow screens.
  */
 export function CoverageMatrix({
   matrix,

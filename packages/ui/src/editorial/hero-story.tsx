@@ -66,8 +66,7 @@ export function HeroStory({
   const spanHours =
     first && last ? Math.round((Date.parse(last.at) - Date.parse(first.at)) / 3_600_000) : 0
   const outlets = story.sources.length
-  // Long titles step down a size. The front-page lead shares the Story page's scale: the
-  // largest display size crowded out the summary and the source board beside it.
+  // Long titles step down a size.
   const long = story.title.length > LONG_TITLE
   const display = long ? 'type-display-sm' : 'type-display-md'
 

@@ -19,7 +19,7 @@ export interface LaidOutNode {
 
 /**
  * A Narrative's Stories oldest first, each with its main link to an earlier Story and its
- * other links. Rendered as one timeline; relationships are text, not lanes. Pure for testing.
+ * other links. Rendered as one timeline. Pure for testing.
  */
 export function layoutNarrative(
   nodes: NarrativeNode[],

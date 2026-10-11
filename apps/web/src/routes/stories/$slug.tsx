@@ -52,7 +52,7 @@ function StoryPage() {
   }, [rememberReads, story.id])
   const [editing, setEditing] = useState(false)
   const editButtonRef = useRef<HTMLButtonElement>(null)
-  const outlets = new Set(story.sources.map((s) => s.publisher.id)).size
+  const publisherCount = new Set(story.sources.map((s) => s.publisher.id)).size
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
     ...queries.narrative(narrativeRef?.slug ?? ''),
@@ -114,7 +114,7 @@ function StoryPage() {
             <SectionHeader
               id="sources-heading"
               title="Original reporting"
-              meta={`${plural(story.sources.length, 'report')} from ${plural(outlets, 'publisher')}`}
+              meta={`${plural(story.sources.length, 'report')} from ${plural(publisherCount, 'publisher')}`}
             />
             <p className="mb-4 max-w-reading text-sm text-text-secondary">
               Headlines and descriptions as each publisher published them in its feed. Open a link

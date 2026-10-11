@@ -18,8 +18,8 @@ function PublishersPage() {
     <Page>
       <PageTitle meta={plural(data.items.length, 'publisher')}>Publishers</PageTitle>
       <p className="-mt-4 mb-10 max-w-reading text-text-secondary">
-        Which publishers reported which stories, and who was first. This shows coverage only; it
-        does not rate accuracy or political leaning.
+        Which publishers reported which stories, and who was first. Each publisher's page shows its
+        reviewed assessment of funding, reliability and political lean.
       </p>
 
       <section aria-labelledby="matrix-heading">

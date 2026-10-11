@@ -60,7 +60,7 @@
 }
 
 /* Native <details> accordion. ::details-content animates where supported (Chromium,
-   Safari 18.4+); elsewhere it opens instantly, which is the old behaviour. */
+   Safari 18.4+); elsewhere it opens instantly. */
 .t-acc {
   interpolate-size: allow-keywords;
 }
