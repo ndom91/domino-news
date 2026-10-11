@@ -1,8 +1,8 @@
 import { clockTime, longDate, plural } from '@dn/domain'
 import { Menu, MenuItem, MenuLinkItem, UserAvatar } from '@dn/ui'
-import { MoonIcon, SunIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, MoonIcon, SunIcon } from '@phosphor-icons/react'
 import { useQuery } from '@tanstack/react-query'
-import { Link, useNavigate, useRouter } from '@tanstack/react-router'
+import { Link, useMatchRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { queries } from '../lib/api.ts'
@@ -53,13 +53,13 @@ export function SiteHeader({
     <>
       <Strip />
       <div className="mx-auto max-w-page px-gutter pt-(--dn-safe-top)">
-        <header className="flex items-end justify-between gap-x-6 border-b-6 border-rule pt-5.5 pb-3.5 max-md:flex-wrap max-md:gap-y-2 max-md:border-b-4">
+        <header className="flex items-end justify-between gap-x-6 border-b-6 border-rule pt-5.5 pb-3.5 max-lg:gap-x-2 max-md:border-b-4">
           <Link to="/" className="type-masthead" aria-label="Domino, front page">
             Domino<span className="text-accent">.</span>
           </Link>
           <nav
             aria-label="Primary"
-            className="ml-auto flex gap-2 text-base font-semibold [scrollbar-width:none] max-md:order-last max-md:-ml-2.5 max-md:w-full max-md:gap-1 max-md:overflow-x-auto"
+            className="ml-auto flex gap-2 text-base font-semibold max-lg:hidden"
           >
             {navFor(user).map((item) => (
               <Link
@@ -76,11 +76,48 @@ export function SiteHeader({
               </Link>
             ))}
           </nav>
-          {/* On narrow screens the nav wraps below, leaving this beside the masthead. */}
+          <SectionMenu items={navFor(user)} />
           <UserMenu user={user} />
         </header>
       </div>
     </>
+  )
+}
+
+/** Narrow screens: the current section's name opens a menu of all sections. */
+function SectionMenu({ items }: { items: ReturnType<typeof navFor> }) {
+  const matchRoute = useMatchRoute()
+  const current = items.find((item) => matchRoute({ to: item.to, fuzzy: !item.exact }))
+  return (
+    <div className="ml-auto lg:hidden">
+      <Menu
+        trigger={
+          <button
+            type="button"
+            aria-label={current ? `Sections, current: ${current.label}` : 'Sections'}
+            className="inline-flex min-h-tap items-center gap-1.5 px-2.5 text-base font-semibold"
+          >
+            {current?.label ?? 'Sections'}
+            <CaretDownIcon aria-hidden size={14} weight="bold" />
+          </button>
+        }
+      >
+        {items.map((item) => (
+          <MenuLinkItem
+            key={item.to}
+            render={
+              <Link
+                to={item.to}
+                activeOptions={{ exact: item.exact }}
+                activeProps={{ 'aria-current': 'page' }}
+              />
+            }
+          >
+            {item.label}
+          </MenuLinkItem>
+        ))}
+      </Menu>
+    </div>
   )
 }
 

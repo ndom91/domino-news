@@ -46,7 +46,8 @@ export function Popover({ trigger, title, children, side = 'bottom', className }
 
 const menuItemBase =
   'flex min-h-tap w-full cursor-pointer items-center px-4 text-base font-semibold outline-none select-none data-highlighted:text-canvas'
-const menuItemClass = `${menuItemBase} data-highlighted:bg-text`
+// aria-current marks the current page in a navigation menu, as in the header nav.
+const menuItemClass = `${menuItemBase} data-highlighted:bg-text aria-[current=page]:bg-accent aria-[current=page]:text-accent-contrast`
 // Matches the danger Button. Separate strings: two highlight fills on one element would
 // leave the winner to CSS order.
 const dangerItemClass = `${menuItemBase} text-error data-highlighted:bg-error`
