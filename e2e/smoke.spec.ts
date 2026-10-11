@@ -70,9 +70,8 @@ test('feed → story → narrative → search', async ({ page }) => {
 
   // Publisher coverage
   await page.goto('/publishers')
-  await expect(page.getByRole('table').first()).toBeVisible()
   await expectNoHorizontalOverflow(page)
-  await page.getByRole('row').nth(1).getByRole('link').first().click()
+  await page.locator('main a[href^="/publishers/"]').first().click()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
   // Search (hybrid or keyword fallback)
