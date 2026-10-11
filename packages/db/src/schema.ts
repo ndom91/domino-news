@@ -284,6 +284,22 @@ export const publisherLean = pgEnum('publisher_lean', [
   'right',
 ])
 
+export const publisherFundingModel = pgEnum('publisher_funding_model', [
+  'public_broadcaster',
+  'state',
+  'commercial',
+  'nonprofit',
+  'other',
+])
+
+// Ordinal, best to worst. Mirrors Wikipedia's perennial-sources labels, folded to four steps.
+export const publisherReliability = pgEnum('publisher_reliability', [
+  'reliable',
+  'no_consensus',
+  'unreliable',
+  'deprecated',
+])
+
 export const publisherAssessment = pgTable(
   'publisher_assessment',
   {
@@ -294,7 +310,10 @@ export const publisherAssessment = pgTable(
     methodologyVersion: text('methodology_version').notNull(),
     // Lean is relative to this country's media, never one global axis.
     countryContext: text('country_context'),
+    // Null on assessments made before these fields existed, or when not rated.
+    fundingModel: publisherFundingModel('funding_model'),
     ownership: text('ownership').notNull(),
+    reliabilityLevel: publisherReliability('reliability_level'),
     reliability: text('reliability').notNull(),
     // Null = not assessed. When set, it must cite evidence (e.g. Reuters audience data).
     lean: publisherLean('lean'),

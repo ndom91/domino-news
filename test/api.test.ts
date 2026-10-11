@@ -401,7 +401,9 @@ describe('publisher assessments', () => {
       headers: { 'content-type': 'application/json' },
     })
   const review = {
+    fundingModel: 'public_broadcaster',
     ownership: 'Public broadcaster funded by the licence fee',
+    reliabilityLevel: 'reliable',
     reliability: 'Generally reliable (Wikipedia perennial sources)',
     countryContext: 'GB',
     lean: null,
@@ -427,7 +429,17 @@ describe('publisher assessments', () => {
 
     expect((await post('/api/v1/publishers/bbc/assessment', review)).status).toBe(200)
     const first = (await detail()).assessment
-    expect(first).toMatchObject({ ownership: review.ownership, lean: null })
+    expect(first).toMatchObject({
+      fundingModel: 'public_broadcaster',
+      ownership: review.ownership,
+      reliabilityLevel: 'reliable',
+      lean: null,
+    })
+    // Funding models are a fixed set.
+    expect(
+      (await post('/api/v1/publishers/bbc/assessment', { ...review, fundingModel: 'tabloid' }))
+        .status,
+    ).toBe(400)
     expect(first?.evidence).toEqual([
       {
         source: 'wp_rsp',

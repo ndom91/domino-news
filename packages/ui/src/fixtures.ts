@@ -1,8 +1,10 @@
 import type {
   CoverageMatrix,
+  CoverageProfile,
   Desk,
   DevelopingNarrative,
   NarrativeDetail,
+  PublisherAssessment,
   StoryDetail,
   StoryListItem,
 } from '@dn/schemas'
@@ -521,4 +523,74 @@ export const fixtureCoverage: CoverageMatrix = {
       first: i === s.publishers.length - 1,
     })),
   })),
+}
+
+export const fixtureAssessment: PublisherAssessment = {
+  id: 'pas_1',
+  methodologyVersion: 'assessment@1',
+  countryContext: 'GB',
+  fundingModel: 'public_broadcaster',
+  ownership:
+    'Public corporation funded mainly by the UK licence fee; editorially independent by charter.',
+  reliabilityLevel: 'reliable',
+  reliability: 'Generally reliable per Wikipedia editors; opinion pieces judged separately.',
+  lean: 'centre',
+  leanEvidenceUrl: 'https://reutersinstitute.politics.ox.ac.uk/digital-news-report',
+  leanNote: 'Audience close to the UK average (Reuters Institute, audience self-placement).',
+  evidence: [
+    {
+      source: 'wikidata',
+      dimension: 'ownership',
+      value: 'Owned by British Broadcasting Corporation (public broadcaster)',
+      url: 'https://www.wikidata.org/wiki/Q9531',
+    },
+    {
+      source: 'wp_rsp',
+      dimension: 'reliability',
+      value: 'Generally reliable (Wikipedia perennial sources: BBC)',
+      url: 'https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources',
+    },
+  ],
+  reviewedAt: '2026-10-11T09:00:00.000Z',
+}
+
+export const fixtureAssessmentUnrated: PublisherAssessment = {
+  ...fixtureAssessment,
+  id: 'pas_2',
+  countryContext: 'RU',
+  fundingModel: 'state',
+  ownership: 'Owned and funded by the Russian state.',
+  reliabilityLevel: 'deprecated',
+  reliability: 'Deprecated by Wikipedia editors for publishing fabricated information.',
+  lean: null,
+  leanEvidenceUrl: null,
+  leanNote: null,
+  evidence: [],
+}
+
+export const fixtureCoverageProfile: CoverageProfile = {
+  days: 30,
+  storyCount: 64,
+  desks: [
+    { key: 'politics', share: 0.38, overallShare: 0.27 },
+    { key: 'conflict', share: 0.22, overallShare: 0.19 },
+    { key: 'economy', share: 0.14, overallShare: 0.21 },
+    { key: 'science', share: 0.11, overallShare: 0.16 },
+    { key: 'justice', share: 0.09, overallShare: 0.1 },
+    { key: 'culture', share: 0.06, overallShare: 0.07 },
+  ],
+  regions: [
+    { key: 'europe', share: 0.41, overallShare: 0.24 },
+    { key: 'north-america', share: 0.23, overallShare: 0.38 },
+    { key: 'middle-east', share: 0.17, overallShare: 0.14 },
+    { key: 'africa', share: 0.08, overallShare: 0.06 },
+  ],
+  officialShare: 0.18,
+  missedMajor: {
+    count: 2,
+    examples: [
+      { id: 'sty_a', slug: 'ceasefire-talks-resume', title: 'Ceasefire talks resume in Doha' },
+      { id: 'sty_b', slug: 'central-bank-holds-rates', title: 'Central bank holds rates steady' },
+    ],
+  },
 }

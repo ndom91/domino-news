@@ -426,6 +426,24 @@ export const publisherLeanSchema = z.enum([
 ])
 export type PublisherLean = z.infer<typeof publisherLeanSchema>
 
+export const fundingModelSchema = z.enum([
+  'public_broadcaster',
+  'state',
+  'commercial',
+  'nonprofit',
+  'other',
+])
+export type FundingModel = z.infer<typeof fundingModelSchema>
+
+// Ordinal, best to worst (Wikipedia's perennial-sources labels folded to four steps).
+export const reliabilityLevelSchema = z.enum([
+  'reliable',
+  'no_consensus',
+  'unreliable',
+  'deprecated',
+])
+export type ReliabilityLevel = z.infer<typeof reliabilityLevelSchema>
+
 export const assessmentEvidenceSchema = z.object({
   source: z.string(),
   dimension: z.enum(['ownership', 'reliability', 'lean']),
@@ -439,7 +457,9 @@ export const publisherAssessmentSchema = z.object({
   id: z.string(),
   methodologyVersion: z.string(),
   countryContext: z.string().nullable(),
+  fundingModel: fundingModelSchema.nullable(),
   ownership: z.string(),
+  reliabilityLevel: reliabilityLevelSchema.nullable(),
   reliability: z.string(),
   lean: publisherLeanSchema.nullable(),
   leanEvidenceUrl: z.string().nullable(),
@@ -451,7 +471,10 @@ export type PublisherAssessment = z.infer<typeof publisherAssessmentSchema>
 
 export const assessmentRequestSchema = z
   .object({
+    fundingModel: fundingModelSchema,
     ownership: z.string().trim().min(1).max(500),
+    // Null = not rated (e.g. the outlet isn't on Wikipedia's perennial sources list).
+    reliabilityLevel: reliabilityLevelSchema.nullable(),
     reliability: z.string().trim().min(1).max(500),
     countryContext: z.string().length(2).nullable(),
     lean: publisherLeanSchema.nullable(),

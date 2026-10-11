@@ -4,14 +4,30 @@ import {
   type CoverageProfile,
   DESK_LABELS,
   type Desk,
+  fundingModelSchema,
   type PublisherAssessment,
   type PublisherDetail,
   type PublisherLean,
   publisherLeanSchema,
   REGION_LABELS,
   type Region,
+  type ReliabilityLevel,
+  reliabilityLevelSchema,
 } from '@dn/schemas'
-import { Badge, Button, Notice, Select, StoryItem, Textarea, TextInput } from '@dn/ui'
+import {
+  AssessmentScorecard,
+  Badge,
+  Button,
+  cx,
+  deskKey,
+  Meter,
+  MixBars,
+  Notice,
+  Select,
+  StoryItem,
+  Textarea,
+  TextInput,
+} from '@dn/ui'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
@@ -139,8 +155,6 @@ function PublisherPage() {
   )
 }
 
-const pct = (n: number) => `${Math.round(n * 100)}%`
-
 /** Facts about what this outlet covers vs all published Stories; no ratings. */
 function CoverageProfileSection({ profile }: { profile: CoverageProfile }) {
   if (profile.storyCount === 0) return null
@@ -149,80 +163,52 @@ function CoverageProfileSection({ profile }: { profile: CoverageProfile }) {
       <SectionLabel id="profile-heading">Coverage, last {profile.days} days</SectionLabel>
       <div className="grid gap-10 md:grid-cols-2">
         <MixBars
-          title="Desks"
-          entries={profile.desks.slice(0, 6)}
-          label={(k) => DESK_LABELS[k as Desk] ?? k}
+          title={`Desks · ${plural(profile.storyCount, 'story', 'stories')}`}
+          entries={profile.desks.slice(0, 6).map((d) => ({
+            ...d,
+            label: DESK_LABELS[d.key as Desk] ?? d.key,
+            // A desk's own key colour already means that desk across the site.
+            fillClass: cx(deskKey(d.key as Desk), 'bg-key'),
+          }))}
         />
         <MixBars
           title="Regions"
-          entries={profile.regions.slice(0, 6)}
-          label={(k) => REGION_LABELS[k as Region] ?? k}
+          entries={profile.regions
+            .slice(0, 6)
+            .map((r) => ({ ...r, label: REGION_LABELS[r.key as Region] ?? r.key }))}
         />
       </div>
-      <p className="mt-6 max-w-reading text-sm text-text-secondary">
-        Bars show the share of this outlet's {plural(profile.storyCount, 'story', 'stories')}; the
-        tick marks the share across all outlets.
-        {profile.officialShare !== null
-          ? ` ${pct(profile.officialShare)} of its stories also carry an official source.`
-          : ''}
-      </p>
-      {profile.missedMajor.count > 0 ? (
-        <div className="mt-6">
-          <p className="type-label text-text-muted">
-            Not covered:{' '}
-            {plural(profile.missedMajor.count, 'widely reported story', 'widely reported stories')}{' '}
-            this week
+      <div className="mt-10 grid gap-10 md:grid-cols-2">
+        {profile.officialShare !== null ? (
+          <Meter
+            value={profile.officialShare}
+            label="of its stories also carry an official source (agency, court, regulator)"
+          />
+        ) : null}
+        <div>
+          <p className="type-numeral">{profile.missedMajor.count}</p>
+          <p className="mt-2 text-sm text-text-secondary">
+            widely reported {profile.missedMajor.count === 1 ? 'story' : 'stories'} (4+ outlets)
+            this week it didn't cover
           </p>
-          <ul className="mt-2 flex flex-col gap-1">
-            {profile.missedMajor.examples.map((s) => (
-              <li key={s.id}>
-                <Link
-                  to="/stories/$slug"
-                  params={{ slug: s.slug }}
-                  className="link-headline font-semibold"
-                >
-                  {s.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {profile.missedMajor.examples.length > 0 ? (
+            <ul className="mt-3 flex flex-col gap-1.5">
+              {profile.missedMajor.examples.map((s) => (
+                <li key={s.id}>
+                  <Link
+                    to="/stories/$slug"
+                    params={{ slug: s.slug }}
+                    className="link-headline font-semibold"
+                  >
+                    {s.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          ) : null}
         </div>
-      ) : null}
+      </div>
     </section>
-  )
-}
-
-function MixBars({
-  title,
-  entries,
-  label,
-}: {
-  title: string
-  entries: CoverageProfile['desks']
-  label: (key: string) => string
-}) {
-  return (
-    <div>
-      <p className="mb-3 type-label text-text-muted">{title}</p>
-      <ul className="flex flex-col gap-2.5">
-        {entries.map((e) => (
-          <li key={e.key} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 text-sm">
-            <span className="truncate">{label(e.key)}</span>
-            <span className="relative h-2.5 bg-border" aria-hidden>
-              <span className="absolute inset-y-0 left-0 bg-text" style={{ width: pct(e.share) }} />
-              <span
-                className="absolute -inset-y-1 w-0.5 bg-accent"
-                style={{ left: pct(e.overallShare) }}
-              />
-            </span>
-            <span className="text-right tabular-nums">
-              {pct(e.share)}
-              <span className="sr-only">, all outlets {pct(e.overallShare)}</span>
-            </span>
-          </li>
-        ))}
-      </ul>
-    </div>
   )
 }
 
@@ -240,79 +226,45 @@ const SOURCE_LABELS: Record<string, string> = {
 }
 
 /** The latest reviewed assessment. Unreviewed evidence is never shown here. */
-function AssessmentSection({ assessment: a }: { assessment: PublisherAssessment | null }) {
+function AssessmentSection({ assessment }: { assessment: PublisherAssessment | null }) {
   return (
     <section aria-labelledby="assessment-heading" className="mt-12">
       <SectionLabel id="assessment-heading">Assessment</SectionLabel>
-      {!a ? (
-        <p className="text-text-secondary">Not assessed yet.</p>
+      {assessment ? (
+        <AssessmentScorecard assessment={assessment} />
       ) : (
-        <>
-          <dl className="grid gap-5 sm:grid-cols-3">
-            <div>
-              <dt className="type-label text-text-muted">Ownership</dt>
-              <dd className="mt-1">{a.ownership}</dd>
-            </div>
-            <div>
-              <dt className="type-label text-text-muted">Reliability</dt>
-              <dd className="mt-1">{a.reliability}</dd>
-            </div>
-            <div>
-              <dt className="type-label text-text-muted">Political lean</dt>
-              <dd className="mt-1">
-                {a.lean ? (
-                  <>
-                    {LEAN_LABELS[a.lean]}
-                    {a.countryContext ? ` within ${a.countryContext} media` : ''}
-                    {a.leanEvidenceUrl ? (
-                      <>
-                        {' '}
-                        <a
-                          href={a.leanEvidenceUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline underline-offset-4"
-                        >
-                          source
-                        </a>
-                      </>
-                    ) : null}
-                    {a.leanNote ? (
-                      <span className="block text-sm text-text-secondary">{a.leanNote}</span>
-                    ) : null}
-                  </>
-                ) : (
-                  'Not assessed'
-                )}
-              </dd>
-            </div>
-          </dl>
-          {a.evidence.length > 0 ? (
-            <ul className="mt-5 flex flex-col gap-1 text-sm text-text-secondary">
-              {a.evidence.map((e) => (
-                <li key={`${e.source}-${e.value}`}>
-                  {e.value} ·{' '}
-                  <a
-                    href={e.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="underline underline-offset-4"
-                  >
-                    {SOURCE_LABELS[e.source] ?? e.source}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <p className="mt-4 type-meta">
-            Reviewed {formatDate(a.reviewedAt)} · {a.methodologyVersion}. Ownership from Wikidata
-            (CC0); reliability labels from Wikipedia's perennial sources list (CC BY-SA 4.0). Lean
-            is relative to the outlet's own country, and only shown with a cited source.
-          </p>
-        </>
+        <p className="text-text-secondary">Not assessed yet.</p>
       )}
     </section>
   )
+}
+
+const FUNDING_OPTIONS = [
+  { value: 'public_broadcaster', label: 'Public broadcaster' },
+  { value: 'state', label: 'State-owned' },
+  { value: 'commercial', label: 'Commercial' },
+  { value: 'nonprofit', label: 'Nonprofit' },
+  { value: 'other', label: 'Other' },
+] as const
+
+const RELIABILITY_OPTIONS = [
+  { value: null, label: 'Not rated' },
+  { value: 'reliable', label: 'Generally reliable' },
+  { value: 'no_consensus', label: 'No consensus / mixed' },
+  { value: 'unreliable', label: 'Generally unreliable' },
+  { value: 'deprecated', label: 'Deprecated / blacklisted' },
+] as const
+
+/** Pre-fill the level from the imported Wikipedia label, when there is one. */
+function importedReliability(
+  evidence: { source: string; value: string }[],
+): ReliabilityLevel | null {
+  const rsp = evidence.find((e) => e.source === 'wp_rsp')?.value ?? ''
+  if (rsp.startsWith('Generally reliable')) return 'reliable'
+  if (rsp.startsWith('No consensus') || rsp.startsWith('Mixed')) return 'no_consensus'
+  if (rsp.startsWith('Generally unreliable')) return 'unreliable'
+  if (rsp.startsWith('Deprecated') || rsp.startsWith('Blacklisted')) return 'deprecated'
+  return null
 }
 
 const LEAN_OPTIONS = [
@@ -326,6 +278,8 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
   const evidence = useQuery(queries.evidence(slug))
   const save = useMutation(saveAssessmentMutation(api, queryClient, slug))
   const leanId = useId()
+  const fundingId = useId()
+  const reliabilityId = useId()
   const current = publisher.assessment
   const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
 
@@ -333,8 +287,12 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
     event.preventDefault()
     const form = new FormData(event.currentTarget)
     const lean = publisherLeanSchema.safeParse(form.get('lean'))
+    const funding = fundingModelSchema.safeParse(form.get('fundingModel'))
+    const level = reliabilityLevelSchema.safeParse(form.get('reliabilityLevel'))
     save.mutate({
+      fundingModel: funding.success ? funding.data : 'other',
       ownership: text(form, 'ownership'),
+      reliabilityLevel: level.success ? level.data : null,
       reliability: text(form, 'reliability'),
       countryContext: text(form, 'countryContext').toUpperCase() || null,
       lean: lean.success ? lean.data : null,
@@ -369,7 +327,23 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
       ) : (
         <p className="mb-6 text-sm text-text-muted">No imported evidence.</p>
       )}
-      <form onSubmit={onSubmit} className="flex max-w-reading flex-col gap-4">
+      {/* Remount once evidence loads so the reliability pre-fill applies (uncontrolled form). */}
+      <form
+        key={evidence.isSuccess ? 'ready' : 'loading'}
+        onSubmit={onSubmit}
+        className="flex max-w-reading flex-col gap-4"
+      >
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={fundingId} className="type-label">
+            Funding model
+          </label>
+          <Select
+            id={fundingId}
+            name="fundingModel"
+            options={FUNDING_OPTIONS}
+            defaultValue={current?.fundingModel ?? 'commercial'}
+          />
+        </div>
         <Textarea
           label="Ownership and funding"
           name="ownership"
@@ -386,6 +360,19 @@ function AssessmentEditor({ slug, publisher }: { slug: string; publisher: Publis
           maxLength={500}
           defaultValue={current?.reliability ?? ''}
         />
+        <div className="flex flex-col gap-1.5">
+          <label htmlFor={reliabilityId} className="type-label">
+            Reliability level
+          </label>
+          <Select
+            id={reliabilityId}
+            name="reliabilityLevel"
+            options={RELIABILITY_OPTIONS}
+            defaultValue={
+              current?.reliabilityLevel ?? importedReliability(evidence.data?.evidence ?? [])
+            }
+          />
+        </div>
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1.5">
             <label htmlFor={leanId} className="type-label">
