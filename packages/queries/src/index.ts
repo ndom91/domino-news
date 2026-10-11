@@ -1,5 +1,6 @@
 import type { ApiClient } from '@dn/api-client'
 import type {
+  AssessmentRequest,
   Region,
   SearchQuery,
   SummaryEditRequest,
@@ -24,6 +25,7 @@ export const queryKeys = {
   ops: () => ['ops', 'status'] as const,
   preferences: () => ['me', 'preferences'] as const,
   insights: () => ['me', 'insights'] as const,
+  evidence: (slug: string) => ['publishers', 'evidence', slug] as const,
 }
 
 export function createQueries(api: ApiClient) {
@@ -86,6 +88,11 @@ export function createQueries(api: ApiClient) {
         queryFn: ({ signal }) => api.getPreferences(signal),
         staleTime: 5 * 60_000,
       }),
+    evidence: (slug: string) =>
+      queryOptions({
+        queryKey: queryKeys.evidence(slug),
+        queryFn: ({ signal }) => api.getEvidence(slug, signal),
+      }),
     insights: () =>
       queryOptions({
         queryKey: queryKeys.insights(),
@@ -118,6 +125,15 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
     onSuccess: async (prefs: UserPreferences) => {
       queryClient.setQueryData(queryKeys.preferences(), prefs)
       await queryClient.invalidateQueries({ queryKey: queryKeys.insights() })
+    },
+  }
+}
+
+export function saveAssessmentMutation(api: ApiClient, queryClient: QueryClient, slug: string) {
+  return {
+    mutationFn: (body: AssessmentRequest) => api.saveAssessment(slug, body),
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: queryKeys.publisher(slug) })
     },
   }
 }

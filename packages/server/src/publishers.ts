@@ -7,6 +7,7 @@ import type {
   PublisherStats,
 } from '@dn/schemas'
 import { eq, sql } from 'drizzle-orm'
+import { latestAssessment } from './assessments.ts'
 import { storyListItems } from './reader.ts'
 
 // Coverage is measured over published Stories and their active source articles.
@@ -173,6 +174,7 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
   return {
     ...stats,
     profile: await coverageProfile(db, publisher.id),
+    assessment: await latestAssessment(db, publisher.id),
     languages: publisher.languages,
     policyNote: publisher.policyNote,
     policyReviewedAt: publisher.policyReviewedAt?.toISOString() ?? null,

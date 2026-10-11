@@ -256,6 +256,67 @@ export const interpretationEvidence = pgTable(
   (t) => [primaryKey({ columns: [t.interpretationId, t.observationId] })],
 )
 
+// Publisher assessments. Evidence is imported from open sources (Wikidata, Wikipedia's
+// perennial sources list) and refreshed on every import. An assessment is a reviewed,
+// append-only snapshot: a new review is a new row, and it freezes the evidence it used.
+
+export const publisherEvidence = pgTable(
+  'publisher_evidence',
+  {
+    id: text('id').primaryKey(),
+    publisherId: text('publisher_id')
+      .notNull()
+      .references(() => publisher.id, { onDelete: 'cascade' }),
+    source: text('source').$type<'wikidata' | 'wp_rsp'>().notNull(),
+    dimension: text('dimension').$type<'ownership' | 'reliability' | 'lean'>().notNull(),
+    value: text('value').notNull(),
+    url: text('url').notNull(),
+    retrievedAt: ts('retrieved_at').notNull(),
+  },
+  (t) => [index('publisher_evidence_publisher_idx').on(t.publisherId)],
+)
+
+export const publisherLean = pgEnum('publisher_lean', [
+  'left',
+  'centre_left',
+  'centre',
+  'centre_right',
+  'right',
+])
+
+export const publisherAssessment = pgTable(
+  'publisher_assessment',
+  {
+    id: text('id').primaryKey(),
+    publisherId: text('publisher_id')
+      .notNull()
+      .references(() => publisher.id, { onDelete: 'cascade' }),
+    methodologyVersion: text('methodology_version').notNull(),
+    // Lean is relative to this country's media, never one global axis.
+    countryContext: text('country_context'),
+    ownership: text('ownership').notNull(),
+    reliability: text('reliability').notNull(),
+    // Null = not assessed. When set, it must cite evidence (e.g. Reuters audience data).
+    lean: publisherLean('lean'),
+    leanEvidenceUrl: text('lean_evidence_url'),
+    leanNote: text('lean_note'),
+    evidence: jsonb('evidence')
+      .$type<{ source: string; dimension: string; value: string; url: string }[]>()
+      .notNull(),
+    reviewedBy: text('reviewed_by')
+      .notNull()
+      .references(() => authUser.id),
+    reviewedAt: ts('reviewed_at').notNull().defaultNow(),
+  },
+  (t) => [
+    index('publisher_assessment_publisher_idx').on(t.publisherId, t.reviewedAt),
+    check(
+      'publisher_assessment_lean_cited',
+      sql`${t.lean} is null or ${t.leanEvidenceUrl} is not null`,
+    ),
+  ],
+)
+
 // Stories, graph and narratives
 
 export const story = pgTable(

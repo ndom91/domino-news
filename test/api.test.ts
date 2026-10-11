@@ -1,6 +1,7 @@
 import { schema } from '@dn/db'
 import {
   apiErrorSchema,
+  evidenceResponseSchema,
   frontPageSchema,
   insightsSchema,
   narrativeListResponseSchema,
@@ -254,6 +255,19 @@ describe('/api/v1 write endpoints', () => {
         }),
       )
     expect((await asReader('/api/v1/ops/status')).status).toBe(403)
+    expect((await asReader('/api/v1/publishers/bbc/evidence')).status).toBe(403)
+    const review = await asReader('/api/v1/publishers/bbc/assessment', {
+      method: 'POST',
+      body: JSON.stringify({
+        ownership: 'x',
+        reliability: 'y',
+        countryContext: null,
+        lean: null,
+        leanEvidenceUrl: null,
+        leanNote: null,
+      }),
+    })
+    expect(review.status).toBe(403)
     const action = await asReader('/api/v1/ops/actions', {
       method: 'POST',
       body: JSON.stringify({ action: 'pause_backfill' }),
@@ -365,8 +379,10 @@ describe('reading history and insights', () => {
       )
       const insights = insightsSchema.parse(await (await call('/api/v1/me/insights')).json())
       const missed = insights.missedDevelopments.find((m) => m.narrative.id === oldest.narrative_id)
-      expect(missed?.stories.map((s) => s.id)).toContain(newer[0].id)
-      expect(missed?.stories.some((s) => s.id === oldest.id)).toBe(false)
+      // Up to 3 of the newer Stories, never the one already read.
+      const newerIds = new Set(newer.map((r) => r.id))
+      expect(missed?.stories.length).toBeGreaterThan(0)
+      expect(missed?.stories.every((s) => newerIds.has(s.id))).toBe(true)
     } finally {
       await post('/api/v1/me/preferences', { rememberReads: false })
     }
@@ -374,6 +390,74 @@ describe('reading history and insights', () => {
 
   it('rejects reads without a story id', async () => {
     expect((await post('/api/v1/me/reads', {})).status).toBe(400)
+  })
+})
+
+describe('publisher assessments', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+  const review = {
+    ownership: 'Public broadcaster funded by the licence fee',
+    reliability: 'Generally reliable (Wikipedia perennial sources)',
+    countryContext: 'GB',
+    lean: null,
+    leanEvidenceUrl: null,
+    leanNote: null,
+  }
+
+  it('publishes reviewed versions that freeze the imported evidence', async () => {
+    const { publisherDetailSchema } = await import('@dn/schemas')
+    const detail = async () =>
+      publisherDetailSchema.parse(await (await call('/api/v1/publishers/bbc')).json())
+    expect((await detail()).assessment).toBeNull()
+
+    await h.ctx.pool.query(
+      `insert into publisher_evidence (id, publisher_id, source, dimension, value, url, retrieved_at)
+       select 'pev_test', id, 'wp_rsp', 'reliability', 'Generally reliable', 'https://en.wikipedia.org/wiki/WP:RSP', now()
+       from publisher where slug = 'bbc'`,
+    )
+    expect(
+      evidenceResponseSchema.parse(await (await call('/api/v1/publishers/bbc/evidence')).json())
+        .evidence,
+    ).toHaveLength(1)
+
+    expect((await post('/api/v1/publishers/bbc/assessment', review)).status).toBe(200)
+    const first = (await detail()).assessment
+    expect(first).toMatchObject({ ownership: review.ownership, lean: null })
+    expect(first?.evidence).toEqual([
+      {
+        source: 'wp_rsp',
+        dimension: 'reliability',
+        value: 'Generally reliable',
+        url: 'https://en.wikipedia.org/wiki/WP:RSP',
+      },
+    ])
+
+    // A lean must cite a source.
+    expect(
+      (await post('/api/v1/publishers/bbc/assessment', { ...review, lean: 'centre' })).status,
+    ).toBe(400)
+    const withLean = {
+      ...review,
+      lean: 'centre',
+      leanEvidenceUrl: 'https://reutersinstitute.politics.ox.ac.uk/digital-news-report',
+    }
+    expect((await post('/api/v1/publishers/bbc/assessment', withLean)).status).toBe(200)
+    expect((await detail()).assessment).toMatchObject({ lean: 'centre', countryContext: 'GB' })
+
+    // History is append-only: earlier versions stay and can't be edited.
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from publisher_assessment a join publisher p on p.id = a.publisher_id where p.slug = 'bbc'`,
+    )
+    expect(rows[0].n).toBe(2)
+    await expect(
+      h.ctx.pool.query(`update publisher_assessment set ownership = 'edited'`),
+    ).rejects.toThrow()
+    expect((await call('/api/v1/publishers/nope/evidence')).status).toBe(404)
   })
 })
 

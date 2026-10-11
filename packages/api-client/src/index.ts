@@ -1,6 +1,9 @@
 import {
   type ApiErrorCode,
+  type AssessmentRequest,
   apiErrorSchema,
+  type EvidenceResponse,
+  evidenceResponseSchema,
   type FrontPage,
   frontPageSchema,
   type Insights,
@@ -12,8 +15,10 @@ import {
   type OpsAction,
   type OpsStatus,
   opsStatusSchema,
+  type PublisherAssessment,
   type PublisherDetail,
   type PublisherListResponse,
+  publisherAssessmentSchema,
   publisherDetailSchema,
   publisherListResponseSchema,
   type Region,
@@ -133,6 +138,18 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
         method: 'POST',
         body: { storyId },
       }),
+    getEvidence: (slug: string, signal?: AbortSignalLike) =>
+      request<EvidenceResponse>(
+        evidenceResponseSchema,
+        `/publishers/${encodeURIComponent(slug)}/evidence`,
+        { signal },
+      ),
+    saveAssessment: (slug: string, body: AssessmentRequest) =>
+      request<PublisherAssessment | null>(
+        publisherAssessmentSchema.nullable(),
+        `/publishers/${encodeURIComponent(slug)}/assessment`,
+        { method: 'POST', body },
+      ),
     getInsights: (signal?: AbortSignalLike) =>
       request<Insights>(insightsSchema, '/me/insights', { signal }),
     runOpsAction: (action: OpsAction['action']) =>

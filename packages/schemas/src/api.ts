@@ -416,8 +416,62 @@ export const coverageProfileSchema = z.object({
 })
 export type CoverageProfile = z.infer<typeof coverageProfileSchema>
 
+// Lean is always relative to one country's media (countryContext), never a global axis.
+export const publisherLeanSchema = z.enum([
+  'left',
+  'centre_left',
+  'centre',
+  'centre_right',
+  'right',
+])
+export type PublisherLean = z.infer<typeof publisherLeanSchema>
+
+export const assessmentEvidenceSchema = z.object({
+  source: z.string(),
+  dimension: z.enum(['ownership', 'reliability', 'lean']),
+  value: z.string(),
+  url: z.string(),
+})
+export type AssessmentEvidence = z.infer<typeof assessmentEvidenceSchema>
+
+// A reviewed snapshot. Only reviewed assessments are ever shown to readers.
+export const publisherAssessmentSchema = z.object({
+  id: z.string(),
+  methodologyVersion: z.string(),
+  countryContext: z.string().nullable(),
+  ownership: z.string(),
+  reliability: z.string(),
+  lean: publisherLeanSchema.nullable(),
+  leanEvidenceUrl: z.string().nullable(),
+  leanNote: z.string().nullable(),
+  evidence: z.array(assessmentEvidenceSchema),
+  reviewedAt: z.string(),
+})
+export type PublisherAssessment = z.infer<typeof publisherAssessmentSchema>
+
+export const assessmentRequestSchema = z
+  .object({
+    ownership: z.string().trim().min(1).max(500),
+    reliability: z.string().trim().min(1).max(500),
+    countryContext: z.string().length(2).nullable(),
+    lean: publisherLeanSchema.nullable(),
+    leanEvidenceUrl: z.url().nullable(),
+    leanNote: z.string().trim().max(500).nullable(),
+  })
+  .refine((r) => r.lean === null || r.leanEvidenceUrl !== null, {
+    message: 'A lean needs a cited source',
+    path: ['leanEvidenceUrl'],
+  })
+export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>
+
+export const evidenceResponseSchema = z.object({
+  evidence: z.array(assessmentEvidenceSchema.extend({ retrievedAt: z.string() })),
+})
+export type EvidenceResponse = z.infer<typeof evidenceResponseSchema>
+
 export const publisherDetailSchema = publisherStatsSchema.extend({
   profile: coverageProfileSchema,
+  assessment: publisherAssessmentSchema.nullable(),
   languages: z.array(z.string()),
   policyNote: z.string().nullable(),
   policyReviewedAt: z.string().nullable(),

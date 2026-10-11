@@ -1,6 +1,7 @@
 import {
   type ApiErrorBody,
   type ApiErrorCode,
+  assessmentRequestSchema,
   opsActionSchema,
   readRequestSchema,
   regionSchema,
@@ -9,6 +10,7 @@ import {
   userPreferencesUpdateSchema,
 } from '@dn/schemas'
 import { ZodError, z } from 'zod'
+import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import type { ServerContext } from '../context.ts'
 import { getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
@@ -29,6 +31,12 @@ const storyListQuery = z.object({
   limit: z.coerce.number().int().min(1).max(100).default(30),
   region: regionSchema.optional(),
 })
+
+async function publisherIdOf(ctx: ServerContext, slug: string | undefined) {
+  const id = await publisherIdBySlug(ctx.db, slug ?? '')
+  if (!id) throw new HttpError('not_found', 'publisher not found')
+  return id
+}
 
 const STATUS: Record<ApiErrorCode, number> = {
   bad_request: 400,
@@ -175,6 +183,25 @@ const routes: Route[] = [
   }),
   route('GET', '/api/v1/me/insights', async ({ ctx, userId }) =>
     json(await getInsights(ctx.db, userId)),
+  ),
+  route(
+    'GET',
+    '/api/v1/publishers/:slug/evidence',
+    async ({ ctx, params }) =>
+      json(await listEvidence(ctx.db, await publisherIdOf(ctx, params.slug))),
+    { adminOnly: true },
+  ),
+  route(
+    'POST',
+    '/api/v1/publishers/:slug/assessment',
+    async ({ ctx, request, params, userId }) => {
+      const body = await readJson(request, assessmentRequestSchema)
+      const publisherId = await publisherIdOf(ctx, params.slug)
+      return json(
+        await createAssessment(ctx.db, { publisherId, reviewedBy: userId, request: body }),
+      )
+    },
+    { adminOnly: true },
   ),
   route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx)), {
     adminOnly: true,

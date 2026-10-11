@@ -1,5 +1,12 @@
 import { parseArgs } from 'node:util'
-import { createQueues, type FixtureVariant, feedIds, pollFeed, seedPublishers } from '@dn/jobs'
+import {
+  createQueues,
+  type FixtureVariant,
+  feedIds,
+  importAssessmentEvidence,
+  pollFeed,
+  seedPublishers,
+} from '@dn/jobs'
 import {
   analysisJob,
   createUserAccount,
@@ -21,6 +28,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   user:create --username u --password p [--role admin|user]   (default admin)
   user:role --username u --role admin|user
   search:rebuild                    Rebuild Typesense collections from Postgres and swap aliases
+  assessments:import                Refresh publisher evidence from Wikidata and Wikipedia's perennial sources
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
@@ -78,6 +86,9 @@ try {
     }
     case 'search:rebuild':
       await rebuildSearchIndex(ctx.db, ctx.ts)
+      break
+    case 'assessments:import':
+      console.log(await importAssessmentEvidence(ctx, (msg) => console.log(`[assessments] ${msg}`)))
       break
     case 'backfill:pause':
     case 'backfill:resume':

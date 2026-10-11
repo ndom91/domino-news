@@ -1,17 +1,23 @@
 import { formatDate, plural } from '@dn/domain'
+import { saveAssessmentMutation } from '@dn/queries'
 import {
   type CoverageProfile,
   DESK_LABELS,
   type Desk,
+  type PublisherAssessment,
+  type PublisherDetail,
+  type PublisherLean,
+  publisherLeanSchema,
   REGION_LABELS,
   type Region,
 } from '@dn/schemas'
-import { Badge, Notice, StoryItem } from '@dn/ui'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { Badge, Button, Notice, Select, StoryItem, Textarea, TextInput } from '@dn/ui'
+import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { type FormEvent, useId } from 'react'
 import { RouterLink } from '../../components/link.tsx'
 import { Page, SectionLabel } from '../../components/page.tsx'
-import { queries } from '../../lib/api.ts'
+import { api, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/publishers/$slug')({
   loader: async ({ context, params }) => {
@@ -28,6 +34,7 @@ function PublisherPage() {
   const { slug } = Route.useParams()
   const { now } = Route.useLoaderData()
   const { data: p } = useSuspenseQuery(queries.publisher(slug))
+  const isAdmin = Route.useRouteContext().session.user?.isAdmin ?? false
   const maxShared = Math.max(1, ...p.coCoverage.map((c) => c.sharedStories))
   return (
     <Page>
@@ -63,6 +70,8 @@ function PublisherPage() {
           </dl>
 
           <CoverageProfileSection profile={p.profile} />
+          <AssessmentSection assessment={p.assessment} />
+          {isAdmin ? <AssessmentEditor slug={p.slug} publisher={p} /> : null}
 
           <section aria-labelledby="recent-heading" className="mt-12">
             <SectionLabel id="recent-heading">Recent stories with {p.name}</SectionLabel>
@@ -214,5 +223,215 @@ function MixBars({
         ))}
       </ul>
     </div>
+  )
+}
+
+const LEAN_LABELS: Record<PublisherLean, string> = {
+  left: 'Left',
+  centre_left: 'Centre-left',
+  centre: 'Centre',
+  centre_right: 'Centre-right',
+  right: 'Right',
+}
+
+const SOURCE_LABELS: Record<string, string> = {
+  wikidata: 'Wikidata',
+  wp_rsp: 'Wikipedia perennial sources',
+}
+
+/** The latest reviewed assessment. Unreviewed evidence is never shown here. */
+function AssessmentSection({ assessment: a }: { assessment: PublisherAssessment | null }) {
+  return (
+    <section aria-labelledby="assessment-heading" className="mt-12">
+      <SectionLabel id="assessment-heading">Assessment</SectionLabel>
+      {!a ? (
+        <p className="text-text-secondary">Not assessed yet.</p>
+      ) : (
+        <>
+          <dl className="grid gap-5 sm:grid-cols-3">
+            <div>
+              <dt className="type-label text-text-muted">Ownership</dt>
+              <dd className="mt-1">{a.ownership}</dd>
+            </div>
+            <div>
+              <dt className="type-label text-text-muted">Reliability</dt>
+              <dd className="mt-1">{a.reliability}</dd>
+            </div>
+            <div>
+              <dt className="type-label text-text-muted">Political lean</dt>
+              <dd className="mt-1">
+                {a.lean ? (
+                  <>
+                    {LEAN_LABELS[a.lean]}
+                    {a.countryContext ? ` within ${a.countryContext} media` : ''}
+                    {a.leanEvidenceUrl ? (
+                      <>
+                        {' '}
+                        <a
+                          href={a.leanEvidenceUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline underline-offset-4"
+                        >
+                          source
+                        </a>
+                      </>
+                    ) : null}
+                    {a.leanNote ? (
+                      <span className="block text-sm text-text-secondary">{a.leanNote}</span>
+                    ) : null}
+                  </>
+                ) : (
+                  'Not assessed'
+                )}
+              </dd>
+            </div>
+          </dl>
+          {a.evidence.length > 0 ? (
+            <ul className="mt-5 flex flex-col gap-1 text-sm text-text-secondary">
+              {a.evidence.map((e) => (
+                <li key={`${e.source}-${e.value}`}>
+                  {e.value} ·{' '}
+                  <a
+                    href={e.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="underline underline-offset-4"
+                  >
+                    {SOURCE_LABELS[e.source] ?? e.source}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          ) : null}
+          <p className="mt-4 type-meta">
+            Reviewed {formatDate(a.reviewedAt)} · {a.methodologyVersion}. Ownership from Wikidata
+            (CC0); reliability labels from Wikipedia's perennial sources list (CC BY-SA 4.0). Lean
+            is relative to the outlet's own country, and only shown with a cited source.
+          </p>
+        </>
+      )}
+    </section>
+  )
+}
+
+const LEAN_OPTIONS = [
+  { value: null, label: 'Not assessed' },
+  ...publisherLeanSchema.options.map((l) => ({ value: l, label: LEAN_LABELS[l] })),
+]
+
+/** Admin: review imported evidence and publish a new assessment version. */
+function AssessmentEditor({ slug, publisher }: { slug: string; publisher: PublisherDetail }) {
+  const queryClient = useQueryClient()
+  const evidence = useQuery(queries.evidence(slug))
+  const save = useMutation(saveAssessmentMutation(api, queryClient, slug))
+  const leanId = useId()
+  const current = publisher.assessment
+  const text = (form: FormData, key: string) => String(form.get(key) ?? '').trim()
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const lean = publisherLeanSchema.safeParse(form.get('lean'))
+    save.mutate({
+      ownership: text(form, 'ownership'),
+      reliability: text(form, 'reliability'),
+      countryContext: text(form, 'countryContext').toUpperCase() || null,
+      lean: lean.success ? lean.data : null,
+      leanEvidenceUrl: text(form, 'leanEvidenceUrl') || null,
+      leanNote: text(form, 'leanNote') || null,
+    })
+  }
+
+  return (
+    <section aria-labelledby="review-heading" className="mt-10 border-t-2 border-rule pt-6">
+      <SectionLabel id="review-heading">Review assessment (admin)</SectionLabel>
+      <p className="mb-3 text-sm text-text-secondary">
+        Imported evidence. Refresh it with <code>pnpm cli assessments:import</code>. Wikidata
+        ownership can be incomplete, so check it before publishing.
+      </p>
+      {evidence.data?.evidence.length ? (
+        <ul className="mb-6 flex flex-col gap-1 text-sm">
+          {evidence.data.evidence.map((e) => (
+            <li key={`${e.source}-${e.value}`}>
+              <span className="type-label text-text-muted">{e.dimension}</span> {e.value} ·{' '}
+              <a
+                href={e.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline underline-offset-4"
+              >
+                {SOURCE_LABELS[e.source] ?? e.source}
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="mb-6 text-sm text-text-muted">No imported evidence.</p>
+      )}
+      <form onSubmit={onSubmit} className="flex max-w-reading flex-col gap-4">
+        <Textarea
+          label="Ownership and funding"
+          name="ownership"
+          rows={2}
+          required
+          maxLength={500}
+          defaultValue={current?.ownership ?? ''}
+        />
+        <Textarea
+          label="Reliability"
+          name="reliability"
+          rows={2}
+          required
+          maxLength={500}
+          defaultValue={current?.reliability ?? ''}
+        />
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label htmlFor={leanId} className="type-label">
+              Political lean
+            </label>
+            <Select
+              id={leanId}
+              name="lean"
+              options={LEAN_OPTIONS}
+              defaultValue={current?.lean ?? null}
+            />
+          </div>
+          <TextInput
+            label="Country context"
+            name="countryContext"
+            maxLength={2}
+            defaultValue={current?.countryContext ?? publisher.countryCode ?? ''}
+            className="w-28"
+          />
+        </div>
+        <TextInput
+          label="Lean source (required with a lean, e.g. Reuters Digital News Report)"
+          name="leanEvidenceUrl"
+          type="url"
+          defaultValue={current?.leanEvidenceUrl ?? ''}
+        />
+        <TextInput
+          label="Lean note (optional)"
+          name="leanNote"
+          maxLength={500}
+          defaultValue={current?.leanNote ?? ''}
+        />
+        <div>
+          <Button type="submit" variant="primary" loading={save.isPending}>
+            Publish assessment
+          </Button>
+        </div>
+        {save.isError ? (
+          <Notice tone="error" title="Assessment not published">
+            {save.error.message}
+          </Notice>
+        ) : null}
+        {save.isSuccess ? (
+          <p className="text-sm text-text-secondary">Published as a new version.</p>
+        ) : null}
+      </form>
+    </section>
   )
 }

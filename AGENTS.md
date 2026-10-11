@@ -38,6 +38,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
 | `pnpm cli user:create --username u --password p [--role user]` | Create an account (public sign-up is disabled). CLI accounts are admins unless `--role user` |
 | `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
+| `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership) and Wikipedia's perennial sources (reliability) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli summaries:refresh` | Re-summarise published stories that have no desk yet (one GPU call each, plus context, claims and relate for the new version) |
@@ -143,7 +144,9 @@ GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=&region=
 GET  /api/v1/publishers                  # outlet stats + who-covered-what matrix
-GET  /api/v1/publishers/:slug            # stats, source-use policy, recent stories, co-coverage
+GET  /api/v1/publishers/:slug            # stats, source-use policy, coverage profile, assessment, co-coverage
+GET  /api/v1/publishers/:slug/evidence   # admin: imported, unreviewed evidence
+POST /api/v1/publishers/:slug/assessment # admin: publish a reviewed assessment (new version)
 GET  /api/v1/ops/status                  # admin only
 POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
 GET  /api/v1/me/preferences              # { edition: region | null, rememberReads }
@@ -165,6 +168,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
 - **Regions and editions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region; a reader's edition (`/account`) picks the lead and adds an "In {region}" rail without re-ranking the chronological feed. After upgrading, existing Stories have no regions until re-summarised, and Typesense needs `pnpm cli search:rebuild`.
 - **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored.
+- **Publisher assessments:** evidence is imported from open sources only: Wikidata for ownership (CC0), and Wikipedia's perennial sources list for reliability (CC BY-SA). An admin reviews it on the publisher page and publishes an append-only, versioned assessment that freezes the evidence used. Political lean is entered by hand, relative to the outlet's own country, and must cite a source such as the Reuters Institute's audience data; otherwise it shows "Not assessed". Licensed ratings (AllSides, MBFC, NewsGuard) are not used: they're non-commercial or paid.
 - **Coverage profile:** each publisher page shows its desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it didn't cover this week. Facts only; no ratings yet.
 - **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.

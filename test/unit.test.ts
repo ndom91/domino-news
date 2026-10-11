@@ -8,7 +8,14 @@ import {
   regionForCountry,
   validateNewEdge,
 } from '@dn/domain'
-import { isStaleItem, isWireCopy, parseFeed } from '@dn/jobs'
+import {
+  findRspEntry,
+  isStaleItem,
+  isWireCopy,
+  parseFeed,
+  parseRspWikitext,
+  wikidataEvidence,
+} from '@dn/jobs'
 import { layoutNarrative } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { describe, expect, it } from 'vitest'
@@ -321,5 +328,51 @@ describe('prompt inputs', () => {
     })
     expect(prompt).toContain('"sourceType": "official"')
     expect(prompt).toContain('"sourceType": "newsroom"')
+  })
+})
+
+describe('assessment evidence parsing', () => {
+  it('reads status and domains from perennial sources rows', () => {
+    const wikitext = `{| class="wikitable"
+|- class="s-gr" id="The New York Times"
+| data-sort-value="New York Times" | ''[[The New York Times]]''
+| {{WP:RSPSTATUS|gr}}
+| {{WP:RSPUSES|nytimes.com}}
+|- class="s-d"
+| ''[[Daily Mail]]''
+| {{WP:RSPSTATUS|d}}
+| {{WP:RSPUSES|dailymail.co.uk|mailonsunday.co.uk}}
+|}`
+    const entries = parseRspWikitext(wikitext)
+    expect(entries).toEqual([
+      { name: 'The New York Times', status: 'Generally reliable', domains: ['nytimes.com'] },
+      {
+        name: 'Daily Mail',
+        status: 'Deprecated',
+        domains: ['dailymail.co.uk', 'mailonsunday.co.uk'],
+      },
+    ])
+    expect(findRspEntry(entries, 'www.nytimes.com')?.name).toBe('The New York Times')
+    expect(findRspEntry(entries, 'mailonsunday.co.uk')?.status).toBe('Deprecated')
+    expect(findRspEntry(entries, 'example.com')).toBeUndefined()
+  })
+
+  it('describes owners, their kind and their own owner from Wikidata', () => {
+    const ref = (id: string) => ({ mainsnak: { datavalue: { value: { id } } } })
+    const item = { id: 'Q1', claims: { P127: [ref('Q2')], P1387: [ref('Q9')] } }
+    const related = {
+      Q2: {
+        id: 'Q2',
+        labels: { de: { value: 'Netz GmbH' } },
+        claims: { P31: [ref('Q3')], P127: [ref('Q4')] },
+      },
+      Q3: { id: 'Q3', labels: { en: { value: 'business' } } },
+      Q4: { id: 'Q4', labels: { en: { value: 'Government of Exampleland' } } },
+      Q9: { id: 'Q9', labels: { en: { value: 'centrism' } } },
+    }
+    expect(wikidataEvidence(item, related).map((e) => `${e.dimension}: ${e.value}`)).toEqual([
+      'ownership: Owned by Netz GmbH (business), itself owned by Government of Exampleland',
+      'lean: Political alignment (community-edited, unsourced): centrism',
+    ])
   })
 })

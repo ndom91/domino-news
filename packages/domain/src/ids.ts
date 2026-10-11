@@ -31,4 +31,6 @@ export const ID_PREFIX = {
   analysisRun: 'run',
   interpretation: 'int',
   summaryVersion: 'sum',
+  publisherEvidence: 'pev',
+  publisherAssessment: 'pas',
 } as const
