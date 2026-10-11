@@ -53,11 +53,14 @@ function DaySections({ stories, now }: { stories: StoryListItem[]; now: string }
     <div className="flex flex-col gap-10">
       {days.map((day, i) => (
         <section key={day.label} aria-label={day.label} className="flex flex-col gap-8">
-          <PeriodBar
-            position={i}
-            title={day.label}
-            meta={plural(day.stories.length, 'story', 'stories')}
-          />
+          {/* Today's stories sit straight under LATEST; only older days get a bar. */}
+          {day.label === 'Today' ? null : (
+            <PeriodBar
+              position={i}
+              title={day.label}
+              meta={plural(day.stories.length, 'story', 'stories')}
+            />
+          )}
           <StoryGrid stories={day.stories} now={now} />
         </section>
       ))}
