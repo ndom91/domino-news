@@ -393,7 +393,31 @@ export const opsActionSchema = z.object({
 })
 export type OpsAction = z.infer<typeof opsActionSchema>
 
+const mixEntry = z.object({
+  key: z.string(),
+  // Share of this outlet's Stories vs share of all published Stories, both 0-1.
+  share: z.number(),
+  overallShare: z.number(),
+})
+
+// Computed facts about what an outlet covers. No judgement or ratings.
+export const coverageProfileSchema = z.object({
+  days: z.number().int(),
+  storyCount: z.number().int().nonnegative(),
+  desks: z.array(mixEntry),
+  regions: z.array(mixEntry),
+  // Share of its Stories that also carry an official source (agency, court…); null if none.
+  officialShare: z.number().nullable(),
+  // Widely covered Stories from the last 7 days this outlet didn't cover.
+  missedMajor: z.object({
+    count: z.number().int().nonnegative(),
+    examples: z.array(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
+  }),
+})
+export type CoverageProfile = z.infer<typeof coverageProfileSchema>
+
 export const publisherDetailSchema = publisherStatsSchema.extend({
+  profile: coverageProfileSchema,
   languages: z.array(z.string()),
   policyNote: z.string().nullable(),
   policyReviewedAt: z.string().nullable(),
@@ -406,8 +430,37 @@ export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 
 export const userPreferencesSchema = z.object({
   edition: regionSchema.nullable(),
+  rememberReads: z.boolean(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
+
+// Saves only the fields sent, so one setting can change without resending the rest.
+export const userPreferencesUpdateSchema = userPreferencesSchema.partial()
+export type UserPreferencesUpdate = z.infer<typeof userPreferencesUpdateSchema>
+
+export const readRequestSchema = z.object({ storyId: z.string().min(1) })
+
+const deskOrRegion = z.union([deskSchema, regionSchema])
+
+export const insightsSchema = z.object({
+  // False when reading history is off; the page then offers the opt-in.
+  enabled: z.boolean(),
+  readCount: z.number().int().nonnegative(),
+  // Narratives you read in that have newer Stories you haven't opened.
+  missedDevelopments: z.array(
+    z.object({ narrative: narrativeRefSchema, stories: z.array(storyListItemSchema) }),
+  ),
+  // Regions and desks with many Stories this week that you barely read.
+  gaps: z.array(
+    z.object({
+      kind: z.enum(['region', 'desk']),
+      key: deskOrRegion,
+      storiesThisWeek: z.number().int().nonnegative(),
+      yourReads: z.number().int().nonnegative(),
+    }),
+  ),
+})
+export type Insights = z.infer<typeof insightsSchema>
 
 // A Narrative's Stories as a list of steps, oldest first (front page Developing band).
 export const narrativeStepSchema = z.object({

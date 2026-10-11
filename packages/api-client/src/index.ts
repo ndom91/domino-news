@@ -3,6 +3,8 @@ import {
   apiErrorSchema,
   type FrontPage,
   frontPageSchema,
+  type Insights,
+  insightsSchema,
   type NarrativeDetail,
   type NarrativeListResponse,
   narrativeDetailSchema,
@@ -24,6 +26,7 @@ import {
   storyDetailSchema,
   storyListResponseSchema,
   type UserPreferences,
+  type UserPreferencesUpdate,
   userPreferencesSchema,
 } from '@dn/schemas'
 import { z } from 'zod'
@@ -123,8 +126,15 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       request<OpsStatus>(opsStatusSchema, '/ops/status', { signal }),
     getPreferences: (signal?: AbortSignalLike) =>
       request<UserPreferences>(userPreferencesSchema, '/me/preferences', { signal }),
-    savePreferences: (body: UserPreferences) =>
+    savePreferences: (body: UserPreferencesUpdate) =>
       request<UserPreferences>(userPreferencesSchema, '/me/preferences', { method: 'POST', body }),
+    recordRead: (storyId: string) =>
+      request(z.object({ recorded: z.boolean() }), '/me/reads', {
+        method: 'POST',
+        body: { storyId },
+      }),
+    getInsights: (signal?: AbortSignalLike) =>
+      request<Insights>(insightsSchema, '/me/insights', { signal }),
     runOpsAction: (action: OpsAction['action']) =>
       request(z.object({ ok: z.boolean() }), '/ops/actions', { method: 'POST', body: { action } }),
   }

@@ -2,16 +2,18 @@ import {
   type ApiErrorBody,
   type ApiErrorCode,
   opsActionSchema,
+  readRequestSchema,
   regionSchema,
   searchQuerySchema,
   summaryEditRequestSchema,
-  userPreferencesSchema,
+  userPreferencesUpdateSchema,
 } from '@dn/schemas'
 import { ZodError, z } from 'zod'
 import type { ServerContext } from '../context.ts'
 import { getFrontPage } from '../front.ts'
+import { getInsights } from '../insights.ts'
 import { getOpsStatus, runOpsAction } from '../ops.ts'
-import { getPreferences, savePreferences } from '../preferences.ts'
+import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPublisher, listPublishers } from '../publishers.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
@@ -163,7 +165,16 @@ const routes: Route[] = [
     json(await getPreferences(ctx.db, userId)),
   ),
   route('POST', '/api/v1/me/preferences', async ({ ctx, request, userId }) =>
-    json(await savePreferences(ctx.db, userId, await readJson(request, userPreferencesSchema))),
+    json(
+      await savePreferences(ctx.db, userId, await readJson(request, userPreferencesUpdateSchema)),
+    ),
+  ),
+  route('POST', '/api/v1/me/reads', async ({ ctx, request, userId }) => {
+    const { storyId } = await readJson(request, readRequestSchema)
+    return json({ recorded: await recordRead(ctx.db, userId, storyId) })
+  }),
+  route('GET', '/api/v1/me/insights', async ({ ctx, userId }) =>
+    json(await getInsights(ctx.db, userId)),
   ),
   route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx)), {
     adminOnly: true,

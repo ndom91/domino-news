@@ -1,5 +1,6 @@
 import { type Db, schema } from '@dn/db'
 import type {
+  CoverageProfile,
   PublisherDetail,
   PublisherListResponse,
   PublisherRef,
@@ -171,6 +172,7 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
 
   return {
     ...stats,
+    profile: await coverageProfile(db, publisher.id),
     languages: publisher.languages,
     policyNote: publisher.policyNote,
     policyReviewedAt: publisher.policyReviewedAt?.toISOString() ?? null,
@@ -182,5 +184,69 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
       publisher: ref,
       sharedStories,
     })),
+  }
+}
+
+const PROFILE_DAYS = 30
+// "Widely covered" = this many newsrooms or more, within the last week.
+const MAJOR_OUTLETS = 4
+
+/** What an outlet covers compared with everyone, over the last PROFILE_DAYS. Facts only. */
+export async function coverageProfile(db: Db, publisherId: string): Promise<CoverageProfile> {
+  const window = sql`now() - make_interval(days => ${PROFILE_DAYS})`
+  const { rows: stories } = await db.execute<{
+    desk: string | null
+    regions: string[]
+    mine: boolean
+    official: boolean
+  }>(sql`
+    select s.desk, s.regions,
+      exists (select 1 from story_article sa join article a on a.id = sa.article_id
+        where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisherId}) as mine,
+      exists (select 1 from story_article sa join article a on a.id = sa.article_id
+        join publisher p on p.id = a.publisher_id
+        where sa.story_id = s.id and sa.removed_at is null and p.kind = 'official') as official
+    from story s
+    where s.published_at > ${window} and s.merged_into_story_id is null`)
+  const mine = stories.filter((s) => s.mine)
+
+  const mix = (keysOf: (s: (typeof stories)[number]) => string[]) => {
+    const count = (list: typeof stories) => {
+      const m = new Map<string, number>()
+      for (const s of list) for (const k of keysOf(s)) m.set(k, (m.get(k) ?? 0) + 1)
+      return m
+    }
+    const own = count(mine)
+    const all = count(stories)
+    return [...all.entries()]
+      .map(([key, n]) => ({
+        key,
+        share: mine.length ? (own.get(key) ?? 0) / mine.length : 0,
+        overallShare: stories.length ? n / stories.length : 0,
+      }))
+      .sort((a, b) => b.share - a.share || b.overallShare - a.overallShare)
+  }
+
+  const { rows: missed } = await db.execute<{ id: string; slug: string; title: string }>(sql`
+    with outlets as (
+      select sa.story_id, count(distinct a.publisher_id) as n,
+        bool_or(a.publisher_id = ${publisherId}) as mine
+      from story_article sa join article a on a.id = sa.article_id
+      join publisher p on p.id = a.publisher_id
+      where sa.removed_at is null and p.kind = 'newsroom'
+      group by sa.story_id
+    )
+    select s.id, s.slug, s.title from story s join outlets o on o.story_id = s.id
+    where s.published_at > now() - interval '7 days' and s.merged_into_story_id is null
+      and o.n >= ${MAJOR_OUTLETS} and not o.mine
+    order by o.n desc, s.last_updated_at desc`)
+
+  return {
+    days: PROFILE_DAYS,
+    storyCount: mine.length,
+    desks: mix((s) => (s.desk ? [s.desk] : [])),
+    regions: mix((s) => s.regions.filter((r) => r !== 'global')),
+    officialShare: mine.length ? mine.filter((s) => s.official).length / mine.length : null,
+    missedMajor: { count: missed.length, examples: missed.slice(0, 3) },
   }
 }

@@ -11,6 +11,7 @@ import { currentTheme, switchTheme, type Theme } from '../lib/theme.ts'
 
 const NAV = [
   { to: '/', label: 'Front page', exact: true },
+  { to: '/blindspot', label: 'Blindspot', exact: false },
   { to: '/narratives', label: 'Narratives', exact: false },
   { to: '/publishers', label: 'Publishers', exact: false },
   { to: '/search', label: 'Search', exact: false },

@@ -2,6 +2,7 @@ import { schema } from '@dn/db'
 import {
   apiErrorSchema,
   frontPageSchema,
+  insightsSchema,
   narrativeListResponseSchema,
   searchResponseSchema,
   storyDetailSchema,
@@ -309,6 +310,73 @@ describe('preferences', () => {
   })
 })
 
+describe('reading history and insights', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+  const reads = async () =>
+    (await h.ctx.pool.query(`select story_id from reading_event`)).rows.map((r) => r.story_id)
+
+  it('records reads only after opting in, and forgets them when turned off', async () => {
+    const { rows } = await h.ctx.pool.query(
+      `select id from story where published_at is not null limit 1`,
+    )
+    const storyId = rows[0].id as string
+    const off = insightsSchema.parse(await (await call('/api/v1/me/insights')).json())
+    expect(off.enabled).toBe(false)
+    expect(await (await post('/api/v1/me/reads', { storyId })).json()).toEqual({ recorded: false })
+    expect(await reads()).toEqual([])
+
+    await post('/api/v1/me/preferences', { rememberReads: true })
+    expect(await (await post('/api/v1/me/reads', { storyId })).json()).toEqual({ recorded: true })
+    const on = insightsSchema.parse(await (await call('/api/v1/me/insights')).json())
+    expect(on).toMatchObject({ enabled: true, readCount: 1 })
+
+    // Partial updates keep other settings; turning history off deletes it.
+    const prefs = userPreferencesSchema.parse(
+      await (await post('/api/v1/me/preferences', { rememberReads: false })).json(),
+    )
+    expect(prefs.rememberReads).toBe(false)
+    expect(await reads()).toEqual([])
+  })
+
+  it('shows newer Stories in narratives you read as missed developments', async () => {
+    const { rows } = await h.ctx.pool.query(
+      `select ns.narrative_id, s.id, s.published_at from narrative_story ns
+       join story s on s.id = ns.story_id
+       where ns.removed_at is null and s.published_at is not null
+         and ns.narrative_id = (
+           select narrative_id from narrative_story where removed_at is null
+           group by narrative_id having count(*) >= 2 limit 1)
+       order by s.published_at`,
+    )
+    const [oldest, ...newer] = rows
+    if (!oldest || newer.length === 0) throw new Error('no narrative with two stories')
+    await post('/api/v1/me/preferences', { rememberReads: true })
+    try {
+      // Read the oldest Story just before the others were published.
+      await h.ctx.pool.query(
+        `insert into reading_event (user_id, story_id, read_at)
+         select id, $1, $2::timestamptz - interval '1 second' from auth_user where username = 'contract'`,
+        [oldest.id, newer[0].published_at],
+      )
+      const insights = insightsSchema.parse(await (await call('/api/v1/me/insights')).json())
+      const missed = insights.missedDevelopments.find((m) => m.narrative.id === oldest.narrative_id)
+      expect(missed?.stories.map((s) => s.id)).toContain(newer[0].id)
+      expect(missed?.stories.some((s) => s.id === oldest.id)).toBe(false)
+    } finally {
+      await post('/api/v1/me/preferences', { rememberReads: false })
+    }
+  })
+
+  it('rejects reads without a story id', async () => {
+    expect((await post('/api/v1/me/reads', {})).status).toBe(400)
+  })
+})
+
 describe('account creation', () => {
   it('leaves no half-created user when the credential step fails', async () => {
     const { createUserAccount } = await import('@dn/server')
@@ -449,6 +517,10 @@ describe('publisher coverage', () => {
     expect(res.status).toBe(200)
     const bbc = publisherDetailSchema.parse(await res.json())
     expect(bbc.recentStories.length).toBe(bbc.storiesCovered)
+    // Fixture Stories are all recent, so the 30-day profile sees every one of them.
+    expect(bbc.profile.storyCount).toBe(bbc.storiesCovered)
+    const deskShare = bbc.profile.desks.reduce((sum, d) => sum + d.share, 0)
+    expect(deskShare).toBeLessThanOrEqual(1.0001)
     expect(bbc.coCoverage.every((c) => c.publisher.slug !== 'bbc')).toBe(true)
     expect((await call('/api/v1/publishers/nope')).status).toBe(404)
   })

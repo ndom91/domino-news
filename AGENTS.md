@@ -146,8 +146,10 @@ GET  /api/v1/publishers                  # outlet stats + who-covered-what matri
 GET  /api/v1/publishers/:slug            # stats, source-use policy, recent stories, co-coverage
 GET  /api/v1/ops/status                  # admin only
 POST /api/v1/ops/actions                  # admin only: pause_backfill | resume_backfill | poll_all_feeds | rebuild_search
-GET  /api/v1/me/preferences              # { edition: region | null }
-POST /api/v1/me/preferences
+GET  /api/v1/me/preferences              # { edition: region | null, rememberReads }
+POST /api/v1/me/preferences              # partial update; rememberReads=false deletes history
+POST /api/v1/me/reads                    # { storyId }; recorded only if rememberReads
+GET  /api/v1/me/insights                 # Blindspot: missed developments, region/desk gaps
 ```
 
 Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `packages/queries` are platform-neutral for a future Expo app.
@@ -162,6 +164,8 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
 - **Regions and editions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region; a reader's edition (`/account`) picks the lead and adds an "In {region}" rail without re-ranking the chronological feed. After upgrading, existing Stories have no regions until re-summarised, and Typesense needs `pnpm cli search:rebuild`.
+- **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored.
+- **Coverage profile:** each publisher page shows its desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it didn't cover this week. Facts only; no ratings yet.
 - **Publisher coverage:** outlet stats (stories, first to report, only source), a who-covered-what matrix, and per-publisher pages with source-use policy and co-coverage. No political or credibility ratings.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, Story, Narrative (branching lane graph), publishers, search, pipeline and account pages. Desktop-first and checked at 375px.

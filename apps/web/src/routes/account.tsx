@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useId, useState } from 'react'
 import { Page, PageTitle, SectionLabel } from '../components/page.tsx'
+import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { api, queries } from '../lib/api.ts'
 import { authClient } from '../lib/auth-client.ts'
 
@@ -66,6 +67,7 @@ function AccountPage() {
         </div>
 
         <EditionSection />
+        <ReadingHistorySection />
 
         <section aria-labelledby="passkeys-heading" className="mt-10">
           <SectionLabel id="passkeys-heading">Passkeys</SectionLabel>
@@ -179,6 +181,15 @@ const EDITION_OPTIONS = [
   { value: null, label: 'No preference' },
   ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
 ]
+
+function ReadingHistorySection() {
+  return (
+    <section aria-labelledby="history-heading" className="mt-10">
+      <SectionLabel id="history-heading">Reading history</SectionLabel>
+      <ReadingHistoryToggle />
+    </section>
+  )
+}
 
 function EditionSection() {
   const queryClient = useQueryClient()

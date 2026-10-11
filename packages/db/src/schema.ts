@@ -671,8 +671,29 @@ export const userPreference = pgTable('user_preference', {
     .references(() => authUser.id, { onDelete: 'cascade' }),
   // A region from `REGIONS` that boosts the feed; null = no preference.
   edition: text('edition').$type<Region>(),
+  // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
+  rememberReads: boolean('remember_reads').notNull().default(false),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
+
+// One row per user and Story (latest read wins), kept for READ_RETENTION_DAYS. Only
+// written while the user has opted in; insights are computed from it on request.
+export const readingEvent = pgTable(
+  'reading_event',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id, { onDelete: 'cascade' }),
+    readAt: ts('read_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.userId, t.storyId] }),
+    index('reading_event_read_at_idx').on(t.readAt),
+  ],
+)
 
 // better-auth passkey plugin (WebAuthn credentials).
 export const authPasskey = pgTable(

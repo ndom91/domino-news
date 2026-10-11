@@ -16,12 +16,12 @@ import {
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
 import { SectionLabel } from '../../components/page.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
-import { queries } from '../../lib/api.ts'
+import { api, queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/stories/$slug')({
   loader: async ({ context, params }) => {
@@ -44,6 +44,12 @@ function StoryPage() {
   const { now } = Route.useLoaderData()
   const { session } = Route.useRouteContext()
   const { data: story } = useSuspenseQuery(queries.story(slug))
+  // Opt-in reading history, recorded from the browser so SSR and prefetches don't count.
+  // Best effort: a lost read only makes the Blindspot insights slightly less complete.
+  const rememberReads = useQuery(queries.preferences()).data?.rememberReads ?? false
+  useEffect(() => {
+    if (rememberReads) api.recordRead(story.id).catch(() => {})
+  }, [rememberReads, story.id])
   const [editing, setEditing] = useState(false)
   const editButtonRef = useRef<HTMLButtonElement>(null)
   const outlets = new Set(story.sources.map((s) => s.publisher.id)).size

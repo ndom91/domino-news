@@ -1,5 +1,11 @@
 import type { ApiClient } from '@dn/api-client'
-import type { Region, SearchQuery, SummaryEditRequest, UserPreferences } from '@dn/schemas'
+import type {
+  Region,
+  SearchQuery,
+  SummaryEditRequest,
+  UserPreferences,
+  UserPreferencesUpdate,
+} from '@dn/schemas'
 import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/react-query'
 
 // Query keys and options shared by web (and later native). Each factory takes the
@@ -17,6 +23,7 @@ export const queryKeys = {
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
   ops: () => ['ops', 'status'] as const,
   preferences: () => ['me', 'preferences'] as const,
+  insights: () => ['me', 'insights'] as const,
 }
 
 export function createQueries(api: ApiClient) {
@@ -79,6 +86,12 @@ export function createQueries(api: ApiClient) {
         queryFn: ({ signal }) => api.getPreferences(signal),
         staleTime: 5 * 60_000,
       }),
+    insights: () =>
+      queryOptions({
+        queryKey: queryKeys.insights(),
+        queryFn: ({ signal }) => api.getInsights(signal),
+        staleTime: 60_000,
+      }),
     ops: () =>
       queryOptions({
         queryKey: queryKeys.ops(),
@@ -101,9 +114,10 @@ export function editSummaryMutation(api: ApiClient, queryClient: QueryClient, st
 
 export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient) {
   return {
-    mutationFn: (body: UserPreferences) => api.savePreferences(body),
-    onSuccess: (prefs: UserPreferences) => {
+    mutationFn: (body: UserPreferencesUpdate) => api.savePreferences(body),
+    onSuccess: async (prefs: UserPreferences) => {
       queryClient.setQueryData(queryKeys.preferences(), prefs)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.insights() })
     },
   }
 }

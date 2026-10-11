@@ -1,4 +1,11 @@
-import { formatDate } from '@dn/domain'
+import { formatDate, plural } from '@dn/domain'
+import {
+  type CoverageProfile,
+  DESK_LABELS,
+  type Desk,
+  REGION_LABELS,
+  type Region,
+} from '@dn/schemas'
 import { Badge, Notice, StoryItem } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -54,6 +61,8 @@ function PublisherPage() {
               </div>
             ))}
           </dl>
+
+          <CoverageProfileSection profile={p.profile} />
 
           <section aria-labelledby="recent-heading" className="mt-12">
             <SectionLabel id="recent-heading">Recent stories with {p.name}</SectionLabel>
@@ -118,5 +127,92 @@ function PublisherPage() {
         </aside>
       </div>
     </Page>
+  )
+}
+
+const pct = (n: number) => `${Math.round(n * 100)}%`
+
+/** Facts about what this outlet covers vs all published Stories; no ratings. */
+function CoverageProfileSection({ profile }: { profile: CoverageProfile }) {
+  if (profile.storyCount === 0) return null
+  return (
+    <section aria-labelledby="profile-heading" className="mt-12">
+      <SectionLabel id="profile-heading">Coverage, last {profile.days} days</SectionLabel>
+      <div className="grid gap-10 md:grid-cols-2">
+        <MixBars
+          title="Desks"
+          entries={profile.desks.slice(0, 6)}
+          label={(k) => DESK_LABELS[k as Desk] ?? k}
+        />
+        <MixBars
+          title="Regions"
+          entries={profile.regions.slice(0, 6)}
+          label={(k) => REGION_LABELS[k as Region] ?? k}
+        />
+      </div>
+      <p className="mt-6 max-w-reading text-sm text-text-secondary">
+        Bars show the share of this outlet's {plural(profile.storyCount, 'story', 'stories')}; the
+        tick marks the share across all outlets.
+        {profile.officialShare !== null
+          ? ` ${pct(profile.officialShare)} of its stories also carry an official source.`
+          : ''}
+      </p>
+      {profile.missedMajor.count > 0 ? (
+        <div className="mt-6">
+          <p className="type-label text-text-muted">
+            Not covered:{' '}
+            {plural(profile.missedMajor.count, 'widely reported story', 'widely reported stories')}{' '}
+            this week
+          </p>
+          <ul className="mt-2 flex flex-col gap-1">
+            {profile.missedMajor.examples.map((s) => (
+              <li key={s.id}>
+                <Link
+                  to="/stories/$slug"
+                  params={{ slug: s.slug }}
+                  className="link-headline font-semibold"
+                >
+                  {s.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </section>
+  )
+}
+
+function MixBars({
+  title,
+  entries,
+  label,
+}: {
+  title: string
+  entries: CoverageProfile['desks']
+  label: (key: string) => string
+}) {
+  return (
+    <div>
+      <p className="mb-3 type-label text-text-muted">{title}</p>
+      <ul className="flex flex-col gap-2.5">
+        {entries.map((e) => (
+          <li key={e.key} className="grid grid-cols-[8rem_1fr_3rem] items-center gap-3 text-sm">
+            <span className="truncate">{label(e.key)}</span>
+            <span className="relative h-2.5 bg-border" aria-hidden>
+              <span className="absolute inset-y-0 left-0 bg-text" style={{ width: pct(e.share) }} />
+              <span
+                className="absolute -inset-y-1 w-0.5 bg-accent"
+                style={{ left: pct(e.overallShare) }}
+              />
+            </span>
+            <span className="text-right tabular-nums">
+              {pct(e.share)}
+              <span className="sr-only">, all outlets {pct(e.overallShare)}</span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

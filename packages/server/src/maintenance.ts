@@ -20,6 +20,7 @@ const INGESTED_TABLES = [
   'story_lineage_event',
   'story_alias',
   'story_article',
+  'reading_event',
   'story',
   'interpretation_evidence',
   'interpretation',
