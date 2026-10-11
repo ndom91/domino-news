@@ -1,7 +1,7 @@
 import { formatDate, plural, truncate } from '@dn/domain'
 import type { DevelopingNarrative, NarrativeStep } from '@dn/schemas'
 import { cx } from '../cx.ts'
-import { deskKey, positionKey } from './desk-key.ts'
+import { positionKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { Timestamp } from './time.tsx'
 
@@ -30,7 +30,7 @@ function stepRelation(step: NarrativeStep) {
  * Narrative's key colour and bold; corrected steps are struck through in orange.
  * Designed for the always-dark band.
  */
-export function NarrativeSteps({
+function NarrativeSteps({
   steps,
   Link = DefaultLink,
 }: {
@@ -98,7 +98,7 @@ export function NarrativeSteps({
 
 /**
  * One Narrative in the Developing band: key-colour rule, title, meta and its step list.
- * Pass `position` to colour columns by place, so neighbours never share a desk colour.
+ * Coloured by `position`, so neighbouring columns never share a desk colour.
  */
 export function NarrativeColumn({
   narrative,
@@ -106,12 +106,11 @@ export function NarrativeColumn({
   Link = DefaultLink,
 }: {
   narrative: DevelopingNarrative
-  position?: number
+  position: number
   Link?: LinkLike
 }) {
-  const key = position === undefined ? deskKey(narrative.desk) : positionKey(position)
   return (
-    <div className={cx(key, 'min-w-0 border-t-6 border-key pt-4')}>
+    <div className={cx(positionKey(position), 'min-w-0 border-t-6 border-key pt-4')}>
       <h3 className="mb-1.5 type-narrative-title">
         <Link
           to={`/narratives/${narrative.slug}`}

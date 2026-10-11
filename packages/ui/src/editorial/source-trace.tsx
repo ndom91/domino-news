@@ -116,7 +116,7 @@ export function SourceTrace({
                   r={r}
                   strokeWidth={s.citation === null ? 1.5 : 0}
                   className={cx(
-                    'origin-center transition-[scale,opacity] duration-(--dn-duration-base) ease-(--dn-ease-out) [transform-box:fill-box]',
+                    'origin-center transition-[scale,opacity] [transform-box:fill-box]',
                     current === s.id && 'scale-150',
                     current && current !== s.id && 'opacity-35',
                     s.citation === null

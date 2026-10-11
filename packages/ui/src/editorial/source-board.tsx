@@ -41,7 +41,7 @@ export function SourceBoard({
             className={cx(
               // Hover tint on a pseudo-element, so only opacity animates. The outline marks
               // the row a citation marker jumped to.
-              'relative isolate before:absolute before:inset-0 before:-z-10 before:bg-current/12 before:opacity-0 before:transition-opacity before:duration-(--dn-duration-base) data-active:before:opacity-100',
+              'relative isolate before:absolute before:inset-0 before:-z-10 before:bg-current/12 before:opacity-0 before:transition-opacity data-active:before:opacity-100',
               'grid min-h-12 scroll-mt-24 grid-cols-[4.75rem_minmax(0,1fr)_2.5rem] items-center border-b target:outline-2 target:outline-current max-md:grid-cols-[4rem_minmax(0,1fr)_2.5rem]',
               onKey ? 'border-key-text/30' : 'border-border',
             )}

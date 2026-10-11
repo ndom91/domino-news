@@ -1,6 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 
-export interface SessionInfo {
+interface SessionInfo {
   user: {
     id: string
     name: string

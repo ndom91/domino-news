@@ -8,7 +8,7 @@ type Size = 'sm' | 'md'
 
 // Square. Primary = ink fill, secondary = 2px ink border; hover inverts. Orange is never a button colour.
 const base =
-  'inline-flex cursor-pointer items-center justify-center gap-2 border-2 font-semibold whitespace-nowrap select-none transition-colors duration-[var(--dn-duration-fast)] data-disabled:cursor-not-allowed data-disabled:opacity-40'
+  'inline-flex cursor-pointer items-center justify-center gap-2 border-2 font-semibold whitespace-nowrap select-none transition-colors duration-(--dn-duration-fast) data-disabled:cursor-not-allowed data-disabled:opacity-40'
 
 const variants: Record<Variant, string> = {
   primary:

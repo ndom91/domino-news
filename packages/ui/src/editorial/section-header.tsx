@@ -6,22 +6,20 @@ export function SectionHeader({
   title,
   meta,
   id,
-  as: As = 'h2',
   muted = 'text-text-muted',
   className,
 }: {
   title: ReactNode
   meta?: ReactNode
   id?: string
-  as?: 'h1' | 'h2'
   muted?: string
   className?: string
 }) {
   return (
     <div className={cx('flex items-baseline justify-between gap-4 pt-10 pb-4', className)}>
-      <As id={id} className="type-section">
+      <h2 id={id} className="type-section">
         {title}
-      </As>
+      </h2>
       {meta ? <span className={cx('text-label', muted)}>{meta}</span> : null}
     </div>
   )

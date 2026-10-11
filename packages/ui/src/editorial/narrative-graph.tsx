@@ -82,7 +82,7 @@ export function NarrativeGraph({
               <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5">
                 <time
                   dateTime={node.firstObservedAt}
-                  className="type-meta font-semibold whitespace-nowrap tabular-nums"
+                  className="type-meta font-semibold whitespace-nowrap"
                 >
                   {formatDate(node.firstObservedAt)} · {clockTime(node.firstObservedAt)} UTC
                 </time>

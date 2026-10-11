@@ -80,7 +80,7 @@ function PublisherPage() {
             ].map(([label, value]) => (
               <div key={label} className="border-b border-border py-4 pr-4">
                 <dt className="type-label text-text-muted">{label}</dt>
-                <dd className="mt-1 type-numeral tabular-nums">{value}</dd>
+                <dd className="mt-1 type-numeral">{value}</dd>
               </div>
             ))}
           </dl>
@@ -136,7 +136,7 @@ function PublisherPage() {
                       >
                         {c.publisher.name}
                       </Link>
-                      <span className="type-meta tabular-nums">{c.sharedStories}</span>
+                      <span className="type-meta">{c.sharedStories}</span>
                     </div>
                     <div aria-hidden className="mt-1 h-1.5 bg-sunken">
                       <div

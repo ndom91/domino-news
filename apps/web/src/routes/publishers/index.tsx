@@ -42,10 +42,10 @@ function PublishersPage() {
                 <th scope="col" className="py-2 pr-4">
                   Publisher
                 </th>
-                <th scope="col" className="py-2 pr-4 tabular-nums">
+                <th scope="col" className="py-2 pr-4">
                   Stories
                 </th>
-                <th scope="col" className="py-2 pr-4 tabular-nums">
+                <th scope="col" className="py-2 pr-4">
                   First to report
                 </th>
                 <th scope="col" className="py-2 pr-4">
@@ -69,8 +69,8 @@ function PublishersPage() {
                       {p.kind === 'official' ? ' · official' : ''}
                     </span>
                   </td>
-                  <td className="py-2.5 pr-4 tabular-nums">{p.storiesCovered}</td>
-                  <td className="py-2.5 pr-4 tabular-nums">{p.firstReports}</td>
+                  <td className="py-2.5 pr-4">{p.storiesCovered}</td>
+                  <td className="py-2.5 pr-4">{p.firstReports}</td>
                   <td className="py-2.5 pr-4 whitespace-nowrap text-text-muted">
                     {p.lastSeenAt ? relativeTime(p.lastSeenAt) : '–'}
                   </td>

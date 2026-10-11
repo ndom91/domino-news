@@ -11,7 +11,7 @@ import { SourceTrace } from './source-trace.tsx'
 import { StoryBar } from './story-bar.tsx'
 
 /** Black uppercase flag before a correcting Story's headline. */
-export function CorrectionFlag() {
+function CorrectionFlag() {
   return (
     <span className="mr-2 inline-block bg-text px-1.5 py-[3px] align-[5px] text-2xs font-extrabold tracking-[0.05em] text-canvas uppercase [font-stretch:100%]">
       Correction
@@ -19,7 +19,7 @@ export function CorrectionFlag() {
   )
 }
 
-export function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
+function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
   const map = new Map<number, CitedSource>()
   for (const t of story.trace) {
     if (t.citation)
@@ -53,12 +53,7 @@ export function StoryItem({
   const reveal = useReveal()
   return (
     <article
-      className={cx(
-        'flex min-w-0 flex-col',
-        wide && 'lg:col-span-2 md:col-span-2',
-        reveal.className,
-        className,
-      )}
+      className={cx('flex min-w-0 flex-col', wide && 'md:col-span-2', reveal.className, className)}
       style={reveal.style}
     >
       <StoryBar

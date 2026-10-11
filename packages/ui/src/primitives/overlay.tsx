@@ -53,20 +53,12 @@ const menuItemClass = `${menuItemBase} data-highlighted:bg-text aria-[current=pa
 const dangerItemClass = `${menuItemBase} text-error data-highlighted:bg-error`
 
 /** Click/keyboard menu of actions, anchored to its trigger. Arrow keys move between items. */
-export function Menu({
-  trigger,
-  children,
-  align = 'end',
-}: {
-  trigger: ReactElement
-  children: ReactNode
-  align?: 'start' | 'center' | 'end'
-}) {
+export function Menu({ trigger, children }: { trigger: ReactElement; children: ReactNode }) {
   return (
     <BaseMenu.Root>
       <BaseMenu.Trigger render={trigger} />
       <BaseMenu.Portal>
-        <BaseMenu.Positioner align={align} sideOffset={8} collisionPadding={12} className="z-50">
+        <BaseMenu.Positioner align="end" sideOffset={8} collisionPadding={12} className="z-50">
           <BaseMenu.Popup className={cx(popupBase, 't-popup min-w-44 border-2 border-rule py-1')}>
             {children}
           </BaseMenu.Popup>

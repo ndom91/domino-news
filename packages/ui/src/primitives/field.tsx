@@ -49,8 +49,6 @@ export interface TextInputProps extends Omit<ComponentProps<typeof Input>, 'clas
   description?: string
   error?: string | null
   className?: string
-  inputClassName?: string
-  leading?: ReactNode
 }
 
 export function TextInput({
@@ -59,8 +57,6 @@ export function TextInput({
   description,
   error,
   className,
-  inputClassName,
-  leading,
   ...props
 }: TextInputProps) {
   return (
@@ -71,17 +67,7 @@ export function TextInput({
       error={error}
       className={className}
     >
-      <div className="relative">
-        {leading ? (
-          <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-text-muted">
-            {leading}
-          </span>
-        ) : null}
-        <Input
-          {...props}
-          className={cx(control, 'min-h-tap', leading ? 'pl-9' : null, inputClassName)}
-        />
-      </div>
+      <Input {...props} className={cx(control, 'min-h-tap')} />
     </FieldShell>
   )
 }

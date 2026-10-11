@@ -55,7 +55,7 @@ export function Select<T extends string>({
         )}
       >
         <BaseSelect.Value className="truncate" />
-        <BaseSelect.Icon className="flex-none transition-transform duration-[var(--dn-duration-fast)] data-popup-open:rotate-180">
+        <BaseSelect.Icon className="flex-none transition-transform duration-(--dn-duration-fast) data-popup-open:rotate-180">
           <svg aria-hidden width="10" height="6" viewBox="0 0 10 6" fill="none">
             <path d="M1 1l4 4 4-4" stroke="currentColor" strokeWidth="2" />
           </svg>

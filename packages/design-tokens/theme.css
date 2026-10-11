@@ -120,11 +120,9 @@
   --shadow-popover: var(--dn-shadow-popover);
 
   --ease-out: var(--dn-ease-out);
-  --ease-in-out: var(--dn-ease-in-out);
   --default-transition-duration: var(--dn-duration-base);
   --default-transition-timing-function: var(--dn-ease-out);
 
-  /* Breakpoints mirror BREAKPOINTS in src/index.ts. */
   --breakpoint-*: initial;
   --breakpoint-sm: 30rem; /* 480 */
   --breakpoint-md: 48rem; /* 768 */
@@ -205,7 +203,6 @@
   font-weight: var(--dn-weight-bold);
   font-size: var(--dn-text-numeral);
   line-height: 1;
-  font-variant-numeric: tabular-nums;
 }
 @utility type-label {
   font-weight: var(--dn-weight-extrabold);
@@ -219,7 +216,6 @@
   font-size: var(--dn-text-sm);
   line-height: var(--dn-leading-normal);
   color: var(--dn-text-muted);
-  font-variant-numeric: tabular-nums;
 }
 
 /* Narrative keys: set once on a container, then use bg-key / text-key-text / border-key inside it. */

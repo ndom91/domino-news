@@ -222,7 +222,7 @@ function StoryPage() {
             <ol className="flex flex-col gap-2 text-sm">
               {story.summaryHistory.map((v, i) => (
                 <li key={v.versionId} className="flex items-center justify-between gap-3">
-                  <time dateTime={v.createdAt} className="type-meta tabular-nums">
+                  <time dateTime={v.createdAt} className="type-meta">
                     {formatDateTime(v.createdAt)}
                   </time>
                   <span className="flex items-center gap-2">

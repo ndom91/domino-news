@@ -135,10 +135,10 @@ function OpsPage() {
             {s.queues.map((q) => (
               <tr key={q.name}>
                 <Td mono>{q.name}</Td>
-                <Td num>{q.queued}</Td>
-                <Td num>{q.active}</Td>
-                <Td num>{q.failed > 0 ? <span className="text-error">{q.failed}</span> : 0}</Td>
-                <Td num>{q.oldestQueuedAgeSeconds ? `${q.oldestQueuedAgeSeconds}s` : '–'}</Td>
+                <Td>{q.queued}</Td>
+                <Td>{q.active}</Td>
+                <Td>{q.failed > 0 ? <span className="text-error">{q.failed}</span> : 0}</Td>
+                <Td>{q.oldestQueuedAgeSeconds ? `${q.oldestQueuedAgeSeconds}s` : '–'}</Td>
               </tr>
             ))}
           </Table>
@@ -193,7 +193,7 @@ function OpsPage() {
                 )}
               </Td>
               <Td>{f.lastPolledAt ? relativeTime(f.lastPolledAt) : '–'}</Td>
-              <Td num>{f.articleCount}</Td>
+              <Td>{f.articleCount}</Td>
             </tr>
           ))}
         </Table>
@@ -224,7 +224,7 @@ function Stat({ label, value, note }: { label: string; value: number; note?: str
   return (
     <div className="border-b border-border py-4 pr-4">
       <dt className="type-label text-text-muted">{label}</dt>
-      <dd className="mt-1 type-numeral tabular-nums">
+      <dd className="mt-1 type-numeral">
         <Digits value={value} />
       </dd>
       {note ? <dd className="mt-1 type-meta">{note}</dd> : null}
@@ -251,13 +251,9 @@ function Table({ head, children }: { head: string[]; children: ReactNode }) {
   )
 }
 
-function Td({ children, mono, num }: { children: ReactNode; mono?: boolean; num?: boolean }) {
+function Td({ children, mono }: { children: ReactNode; mono?: boolean }) {
   return (
-    <td
-      className={`py-2 pr-4 align-top ${mono ? 'text-xs font-semibold' : ''} ${num ? 'tabular-nums' : ''}`}
-    >
-      {children}
-    </td>
+    <td className={`py-2 pr-4 align-top ${mono ? 'text-xs font-semibold' : ''}`}>{children}</td>
   )
 }
 

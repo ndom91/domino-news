@@ -89,7 +89,6 @@
   --dn-width-display: 66%;
   --dn-width-headline: 72%;
   --dn-width-numeral: 75%;
-  --dn-width-text: 100%;
 
   /* Sizes. Fluid where a size must survive 375px. */
   --dn-text-2xs: 0.6875rem; /* 11 — axis labels */
@@ -131,22 +130,6 @@
   --dn-tracking-headline: -0.01em;
   --dn-tracking-label: 0.04em;
 
-  /* ── Spacing (4px base) ───────────────────────────────── */
-  --dn-space-0-5: 0.125rem;
-  --dn-space-1: 0.25rem;
-  --dn-space-2: 0.5rem;
-  --dn-space-3: 0.75rem;
-  --dn-space-4: 1rem;
-  --dn-space-5: 1.25rem;
-  --dn-space-6: 1.5rem;
-  --dn-space-7: 1.75rem;
-  --dn-space-8: 2rem;
-  --dn-space-9: 2.25rem;
-  --dn-space-10: 2.5rem;
-  --dn-space-12: 3rem;
-  --dn-space-14: 3.5rem;
-  --dn-space-16: 4rem;
-
   /* ── Layout ───────────────────────────────────────────── */
   --dn-page-max: 90rem; /* 1440 incl. gutters */
   --dn-gutter: clamp(1rem, 3.4vw, 3rem); /* 16 → 48 */
@@ -159,10 +142,6 @@
   --dn-safe-bottom: env(safe-area-inset-bottom, 0px);
 
   /* ── Lines and shape ──────────────────────────────────── */
-  --dn-rule-hair: 1px;
-  --dn-rule-width: 2px; /* section and item rules */
-  --dn-rule-key: 6px; /* narrative key rule in the Developing band */
-  --dn-rule-heavy: 6px; /* under the masthead */
   --dn-radius-none: 0; /* the system is square */
   --dn-radius-sm: 2px; /* only for inputs and focus outlines if a platform insists */
   --dn-shadow-popover: 0 10px 30px -10px rgb(18 18 18 / 0.35), 0 0 0 1px rgb(18 18 18 / 0.08);
@@ -170,14 +149,12 @@
   /* ── Motion ───────────────────────────────────────────── */
   --dn-duration-fast: 120ms;
   --dn-duration-base: 180ms;
-  --dn-duration-slow: 280ms;
   --dn-duration-instant: 50ms; /* tooltip close */
   --dn-duration-exit: 150ms; /* popup/dialog close, tooltip open, hover colour */
   --dn-duration-enter: 250ms; /* popup/dialog open, accordion */
   --dn-duration-reveal: 400ms; /* content replacing a skeleton */
   --dn-ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
   --dn-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1); /* open/close, reveal, position change */
-  --dn-ease-in-out: cubic-bezier(0.6, 0, 0.3, 1);
 }
 
 [data-theme="dark"] {
@@ -248,7 +225,6 @@
   :root {
     --dn-duration-fast: 0ms;
     --dn-duration-base: 0ms;
-    --dn-duration-slow: 0ms;
     --dn-duration-instant: 0ms;
     --dn-duration-exit: 0ms;
     --dn-duration-enter: 0ms;

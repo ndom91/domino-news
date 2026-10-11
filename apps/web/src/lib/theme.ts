@@ -13,7 +13,7 @@ export function currentTheme(): Theme {
   return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
 }
 
-export function setTheme(theme: Theme) {
+function setTheme(theme: Theme) {
   document.documentElement.dataset.theme = theme
   try {
     localStorage.setItem(KEY, theme)

@@ -12,7 +12,7 @@ export interface CitedSource {
 }
 
 /** Superscript `[n]` linking to a source. Orange text on canvas; inherits colour on a coloured hero. */
-export function CitationMarker({
+function CitationMarker({
   n,
   source,
   inherit = false,
