@@ -5,6 +5,7 @@ import { flushSync } from 'react-dom'
 import { Button } from '../primitives/button.tsx'
 import { Badge } from '../primitives/surface.tsx'
 import { DefaultLink, type LinkLike } from './link.tsx'
+import { PublisherLogo } from './publisher-logo.tsx'
 import { Timestamp } from './time.tsx'
 
 const COLLAPSED_COUNT = 5
@@ -51,11 +52,12 @@ export function SourceList({
             id={`report-${s.articleId}`}
             className="scroll-mt-24 border-b border-border py-4"
           >
-            <div className="mb-1.5 flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <div className="mb-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
               <Link
                 to={`/publishers/${s.publisher.slug}`}
-                className="text-base font-bold hover:underline"
+                className="inline-flex items-center gap-2 text-base font-bold hover:underline"
               >
+                <PublisherLogo slug={s.publisher.slug} size={20} />
                 {s.publisher.name}
               </Link>
               {s.official ? <Badge>Official source</Badge> : null}
