@@ -113,7 +113,7 @@ function LoginPage() {
         <p className="mb-2 text-sm" suppressHydrationWarning>
           <b className="font-bold">{longDate(new Date().toISOString())}</b>
         </p>
-        <Marble seed={MARBLE_SEED} className="h-36 lg:h-auto lg:flex-1" />
+        <Marble seed={MARBLE_SEED} className="min-h-36 flex-1" />
         <div className="bg-band-text px-6 pt-5 pb-5 text-band">
           <p translate="no" className="type-masthead">
             Domino<span className="text-accent">.</span>
