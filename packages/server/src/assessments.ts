@@ -3,6 +3,7 @@ import { ID_PREFIX, newId } from '@dn/domain'
 import type {
   AssessmentRequest,
   EvidenceResponse,
+  LeanBasis,
   PublisherAssessment,
   PublisherLean,
 } from '@dn/schemas'
@@ -10,7 +11,8 @@ import { desc, eq, inArray } from 'drizzle-orm'
 
 // Bump when the rubric or evidence sources change; stored on every assessment.
 // @2: hand-checked lean evidence (AllSides, Reuters Institute DNR) joined the sources.
-export const ASSESSMENT_METHODOLOGY = 'assessment@2'
+// @3: leans carry a basis; estimates follow docs/prompts/lean-estimate.md.
+export const ASSESSMENT_METHODOLOGY = 'assessment@3'
 
 export async function publisherIdBySlug(db: Db, slug: string): Promise<string | null> {
   const [p] = await db
@@ -41,6 +43,7 @@ export async function latestAssessment(
     reliabilityLevel: row.reliabilityLevel,
     reliability: row.reliability,
     lean: row.lean,
+    leanBasis: row.leanBasis,
     leanEvidenceUrl: row.leanEvidenceUrl,
     leanNote: row.leanNote,
     evidence: row.evidence as PublisherAssessment['evidence'],
@@ -50,6 +53,7 @@ export async function latestAssessment(
 
 export interface PublisherLeanInfo {
   lean: PublisherLean | null
+  basis: LeanBasis | null
   // The country the lean is relative to; falls back to the publisher's home country.
   country: string | null
 }
@@ -65,6 +69,7 @@ export async function latestLeans(
       publisherId: schema.publisher.id,
       homeCountry: schema.publisher.countryCode,
       lean: schema.publisherAssessment.lean,
+      basis: schema.publisherAssessment.leanBasis,
       countryContext: schema.publisherAssessment.countryContext,
     })
     .from(schema.publisher)
@@ -77,7 +82,11 @@ export async function latestLeans(
   return new Map(
     rows.map((r) => [
       r.publisherId,
-      { lean: r.lean ?? null, country: r.countryContext ?? r.homeCountry ?? null },
+      {
+        lean: r.lean ?? null,
+        basis: r.basis ?? null,
+        country: r.countryContext ?? r.homeCountry ?? null,
+      },
     ]),
   )
 }
@@ -118,6 +127,7 @@ export async function createAssessment(
     reliabilityLevel: request.reliabilityLevel,
     reliability: request.reliability,
     lean: request.lean,
+    leanBasis: request.lean ? (request.leanBasis ?? 'sourced') : null,
     leanEvidenceUrl: request.lean ? request.leanEvidenceUrl : null,
     leanNote: request.leanNote,
     evidence: evidence.map(({ source, dimension, value, url }) => ({

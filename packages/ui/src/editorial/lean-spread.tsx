@@ -37,6 +37,7 @@ export function LeanSpread({
   className?: string
 }) {
   const rated = lean.publishers.filter((p) => p.lean).length
+  const estimated = lean.publishers.filter((p) => p.lean && p.estimated).length
   const unrated = lean.publishers.filter((p) => !p.lean)
   const rows = LEANS.map((key) => ({
     key,
@@ -50,6 +51,7 @@ export function LeanSpread({
         <span className="type-label text-text-muted">Publishers in {countryLabel}</span>
         <span className="type-meta">
           {rated} of {plural(lean.publishers.length, 'publisher')} rated
+          {estimated ? `, ${estimated} estimated` : null}
         </span>
       </figcaption>
 
@@ -140,6 +142,7 @@ function LeanRow({
             >
               {p.publisher.name}
             </Link>
+            {p.estimated ? <span className="text-text-muted"> (estimated)</span> : null}
           </span>
         ))}
       </span>

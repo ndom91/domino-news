@@ -28,14 +28,20 @@ const FIELDS = [
   'reliability',
   'countryContext',
   'lean',
+  'leanBasis',
   'leanEvidenceUrl',
   'leanNote',
 ] as const
 
 /** True when the latest published assessment already says exactly this. */
 function unchanged(current: Record<string, unknown> | null, request: AssessmentRequest) {
-  // The API drops the evidence URL when there is no lean, so compare it the same way.
-  const wanted = { ...request, leanEvidenceUrl: request.lean ? request.leanEvidenceUrl : null }
+  // Normalise the way createAssessment stores it: no lean means no URL and no basis, and a
+  // lean without a basis is sourced.
+  const wanted = {
+    ...request,
+    leanBasis: request.lean ? (request.leanBasis ?? 'sourced') : null,
+    leanEvidenceUrl: request.lean ? request.leanEvidenceUrl : null,
+  }
   return current !== null && FIELDS.every((f) => (current[f] ?? null) === (wanted[f] ?? null))
 }
 

@@ -91,6 +91,11 @@ export function AssessmentScorecard({
             startLabel="Left"
             endLabel="Right"
           />
+          {a.lean && a.leanBasis === 'estimated' ? (
+            <p className="text-sm font-bold">
+              Estimated by Domino from public research, not a survey or rating.
+            </p>
+          ) : null}
           {a.lean ? (
             <p className="text-sm text-text-secondary">
               Relative to {a.countryContext ? `${a.countryContext} ` : ''}media
@@ -111,7 +116,7 @@ export function AssessmentScorecard({
             </p>
           ) : (
             <p className="text-sm text-text-secondary">
-              Only shown with a cited, country-relative source.
+              {a.leanNote ?? 'Only shown with a cited, country-relative source.'}
             </p>
           )}
         </Panel>

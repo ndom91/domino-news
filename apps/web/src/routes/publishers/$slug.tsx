@@ -9,6 +9,7 @@ import {
   FUNDING_LABELS,
   fundingModelSchema,
   LEAN_LABELS,
+  leanBasisSchema,
   type PublisherAssessment,
   type PublisherDetail,
   publisherLeanSchema,
@@ -269,16 +270,23 @@ type ImportedEvidence = EvidenceResponse['evidence'][number]
 
 /**
  * Pre-fill the lean from hand-checked evidence for the assessment's country. Audience data
- * from the outlet's own country wins over AllSides, which only rates on the US scale.
+ * from the outlet's own country wins over AllSides, which only rates on the US scale; our own
+ * estimate is the last resort.
  */
 function importedLean(evidence: ImportedEvidence[], country: string | null) {
   const usable = evidence.filter((e) => e.lean && e.countryContext === country)
   return (
     usable.find((e) => e.source === 'reuters_dnr') ??
     usable.find((e) => e.source === 'allsides') ??
+    usable.find((e) => e.source === 'domino_estimate') ??
     null
   )
 }
+
+const LEAN_BASIS_OPTIONS = [
+  { value: 'sourced' as const, label: 'Sourced (survey or rating)' },
+  { value: 'estimated' as const, label: 'Estimated (our research)' },
+]
 
 const LEAN_OPTIONS = [
   { value: null, label: 'Not assessed' },
@@ -301,6 +309,7 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
     event.preventDefault()
     const form = new FormData(event.currentTarget)
     const lean = publisherLeanSchema.safeParse(form.get('lean'))
+    const basis = leanBasisSchema.safeParse(form.get('leanBasis'))
     const funding = fundingModelSchema.safeParse(form.get('fundingModel'))
     const level = reliabilityLevelSchema.safeParse(form.get('reliabilityLevel'))
     save.mutate({
@@ -310,6 +319,7 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
       reliability: text(form, 'reliability'),
       countryContext: text(form, 'countryContext').toUpperCase() || null,
       lean: lean.success ? lean.data : null,
+      leanBasis: lean.success ? (basis.success ? basis.data : 'sourced') : null,
       leanEvidenceUrl: text(form, 'leanEvidenceUrl') || null,
       leanNote: text(form, 'leanNote') || null,
     })
@@ -392,6 +402,15 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
             name="lean"
             options={LEAN_OPTIONS}
             defaultValue={current?.lean ?? suggested?.lean ?? null}
+          />
+          <Select
+            label="Lean basis"
+            name="leanBasis"
+            options={LEAN_BASIS_OPTIONS}
+            defaultValue={
+              current?.leanBasis ??
+              (suggested?.source === 'domino_estimate' ? 'estimated' : 'sourced')
+            }
           />
           <TextInput
             label="Country context"

@@ -276,6 +276,9 @@ export const publisherLean = pgEnum('publisher_lean', [
   'right',
 ])
 
+// Sourced = a survey or rating; estimated = Domino's own research (docs/prompts/lean-estimate.md).
+export const leanBasis = pgEnum('lean_basis', ['sourced', 'estimated'])
+
 export const publisherEvidence = pgTable(
   'publisher_evidence',
   {
@@ -283,7 +286,9 @@ export const publisherEvidence = pgTable(
     publisherId: text('publisher_id')
       .notNull()
       .references(() => publisher.id, { onDelete: 'cascade' }),
-    source: text('source').$type<'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr'>().notNull(),
+    source: text('source')
+      .$type<'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr' | 'domino_estimate'>()
+      .notNull(),
     dimension: text('dimension').$type<'ownership' | 'reliability' | 'lean'>().notNull(),
     value: text('value').notNull(),
     url: text('url').notNull(),
@@ -329,6 +334,7 @@ export const publisherAssessment = pgTable(
     reliability: text('reliability').notNull(),
     // Null = not assessed. When set, it must cite evidence (e.g. Reuters audience data).
     lean: publisherLean('lean'),
+    leanBasis: leanBasis('lean_basis'),
     leanEvidenceUrl: text('lean_evidence_url'),
     leanNote: text('lean_note'),
     evidence: jsonb('evidence')
@@ -345,6 +351,7 @@ export const publisherAssessment = pgTable(
       'publisher_assessment_lean_cited',
       sql`${t.lean} is null or ${t.leanEvidenceUrl} is not null`,
     ),
+    check('publisher_assessment_lean_basis', sql`(${t.lean} is null) = (${t.leanBasis} is null)`),
   ],
 )
 

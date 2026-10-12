@@ -44,7 +44,11 @@ export async function leanMixByStory(
     byStory.set(r.storyId, countries)
     const list = countries.get(info.country) ?? []
     countries.set(info.country, list)
-    list.push({ publisher: r.publisher as PublisherRef, lean: info.lean })
+    list.push({
+      publisher: r.publisher as PublisherRef,
+      lean: info.lean,
+      estimated: info.basis === 'estimated',
+    })
   }
 
   const result = new Map<string, StoryLean[]>()
@@ -52,7 +56,8 @@ export async function leanMixByStory(
     const mixes = [...countries].map(([country, publishers]) => ({
       country,
       publishers: publishers.sort((a, b) => a.publisher.name.localeCompare(b.publisher.name)),
-      oneSided: oneSidedCoverage(publishers.map((p) => p.lean)),
+      // An estimate can show in the bar, but can't make a Story one-sided.
+      oneSided: oneSidedCoverage(publishers.filter((p) => !p.estimated).map((p) => p.lean)),
     }))
     const rated = (m: StoryLean) => m.publishers.filter((p) => p.lean).length
     mixes.sort(

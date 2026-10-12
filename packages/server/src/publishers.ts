@@ -1,6 +1,7 @@
 import { type Db, schema } from '@dn/db'
 import type {
   CoverageProfile,
+  LeanBasis,
   PublisherDetail,
   PublisherLean,
   PublisherListResponse,
@@ -45,6 +46,7 @@ type StatsRow = {
   article_count: number
   last_seen: Date | null
   lean: PublisherLean | null
+  lean_basis: LeanBasis | null
   lean_country: string | null
 }
 
@@ -69,12 +71,12 @@ async function statsRows(db: Db, slug?: string) {
       coalesce(pp.exclusives, 0) as exclusives,
       coalesce(pa.article_count, 0) as article_count,
       pa.last_seen,
-      la.lean, coalesce(la.country_context, p.country_code) as lean_country
+      la.lean, la.lean_basis, coalesce(la.country_context, p.country_code) as lean_country
     from publisher p
     left join per_pub pp on pp.publisher_id = p.id
     left join per_article pa on pa.publisher_id = p.id
     left join lateral (
-      select lean, country_context from publisher_assessment
+      select lean, lean_basis, country_context from publisher_assessment
       where publisher_id = p.id order by reviewed_at desc limit 1
     ) la on true
     ${slug ? sql`where p.slug = ${slug}` : sql``}
@@ -95,6 +97,7 @@ async function statsRows(db: Db, slug?: string) {
       articleCount: r.article_count,
       lastSeenAt: r.last_seen ? new Date(r.last_seen).toISOString() : null,
       lean: r.lean,
+      leanBasis: r.lean_basis,
       leanCountry: r.lean ? r.lean_country : null,
     }),
   )

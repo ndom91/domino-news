@@ -53,6 +53,11 @@ export const LEAN_LABELS: Record<PublisherLean, string> = {
   right: 'Right',
 }
 
+// Where a published lean comes from: a survey or rating (sourced), or Domino's own
+// documented research where none exists (estimated, rubric docs/prompts/lean-estimate.md).
+export const leanBasisSchema = z.enum(['sourced', 'estimated'])
+export type LeanBasis = z.infer<typeof leanBasisSchema>
+
 // Which side of centre a lean sits on. Centre is neither.
 export const leanSideSchema = z.enum(['left', 'right'])
 export type LeanSide = z.infer<typeof leanSideSchema>
@@ -69,6 +74,7 @@ export const publisherStatsSchema = z.extend(publisherRefSchema, {
   lastSeenAt: z.nullable(z.string()),
   // From the latest reviewed assessment; null = not assessed.
   lean: z.nullable(publisherLeanSchema),
+  leanBasis: z.nullable(leanBasisSchema),
   leanCountry: z.nullable(z.string()),
 })
 export type PublisherStats = z.infer<typeof publisherStatsSchema>
@@ -239,9 +245,14 @@ export type StoryClaim = z.infer<typeof storyClaimSchema>
 export const storyLeanSchema = z.object({
   country: z.string(),
   publishers: z.array(
-    z.object({ publisher: publisherRefSchema, lean: z.nullable(publisherLeanSchema) }),
+    z.object({
+      publisher: publisherRefSchema,
+      lean: z.nullable(publisherLeanSchema),
+      estimated: z.boolean(),
+    }),
   ),
-  // Set when enough rated publishers sit mostly on one side (see `oneSidedCoverage`).
+  // Set when enough sourced ratings sit mostly on one side (see `oneSidedCoverage`).
+  // Estimates never set it.
   oneSided: z.nullable(leanSideSchema),
 })
 export type StoryLean = z.infer<typeof storyLeanSchema>
@@ -496,6 +507,7 @@ export const EVIDENCE_SOURCE_LABELS: Record<string, string> = {
   wikidata: 'Wikidata',
   wp_rsp: 'Wikipedia perennial sources',
   allsides: 'AllSides',
+  domino_estimate: 'Domino estimate',
   reuters_dnr: 'Reuters Institute Digital News Report',
 }
 
@@ -524,6 +536,7 @@ export const publisherAssessmentSchema = z.object({
   reliabilityLevel: z.nullable(reliabilityLevelSchema),
   reliability: z.string(),
   lean: z.nullable(publisherLeanSchema),
+  leanBasis: z.nullable(leanBasisSchema),
   leanEvidenceUrl: z.nullable(z.string()),
   leanNote: z.nullable(z.string()),
   evidence: z.array(assessmentEvidenceSchema),
@@ -540,6 +553,8 @@ export const assessmentRequestSchema = z
     reliability: z.string().check(z.trim(), z.minLength(1), z.maxLength(500)),
     countryContext: z.nullable(z.string().check(z.length(2))),
     lean: z.nullable(publisherLeanSchema),
+    // Missing = sourced. Only meaningful with a lean.
+    leanBasis: z.optional(z.nullable(leanBasisSchema)),
     leanEvidenceUrl: z.nullable(z.url()),
     leanNote: z.nullable(z.string().check(z.trim(), z.maxLength(500))),
   })
@@ -547,6 +562,10 @@ export const assessmentRequestSchema = z
     z.refine((r) => r.lean === null || r.leanEvidenceUrl !== null, {
       message: 'A lean needs a cited source',
       path: ['leanEvidenceUrl'],
+    }),
+    z.refine((r) => r.lean !== null || !r.leanBasis, {
+      message: 'A lean basis needs a lean',
+      path: ['leanBasis'],
     }),
   )
 export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>

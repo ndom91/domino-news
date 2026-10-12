@@ -12,6 +12,8 @@ import { z } from 'zod/mini'
 //   foreign ones included, so its entries are always relative to the US.
 // - Reuters Institute Digital News Report: the outlet's audience left/right score in its own
 //   country (-0.5 = all left, +0.5 = all right, 0 = matches the population).
+// - Domino estimate: our own documented research where no survey or rating exists, following
+//   docs/prompts/lean-estimate.md. Shown to readers as an estimate, never as a measure.
 
 const ALLSIDES_LEANS = {
   Left: 'left',
@@ -43,6 +45,30 @@ const entrySchema = z.discriminatedUnion('source', [
     url: z.url(),
     checkedAt: z.iso.date(),
   }),
+  z
+    .object({
+      publisher: z.string(),
+      source: z.literal('domino_estimate'),
+      // False when the country's main media divide isn't left vs right (see axisNote).
+      applicable: z.boolean(),
+      lean: z.nullable(publisherLeanSchema),
+      countryContext: z.string().check(z.regex(/^[A-Z]{2}$/)),
+      // Low-confidence estimates are not recorded at all.
+      confidence: z.enum(['high', 'medium']),
+      rubric: z.string().check(z.regex(/^lean-estimate@\d+$/)),
+      rationale: z.string().check(z.minLength(1), z.maxLength(400)),
+      axisNote: z.optional(z.string().check(z.maxLength(300))),
+      sources: z.array(z.url()).check(z.minLength(1)),
+      estimatedAt: z.iso.date(),
+    })
+    .check(
+      z.refine((e) => (e.lean === null) === !e.applicable, {
+        message: 'An estimate has a lean exactly when left–right applies',
+      }),
+      z.refine((e) => e.applicable || Boolean(e.axisNote), {
+        message: 'Say which divide applies instead',
+      }),
+    ),
 ])
 export type LeanEvidenceEntry = z.infer<typeof entrySchema>
 
@@ -59,6 +85,20 @@ export async function loadLeanEvidence(fixtureDir: string): Promise<LeanEvidence
 
 /** An evidence row for one hand-checked entry. The text says what scale it is on. */
 export function leanEvidenceRow(e: LeanEvidenceEntry) {
+  if (e.source === 'domino_estimate') {
+    const value = e.applicable
+      ? `Domino estimate (${e.rubric}, ${e.confidence} confidence): ${e.rationale}`
+      : `Domino research (${e.rubric}): left–right lean doesn't apply. ${e.axisNote}`
+    const [url = ''] = e.sources
+    return {
+      source: e.source,
+      dimension: 'lean' as const,
+      value,
+      url,
+      lean: e.lean,
+      countryContext: e.countryContext,
+    }
+  }
   const value =
     e.source === 'allsides'
       ? `AllSides rating: ${e.rating} (US political scale; checked ${e.checkedAt})`

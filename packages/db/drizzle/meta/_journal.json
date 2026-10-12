@@ -169,6 +169,13 @@
       "when": 1791732470152,
       "tag": "0023_lean_evidence",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "7",
+      "when": 1791805125555,
+      "tag": "0024_lean_basis",
+      "breakpoints": true
     }
   ]
 }

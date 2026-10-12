@@ -211,7 +211,7 @@ function PublisherCard({ publisher: p }: { publisher: PublisherStats }) {
           {p.kind === 'newsroom' ? (
             <span className="mt-1 type-meta">
               {p.lean
-                ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}`
+                ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}${p.leanBasis === 'estimated' ? ' · estimated' : ''}`
                 : 'Lean not assessed'}
             </span>
           ) : null}

@@ -915,7 +915,7 @@ describe('political lean', () => {
        join publisher p on p.id = a.publisher_id where p.slug = 'nytimes'
        order by reviewed_at desc limit 1`,
     )
-    expect(rows[0].methodology_version).toBe('assessment@2')
+    expect(rows[0].methodology_version).toBe('assessment@3')
     expect(rows[0].evidence).toEqual([
       {
         source: 'allsides',
@@ -944,9 +944,9 @@ describe('political lean', () => {
     await h.ctx.pool.query(
       `insert into publisher_assessment
          (id, publisher_id, methodology_version, country_context, ownership, reliability,
-          lean, lean_evidence_url, evidence, reviewed_by)
+          lean, lean_basis, lean_evidence_url, evidence, reviewed_by)
        select 'pas_lean_' || p.id, p.id, 'assessment@1', 'US', 'test', 'test',
-         'centre_left', 'https://example.org/lean', '[]'::jsonb, u.id
+         'centre_left', 'sourced', 'https://example.org/lean', '[]'::jsonb, u.id
        from publisher p, auth_user u
        where p.id = any($1) and u.username = 'contract'`,
       [target.publisher_ids],
@@ -982,6 +982,36 @@ describe('political lean', () => {
     )
     expect(fr.oneSided.country).toBe('FR')
     expect(fr.oneSided.stories.map((s) => s.story.id)).not.toContain(target.id)
+
+    // A lean needs a basis, and a basis needs a lean.
+    await expect(
+      h.ctx.pool.query(
+        `insert into publisher_assessment (id, publisher_id, methodology_version, ownership,
+           reliability, lean, lean_evidence_url, evidence, reviewed_by)
+         select 'pas_nobasis', $1, 'assessment@3', 'x', 'x', 'left', 'https://example.org', '[]', id
+         from auth_user where username = 'contract'`,
+        [target.publisher_ids[0]],
+      ),
+    ).rejects.toThrow(/lean_basis/)
+
+    // Re-rate the same publishers as estimates: the bar still shows them, marked, but an
+    // estimate can't make a Story one-sided.
+    await h.ctx.pool.query(
+      `insert into publisher_assessment
+         (id, publisher_id, methodology_version, country_context, ownership, reliability,
+          lean, lean_basis, lean_evidence_url, evidence, reviewed_by)
+       select 'pas_est_' || p.id, p.id, 'assessment@3', 'US', 'test', 'test',
+         'centre_left', 'estimated', 'https://example.org/lean', '[]'::jsonb, u.id
+       from publisher p, auth_user u
+       where p.id = any($1) and u.username = 'contract'`,
+      [target.publisher_ids],
+    )
+    const estimated = storyDetailSchema.parse(
+      await (await call(`/api/v1/stories/${target.id}`)).json(),
+    )
+    const usEstimated = estimated.leanMix.find((m) => m.country === 'US')
+    expect(usEstimated?.publishers.every((p) => p.lean === 'centre_left' && p.estimated)).toBe(true)
+    expect(usEstimated?.oneSided).toBeNull()
   })
 })
 

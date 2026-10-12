@@ -56,6 +56,8 @@ export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: str
       ) : null}
       <p className="mt-4 text-xs text-text-muted">
         Each publisher’s lean is relative to its own country’s media, from our reviewed assessments.
+        Most come from audience surveys or ratings; where none exists, we estimate it from public
+        research and say so. Estimates never mark a story as one-sided.
       </p>
     </section>
   )

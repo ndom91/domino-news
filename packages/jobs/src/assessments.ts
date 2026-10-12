@@ -18,7 +18,7 @@ const RSP_PAGE = 'Wikipedia:Reliable sources/Perennial sources'
 const RSP_URL = 'https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources'
 
 type EvidenceRow = {
-  source: 'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr'
+  source: 'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr' | 'domino_estimate'
   dimension: 'ownership' | 'reliability' | 'lean'
   value: string
   url: string

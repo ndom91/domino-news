@@ -713,6 +713,36 @@ describe('hand-checked lean evidence', () => {
     })
   })
 
+  it('accepts estimates only with a lean, or with a note when left–right does not apply', () => {
+    const estimate = {
+      publisher: 'groundup',
+      source: 'domino_estimate',
+      applicable: true,
+      lean: 'centre_left',
+      countryContext: 'ZA',
+      confidence: 'medium',
+      rubric: 'lean-estimate@1',
+      rationale: 'Two indicators …',
+      sources: ['https://example.org/a'],
+      estimatedAt: '2026-10-12',
+    }
+    const ok = (entry: unknown) => leanEvidenceFileSchema.safeParse({ entries: [entry] }).success
+    expect(ok(estimate)).toBe(true)
+    expect(ok({ ...estimate, confidence: 'low' })).toBe(false)
+    expect(ok({ ...estimate, lean: null })).toBe(false)
+    expect(ok({ ...estimate, applicable: false, lean: null })).toBe(false)
+    const notApplicable = {
+      ...estimate,
+      applicable: false,
+      lean: null,
+      axisNote: 'Pro-government vs independent.',
+    }
+    expect(ok(notApplicable)).toBe(true)
+    const [entry] = leanEvidenceFileSchema.parse({ entries: [notApplicable] }).entries
+    if (!entry) throw new Error('no entry')
+    expect(leanEvidenceRow(entry)).toMatchObject({ source: 'domino_estimate', lean: null })
+  })
+
   it('rejects AllSides outside the US scale, unknown ratings and out-of-range scores', () => {
     const bad = (entry: unknown) => leanEvidenceFileSchema.safeParse({ entries: [entry] }).success
     expect(bad({ ...allsides, countryContext: 'GB' })).toBe(false)
