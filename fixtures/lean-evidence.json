@@ -315,6 +315,312 @@
       "edition": 2017,
       "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
       "checkedAt": "2026-10-12"
+    },
+    {
+      "publisher": "al-monitor",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Not placed on the US left–right axis. Al-Monitor reports on the Middle East for an international policy readership, not on US domestic politics. Its founder-owner Jamal Daniel is a documented Republican donor (FEC records), but that is a single ownership indicator; no editorial positions, columnist balance or audience data place its coverage on the US axis.",
+      "sources": ["https://www.al-monitor.com/about", "https://en.wikipedia.org/wiki/Al-Monitor"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Al-Monitor covers the Middle East for policymakers, diplomats and analysts in the US, Europe and the region; the divides in its coverage are regional (Israel–Palestine, Iran, Gulf and Turkish politics), not the US left–right party contest."
+    },
+    {
+      "publisher": "kffhealthnews",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": "centre",
+      "countryContext": "US",
+      "confidence": "medium",
+      "rubric": "lean-estimate@1",
+      "rationale": "KFF Health News is a program of KFF, which is governed by a board chaired by former Republican senator Olympia Snowe and including former Democratic HHS secretary Kathleen Sebelius. KFF describes itself as nonpartisan, and NPR describes it as a nonpartisan health research organisation. No endorsements or opinion section.",
+      "sources": [
+        "https://www.kff.org/about-us/board-of-trustees/",
+        "https://www.kff.org/about-us/history-and-mission/",
+        "https://kffhealthnews.org/about-us/",
+        "https://en.wikipedia.org/wiki/Olympia_Snowe",
+        "https://text.npr.org/nx-s1-5978044"
+      ],
+      "estimatedAt": "2026-10-12"
+    },
+    {
+      "publisher": "mongabay",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Not placed on the US left–right axis. Mongabay covers conservation and environmental science worldwide, with much of its readership outside the US (its Indonesian site alone drew a large share of its 7 million monthly visitors in 2020). It calls itself independent and has no documented US party ties.",
+      "sources": ["https://en.wikipedia.org/wiki/Mongabay", "https://news.mongabay.com/about/"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Mongabay is a US-registered but globally oriented environmental news service, publishing in eight or nine languages with bureaus in Indonesia, Latin America and India; it has no meaningful role in US domestic party politics."
+    },
+    {
+      "publisher": "restofworld",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Not placed on the US left–right axis. Rest of World is a New York-based nonprofit (funded mainly by the Schmidt Family Foundation) that reports on technology in Africa, Asia and Latin America for a worldwide readership. It makes no endorsements and has no documented US party ties.",
+      "sources": ["https://restofworld.org/about/", "https://en.wikipedia.org/wiki/Rest_of_World"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Rest of World covers technology outside Western countries for a global audience, with staff mostly based in Asia, Africa and Latin America; US domestic party politics is not its subject."
+    },
+    {
+      "publisher": "cbc",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": "centre",
+      "countryContext": "CA",
+      "confidence": "medium",
+      "rubric": "lean-estimate@1",
+      "rationale": "A Crown corporation under the Broadcasting Act with no editorial line or endorsements. The only systematic content study (ERIN Research for CBC, 2009–10) found no tilt toward the opposition. Trust is much higher among Liberal and NDP voters than Conservative voters (Pollara 2024–26), but that is one audience signal and not enough on its own to place it off centre.",
+      "sources": [
+        "https://thehub.ca/2026/07/24/the-cbc-continues-to-gaslight-conservatives-even-after-its-near-death-experience/",
+        "https://thewalrusca.substack.com/p/the-weather-network-is-canadas-most",
+        "https://www.pollara.com/pollaras-annual-trust-in-media-survey-ranks-canadas-most-trusted-news-outlets/",
+        "https://www.straight.com/news/richard-stursberg-reveals-cbc-study-indicated-conservatives-were-treated-best-national",
+        "https://breachmedia.ca/pierre-poilievre-is-wrong-cbcs-real-bias-benefits-conservatives/",
+        "https://j-source.ca/public-broadcasting-private-boardrooms/"
+      ],
+      "estimatedAt": "2026-10-12"
+    },
+    {
+      "publisher": "dw",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "DE",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "DW broadcasts in about 30 languages for audiences outside Germany, is funded by federal tax grants under the Deutsche Welle Act (which requires independence from government), and closed its German-language linear channel in 2024. It is not in the Reuters Institute's German audience data, and no evidence places it on Germany's domestic left–right spectrum.",
+      "sources": ["https://en.wikipedia.org/wiki/Deutsche_Welle"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "DW is Germany's international broadcaster for audiences abroad; it has no meaningful domestic audience to place on Germany's left–right axis."
+    },
+    {
+      "publisher": "euronews",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "FR",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Euronews reaches households in 166 countries in 18 languages and moved its editorial headquarters to Brussels. Its only audience-based placement is relative to Spain (0.00), not France. No evidence places it on France's domestic left–right spectrum.",
+      "sources": ["https://en.wikipedia.org/wiki/Euronews"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Euronews is a pan-European international broadcaster (18 languages, editorial HQ moved from Lyon to Brussels in 2023), not a French domestic outlet, so France's left–right axis does not apply."
+    },
+    {
+      "publisher": "politico-eu",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "BE",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Registered in Brussels, Politico Europe reports on the Commission, Parliament and Council for a professional EU-policy audience across member states (Pro subscriptions from €7,000 a year). It does not cover Belgian domestic politics for Belgian readers. No left–right measure exists.",
+      "sources": ["https://en.wikipedia.org/wiki/Politico_Europe"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Politico Europe covers EU institutions for an EU-wide policy readership; it has no Belgian domestic audience to place on Belgium's (language-split) party spectrum."
+    },
+    {
+      "publisher": "globalvoices",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "NL",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Founded at Harvard's Berkman Center and incorporated in Amsterdam in 2008, Global Voices translates and reports citizen media from around the world, focusing on non-Western and underrepresented voices. Its stated advocacy is for free expression. No left–right measure or Dutch audience exists.",
+      "sources": ["https://en.wikipedia.org/wiki/Global_Voices"],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Global Voices is a global volunteer citizen-media network registered as a Dutch foundation; it does not cover Dutch politics for Dutch readers, so the Dutch left–right axis does not apply."
+    },
+    {
+      "publisher": "meduza",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "LV",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Founded in Riga in 2014 by former Lenta.ru staff because independent Russian-language publishing was not feasible in Russia. Russia designated it a 'foreign agent' (2021), blocked it (2022) and declared it 'undesirable' (2023). Its divide is independent vs state-aligned, not a Latvian left–right position.",
+      "sources": [
+        "https://en.wikipedia.org/wiki/Meduza",
+        "https://en.wikipedia.org/wiki/Meduza_(website)"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Meduza is Russian exile media registered in Latvia and written for Russian readers; in Russia the media divide is state-aligned vs independent (Meduza is a designated 'undesirable organisation'), not left vs right, and it has no Latvian domestic role."
+    },
+    {
+      "publisher": "kyivindependent",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "UA",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Founded in 2021 by fired Kyiv Post staff, partly journalist-owned and funded mainly by reader memberships. It publishes in English for an international audience. In Ukraine, the documented media divides are oligarch or state-coordinated vs independent and (pre-2022) pro-Russian vs pro-Western; no left–right placement exists.",
+      "sources": [
+        "https://en.wikipedia.org/wiki/The_Kyiv_Independent",
+        "https://ukraineworld.org/en/articles/ukraine-explained/clash-oligarchs-key-features-ukraines-media-sphere",
+        "https://en.wikipedia.org/wiki/United_News_(telethon)"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Ukraine's main media divide is oligarch-owned or state-coordinated (the wartime United News telethon) vs independent media, and before 2022 pro-Russian vs pro-Western, not left vs right."
+    },
+    {
+      "publisher": "taipeitimes",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "TW",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Published by the Liberty Times Group, which the Reuters Institute (2024) places on the pro-independence side; its editorial line is described as leaning toward Taiwan independence. That is a national-identity placement, not a left–right one.",
+      "sources": [
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2024/taiwan",
+        "https://en.wikipedia.org/wiki/Taipei_Times"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Taiwan's media divide is national identity and cross-strait relations (pan-green, pro-independence vs pan-blue, pro-unification), not left vs right."
+    },
+    {
+      "publisher": "cna",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "SG",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "CNA belongs to Mediacorp, which RSF says is owned by a state investment company (Temasek). RSF says the government can appoint boards and editors of leading outlets. A left–right label does not fit.",
+      "sources": [
+        "https://rsf.org/en/country/singapore",
+        "https://en.wikipedia.org/wiki/Mass_media_in_Singapore"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Singapore has had one-party (PAP) government since 1965; the media divide is government-aligned vs independent, not left vs right."
+    },
+    {
+      "publisher": "straitstimes",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "SG",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Published by SPH Media Trust, which RSF says receives direct government funding and is chaired by a former PAP minister. The Newspaper and Printing Presses Act gives the government a say over management shares. A left–right label does not fit.",
+      "sources": [
+        "https://rsf.org/en/country/singapore",
+        "https://en.wikipedia.org/wiki/Mass_media_in_Singapore"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Singapore has had one-party (PAP) government since 1965; the media divide is government-aligned vs independent, not left vs right."
+    },
+    {
+      "publisher": "rappler",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "PH",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "ISEAS analysts say Philippine parties 'lack clear ideological leanings' and loyalties follow personalities. Rappler is documented mainly as a critic of the Duterte administration's drug war and a target of government cases, which is a government-vs-critic placement, not a left–right one.",
+      "sources": [
+        "https://fulcrum.sg/marcos-jr-versus-duterte-betrayal-and-loyalty-in-the-2025-philippine-midterm-elections/",
+        "https://en.wikipedia.org/wiki/Rappler"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Philippine parties lack clear ideology; the divide is personalistic and factional (e.g. Marcos vs Duterte camps, administration vs critics), not left vs right."
+    },
+    {
+      "publisher": "dawn",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "PK",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Media Ownership Monitor describes Dawn as historically conservative and pro-business, and since 2005 'a champion of civilian supremacy over the military'. That places it on the civil–military axis. Owners (Haroon family) have held posts under several governments.",
+      "sources": [
+        "https://pakistan.mom-gmr.org/en/media/detail/outlet/dawn/",
+        "https://en.wikipedia.org/wiki/Dawn_(newspaper)"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Pakistan's media divide runs mainly along civil–military and party lines (establishment vs civilian supremacy; PTI vs PML-N/PPP), not left vs right."
+    },
+    {
+      "publisher": "thedailystar-bd",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "BD",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "The Media Reform Commission (reported 2025) describes outlets alternating as party mouthpieces under BNP and AL rule. The Daily Star has faced defamation suits from leaders of both parties and an AL advertising suspension, which places it on a partisan/government axis rather than left–right.",
+      "sources": [
+        "https://www.thedailystar.net/news/bangladesh/news/how-our-media-got-politicised-3865156",
+        "https://en.wikipedia.org/wiki/The_Daily_Star_(Bangladesh)"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Bangladesh's media divide is partisan alignment with the Awami League or the BNP (and Jamaat), not left vs right."
+    },
+    {
+      "publisher": "aljazeera",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "QA",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Qatar does not permit political parties (Freedom House 2025), so a domestic left–right placement has no reference point. Al Jazeera English belongs to Al Jazeera Media Network, which is partly funded by the Qatari government, and it presents itself as an alternative to Western broadcasters for a mainly international audience.",
+      "sources": [
+        "https://freedomhouse.org/country/qatar/freedom-world/2025",
+        "https://en.wikipedia.org/wiki/Al_Jazeera_English"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Qatar has no political parties or competitive elections, so there is no left–right party axis; the relevant divide is state-funded vs independent media, and Al Jazeera English's audience is mostly outside Qatar."
+    },
+    {
+      "publisher": "thenational",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "AE",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Political parties are banned in the UAE (Freedom House 2025), so there is no left–right axis to place it on. The paper is owned by International Media Investments, controlled by UAE Vice President Sheikh Mansour bin Zayed Al Nahyan, and the Financial Times (2024) describes it as following the government line.",
+      "sources": [
+        "https://freedomhouse.org/country/united-arab-emirates/freedom-world/2025",
+        "https://en.wikipedia.org/wiki/The_National_(Abu_Dhabi)"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "The UAE bans political parties; the relevant media divide is state-aligned vs independent, not left vs right."
+    },
+    {
+      "publisher": "premiumtimes",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "NG",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "The BTI 2026 report finds 'virtually no ideology' in Nigerian parties, which mobilise ethnic, regional or religious bases, and says media bias tends to follow political funders and factions. Premium Times is a privately held Abuja investigative outlet with no documented party ties, so there is no left–right axis to place it on.",
+      "sources": [
+        "https://bti-project.org/en/reports/country-report/NGA",
+        "https://researchonline.lse.ac.uk/id/eprint/132077/",
+        "https://www.premiumtimesng.com/about"
+      ],
+      "estimatedAt": "2026-10-12",
+      "axisNote": "Nigeria's party and media divides follow ethnic, regional and religious lines, patronage and pro-incumbent vs independent, not a left–right ideology."
     }
   ]
 }

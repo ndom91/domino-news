@@ -84,12 +84,13 @@
         "countryContext": "US",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Al-Monitor covers the Middle East for policymakers, diplomats and analysts in the US, Europe and the region; the divides in its coverage are regional (Israel–Palestine, Iran, Gulf and Turkish politics), not the US left–right party contest. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q4702909",
         "https://en.wikipedia.org/wiki/Al-Monitor",
-        "https://www.new-levant.org/person/jamal-daniel/"
+        "https://www.al-monitor.com/about",
+        "https://www.new-levant.org/person/jamal-daniel/",
+        "https://www.wikidata.org/wiki/Q4702909"
       ],
       "notes": "Crest Media LLC as holding entity comes from a secondary profile (New Levant Initiative); no 2025-26 sale found. Revenue mix (subscriptions/ads/events) is general knowledge, not verified on a primary page."
     },
@@ -103,12 +104,13 @@
         "countryContext": "QA",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Qatar has no political parties or competitive elections, so there is no left–right party axis; the relevant divide is state-funded vs independent media, and Al Jazeera English's audience is mostly outside Qatar. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/Al_Jazeera_English",
         "https://en.wikipedia.org/wiki/Al_Jazeera_Media_Network",
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://freedomhouse.org/country/qatar/freedom-world/2025"
       ],
       "notes": "1) The imported wp_rsp row names the entry 'Al Jazeera Magazine', which looks like a mis-match; check the RSP entry for Al Jazeera itself (and any caveats it carries) before publishing. 2) fundingModel 'state' chosen because it is government-owned and mostly state-funded; reviewer may prefer 'other' given its formal foundation status."
     },
@@ -196,15 +198,22 @@
         "reliabilityLevel": null,
         "reliability": "Not on Wikipedia's perennial sources list.",
         "countryContext": "CA",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre",
+        "leanEvidenceUrl": "https://thehub.ca/2026/07/24/the-cbc-continues-to-gaslight-conservatives-even-after-its-near-death-experience/",
+        "leanNote": "A Crown corporation under the Broadcasting Act with no editorial line or endorsements. The only systematic content study (ERIN Research for CBC, 2009–10) found no tilt toward the opposition. Trust is much higher among Liberal and NDP voters than Conservative voters (Pollara 2024–26), but that is one audience signal and not enough on its own to place it off centre. Domino estimate, medium confidence (lean-estimate@1).",
+        "leanBasis": "estimated"
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q2931014",
-        "https://en.wikipedia.org/wiki/CBC_News",
+        "https://breachmedia.ca/pierre-poilievre-is-wrong-cbcs-real-bias-benefits-conservatives/",
         "https://cbc.radio-canada.ca/en/your-public-broadcaster/about-us/answers-to-common-questions",
-        "https://sencanada.ca/content/sen/committee/451/TRCM/Reports/TRCM_45-1_SS-1_CBC_Report_final_e.pdf"
+        "https://en.wikipedia.org/wiki/CBC_News",
+        "https://j-source.ca/public-broadcasting-private-boardrooms/",
+        "https://sencanada.ca/content/sen/committee/451/TRCM/Reports/TRCM_45-1_SS-1_CBC_Report_final_e.pdf",
+        "https://thehub.ca/2026/07/24/the-cbc-continues-to-gaslight-conservatives-even-after-its-near-death-experience/",
+        "https://thewalrusca.substack.com/p/the-weather-network-is-canadas-most",
+        "https://www.pollara.com/pollaras-annual-trust-in-media-survey-ranks-canadas-most-trusted-news-outlets/",
+        "https://www.straight.com/news/richard-stursberg-reveals-cbc-study-indicated-conservatives-were-treated-best-national",
+        "https://www.wikidata.org/wiki/Q2931014"
       ],
       "notes": ""
     },
@@ -252,12 +261,14 @@
         "countryContext": "SG",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Singapore has had one-party (PAP) government since 1965; the media divide is government-aligned vs independent, not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
         "https://en.wikipedia.org/wiki/CNA_(TV_network)",
+        "https://en.wikipedia.org/wiki/Mass_media_in_Singapore",
         "https://en.wikipedia.org/wiki/Mediacorp",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://rsf.org/en/country/singapore",
         "https://statemediamonitor.com/2026/08/mediacorp/"
       ],
       "notes": "fundingModel judgement call: 'state' (state-owned via Temasek, no independence charter) vs 'public_broadcaster' (receives public-service allocation). State Media Monitor does not classify Mediacorp as 'state-controlled' because state funding share is unknown. Reviewer should confirm."
@@ -287,7 +298,7 @@
         "countryContext": "PK",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Pakistan's media divide runs mainly along civil–military and party lines (establishment vs civilian supremacy; PTI vs PML-N/PPP), not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/Dawn_(newspaper)",
@@ -307,11 +318,11 @@
         "countryContext": "DE",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: DW is Germany's international broadcaster for audiences abroad; it has no meaningful domestic audience to place on Germany's left–right axis. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
-        "https://en.wikipedia.org/wiki/Deutsche_Welle"
+        "https://en.wikipedia.org/wiki/Deutsche_Welle",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
       ],
       "notes": "Funded by federal tax revenue, not a licence fee; classed public_broadcaster because of statutory editorial independence."
     },
@@ -397,13 +408,13 @@
         "countryContext": "FR",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Euronews is a pan-European international broadcaster (18 languages, editorial HQ moved from Lyon to Brussels in 2023), not a French domestic outlet, so France's left–right axis does not apply. (Domino research, lean-estimate@1)"
       },
       "sources": [
+        "https://en.wikipedia.org/wiki/Alpac_Capital",
         "https://en.wikipedia.org/wiki/Euronews",
         "https://www.broadbandtvnews.com/2022/07/05/alpac-capital-completes-euronews-acquisition/",
-        "https://www.tvbeurope.com/business/alpac-capital-takes-majority-share-in-euronews",
-        "https://en.wikipedia.org/wiki/Alpac_Capital"
+        "https://www.tvbeurope.com/business/alpac-capital-takes-majority-share-in-euronews"
       ],
       "notes": "Stake size differs (88% at deal vs 98% per Wikipedia Alpac page). 'Historically EU contracts' is from general knowledge, not verified this session; reviewer may want to drop that clause."
     },
@@ -473,7 +484,7 @@
         "countryContext": "NL",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Global Voices is a global volunteer citizen-media network registered as a Dutch foundation; it does not cover Dutch politics for Dutch readers, so the Dutch left–right axis does not apply. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/Global_Voices",
@@ -599,14 +610,19 @@
         "reliabilityLevel": null,
         "reliability": "Not on Wikipedia's perennial sources list.",
         "countryContext": "US",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre",
+        "leanEvidenceUrl": "https://www.kff.org/about-us/board-of-trustees/",
+        "leanNote": "KFF Health News is a program of KFF, which is governed by a board chaired by former Republican senator Olympia Snowe and including former Democratic HHS secretary Kathleen Sebelius. KFF describes itself as nonpartisan, and NPR describes it as a nonpartisan health research organisation. No endorsements or opinion section. Domino estimate, medium confidence (lean-estimate@1).",
+        "leanBasis": "estimated"
       },
       "sources": [
+        "https://en.wikipedia.org/wiki/KFF",
+        "https://en.wikipedia.org/wiki/Olympia_Snowe",
         "https://kffhealthnews.org/about-us/",
         "https://kffhealthnews.org/faq/",
-        "https://en.wikipedia.org/wiki/KFF"
+        "https://text.npr.org/nx-s1-5978044",
+        "https://www.kff.org/about-us/board-of-trustees/",
+        "https://www.kff.org/about-us/history-and-mission/"
       ],
       "notes": "No AllSides row imported; lean left null."
     },
@@ -640,12 +656,14 @@
         "countryContext": "UA",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Ukraine's main media divide is oligarch-owned or state-coordinated (the wartime United News telethon) vs independent media, and before 2022 pro-Russian vs pro-Western, not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/The_Kyiv_Independent",
+        "https://en.wikipedia.org/wiki/United_News_(telethon)",
+        "https://jia.sipa.columbia.edu/content/reporting-war-feature-kyiv-independent",
         "https://kyivindependent.com/who-funds-the-kyiv-independent/",
-        "https://jia.sipa.columbia.edu/content/reporting-war-feature-kyiv-independent"
+        "https://ukraineworld.org/en/articles/ukraine-explained/clash-oligarchs-key-features-ukraines-media-sphere"
       ],
       "notes": "fundingModel: for-profit company (Crunchbase) but reader-funded and employee-owned; chose 'other'. 'commercial' is also defensible. Exact shareholders not public in sources found."
     },
@@ -659,9 +677,10 @@
         "countryContext": "LV",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Meduza is Russian exile media registered in Latvia and written for Russian readers; in Russia the media divide is state-aligned vs independent (Meduza is a designated 'undesirable organisation'), not left vs right, and it has no Latvian domestic role. (Domino research, lean-estimate@1)"
       },
       "sources": [
+        "https://en.wikipedia.org/wiki/Meduza",
         "https://en.wikipedia.org/wiki/Meduza_(website)",
         "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
       ],
@@ -696,10 +715,11 @@
         "countryContext": "US",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Mongabay is a US-registered but globally oriented environmental news service, publishing in eight or nine languages with bureaus in Indonesia, Latin America and India; it has no meaningful role in US domestic party politics. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/Mongabay",
+        "https://news.mongabay.com/about/",
         "https://news.mongabay.com/funders/",
         "https://philanthropy.org/990/report/453714703/mongabay-org-corp"
       ],
@@ -845,12 +865,12 @@
         "countryContext": "BE",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Politico Europe covers EU institutions for an EU-wide policy readership; it has no Belgian domestic audience to place on Belgium's (language-split) party spectrum. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q991826",
         "https://en.wikipedia.org/wiki/Politico_Europe",
-        "https://www.axios.com/2024/09/19/axel-springer-kkr-break-up"
+        "https://www.axios.com/2024/09/19/axel-springer-kkr-break-up",
+        "https://www.wikidata.org/wiki/Q991826"
       ],
       "notes": "The Axel Springer/KKR split was announced in September 2024. I did not confirm the closing date. Politico (US) is on the perennial sources list, but Politico Europe has no separate wp_rsp row, so reliabilityLevel is null."
     },
@@ -864,12 +884,14 @@
         "countryContext": "NG",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Nigeria's party and media divides follow ethnic, regional and religious lines, patronage and pro-incumbent vs independent, not a left–right ideology. (Domino research, lean-estimate@1)"
       },
       "sources": [
+        "https://bti-project.org/en/reports/country-report/NGA",
         "https://en.wikipedia.org/wiki/Premium_Times",
-        "https://www.premiumtimesng.com/about",
-        "https://www.macfound.org/grantee/premium-times-centre-for-investigative-journalism-46007/"
+        "https://researchonline.lse.ac.uk/id/eprint/132077/",
+        "https://www.macfound.org/grantee/premium-times-centre-for-investigative-journalism-46007/",
+        "https://www.premiumtimesng.com/about"
       ],
       "notes": "Shareholders of Premium Times Services Limited are not public. Funding mix partly comes from a secondary summary; check the About page."
     },
@@ -902,13 +924,14 @@
         "countryContext": "PH",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Philippine parties lack clear ideology; the divide is personalistic and factional (e.g. Marcos vs Duterte camps, administration vs critics), not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://en.wikipedia.org/wiki/Rappler",
-        "https://philippines.mom-gmr.org/en/owners/companies/detail/company/company/show/rappler-holdings-corporation/",
         "https://business.inquirer.net/453375/real-estate-firm-to-become-rapplers-biggest-shareholder",
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+        "https://en.wikipedia.org/wiki/Rappler",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://fulcrum.sg/marcos-jr-versus-duterte-betrayal-and-loyalty-in-the-2025-philippine-midterm-elections/",
+        "https://philippines.mom-gmr.org/en/owners/companies/detail/company/company/show/rappler-holdings-corporation/"
       ],
       "notes": "Shareholding data is from Media Ownership Monitor and is several years old. In 2024 MRC Allied (Bitanga family) planned to take over Dolphin Fire's stake; I could not confirm whether that closed."
     },
@@ -922,10 +945,11 @@
         "countryContext": "US",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Rest of World covers technology outside Western countries for a global audience, with staff mostly based in Asia, Africa and Latin America; US domestic party politics is not its subject. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/Rest_of_World",
+        "https://restofworld.org/about/",
         "https://restofworld.org/about/our-supporters/"
       ],
       "notes": ""
@@ -1010,13 +1034,15 @@
         "countryContext": "SG",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Singapore has had one-party (PAP) government since 1965; the media divide is government-aligned vs independent, not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q498921",
-        "https://en.wikipedia.org/wiki/The_Straits_Times",
+        "https://en.wikipedia.org/wiki/Mass_media_in_Singapore",
         "https://en.wikipedia.org/wiki/SPH_Media_Trust",
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+        "https://en.wikipedia.org/wiki/The_Straits_Times",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://rsf.org/en/country/singapore",
+        "https://www.wikidata.org/wiki/Q498921"
       ],
       "notes": "Wikidata says Singapore Press Holdings, which is stale: SPH Media Trust has owned it since December 2021. fundingModel 'other' because it is a not-for-profit guarantee company with large government funding; reviewer may prefer 'state' (some sources call it state-run) or 'nonprofit'."
     },
@@ -1030,12 +1056,13 @@
         "countryContext": "TW",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Taiwan's media divide is national identity and cross-strait relations (pan-green, pro-independence vs pan-blue, pro-unification), not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://en.wikipedia.org/wiki/Taipei_Times",
         "https://en.wikipedia.org/wiki/Liberty_Times",
-        "https://en.wikipedia.org/wiki/Lin_Rong-San"
+        "https://en.wikipedia.org/wiki/Lin_Rong-San",
+        "https://en.wikipedia.org/wiki/Taipei_Times",
+        "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2024/taiwan"
       ],
       "notes": "'Controlled by his family' after Lin Rong-san's death is not confirmed by a primary source."
     },
@@ -1129,11 +1156,12 @@
         "countryContext": "BD",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: Bangladesh's media divide is partisan alignment with the Awami League or the BNP (and Jamaat), not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q1586163",
-        "https://en.wikipedia.org/wiki/The_Daily_Star_(Bangladesh)"
+        "https://en.wikipedia.org/wiki/The_Daily_Star_(Bangladesh)",
+        "https://www.thedailystar.net/news/bangladesh/news/how-our-media-got-politicised-3865156",
+        "https://www.wikidata.org/wiki/Q1586163"
       ],
       "notes": ""
     },
@@ -1190,10 +1218,11 @@
         "countryContext": "AE",
         "lean": null,
         "leanEvidenceUrl": null,
-        "leanNote": null
+        "leanNote": "Left–right lean doesn't apply: The UAE bans political parties; the relevant media divide is state-aligned vs independent, not left vs right. (Domino research, lean-estimate@1)"
       },
       "sources": [
         "https://en.wikipedia.org/wiki/The_National_(Abu_Dhabi)",
+        "https://freedomhouse.org/country/united-arab-emirates/freedom-world/2025",
         "https://gulfnews.com/technology/media/international-media-investments-acquires-the-national-1.1930822",
         "https://statemediamonitor.com/2026/06/international-media-investments-imi/"
       ],

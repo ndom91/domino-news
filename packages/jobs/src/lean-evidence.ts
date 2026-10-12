@@ -53,8 +53,8 @@ const entrySchema = z.discriminatedUnion('source', [
       applicable: z.boolean(),
       lean: z.nullable(publisherLeanSchema),
       countryContext: z.string().check(z.regex(/^[A-Z]{2}$/)),
-      // Low-confidence estimates are not recorded at all.
-      confidence: z.enum(['high', 'medium']),
+      // Low-confidence estimates are not recorded at all. Null when left–right doesn't apply.
+      confidence: z.nullable(z.enum(['high', 'medium'])),
       rubric: z.string().check(z.regex(/^lean-estimate@\d+$/)),
       rationale: z.string().check(z.minLength(1), z.maxLength(400)),
       axisNote: z.optional(z.string().check(z.maxLength(300))),
@@ -67,6 +67,9 @@ const entrySchema = z.discriminatedUnion('source', [
       }),
       z.refine((e) => e.applicable || Boolean(e.axisNote), {
         message: 'Say which divide applies instead',
+      }),
+      z.refine((e) => (e.lean === null) === (e.confidence === null), {
+        message: 'A lean needs a confidence, and only a lean has one',
       }),
     ),
 ])

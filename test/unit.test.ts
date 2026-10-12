@@ -730,11 +730,13 @@ describe('hand-checked lean evidence', () => {
     expect(ok(estimate)).toBe(true)
     expect(ok({ ...estimate, confidence: 'low' })).toBe(false)
     expect(ok({ ...estimate, lean: null })).toBe(false)
-    expect(ok({ ...estimate, applicable: false, lean: null })).toBe(false)
+    expect(ok({ ...estimate, applicable: false, lean: null, confidence: null })).toBe(false)
+    expect(ok({ ...estimate, confidence: null })).toBe(false)
     const notApplicable = {
       ...estimate,
       applicable: false,
       lean: null,
+      confidence: null,
       axisNote: 'Pro-government vs independent.',
     }
     expect(ok(notApplicable)).toBe(true)
