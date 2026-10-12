@@ -90,6 +90,13 @@ export function zoneName(iso: string, timeZone = 'UTC'): string {
 }
 
 /** "Saturday 10 October 2026" in UTC (the strip's edition date). */
+/** "12 October 2026": day, month and year, for dates that must stand on their own. */
+export function fullDate(iso: string): string {
+  return dateFormat({ day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' }).format(
+    new Date(iso),
+  )
+}
+
 export function longDate(iso: string): string {
   return dateFormat({
     weekday: 'long',

@@ -10,13 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlindspotRouteImport } from './routes/blindspot'
 import { Route as ForYouRouteImport } from './routes/for-you'
+import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OpsRouteImport } from './routes/ops'
+import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as NarrativesIndexRouteImport } from './routes/narratives/index'
 import { Route as NarrativesSlugRouteImport } from './routes/narratives/$slug'
 import { Route as PublishersIndexRouteImport } from './routes/publishers/index'
@@ -28,6 +32,11 @@ import { Route as ApiV1SplatRouteImport } from './routes/api/v1/$'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AccountRoute = AccountRouteImport.update({
@@ -45,6 +54,11 @@ const ForYouRoute = ForYouRouteImport.update({
   path: '/for-you',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ImprintRoute = ImprintRouteImport.update({
+  id: '/imprint',
+  path: '/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -60,9 +74,19 @@ const OpsRoute = OpsRouteImport.update({
   path: '/ops',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
 const NarrativesIndexRoute = NarrativesIndexRouteImport.update({
@@ -103,13 +127,17 @@ const ApiV1SplatRoute = ApiV1SplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
@@ -120,13 +148,17 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
@@ -138,13 +170,17 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/for-you': typeof ForYouRoute
+  '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
+  '/privacy': typeof PrivacyRoute
   '/search': typeof SearchRoute
+  '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
   '/stories/$slug': typeof StoriesSlugRoute
@@ -157,13 +193,17 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/account'
     | '/blindspot'
     | '/for-you'
+    | '/imprint'
     | '/login'
     | '/onboarding'
     | '/ops'
+    | '/privacy'
     | '/search'
+    | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
     | '/stories/$slug'
@@ -174,13 +214,17 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/account'
     | '/blindspot'
     | '/for-you'
+    | '/imprint'
     | '/login'
     | '/onboarding'
     | '/ops'
+    | '/privacy'
     | '/search'
+    | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
     | '/stories/$slug'
@@ -191,13 +235,17 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/account'
     | '/blindspot'
     | '/for-you'
+    | '/imprint'
     | '/login'
     | '/onboarding'
     | '/ops'
+    | '/privacy'
     | '/search'
+    | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
     | '/stories/$slug'
@@ -209,13 +257,17 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   BlindspotRoute: typeof BlindspotRoute
   ForYouRoute: typeof ForYouRoute
+  ImprintRoute: typeof ImprintRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   OpsRoute: typeof OpsRoute
+  PrivacyRoute: typeof PrivacyRoute
   SearchRoute: typeof SearchRoute
+  TermsRoute: typeof TermsRoute
   NarrativesSlugRoute: typeof NarrativesSlugRoute
   PublishersSlugRoute: typeof PublishersSlugRoute
   StoriesSlugRoute: typeof StoriesSlugRoute
@@ -232,6 +284,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/account': {
@@ -255,6 +314,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForYouRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/imprint': {
+      id: '/imprint'
+      path: '/imprint'
+      fullPath: '/imprint'
+      preLoaderRoute: typeof ImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -276,11 +342,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OpsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/narratives/': {
@@ -337,13 +417,17 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   BlindspotRoute: BlindspotRoute,
   ForYouRoute: ForYouRoute,
+  ImprintRoute: ImprintRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   OpsRoute: OpsRoute,
+  PrivacyRoute: PrivacyRoute,
   SearchRoute: SearchRoute,
+  TermsRoute: TermsRoute,
   NarrativesSlugRoute: NarrativesSlugRoute,
   PublishersSlugRoute: PublishersSlugRoute,
   StoriesSlugRoute: StoriesSlugRoute,

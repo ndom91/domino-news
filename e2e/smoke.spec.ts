@@ -14,8 +14,44 @@ test('unauthenticated visitors are sent to sign in', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
+test('about and legal pages are public and linked from login and the footer', async ({ page }) => {
+  for (const [path, title] of [
+    ['/about', 'About Domino'],
+    ['/privacy', 'Privacy policy'],
+    ['/terms', 'Terms of service'],
+    ['/imprint', 'Imprint'],
+  ] as const) {
+    await page.goto(path)
+    await expect(page).toHaveURL(new RegExp(`${path}$`))
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText(title)
+    await expect(page.locator('h1')).toHaveCount(1)
+    await expectNoHorizontalOverflow(page)
+  }
+  // Signed-out footer: legal links and a way to sign in.
+  await page
+    .getByRole('navigation', { name: 'Legal' })
+    .getByRole('link', { name: 'Privacy' })
+    .click()
+  await expect(page).toHaveURL(/\/privacy$/)
+  await page
+    .getByRole('navigation', { name: 'Footer' })
+    .getByRole('link', { name: 'Sign in' })
+    .click()
+  await expect(page).toHaveURL(/\/login/)
+  await page
+    .getByRole('navigation', { name: 'Legal' })
+    .getByRole('link', { name: 'Imprint' })
+    .click()
+  await expect(page).toHaveURL(/\/imprint$/)
+})
+
 test('feed → story → narrative → search', async ({ page }) => {
   await signIn(page)
+
+  // Signed in, the footer keeps the legal links.
+  await expect(
+    page.getByRole('navigation', { name: 'Legal' }).getByRole('link', { name: 'Terms' }),
+  ).toBeVisible()
 
   // Feed
   const firstStory = page.locator('main article h3 a').first()

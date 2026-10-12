@@ -68,6 +68,10 @@ INFERENCE_CA_CERT=/abs/path/to/private-ca.pem        # only for a private CA
 
 Fixture and model embeddings live in different vector spaces. When you switch modes, run `pnpm cli dev:reset` and ingest again.
 
+### Legal pages
+
+`/about`, `/privacy`, `/terms` and `/imprint` are public (no sign-in) and linked from every footer and the login page. Operator details (name, email, postal address, hosting provider) live in `apps/web/src/lib/operator.ts`; the imprint shows the address only once it's set. When the content changes, bump `LEGAL_UPDATED_AT` there. The privacy policy's retention table mirrors the code (sessions in `auth.ts`, reading history in `preferences.ts`, backups in `scripts/deploy.sh`): change them together. Code is AGPL-3.0 (`LICENSE`); third-party data keeps its own terms (`NOTICE.md`).
+
 ### Mobile app (Expo)
 
 The server is ready for an Expo client through better-auth's `expo()` plugin:

@@ -186,7 +186,37 @@ function ThemeItem() {
 }
 
 /** Always-dark footer: what Domino is, how summaries are made, and the main pages again. */
-export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
+/** Header for signed-out readers on the public pages: the wordmark and a way to sign in. */
+export function PublicHeader() {
+  return (
+    <header className="mx-auto flex max-w-page items-center justify-between gap-4 border-b-6 border-rule px-gutter pt-6 pb-3">
+      <Link
+        to="/login"
+        translate="no"
+        className="type-masthead text-[2rem]"
+        aria-label="Domino, sign in"
+      >
+        Domino<span className="text-accent">.</span>
+      </Link>
+      <Link
+        to="/login"
+        className="inline-flex min-h-tap items-center font-semibold underline-offset-4 hover:underline"
+      >
+        Sign in
+      </Link>
+    </header>
+  )
+}
+
+const LEGAL = [
+  { to: '/about', label: 'About' },
+  { to: '/privacy', label: 'Privacy' },
+  { to: '/terms', label: 'Terms' },
+  { to: '/imprint', label: 'Imprint' },
+] as const
+
+/** Site footer. Signed out (on the public pages) it shows only the legal links and sign-in. */
+export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
   return (
     <footer className="mt-24 bg-band text-band-text">
       <div className="mx-auto max-w-page px-gutter pb-[calc(3rem+var(--dn-safe-bottom))]">
@@ -203,18 +233,45 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } }) {
           </div>
           <nav aria-label="Footer" className="border-t-2 border-band-text pt-3">
             <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-base font-semibold">
-              {navFor(user).map((item) => (
+              {user ? (
+                <>
+                  {navFor(user).map((item) => (
+                    <li key={item.to}>
+                      <Link to={item.to} className="hover:underline underline-offset-3">
+                        {item.label}
+                      </Link>
+                    </li>
+                  ))}
+                  <li>
+                    <Link to="/account" className="hover:underline underline-offset-3">
+                      Account
+                    </Link>
+                  </li>
+                </>
+              ) : (
+                <li>
+                  <Link to="/login" className="hover:underline underline-offset-3">
+                    Sign in
+                  </Link>
+                </li>
+              )}
+            </ul>
+          </nav>
+        </div>
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-band-line pt-4 text-sm text-band-muted">
+          <p>© {new Date().getFullYear()} Domino News</p>
+          <nav aria-label="Legal">
+            <ul className="flex flex-wrap gap-x-5 gap-y-2">
+              {LEGAL.map((item) => (
                 <li key={item.to}>
-                  <Link to={item.to} className="hover:underline underline-offset-3">
+                  <Link
+                    to={item.to}
+                    className="inline-flex min-h-tap items-center hover:text-band-text hover:underline underline-offset-3"
+                  >
                     {item.label}
                   </Link>
                 </li>
               ))}
-              <li>
-                <Link to="/account" className="hover:underline underline-offset-3">
-                  Account
-                </Link>
-              </li>
             </ul>
           </nav>
         </div>

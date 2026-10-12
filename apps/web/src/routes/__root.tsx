@@ -14,11 +14,14 @@ import {
 } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { NotFoundPage } from '../components/not-found.tsx'
-import { SiteFooter, SiteHeader } from '../components/site-header.tsx'
+import { PublicHeader, SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { queries } from '../lib/api.ts'
 import { getSessionInfo } from '../lib/session.ts'
 import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
+
+// Readable without an account: the imprint and privacy policy must be reachable by anyone.
+const PUBLIC_PATHS = new Set(['/login', '/about', '/privacy', '/terms', '/imprint'])
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context, location }) => {
@@ -29,8 +32,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       queryFn: () => getSessionInfo(),
       staleTime: Number.POSITIVE_INFINITY,
     })
-    // The whole app sits behind login.
-    if (!session.user && location.pathname !== '/login') {
+    // The whole app sits behind login, apart from the public pages.
+    if (!session.user && !PUBLIC_PATHS.has(location.pathname)) {
       throw redirect({ to: '/login', search: { next: location.href } })
     }
     // First visit: onboarding once, then back to where they were going.
@@ -80,12 +83,21 @@ function RootLayout() {
   return (
     <TooltipProvider>
       {/* Block wrapper: as flex items, the header's mx-auto rows would shrink to fit. */}
-      <div>{user ? <SiteHeader user={user} /> : null}</div>
+      <div>
+        {user ? (
+          <SiteHeader user={user} />
+        ) : !session.user && pathname !== '/login' ? (
+          <PublicHeader />
+        ) : null}
+      </div>
       {/* flex-1 pins the footer to the bottom when the page is short. */}
       <main id="main" className="flex-1">
         <Outlet />
       </main>
-      {user ? <SiteFooter user={user} /> : null}
+      {/* The login page has its own layout and links to the legal pages itself. */}
+      {pathname !== '/login' && pathname !== '/onboarding' ? (
+        <SiteFooter user={session.user} />
+      ) : null}
     </TooltipProvider>
   )
 }

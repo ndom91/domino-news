@@ -1,7 +1,7 @@
 import { longDate } from '@dn/domain'
 import { Button, Marble, Notice, TextInput } from '@dn/ui'
 import { useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
 import { authClient } from '../lib/auth-client.ts'
@@ -185,6 +185,27 @@ function LoginPage() {
               : ''}
             .
           </p>
+          <nav aria-label="Legal" className="mt-8 border-t border-border pt-2 text-sm">
+            <ul className="flex flex-wrap gap-x-5">
+              {(
+                [
+                  ['/about', 'About'],
+                  ['/privacy', 'Privacy'],
+                  ['/terms', 'Terms'],
+                  ['/imprint', 'Imprint'],
+                ] as const
+              ).map(([to, label]) => (
+                <li key={to}>
+                  <Link
+                    to={to}
+                    className="inline-flex min-h-tap items-center text-text-muted underline-offset-4 hover:text-text hover:underline"
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
         </div>
       </main>
     </div>
