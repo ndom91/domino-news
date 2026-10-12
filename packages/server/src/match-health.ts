@@ -3,6 +3,8 @@ import { sql } from 'drizzle-orm'
 import type { ServerContext } from './context.ts'
 
 const SPLIT_THRESHOLD = 0.9
+// Closest pairs returned for the list; the count covers all of them.
+const SPLIT_PAIRS_LISTED = 25
 // The split-pair search compares embeddings pairwise; the page refreshes every few seconds.
 const CACHE_MS = 5 * 60_000
 let cached: { at: number; value: MatchHealth } | null = null
@@ -93,7 +95,7 @@ export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<Ma
     join publisher pb on pb.id = ab.publisher_id
     join story s1 on s1.id = p.sa join story s2 on s2.id = p.sb
     order by p.similarity desc
-    limit 10`)
+    limit ${SPLIT_PAIRS_LISTED}`)
   const side = (
     title: string,
     publisher: string,

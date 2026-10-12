@@ -583,30 +583,45 @@ function MatchHealthBody({ h }: { h: MatchHealth }) {
           note={`article pairs ≥ ${h.splitPairs.threshold.toFixed(2)} similar, different stories (3 days)`}
         />
       </dl>
-      {h.splitPairs.worst.length > 0 ? (
-        <details className="t-acc group mt-4">
-          <summary className="flex cursor-pointer list-none items-center gap-2 type-label text-text [&::-webkit-details-marker]:hidden">
-            <DisclosureChevron />
-            Closest pairs in different stories
-          </summary>
-          <div className="mt-2">
-            <Table head={['Similarity', 'Article', 'Article']}>
-              {h.splitPairs.worst.map((p) => (
-                <tr key={`${p.a.title}|${p.b.title}`}>
-                  <Td>{p.similarity.toFixed(3)}</Td>
-                  <Td>
-                    <PairSide side={p.a} />
-                  </Td>
-                  <Td>
-                    <PairSide side={p.b} />
-                  </Td>
-                </tr>
-              ))}
-            </Table>
-          </div>
-        </details>
-      ) : null}
+      <ClosestPairs pairs={h.splitPairs.worst} />
     </>
+  )
+}
+
+const PAIRS_SHOWN = 5
+
+/** The closest pairs of articles that sit in different stories: top 5, the rest on request. */
+function ClosestPairs({ pairs }: { pairs: MatchHealth['splitPairs']['worst'] }) {
+  const [expanded, setExpanded] = useState(false)
+  if (pairs.length === 0) return null
+  const shown = expanded ? pairs : pairs.slice(0, PAIRS_SHOWN)
+  return (
+    <div className="mt-6">
+      <h3 className="mb-2 type-label text-text">Closest pairs in different stories</h3>
+      <Table head={['Similarity', 'Article', 'Article']}>
+        {shown.map((p) => (
+          <tr key={`${p.a.title}|${p.b.title}`}>
+            <Td>{p.similarity.toFixed(3)}</Td>
+            <Td>
+              <PairSide side={p.a} />
+            </Td>
+            <Td>
+              <PairSide side={p.b} />
+            </Td>
+          </tr>
+        ))}
+      </Table>
+      {pairs.length > PAIRS_SHOWN ? (
+        <Button
+          size="sm"
+          className="mt-4"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((e) => !e)}
+        >
+          {expanded ? 'Show fewer pairs' : `Show ${pairs.length - PAIRS_SHOWN} more pairs`}
+        </Button>
+      ) : null}
+    </div>
   )
 }
 
