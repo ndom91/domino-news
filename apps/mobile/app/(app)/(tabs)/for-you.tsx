@@ -28,7 +28,7 @@ export default function ForYouScreen() {
     )
   }
   if (isUnauthorized(feed.error)) return <Redirect href="/sign-in" />
-  if (feed.isError) {
+  if (feed.isError && !feed.data) {
     return (
       <Screen>
         <MessageView
@@ -43,6 +43,9 @@ export default function ForYouScreen() {
   const first = feed.data.pages[0]
   const items = feed.data.pages.flatMap((page) => page.items)
   const now = new Date().toISOString()
+  let moreLabel = 'Show more stories'
+  if (feed.isFetchNextPageError) moreLabel = 'Try again'
+  if (feed.isFetchingNextPage) moreLabel = 'Loading…'
 
   return (
     <Screen>
@@ -85,11 +88,16 @@ export default function ForYouScreen() {
             title="Nothing new yet"
           />
         )}
-        {feed.hasNextPage ? (
+        {feed.hasNextPage || feed.isFetchNextPageError ? (
           <View style={styles.more}>
             <Button disabled={feed.isFetchingNextPage} onPress={() => feed.fetchNextPage()}>
-              {feed.isFetchingNextPage ? 'Loading…' : 'Show more stories'}
+              {moreLabel}
             </Button>
+            {feed.isFetchNextPageError ? (
+              <Text accessibilityRole="alert" style={styles.pageError}>
+                Couldn’t load more stories. Try again.
+              </Text>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
@@ -279,4 +287,5 @@ const styles = StyleSheet.create({
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
   pressed: { opacity: 0.65 },
   more: { marginTop: t.space[8] },
+  pageError: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
 })

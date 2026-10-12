@@ -68,7 +68,7 @@ export function MessageView({
   action?: { label: string; onPress: () => void }
 }) {
   return (
-    <View style={styles.message}>
+    <View accessibilityRole="alert" style={styles.message}>
       <Text style={styles.messageTitle}>{title}</Text>
       <Text style={styles.messageDetail}>{detail}</Text>
       {action ? (

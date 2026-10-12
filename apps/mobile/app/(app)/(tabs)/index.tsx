@@ -26,7 +26,7 @@ export default function LatestScreen() {
   if (isUnauthorized(front.error) || isUnauthorized(stories.error)) {
     return <Redirect href="/sign-in" />
   }
-  if (front.isError || stories.isError) {
+  if ((front.isError && !front.data) || (stories.isError && !stories.data)) {
     return (
       <Screen>
         <MessageView
@@ -42,6 +42,9 @@ export default function LatestScreen() {
   const latest = stories.data.pages
     .flatMap((page) => page.items)
     .filter((story) => story.id !== front.data.lead?.id)
+  let moreLabel = 'Show older stories'
+  if (stories.isFetchNextPageError) moreLabel = 'Try again'
+  if (stories.isFetchingNextPage) moreLabel = 'Loading…'
 
   return (
     <Screen>
@@ -85,11 +88,16 @@ export default function LatestScreen() {
             ))}
           </View>
         )}
-        {stories.hasNextPage ? (
+        {stories.hasNextPage || stories.isFetchNextPageError ? (
           <View style={styles.more}>
             <Button disabled={stories.isFetchingNextPage} onPress={() => stories.fetchNextPage()}>
-              {stories.isFetchingNextPage ? 'Loading…' : 'Show older stories'}
+              {moreLabel}
             </Button>
+            {stories.isFetchNextPageError ? (
+              <Text accessibilityRole="alert" style={styles.pageError}>
+                Couldn’t load older stories. Try again.
+              </Text>
+            ) : null}
           </View>
         ) : null}
       </ScrollView>
@@ -168,4 +176,5 @@ const styles = StyleSheet.create({
   count: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
   list: { gap: t.space[3], marginTop: t.space[4] },
   more: { marginTop: t.space[6] },
+  pageError: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
 })

@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { savePreferencesMutation } from '@dn/queries'
+import { queryKeys, savePreferencesMutation } from '@dn/queries'
 import {
   DESK_LABELS,
   DESK_SLOT,
@@ -9,6 +9,8 @@ import {
   TOPIC_DESK,
   TOPIC_LABELS,
   TOPICS,
+  type UserPreferences,
+  type UserPreferencesUpdate,
 } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
@@ -20,6 +22,7 @@ import { authClient } from '../../../lib/auth-client'
 import {
   disableForYouAlerts,
   enableForYouAlerts,
+  forYouAlertsAvailable,
   forYouAlertsEnabled,
 } from '../../../lib/for-you-alerts'
 
@@ -28,7 +31,25 @@ export default function AccountScreen() {
   const queryClient = useQueryClient()
   const session = authClient.useSession()
   const preferences = useQuery(queries.preferences())
-  const save = useMutation(savePreferencesMutation(api, queryClient))
+  const save = useMutation({
+    ...savePreferencesMutation(api, queryClient),
+    onMutate: async (update: UserPreferencesUpdate) => {
+      await queryClient.cancelQueries({ queryKey: queryKeys.preferences() })
+      const previous = queryClient.getQueryData<UserPreferences>(queryKeys.preferences())
+      if (previous) {
+        queryClient.setQueryData<UserPreferences>(queryKeys.preferences(), {
+          ...previous,
+          ...update,
+          onboarded: previous.onboarded || update.onboarded === true,
+        })
+      }
+      return { previous }
+    },
+    onError: (_error, _update, context) => {
+      if (context?.previous) queryClient.setQueryData(queryKeys.preferences(), context.previous)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.preferences() })
+    },
+  })
   const [signingOut, setSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
   const [alertsEnabled, setAlertsEnabled] = useState(false)
@@ -37,21 +58,34 @@ export default function AccountScreen() {
   const user = session.data?.user
 
   useEffect(() => {
+    let mounted = true
     void forYouAlertsEnabled()
-      .then(setAlertsEnabled)
-      .finally(() => setAlertsPending(false))
+      .then((enabled) => {
+        if (mounted) setAlertsEnabled(enabled)
+      })
+      .catch((error) => {
+        if (mounted) {
+          setAlertsError(
+            error instanceof Error ? error.message : 'Could not check background alerts.',
+          )
+        }
+      })
+      .finally(() => {
+        if (mounted) setAlertsPending(false)
+      })
+    return () => {
+      mounted = false
+    }
   }, [])
 
   async function signOut() {
     setSigningOut(true)
     setSignOutError(null)
-    try {
-      await disableForYouAlerts()
-    } catch {
-      // A local task must never prevent the account session from being cleared.
-    }
     const result = await authClient.signOut()
     if (!result.error) {
+      try {
+        await disableForYouAlerts()
+      } catch {}
       queryClient.clear()
       router.replace('/sign-in')
       return
@@ -155,17 +189,23 @@ export default function AccountScreen() {
             When your phone gives Domino News a background window, it checks For You and lets you
             know about a newly surfaced story.
           </Text>
-          <View style={styles.switchRow}>
-            <Text style={styles.switchLabel}>Alert me about For You</Text>
-            <Switch
-              accessibilityLabel="Alert me about For You"
-              disabled={alertsPending}
-              onValueChange={toggleAlerts}
-              thumbColor={alertsEnabled ? t.color.elevated : t.color.surface}
-              trackColor={{ false: t.color.borderStrong, true: t.color.success }}
-              value={alertsEnabled}
-            />
-          </View>
+          {forYouAlertsAvailable ? (
+            <View style={styles.switchRow}>
+              <Text style={styles.switchLabel}>Alert me about For You</Text>
+              <Switch
+                accessibilityLabel="Alert me about For You"
+                disabled={alertsPending}
+                onValueChange={toggleAlerts}
+                thumbColor={alertsEnabled ? t.color.elevated : t.color.surface}
+                trackColor={{ false: t.color.borderStrong, true: t.color.success }}
+                value={alertsEnabled}
+              />
+            </View>
+          ) : (
+            <Text style={styles.alertNote}>
+              Available in the installed Domino News development build.
+            </Text>
+          )}
           {alertsError ? (
             <Text accessibilityLiveRegion="polite" style={styles.error}>
               {alertsError}
@@ -305,5 +345,11 @@ const styles = StyleSheet.create({
   switchRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   switchLabel: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.body, lineHeight: 22 },
+  alertNote: {
+    color: t.color.textMuted,
+    fontFamily: t.font.medium,
+    fontSize: t.type.meta,
+    lineHeight: 18,
+  },
   pressed: { opacity: 0.68 },
 })

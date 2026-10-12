@@ -25,6 +25,7 @@ const config: ExpoConfig = {
       }
     : undefined,
   android: { package: 'dev.ndo.dominonews' },
+  extra: { eas: { projectId: '433e551b-9dfb-4c06-9edf-59f8b0b5faa1' } },
   experiments: { typedRoutes: true },
   plugins: [
     'expo-router',

@@ -2,7 +2,8 @@
 
 What an agent or developer needs before building the iOS/Android app. The direction comes from [004](004-frontend-platform.md): Expo + React Native with Expo Router. Share contracts, data access and formatting with the web app; build native screens rather than wrapping the website. Status, commands and configuration live in [`AGENTS.md`](../AGENTS.md). This doc covers only what's specific to the app.
 
-Written 2026-10-12, when the server was made Expo-ready (`@better-auth/expo` 1.7.7, the `expo()` plugin). No app code exists yet.
+Written 2026-10-12, when the server was made Expo-ready (`@better-auth/expo` 1.7.7, the `expo()` plugin).
+The Android app now lives in [`apps/mobile`](../apps/mobile); iOS remains deferred.
 
 ## 1. Where it goes
 

@@ -1,10 +1,10 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import * as Notifications from 'expo-notifications'
 import { Redirect, Stack, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import { LoadingView, Screen } from '../../components/ui'
 import { authClient } from '../../lib/auth-client'
+import { listenForStoryNotifications } from '../../lib/for-you-alerts'
 
 export default function SignedInLayout() {
   const session = authClient.useSession()
@@ -13,15 +13,18 @@ export default function SignedInLayout() {
   useEffect(() => {
     if (!session.data) return
 
-    const openStory = (response: Notifications.NotificationResponse | null) => {
-      const storySlug = response?.notification.request.content.data?.storySlug
-      if (typeof storySlug === 'string') {
-        router.push({ pathname: '/stories/[slug]', params: { slug: storySlug } })
-      }
+    let subscription: { remove: () => void } | undefined
+    let disposed = false
+    void listenForStoryNotifications((storySlug) => {
+      router.push({ pathname: '/stories/[slug]', params: { slug: storySlug } })
+    }).then((nextSubscription) => {
+      if (disposed) nextSubscription.remove()
+      else subscription = nextSubscription
+    })
+    return () => {
+      disposed = true
+      subscription?.remove()
     }
-    void Notifications.getLastNotificationResponseAsync().then(openStory)
-    const subscription = Notifications.addNotificationResponseReceivedListener(openStory)
-    return () => subscription.remove()
   }, [router, session.data])
 
   if (session.isPending) {
@@ -34,7 +37,18 @@ export default function SignedInLayout() {
   if (!session.data) return <Redirect href="/sign-in" />
 
   return (
-    <Stack screenOptions={{ contentStyle: styles.screen, headerTintColor: t.color.text }}>
+    <Stack
+      screenOptions={{
+        contentStyle: styles.screen,
+        headerBackButtonDisplayMode: 'minimal',
+        headerShadowVisible: false,
+        headerStyle: styles.header,
+        headerTintColor: t.color.bandText,
+        headerTitleStyle: styles.headerTitle,
+        statusBarBackgroundColor: t.color.band,
+        statusBarStyle: 'light',
+      }}
+    >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen
         name="stories/[slug]"
@@ -44,4 +58,13 @@ export default function SignedInLayout() {
   )
 }
 
-const styles = StyleSheet.create({ screen: { backgroundColor: t.color.canvas } })
+const styles = StyleSheet.create({
+  screen: { backgroundColor: t.color.canvas },
+  header: { backgroundColor: t.color.band },
+  headerTitle: {
+    color: t.color.bandText,
+    fontFamily: t.font.black,
+    fontSize: t.type.body,
+    letterSpacing: -0.3,
+  },
+})

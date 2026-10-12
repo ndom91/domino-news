@@ -1,3 +1,4 @@
+import { ApiError } from '@dn/api-client'
 import { Archivo_400Regular } from '@expo-google-fonts/archivo/400Regular'
 import { Archivo_500Medium } from '@expo-google-fonts/archivo/500Medium'
 import { Archivo_600SemiBold } from '@expo-google-fonts/archivo/600SemiBold'
@@ -11,7 +12,19 @@ import { View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export default function RootLayout() {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            retry: (failures, error) =>
+              !(error instanceof ApiError && error.status >= 400 && error.status < 500) &&
+              failures < 3,
+          },
+          mutations: { retry: false },
+        },
+      }),
+  )
   const [fontsLoaded, fontError] = useFonts({
     Archivo_400Regular,
     Archivo_500Medium,

@@ -6,13 +6,16 @@ import { Redirect, useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { Linking, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
+import { StoryLeanMeter } from '../../../components/story-lean'
+import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
 
 export default function StoryScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const story = useQuery(queries.story(slug))
+  const preferences = useQuery(queries.preferences())
   const [context, setContext] = useState<StoryContextItem | null>(null)
+  const [sourcesExpanded, setSourcesExpanded] = useState(false)
 
   if (story.isPending)
     return (
@@ -35,6 +38,10 @@ export default function StoryScreen() {
   const data = story.data
   const publisherCount = new Set(data.sources.map((source) => source.publisher.id)).size
   const regions = data.regions.map((region) => REGION_LABELS[region]).join(' · ')
+  const orderedSources = [...data.sources].sort((a, b) =>
+    (a.publishedAt ?? a.observedAt).localeCompare(b.publishedAt ?? b.observedAt),
+  )
+  const shownSources = sourcesExpanded ? orderedSources : orderedSources.slice(0, 5)
 
   return (
     <Screen>
@@ -53,6 +60,7 @@ export default function StoryScreen() {
         ) : (
           <Text style={styles.pending}>This story is still being summarised.</Text>
         )}
+        <StoryLeanMeter country={preferences.data?.country ?? null} mix={data.leanMix} />
         {data.context.length > 0 ? (
           <View style={styles.section}>
             <Text style={uiStyles.label}>Background</Text>
@@ -77,7 +85,7 @@ export default function StoryScreen() {
           <Text style={styles.caption}>
             {plural(data.sources.length, 'report')} from {plural(publisherCount, 'publisher')}
           </Text>
-          {data.sources.map((source) => (
+          {shownSources.map((source) => (
             <Pressable
               accessibilityHint="Opens the publisher’s article"
               accessibilityRole="link"
@@ -93,6 +101,11 @@ export default function StoryScreen() {
               <Text style={styles.sourceDomain}>{hostnameOf(source.url) ?? source.url}</Text>
             </Pressable>
           ))}
+          {shownSources.length < orderedSources.length ? (
+            <Button onPress={() => setSourcesExpanded(true)} tone="light">
+              {`View all ${plural(orderedSources.length, 'report')}`}
+            </Button>
+          ) : null}
         </View>
       </ScrollView>
       <ContextSheet entry={context} onClose={() => setContext(null)} />

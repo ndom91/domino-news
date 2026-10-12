@@ -1,8 +1,7 @@
-import Constants from 'expo-constants'
 import { googleWebClientId } from './config'
+import { isExpoGo } from './expo-go'
 
-export const supportsGoogleSignIn =
-  Constants.appOwnership !== 'expo' && googleWebClientId.length > 0
+export const supportsGoogleSignIn = !isExpoGo && googleWebClientId.length > 0
 
 export async function requestGoogleIdToken(): Promise<string | null> {
   if (!supportsGoogleSignIn) throw new Error('Google sign-in is unavailable in this app.')
