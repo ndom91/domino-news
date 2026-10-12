@@ -86,7 +86,9 @@
         "art_01m4q0085s20fdzdy2fybr233q",
         "art_01m4q49s1wz6806dxmz92er4cz",
         "art_01m4q00yettb7hxe759me0ybz0",
-        "art_01m4qq6phm6xs70gcpvbf6gncm"
+        "art_01m4qq6phm6xs70gcpvbf6gncm",
+        "art_01m4qcwmc27efxe5c2w3rggsmm",
+        "art_01m4n9ykz03m1wbv6wbav50e6c"
       ],
       "confidence": "medium"
     },
@@ -171,7 +173,8 @@
       "reason": "Consequence for the energy event after the attacks",
       "articleIds": [
         "art_01m4qkrjybahn8cxhwv003nnrv",
-        "art_01m4qnf9q54gry7xqezqez9mz7"
+        "art_01m4qnf9q54gry7xqezqez9mz7",
+        "art_01m4p1z0eh7bc83n9kza4586g9"
       ],
       "confidence": "high"
     },
@@ -273,7 +276,8 @@
         "art_01m4ndcjb9sekaywzbkf9tyzsq",
         "art_01m4ne8cdj2cc6913dh697jwse",
         "art_01m4p1ymgg5rhav4cskby5g3r2",
-        "art_01m4p1ywpq7ctq8hd4yfjjz4e2"
+        "art_01m4p1ywpq7ctq8hd4yfjjz4e2",
+        "art_01m4qr2j7vgvbcdqfffjsf8hf2"
       ],
       "confidence": "medium"
     },
@@ -321,7 +325,12 @@
         "art_01m4q1q966298eys9424h7axf5",
         "art_01m4qem24vrptkx2exa3cf4gtb",
         "art_01m4qgath6r0vbct6xc980hy8d",
-        "art_01m4qq6phrzdmqt2h27rayc8gd"
+        "art_01m4qq6phrzdmqt2h27rayc8gd",
+        "art_01m4qh6afphxg9xj759h1nqgr5",
+        "art_01m4p4j5faeetbdm2awa61ffm5",
+        "art_01m4pgj2gq9g4fcd4mj4723wzj",
+        "art_01m4qc1e68vw4rkwn5vrq3c6yv",
+        "art_01m4qekd4ap2a7kyvnt4ptn98m"
       ],
       "confidence": "medium"
     },
@@ -345,7 +354,8 @@
         "art_01m4qffan44scd92kcwyq5z8rr",
         "art_01m4qr1rwc9krnpfxb62sa6zh9",
         "art_01m4qrxdrkgy5d6wv66a8akcba",
-        "art_01m4qrx1wr8sq4g27x6251cmja"
+        "art_01m4qrx1wr8sq4g27x6251cmja",
+        "art_01m4nzcsyh6v8tvttseje7d6fy"
       ],
       "confidence": "medium"
     },
@@ -785,15 +795,6 @@
       "confidence": "high"
     },
     {
-      "id": "g68",
-      "title": "Saudi Arabia presses on with global energy summit after deadly Riyadh airport attack",
-      "reason": "Saudi decision to keep the energy summit; could join the WPC executives group",
-      "articleIds": [
-        "art_01m4p1z0eh7bc83n9kza4586g9"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g69",
       "title": "Musk vows ‘affordable’ Starlink in India as he escalates feud with Ambani",
       "reason": "No other article in the set covers this development",
@@ -828,15 +829,6 @@
         "art_01m4n9ykz47rxncbgn63vc7yhw"
       ],
       "confidence": "high"
-    },
-    {
-      "id": "g73",
-      "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
-      "reason": "Analysis/explainer; kept separate from the event per guide",
-      "articleIds": [
-        "art_01m4n9ykz03m1wbv6wbav50e6c"
-      ],
-      "confidence": "low"
     },
     {
       "id": "g74",
@@ -1037,15 +1029,6 @@
       "confidence": "low"
     },
     {
-      "id": "g96",
-      "title": "Ukraine war latest: Russia pounds Kyiv's energy infrastructure as Trump’s energy ceasefire claim catches Ukraine off guard",
-      "reason": "Daily war roundup covering several developments",
-      "articleIds": [
-        "art_01m4nzcsyh6v8tvttseje7d6fy"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g97",
       "title": "Turkiye highway crash kills 11, injures 27 after tour bus hits truck",
       "reason": "No other article in the set covers this development",
@@ -1118,15 +1101,6 @@
       "confidence": "high"
     },
     {
-      "id": "g105",
-      "title": "'To keep oil prices from rising' — Russian lawmaker questions Trump’s energy ceasefire claim",
-      "reason": "Russian lawmaker doubts the ceasefire claim; Russia is a party, so not a reaction wave",
-      "articleIds": [
-        "art_01m4p4j5faeetbdm2awa61ffm5"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g106",
       "title": "Republican senator says Trump diesel agreement with Russia may be illegal",
       "reason": "US senator says diesel deal may be illegal",
@@ -1141,15 +1115,6 @@
       "reason": "FT report on US pressure before the ceasefire",
       "articleIds": [
         "art_01m4pbe0q55j9tmrkbc3qyr12x"
-      ],
-      "confidence": "low"
-    },
-    {
-      "id": "g108",
-      "title": "Watch: What's behind Trump's energy ceasefire claim?",
-      "reason": "Video explainer of the ceasefire claim; could join the announcement",
-      "articleIds": [
-        "art_01m4pgj2gq9g4fcd4mj4723wzj"
       ],
       "confidence": "low"
     },
@@ -1415,24 +1380,6 @@
       "confidence": "high"
     },
     {
-      "id": "g138",
-      "title": "Europe Today: Trump claims Ukraine-Russia energy ceasefire as Baltics stay on alert",
-      "reason": "Newsletter/roundup mixing several topics",
-      "articleIds": [
-        "art_01m4qc1e68vw4rkwn5vrq3c6yv"
-      ],
-      "confidence": "low"
-    },
-    {
-      "id": "g139",
-      "title": "Riyadh airport attacked again and Trump announces Ukraine-Russia 'energy ceasefire'",
-      "reason": "Newsletter roundup of Riyadh attack and energy ceasefire",
-      "articleIds": [
-        "art_01m4qcwmc27efxe5c2w3rggsmm"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g140",
       "title": "Pupil detained after staff shot at school near Marseille",
       "reason": "No other article in the set covers this development",
@@ -1451,15 +1398,6 @@
       "confidence": "high"
     },
     {
-      "id": "g142",
-      "title": "Oil falls on hopes Russia-Ukraine energy ceasefire will boost supplies",
-      "reason": "Market reaction to the ceasefire",
-      "articleIds": [
-        "art_01m4qekd4ap2a7kyvnt4ptn98m"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g143",
       "title": "Roman fort found in Wales could prove myth of emperor’s camp is real",
       "reason": "No other article in the set covers this development",
@@ -1476,15 +1414,6 @@
         "art_01m4qff67vm54n5gqqdxhb29c4"
       ],
       "confidence": "high"
-    },
-    {
-      "id": "g145",
-      "title": "Zelensky says Ukrainian military ‘received all relevant orders’ over energy truce announced by Trump",
-      "reason": "Ukraine issues orders to comply with the truce; an action, kept separate",
-      "articleIds": [
-        "art_01m4qh6afphxg9xj759h1nqgr5"
-      ],
-      "confidence": "low"
     },
     {
       "id": "g146",
@@ -1559,15 +1488,6 @@
       "confidence": "high"
     },
     {
-      "id": "g154",
-      "title": "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil",
-      "reason": "Oct 12 Zelensky terms (truce must cover the grid); close to the refinery-offer group",
-      "articleIds": [
-        "art_01m4qr2j7vgvbcdqfffjsf8hf2"
-      ],
-      "confidence": "low"
-    },
-    {
       "id": "g155",
       "title": "Saudi energy minister says attacks testing infrastructure, vows response",
       "reason": "Saudi energy minister vows response; may be the same speech as the oil-supply item",
@@ -1576,5 +1496,6 @@
       ],
       "confidence": "low"
     }
-  ]
+  ],
+  "note": "Model-drafted (subagent, 2026-10-12), accepted by Nico Domino; 10 singletons then moved into their main stories at his request (ceasefire and Riyadh follow-ups, roundups)."
 }

@@ -12,6 +12,7 @@ import {
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { loadArticles, loadStoryInput } from './inputs.ts'
+import { decideMatch, type MatchPolicy, rankStories } from './match-core.ts'
 import { withAnalysisRun } from './provenance.ts'
 
 // Cosine-similarity bands. Above `autoSame` we attach without asking the model; between
@@ -22,8 +23,15 @@ export const THRESHOLDS = {
   local: { autoSame: 0.93, llmMin: 0.72, relateMin: 0.6 },
 } as const
 
-const CANDIDATE_WINDOW_SECONDS = 4 * 86_400
+export const CANDIDATE_WINDOW_SECONDS = 4 * 86_400
+export const NEIGHBOURS = 12
 const MAX_LLM_CANDIDATES = 3
+
+/** The policy production runs with; the evaluation harness starts from it. */
+export function matchPolicy(mode: keyof typeof THRESHOLDS): MatchPolicy {
+  const t = THRESHOLDS[mode]
+  return { autoSame: t.autoSame, llmMin: t.llmMin, maxCandidates: MAX_LLM_CANDIDATES }
+}
 
 class NotIndexedYetError extends Error {}
 export class CandidatesChangedError extends Error {}
@@ -48,14 +56,7 @@ async function rankCandidateStories(
       ),
     )
   const storyOf = new Map(memberships.map((m) => [m.articleId, m.storyId]))
-  const bestByStory = new Map<string, number>()
-  for (const n of neighbours) {
-    const storyId = storyOf.get(n.articleId)
-    if (storyId) bestByStory.set(storyId, Math.max(bestByStory.get(storyId) ?? 0, n.similarity))
-  }
-  return [...bestByStory.entries()]
-    .filter(([, s]) => s >= minSimilarity)
-    .sort((a, b) => b[1] - a[1])
+  return rankStories(neighbours, (id) => storyOf.get(id), minSimilarity)
 }
 
 async function similarArticles(
@@ -66,7 +67,7 @@ async function similarArticles(
 ) {
   const t = Math.floor(at.getTime() / 1000)
   const hits = await nearestByVector(ctx.ts, 'articles', embedding, {
-    k: 12,
+    k: NEIGHBOURS,
     filter: `id:!=${articleId} && published_at:>=${t - CANDIDATE_WINDOW_SECONDS} && published_at:<=${t + CANDIDATE_WINDOW_SECONDS}`,
   })
   return hits.map((h) => ({ articleId: h.id, similarity: h.similarity }))
@@ -117,49 +118,43 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
     throw new NotIndexedYetError(`article ${job.targetId} not indexed yet`)
 
   const thresholds = THRESHOLDS[ctx.inference.mode]
+  const policy = matchPolicy(ctx.inference.mode)
   const at = row.article.publishedAt ?? row.article.firstSeenAt
   const neighbours = await similarArticles(ctx, job.targetId, row.embedding.embedding, at)
 
   const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin)
 
-  let decision: { storyId: string; similarity: number; method: string; runId?: string } | null =
-    null
   const [top] = ranked
-  if (top && top[1] >= thresholds.autoSame) {
-    decision = { storyId: top[0], similarity: top[1], method: 'embedding' }
-  } else {
-    const [articleInput] = await loadArticles(ctx.db, [job.targetId])
-    if (!articleInput) return { status: 'stale' }
-    for (const [storyId, similarity] of ranked.slice(0, MAX_LLM_CANDIDATES)) {
-      const story = await loadStoryInput(ctx.db, storyId)
-      if (!story) continue
-      const { runId, result } = await withAnalysisRun(
-        ctx.db,
-        {
-          operation: 'story_match',
-          targetType: 'article',
-          targetId: job.targetId,
-          inputFingerprint: `${job.inputFingerprint}|${storyId}`,
-          modelId: ctx.inference.generation.modelId,
-        },
-        () =>
-          ctx.gpu.generation.run(job.priorityClass, () =>
-            ctx.inference.generation.matchStory({ article: articleInput, story }),
-          ),
-      )
-      await recordMatchInterpretation(
-        ctx,
-        runId,
-        job.targetId,
-        articleInput.observationId,
-        result.output,
-      )
-      if (result.output.decision === 'same_development') {
-        decision = { storyId, similarity, method: 'llm', runId }
-        break
-      }
-    }
-  }
+  // The model needs the article only when the embedding alone doesn't decide.
+  const needsModel = !top || top[1] < policy.autoSame
+  const articleInput = needsModel ? (await loadArticles(ctx.db, [job.targetId]))[0] : null
+  if (needsModel && !articleInput) return { status: 'stale' }
+  const decision = await decideMatch(ranked, policy, async (storyId) => {
+    const story = await loadStoryInput(ctx.db, storyId)
+    if (!story || !articleInput) return null
+    const { runId, result } = await withAnalysisRun(
+      ctx.db,
+      {
+        operation: 'story_match',
+        targetType: 'article',
+        targetId: job.targetId,
+        inputFingerprint: `${job.inputFingerprint}|${storyId}`,
+        modelId: ctx.inference.generation.modelId,
+      },
+      () =>
+        ctx.gpu.generation.run(job.priorityClass, () =>
+          ctx.inference.generation.matchStory({ article: articleInput, story }),
+        ),
+    )
+    await recordMatchInterpretation(
+      ctx,
+      runId,
+      job.targetId,
+      articleInput.observationId,
+      result.output,
+    )
+    return { same: result.output.decision === 'same_development', runId }
+  })
 
   // Model calls above run concurrently across jobs; the write below is serialised.
   const storyId = await withTransaction(ctx.pool, async (tx) => {
