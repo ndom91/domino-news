@@ -1,4 +1,4 @@
-import { plural, pluralWord, regionForCountry, relativeTime } from '@dn/domain'
+import { plural, pluralWord, regionForCountry } from '@dn/domain'
 import {
   LEAN_LABELS,
   type PublisherStats,
@@ -7,15 +7,7 @@ import {
   REGIONS,
   type Region,
 } from '@dn/schemas'
-import {
-  LeanMark,
-  PublisherLogo,
-  positionKey,
-  SectionLabel,
-  Select,
-  TextInput,
-  Timestamp,
-} from '@dn/ui'
+import { LeanMark, PublisherLogo, positionKey, Select, TextInput, Timestamp } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
@@ -73,7 +65,6 @@ function byRegion(items: PublisherStats[]) {
 
 function PublishersPage() {
   const { data } = useSuspenseQuery(queries.publishers())
-  const isAdmin = Route.useRouteContext().session.user?.isAdmin ?? false
   const { q = '', lean } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
   // The field keeps its own text so typing never waits on the router; it follows the URL on
@@ -170,56 +161,6 @@ function PublishersPage() {
           </section>
         ))}
       </div>
-
-      {isAdmin ? (
-        <section aria-labelledby="outlets-heading" className="mt-12">
-          <SectionLabel id="outlets-heading">Publisher stats</SectionLabel>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b-2 border-rule text-left type-label">
-                  <th scope="col" className="py-2 pr-4">
-                    Publisher
-                  </th>
-                  <th scope="col" className="py-2 pr-4">
-                    Stories
-                  </th>
-                  <th scope="col" className="py-2 pr-4">
-                    First to report
-                  </th>
-                  <th scope="col" className="py-2 pr-4">
-                    Last seen
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {data.items.map((p) => (
-                  <tr key={p.id}>
-                    <td className="py-2.5 pr-4">
-                      <Link
-                        to="/publishers/$slug"
-                        params={{ slug: p.slug }}
-                        className="font-semibold text-text hover:underline underline-offset-4"
-                      >
-                        {p.name}
-                      </Link>
-                      <span className="ml-2 type-meta">
-                        {p.countryCode}
-                        {p.kind === 'official' ? ' · official' : ''}
-                      </span>
-                    </td>
-                    <td className="py-2.5 pr-4">{p.storiesCovered}</td>
-                    <td className="py-2.5 pr-4">{p.firstReports}</td>
-                    <td className="py-2.5 pr-4 whitespace-nowrap text-text-muted">
-                      {p.lastSeenAt ? relativeTime(p.lastSeenAt) : '–'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-      ) : null}
     </Page>
   )
 }
