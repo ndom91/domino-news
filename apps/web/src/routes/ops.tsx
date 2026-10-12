@@ -362,11 +362,9 @@ function FailedJobRow({
 }) {
   return (
     <details className="t-acc group">
-      <summary className="grid cursor-pointer list-none grid-cols-[auto_1fr] gap-x-3 gap-y-1 py-3 text-sm [&::-webkit-details-marker]:hidden">
-        <span aria-hidden className="t-acc-chevron text-text-muted">
-          ›
-        </span>
-        <span className="min-w-0">
+      <summary className="flex cursor-pointer list-none gap-3 py-3 text-sm [&::-webkit-details-marker]:hidden">
+        <Chevron />
+        <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-baseline gap-x-3">
             <span className="text-xs font-semibold">{job.queue}</span>
             <span className="type-meta">
@@ -382,8 +380,9 @@ function FailedJobRow({
           ) : null}
         </span>
       </summary>
-      <div className="flex flex-col gap-4 pb-5 pl-6">
-        <div className="flex flex-wrap gap-2">
+      {/* Indented under the summary text, with a rule so the panel reads as one job. */}
+      <div className="mb-5 ml-7 flex flex-col divide-y divide-border border-l-2 border-border-strong pl-5">
+        <div className="flex flex-wrap gap-2 pb-4">
           <Button size="sm" loading={retrying} onClick={onRetry}>
             Retry job
           </Button>
@@ -392,7 +391,7 @@ function FailedJobRow({
           </Button>
         </div>
         <Detail label="Error">
-          <pre className="text-xs whitespace-pre-wrap break-words text-error">
+          <pre className="bg-error-subtle p-3 text-xs whitespace-pre-wrap break-words text-error">
             {job.error ?? 'No error message'}
           </pre>
         </Detail>
@@ -417,7 +416,7 @@ function FailedJobRow({
           </Detail>
         ) : null}
         {job.runs.length > 0 ? (
-          <Detail label="Recent attempts">
+          <Detail label={`Recent attempts (${job.runs.length})`}>
             <Table head={['Started', 'Status', 'Prompt', 'Error']}>
               {job.runs.map((r) => (
                 <tr key={r.id}>
@@ -435,7 +434,8 @@ function FailedJobRow({
                       {r.status}
                     </Badge>
                   </Td>
-                  <Td mono>{r.promptVersion}</Td>
+                  {/* "pending" = the call failed before the model reported its prompt version. */}
+                  <Td mono>{r.promptVersion === 'pending' ? '–' : r.promptVersion}</Td>
                   <Td>
                     <span className="break-words text-xs text-text-secondary">
                       {r.error ?? '–'}
@@ -447,16 +447,16 @@ function FailedJobRow({
           </Detail>
         ) : null}
         {job.stack ? (
-          <Detail label="Stack">
+          <Fold label="Stack trace">
             <pre className="max-h-64 overflow-auto bg-sunken p-3 text-xs">{job.stack}</pre>
-          </Detail>
+          </Fold>
         ) : null}
-        <Detail label="Payload">
+        <Fold label="Payload">
           <pre className="max-h-64 overflow-auto bg-sunken p-3 text-xs">
             {JSON.stringify(job.payload, null, 2)}
           </pre>
-        </Detail>
-        <p className="type-meta">
+        </Fold>
+        <p className="pt-4 type-meta">
           Job {job.id} · queued {relativeTime(job.createdAt)}
         </p>
       </div>
@@ -464,10 +464,38 @@ function FailedJobRow({
   )
 }
 
+/**
+ * Disclosure chevron in a fixed box on the first text line. As a stretched flex or grid item
+ * it would rotate around the middle of the whole multi-line summary and drift into the text.
+ */
+function Chevron() {
+  return (
+    <span
+      aria-hidden
+      className="t-acc-chevron flex size-5 flex-none items-center justify-center self-start leading-none text-text-muted"
+    >
+      ›
+    </span>
+  )
+}
+
+/** A detail that starts folded: long, rarely needed output (stack trace, payload). */
+function Fold({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <details className="t-acc py-4">
+      <summary className="flex cursor-pointer list-none items-center gap-2 type-label text-text [&::-webkit-details-marker]:hidden">
+        <Chevron />
+        {label}
+      </summary>
+      <div className="mt-2">{children}</div>
+    </details>
+  )
+}
+
 function Detail({ label, children }: { label: string; children: ReactNode }) {
   return (
-    <div>
-      <p className="mb-1 type-label text-text-muted">{label}</p>
+    <div className="py-4">
+      <p className="mb-2 type-label text-text">{label}</p>
       {children}
     </div>
   )

@@ -84,7 +84,8 @@
   display: inline-block;
   transition: rotate var(--dn-duration-enter) var(--dn-ease-smooth);
 }
-.t-acc[open] .t-acc-chevron {
+/* Only this disclosure's own chevron: a nested, closed <details> keeps its own. */
+.t-acc[open] > summary .t-acc-chevron {
   rotate: 90deg;
 }
 
