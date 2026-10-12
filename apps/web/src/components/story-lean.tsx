@@ -1,16 +1,15 @@
 import { countryName, LEAN_MIX_MIN_RATED, plural } from '@dn/domain'
 import type { StoryLean as StoryLeanData } from '@dn/schemas'
 import { LeanSpread, SectionLabel } from '@dn/ui'
-import { DisclosureChevron } from './disclosure-chevron.tsx'
 import { RouterLink } from './link.tsx'
 
 const hasEnough = (m: StoryLeanData) =>
   m.publishers.filter((p) => p.lean).length >= LEAN_MIX_MIN_RATED
 
 /**
- * The lean mix of a Story's publishers: the reader's country first (else the best-rated one),
- * other countries folded away. Leans are only comparable within one country, and countries
- * with too few ratings are named on one line instead of each getting an empty chart.
+ * The lean mix of a Story's publishers: the reader's country in full (else the best-rated
+ * one), other countries compact below it. Leans are only comparable within one country, so
+ * each gets its own bar. Countries with too few ratings are named in the footnote.
  */
 export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: string | null }) {
   if (mix.length === 0) return null
@@ -31,32 +30,25 @@ export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: str
         </p>
       )}
       {others.length ? (
-        <details className="t-acc mt-4 border-t border-border pt-3">
-          <summary className="flex cursor-pointer list-none items-center gap-1.5 type-label text-text-muted [&::-webkit-details-marker]:hidden">
-            <DisclosureChevron />
-            Other countries ({others.length})
-          </summary>
-          <div className="mt-4 flex flex-col gap-6">
-            {others.map((m) => (
-              <LeanSpread
-                key={m.country}
-                lean={m}
-                countryLabel={countryName(m.country)}
-                Link={RouterLink}
-              />
-            ))}
-          </div>
-        </details>
-      ) : null}
-      {main && thin.length ? (
-        <p className="mt-4 text-sm text-text-secondary">
-          Too few rated publishers to show: {thin.map((m) => countryName(m.country)).join(', ')}.
-        </p>
+        <div className="mt-5 flex flex-col gap-4 border-t border-border pt-4">
+          {others.map((m) => (
+            <LeanSpread
+              key={m.country}
+              lean={m}
+              countryLabel={countryName(m.country)}
+              Link={RouterLink}
+              compact
+            />
+          ))}
+        </div>
       ) : null}
       <p className="mt-4 text-xs text-text-muted">
         Each publisher’s lean is relative to its own country’s media, from our reviewed assessments.
         Most come from audience surveys or ratings; where none exists, we estimate it from public
         research and say so. Estimates never mark a story as one-sided.
+        {main && thin.length
+          ? ` Too few rated publishers to show: ${thin.map((m) => countryName(m.country)).join(', ')}.`
+          : null}
       </p>
     </section>
   )

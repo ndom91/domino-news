@@ -29,11 +29,14 @@ export function LeanSpread({
   lean,
   countryLabel,
   Link = DefaultLink,
+  compact = false,
   className,
 }: {
   lean: StoryLean
   countryLabel: string
   Link?: LinkLike
+  /** One line of names instead of the labelled rows, for countries after the reader's own. */
+  compact?: boolean
   className?: string
 }) {
   const rated = lean.publishers.filter((p) => p.lean).length
@@ -47,7 +50,7 @@ export function LeanSpread({
 
   return (
     <figure className={className}>
-      <figcaption className="mb-3 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+      <figcaption className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <span className="type-label text-text-muted">Publishers in {countryLabel}</span>
         <span className="type-meta">
           {rated} of {plural(lean.publishers.length, 'publisher')} rated
@@ -55,22 +58,26 @@ export function LeanSpread({
         </span>
       </figcaption>
 
-      {enough ? (
+      {enough && compact ? (
         <>
-          <div className="flex h-3 gap-0.5" aria-hidden>
-            {rows.map((r) =>
-              r.publishers.length ? (
-                <span
-                  key={r.key}
-                  className={LEAN_FILL[r.key]}
-                  style={{ flexGrow: r.publishers.length }}
-                />
-              ) : null,
-            )}
-            {unrated.length ? (
-              <span className="text-border-strong" style={{ ...HATCH, flexGrow: unrated.length }} />
-            ) : null}
-          </div>
+          <LeanBar rows={rows} unrated={unrated.length} className="h-2" />
+          <p className="mt-2 text-sm text-text-secondary">
+            {[...rows, { key: 'unrated' as const, publishers: unrated }]
+              .filter((r) => r.publishers.length)
+              .map((r, i) => (
+                <span key={r.key}>
+                  {i > 0 ? ' · ' : null}
+                  <span className="text-text">
+                    {r.key === 'unrated' ? 'Not rated' : LEAN_LABELS[r.key]}:
+                  </span>{' '}
+                  <PublisherNames publishers={r.publishers} Link={Link} />
+                </span>
+              ))}
+          </p>
+        </>
+      ) : enough ? (
+        <>
+          <LeanBar rows={rows} unrated={unrated.length} className="h-3" />
           <div className="mt-1.5 flex justify-between type-meta" aria-hidden>
             <span>Left</span>
             <span>Right</span>
@@ -133,19 +140,56 @@ function LeanRow({
         {publishers.length}
       </span>
       <span className="text-text-secondary">
-        {publishers.map((p, i) => (
-          <span key={p.publisher.id}>
-            {i > 0 ? ', ' : null}
-            <Link
-              to={`/publishers/${p.publisher.slug}`}
-              className="underline-offset-4 hover:text-text hover:underline"
-            >
-              {p.publisher.name}
-            </Link>
-            {p.estimated ? <span className="text-text-muted"> (estimated)</span> : null}
-          </span>
-        ))}
+        <PublisherNames publishers={publishers} Link={Link} />
       </span>
     </li>
   )
+}
+
+function LeanBar({
+  rows,
+  unrated,
+  className,
+}: {
+  rows: { key: PublisherLean; publishers: StoryLean['publishers'] }[]
+  unrated: number
+  className: string
+}) {
+  return (
+    <div className={cx('flex gap-0.5', className)} aria-hidden>
+      {rows.map((r) =>
+        r.publishers.length ? (
+          <span
+            key={r.key}
+            className={LEAN_FILL[r.key]}
+            style={{ flexGrow: r.publishers.length }}
+          />
+        ) : null,
+      )}
+      {unrated ? (
+        <span className="text-border-strong" style={{ ...HATCH, flexGrow: unrated }} />
+      ) : null}
+    </div>
+  )
+}
+
+function PublisherNames({
+  publishers,
+  Link,
+}: {
+  publishers: StoryLean['publishers']
+  Link: LinkLike
+}) {
+  return publishers.map((p, i) => (
+    <span key={p.publisher.id}>
+      {i > 0 ? ', ' : null}
+      <Link
+        to={`/publishers/${p.publisher.slug}`}
+        className="underline-offset-4 hover:text-text hover:underline"
+      >
+        {p.publisher.name}
+      </Link>
+      {p.estimated ? <span className="text-text-muted"> (estimated)</span> : null}
+    </span>
+  ))
 }
