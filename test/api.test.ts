@@ -60,6 +60,7 @@ describe('/api/v1 contracts', () => {
   it('requires authentication on every route', async () => {
     const routes: [string, string][] = [
       ['GET', '/api/v1/front'],
+      ['GET', '/api/v1/edition'],
       ['GET', '/api/v1/stories'],
       ['GET', '/api/v1/stories/x'],
       ['POST', '/api/v1/stories/x/summary'],

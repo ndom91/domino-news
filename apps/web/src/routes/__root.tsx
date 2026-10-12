@@ -1,6 +1,7 @@
 /// <reference types="vite/client" />
 
 import { archivoLatinUrl } from '@dn/design-tokens/fonts'
+import { queryKeys } from '@dn/queries'
 import { TooltipProvider } from '@dn/ui'
 import type { QueryClient } from '@tanstack/react-query'
 import {
@@ -14,13 +15,20 @@ import {
 import type { ReactNode } from 'react'
 import { NotFoundPage } from '../components/not-found.tsx'
 import { SiteFooter, SiteHeader } from '../components/site-header.tsx'
+import { queries } from '../lib/api.ts'
 import { getSessionInfo } from '../lib/session.ts'
 import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  beforeLoad: async ({ location }) => {
-    const session = await getSessionInfo()
+  beforeLoad: async ({ context, location }) => {
+    // Cached for the visit: not refetched on every navigation and hover preload. Sign-in,
+    // sign-out and preference saves invalidate it; fetchQuery then reloads it here.
+    const session = await context.queryClient.fetchQuery({
+      queryKey: queryKeys.session(),
+      queryFn: () => getSessionInfo(),
+      staleTime: Number.POSITIVE_INFINITY,
+    })
     // The whole app sits behind login.
     if (!session.user && location.pathname !== '/login') {
       throw redirect({ to: '/login', search: { next: location.href } })
@@ -30,6 +38,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       throw redirect({ to: '/onboarding', search: { next: location.href } })
     }
     return { session }
+  },
+  // The header strip; in the server HTML so it doesn't pop in after hydration.
+  loader: async ({ context }) => {
+    if (context.session.user) await context.queryClient.ensureQueryData(queries.edition())
   },
   head: () => ({
     meta: [

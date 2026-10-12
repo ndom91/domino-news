@@ -1,6 +1,6 @@
 import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
-import type { Desk, DevelopingNarrative, FrontPage, Region } from '@dn/schemas'
+import type { Desk, DevelopingNarrative, Edition, FrontPage, Region } from '@dn/schemas'
 import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import {
   edgesWithin,
@@ -23,35 +23,43 @@ export async function getFrontPage(
   opts: { region?: Region; regions?: readonly Region[]; now?: Date } = {},
 ): Promise<FrontPage> {
   const now = opts.now ?? new Date()
-  const since = new Date(now.getTime() - DAY_MS)
 
-  const [[stats], { lead, leadPosition }, { developing, narrativeCount }] = await Promise.all([
-    db
-      .select({
-        stories: sql<number>`count(distinct ${schema.storyArticle.storyId})::int`,
-        publishers: sql<number>`count(distinct ${schema.article.publisherId})::int`,
-      })
-      .from(schema.storyArticle)
-      .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
-      .innerJoin(schema.story, eq(schema.story.id, schema.storyArticle.storyId))
-      .where(
-        and(
-          isNull(schema.storyArticle.removedAt),
-          isNotNull(schema.story.publishedAt),
-          sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt}) >= ${since}`,
-        ),
-      ),
+  const [edition, { lead, leadPosition }, { developing, narrativeCount }] = await Promise.all([
+    getEdition(db, now),
     leadStory(db, opts, now),
     developingSection(db),
   ])
 
   return {
-    editionAt: now.toISOString(),
-    stats: { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 },
+    ...edition,
     lead,
     leadPosition,
     developing,
     narrativeCount,
+  }
+}
+
+/** The header strip: edition time and the last 24 hours' Story and publisher counts. */
+export async function getEdition(db: Db, now = new Date()): Promise<Edition> {
+  const since = new Date(now.getTime() - DAY_MS)
+  const [stats] = await db
+    .select({
+      stories: sql<number>`count(distinct ${schema.storyArticle.storyId})::int`,
+      publishers: sql<number>`count(distinct ${schema.article.publisherId})::int`,
+    })
+    .from(schema.storyArticle)
+    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+    .innerJoin(schema.story, eq(schema.story.id, schema.storyArticle.storyId))
+    .where(
+      and(
+        isNull(schema.storyArticle.removedAt),
+        isNotNull(schema.story.publishedAt),
+        sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt}) >= ${since}`,
+      ),
+    )
+  return {
+    editionAt: now.toISOString(),
+    stats: { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 },
   }
 }
 

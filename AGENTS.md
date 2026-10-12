@@ -236,6 +236,7 @@ All routes except the logo route require a session: the cookie from the web app,
 
 ```text
 GET  /api/v1/front?region=                # lead (prefers the reader's regions), stats, developing narratives
+GET  /api/v1/edition                     # header strip: editionAt + last-24h story/publisher counts
 GET  /api/v1/stories?cursor=&limit=&region=
 GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related
 POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE_SUMMARY_EDITING)

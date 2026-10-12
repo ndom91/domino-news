@@ -18,7 +18,10 @@ import { infiniteQueryOptions, type QueryClient, queryOptions } from '@tanstack/
 // platform's ApiClient so transport/auth stays a client concern.
 
 export const queryKeys = {
+  // Web caches its session info here (user plus a few preferences); see savePreferencesMutation.
+  session: () => ['session'] as const,
   stories: () => ['stories'] as const,
+  edition: () => ['edition'] as const,
   fronts: () => ['front'] as const,
   front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
@@ -45,6 +48,12 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.front(region),
         queryFn: ({ signal }) => api.getFrontPage({ region }, signal),
         staleTime: 30_000,
+      }),
+    edition: () =>
+      queryOptions({
+        queryKey: queryKeys.edition(),
+        queryFn: ({ signal }) => api.getEdition(signal),
+        staleTime: 60_000,
       }),
     storyList: (region: Region | null = null) =>
       infiniteQueryOptions({
@@ -164,6 +173,7 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
       queryClient.setQueryData(queryKeys.preferences(), prefs)
       // The front page lead prefers the reader's regions.
       await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.session() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.insights() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.fronts() }),

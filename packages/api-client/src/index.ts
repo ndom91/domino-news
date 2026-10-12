@@ -2,7 +2,9 @@ import {
   type ApiErrorCode,
   type AssessmentRequest,
   apiErrorSchema,
+  type Edition,
   type EvidenceResponse,
+  editionSchema,
   evidenceResponseSchema,
   type FailedJobsResponse,
   type FeedbackRequest,
@@ -124,6 +126,8 @@ export function createApiClient({
   return {
     getFrontPage: (opts: { region?: Region | null } = {}, signal?: AbortSignalLike) =>
       request<FrontPage>(frontPageSchema, `/front${qs({ region: opts.region })}`, { signal }),
+    getEdition: (signal?: AbortSignalLike) =>
+      request<Edition>(editionSchema, '/edition', { signal }),
     listStories: (
       opts: { cursor?: string | null; limit?: number; region?: Region | null } = {},
       signal?: AbortSignalLike,

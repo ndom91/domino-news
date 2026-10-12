@@ -27,6 +27,9 @@ import { api, orNotFound, queries } from '../../lib/api.ts'
 export const Route = createFileRoute('/stories/$slug')({
   loader: async ({ context, params }) => {
     const story = await orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug)))
+    // The narrative graph renders in the server HTML instead of as a skeleton.
+    const narrative = story.narratives[0]
+    if (narrative) await context.queryClient.prefetchQuery(queries.narrative(narrative.slug))
     // Window end for the Source Trace, fixed at load so SSR and hydration agree.
     return { title: story.title, now: new Date().toISOString() }
   },
@@ -49,7 +52,7 @@ function StoryPage() {
   const { data: story } = useSuspenseQuery(queries.story(slug))
   // Opt-in reading history, recorded from the browser so SSR and prefetches don't count.
   // Best effort: a lost read only makes the Blindspot insights slightly less complete.
-  const rememberReads = useQuery(queries.preferences()).data?.rememberReads ?? false
+  const rememberReads = session.user?.rememberReads ?? false
   useEffect(() => {
     if (rememberReads) api.recordRead(story.id).catch(() => {})
   }, [rememberReads, story.id])

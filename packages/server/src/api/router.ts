@@ -19,7 +19,7 @@ import type { ServerContext } from '../context.ts'
 import { listSignals, setFeedback, updateSignals } from '../feedback.ts'
 import { listFollows, setFollow } from '../follows.ts'
 import { getForYou } from '../for-you.ts'
-import { getFrontPage } from '../front.ts'
+import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
@@ -35,6 +35,8 @@ const storyListQuery = z.object({
   limit: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(100)), 30),
   region: z.optional(regionSchema),
 })
+
+export type Session = Awaited<ReturnType<ServerContext['auth']['api']['getSession']>>
 
 async function publisherIdOf(ctx: ServerContext, slug: string | undefined) {
   const id = await publisherIdBySlug(ctx.db, slug ?? '')
@@ -155,6 +157,7 @@ const routes: Route[] = [
     const { regions } = await getPreferences(ctx.db, userId)
     return json(await getFrontPage(ctx.db, { region, regions }))
   }),
+  route('GET', '/api/v1/edition', async ({ ctx }) => json(await getEdition(ctx.db))),
   route('GET', '/api/v1/stories', async ({ ctx, url }) =>
     json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
@@ -282,7 +285,12 @@ const routes: Route[] = [
  * exercised directly in contract tests. Every route requires a session (cookie or bearer),
  * except the few marked public.
  */
-export async function handleApiRequest(ctx: ServerContext, request: Request): Promise<Response> {
+export async function handleApiRequest(
+  ctx: ServerContext,
+  request: Request,
+  // SSR passes the page request's session, so in-process calls don't each look it up again.
+  session?: Promise<Session | null>,
+): Promise<Response> {
   try {
     const url = new URL(request.url)
     const candidates = routes.filter((r) => r.pattern.test({ pathname: url.pathname }))
@@ -293,12 +301,11 @@ export async function handleApiRequest(ctx: ServerContext, request: Request): Pr
     const params = match.pattern.exec({ pathname: url.pathname })?.pathname.groups ?? {}
     if (match.public) return await match.handler({ ctx, request, url, params, userId: '' })
 
-    const session = await ctx.auth.api.getSession({ headers: request.headers })
-    if (!session) throw new HttpError('unauthorized', 'sign in required')
-    if (match.adminOnly && session.user.role !== 'admin')
-      throw new HttpError('forbidden', 'admin only')
+    const user = (await (session ?? ctx.auth.api.getSession({ headers: request.headers })))?.user
+    if (!user) throw new HttpError('unauthorized', 'sign in required')
+    if (match.adminOnly && user.role !== 'admin') throw new HttpError('forbidden', 'admin only')
 
-    return await match.handler({ ctx, request, url, params, userId: session.user.id })
+    return await match.handler({ ctx, request, url, params, userId: user.id })
   } catch (error) {
     return errorResponse(error)
   }

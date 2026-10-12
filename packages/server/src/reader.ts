@@ -10,10 +10,25 @@ import type {
   StoryListItem,
   StoryListResponse,
 } from '@dn/schemas'
-import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, lt, or, sql } from 'drizzle-orm'
+import {
+  and,
+  arrayContains,
+  desc,
+  eq,
+  getTableColumns,
+  inArray,
+  isNotNull,
+  isNull,
+  lt,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { leanMixByStory } from './lean.ts'
 
 const iso = (d: Date) => d.toISOString()
+
+// Reads never need the embedding (768 floats, ~9.5 KB per row as text).
+const { embedding: _embedding, ...storyColumns } = getTableColumns(schema.story)
 
 /** Accepts a Story id, current slug, or a historical alias (merged/renamed stories). */
 export async function resolveStoryId(db: Db, idOrSlug: string): Promise<string | null> {
@@ -227,7 +242,7 @@ async function sourceCounts(db: Db, storyIds: string[]) {
 export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryListItem[]> {
   if (storyIds.length === 0) return []
   const rows = await db
-    .select({ story: schema.story, summary: schema.storySummaryVersion.body })
+    .select({ story: storyColumns, summary: schema.storySummaryVersion.body })
     .from(schema.story)
     .leftJoin(
       schema.storySummaryVersion,
@@ -318,7 +333,7 @@ export async function listStories(
 export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | null> {
   const id = await resolveStoryId(db, idOrSlug)
   if (!id) return null
-  const [story] = await db.select().from(schema.story).where(eq(schema.story.id, id))
+  const [story] = await db.select(storyColumns).from(schema.story).where(eq(schema.story.id, id))
   if (!story?.publishedAt) return null
 
   const versions = await db
@@ -388,7 +403,7 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
   const otherIds = edges.map((e) => (e.fromStoryId === id ? e.toStoryId : e.fromStoryId))
   const others = otherIds.length
     ? await db
-        .select()
+        .select(storyColumns)
         .from(schema.story)
         .where(and(inArray(schema.story.id, otherIds), isNotNull(schema.story.publishedAt)))
     : []
@@ -483,7 +498,7 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
   if (!row) return null
   const { narrative, desk } = row
   const stories = await db
-    .select({ story: schema.story, summary: schema.storySummaryVersion.body })
+    .select({ story: storyColumns, summary: schema.storySummaryVersion.body })
     .from(schema.narrativeStory)
     .innerJoin(schema.story, eq(schema.story.id, schema.narrativeStory.storyId))
     .leftJoin(

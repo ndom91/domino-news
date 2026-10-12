@@ -24,9 +24,9 @@ const navFor = (user: { isAdmin: boolean }) =>
 
 /** Always-dark strip: edition date and time, and how much was reported in the last 24 hours. */
 function Strip() {
-  // Shared with the front page loader; other pages fill it in after load.
-  const front = useQuery(queries.front()).data
-  const editionAt = front?.editionAt
+  // Loaded by the root route, so it is in the server-rendered HTML.
+  const edition = useQuery(queries.edition()).data
+  const editionAt = edition?.editionAt
   return (
     <div className="bg-band text-sm text-band-text">
       <div className="mx-auto flex h-strip max-w-page items-center justify-between gap-4 px-gutter">
@@ -39,10 +39,10 @@ function Strip() {
             </>
           ) : null}
         </span>
-        {front ? (
+        {edition ? (
           <span className="max-md:hidden">
-            {plural(front.stats.stories, 'story', 'stories')} from{' '}
-            {plural(front.stats.publishers, 'publisher')} in the last 24 hours
+            {plural(edition.stats.stories, 'story', 'stories')} from{' '}
+            {plural(edition.stats.publishers, 'publisher')} in the last 24 hours
           </span>
         ) : null}
       </div>

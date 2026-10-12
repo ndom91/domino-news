@@ -1,3 +1,4 @@
+import type { Region } from '@dn/schemas'
 import { createServerFn } from '@tanstack/react-start'
 
 interface SessionInfo {
@@ -9,6 +10,9 @@ interface SessionInfo {
     isAdmin: boolean
     // False until onboarding is finished or skipped; the root route sends them there.
     onboarded: boolean
+    // Saved preferences the app reads on most pages, so they don't need their own request.
+    regions: Region[]
+    rememberReads: boolean
   } | null
   // Saved preference, else the request's country (Cloudflare); null when neither is known.
   country: string | null
@@ -21,9 +25,10 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
     const { getPreferences, getServerContext } = await import('@dn/server')
     const { countryFromHeader } = await import('@dn/domain')
     const { getRequestHeaders } = await import('@tanstack/react-start/server')
+    const { requestSession } = await import('../server/api-bridge.ts')
     const ctx = getServerContext()
     const headers = getRequestHeaders()
-    const session = await ctx.auth.api.getSession({ headers })
+    const session = await requestSession()
     const prefs = session ? await getPreferences(ctx.db, session.user.id) : null
     return {
       user: session
@@ -34,6 +39,8 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
             username: (session.user as { username?: string | null }).username ?? null,
             isAdmin: session.user.role === 'admin',
             onboarded: prefs?.onboarded ?? false,
+            regions: prefs?.regions ?? [],
+            rememberReads: prefs?.rememberReads ?? false,
           }
         : null,
       country: prefs?.country ?? countryFromHeader(headers.get('cf-ipcountry')),

@@ -784,13 +784,19 @@ export const developingNarrativeSchema = z.object({
 })
 export type DevelopingNarrative = z.infer<typeof developingNarrativeSchema>
 
-// Everything above the Latest grid: strip stats, lead Story and the Developing band.
-export const frontPageSchema = z.object({
+// The header strip: edition time and the last 24 hours' counts.
+export const editionSchema = z.object({
   editionAt: z.string(),
   stats: z.object({
     stories: z.int().check(z.nonnegative()),
     publishers: z.int().check(z.nonnegative()),
   }),
+})
+export type Edition = z.infer<typeof editionSchema>
+
+// Everything above the Latest grid: strip stats, lead Story and the Developing band.
+export const frontPageSchema = z.object({
+  ...editionSchema.shape,
   lead: z.nullable(storyDetailSchema),
   // "Story 3 of 6" within the lead's Narrative.
   leadPosition: z.nullable(z.object({ index: z.int().check(z.positive()), total: z.int() })),

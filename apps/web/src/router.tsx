@@ -1,3 +1,4 @@
+import { ApiError } from '@dn/api-client'
 import { Button } from '@dn/ui'
 import { QueryClient } from '@tanstack/react-query'
 import { createRouter, Link, useRouter } from '@tanstack/react-router'
@@ -6,7 +7,14 @@ import { routeTree } from './routeTree.gen'
 
 export function getRouter() {
   const queryClient = new QueryClient({
-    defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+    defaultOptions: {
+      queries: {
+        // Retry once, but not a 4xx: a missing slug should 404 at once, not after a retry.
+        retry: (count, error) =>
+          count < 1 && !(error instanceof ApiError && error.status >= 400 && error.status < 500),
+        refetchOnWindowFocus: false,
+      },
+    },
   })
   const router = createRouter({
     routeTree,
