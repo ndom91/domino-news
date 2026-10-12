@@ -288,6 +288,19 @@ export const storyDetailSchema = z.object({
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 
+// What the lead block (HeroStory) shows; the front page sends only this.
+export const storyLeadSchema = z.pick(storyDetailSchema, {
+  id: true,
+  slug: true,
+  title: true,
+  desk: true,
+  summary: true,
+  sources: true,
+  narratives: true,
+  context: true,
+})
+export type StoryLead = z.infer<typeof storyLeadSchema>
+
 export const narrativeNodeSchema = z.object({
   id: z.string(),
   slug: z.string(),
@@ -797,7 +810,7 @@ export type Edition = z.infer<typeof editionSchema>
 // Everything above the Latest grid: strip stats, lead Story and the Developing band.
 export const frontPageSchema = z.object({
   ...editionSchema.shape,
-  lead: z.nullable(storyDetailSchema),
+  lead: z.nullable(storyLeadSchema),
   // "Story 3 of 6" within the lead's Narrative.
   leadPosition: z.nullable(z.object({ index: z.int().check(z.positive()), total: z.int() })),
   developing: z.array(developingNarrativeSchema),

@@ -1,4 +1,5 @@
 import { schema } from '@dn/db'
+import { pickLead } from '@dn/domain'
 import { publishAssessments } from '@dn/jobs'
 import {
   apiErrorSchema,
@@ -490,6 +491,12 @@ describe('For You', () => {
     const before = await feed()
     expect(before.personalised).toBe(false)
     const total = before.items.length
+    // The front page rail asks for a few; the API caps the page size.
+    const rail = forYouResponseSchema.parse(await (await call('/api/v1/for-you?limit=2')).json())
+    expect(rail.items.map((i) => i.story.id)).toEqual(
+      before.items.slice(0, 2).map((i) => i.story.id),
+    )
+    expect((await call('/api/v1/for-you?limit=31')).status).toBe(400)
 
     const { rows } = await h.ctx.pool.query(
       `select ns.narrative_id, n.title from narrative_story ns join narrative n on n.id = ns.narrative_id
@@ -953,6 +960,19 @@ describe('front page and citation numbers', () => {
     expect(front.lead).not.toBeNull()
     expect(front.stats.stories).toBeGreaterThan(0)
     expect(front.lead?.desk).not.toBeNull()
+
+    // The lead is pickLead over the first page of Latest; Developing is the newest listed
+    // Narratives, and the count matches the Narratives page.
+    const latest = storyListResponseSchema.parse(await (await call('/api/v1/stories')).json())
+    const prefs = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect(front.lead?.id).toBe(pickLead(latest.items, prefs.regions)?.id)
+    const narratives = narrativeListResponseSchema.parse(
+      await (await call('/api/v1/narratives')).json(),
+    )
+    expect(front.narrativeCount).toBe(narratives.items.length)
+    expect(front.developing.map((n) => [n.id, n.desk])).toEqual(
+      narratives.items.slice(0, 3).map((n) => [n.id, n.desk]),
+    )
   })
 
   it('accepts cited sources without a number (summaries from before citation numbers)', async () => {

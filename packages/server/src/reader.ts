@@ -7,6 +7,7 @@ import type {
   PublisherRef,
   Region,
   StoryDetail,
+  StoryLead,
   StoryListItem,
   StoryListResponse,
 } from '@dn/schemas'
@@ -332,62 +333,164 @@ export async function listStories(
 
 export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | null> {
   const id = await resolveStoryId(db, idOrSlug)
-  if (!id) return null
-  const [story] = await db.select(storyColumns).from(schema.story).where(eq(schema.story.id, id))
+  const story = id ? await storyRow(db, id) : null
   if (!story?.publishedAt) return null
 
-  const versions = await db
-    .select({
-      version: schema.storySummaryVersion,
-      modelId: schema.analysisRun.modelId,
-    })
-    .from(schema.storySummaryVersion)
-    .leftJoin(
-      schema.interpretation,
-      eq(schema.interpretation.id, schema.storySummaryVersion.interpretationId),
-    )
-    .leftJoin(schema.analysisRun, eq(schema.analysisRun.id, schema.interpretation.analysisRunId))
-    .where(eq(schema.storySummaryVersion.storyId, id))
-    .orderBy(desc(schema.storySummaryVersion.createdAt))
+  const [{ lead, versions }, related, primary, claims, leanMix] = await Promise.all([
+    storyLeadParts(db, story),
+    relatedStories(db, story.id),
+    db
+      .select({ ref: schema.sourceReference })
+      .from(schema.storySourceReference)
+      .innerJoin(
+        schema.sourceReference,
+        eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+      )
+      .where(eq(schema.storySourceReference.storyId, story.id)),
+    storyClaims(db, story.id),
+    leanMixByStory(db, [story.id]),
+  ])
+
+  return {
+    ...lead,
+    status: story.status,
+    firstObservedAt: iso(story.firstObservedAt),
+    lastUpdatedAt: iso(story.lastUpdatedAt),
+    publishedAt: iso(story.publishedAt),
+    regions: story.regions,
+    topics: story.topics,
+    summaryHistory: versions.map((v) => ({
+      versionId: v.version.id,
+      createdAt: iso(v.version.createdAt),
+      origin: v.version.editedByUserId ? ('edited' as const) : ('generated' as const),
+    })),
+    related,
+    claims,
+    leanMix: leanMix.get(story.id) ?? [],
+    primarySources: primary.map(({ ref }) => ({
+      id: ref.id,
+      url: ref.url,
+      title: ref.title,
+      kind: ref.kind,
+      discoveredAt: iso(ref.discoveredAt),
+    })),
+  }
+}
+
+/** The front page's lead: only what the lead block shows (a fraction of getStory's reads). */
+export async function getStoryLead(db: Db, id: string): Promise<StoryLead | null> {
+  const story = await storyRow(db, id)
+  return story?.publishedAt ? (await storyLeadParts(db, story)).lead : null
+}
+
+async function storyRow(db: Db, id: string) {
+  const [story] = await db.select(storyColumns).from(schema.story).where(eq(schema.story.id, id))
+  return story ?? null
+}
+
+async function storyLeadParts(
+  db: Db,
+  story: {
+    id: string
+    slug: string
+    title: string
+    desk: Desk | null
+    currentSummaryId: string | null
+  },
+) {
+  const id = story.id
+  const [versions, cited, sources, narratives, context] = await Promise.all([
+    db
+      .select({
+        version: schema.storySummaryVersion,
+        modelId: schema.analysisRun.modelId,
+      })
+      .from(schema.storySummaryVersion)
+      .leftJoin(
+        schema.interpretation,
+        eq(schema.interpretation.id, schema.storySummaryVersion.interpretationId),
+      )
+      .leftJoin(schema.analysisRun, eq(schema.analysisRun.id, schema.interpretation.analysisRunId))
+      .where(eq(schema.storySummaryVersion.storyId, id))
+      .orderBy(desc(schema.storySummaryVersion.createdAt)),
+    story.currentSummaryId
+      ? db
+          .select({
+            articleId: schema.storySummarySource.articleId,
+            citation: schema.storySummarySource.citation,
+          })
+          .from(schema.storySummarySource)
+          .where(eq(schema.storySummarySource.summaryVersionId, story.currentSummaryId))
+      : [],
+    db
+      .select({
+        articleId: schema.article.id,
+        url: schema.article.canonicalUrl,
+        publishedAt: schema.article.publishedAt,
+        title: schema.articleRevision.title,
+        description: schema.articleRevision.description,
+        observedAt: schema.articleRevision.observedAt,
+        publisher: {
+          id: schema.publisher.id,
+          slug: schema.publisher.slug,
+          name: schema.publisher.name,
+          domain: schema.publisher.domain,
+        },
+        publisherKind: schema.publisher.kind,
+      })
+      .from(schema.storyArticle)
+      .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+      .innerJoin(
+        schema.articleRevision,
+        eq(schema.articleRevision.id, schema.article.latestRevisionId),
+      )
+      .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+      .where(and(eq(schema.storyArticle.storyId, id), isNull(schema.storyArticle.removedAt)))
+      .orderBy(schema.article.publishedAt),
+    narrativesByStory(db, [id]),
+    storyContext(db, id),
+  ])
   const current = versions.find((v) => v.version.id === story.currentSummaryId)
-  const cited = current
-    ? await db
-        .select({
-          articleId: schema.storySummarySource.articleId,
-          citation: schema.storySummarySource.citation,
-        })
-        .from(schema.storySummarySource)
-        .where(eq(schema.storySummarySource.summaryVersionId, current.version.id))
-    : []
   const citedIds = new Set(cited.map((c) => c.articleId))
   const citationOf = new Map(cited.map((c) => [c.articleId, c.citation]))
 
-  const sources = await db
-    .select({
-      articleId: schema.article.id,
-      url: schema.article.canonicalUrl,
-      publishedAt: schema.article.publishedAt,
-      title: schema.articleRevision.title,
-      description: schema.articleRevision.description,
-      observedAt: schema.articleRevision.observedAt,
-      publisher: {
-        id: schema.publisher.id,
-        slug: schema.publisher.slug,
-        name: schema.publisher.name,
-        domain: schema.publisher.domain,
-      },
-      publisherKind: schema.publisher.kind,
-    })
-    .from(schema.storyArticle)
-    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
-    .innerJoin(
-      schema.articleRevision,
-      eq(schema.articleRevision.id, schema.article.latestRevisionId),
-    )
-    .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
-    .where(and(eq(schema.storyArticle.storyId, id), isNull(schema.storyArticle.removedAt)))
-    .orderBy(schema.article.publishedAt)
+  const lead: StoryLead = {
+    id,
+    slug: story.slug,
+    title: story.title,
+    desk: story.desk,
+    summary: current
+      ? {
+          versionId: current.version.id,
+          headline: current.version.headline,
+          body: current.version.body,
+          format: current.version.format,
+          createdAt: iso(current.version.createdAt),
+          origin: current.version.editedByUserId ? 'edited' : 'generated',
+          modelId: current.modelId,
+          citedArticleIds: [...citedIds],
+        }
+      : null,
+    sources: sources.map((s) => ({
+      articleId: s.articleId,
+      title: s.title,
+      description: s.description,
+      url: s.url,
+      publishedAt: s.publishedAt ? iso(s.publishedAt) : null,
+      observedAt: iso(s.observedAt),
+      publisher: s.publisher,
+      official: s.publisherKind === 'official',
+      citedInSummary: citedIds.has(s.articleId),
+      citation: citationOf.get(s.articleId) ?? null,
+    })),
+    narratives: narratives.get(id) ?? [],
+    // Only entries whose anchor is still in the current text (an edit may have removed it).
+    context: context.filter((c) => current?.version.body.includes(c.anchorText)),
+  }
+  return { lead, versions }
+}
 
+async function relatedStories(db: Db, id: string): Promise<StoryDetail['related']> {
   const edges = await db
     .select()
     .from(schema.storyRelationship)
@@ -408,86 +511,21 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
         .where(and(inArray(schema.story.id, otherIds), isNotNull(schema.story.publishedAt)))
     : []
   const otherById = new Map(others.map((o) => [o.id, o]))
-
-  const primary = await db
-    .select({ ref: schema.sourceReference })
-    .from(schema.storySourceReference)
-    .innerJoin(
-      schema.sourceReference,
-      eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
-    )
-    .where(eq(schema.storySourceReference.storyId, id))
-
-  return {
-    id: story.id,
-    slug: story.slug,
-    title: story.title,
-    status: story.status,
-    firstObservedAt: iso(story.firstObservedAt),
-    lastUpdatedAt: iso(story.lastUpdatedAt),
-    publishedAt: iso(story.publishedAt),
-    regions: story.regions,
-    topics: story.topics,
-    desk: story.desk,
-    summary: current
-      ? {
-          versionId: current.version.id,
-          headline: current.version.headline,
-          body: current.version.body,
-          format: current.version.format,
-          createdAt: iso(current.version.createdAt),
-          origin: current.version.editedByUserId ? 'edited' : 'generated',
-          modelId: current.modelId,
-          citedArticleIds: [...citedIds],
-        }
-      : null,
-    summaryHistory: versions.map((v) => ({
-      versionId: v.version.id,
-      createdAt: iso(v.version.createdAt),
-      origin: v.version.editedByUserId ? ('edited' as const) : ('generated' as const),
-    })),
-    sources: sources.map((s) => ({
-      articleId: s.articleId,
-      title: s.title,
-      description: s.description,
-      url: s.url,
-      publishedAt: s.publishedAt ? iso(s.publishedAt) : null,
-      observedAt: iso(s.observedAt),
-      publisher: s.publisher,
-      official: s.publisherKind === 'official',
-      citedInSummary: citedIds.has(s.articleId),
-      citation: citationOf.get(s.articleId) ?? null,
-    })),
-    related: edges.flatMap((e) => {
-      const otherId = e.fromStoryId === id ? e.toStoryId : e.fromStoryId
-      const other = otherById.get(otherId)
-      if (!other) return []
-      return [
-        {
-          id: other.id,
-          slug: other.slug,
-          title: other.title,
-          relation: e.relation,
-          direction: e.fromStoryId === id ? ('outgoing' as const) : ('incoming' as const),
-          lastUpdatedAt: iso(other.lastUpdatedAt),
-        },
-      ]
-    }),
-    narratives: (await narrativesByStory(db, [id])).get(id) ?? [],
-    // Only entries whose anchor is still in the current text (an edit may have removed it).
-    context: (await storyContext(db, id)).filter((c) =>
-      current?.version.body.includes(c.anchorText),
-    ),
-    claims: await storyClaims(db, id),
-    leanMix: (await leanMixByStory(db, [id])).get(id) ?? [],
-    primarySources: primary.map(({ ref }) => ({
-      id: ref.id,
-      url: ref.url,
-      title: ref.title,
-      kind: ref.kind,
-      discoveredAt: iso(ref.discoveredAt),
-    })),
-  }
+  return edges.flatMap((e) => {
+    const otherId = e.fromStoryId === id ? e.toStoryId : e.fromStoryId
+    const other = otherById.get(otherId)
+    if (!other) return []
+    return [
+      {
+        id: other.id,
+        slug: other.slug,
+        title: other.title,
+        relation: e.relation,
+        direction: e.fromStoryId === id ? ('outgoing' as const) : ('incoming' as const),
+        lastUpdatedAt: iso(other.lastUpdatedAt),
+      },
+    ]
+  })
 }
 
 export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeDetail | null> {

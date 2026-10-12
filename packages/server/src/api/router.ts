@@ -18,7 +18,7 @@ import { createAssessment, listEvidence, publisherIdBySlug } from '../assessment
 import type { ServerContext } from '../context.ts'
 import { listSignals, setFeedback, updateSignals } from '../feedback.ts'
 import { listFollows, setFollow } from '../follows.ts'
-import { getForYou } from '../for-you.ts'
+import { FOR_YOU_PAGE_SIZE, getForYou } from '../for-you.ts'
 import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
@@ -34,6 +34,15 @@ const storyListQuery = z.object({
   cursor: z.optional(z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}T[^|]+\|.+$/))),
   limit: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(100)), 30),
   region: z.optional(regionSchema),
+})
+
+// Cursor = offset into the ranked window (see getForYou).
+const forYouQuery = z.object({
+  cursor: z.optional(z.string()),
+  limit: z._default(
+    z.coerce.number().check(z.int(), z.gte(1), z.lte(FOR_YOU_PAGE_SIZE)),
+    FOR_YOU_PAGE_SIZE,
+  ),
 })
 
 export type Session = Awaited<ReturnType<ServerContext['auth']['api']['getSession']>>
@@ -226,7 +235,7 @@ const routes: Route[] = [
     json(await updateSignals(ctx.db, userId, await readJson(request, signalsRequestSchema))),
   ),
   route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
-    json(await getForYou(ctx.db, userId, { cursor: url.searchParams.get('cursor') })),
+    json(await getForYou(ctx.db, userId, forYouQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
   route('POST', '/api/v1/me/reads', async ({ ctx, request, userId }) => {
     const { storyId } = await readJson(request, readRequestSchema)

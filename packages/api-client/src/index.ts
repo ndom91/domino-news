@@ -185,8 +185,8 @@ export function createApiClient({
       request<FollowList>(followListSchema, '/me/follows', { signal }),
     setFollow: (body: FollowRequest) =>
       request<FollowList>(followListSchema, '/me/follows', { method: 'POST', body }),
-    getForYou: (cursor: string | null, signal?: AbortSignalLike) =>
-      request<ForYouResponse>(forYouResponseSchema, `/for-you${qs({ cursor })}`, { signal }),
+    getForYou: (opts: { cursor?: string | null; limit?: number } = {}, signal?: AbortSignalLike) =>
+      request<ForYouResponse>(forYouResponseSchema, `/for-you${qs(opts)}`, { signal }),
     setFeedback: (body: FeedbackRequest) =>
       request<LearnedSignals>(learnedSignalsSchema, '/me/feedback', { method: 'POST', body }),
     getSignals: (signal?: AbortSignalLike) =>

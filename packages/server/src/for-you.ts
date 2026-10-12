@@ -18,7 +18,7 @@ import { storyListItems } from './reader.ts'
 
 // Only recent Stories compete; the window is small enough to rank in memory.
 const WINDOW_HOURS = 72
-const PAGE_SIZE = 30
+export const FOR_YOU_PAGE_SIZE = 30
 
 // Boosts, strongest first. A follow says more than a broad pick.
 const WEIGHT = { narrative: 3, topic: 2, publisher: 1, region: 1, desk: 1 } as const
@@ -111,7 +111,7 @@ export function scoreStory(
 export async function getForYou(
   db: Db,
   userId: string,
-  opts: { cursor?: string | null } = {},
+  opts: { cursor?: string | null; limit?: number } = {},
 ): Promise<ForYouResponse> {
   const [prefs, follows, learned, feedback, rows] = await Promise.all([
     getPreferences(db, userId),
@@ -168,7 +168,8 @@ export async function getForYou(
     .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
 
   const offset = Math.max(0, Number(opts.cursor) || 0)
-  const page = ranked.slice(offset, offset + PAGE_SIZE)
+  const limit = opts.limit ?? FOR_YOU_PAGE_SIZE
+  const page = ranked.slice(offset, offset + limit)
   const stories = await storyListItems(
     db,
     page.map((p) => p.id),
@@ -181,7 +182,7 @@ export async function getForYou(
       return story ? [{ story, reasons: p.reasons, feedback: feedback.get(p.id) ?? null }] : []
     }),
     pageInfo: {
-      nextCursor: offset + PAGE_SIZE < ranked.length ? String(offset + PAGE_SIZE) : null,
+      nextCursor: offset + limit < ranked.length ? String(offset + limit) : null,
     },
   }
 }

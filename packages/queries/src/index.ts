@@ -37,6 +37,7 @@ export const queryKeys = {
   insights: () => ['me', 'insights'] as const,
   follows: () => ['me', 'follows'] as const,
   forYou: () => ['for-you'] as const,
+  forYouRail: () => ['for-you', 'rail'] as const,
   signals: () => ['me', 'signals'] as const,
   evidence: (slug: string) => ['publishers', 'evidence', slug] as const,
 }
@@ -121,9 +122,16 @@ export function createQueries(api: ApiClient) {
     forYou: () =>
       infiniteQueryOptions({
         queryKey: queryKeys.forYou(),
-        queryFn: ({ pageParam, signal }) => api.getForYou(pageParam, signal),
+        queryFn: ({ pageParam, signal }) => api.getForYou({ cursor: pageParam }, signal),
         initialPageParam: null as string | null,
         getNextPageParam: (last) => last.pageInfo.nextCursor,
+        staleTime: 60_000,
+      }),
+    // The front page rail shows 4; one spare in case the lead is among them.
+    forYouRail: () =>
+      queryOptions({
+        queryKey: queryKeys.forYouRail(),
+        queryFn: ({ signal }) => api.getForYou({ limit: 5 }, signal),
         staleTime: 60_000,
       }),
     signals: () =>

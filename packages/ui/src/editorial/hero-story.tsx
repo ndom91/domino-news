@@ -1,5 +1,5 @@
 import { plural } from '@dn/domain'
-import type { StoryDetail } from '@dn/schemas'
+import type { StoryLead } from '@dn/schemas'
 import { useState } from 'react'
 import { cx } from '../cx.ts'
 import { type CitedSource, SummaryText } from './citation.tsx'
@@ -25,7 +25,7 @@ export function HeroStory({
   linkHeadline = true,
   Link = DefaultLink,
 }: {
-  story: StoryDetail
+  story: StoryLead
   position?: { index: number; total: number } | null
   kicker?: string
   now: string
@@ -37,7 +37,7 @@ export function HeroStory({
   const [activeSource, setActiveSource] = useState<string | null>(null)
   const narrative = story.narratives[0]
   const Heading = headingLevel
-  const reportedAt = (s: StoryDetail['sources'][number]) => s.publishedAt ?? s.observedAt
+  const reportedAt = (s: StoryLead['sources'][number]) => s.publishedAt ?? s.observedAt
   const reports = story.sources
     .map((s) => ({
       id: s.articleId,

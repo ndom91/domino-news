@@ -1,18 +1,13 @@
 import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
 import type { Desk, DevelopingNarrative, Edition, FrontPage, Region } from '@dn/schemas'
-import { and, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import {
-  edgesWithin,
-  getStory,
-  listStories,
-  MIN_NARRATIVE_STORIES,
-  narrativeDesk,
-} from './reader.ts'
+import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
+import { edgesWithin, getStoryLead, MIN_NARRATIVE_STORIES, narrativeDesk } from './reader.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
 const MAX_STEPS = 6
+const LEAD_CANDIDATES = 30
 
 /**
  * Everything on the front page above the Latest grid. The lead is the most widely reported
@@ -68,13 +63,31 @@ async function leadStory(
   opts: { region?: Region; regions?: readonly Region[] },
   now: Date,
 ) {
-  const candidates = await listStories(db, { limit: 30, region: opts.region })
+  // The first page of Latest (same filter and order), with only what pickLead needs.
+  const candidates = await db
+    .select({
+      id: schema.story.id,
+      lastUpdatedAt: schema.story.lastUpdatedAt,
+      regions: schema.story.regions,
+      sourceCount: sql<number>`(select count(*)::int from story_article sa
+        where sa.story_id = story.id and sa.removed_at is null)`,
+    })
+    .from(schema.story)
+    .where(
+      and(
+        isNotNull(schema.story.publishedAt),
+        isNull(schema.story.mergedIntoStoryId),
+        opts.region ? arrayContains(schema.story.regions, [opts.region]) : undefined,
+      ),
+    )
+    .orderBy(desc(schema.story.lastUpdatedAt), desc(schema.story.id))
+    .limit(LEAD_CANDIDATES)
   const leadItem = pickLead(
-    candidates.items,
+    candidates.map((c) => ({ ...c, lastUpdatedAt: c.lastUpdatedAt.toISOString() })),
     opts.region ? [] : (opts.regions ?? []),
     now.getTime(),
   )
-  const lead = leadItem ? await getStory(db, leadItem.id) : null
+  const lead = leadItem ? await getStoryLead(db, leadItem.id) : null
   const leadNarrative = lead?.narratives[0]
   let leadPosition: FrontPage['leadPosition'] = null
   if (lead && leadNarrative) {
@@ -86,22 +99,47 @@ async function leadStory(
 }
 
 async function developingSection(db: Db) {
-  const recent = await db
+  const counted = db
     .select({
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
-      desk: narrativeDesk,
       updatedAt: schema.narrative.updatedAt,
+      // Narratives that qualify, before the limit (for "View more narratives").
+      total: sql<number>`count(*) over ()`.mapWith(Number).as('total'),
     })
     .from(schema.narrative)
-    .where(
-      sql`(select count(*) from ${schema.narrativeStory} ns join ${schema.story} s on s.id = ns.story_id
-        where ns.narrative_id = narrative.id and ns.removed_at is null and s.published_at is not null) >= ${MIN_NARRATIVE_STORIES}`,
+    .innerJoin(
+      schema.narrativeStory,
+      and(
+        eq(schema.narrativeStory.narrativeId, schema.narrative.id),
+        isNull(schema.narrativeStory.removedAt),
+      ),
     )
+    .innerJoin(
+      schema.story,
+      and(eq(schema.story.id, schema.narrativeStory.storyId), isNotNull(schema.story.publishedAt)),
+    )
+    .groupBy(schema.narrative.id)
+    .having(sql`count(*) >= ${MIN_NARRATIVE_STORIES}`)
     .orderBy(desc(schema.narrative.updatedAt))
-  const developing = await developingNarratives(db, recent.slice(0, DEVELOPING_COUNT))
-  return { developing, narrativeCount: recent.length }
+    .limit(DEVELOPING_COUNT)
+    .as('counted')
+  // narrativeDesk refers to "narrative", so it runs in an outer select over the 3 rows only.
+  const recent = await db
+    .select({
+      id: schema.narrative.id,
+      slug: counted.slug,
+      title: counted.title,
+      desk: narrativeDesk,
+      updatedAt: counted.updatedAt,
+      total: counted.total,
+    })
+    .from(counted)
+    .innerJoin(schema.narrative, eq(schema.narrative.id, counted.id))
+    .orderBy(desc(counted.updatedAt))
+  const developing = await developingNarratives(db, recent)
+  return { developing, narrativeCount: recent[0]?.total ?? 0 }
 }
 
 /** Published Story ids per Narrative, oldest first. */

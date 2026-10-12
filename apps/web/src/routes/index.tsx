@@ -10,7 +10,7 @@ import {
   StoryItem,
   StoryItemSkeleton,
 } from '@dn/ui'
-import { useInfiniteQuery, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
+import { useQuery, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { z } from 'zod/mini'
 import { RouterLink } from '../components/link.tsx'
@@ -26,7 +26,7 @@ export const Route = createFileRoute('/')({
       context.queryClient.ensureInfiniteQueryData(queries.storyList(deps.region)),
       // The For You rail (unfiltered front only), so it renders with the page instead of
       // popping in after hydration. prefetch never throws: a failure just hides the rail.
-      deps.region ? null : context.queryClient.prefetchInfiniteQuery(queries.forYou()),
+      deps.region ? null : context.queryClient.prefetchQuery(queries.forYouRail()),
     ])
   },
   pendingComponent: FeedSkeleton,
@@ -172,10 +172,9 @@ function RegionFilter({ active }: { active: Region | null }) {
  * it; it stays hidden until the reader picks or follows something.
  */
 function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
-  const feed = useInfiniteQuery(queries.forYou())
-  const first = feed.data?.pages[0]
-  const items = (first?.items ?? []).filter((i) => i.story.id !== excludeId).slice(0, 4)
-  if (!first?.personalised || items.length === 0) return null
+  const { data } = useQuery(queries.forYouRail())
+  const items = (data?.items ?? []).filter((i) => i.story.id !== excludeId).slice(0, 4)
+  if (!data?.personalised || items.length === 0) return null
   return (
     <section aria-labelledby="for-you-heading">
       <SectionHeader
