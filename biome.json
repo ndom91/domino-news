@@ -6,7 +6,13 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/routeTree.gen.ts", "!**/drizzle/meta", "!fixtures/**/*.xml"]
+    "includes": [
+      "**",
+      "!**/routeTree.gen.ts",
+      "!**/drizzle/meta",
+      "!fixtures/**/*.xml",
+      "!fixtures/match-eval"
+    ]
   },
   "formatter": {
     "enabled": true,

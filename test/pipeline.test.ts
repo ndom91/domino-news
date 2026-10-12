@@ -1130,6 +1130,8 @@ describe('context popovers', () => {
         schema.storySummaryVersion,
         eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
       )
+      // getStory and getStoryLead only return published Stories.
+      .where(isNotNull(schema.story.publishedAt))
     const link = links.find(
       (l) => !l.body.includes(l.anchorText) && l.detail?.includes(l.anchorText),
     )
