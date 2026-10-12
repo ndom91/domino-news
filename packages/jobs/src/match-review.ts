@@ -48,6 +48,11 @@ export function reviewHtml(set: EvalSet, labels: Labels): string {
   li:focus-within .d, li:hover .d { -webkit-line-clamp: unset; }
   select, button, input[type=search] { font: inherit; font-size: 12px; }
   .hidden { display: none; }
+  .grip { cursor: grab; color: var(--dim); padding: 0 2px; user-select: none; }
+  li[draggable] { cursor: grab; }
+  .card.over { outline: 3px dashed Highlight; outline-offset: 2px; }
+  .card.dragging, li.dragging { opacity: .4; }
+  #undo:disabled { opacity: .4; }
 </style>
 </head>
 <body>
@@ -57,7 +62,11 @@ export function reviewHtml(set: EvalSet, labels: Labels): string {
   <input type="search" id="q" placeholder="Filter titles…" aria-label="Filter titles">
   <label><input type="checkbox" id="hideDone"> Hide reviewed</label>
   <button id="export">Export labels.json</button>
+  <button id="import" title="Load a labels.json you exported earlier">Import…</button>
+  <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <button id="undo" disabled title="Undo the last change (⌘Z / Ctrl+Z)">Undo</button>
   <button id="reset" title="Discard local edits and reload the draft">Reset</button>
+  <span class="m">Drag a story's ⠿ onto another to merge; drag an article onto a story to move it.</span>
   <a href="https://github.com/ndom91/domino-news/blob/main/docs/story-granularity.md" target="_blank" rel="noreferrer">Rules</a>
 </header>
 <main id="groups"></main>
@@ -69,11 +78,21 @@ const byId = new Map(set.articles.map(a => [a.id, a]))
 let state = JSON.parse(localStorage.getItem(KEY) || 'null') || structuredClone(initial)
 state.groups.forEach(g => { g.done ??= false })
 const save = () => { localStorage.setItem(KEY, JSON.stringify(state)); render() }
+// Snapshots before each change, for Undo. Kept in memory only.
+const history = []
+const remember = () => { history.push(structuredClone(state)); if (history.length > 100) history.shift() }
+function undo() {
+  const prev = history.pop()
+  if (!prev) return
+  state = prev
+  save()
+}
 const order = { low: 0, medium: 1, high: 2 }
 const fmt = iso => new Date(iso).toLocaleString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'UTC' }) + ' UTC'
 let seq = Date.now()
 
 function moveArticle(articleId, to) {
+  remember()
   const from = state.groups.find(g => g.articleIds.includes(articleId))
   from.articleIds = from.articleIds.filter(id => id !== articleId)
   if (to === '__new') {
@@ -84,6 +103,8 @@ function moveArticle(articleId, to) {
   save()
 }
 function mergeInto(fromId, toId) {
+  if (fromId === toId) return
+  remember()
   const from = state.groups.find(g => g.id === fromId), to = state.groups.find(g => g.id === toId)
   to.articleIds.push(...from.articleIds); state.groups = state.groups.filter(g => g !== from); save()
 }
@@ -94,6 +115,7 @@ function options(exclude) {
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
 
 function render() {
+  document.getElementById('undo').disabled = history.length === 0
   const q = document.getElementById('q').value.toLowerCase()
   const hideDone = document.getElementById('hideDone').checked
   const groups = [...state.groups].sort((a, b) =>
@@ -106,11 +128,12 @@ function render() {
     const visible = !q || g.title.toLowerCase().includes(q) || arts.some(a => a.title.toLowerCase().includes(q))
     const hidden = !visible || (hideDone && g.done)
     return '<section class="card ' + esc(g.confidence ?? '') + (g.done ? ' done' : '') + (hidden ? ' hidden' : '') + '" data-g="' + esc(g.id) + '">' +
-      '<h2><input value="' + esc(g.title) + '" data-rename="' + esc(g.id) + '" aria-label="Story title"> <span class="m">' + arts.length + '</span></h2>' +
+      '<h2><span class="grip" draggable="true" data-drag-group="' + esc(g.id) + '" title="Drag onto another story to merge">⠿</span>' +
+      '<input value="' + esc(g.title) + '" data-rename="' + esc(g.id) + '" aria-label="Story title"> <span class="m">' + arts.length + '</span></h2>' +
       (g.reason ? '<p class="reason">' + esc(g.reason) + '</p>' : '') +
       '<div class="tools"><label><input type="checkbox" data-done="' + esc(g.id) + '"' + (g.done ? ' checked' : '') + '> Reviewed</label>' +
       '<select data-merge="' + esc(g.id) + '" aria-label="Merge this group into"><option value="">Merge into…</option>' + options(g.id) + '</select></div>' +
-      '<ol>' + arts.map(a => '<li><div class="t">' + esc(a.title) + '</div>' +
+      '<ol>' + arts.map(a => '<li draggable="true" data-drag-article="' + esc(a.id) + '"><div class="t">' + esc(a.title) + '</div>' +
         '<div class="m">' + esc(a.publisher) + (a.publisherKind === 'official' ? ' (official)' : '') + ' · ' + fmt(a.publishedAt) + '</div>' +
         (a.description ? '<div class="d">' + esc(a.description) + '</div>' : '') +
         '<select data-move="' + esc(a.id) + '" aria-label="Move this article to"><option value="">Move to…</option><option value="__new">New group</option>' + options(g.id) + '</select></li>').join('') +
@@ -122,11 +145,75 @@ document.addEventListener('change', e => {
   const t = e.target
   if (t.dataset.move && t.value) moveArticle(t.dataset.move, t.value)
   else if (t.dataset.merge && t.value) mergeInto(t.dataset.merge, t.value)
-  else if (t.dataset.done) { state.groups.find(g => g.id === t.dataset.done).done = t.checked; save() }
-  else if (t.dataset.rename) { state.groups.find(g => g.id === t.dataset.rename).title = t.value; save() }
+  else if (t.dataset.done) { remember(); state.groups.find(g => g.id === t.dataset.done).done = t.checked; save() }
+  else if (t.dataset.rename) { remember(); state.groups.find(g => g.id === t.dataset.rename).title = t.value; save() }
   else if (t.id === 'hideDone') render()
 })
 document.getElementById('q').addEventListener('input', render)
+
+// Drag and drop: a story's grip onto another story merges it; an article onto a story moves it.
+let dragged = null
+document.addEventListener('dragstart', e => {
+  const t = e.target.closest?.('[data-drag-group], [data-drag-article]')
+  if (!t) return
+  dragged = t.dataset.dragGroup ? { group: t.dataset.dragGroup } : { article: t.dataset.dragArticle }
+  e.dataTransfer.effectAllowed = 'move'
+  e.dataTransfer.setData('text/plain', dragged.group ?? dragged.article)
+  const card = t.closest('section.card')
+  // Drag the whole card's image when grabbing a story's grip.
+  if (dragged.group && card) e.dataTransfer.setDragImage(card, 20, 20)
+  ;(dragged.group ? card : t).classList.add('dragging')
+})
+document.addEventListener('dragend', () => {
+  dragged = null
+  document.querySelectorAll('.dragging, .over').forEach(el => el.classList.remove('dragging', 'over'))
+})
+document.addEventListener('dragover', e => {
+  const card = e.target.closest?.('section.card')
+  if (!dragged || !card) return
+  const from = dragged.group ?? state.groups.find(g => g.articleIds.includes(dragged.article))?.id
+  if (card.dataset.g === from) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'move'
+  document.querySelectorAll('.over').forEach(el => el !== card && el.classList.remove('over'))
+  card.classList.add('over')
+})
+document.addEventListener('dragleave', e => {
+  const card = e.target.closest?.('section.card')
+  if (card && !card.contains(e.relatedTarget)) card.classList.remove('over')
+})
+document.addEventListener('drop', e => {
+  const card = e.target.closest?.('section.card')
+  if (!dragged || !card) return
+  e.preventDefault()
+  const d = dragged
+  dragged = null
+  if (d.group) mergeInto(d.group, card.dataset.g)
+  else moveArticle(d.article, card.dataset.g)
+})
+document.getElementById('undo').addEventListener('click', undo)
+document.getElementById('import').addEventListener('click', () => document.getElementById('importFile').click())
+document.getElementById('importFile').addEventListener('change', async e => {
+  const file = e.target.files[0]
+  e.target.value = ''
+  if (!file) return
+  const loaded = JSON.parse(await file.text())
+  const ids = (loaded.groups ?? []).flatMap(g => g.articleIds)
+  const known = ids.filter(id => byId.has(id))
+  if (loaded.set !== set.name || known.length !== set.articles.length || new Set(ids).size !== ids.length) {
+    alert('That file doesn\u2019t match ' + set.name + ' (wrong set, or articles missing or repeated).')
+    return
+  }
+  remember()
+  state = { set: loaded.set, guide: loaded.guide, groups: loaded.groups.map(({ reviewed, ...g }) => ({ ...g, done: reviewed ?? g.done ?? false })) }
+  save()
+})
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'z' && !e.shiftKey && e.target.tagName !== 'INPUT') {
+    e.preventDefault()
+    undo()
+  }
+})
 document.getElementById('reset').addEventListener('click', () => {
   if (confirm('Discard your edits and reload the draft?')) { localStorage.removeItem(KEY); state = structuredClone(initial); render() }
 })
