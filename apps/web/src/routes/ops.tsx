@@ -4,11 +4,12 @@ import {
   type FailedJob,
   type MatchHealth,
   type OpsAction,
+  type OpsStatus,
 } from '@dn/schemas'
 import { Badge, Button, ConfirmDialog, Notice, SectionLabel, Skeleton, Tooltip } from '@dn/ui'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { type ReactNode, useState } from 'react'
 import { z } from 'zod/mini'
 import { DisclosureChevron } from '../components/disclosure-chevron.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
@@ -208,34 +209,7 @@ function OpsPage() {
 
       <MatchHealthSection />
 
-      <section className="mt-10">
-        <SectionLabel>Feeds</SectionLabel>
-        <Table head={['Publisher', 'Status', 'Last polled', 'Articles']}>
-          {s.feeds.map((f) => (
-            <tr key={f.id}>
-              <Td>
-                <span className="font-medium">{f.publisherName}</span>
-                <span className="block max-w-48 truncate type-meta sm:max-w-xs">{f.url}</span>
-              </Td>
-              <Td>
-                {f.lastStatus === 'error' ? (
-                  <Tooltip content={f.lastError ?? 'No error message'}>
-                    <span>
-                      <Badge tone="error">error</Badge>
-                    </span>
-                  </Tooltip>
-                ) : (
-                  <Badge tone={f.lastStatus === 'ok' ? 'success' : 'neutral'}>
-                    {f.lastStatus ?? 'never'}
-                  </Badge>
-                )}
-              </Td>
-              <Td>{f.lastPolledAt ? relativeTime(f.lastPolledAt) : '–'}</Td>
-              <Td>{f.articleCount}</Td>
-            </tr>
-          ))}
-        </Table>
-      </section>
+      <FeedsSection feeds={s.feeds} />
 
       <FailedJobs queue={failed ?? null} />
     </Page>
@@ -500,6 +474,62 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
 const pct = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '–')
 
 /** How well articles are grouped into stories. Computed on the server every 5 minutes. */
+const FEEDS_SHOWN = 5
+
+/** Feeds, failing ones first so a broken feed is never hidden behind "Show all". */
+function FeedsSection({ feeds }: { feeds: OpsStatus['feeds'] }) {
+  const [expanded, setExpanded] = useState(false)
+  const sorted = [...feeds].sort(
+    (a, b) => Number(b.lastStatus === 'error') - Number(a.lastStatus === 'error'),
+  )
+  const shown = expanded ? sorted : sorted.slice(0, FEEDS_SHOWN)
+  const errors = feeds.filter((f) => f.lastStatus === 'error').length
+  return (
+    <section aria-labelledby="feeds-heading" className="mt-10">
+      <SectionLabel id="feeds-heading">Feeds</SectionLabel>
+      <p className="mb-2 type-meta" aria-live="polite">
+        {plural(feeds.length, 'feed')}
+        {errors ? ` · ${errors} failing` : ' · all polling fine'}
+      </p>
+      <Table head={['Publisher', 'Status', 'Last polled', 'Articles']}>
+        {shown.map((f) => (
+          <tr key={f.id}>
+            <Td>
+              <span className="font-medium">{f.publisherName}</span>
+              <span className="block max-w-48 truncate type-meta sm:max-w-xs">{f.url}</span>
+            </Td>
+            <Td>
+              {f.lastStatus === 'error' ? (
+                <Tooltip content={f.lastError ?? 'No error message'}>
+                  <span>
+                    <Badge tone="error">error</Badge>
+                  </span>
+                </Tooltip>
+              ) : (
+                <Badge tone={f.lastStatus === 'ok' ? 'success' : 'neutral'}>
+                  {f.lastStatus ?? 'never'}
+                </Badge>
+              )}
+            </Td>
+            <Td>{f.lastPolledAt ? relativeTime(f.lastPolledAt) : '–'}</Td>
+            <Td>{f.articleCount}</Td>
+          </tr>
+        ))}
+      </Table>
+      {feeds.length > FEEDS_SHOWN ? (
+        <Button
+          size="sm"
+          className="mt-4"
+          aria-expanded={expanded}
+          onClick={() => setExpanded((e) => !e)}
+        >
+          {expanded ? 'Show fewer feeds' : `Show all ${feeds.length} feeds`}
+        </Button>
+      ) : null}
+    </section>
+  )
+}
+
 function MatchHealthSection() {
   const health = useQuery(queries.matchHealth())
   return (
