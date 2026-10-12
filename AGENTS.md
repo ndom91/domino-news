@@ -188,6 +188,36 @@ Nightly cron (adjust the path):
 
 - In a correlated `sql` subquery, write outer columns literally (`narrative.id`), not as `${schema.narrative.id}`. Drizzle drops the table name from select-list columns when the query has no joins, and a bare `"id"` then binds to the subquery's own tables.
 
+## Performance guidelines
+
+Learned from the October 2026 performance pass. Queries are fast (0.1–6 ms); what costs time is round trips, serial awaits and bytes. Check these before adding a read or a page.
+
+**Server reads**
+- Never select `story.embedding` in request paths. Use `storyColumns` from `packages/server/src/reader.ts`, not `select().from(schema.story)`: the vector is about 10 KB per row as text.
+- Run independent queries with `Promise.all`. Await in sequence only when a query needs the previous result.
+- Fetch only what the page renders. Add a slim read rather than reusing a full one, as `getStoryLead` does for the front-page hero instead of `getStory`.
+- Don't run the same work twice in one request. For example, don't build a 30-item list just to pick one item from it.
+- Bound every list query with a `limit`, and filter to the subject before aggregating. Don't aggregate every publisher or every story and then filter at the end.
+- Avoid correlated subqueries in select lists, which run once per row. For a narrative's desk, use `narrativeDesks` / `deskByNarrative`.
+- When a new query filters or sorts on a column, check that an index serves it (`EXPLAIN` against the dev DB, read-only). Ingest adds about 1,000 articles a day, so all-time scans slow down month by month.
+- For results that are the same for every reader and change only when the pipeline runs, wrap them in `cached(key, SHARED_TTL_MS, load)` from `packages/server/src/cache.ts`. Put every parameter in the key. Tests clear the cache before each test (`test/setup.ts`). Call `clearCache()` in a test that changes data mid-test.
+
+**Session and loaders**
+- Resolve the session once per request. During SSR, `requestSession()` in `apps/web/src/server/api-bridge.ts` shares one lookup across all in-process API calls.
+- Root `beforeLoad` reads the session from the query cache (`queryKeys.session()`), not the server. It runs on every navigation and every hover preload. When something stored in session info changes, invalidate that key (`savePreferencesMutation` does).
+- A route loader prefetches every query its component needs, so the SSR HTML is complete and nothing pops in after hydration. Avoid `useQuery` without a matching loader prefetch, except for admin-only or below-the-fold extras.
+- Don't fetch a big endpoint for a few fields. The header strip uses `/api/v1/edition`, not `/api/v1/front`.
+- Queries never retry 4xx responses (`apps/web/src/router.tsx`), so a 404 shows at once.
+
+**Client bundle and runtime**
+- `@dn/ui` is `"sideEffects": false`. Keep its modules free of side effects (no CSS imports, no top-level registration), or route chunks will merge back into the shared chunk.
+- Import heavy, rarely used code dynamically where it's used, as `useSignOut` does with the auth client. Keep it out of the root layout and header imports.
+- Reuse `Intl` formatters (`@dn/domain` caches them). Don't add per-component timers: relative times share `useMinuteClock`.
+- Don't let a chart's height depend on a measured width, or it shifts layout after hydration.
+
+**Measuring**
+Measure against a production build, not the dev server: run `pnpm build`, then start `apps/web/server.mjs` on a spare port with `BETTER_AUTH_URL` set to that port. Compare SSR time, HTML size and the requests made on client navigation before and after. Production HTML is brotli-compressed by Cloudflare.
+
 ## Frontend guidelines
 
 Follow these for any UI work in `apps/web` and `packages/ui`. They come from the [Web Interface Guidelines](https://github.com/vercel-labs/web-interface-guidelines) and the issues a full review found here.
