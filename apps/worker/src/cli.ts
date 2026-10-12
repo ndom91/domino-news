@@ -1,3 +1,4 @@
+import { readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 import {
   createQueues,
@@ -6,7 +7,10 @@ import {
   importAssessmentEvidence,
   pollFeed,
   publishAssessments,
+  reviewHtml,
+  sampleMatchSet,
   seedPublishers,
+  writeJson,
 } from '@dn/jobs'
 import {
   analysisJob,
@@ -35,6 +39,9 @@ const USAGE = `Usage: pnpm cli <command> [options]
   assessments:publish --username u [--dry-run]
                                     Publish fixtures/assessments.json as admin u (skips unchanged ones;
                                     run assessments:import first)
+  match:sample --name n --seed <title regex> [--seed …] [--days 6] [--random 100] [--neighbour-min 0.8]
+                                    Draw a match evaluation set into fixtures/match-eval/<name>.json
+  match:review --name n             Write a review page for its labels (reviewed labels, else the draft)
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
@@ -52,6 +59,11 @@ const { positionals, values } = parseArgs({
     variant: { type: 'string', default: 'rss' },
     'reset-graph': { type: 'boolean', default: false },
     'dry-run': { type: 'boolean', default: false },
+    name: { type: 'string' },
+    seed: { type: 'string', multiple: true },
+    days: { type: 'string', default: '6' },
+    random: { type: 'string', default: '100' },
+    'neighbour-min': { type: 'string', default: '0.8' },
     all: { type: 'boolean', default: false },
   },
 })
@@ -106,6 +118,34 @@ try {
         ),
       )
       break
+    case 'match:sample': {
+      if (!values.name || !values.seed?.length)
+        throw new Error('--name and at least one --seed required')
+      const set = await sampleMatchSet(ctx.db, {
+        name: values.name,
+        days: Number(values.days),
+        seeds: values.seed,
+        neighbourMin: Number(values['neighbour-min']),
+        randomCount: Number(values.random),
+      })
+      const file = `${ctx.config.fixtureDir}/match-eval/${values.name}.json`
+      await writeJson(file, set)
+      console.log(`${set.articles.length} articles → ${file}`)
+      break
+    }
+    case 'match:review': {
+      if (!values.name) throw new Error('--name required')
+      const dir = `${ctx.config.fixtureDir}/match-eval`
+      const read = async (file: string) => JSON.parse(await readFile(`${dir}/${file}`, 'utf8'))
+      const set = await read(`${values.name}.json`)
+      const labels = await read(`${values.name}.labels.json`).catch(() =>
+        read(`${values.name}.labels-draft.json`),
+      )
+      const out = `${dir}/${values.name}.review.html`
+      await writeFile(out, reviewHtml(set, labels))
+      console.log(`open ${out}`)
+      break
+    }
     case 'backfill:pause':
     case 'backfill:resume':
       await setBackfillPaused(ctx, positionals[0] === 'backfill:pause')

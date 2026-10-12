@@ -1,0 +1,1580 @@
+{
+  "set": "set-1",
+  "guide": "docs/story-granularity.md",
+  "groups": [
+    {
+      "id": "g1",
+      "title": "Houthi missiles hit Riyadh airport, killing three (Oct 9)",
+      "reason": "Earlier attack in the week, before the 12-death strike; separate event of the same kind",
+      "articleIds": [
+        "art_01m4ksk67m7dwfr7y4pj31dr2v",
+        "art_01m4ksk2s68nqjwa467nz02cwg"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g2",
+      "title": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+      "reason": "The deadliest strike, Saturday Oct 10; toll updates to 13, CCTV, victims and Saudi vows of a response that recap it",
+      "articleIds": [
+        "art_01m4ksk2qszbggevxcx84xxp4d",
+        "art_01m4ksk67d52z8wqzazhc01w9p",
+        "art_01m4ksk2b2mpf2cbhxz45avnba",
+        "art_01m4ksk2ky5qqp7hzjffx4s9js",
+        "art_01m4ksk6tz836gq1j8pgs0bzp5",
+        "art_01m4ksk97t4xd41cbc42v9edgv",
+        "art_01m4kskbb1mkskqcbq5q2y1hew",
+        "art_01m4ktqjwm9np9r80dwh0xdg3k",
+        "art_01m4ky5g2ww2y5r6qygbz6p67k",
+        "art_01m4m50x7jgrzamd74eezsxckx",
+        "art_01m4m9a8kmxck9t9t27vs76mn7",
+        "art_01m4n4snke6vde126tjsfsp8p7",
+        "art_01m4mtg3vschqbqtarjw8mx9dq",
+        "art_01m4p1z0emacjf6hrd5k6q8jrc",
+        "art_01m4p1ytj00pzcy5g3e2xddytk",
+        "art_01m4p1ym8x2kafwcpmxqescgmr",
+        "art_01m4nf2s2q84j70424ethcap7c",
+        "art_01m4ngs8hgk1xdny521djcp0wk",
+        "art_01m4paj3sr0gry3mdxpcm5s7qr",
+        "art_01m4pc93mdafx5mgnsdvg53a47",
+        "art_01m4qc1w17e24739z1v1669ezq",
+        "art_01m4pj944jjg193fyt0gr0754r",
+        "art_01m4pt10jzabcn3sz3fn2085ap",
+        "art_01m4q7rfs3ad6x0jfpzbqs18dp",
+        "art_01m4qks12hcpwfywq6438dw4dp"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g3",
+      "title": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+      "reason": "New attack Sunday Oct 11 (1 dead, 11 injured, fire at terminal); includes live blogs/claims that lead with the new strike",
+      "articleIds": [
+        "art_01m4m45hy5y0w256m6d6z4k5sa",
+        "art_01m4mp6t2fst6ceepvd66f5xtd",
+        "art_01m4n2768vvsf4b0d3f9mr8tsa",
+        "art_01m4p1yp6a6x5hc7xw3yvqz3qc",
+        "art_01m4p1yzxpwzfhtkba43chavyy",
+        "art_01m4p5cjts6e90d5n05vdhhtk1",
+        "art_01m4nhmzw04kb5k6mhm8s3wr2e",
+        "art_01m4npsjzfhewk95pfbk9way9v",
+        "art_01m4p1yykas5jacr0mq32gsxyf",
+        "art_01m4nvyj0ya8zgyxr9h91gvhn8",
+        "art_01m4nwsxwqcqbt00517yx6nnpe",
+        "art_01m4nygrd2end8sd8r1k4xz5nr",
+        "art_01m4nxn7z7csad8yr94tppe329",
+        "art_01m4p1ymyr3rp9zsdszhnpwk01",
+        "art_01m4p1z0c4t7shkv9n7gn6dw6c",
+        "art_01m4p1ytfrh15s437n388d1md5",
+        "art_01m4p1ym6xnwkdmxdb9gxpkmzr",
+        "art_01m4p1yvypjkzaej0ztfemse3v",
+        "art_01m4p4j1mnw4dg4j09pjwxdeda",
+        "art_01m4p8thwvhkr988gsr8ytf7qj",
+        "art_01m4pr95qm4j9ha3be5etr68sx",
+        "art_01m4pk4gz4zr7jv91eszdc9pn8",
+        "art_01m4pnqebbs78r9946dp4xwg00",
+        "art_01m4pkzv7yfmtrvhq42976zjzg",
+        "art_01m4ppjd6w94xcz6pqpdpffm7s",
+        "art_01m4py9gafswtsc8nqserps6ba",
+        "art_01m4pqe898g3qqepfqrvwp3gxb",
+        "art_01m4pr8yy1ye2tatwwd4mbphc5",
+        "art_01m4pr98k9daf5dh8zrg50essp",
+        "art_01m4ptw3pg2pmztpyrjdd5c3ed",
+        "art_01m4pvq10vdf9eqa25gvzccrty",
+        "art_01m4pz5drsbxp1c5k2z8rejzq3",
+        "art_01m4pz54vdempsrvqgvgdhp9cx",
+        "art_01m4q0085s20fdzdy2fybr233q",
+        "art_01m4q49s1wz6806dxmz92er4cz",
+        "art_01m4q00yettb7hxe759me0ybz0",
+        "art_01m4qq6phm6xs70gcpvbf6gncm"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g4",
+      "title": "Countries condemn the Houthi attacks on Riyadh airport",
+      "reason": "Wave of condemnations (world, Pakistan, Turkey, Egypt, Nigeria, China)",
+      "articleIds": [
+        "art_01m4mdm21g9qhxgq35qt10rxk7",
+        "art_01m4p1yvzqq9xk9ad81ap9zrem",
+        "art_01m4q9ewrpakpmf61rcpvydd2v",
+        "art_01m4qb5vdbfnhszn28a5f2atg3",
+        "art_01m4qb696da81k79jmdghr73hx",
+        "art_01m4qpazdcykhsxx2em9hfa9ws"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g5",
+      "title": "US considers joining Saudi strikes on the Houthis",
+      "reason": "Trump says the US may join strikes after the airport attack",
+      "articleIds": [
+        "art_01m4kwe6hmk3g6tvz32ehxga3j",
+        "art_01m4mbwx06p9tnv5tfewtp8bk3",
+        "art_01m4npsrshf2ya6010rjqawwzy"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g6",
+      "title": "Riyadh airport closure and flight cancellations",
+      "reason": "Suspension of operations, its extensions, UAE cancellations, empty skies",
+      "articleIds": [
+        "art_01m4ksk7vaw34k0ejjn3xbmdj4",
+        "art_01m4p1z0cyy55ebvmaegjq8fv1",
+        "art_01m4p1z0cmc6a6cfe4ptk6kfa9",
+        "art_01m4p1ywpkwhtz3frz42y3kyvz",
+        "art_01m4qc18cx2eeewmhjaf78nd4a",
+        "art_01m4qjwrescr9d7v7vd04jpgmw",
+        "art_01m4qkrjy7snhyqp4q64tb126c",
+        "art_01m4qkrabqxm8v5ntkmjw1sdcv",
+        "art_01m4qmmd8qewa9zw1sq88za36p",
+        "art_01m4qnf9q00fpv8mkm90619q40",
+        "art_01m4qnfhgp1pgedyjm9vkfvrrh"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g7",
+      "title": "Houthis warn travellers to stay away from Saudi airports",
+      "reason": "Houthi threat/warning to passengers and airlines, distinct statement from the attacks",
+      "articleIds": [
+        "art_01m4n5n91tgdk88xgac1hy3h61",
+        "art_01m4p1yym94fyqytjhr7ffhk76",
+        "art_01m4p1ytdpfs45sfqda8fm71vt"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g8",
+      "title": "Countries warn against travel to Saudi Arabia",
+      "reason": "Wave of travel advisories (US, Australia, Canada, Japan, Malaysia umrah advice)",
+      "articleIds": [
+        "art_01m4qc1d97jxkcpmqk7kgpqmtp",
+        "art_01m4qr1ws8nhqryagw9a3veyak"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g9",
+      "title": "FAA tells US airlines to exercise caution over Saudi Arabia",
+      "reason": "FAA notice to airmen after the Riyadh strikes; an aviation directive, kept apart from travel advisories",
+      "articleIds": [
+        "art_01m4phd4ptd5cq3btye4g5nfqt",
+        "art_01m4pk41fdzpwybdm6j5ddy3ep"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g10",
+      "title": "Top oil executives dropped from Riyadh WPC Energy Congress",
+      "reason": "Consequence for the energy event after the attacks",
+      "articleIds": [
+        "art_01m4qkrjybahn8cxhwv003nnrv",
+        "art_01m4qnf9q54gry7xqezqez9mz7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g11",
+      "title": "Iran urges Saudi diplomacy after Houthi escalation",
+      "reason": "Iranian statements on the escalation and offer to facilitate talks",
+      "articleIds": [
+        "art_01m4pr9t9pqv9346tq3xvssq96",
+        "art_01m4pt0r22n0ne1wkmfkbxxx74"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g12",
+      "title": "Yemeni government forces advance against Houthis",
+      "reason": "Saudi-backed Yemeni forces report advances (Bab al-Mandab, 1,150 Houthis killed), Oct 10",
+      "articleIds": [
+        "art_01m4ksk2cg7ns6wvc8bk3py0ge",
+        "art_01m4kzwfst3zq3q06w9ynty5w9"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g13",
+      "title": "Trump and Putin agree deal to release Russian diesel",
+      "reason": "Announcement of the US-Russia diesel deal, Oct 9",
+      "articleIds": [
+        "art_01m4ksk7wdrg2nm57tyf4jmkka",
+        "art_01m4ksk52q4fqenzs8m0rvza6p",
+        "art_01m4ksk98czvxzvf6q86cq91sa"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g14",
+      "title": "Zelensky and UK criticise the US-Russia diesel deal",
+      "reason": "Reactions to the diesel deal (Zelensky \"gifts to Putin\", \"used as a front\"; UK response)",
+      "articleIds": [
+        "art_01m4ksk2rdhczef6zaap91wzmr",
+        "art_01m4ksk52mgddnr4mmfycstyjk",
+        "art_01m4ksk9b8k4fe7hyyx0p64s3j",
+        "art_01m4ksk674xjsfmxqy8bd91w55"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g15",
+      "title": "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+      "reason": "Oct 10 strike on Zaporizhzhia; toll updates",
+      "articleIds": [
+        "art_01m4ksk2c764r8zktqxbbcdmav",
+        "art_01m4ksk6tt35yj93xh5q31de8k"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g16",
+      "title": "Trump says Ukraine should get a new president",
+      "reason": "Trump remarks Oct 10 calling for Zelensky to be replaced; includes mixed clash pieces",
+      "articleIds": [
+        "art_01m4ksk2cjb0exc1qkb4fftx3k",
+        "art_01m4ksk52gxjgna56jxgg3ewa1",
+        "art_01m4ksk8sv32rtnmpz4wzv0rt6",
+        "art_01m4ksk2b968297w76h8s2evsk",
+        "art_01m4ksk7v72cf3knhb3nc2m660",
+        "art_01m4ksk2kq8vmj0fp6pbff375z",
+        "art_01m4ksk6x4q6f26jpztp2236rz",
+        "art_01m4ksk6tnv5q5szfjnx9pa88m",
+        "art_01m4kskbb8bqvekmbs2v9vybwv",
+        "art_01m4ksk2kefg8dw7ms8avy4hf6",
+        "art_01m4nt7wrs0j5c3w29dmdbdzyz",
+        "art_01m4ksk66y18sqa7yqqvscasck",
+        "art_01m4mtg3xqnxgrnf04b85gp708",
+        "art_01m4n32xxxm1ha3zq5r3tj9x4y",
+        "art_01m4n4snjg2k3b6d3c5fv3k4h9",
+        "art_01m4n7cbrsb2q6f1wvyj129amx",
+        "art_01m4n92z1evwxvkkz66qcg94v8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g17",
+      "title": "UK and Germany back Zelensky after Trump call",
+      "reason": "Wave of support statements for Zelensky",
+      "articleIds": [
+        "art_01m4n7c27910d1rhqr56yngxck",
+        "art_01m4p1yykvab5z1sjct887hd84"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g18",
+      "title": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+      "reason": "Kyiv response to Trump on Oct 11: conditional offer to halt refinery strikes",
+      "articleIds": [
+        "art_01m4n87qg1px2w5zzcdnr93wkc",
+        "art_01m4p1yxpat12j9n7njkxc1tbj",
+        "art_01m4ndcjb9sekaywzbkf9tyzsq",
+        "art_01m4ne8cdj2cc6913dh697jwse",
+        "art_01m4p1ymgg5rhav4cskby5g3r2",
+        "art_01m4p1ywpq7ctq8hd4yfjjz4e2"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g19",
+      "title": "Zelensky offers elections if Russia agrees 60-day ceasefire",
+      "reason": "Zelensky ABC interview offer, Oct 11",
+      "articleIds": [
+        "art_01m4p1yykjdwdvgw1v0e50mew6",
+        "art_01m4nnygthv32by5gz47bqaxp4",
+        "art_01m4pk4a6fb012py0kd73vb3jr",
+        "art_01m4p1yxxpv64dvtv5s2ktb98r",
+        "art_01m4qq6jpx5bnqnpszs99mfcm5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g20",
+      "title": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+      "reason": "Trump announcement Oct 11; Kyiv surprise/\"news to me\" and welcome as party to the deal",
+      "articleIds": [
+        "art_01m4p1yym3mk4xewcttztqn2vy",
+        "art_01m4p1ysyxy0vwdbyfdtpxaks3",
+        "art_01m4p1ytds29c0k66sj6r0kxt5",
+        "art_01m4npsrs7dsjfa385wkgv6sk6",
+        "art_01m4nqnhj9e8zz1e0m857cgafs",
+        "art_01m4nqn5txc1artg0074jjjn0p",
+        "art_01m4p8v5cr92fm5nwa6dhv95p9",
+        "art_01m4p4j7cnj88y37r1ahrm9myr",
+        "art_01m4p1yxy3v68xme29hhx2psfn",
+        "art_01m4p1yp6fadktx59zskehedpk",
+        "art_01m4nrgqxynseye7y0ccsan68t",
+        "art_01m4nsc160k70z4h87d2c5dmtm",
+        "art_01m4p1yykepg5dw3j6t9wqd0em",
+        "art_01m4p1ym81dxgv3phjk256279x",
+        "art_01m4nvyagfr056fr4rh200gjnh",
+        "art_01m4nvyj126hvf264mabb1j4ex",
+        "art_01m4p1z0cc1ra72nd9epghagfq",
+        "art_01m4p1ymyh2stpdtkb1srebv9h",
+        "art_01m4pc91v75nbdf6gzqndttwjp",
+        "art_01m4pdzfzkv67ptrffn9maedsh",
+        "art_01m4pj90d8a0nzy2anhdkyg686",
+        "art_01m4pr95qv5fqwww2mna2n79xx",
+        "art_01m4q1qgq0dn0pzxten94ejj2w",
+        "art_01m4q1q966298eys9424h7axf5",
+        "art_01m4qem24vrptkx2exa3cf4gtb",
+        "art_01m4qgath6r0vbct6xc980hy8d",
+        "art_01m4qq6phrzdmqt2h27rayc8gd"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g21",
+      "title": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+      "reason": "New strikes (Kharkiv thermal plant, Kyiv energy) and Zelensky accusing Russia of violating the truce",
+      "articleIds": [
+        "art_01m4npsrsfeebkgdm9f6t5gx5j",
+        "art_01m4pbda52459wtg4xhjp4x93q",
+        "art_01m4phden7pmyp5wdxv2zdksd2",
+        "art_01m4p1ytfxe10pnrwnx59rsg77",
+        "art_01m4nv3ah0t2bdbhzmggc9avps",
+        "art_01m4p13mjrxczsgq0fe684d1zn",
+        "art_01m4p2t6d5d68mx10ht67s1jtc",
+        "art_01m4p3nszr5s0fmhzbn2qa8cqa",
+        "art_01m4pghry7c5thzhdq9r1r229j",
+        "art_01m4pmv54fs1kdezdpf028tmmf",
+        "art_01m4pev9mzmjkw3j37c5r5yv76",
+        "art_01m4pqdrr2qbyf84c3xvrfrr5h",
+        "art_01m4qffan44scd92kcwyq5z8rr",
+        "art_01m4qr1rwc9krnpfxb62sa6zh9",
+        "art_01m4qrxdrkgy5d6wv66a8akcba",
+        "art_01m4qrx1wr8sq4g27x6251cmja"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g22",
+      "title": "EU says it will welcome energy truce \"when it holds\"",
+      "reason": "Wave of EU reactions to the energy ceasefire",
+      "articleIds": [
+        "art_01m4nt7yscn43yqkgeqav6gqhd",
+        "art_01m4qaas8520ffeapqm51s4gfq",
+        "art_01m4qmm4ske60w1rqycqs2bs9g"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g23",
+      "title": "Hurricane Simon hits Mexico's Pacific coast",
+      "reason": "Strengthening, landfall/damage, weakening, and Sheinbaum urging residents to stay indoors",
+      "articleIds": [
+        "art_01m4kwecekjct0p6zf7ddwhxdr",
+        "art_01m4ne7rp1xswxc4kxhmwphpdq",
+        "art_01m4p1ym7y2j8vqx0qrtqp1s8n",
+        "art_01m4p1yyjqxjqr3bh7crhwn2hj",
+        "art_01m4p2t87pp9pacast4nyj9d38",
+        "art_01m4p8v7btn1g4mhtpt1zpxmcp",
+        "art_01m4pghkzxea1qktm8a2rnnr96",
+        "art_01m4p1ywstqx0dpfxhpaaqj8xj",
+        "art_01m4q00nxr3wm9khnv7sq0y5w6",
+        "art_01m4q0vt2ybjpqv4v0ty85dwgs",
+        "art_01m4q55d0gz1vh43r02a9s68a3",
+        "art_01m4qekzt1fs0eym0dd83vvep9",
+        "art_01m4qj1gazzax27r65310gp5k8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g24",
+      "title": "Hurricane Isaias kills four in the US",
+      "reason": "Isaias landfall and deaths",
+      "articleIds": [
+        "art_01m4ksk6v6thrrr3dje0wqj49c",
+        "art_01m4p1yptrfdrjd82h77pn5412"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g25",
+      "title": "Thousands detained ahead of Delhi protest against CEC",
+      "reason": "Preventive detentions before Oct 10 protest, incl. Dhruv Rathee",
+      "articleIds": [
+        "art_01m4kskb5dz5w3tmc4qtt6zp9y",
+        "art_01m4kskb3jzq8n3ybvtq0r3yre"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "id": "g26",
+      "title": "Abbas postpones Palestinian legislative elections to 2027",
+      "reason": "Same announcement",
+      "articleIds": [
+        "art_01m4ksk2qxwr4vd7e0g2382hvr",
+        "art_01m4m0qkv2q7pbxxy6ck1nx6r0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g27",
+      "title": "Man dies after entering tiger enclosure at Yorkshire zoo",
+      "reason": "Same incident",
+      "articleIds": [
+        "art_01m4ksk67w820zkwmgwpdjdkvw",
+        "art_01m4ma63s50tgzt10qn4aarjhf"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g28",
+      "title": "Flash flood on Budhi Gandaki river hits Nepal villages",
+      "reason": "Oct 11 flash flood, evacuations, rescue",
+      "articleIds": [
+        "art_01m4p1ypvbfbd1ra1gxgcj9zgk",
+        "art_01m4p1yszc38z2rqdpcxz5rsqj",
+        "art_01m4qaaamm0e37pwmzbvj11jxy"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g29",
+      "title": "Pennsylvania shooting: father mourns toddler",
+      "reason": "Same shooting in Erie, aftermath",
+      "articleIds": [
+        "art_01m4ppjx22x123ppbm4395q1kc",
+        "art_01m4q7qg8scyv83z3xcw74jxfm"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g30",
+      "title": "Blakeman’s campaign finance mess",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk80qb4yk07mcfja95hsm"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g31",
+      "title": "New comedy horror series Gnomes understands just how delightfully daggy good Aussie TV should be",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk5rxdv7xm64gptfxphgx"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g32",
+      "title": "From the farm to your door: How our global food system exploits workers",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk28gqsm3zatka47f8zsb"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g33",
+      "title": "German Bundeswehr: A new naval port in Emden aims to enhance Germany's defense capabilities",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7xv7b5n7d7em1v03632"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g34",
+      "title": "Delhi HC seeks response from minister who slapped AAP worker",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4kskb6d9nebdqm0ddkr8668"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g35",
+      "title": "Farm workers march in Cape Town for public land to be released for housing",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4kskaqad4bp7ff7jehd3cp4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g36",
+      "title": "Russia called its strikes on Ukrainian data centers a ‘forced digital detox.’ Zelensky says Kyiv has answered by hitting a data center belonging to Russian tech giant Yandex.",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk54nebx19k8xjj87bsf8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g37",
+      "title": "Kyiv open to 'constructive dialogue' after Seoul recalls its ambassador amid North Korean POW disclosure row",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk2swv8e8h42f7kv3nzr7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g38",
+      "title": "Russia slashes cancer care as defence spending hits post-Soviet record",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk2snwy83drpsp6qgaap8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g39",
+      "title": "Zankore’s AI Factory: Can Central Java afford the water cost?",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk6a3bt3xpccq6j76x9hv"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g40",
+      "title": "How to meal prep safely: a microbiologist’s step-by-step guide",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk483vtzdnzgfx70e3hf1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g41",
+      "title": "An Arizona County’s “Housing Hub” Is a Dead End for Many Homeless Families",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk4q1x3dajg8ysy9q7g9r"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g42",
+      "title": "World News in Brief: ‘Horrific’ attack in Sudan, Israeli incursions in Syria intensify, most women and girls homeless in Gaza",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7gmsrfjydwrjf15pjr9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g43",
+      "title": "Global trade reaches record $35 trillion despite conflicts",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7grztygtg76jdgmnyed"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g44",
+      "title": "Amid heartache of Nepal flooding disaster, fear remains",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7h2w807dr9ta19j0qhx"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g45",
+      "title": "Kent prison to gain nearly 250 extra places",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk9cbsp1w8c0gtmg9v7ty"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g46",
+      "title": "JNU sacks professor, a Congress MP, over sexual harassment allegations by students",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4kskb4fvbjt0j703t1h88bn"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g47",
+      "title": "Press Remarks by Commissioner Lahbib at the Foreign Affairs Council on Development",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk8pwv6gmv4gm878cr4td"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g48",
+      "title": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4kskba8vkqn8vd4kd4tasw3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g49",
+      "title": "The Kyiv Independent: Russia wants sanctions lifted in exchange for halting strikes on Ukrainian energy infrastructure",
+      "reason": "Russia demands sanctions relief for an energy ceasefire, Oct 9",
+      "articleIds": [
+        "art_01m4ksk53f9g1rz9nct3qww3cr"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g50",
+      "title": "Lawmakers in Suriname call for investigation, stricter oversight amid new mining activity",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksjzmtk1ncdtaevt7wsmjn"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g51",
+      "title": "Thai Queen makes first solo flight in fighter jet",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk6xba8shs16ee7rpwe9d"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g52",
+      "title": "Gavin Newsom backs measure to kill the billionaire tax and ban future wealth taxes",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk9ffrqbcnfyd8fh3k8jh"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g53",
+      "title": "Michigan Spill Prompts Federal Probe of Energy Transfer Pipelines’ Safety",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk4ew7ag9knvfqwkeffnm"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g54",
+      "title": "Kalshi taps former FBI agent to fight against money laundering",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7b2cgsgh2a6k4wqsg3v"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g55",
+      "title": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk8tkyp4dv86g7ka1snqr"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g56",
+      "title": "Major fire reported at oil terminal linked to Russia's Novoshakhtinsk refinery after suspected drone strike",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk8th5q0yjbhc2t81se7a"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g57",
+      "title": "After losing ground with Latino voters, Democrats are turning to influencers for help",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk7a68qhfvrwmwkgn8ytq"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g58",
+      "title": "Panic in Panama as 7.7 quake hits, cathedral collapses and tsunami warnings spread",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk2r0svj3edvp31186azm"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g59",
+      "title": "October 7 scars push Israel's first-time voters to right",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk2cq4vptxeqnyw5ts31h"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g60",
+      "title": "With power bills already high, Meralco wins approval to raise own fees after 15 years",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk4wgn5x3bye352dgjwvk"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g61",
+      "title": "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief",
+      "reason": "Missile strike on Kyiv Oct 10; different strike from Zaporizhzhia",
+      "articleIds": [
+        "art_01m4ksk8t650qxx5a7sgww6qy5"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g62",
+      "title": "David Plouffe warns Dems: Don’t take North Carolina for granted",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk804pnsgbv3zsar7y2ab"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g63",
+      "title": "Republicans’ SNAP changes land in crunch time for midterms",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk801erz0m67hybm6k5n5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g64",
+      "title": "Camden council was warned about paedophile nursery worker years before arrest",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk67ymw1jcq3j3xw7m1nv"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g65",
+      "title": "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4kskb2kw073ymdeyg6qkhw4"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g66",
+      "title": "Malária: Anvisa autoriza teste em humanos de vacina 100% brasileira",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ksk61skj3457wg3zwhjnx3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g67",
+      "title": "Yemen’s Houthis release video of drone attacks on gov’t forces",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ktqjwcytjw1dgn3whvgf1q"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g68",
+      "title": "Saudi Arabia presses on with global energy summit after deadly Riyadh airport attack",
+      "reason": "Saudi decision to keep the energy summit; could join the WPC executives group",
+      "articleIds": [
+        "art_01m4p1z0eh7bc83n9kza4586g9"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g69",
+      "title": "Musk vows ‘affordable’ Starlink in India as he escalates feud with Ambani",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4n1bt75d142r6nws4hdvxcn"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g70",
+      "title": "'You're Russian now': Ukrainians raised in Crimea share how Russia trained them to become future soldiers",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1yrxkzze9xnpw9860nxec"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g71",
+      "title": "The LARPers escaping algorithims and finding real life in the past",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1yte3dv0cpnzqeaxqkcc9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g72",
+      "title": "Fear and uncertainty for civilians as Yemen’s capital comes under attack",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4n9ykz47rxncbgn63vc7yhw"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g73",
+      "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4n9ykz03m1wbv6wbav50e6c"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g74",
+      "title": "Riyadh attack: Iran cannot distance itself from outsourced Houthi violence",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4p1z0dcr55xxwqbc6f72hfv"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g75",
+      "title": "Riyadh airport attacks another dangerous moment in already tense conflict",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4ne7qbhh9yk3px7djr9dt9d"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g76",
+      "title": "There’s more to our music than Oasis, says Manchester mayor",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ne86jz87xwpw4rscswv4a8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g77",
+      "title": "Full List: Governor Yusuf to face 16 challengers as exclusion of main rival stuns Kano",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1zhgct7pxctqaz3rp05vr"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g78",
+      "title": "Kenya’s Eliud Kipchoge wins his first marathon in three years in Melbourne",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nf2k65stczgphhqg0byra6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g79",
+      "title": "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4ne8cdn5r1fp0p19hgb0vse"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g80",
+      "title": "What to expect from Apple’s ‘Welcome Home’ event",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nhmt0hgphn7n7mf2mx8qm2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g81",
+      "title": "India’s crackdown on youth protesters: What next?",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4njg1sdc92yz2nw8sft10gh"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g82",
+      "title": "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4nkbh7ym2z3wghqhtzbsz7m"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g83",
+      "title": "Flu cases higher than usual in England during September, experts say",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nkbh8j3xee59g87hmw55gr"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g84",
+      "title": "Ukraine's drone production jumps 370% in 2026, says defense ministry",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nnygtvdaw6aqkc0vjsr15f"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g85",
+      "title": "Why are Houthi missiles breaking through Saudi Arabia’s air defences?",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4npsghj3az43fpangyqjzjh"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g86",
+      "title": "Strike on Riyadh: What options for the Saudi-led coalition?",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4npsrsdf7jrjrv8670vpff9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g87",
+      "title": "Who are the members of the newly formed KP Advisory Council?",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1yw04r39v1aq4pmdt48hy"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g88",
+      "title": "German 'lawfare': When lawsuits become a political weapon",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nrghwt7dv1y2ptstmkw5nb"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g89",
+      "title": "'No lesson learnt': KP emergency evokes grim October memories",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1yw0kjt8p4s28gq6pe7zx"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g90",
+      "title": "TSE atende Flávio e manda suspender canal do whatsapp Exército do Lula",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nwsrpa358qe0rmwfre5fr5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g91",
+      "title": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4nvyagjafn5fvgcd7r89v0n"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g92",
+      "title": "Latest news bulletin | October 11th, 2026 – Evening",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4nvynzmb9kb0bb4bbkasjxc"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g93",
+      "title": "Saudi Arabia is increasingly under siege",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4p1ypghn688gmmdhbpy7ber"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g94",
+      "title": "2 months after Spain's worst border crisis, migrants at a Ceuta tent camp weigh their choices",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1ymxnnhz4xpwp59j0emfs"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g95",
+      "title": "Iran calls U.S. response \"insufficient\" amid stalled talks to end the war",
+      "reason": "Iran on US-Iran war talks; mentions the Riyadh strike only in passing",
+      "articleIds": [
+        "art_01m4p1ym7bqqvnsacqj33jqmmf"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g96",
+      "title": "Ukraine war latest: Russia pounds Kyiv's energy infrastructure as Trump’s energy ceasefire claim catches Ukraine off guard",
+      "reason": "Daily war roundup covering several developments",
+      "articleIds": [
+        "art_01m4nzcsyh6v8tvttseje7d6fy"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g97",
+      "title": "Turkiye highway crash kills 11, injures 27 after tour bus hits truck",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p07y6xq9yvseetjaz946dz"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g98",
+      "title": "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power",
+      "reason": "Army deployment in KP is a distinct action under the emergency",
+      "articleIds": [
+        "art_01m4p1yvzara0fg01mmvznn2zv"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g99",
+      "title": "Is the Yemen war entering a new phase?",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4p1z45gagw8778d9egtz7sb"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g100",
+      "title": "The new Apple TV could have a built-in mic and a remote with a speaker",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p135982z4zd4709qqek1h1"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g101",
+      "title": "Manchester City block out the noise to defeat Liverpool at Anfield",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1z0bzk822tnt9xx7wd73a"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g102",
+      "title": "Entdecken Sie das ZDF-Nachrichtenstudio",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1ytmt91er18ryybpakyyc"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g103",
+      "title": "When free speech has a price: Youth voices in Mozambique",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p2tp8xby2qtepcphwvwrqx"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g104",
+      "title": "How ‘people power’ and business transformed medicine, but created a whole new set of risks",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p4hpsqw8xgj2v2qwvm4y07"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g105",
+      "title": "'To keep oil prices from rising' — Russian lawmaker questions Trump’s energy ceasefire claim",
+      "reason": "Russian lawmaker doubts the ceasefire claim; Russia is a party, so not a reaction wave",
+      "articleIds": [
+        "art_01m4p4j5faeetbdm2awa61ffm5"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g106",
+      "title": "Republican senator says Trump diesel agreement with Russia may be illegal",
+      "reason": "US senator says diesel deal may be illegal",
+      "articleIds": [
+        "art_01m4p8v7c0syy2e81ywb3mdx7c"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g107",
+      "title": "US threatens to halt weapons procurement for Ukraine over strikes on Russian energy sites, FT reports",
+      "reason": "FT report on US pressure before the ceasefire",
+      "articleIds": [
+        "art_01m4pbe0q55j9tmrkbc3qyr12x"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g108",
+      "title": "Watch: What's behind Trump's energy ceasefire claim?",
+      "reason": "Video explainer of the ceasefire claim; could join the announcement",
+      "articleIds": [
+        "art_01m4pgj2gq9g4fcd4mj4723wzj"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g109",
+      "title": "From buses to boats and helicopters? Jakarta dreams of taking public transport sky-high",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pd3y2djxbmdpm5kzf01vz9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g110",
+      "title": "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says",
+      "reason": "Saudi-Iran foreign minister call; close to the Iran diplomacy group",
+      "articleIds": [
+        "art_01m4pfpftnrkbm4f4qcqtkvw9c"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g111",
+      "title": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+      "reason": "Commentary on the deal by ex-NATO commander",
+      "articleIds": [
+        "art_01m4pgjjb6vg2da6j2djbkga4y"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g112",
+      "title": "Here’s the biggest news you missed this weekend",
+      "reason": "Weekend news roundup, not one development",
+      "articleIds": [
+        "art_01m4pgj0qf7vgvavyd1jtp4ph6"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g113",
+      "title": "Neighbours describe explosions as Melbourne tobacco shop burns down",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pj8pp50mf13d3gzexvz9x7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g114",
+      "title": "Military police’s role to be expanded to combat: MND",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1ywpg1n8b75hjqb1wzt2t"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g115",
+      "title": "Manila opens largest OFW service center in Taipei",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1ywqmnrhdw61b0k7tepeq"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g116",
+      "title": "Line platform gives farmers helping hand: institute",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4p1ywqtxgpkg76ygj6ty20t"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g117",
+      "title": "Pope Leo announces medical update",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pqdgy6qtxhjgt8hq8cvw3q"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g118",
+      "title": "As rising waters flood homes and temples, villagers protest India's $87 billion river-linking project",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4ptv9kqcs89x73pcbzpwdhr"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g119",
+      "title": "Le Sserafim tops Oricon chart again with 2nd single",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pvq5rbbscwdeq4bentkj58"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g120",
+      "title": "Man pushes cousin 42km in Melbourne Marathon, carries him over line",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pz4w6w5fj5fxjww51v7ssn"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g121",
+      "title": "Almost 80,000 older Australians expected to ditch private health over changes",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4pxe0drng5r4e43brwwvy6p"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g122",
+      "title": "Zelenskyy risks rupture with Trump as midterms pressure mounts",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4q00mta6qcbbmdb64mp0x23"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g123",
+      "title": "Babymonster’s ‘Choom’ music video hits 200m views",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q00dkzm1j557k7akb2ftzj"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g124",
+      "title": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+      "reason": "Criticism/analysis of the diesel deal",
+      "articleIds": [
+        "art_01m4q2k0m3g8a2p0qdv6trpavr"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g125",
+      "title": "Elections 2026: even the province couldn’t fix this municipality",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q0wwy8ej7rxhyghapqzz3q"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g126",
+      "title": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4q3eafzwq3hben897zdh839"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g127",
+      "title": "North Korea fires multiple ballistic missiles towards the sea",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q4a69f2428x09y0yf4ryn0"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g128",
+      "title": "AirAsia in talks with Malaysian government over potential funding support, sources say",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q49vn35m08qteeapef5tz9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g129",
+      "title": "Der Täter war ihr Lehrer",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q55adn0t81rm6kfd6d76yj"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g130",
+      "title": "Unification minister denies cracks in South Korea-US alliance, urges caution in media coverage",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q55hfyhk28ektnfzhj2b06"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g131",
+      "title": "After record mid-October heat, S. Korea braces for sharp chill",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q6wd8mz2s8mbze54qjtcv7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g132",
+      "title": "[EDITORIAL] Ang tunay na collateral damage sa umano’y undisclosed wealth ni Sara Duterte",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q6wra0ds5rh1m9jpjkn6s9"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g133",
+      "title": "Butters suggests changes to AFL player movement 'wouldn't be a bad thing'",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q8jz7nh2kj3th0p1xd6zgs"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g134",
+      "title": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4q9ezh307b2nn1r1vkj8gas"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g135",
+      "title": "Timeline: Houthis escalate attacks on Saudi airports",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4q9eh5x3hehq3tvytx5g5xm"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g136",
+      "title": "Clashes reported in Yemen as Houthis advance towards Taiz",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qaae6t4hxe7wmn29wqrvs2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g137",
+      "title": "Mystery of 1950s wedding photo album found dumped in Wakefield solved",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qc1db6xr3k5ec0fnnnyew8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g138",
+      "title": "Europe Today: Trump claims Ukraine-Russia energy ceasefire as Baltics stay on alert",
+      "reason": "Newsletter/roundup mixing several topics",
+      "articleIds": [
+        "art_01m4qc1e68vw4rkwn5vrq3c6yv"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g139",
+      "title": "Riyadh airport attacked again and Trump announces Ukraine-Russia 'energy ceasefire'",
+      "reason": "Newsletter roundup of Riyadh attack and energy ceasefire",
+      "articleIds": [
+        "art_01m4qcwmc27efxe5c2w3rggsmm"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g140",
+      "title": "Pupil detained after staff shot at school near Marseille",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qrx0jcwrshkyzy9h6h3135"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g141",
+      "title": "Watch: How did Roman Abramovich's advisors help hide his wealth?",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qdrktkdhnqzz6szpr52pye"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g142",
+      "title": "Oil falls on hopes Russia-Ukraine energy ceasefire will boost supplies",
+      "reason": "Market reaction to the ceasefire",
+      "articleIds": [
+        "art_01m4qekd4ap2a7kyvnt4ptn98m"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g143",
+      "title": "Roman fort found in Wales could prove myth of emperor’s camp is real",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qffap16mnybs1fm6cyk82q"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g144",
+      "title": "Pakistan looking to raise more than $1bn under govt push for privatisation, says finance minister",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qff67vm54n5gqqdxhb29c4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g145",
+      "title": "Zelensky says Ukrainian military ‘received all relevant orders’ over energy truce announced by Trump",
+      "reason": "Ukraine issues orders to comply with the truce; an action, kept separate",
+      "articleIds": [
+        "art_01m4qh6afphxg9xj759h1nqgr5"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g146",
+      "title": "Commission welcomes adoption of €115 million ‘AGILE' programme for rapid defence innovation",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qksb1rndp8qkx9fv8hnzra"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g147",
+      "title": "‘Trump is really mad’: White House source says president expects Ukraine to stop striking Russian oil refineries",
+      "reason": "Axios: Trump expects Ukraine to stop refinery strikes",
+      "articleIds": [
+        "art_01m4qjx9cma4jerhc383dntgdk"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g148",
+      "title": "DPM Dar defends emergency and governor's rule in KP, says measures not politically motivated",
+      "reason": "Dar defends the KP emergency; the imposition itself is not in the set",
+      "articleIds": [
+        "art_01m4qjwvqan1mb10f0fcyfhh10"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g149",
+      "title": "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash",
+      "reason": "Analysis/explainer; kept separate from the event per guide",
+      "articleIds": [
+        "art_01m4qmm7v21nfkn69ycnqwr3pp"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g150",
+      "title": "Saudi Arabia says oil supply to continue to flow despite Riyadh attacks",
+      "reason": "Saudi oil supply assurance; may be the same speech as the energy minister item",
+      "articleIds": [
+        "art_01m4qnf684j7fdtct6yby8z7jd"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g151",
+      "title": "UNRWA warns Gaza is becoming an increasingly unlivable place",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qpav9s852j0znm1mq0hpaj"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g152",
+      "title": "How Do Cuttlefish Hide? Scientists Search for the Secret to Camouflage.",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qpbn93920c5brf13hjdrpr"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g153",
+      "title": "Births rebound in South Korea, but parents still wait for daycare spots",
+      "reason": "No other article in the set covers this development",
+      "articleIds": [
+        "art_01m4qq6gmqvfd56f1hjn4zz91k"
+      ],
+      "confidence": "high"
+    },
+    {
+      "id": "g154",
+      "title": "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil",
+      "reason": "Oct 12 Zelensky terms (truce must cover the grid); close to the refinery-offer group",
+      "articleIds": [
+        "art_01m4qr2j7vgvbcdqfffjsf8hf2"
+      ],
+      "confidence": "low"
+    },
+    {
+      "id": "g155",
+      "title": "Saudi energy minister says attacks testing infrastructure, vows response",
+      "reason": "Saudi energy minister vows response; may be the same speech as the oil-supply item",
+      "articleIds": [
+        "art_01m4qr1k9dvyxtpv6etdjjdvjd"
+      ],
+      "confidence": "low"
+    }
+  ]
+}

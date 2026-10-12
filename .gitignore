@@ -17,3 +17,6 @@ playroom/dist
 
 # Design handoff archives from Claude Design (large binaries, kept locally)
 docs/*-handoff.zip
+
+# Generated review pages for match labels (pnpm cli match:review)
+fixtures/match-eval/*.review.html

@@ -822,3 +822,35 @@ describe('API client on native', () => {
     expect(calls[0]?.init.credentials).toBe('omit')
   })
 })
+
+describe('match label review page', () => {
+  it('embeds hostile headlines as inert data', async () => {
+    const { reviewHtml } = await import('@dn/jobs')
+    const title = '</script><img src=x onerror=alert(1)>'
+    const html = reviewHtml(
+      {
+        name: 'set-x',
+        createdAt: '2026-10-12T00:00:00Z',
+        sample: { days: 1, seeds: [], neighbourMin: 0.8, randomCount: 0 },
+        articles: [
+          {
+            id: 'art_1',
+            publisher: 'P',
+            publisherKind: 'newsroom',
+            title,
+            description: null,
+            publishedAt: '2026-10-12T00:00:00Z',
+          },
+        ],
+      },
+      {
+        set: 'set-x',
+        guide: 'docs/story-granularity.md',
+        groups: [{ id: 'g1', title, articleIds: ['art_1'] }],
+      },
+    )
+    // Only the page's own two closing script tags; the headline's is escaped inside the JSON.
+    expect(html.match(/<\/script>/g)).toHaveLength(2)
+    expect(html).not.toContain('<img src=x')
+  })
+})

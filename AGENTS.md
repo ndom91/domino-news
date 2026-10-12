@@ -40,6 +40,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
 | `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership), Wikipedia's perennial sources (reliability) and `fixtures/lean-evidence.json` (lean) |
 | `pnpm cli assessments:publish --username u [--dry-run]` | Publish the reviewed assessments in `fixtures/assessments.json` as admin `u`. Skips publishers whose latest assessment already matches. Run `assessments:import` first |
+| `pnpm cli match:sample --name n --seed <regex>` / `match:review --name n` | Draw a match evaluation set of real articles into `fixtures/match-eval/`; write a local review page for its story labels (rules: `docs/story-granularity.md`) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
 | `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one GPU call each, plus context, claims and relate for the new version; edited summaries are kept) |
