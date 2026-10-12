@@ -1,6 +1,7 @@
 import { type Db, schema } from '@dn/db'
 import type { ArticleInput, StoryInput } from '@dn/inference'
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { type MatchPolicy, storyArticlesShown } from './match-core.ts'
 import { fetchTransientArticle } from './transient-body.ts'
 
 export interface LoadedArticle extends ArticleInput {
@@ -62,7 +63,9 @@ export async function loadArticles(db: Db, articleIds: string[]): Promise<Loaded
 export async function loadStoryInput(
   db: Db,
   storyId: string,
-  maxArticles = 12,
+  // matching: which articles a big story shows (see storyArticlesShown). max: only the
+  // newest few, e.g. for narrative titles.
+  opts: { matching?: MatchPolicy['storyArticles']; max?: number } = {},
 ): Promise<StoryInput | null> {
   const [story] = await db
     .select({
@@ -82,16 +85,28 @@ export async function loadStoryInput(
     .select({ articleId: schema.storyArticle.articleId })
     .from(schema.storyArticle)
     .where(and(eq(schema.storyArticle.storyId, storyId), isNull(schema.storyArticle.removedAt)))
-  const articles = (
+  const oldestFirst = (
     await loadArticles(
       db,
       links.map((l) => l.articleId),
     )
-  )
-    // Keep the newest reports so new sources can be summarised and cited; present them oldest-first.
-    .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''))
-    .slice(0, maxArticles)
-    .reverse()
+  ).sort((a, b) => (a.publishedAt ?? '').localeCompare(b.publishedAt ?? ''))
+  // Summaries keep the newest reports so new sources can be summarised and cited.
+  const articles = opts.max
+    ? oldestFirst.slice(-opts.max)
+    : storyArticlesShown(oldestFirst, opts.matching ?? 'newest')
+  // For matching, a story is what its first report says, not its latest title or summary:
+  // those widen as the story grows and pull in neighbouring developments (match evaluation).
+  if (opts.matching) {
+    const [first] = oldestFirst
+    return {
+      storyId: story.id,
+      title: first?.title ?? story.title,
+      summary: null,
+      firstObservedAt: story.firstObservedAt.toISOString(),
+      articles,
+    }
+  }
   return {
     storyId: story.id,
     title: story.title,

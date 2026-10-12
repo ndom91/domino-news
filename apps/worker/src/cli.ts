@@ -46,7 +46,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   match:sample --name n --seed <title regex> [--seed …] [--days 6] [--random 100] [--neighbour-min 0.8]
                                     Draw a match evaluation set into fixtures/match-eval/<name>.json
   match:review --name n             Write a review page for its labels (reviewed labels, else the draft)
-  match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k]
+  match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k] [--story-articles newest|anchored] [--ranking best|top2] [--judging sequential|choose] [--fresh]
                                     Replay matching over a labelled set and score it (B-cubed)
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
@@ -74,6 +74,10 @@ const { positionals, values } = parseArgs({
     'auto-same': { type: 'string' },
     'llm-min': { type: 'string' },
     candidates: { type: 'string' },
+    'story-articles': { type: 'string' },
+    ranking: { type: 'string' },
+    judging: { type: 'string' },
+    fresh: { type: 'boolean', default: false },
     all: { type: 'boolean', default: false },
   },
 })
@@ -163,6 +167,9 @@ try {
         autoSame: values['auto-same'] ? Number(values['auto-same']) : base.autoSame,
         llmMin: values['llm-min'] ? Number(values['llm-min']) : base.llmMin,
         maxCandidates: values.candidates ? Number(values.candidates) : base.maxCandidates,
+        storyArticles: (values['story-articles'] ?? base.storyArticles) as 'newest' | 'anchored',
+        ranking: (values.ranking ?? base.ranking) as 'best' | 'top2',
+        judging: (values.judging ?? base.judging) as 'sequential' | 'choose',
       }
       const r = await runMatchEval(ctx, {
         name: values.name,
@@ -170,6 +177,7 @@ try {
         policy,
         neighbours: NEIGHBOURS,
         windowSeconds: CANDIDATE_WINDOW_SECONDS,
+        fresh: values.fresh,
         log: (msg) => console.log(`[eval] ${msg}`),
       })
       const pct = (n: number) => `${(n * 100).toFixed(1)}%`
@@ -178,6 +186,9 @@ try {
           `  F1 ${pct(r.score.f1)}  precision ${pct(r.score.precision)} (over-merging)  recall ${pct(r.score.recall)} (fragmentation)\n` +
           `  stories ${r.score.predictedStories} vs ${r.score.labelledStories} labelled · singletons ${r.score.predictedSingletons} vs ${r.score.labelledSingletons}\n` +
           `  model calls ${r.modelCalls} new, ${r.cachedCalls} cached, ${r.failedCalls} invalid\n` +
+          `  errors: ${Object.entries(r.errors)
+            .map(([k, v]) => `${k} ${v}`)
+            .join(' · ')}\n` +
           `  most fragmented:\n${r.fragmented
             .slice(0, 8)
             .map((f) => `    ${f.pieces} pieces · ${f.size} articles · ${f.title}`)

@@ -9,6 +9,7 @@ import {
 } from '@dn/schemas'
 import { z } from 'zod/mini'
 import {
+  chooseStoryPrompt,
   classifyRelationshipPrompt,
   explainContextPrompt,
   extractClaimsPrompt,
@@ -122,6 +123,7 @@ const chatResponse = z.object({
 // What the model answers: sources by their number in the prompt ("n", "p"), never by ID.
 // `fromNumbers` below maps them back, so callers only ever see real IDs.
 const sourceNumbers = z.array(z.int()).check(z.minLength(1))
+const choiceByNumber = z.object({ choice: z.int(), rationale: z.string() })
 const matchByNumber = z.object({
   decision: storyMatchSchema.shape.decision,
   evidenceArticles: z.array(z.int()),
@@ -241,6 +243,17 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
           ),
         },
       }
+    },
+    chooseStory: async (input) => {
+      const g = await generate(
+        'story_choice',
+        choiceByNumber,
+        chooseStoryPrompt(input),
+        PROMPT_VERSIONS.chooseStory,
+      )
+      const { choice, rationale } = g.output
+      const storyId = choice === 0 ? null : numbered('story_choice', input.stories, choice).storyId
+      return { ...g, output: { storyId, rationale } }
     },
     summarizeStory: async (input) => {
       const g = await generate(

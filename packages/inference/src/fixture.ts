@@ -117,6 +117,23 @@ export function createFixtureGeneration(): GenerationProvider {
         promptVersion: PROMPT_VERSIONS.matchStory,
       }
     },
+    // The story with the most token overlap, if it clears the "same development" bar.
+    async chooseStory({ article, stories }) {
+      const tokens = articleTokens(article)
+      const scored = stories
+        .map((story) => ({ story, score: jaccard(tokens, storyTokens(story)) }))
+        .sort((a, b) => b.score - a.score)
+      const best = scored[0]
+      const chosen = best && best.score >= 0.22 ? best.story.storyId : null
+      return {
+        output: {
+          storyId: chosen,
+          rationale: `fixture: best token overlap ${best?.score.toFixed(2) ?? 'none'}`,
+        },
+        modelId,
+        promptVersion: PROMPT_VERSIONS.chooseStory,
+      }
+    },
     async summarizeStory({ story }) {
       const [lead] = story.articles
       if (!lead) throw new Error('summarizeStory requires at least one article')

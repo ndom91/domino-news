@@ -883,12 +883,25 @@ describe('match evaluation', () => {
       { id: 'd', publishedAt: at(4), embedding: [0, 1] }, // far from all: new story
     ]
     const asked: string[] = []
-    const policy = { autoSame: 0.95, llmMin: 0.7, maxCandidates: 3 }
+    const policy = {
+      autoSame: 0.95,
+      llmMin: 0.7,
+      maxCandidates: 3,
+      storyArticles: 'newest' as const,
+      ranking: 'best' as const,
+      judging: 'sequential' as const,
+    }
     const run = () =>
-      replayMatching(articles, policy, { neighbours: 12, windowSeconds: 86_400 }, async (id) => {
-        asked.push(id)
-        return id === 'c'
-      })
+      replayMatching(
+        articles,
+        policy,
+        { neighbours: 12, windowSeconds: 86_400 },
+        async (id) => {
+          asked.push(id)
+          return id === 'c'
+        },
+        async () => null,
+      )
     const result = await run()
     expect(result.get('b')).toBe(result.get('a'))
     expect(result.get('c')).toBe(result.get('a'))
@@ -896,5 +909,39 @@ describe('match evaluation', () => {
     expect(asked).toEqual(['c'])
     // Deterministic: the same inputs give the same stories.
     expect([...(await run())]).toEqual([...result])
+  })
+
+  it('choose judging asks once with all candidates and takes its pick, or none', async () => {
+    const { decideMatch } = await import('@dn/jobs')
+    const policy = {
+      autoSame: 0.95,
+      llmMin: 0.7,
+      maxCandidates: 2,
+      storyArticles: 'anchored' as const,
+      ranking: 'best' as const,
+      judging: 'choose' as const,
+    }
+    const ranked: [string, number][] = [
+      ['s1', 0.9],
+      ['s2', 0.85],
+      ['s3', 0.8],
+    ]
+    const seen: string[][] = []
+    const pick = (id: string | null) => async (ids: string[]) => {
+      seen.push(ids)
+      return { storyId: id }
+    }
+    const never = async () => {
+      throw new Error('sequential judge must not run')
+    }
+    // Picks the second-ranked story, which "first yes wins" would never have reached.
+    expect(await decideMatch(ranked, policy, never, pick('s2'))).toMatchObject({
+      storyId: 's2',
+      method: 'llm',
+    })
+    expect(seen[0]).toEqual(['s1', 's2'])
+    expect(await decideMatch(ranked, policy, never, pick(null))).toBeNull()
+    // A pick outside the candidates shown is ignored.
+    expect(await decideMatch(ranked, policy, never, pick('s3'))).toBeNull()
   })
 })

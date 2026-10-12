@@ -17,6 +17,13 @@ export const storyMatchSchema = z.object({
 })
 export type StoryMatch = z.infer<typeof storyMatchSchema>
 
+// Which of several candidate stories an article belongs to; null = none, start a new story.
+export const storyChoiceSchema = z.object({
+  storyId: z.nullable(z.string()),
+  rationale: z.string(),
+})
+export type StoryChoice = z.infer<typeof storyChoiceSchema>
+
 export const storySummarySchema = z.object({
   headline: z.string().check(z.minLength(1), z.maxLength(200)),
   summary: z.string().check(z.minLength(1), z.maxLength(2000)),

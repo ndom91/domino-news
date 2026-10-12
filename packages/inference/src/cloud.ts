@@ -11,6 +11,7 @@ export function createCloudGeneration(): GenerationProvider {
   return {
     modelId: 'cloud-disabled',
     matchStory: disabled,
+    chooseStory: disabled,
     summarizeStory: disabled,
     classifyRelationship: disabled,
     titleNarrative: disabled,

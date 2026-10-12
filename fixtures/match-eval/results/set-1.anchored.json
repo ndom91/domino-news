@@ -1,0 +1,216 @@
+{
+  "set": "set-1",
+  "label": "anchored",
+  "ranAt": "2026-10-12T18:11:27.227Z",
+  "policy": {
+    "autoSame": 0.93,
+    "llmMin": 0.72,
+    "maxCandidates": 3,
+    "storyArticles": "anchored",
+    "ranking": "best"
+  },
+  "promptVersion": "match-story@5",
+  "modelId": "gemma-4-26B-A4B",
+  "score": {
+    "precision": 0.8306350275489959,
+    "recall": 0.7201164958676406,
+    "f1": 0.7714375595977403,
+    "predictedStories": 164,
+    "labelledStories": 145,
+    "predictedSingletons": 131,
+    "labelledSingletons": 116
+  },
+  "modelCalls": 147,
+  "cachedCalls": 262,
+  "failedCalls": 0,
+  "fragmented": [
+    {
+      "title": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+      "size": 32,
+      "pieces": 9
+    },
+    {
+      "title": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+      "size": 25,
+      "pieces": 6
+    },
+    {
+      "title": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+      "size": 17,
+      "pieces": 6
+    },
+    {
+      "title": "Hurricane Simon hits Mexico's Pacific coast",
+      "size": 13,
+      "pieces": 5
+    },
+    {
+      "title": "Countries condemn the Houthi attacks on Riyadh airport",
+      "size": 6,
+      "pieces": 5
+    },
+    {
+      "title": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+      "size": 39,
+      "pieces": 4
+    },
+    {
+      "title": "Riyadh airport closure and flight cancellations",
+      "size": 11,
+      "pieces": 4
+    },
+    {
+      "title": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+      "size": 7,
+      "pieces": 3
+    },
+    {
+      "title": "Zelensky and UK criticise the US-Russia diesel deal",
+      "size": 4,
+      "pieces": 3
+    },
+    {
+      "title": "EU says it will welcome energy truce \"when it holds\"",
+      "size": 3,
+      "pieces": 3
+    },
+    {
+      "title": "Top oil executives dropped from Riyadh WPC Energy Congress",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Flash flood on Budhi Gandaki river hits Nepal villages",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Countries warn against travel to Saudi Arabia",
+      "size": 2,
+      "pieces": 2
+    },
+    {
+      "title": "Iran urges Saudi diplomacy after Houthi escalation",
+      "size": 2,
+      "pieces": 2
+    },
+    {
+      "title": "Yemeni government forces advance against Houthis",
+      "size": 2,
+      "pieces": 2
+    }
+  ],
+  "overMerged": [
+    {
+      "size": 37,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Riyadh airport closure and flight cancellations",
+        "Yemeni government forces advance against Houthis",
+        "Riyadh airport attacks another dangerous moment in already tense conflict",
+        "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions",
+        "Is the Yemen war entering a new phase?",
+        "Here’s the biggest news you missed this weekend"
+      ]
+    },
+    {
+      "size": 21,
+      "labelled": [
+        "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+        "Trump says Ukraine should get a new president",
+        "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+        "Trump announces Russia-Ukraine \"energy ceasefire\"",
+        "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash"
+      ]
+    },
+    {
+      "size": 6,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Countries condemn the Houthi attacks on Riyadh airport",
+        "US considers joining Saudi strikes on the Houthis",
+        "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy"
+      ]
+    },
+    {
+      "size": 5,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Houthis warn travellers to stay away from Saudi airports"
+      ]
+    },
+    {
+      "size": 3,
+      "labelled": [
+        "Who are the members of the newly formed KP Advisory Council?",
+        "'No lesson learnt': KP emergency evokes grim October memories",
+        "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power"
+      ]
+    },
+    {
+      "size": 29,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)"
+      ]
+    },
+    {
+      "size": 23,
+      "labelled": [
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Trump announces Russia-Ukraine \"energy ceasefire\""
+      ]
+    },
+    {
+      "size": 12,
+      "labelled": [
+        "Russia hits Ukrainian power plants despite announced energy ceasefire",
+        "Wie Trumps Ölkrise zur Ukraine-Frage wird"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Trump and Putin agree deal to release Russian diesel",
+        "Zelensky and UK criticise the US-Russia diesel deal"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Trump announces Russia-Ukraine \"energy ceasefire\"",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Iran urges Saudi diplomacy after Houthi escalation",
+        "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+        "Saudi Arabia is increasingly under siege"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+        "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Pope Leo announces medical update",
+        "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?"
+      ]
+    }
+  ]
+}

@@ -226,9 +226,9 @@ async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: st
   const toAdd = members.filter((id) => !alreadyIn.has(id))
   if (target && toAdd.length === 0) return
 
-  const stories = (await Promise.all(members.map((id) => loadStoryInput(ctx.db, id, 3)))).filter(
-    (s): s is StoryInput => s !== null,
-  )
+  const stories = (
+    await Promise.all(members.map((id) => loadStoryInput(ctx.db, id, { max: 3 })))
+  ).filter((s): s is StoryInput => s !== null)
   const { runId, result } = await withAnalysisRun(
     ctx.db,
     {

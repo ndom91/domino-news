@@ -2,6 +2,7 @@ import type {
   ClaimsOutput,
   NarrativeTitle,
   RelationshipCandidate,
+  StoryChoice,
   StoryContextOutput,
   StoryMatch,
   StorySummaryOutput,
@@ -52,6 +53,11 @@ export interface EmbeddingProvider {
 export interface GenerationProvider {
   readonly modelId: string
   matchStory(input: { article: ArticleInput; story: StoryInput }): Promise<Generated<StoryMatch>>
+  /** One call with several candidates side by side: which one, if any, is the same development. */
+  chooseStory(input: {
+    article: ArticleInput
+    stories: StoryInput[]
+  }): Promise<Generated<StoryChoice>>
   summarizeStory(input: { story: StoryInput }): Promise<Generated<StorySummaryOutput>>
   classifyRelationship(input: {
     newer: StoryInput

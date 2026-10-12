@@ -1,11 +1,13 @@
 {
   "set": "set-1",
   "label": "baseline",
-  "ranAt": "2026-10-12T17:55:31.752Z",
+  "ranAt": "2026-10-12T18:55:16.226Z",
   "policy": {
     "autoSame": 0.93,
     "llmMin": 0.72,
-    "maxCandidates": 3
+    "maxCandidates": 3,
+    "storyArticles": "newest",
+    "ranking": "best"
   },
   "promptVersion": "match-story@5",
   "modelId": "gemma-4-26B-A4B",
@@ -18,9 +20,18 @@
     "predictedSingletons": 128,
     "labelledSingletons": 116
   },
-  "modelCalls": 390,
-  "cachedCalls": 0,
+  "modelCalls": 111,
+  "cachedCalls": 279,
   "failedCalls": 0,
+  "errors": {
+    "notRetrieved": 13,
+    "rankedTooLow": 3,
+    "modelSaidNo": 18,
+    "joinedWrongStory": 35,
+    "wrongJoinByModel": 17,
+    "wrongJoinByEmbedding": 0,
+    "correct": 248
+  },
   "fragmented": [
     {
       "title": "Trump announces Russia-Ukraine \"energy ceasefire\"",
