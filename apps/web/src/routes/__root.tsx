@@ -1,4 +1,6 @@
 /// <reference types="vite/client" />
+
+import { archivoLatinUrl } from '@dn/design-tokens/fonts'
 import { TooltipProvider } from '@dn/ui'
 import type { QueryClient } from '@tanstack/react-query'
 import {
@@ -37,6 +39,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: 'robots', content: 'noindex' },
     ],
     links: [
+      // Start the font download with the CSS, not after it's parsed, so text rarely paints
+      // in the fallback first. The Latin subset covers nearly all text. crossOrigin is
+      // required for font preloads, even same-origin.
+      {
+        rel: 'preload',
+        href: archivoLatinUrl,
+        as: 'font',
+        type: 'font/woff2',
+        crossOrigin: 'anonymous',
+      },
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
       { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },

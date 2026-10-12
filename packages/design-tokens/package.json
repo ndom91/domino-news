@@ -5,7 +5,11 @@
   "type": "module",
   "exports": {
     "./design-tokens.css": "./design-tokens.css",
-    "./theme.css": "./theme.css"
+    "./theme.css": "./theme.css",
+    "./fonts": {
+      "types": "./fonts.d.ts",
+      "default": "./fonts.js"
+    }
   },
   "dependencies": {
     "@fontsource-variable/archivo": "5.3.0"

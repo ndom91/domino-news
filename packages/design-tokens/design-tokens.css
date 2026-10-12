@@ -9,6 +9,29 @@
  */
 @import "@fontsource-variable/archivo/standard.css"; /* wght 100–900 + wdth 62–125% */
 
+/*
+ * Metric-matched fallbacks. Until Archivo arrives, text takes about the same space, so the
+ * swap doesn't reflow the page. Widths and vertical metrics measured against Archivo in Chrome.
+ * Body: Arial is within ~1% of Archivo at 100% width.
+ */
+@font-face {
+  font-family: "Archivo Fallback";
+  src: local("Arial"), local("Helvetica Neue"), local("Liberation Sans");
+  size-adjust: 98.8%;
+  ascent-override: 89.1%;
+  descent-override: 21.3%;
+  line-gap-override: 0%;
+}
+/* Condensed roles (62–75% width): Arial Narrow, sized between the 62% and 72% widths. */
+@font-face {
+  font-family: "Archivo Narrow Fallback";
+  src: local("Arial Narrow"), local("Liberation Sans Narrow");
+  size-adjust: 97%;
+  ascent-override: 90.7%;
+  descent-override: 21.6%;
+  line-gap-override: 0%;
+}
+
 :root,
 [data-theme="light"] {
   color-scheme: light;
@@ -95,8 +118,11 @@
   --dn-trace-cell: var(--dn-border); /* hour-cell outlines */
 
   /* ── Typography ───────────────────────────────────────── */
-  --dn-font-sans:
-    "Archivo Variable", "Archivo", "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
+  --dn-font-sans: "Archivo Variable", "Archivo Fallback", sans-serif;
+  /* Same face; only the fallback differs, for roles set at 62–75% width. Without Arial
+     Narrow (Linux, Android) it falls through to the body fallback. */
+  --dn-font-condensed:
+    "Archivo Variable", "Archivo Narrow Fallback", "Archivo Fallback", sans-serif;
 
   /* Width axis (font-stretch). Narrower = louder. */
   --dn-width-masthead: 62%;
