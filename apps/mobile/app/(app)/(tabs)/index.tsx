@@ -56,9 +56,7 @@ export default function LatestScreen() {
         }
       >
         <View style={styles.edition}>
-          <Text style={styles.brand}>
-            DOMINO<Text style={styles.dot}>.</Text>
-          </Text>
+          <Text style={styles.editionLabel}>The latest reporting</Text>
           <Text style={styles.editionText}>
             {plural(front.data.stats.stories, 'story')} in the last 24 hours
           </Text>
@@ -127,8 +125,7 @@ const styles = StyleSheet.create({
     gap: t.space[2],
     paddingBottom: t.space[4],
   },
-  brand: { color: t.color.text, fontFamily: t.font.black, fontSize: 36, letterSpacing: -1.5 },
-  dot: { color: t.color.accent },
+  editionLabel: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
   editionText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
   lead: { gap: t.space[3], marginTop: t.space[6] },
   leadStory: {

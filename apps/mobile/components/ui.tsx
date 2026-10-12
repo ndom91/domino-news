@@ -3,9 +3,9 @@ import type { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-export function Screen({ children }: { children: ReactNode }) {
+export function Screen({ children, top = false }: { children: ReactNode; top?: boolean }) {
   return (
-    <SafeAreaView edges={['top', 'left', 'right']} style={styles.screen}>
+    <SafeAreaView edges={top ? ['top', 'left', 'right'] : ['left', 'right']} style={styles.screen}>
       {children}
     </SafeAreaView>
   )

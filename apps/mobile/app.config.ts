@@ -24,8 +24,14 @@ const config: ExpoConfig = {
         },
       }
     : undefined,
+  android: { package: 'dev.ndo.dominonews' },
   experiments: { typedRoutes: true },
-  plugins: ['expo-router', 'expo-secure-store'],
+  plugins: [
+    'expo-router',
+    'expo-secure-store',
+    'expo-background-task',
+    ['expo-notifications', { color: '#ff4d1a', defaultChannel: 'for-you' }],
+  ],
 }
 
 export default developmentBuild ? withDevelopmentCleartext(config) : config
