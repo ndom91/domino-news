@@ -75,6 +75,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: 'stylesheet', href: appCss },
       { rel: 'icon', href: '/favicon.svg', type: 'image/svg+xml' },
       { rel: 'apple-touch-icon', href: '/apple-touch-icon.png' },
+      // Name, icons and colours for Add to Home Screen (icons: scripts/app-icons.mjs). .json,
+      // not .webmanifest: the production static server only knows the former's content type.
+      { rel: 'manifest', href: '/manifest.json' },
     ],
   }),
   shellComponent: RootDocument,
