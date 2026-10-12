@@ -1,14 +1,12 @@
 import { clockTime, formatDate, formatDateTime, shortRelative, zoneName } from '@dn/domain'
-import { useEffect, useState } from 'react'
 import { Tooltip } from '../primitives/overlay.tsx'
-
-const localZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone
+import { localZone, useMinuteClock, useReaderZone } from '../primitives/use-clock.ts'
 
 /**
  * `<time>` for one moment, shown in UTC (or the reader's zone with `local`), with the full
  * date and time in the other zone in a tooltip. The server can't know the reader's zone, so
- * `local` text renders as UTC first and switches after mount. Relative text refreshes each
- * minute on the client.
+ * `local` text renders as UTC first and switches after hydration. Relative text refreshes each
+ * minute on the client, from one clock shared by every Timestamp.
  */
 export function Timestamp({
   at,
@@ -26,21 +24,14 @@ export function Timestamp({
   firstAt?: string
   className?: string
 }) {
-  const [now, setNow] = useState<Date | null>(null)
-  const [readerZone, setReaderZone] = useState<string | null>(null)
-  useEffect(() => {
-    setReaderZone(localZone())
-    if (format !== 'relative') return
-    setNow(new Date())
-    const timer = setInterval(() => setNow(new Date()), 60_000)
-    return () => clearInterval(timer)
-  }, [format])
+  const now = useMinuteClock(format === 'relative')
+  const readerZone = useReaderZone()
 
   const zone = local && readerZone ? readerZone : 'UTC'
   const clock = () => `${clockTime(at, zone)} ${zoneName(at, zone)}`
   const text =
     format === 'relative'
-      ? shortRelative(at, now ?? undefined)
+      ? shortRelative(at, now === null ? undefined : new Date(now))
       : format === 'clock'
         ? clock()
         : `${formatDate(at, zone)} · ${clock()}`

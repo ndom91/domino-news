@@ -17,6 +17,10 @@ const citationLabel = (n: number | null) =>
 
 const HOUR = 3_600_000
 const CELLS = 24
+const R = 3.8
+// Row height comes from the largest mark, not the cell width, so the trace keeps its height
+// when a 'fill' trace is measured after hydration (no layout shift).
+const RH = R * 2 + 3
 
 /**
  * 24 hour cells ending at `now` (or the latest report if older), one mark per outlet: filled if
@@ -62,8 +66,7 @@ export function SourceTrace({
   const end = latest < nowMs - CELLS * HOUR ? latest : nowMs
   const stale = end !== nowMs
   const cw = width / CELLS
-  const r = Math.min(3.8, cw / 2 - 1.3)
-  const rh = r * 2 + 3
+  const r = Math.min(R, cw / 2 - 1.3)
   const columns = Array.from({ length: CELLS }, () => [] as TraceSource[])
   for (const s of sources) {
     const hoursAgo = (end - Date.parse(s.at)) / HOUR
@@ -74,7 +77,7 @@ export function SourceTrace({
   for (const col of columns)
     col.sort((a, b) => Number(b.citation !== null) - Number(a.citation !== null))
   const rows = fixedRows ?? Math.max(variant === 'full' ? 2 : 3, ...columns.map((c) => c.length))
-  const h = rows * rh + 4
+  const h = rows * RH + 4
   const H = h + (variant === 'full' ? 18 : 0)
   const cited = sources.filter((s) => s.citation !== null).length
   const label = (hoursAgo: number) => {
@@ -108,7 +111,7 @@ export function SourceTrace({
         const shown = overflow ? col.slice(0, rows - 1) : col
         const hidden = overflow ? col.slice(rows - 1) : []
         const x = i * cw + cw / 2
-        const yAt = (j: number) => h - 2 - rh / 2 - j * rh
+        const yAt = (j: number) => h - 2 - RH / 2 - j * RH
         const more = overflow ? (
           <Tooltip
             key={`more-${hidden[0]?.id}`}
@@ -118,9 +121,9 @@ export function SourceTrace({
             <g className="cursor-default">
               <rect
                 x={i * cw}
-                y={yAt(rows - 1) - rh / 2}
+                y={yAt(rows - 1) - RH / 2}
                 width={cw}
-                height={rh}
+                height={RH}
                 fill="transparent"
               />
               <text
@@ -150,7 +153,7 @@ export function SourceTrace({
                   className="cursor-default"
                 >
                   {/* Cell-sized hit area: the mark is only ~7px across. */}
-                  <rect x={i * cw} y={y - rh / 2} width={cw} height={rh} fill="transparent" />
+                  <rect x={i * cw} y={y - RH / 2} width={cw} height={RH} fill="transparent" />
                   <circle
                     cx={x}
                     cy={y}

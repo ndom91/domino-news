@@ -7,11 +7,33 @@ const UNITS: [Intl.RelativeTimeFormatUnit, number][] = [
   ['minute', 60],
 ]
 
+// Building an Intl formatter is slow and these run for every timestamp on a page, so reuse them.
+const formatters = new Map<string, Intl.DateTimeFormat>()
+function dateFormat(options: Intl.DateTimeFormatOptions): Intl.DateTimeFormat {
+  const key = JSON.stringify(options)
+  let fmt = formatters.get(key)
+  if (!fmt) {
+    fmt = new Intl.DateTimeFormat('en-GB', options)
+    formatters.set(key, fmt)
+  }
+  return fmt
+}
+
+const relativeFormats = new Map<string, Intl.RelativeTimeFormat>()
+function relativeFormat(locale: string): Intl.RelativeTimeFormat {
+  let fmt = relativeFormats.get(locale)
+  if (!fmt) {
+    fmt = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+    relativeFormats.set(locale, fmt)
+  }
+  return fmt
+}
+
 export function relativeTime(iso: string, now = new Date(), locale = 'en'): string {
   const seconds = Math.round((new Date(iso).getTime() - now.getTime()) / 1000)
   const abs = Math.abs(seconds)
   if (abs < 60) return 'just now'
-  const fmt = new Intl.RelativeTimeFormat(locale, { numeric: 'auto' })
+  const fmt = relativeFormat(locale)
   for (const [unit, size] of UNITS) {
     if (abs >= size) return fmt.format(Math.round(seconds / size), unit)
   }
@@ -20,7 +42,7 @@ export function relativeTime(iso: string, now = new Date(), locale = 'en'): stri
 
 /** "10 Oct 2026, 14:06 UTC", in UTC unless another IANA time zone is given. */
 export function formatDateTime(iso: string, timeZone = 'UTC'): string {
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateFormat({
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -33,9 +55,7 @@ export function formatDateTime(iso: string, timeZone = 'UTC'): string {
 
 /** "10 Oct", in UTC unless another IANA time zone is given. */
 export function formatDate(iso: string, timeZone = 'UTC'): string {
-  return new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', timeZone }).format(
-    new Date(iso),
-  )
+  return dateFormat({ day: 'numeric', month: 'short', timeZone }).format(new Date(iso))
 }
 
 /** Compact relative time used across the design: "just now", "24 min ago", "5 h ago", "3 d ago", else "9 Oct". */
@@ -52,7 +72,7 @@ export function shortRelative(iso: string, now = new Date()): string {
 
 /** 24-hour clock time, e.g. "18:05", in UTC unless another IANA time zone is given. */
 export function clockTime(iso: string, timeZone = 'UTC'): string {
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateFormat({
     hour: '2-digit',
     minute: '2-digit',
     hourCycle: 'h23',
@@ -63,7 +83,7 @@ export function clockTime(iso: string, timeZone = 'UTC'): string {
 /** Short name of the time zone at that moment: "UTC", "CEST", or "GMT-4" where there's no abbreviation. */
 export function zoneName(iso: string, timeZone = 'UTC'): string {
   return (
-    new Intl.DateTimeFormat('en-GB', { timeZone, timeZoneName: 'short' })
+    dateFormat({ timeZone, timeZoneName: 'short' })
       .formatToParts(new Date(iso))
       .find((p) => p.type === 'timeZoneName')?.value ?? timeZone
   )
@@ -71,7 +91,7 @@ export function zoneName(iso: string, timeZone = 'UTC'): string {
 
 /** "Saturday 10 October 2026" in UTC (the strip's edition date). */
 export function longDate(iso: string): string {
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateFormat({
     weekday: 'long',
     day: 'numeric',
     month: 'long',
@@ -88,7 +108,7 @@ export function dayLabel(iso: string, now: string | Date = new Date()): string {
   const diff = utcDay(new Date(now).getTime()) - utcDay(new Date(iso).getTime())
   if (diff <= 0) return 'Today'
   if (diff === 1) return 'Yesterday'
-  return new Intl.DateTimeFormat('en-GB', {
+  return dateFormat({
     weekday: 'long',
     day: 'numeric',
     month: 'short',
