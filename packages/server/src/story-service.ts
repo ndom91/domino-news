@@ -140,6 +140,9 @@ export async function newsroomOutletCount(db: Db, storyId: string): Promise<numb
   return row?.n ?? 0
 }
 
+// Joins summary and detail for renumbering; never appears in model text.
+const DETAIL_BREAK = '\u0000'
+
 /**
  * Persist a generated summary as a new immutable version, then publish the Story.
  * Rejects stale results (inputs changed since generation) and ungrounded citations.
@@ -153,6 +156,8 @@ export async function recordGeneratedSummary(
     inputFingerprint: string
     /** Article ids in the order shown to the model; enables `[n]` citation markers. */
     shownArticleIds?: string[]
+    /** Replace a generated summary on unchanged inputs (`pnpm cli summaries:refresh --all`). */
+    force?: boolean
   },
 ): Promise<{ status: 'recorded'; versionId: string } | { status: 'stale' }> {
   const [story] = await db
@@ -164,14 +169,14 @@ export async function recordGeneratedSummary(
   if (story.inputFingerprint !== input.inputFingerprint) return { status: 'stale' }
   if (story.currentSummaryId) {
     // Same inputs already summarised (retry/duplicate) or a human edit on these inputs wins.
-    // Exception: a generated summary from before desk tagging may be refreshed to get one.
+    // Exceptions: a generated summary from before desk tagging may be refreshed to get one,
+    // and a forced refresh replaces any generated summary.
     const [current] = await db
       .select()
       .from(schema.storySummaryVersion)
       .where(eq(schema.storySummaryVersion.id, story.currentSummaryId))
-    const refreshForDesk = story.desk === null && current?.editedByUserId === null
-    if (current?.inputFingerprint === input.inputFingerprint && !refreshForDesk)
-      return { status: 'stale' }
+    const refresh = current?.editedByUserId === null && (story.desk === null || input.force)
+    if (current?.inputFingerprint === input.inputFingerprint && !refresh) return { status: 'stale' }
   }
 
   // Grounding: every cited article must be actively linked to this Story, and every
@@ -181,11 +186,14 @@ export async function recordGeneratedSummary(
     .from(schema.storyArticle)
     .where(and(eq(schema.storyArticle.storyId, story.id), isNull(schema.storyArticle.removedAt)))
   const linkedIds = new Set(linked.map((l) => l.articleId))
-  const { body, citation } = renumberCitations(
-    input.output.summary,
+  // One pass over summary and detail, so a source has the same number in both.
+  const renumbered = renumberCitations(
+    `${input.output.summary}${DETAIL_BREAK}${input.output.detail}`,
     input.shownArticleIds ?? [],
     input.output.sourceArticleIds,
   )
+  const [body = '', detail = ''] = renumbered.body.split(DETAIL_BREAK)
+  const { citation } = renumbered
   const citedArticles = [...citation.keys()]
   const unknownArticles = citedArticles.filter((id) => !linkedIds.has(id))
   if (citedArticles.length === 0 || unknownArticles.length > 0) {
@@ -235,6 +243,7 @@ export async function recordGeneratedSummary(
     interpretationId,
     headline: input.output.headline,
     body,
+    detail: detail.trim() || null,
     supersedesVersionId: story.currentSummaryId,
     inputFingerprint: input.inputFingerprint,
   })
@@ -271,6 +280,8 @@ export async function editSummary(
     basedOnVersionId: string
     headline: string
     body: string
+    /** Omitted: the current version's detail carries over. */
+    detail?: string
     userId: string
   },
 ) {
@@ -301,6 +312,7 @@ export async function editSummary(
     storyId: story.id,
     headline: input.headline,
     body: input.body,
+    detail: input.detail === undefined ? base.detail : input.detail.trim() || null,
     format: base.format,
     supersedesVersionId: base.id,
     editedByUserId: input.userId,

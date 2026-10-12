@@ -50,5 +50,7 @@ export interface AnalysisJob {
   inputFingerprint: string
   pipelineVersion: string
   priorityClass: JobClass
+  /** Summaries only: replace a generated summary even if inputs are unchanged. */
+  force?: boolean
   // Never put article bodies or secrets in durable job payloads.
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "story_summary_version" ADD COLUMN "detail" text;

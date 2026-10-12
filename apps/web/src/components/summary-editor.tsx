@@ -42,7 +42,11 @@ export function SummaryEditor({
 
   function onChange(event: FormEvent<HTMLFormElement>) {
     const form = new FormData(event.currentTarget)
-    setDirty(form.get('headline') !== summary.headline || form.get('body') !== summary.body)
+    setDirty(
+      form.get('headline') !== summary.headline ||
+        form.get('body') !== summary.body ||
+        form.get('detail') !== (summary.detail ?? ''),
+    )
   }
 
   function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -52,6 +56,7 @@ export function SummaryEditor({
       {
         headline: String(form.get('headline') ?? ''),
         body: String(form.get('body') ?? ''),
+        detail: String(form.get('detail') ?? ''),
         basedOnVersionId: summary.versionId,
       },
       { onSuccess: onDone },
@@ -86,7 +91,14 @@ export function SummaryEditor({
         defaultValue={summary.body}
         required
         maxLength={4000}
-        description="Saving creates a new version. The current version stays in the history."
+      />
+      <Textarea
+        label="More detail"
+        name="detail"
+        rows={10}
+        defaultValue={summary.detail ?? ''}
+        maxLength={8000}
+        description="Shown below the summary on the story page. Separate paragraphs with a blank line. Saving creates a new version. The current version stays in the history."
       />
       {error ? (
         <Notice tone="error" title="Summary not saved">

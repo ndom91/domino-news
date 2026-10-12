@@ -1,11 +1,12 @@
 import { formatDate, hostnameOf, plural } from '@dn/domain'
-import { REGION_LABELS } from '@dn/schemas'
+import { REGION_LABELS, type StoryDetail } from '@dn/schemas'
 import {
   Badge,
   Button,
   ClaimList,
   ContextExplanation,
   HeroStory,
+  leadCitations,
   NarrativeGraph,
   Reveal,
   relationLabel,
@@ -13,6 +14,7 @@ import {
   SectionLabel,
   Skeleton,
   SourceList,
+  SummaryText,
   Timestamp,
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
@@ -72,6 +74,36 @@ function StoryRoute() {
 const latestAt = (items: { createdAt: string }[]) =>
   items.reduce((latest, item) => (item.createdAt > latest ? item.createdAt : latest), '')
 
+/**
+ * The summary's longer detail, below the lead. Citations lead where the lead's do; a context
+ * term gets its popover only where it first appears, counting the lead's summary.
+ */
+function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }) {
+  const sources = leadCitations(story.sources)
+  let shown = story.summary?.body ?? ''
+  const paragraphs = detail
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean)
+  return (
+    <div
+      data-summary-detail
+      className="mt-10 flex max-w-reading flex-col gap-4 text-md leading-normal"
+    >
+      {paragraphs.map((text, i) => {
+        const context = story.context.filter((c) => !shown.includes(c.anchorText))
+        shown += `\n${text}`
+        return (
+          // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs are positional and never reorder
+          <p key={i}>
+            <SummaryText text={text} sources={sources} context={context} />
+          </p>
+        )
+      })}
+    </div>
+  )
+}
+
 function StoryPage() {
   const { slug } = Route.useParams()
   const { now } = Route.useLoaderData()
@@ -129,6 +161,10 @@ function StoryPage() {
 
       <div className="grid gap-x-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
         <div className="min-w-0">
+          {story.summary?.detail ? (
+            <SummaryDetail story={story} detail={story.summary.detail} />
+          ) : null}
+
           {story.claims.length > 0 ? (
             <section aria-labelledby="claims-heading">
               <SectionHeader

@@ -507,6 +507,8 @@ export const storySummaryVersion = pgTable(
     interpretationId: text('interpretation_id').references(() => interpretation.id),
     headline: text('headline').notNull(),
     body: text('body').notNull(),
+    // Story page only: 2-3 paragraphs after the body. Null before summarize-story@9.
+    detail: text('detail'),
     format: summaryFormat('format').notNull().default('paragraph'),
     createdAt: createdAt(),
     supersedesVersionId: text('supersedes_version_id'),

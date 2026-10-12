@@ -65,6 +65,8 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(
     page.locator('section[aria-labelledby="sources-heading"] a[target="_blank"]').first(),
   ).toBeVisible()
+  // The longer summary below the lead: at least two paragraphs.
+  await expect(page.locator('[data-summary-detail] p').nth(1)).toBeVisible()
   // Context popovers: open the first one found among the first few stories.
   const term = page.locator('#lead-heading ~ p button[data-context-term]')
   for (let i = 0; i < 6 && (await term.count()) === 0; i++) {

@@ -369,23 +369,26 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
   const story = id ? await storyRow(db, id) : null
   if (!story?.publishedAt) return null
 
-  const [{ lead, versions }, related, primary, claims, leanMix] = await Promise.all([
-    storyLeadParts(db, story),
-    relatedStories(db, story.id),
-    db
-      .select({ ref: schema.sourceReference })
-      .from(schema.storySourceReference)
-      .innerJoin(
-        schema.sourceReference,
-        eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
-      )
-      .where(eq(schema.storySourceReference.storyId, story.id)),
-    storyClaims(db, story.id),
-    leanMixByStory(db, [story.id]),
-  ])
+  const [{ lead, versions, detail, context }, related, primary, claims, leanMix] =
+    await Promise.all([
+      storyLeadParts(db, story),
+      relatedStories(db, story.id),
+      db
+        .select({ ref: schema.sourceReference })
+        .from(schema.storySourceReference)
+        .innerJoin(
+          schema.sourceReference,
+          eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+        )
+        .where(eq(schema.storySourceReference.storyId, story.id)),
+      storyClaims(db, story.id),
+      leanMixByStory(db, [story.id]),
+    ])
 
   return {
     ...lead,
+    summary: lead.summary && { ...lead.summary, detail },
+    context,
     status: story.status,
     firstObservedAt: iso(story.firstObservedAt),
     lastUpdatedAt: iso(story.lastUpdatedAt),
@@ -484,6 +487,8 @@ async function storyLeadParts(
     storyContext(db, id),
   ])
   const current = versions.find((v) => v.version.id === story.currentSummaryId)
+  const body = current?.version.body ?? ''
+  const detail = current?.version.detail ?? null
   const citedIds = new Set(cited.map((c) => c.articleId))
   const citationOf = new Map(cited.map((c) => [c.articleId, c.citation]))
 
@@ -518,9 +523,15 @@ async function storyLeadParts(
     })),
     narratives: narratives.get(id) ?? [],
     // Only entries whose anchor is still in the current text (an edit may have removed it).
-    context: context.filter((c) => current?.version.body.includes(c.anchorText)),
+    // The lead shows the body only; the Story page also shows the detail.
+    context: context.filter((c) => body.includes(c.anchorText)),
   }
-  return { lead, versions }
+  return {
+    lead,
+    versions,
+    detail,
+    context: context.filter((c) => body.includes(c.anchorText) || detail?.includes(c.anchorText)),
+  }
 }
 
 async function relatedStories(db: Db, id: string): Promise<StoryDetail['related']> {

@@ -116,6 +116,8 @@ describe('/api/v1 contracts', () => {
     )
     expect(detail.id).toBe(first.id)
     expect(detail.sources.length).toBeGreaterThan(0)
+    // The Story page's longer text: more than one paragraph in fixture mode.
+    expect(detail.summary?.detail?.split('\n\n').length).toBeGreaterThan(1)
   })
 
   it('paginates with a stable cursor', async () => {
@@ -209,9 +211,12 @@ describe('/api/v1 write endpoints', () => {
     expect(ok.status).toBe(200)
     const after = storyDetailSchema.parse(await ok.json())
     expect(after.summary).toMatchObject({ headline: 'Edited headline', origin: 'edited' })
+    // Detail not sent: the previous version's carries over.
+    expect(after.summary?.detail).toBe(before.summary?.detail)
     expect(after.summaryHistory.map((v) => v.versionId)).toContain(baseVersion)
     // Stale anchors are hidden and regeneration is queued for the edited text.
-    expect(after.context.every((c) => 'Edited body.'.includes(c.anchorText))).toBe(true)
+    const text = `Edited body.\n\n${after.summary?.detail ?? ''}`
+    expect(after.context.every((c) => text.includes(c.anchorText))).toBe(true)
     const { rows } = await h.ctx.pool.query(
       `select count(*)::int as n from pgboss.job where name = 'generate_context' and data->>'inputFingerprint' = $1`,
       [after.summary?.versionId],
@@ -226,12 +231,22 @@ describe('/api/v1 write endpoints', () => {
     expect(stale.status).toBe(409)
     expect(apiErrorSchema.parse(await stale.json()).error.code).toBe('conflict')
 
+    const withDetail = await post(`/api/v1/stories/${story.id}/summary`, {
+      headline: 'Edited headline',
+      body: 'Edited body.',
+      detail: 'First paragraph.\n\nSecond paragraph.',
+      basedOnVersionId: after.summary?.versionId,
+    })
+    expect(withDetail.status).toBe(200)
+    const edited = storyDetailSchema.parse(await withDetail.json())
+    expect(edited.summary?.detail).toBe('First paragraph.\n\nSecond paragraph.')
+
     h.ctx.config.enableSummaryEditing = false
     try {
       const disabled = await post(`/api/v1/stories/${story.id}/summary`, {
         headline: 'x',
         body: 'y',
-        basedOnVersionId: after.summary?.versionId ?? '',
+        basedOnVersionId: edited.summary?.versionId ?? '',
       })
       expect(disabled.status).toBe(403)
     } finally {
@@ -951,8 +966,11 @@ describe('front page and citation numbers', () => {
          select sa.article_id from story_article sa join story s on s.id = sa.story_id
          where sa.removed_at is null and s.published_at is not null limit 1)`,
     )
-    const front = frontPageSchema.parse(await (await call('/api/v1/front')).json())
+    const raw = await (await call('/api/v1/front')).json()
+    const front = frontPageSchema.parse(raw)
     expect(front.lead).not.toBeNull()
+    // The lead shows the one-paragraph summary only; detail is for the Story page.
+    expect(raw.lead.summary).not.toHaveProperty('detail')
     expect(front.stats.stories).toBeGreaterThan(0)
     expect(front.lead?.desk).not.toBeNull()
 

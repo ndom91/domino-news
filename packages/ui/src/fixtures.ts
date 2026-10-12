@@ -247,6 +247,8 @@ export const fixtureLead: StoryDetail = {
     versionId: 'sum_lead',
     headline: 'Court halts Harrowgate rail strike hours before walkout',
     body: 'A regional court granted Harrowgate Transit an injunction suspending a 48-hour strike by the Rail & Signal Workers’ Union, according to Meridian Wire[1] and The Civic Record[3]. The union said it would appeal[2]. Calder Review reports the ruling cites unresolved safety-staffing talks[4]; the ruling text has not yet been published.',
+    detail:
+      'The union called the walkout after talks on minimum staffing for signal boxes broke down last month, Meridian Wire reports[1]. Harrowgate Transit argued the strike notice was served too late[3].\n\nThe union’s appeal is expected to be heard within days, according to The Civic Record[3]. Until then, services run to the normal timetable.',
     format: 'paragraph',
     createdAt: ago(1.1),
     origin: 'generated',

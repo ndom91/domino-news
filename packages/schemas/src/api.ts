@@ -104,6 +104,8 @@ export const summarySchema = z.object({
   versionId: z.string(),
   headline: z.string(),
   body: z.string(),
+  // Story page only: 2-3 paragraphs separated by blank lines. Null on older summaries.
+  detail: z.nullable(z.string()),
   format: z.enum(['paragraph', 'bullets']),
   createdAt: z.string(),
   origin: z.enum(['generated', 'edited']),
@@ -274,16 +276,18 @@ export const storyDetailSchema = z.object({
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 
 // What the lead block (HeroStory) shows; the front page sends only this.
-export const storyLeadSchema = z.pick(storyDetailSchema, {
-  id: true,
-  slug: true,
-  title: true,
-  desk: true,
-  summary: true,
-  sources: true,
-  narratives: true,
-  context: true,
-})
+export const storyLeadSchema = z.extend(
+  z.pick(storyDetailSchema, {
+    id: true,
+    slug: true,
+    title: true,
+    desk: true,
+    sources: true,
+    narratives: true,
+    context: true,
+  }),
+  { summary: z.nullable(z.omit(summarySchema, { detail: true })) },
+)
 export type StoryLead = z.infer<typeof storyLeadSchema>
 
 export const narrativeNodeSchema = z.object({
@@ -399,6 +403,8 @@ export type SearchResponse = z.infer<typeof searchResponseSchema>
 export const summaryEditRequestSchema = z.object({
   headline: z.string().check(z.trim(), z.minLength(1), z.maxLength(200)),
   body: z.string().check(z.trim(), z.minLength(1), z.maxLength(4000)),
+  // Omitted keeps the current detail; empty removes it.
+  detail: z.optional(z.string().check(z.trim(), z.maxLength(8000))),
   basedOnVersionId: z.string(),
 })
 export type SummaryEditRequest = z.infer<typeof summaryEditRequestSchema>

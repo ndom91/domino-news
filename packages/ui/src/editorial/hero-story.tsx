@@ -12,6 +12,40 @@ import { Timestamp } from './time.tsx'
 const LONG_TITLE = 60 // characters
 const BOARD_ROWS = 8 // latest reports; the Story page lists them all
 
+const reportedAt = (s: StoryLead['sources'][number]) => s.publishedAt ?? s.observedAt
+
+/** A Story's reports, oldest first, as the trace and board show them. */
+function sortedReports(sources: StoryLead['sources']) {
+  return sources
+    .map((s) => ({
+      id: s.articleId,
+      outlet: s.publisher.name,
+      at: reportedAt(s),
+      href: s.url,
+      citation: s.citedInSummary ? (s.citation ?? 0) : null,
+    }))
+    .sort((a, b) => a.at.localeCompare(b.at))
+}
+
+/**
+ * Where each `[n]` marker leads: its row on the lead's board, or the article if it's too old
+ * for the board. Also used for the Story page's detail below the lead.
+ */
+export function leadCitations(sources: StoryLead['sources']) {
+  const reports = sortedReports(sources)
+  const onBoard = new Set(reports.slice(-BOARD_ROWS).map((r) => r.id))
+  const cited = new Map<number, CitedSource>()
+  for (const r of reports) {
+    if (r.citation) {
+      cited.set(r.citation, {
+        outlet: r.outlet,
+        href: onBoard.has(r.id) ? `#source-${r.id}` : r.href,
+      })
+    }
+  }
+  return cited
+}
+
 /**
  * The lead Story as a block in its Narrative's colour: display headline, cited summary with a
  * provenance note, and "Who reported it" (hour-cell trace + board). Also the Story page header.
@@ -37,28 +71,9 @@ export function HeroStory({
   const [activeSource, setActiveSource] = useState<string | null>(null)
   const narrative = story.narratives[0]
   const Heading = headingLevel
-  const reportedAt = (s: StoryLead['sources'][number]) => s.publishedAt ?? s.observedAt
-  const reports = story.sources
-    .map((s) => ({
-      id: s.articleId,
-      outlet: s.publisher.name,
-      at: reportedAt(s),
-      href: s.url,
-      citation: s.citedInSummary ? (s.citation ?? 0) : null,
-    }))
-    .sort((a, b) => a.at.localeCompare(b.at))
+  const reports = sortedReports(story.sources)
   const board = reports.slice(-BOARD_ROWS)
-  const onBoard = new Set(board.map((r) => r.id))
-  // Markers jump to the board row, or to the article if it's too old for the board.
-  const cited = new Map<number, CitedSource>()
-  for (const r of reports) {
-    if (r.citation) {
-      cited.set(r.citation, {
-        outlet: r.outlet,
-        href: onBoard.has(r.id) ? `#source-${r.id}` : r.href,
-      })
-    }
-  }
+  const cited = leadCitations(story.sources)
   const citedCount = reports.filter((r) => r.citation !== null).length
   const first = reports[0]
   const last = reports.at(-1)

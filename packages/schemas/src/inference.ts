@@ -20,6 +20,8 @@ export type StoryMatch = z.infer<typeof storyMatchSchema>
 export const storySummarySchema = z.object({
   headline: z.string().check(z.minLength(1), z.maxLength(200)),
   summary: z.string().check(z.minLength(1), z.maxLength(2000)),
+  // 2-3 more paragraphs for the Story page; the summary alone goes on cards.
+  detail: z.string().check(z.minLength(1), z.maxLength(4000)),
   sourceArticleIds: z.array(z.string()).check(z.minLength(1)),
   observationIds: z.array(z.string()).check(z.minLength(1)),
   regions: z.array(regionSchema).check(z.minLength(1), z.maxLength(3)),

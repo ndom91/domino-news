@@ -124,11 +124,19 @@ export function createFixtureGeneration(): GenerationProvider {
       const named = story.articles.map((a, i) => `${a.publisher}[${i + 1}]`)
       const reportedBy =
         named.length > 1 ? `${named.slice(0, -1).join(', ')} and ${named.at(-1)}` : named[0]
-      const detail = lead.description ? ` ${truncate(lead.description, 280)}` : ''
+      const leadDescription = lead.description ? ` ${truncate(lead.description, 280)}` : ''
+      // Two cited paragraphs, like the real prompt asks: the first headline, then the other reports.
+      const others = story.articles
+        .slice(1, 4)
+        .map(
+          (a, i) => `${a.publisher} reports: ${truncate(a.description || a.title, 200)}[${i + 2}]`,
+        )
+      const detail = `${lead.publisher} first reported “${truncate(lead.title, 140)}”[1].\n\n${others.join(' ') || 'No other publisher reports it yet.'}`
       return {
         output: {
           headline: truncate(lead.title, 140),
-          summary: `Reported by ${reportedBy}.${detail}`,
+          summary: `Reported by ${reportedBy}.${leadDescription}`,
+          detail,
           sourceArticleIds: story.articles.map((a) => a.articleId),
           observationIds: story.articles.map((a) => a.observationId),
           regions: fixtureRegions(story),

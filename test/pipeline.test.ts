@@ -2,6 +2,8 @@ import { schema } from '@dn/db'
 import { feedIds, pollFeed, seedPublishers } from '@dn/jobs'
 import {
   editSummary,
+  getStory,
+  getStoryLead,
   processOutboxBatch,
   projectAggregate,
   recordGeneratedSummary,
@@ -336,6 +338,7 @@ describe('desks', () => {
               output: {
                 headline: story.title,
                 summary: 'Refreshed.',
+                detail: 'More.',
                 sourceArticleIds: articleIds,
                 observationIds: observations.map((o) => o.id),
                 regions: ['global'],
@@ -355,6 +358,97 @@ describe('desks', () => {
       }),
     ).rejects.toThrow()
     expect(statuses).toEqual(['stale', 'recorded', 'science', 'stale'])
+  })
+
+  it('stores detail paragraphs with every generated summary', async () => {
+    const rows = await h.ctx.db
+      .select({ detail: schema.storySummaryVersion.detail })
+      .from(schema.story)
+      .innerJoin(
+        schema.storySummaryVersion,
+        eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+      )
+      .where(isNull(schema.storySummaryVersion.editedByUserId))
+    expect(rows.length).toBeGreaterThan(0)
+    for (const r of rows) expect(r.detail?.split('\n\n').length).toBeGreaterThan(1)
+  })
+
+  it('numbers citations across summary and detail together, and forced refreshes replace', async () => {
+    const { db } = h.ctx
+    const stories = await db.select().from(schema.story).where(isNotNull(schema.story.publishedAt))
+    let picked: { story: (typeof stories)[number]; articleIds: string[] } | undefined
+    for (const story of stories) {
+      const links = await db
+        .select({ articleId: schema.storyArticle.articleId })
+        .from(schema.storyArticle)
+        .where(
+          and(eq(schema.storyArticle.storyId, story.id), isNull(schema.storyArticle.removedAt)),
+        )
+      if (links.length >= 2) {
+        picked = { story, articleIds: links.map((l) => l.articleId) }
+        break
+      }
+    }
+    if (!picked?.story.inputFingerprint) throw new Error('no story with two articles')
+    const { story, articleIds } = picked
+    const [a, b] = articleIds as [string, string]
+    const observations = await db
+      .select({ id: schema.observation.id })
+      .from(schema.observation)
+      .where(inArray(schema.observation.subjectId, [a, b]))
+    const [run] = await db.select({ id: schema.analysisRun.id }).from(schema.analysisRun).limit(1)
+    let result: unknown
+    // Rolled back at the end so later tests see the original summary.
+    await expect(
+      db.transaction(async (tx) => {
+        const record = (force: boolean) =>
+          recordGeneratedSummary(tx, {
+            storyId: story.id,
+            output: {
+              headline: story.title,
+              // Shown as [2] and [3]; an uncited first source shifts the display numbers down.
+              summary: 'A happened[3].',
+              detail: 'B said so[2].\n\nC disagreed[3].',
+              sourceArticleIds: [a, b],
+              observationIds: observations.map((o) => o.id),
+              regions: ['global'],
+              desk: 'science',
+              topics: [],
+            },
+            analysisRunId: run?.id ?? '',
+            inputFingerprint: story.inputFingerprint ?? '',
+            shownArticleIds: ['art_not_cited', a, b],
+            force,
+          })
+        const unforced = await record(false)
+        const forced = await record(true)
+        if (forced.status !== 'recorded') throw new Error('not recorded')
+        const [version] = await tx
+          .select()
+          .from(schema.storySummaryVersion)
+          .where(eq(schema.storySummaryVersion.id, forced.versionId))
+        const sources = await tx
+          .select({
+            articleId: schema.storySummarySource.articleId,
+            citation: schema.storySummarySource.citation,
+          })
+          .from(schema.storySummarySource)
+          .where(eq(schema.storySummarySource.summaryVersionId, forced.versionId))
+        result = {
+          unforced: unforced.status,
+          body: version?.body,
+          detail: version?.detail,
+          citations: Object.fromEntries(sources.map((s) => [s.articleId, s.citation])),
+        }
+        tx.rollback()
+      }),
+    ).rejects.toThrow()
+    expect(result).toEqual({
+      unforced: 'stale',
+      body: 'A happened[2].',
+      detail: 'B said so[1].\n\nC disagreed[2].',
+      citations: { [a]: 1, [b]: 2 },
+    })
   })
 })
 
@@ -1001,7 +1095,8 @@ describe('context popovers', () => {
     for (const link of links) {
       const [story] = await db
         .select({
-          summary: schema.storySummaryVersion.body,
+          body: schema.storySummaryVersion.body,
+          detail: schema.storySummaryVersion.detail,
           editedBy: schema.storySummaryVersion.editedByUserId,
         })
         .from(schema.story)
@@ -1011,13 +1106,38 @@ describe('context popovers', () => {
         )
         .where(eq(schema.story.id, link.storyId))
       // Human edits regenerate context asynchronously; generated summaries must match now.
-      if (!story?.editedBy) expect(story?.summary).toContain(link.anchorText)
+      if (!story?.editedBy) expect(`${story?.body}\n\n${story?.detail}`).toContain(link.anchorText)
     }
     // Shared subjects are stored once.
     const keys = await db
       .select({ key: schema.contextEntry.normalizedKey })
       .from(schema.contextEntry)
     expect(new Set(keys.map((k) => k.key)).size).toBe(keys.length)
+  })
+
+  it('keeps anchors found only in the detail, for the Story page but not the lead', async () => {
+    const { db } = h.ctx
+    const links = await db
+      .select({
+        storyId: schema.storyContext.storyId,
+        anchorText: schema.storyContext.anchorText,
+        body: schema.storySummaryVersion.body,
+        detail: schema.storySummaryVersion.detail,
+      })
+      .from(schema.storyContext)
+      .innerJoin(schema.story, eq(schema.story.id, schema.storyContext.storyId))
+      .innerJoin(
+        schema.storySummaryVersion,
+        eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+      )
+    const link = links.find(
+      (l) => !l.body.includes(l.anchorText) && l.detail?.includes(l.anchorText),
+    )
+    if (!link) throw new Error('no context anchored only in a detail')
+    const story = await getStory(db, link.storyId)
+    expect(story?.context.map((c) => c.anchorText)).toContain(link.anchorText)
+    const lead = await getStoryLead(db, link.storyId)
+    expect(lead?.context.map((c) => c.anchorText)).not.toContain(link.anchorText)
   })
 
   it('drops entries whose anchor or sources are not grounded', async () => {

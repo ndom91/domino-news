@@ -183,6 +183,13 @@
       "when": 1791816622642,
       "tag": "0025_listing_indexes",
       "breakpoints": true
+    },
+    {
+      "idx": 26,
+      "version": "7",
+      "when": 1791823712718,
+      "tag": "0026_summary_detail",
+      "breakpoints": true
     }
   ]
 }

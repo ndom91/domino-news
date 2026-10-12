@@ -36,7 +36,11 @@ export function validContextEntries(
  */
 export async function explainStoryContext(ctx: WorkerContext, job: AnalysisJob) {
   const [row] = await ctx.db
-    .select({ story: schema.story, summary: schema.storySummaryVersion.body })
+    .select({
+      story: schema.story,
+      body: schema.storySummaryVersion.body,
+      detail: schema.storySummaryVersion.detail,
+    })
     .from(schema.story)
     .innerJoin(
       schema.storySummaryVersion,
@@ -46,15 +50,17 @@ export async function explainStoryContext(ctx: WorkerContext, job: AnalysisJob) 
   if (!row || row.story.currentSummaryId !== job.inputFingerprint) return { status: 'stale' }
   const input = await loadStoryInput(ctx.db, row.story.id)
   if (!input) return { status: 'stale' }
+  // Anchors may come from the Story page's detail as well as the summary.
+  const summary = row.detail ? `${row.body}\n\n${row.detail}` : row.body
 
   const { runId, result } = await runStoryGeneration(
     ctx,
     job,
     { operation: 'story_context', storyId: row.story.id, inputFingerprint: job.inputFingerprint },
-    () => ctx.inference.generation.explainContext({ story: input, summary: row.summary }),
+    () => ctx.inference.generation.explainContext({ story: input, summary }),
   )
   const observationIds = new Set(input.articles.map((a) => a.observationId))
-  const entries = validContextEntries(result.output.entries, row.summary, observationIds)
+  const entries = validContextEntries(result.output.entries, summary, observationIds)
 
   return withTransaction(ctx.pool, async (tx) => {
     if (!(await lockCurrentSummary(tx.db, row.story.id, job.inputFingerprint)))

@@ -42,7 +42,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli assessments:publish --username u [--dry-run]` | Publish the reviewed assessments in `fixtures/assessments.json` as admin `u`. Skips publishers whose latest assessment already matches. Run `assessments:import` first |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
-| `pnpm cli summaries:refresh` | Re-summarise published stories that have no desk yet (one GPU call each, plus context, claims and relate for the new version) |
+| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one GPU call each, plus context, claims and relate for the new version; edited summaries are kept) |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
 | `pnpm cli status` | Pipeline and queue status as JSON |
 | `pnpm cli dev:reset` | Delete all ingested and derived data (keeps users and publishers) |
@@ -303,7 +303,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - RSS/Atom/RDF ingestion with URL normalisation, dedupe, revision tracking, immutable observations and per-feed failure isolation.
 - A durable pg-boss pipeline with priorities, reserved fresh capacity, rate-limited and pausable backfill, retries, stale-job rejection, and per-model GPU concurrency caps.
 - Conservative Story matching (EmbeddingGemma shortlist, Gemma 4 decision, `uncertain` supported) and typed Story relationships with temporal and cycle validation.
-- Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones.
+- Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones. The same call writes 2-3 more paragraphs (background, each side, what's next) that only the Story page shows, below the one-paragraph summary.
 - Narratives from Stories joined by timeline links (follows, responds to, corrects, branches from), with model-written titles. Loose links (related to, background for) show on Story pages but don't join Narratives. After upgrading, `pnpm cli enrich:all --reset-graph` rebuilds existing Narratives under this rule.
 - **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.

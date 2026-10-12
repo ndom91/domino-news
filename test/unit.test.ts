@@ -391,6 +391,22 @@ describe('prompt inputs', () => {
     expect(prompt).toContain('"sourceType": "newsroom"')
   })
 
+  it('ask for a summary plus 2-3 paragraphs of detail in the same call', async () => {
+    const { summarizeStoryPrompt } = await import('@dn/inference')
+    const prompt = summarizeStoryPrompt({
+      story: {
+        storyId: 's',
+        title: 't',
+        summary: null,
+        firstObservedAt: '2026-10-10T00:00:00Z',
+        articles: [],
+      },
+    })
+    expect(prompt).toContain('- summary: 2-4 short sentences')
+    expect(prompt).toContain('- detail: 2-3 short paragraphs separated by a blank line')
+    expect(prompt).toContain("Do not repeat the summary's")
+  })
+
   it('only allow related_to for one nameable event, not a shared theme', async () => {
     const { classifyRelationshipPrompt } = await import('@dn/inference')
     const story = (storyId: string) => ({
@@ -747,6 +763,7 @@ describe('local generation adapter', () => {
     reply({
       headline: 'h',
       summary: 's[2]',
+      detail: 'd[1]',
       sources: [2],
       regions: ['europe'],
       desk: 'politics',

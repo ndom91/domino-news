@@ -6,7 +6,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 // 30-character IDs back and dropped characters, which failed grounding checks.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@5',
-  summarizeStory: 'summarize-story@8',
+  summarizeStory: 'summarize-story@9',
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@5',
@@ -78,6 +78,9 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
   Do not open with a list of who reported it. Lead with what happened. Where outlets agree, say so once; where they
   disagree, or only one outlet reports a detail, name the outlet.
   After each attributed statement, add a citation marker with the source's number "n" from the list, e.g. "according to X[2]". Use only numbers from the list.
+- detail: 2-3 short paragraphs separated by a blank line that continue after the summary for a reader who clicked in:
+  background and what led here, what each side or source says, and what happens next. Do not repeat the summary's
+  sentences. Use only the source articles; same attribution and [n] citation rules as summary.
 - sources: the "n" of every article you relied on.
 - regions: 1-3 regions where the events take place or that they directly affect, most relevant first. Not where the publishers are based. Pick from:
   north-america (US, Canada), latin-america (Mexico, Central and South America, Caribbean), europe (incl. UK, Ukraine, Russia), middle-east (Gulf, Levant, Iran, Israel, Turkey, Egypt), africa (excl. Egypt), south-asia (India, Pakistan, Bangladesh, Sri Lanka, Nepal, Afghanistan), east-asia (China, Japan, Koreas, Taiwan, Mongolia), southeast-asia (Indonesia, Philippines, Vietnam, Thailand, Malaysia, Singapore, Myanmar), oceania (Australia, New Zealand, Pacific islands), central-asia (Kazakhstan, Uzbekistan and neighbours).
