@@ -9,13 +9,16 @@ import type {
 } from '@dn/schemas'
 import { eq, sql } from 'drizzle-orm'
 import { latestAssessment } from './assessments.ts'
+import { cached, SHARED_TTL_MS } from './cache.ts'
 import { storyListItems } from './reader.ts'
 
 // Coverage is measured over published Stories and their active source articles.
 // "First" = the outlet whose article has the earliest report time in that Story.
 // Official sources (agencies, courts) count as coverage but never compete with
 // newsrooms for "first" or "only source".
-const LINKS = sql`
+// With a publisher, only the Stories it covers (with every outlet in them): enough for its own
+// stats and co-coverage, without aggregating everyone.
+const links = (publisherId?: string) => sql`
   links as (
     select sa.story_id, a.publisher_id, coalesce(a.published_at, a.first_seen_at) as at,
       p.kind = 'newsroom' as newsroom
@@ -24,6 +27,13 @@ const LINKS = sql`
     join publisher p on p.id = a.publisher_id
     join story s on s.id = sa.story_id
     where sa.removed_at is null and s.published_at is not null
+    ${
+      publisherId
+        ? sql`and sa.story_id in (
+            select mine.story_id from story_article mine join article ma on ma.id = mine.article_id
+            where mine.removed_at is null and ma.publisher_id = ${publisherId})`
+        : sql``
+    }
   ),
   per_story as (
     select story_id, min(at) as first_at, count(distinct publisher_id)::int as outlets
@@ -49,20 +59,23 @@ type StatsRow = {
   lean_country: string | null
 }
 
-async function statsRows(db: Db, slug?: string) {
+async function statsRows(db: Db, publisherId?: string) {
+  const only = (column: string) =>
+    publisherId ? sql`where ${sql.raw(column)} = ${publisherId}` : sql``
   const { rows } = await db.execute<StatsRow>(sql`
-    with ${LINKS},
+    with ${links(publisherId)},
     per_pub as (
       select l.publisher_id,
         count(distinct l.story_id)::int as stories,
         count(distinct l.story_id) filter (where l.newsroom and l.at = ps.first_at)::int as first_reports,
         count(distinct l.story_id) filter (where l.newsroom and ps.outlets = 1)::int as exclusives
       from links l left join per_story ps using (story_id)
+      ${only('l.publisher_id')}
       group by l.publisher_id
     ),
     per_article as (
       select publisher_id, count(*)::int as article_count, max(first_seen_at) as last_seen
-      from article group by publisher_id
+      from article ${only('publisher_id')} group by publisher_id
     )
     select p.id, p.slug, p.name, p.domain, p.country_code, p.article_body_policy, p.kind, p.license,
       coalesce(pp.stories, 0) as stories,
@@ -78,7 +91,7 @@ async function statsRows(db: Db, slug?: string) {
       select lean, lean_basis, country_context from publisher_assessment
       where publisher_id = p.id order by reviewed_at desc limit 1
     ) la on true
-    ${slug ? sql`where p.slug = ${slug}` : sql``}
+    ${only('p.id')}
     order by stories desc, p.name`)
   return rows.map(
     (r): PublisherStats => ({
@@ -103,7 +116,7 @@ async function statsRows(db: Db, slug?: string) {
 }
 
 export async function listPublishers(db: Db): Promise<PublisherListResponse> {
-  return { items: await statsRows(db) }
+  return { items: await cached('publishers:list', SHARED_TTL_MS, () => statsRows(db)) }
 }
 
 export async function publisherDomainBySlug(db: Db, slug: string): Promise<string | null> {
@@ -115,13 +128,14 @@ export async function publisherDomainBySlug(db: Db, slug: string): Promise<strin
 }
 
 export async function getPublisher(db: Db, slug: string): Promise<PublisherDetail | null> {
-  const [[stats], [publisher]] = await Promise.all([
-    statsRows(db, slug),
-    db.select().from(schema.publisher).where(eq(schema.publisher.slug, slug)),
-  ])
-  if (!stats || !publisher) return null
+  const [publisher] = await db
+    .select()
+    .from(schema.publisher)
+    .where(eq(schema.publisher.slug, slug))
+  if (!publisher) return null
 
-  const [recentStories, shared, profile, assessment] = await Promise.all([
+  const [[stats], recentStories, shared, profile, assessment] = await Promise.all([
+    statsRows(db, publisher.id),
     db
       .execute<{ id: string }>(sql`
         select s.id from story s
@@ -144,7 +158,7 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
       domain: string
       shared: number
     }>(sql`
-      with ${LINKS}
+      with ${links(publisher.id)}
       select p.id, p.slug, p.name, p.domain, count(distinct l1.story_id)::int as shared
       from links l1
       join links l2 on l2.story_id = l1.story_id and l2.publisher_id <> l1.publisher_id
@@ -156,6 +170,7 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
     coverageProfile(db, publisher.id),
     latestAssessment(db, publisher.id),
   ])
+  if (!stats) return null
 
   return {
     ...stats,
@@ -213,18 +228,15 @@ async function coverageProfile(db: Db, publisherId: string): Promise<CoveragePro
   }
 
   const { rows: missed } = await db.execute<{ id: string; slug: string; title: string }>(sql`
-    with outlets as (
-      select sa.story_id, count(distinct a.publisher_id) as n,
-        bool_or(a.publisher_id = ${publisherId}) as mine
-      from story_article sa join article a on a.id = sa.article_id
-      join publisher p on p.id = a.publisher_id
-      where sa.removed_at is null and p.kind = 'newsroom'
-      group by sa.story_id
-    )
-    select s.id, s.slug, s.title from story s join outlets o on o.story_id = s.id
+    select s.id, s.slug, s.title from story s
+    join story_article sa on sa.story_id = s.id and sa.removed_at is null
+    join article a on a.id = sa.article_id
+    join publisher p on p.id = a.publisher_id and p.kind = 'newsroom'
     where s.published_at > now() - interval '7 days' and s.merged_into_story_id is null
-      and o.n >= ${MAJOR_OUTLETS} and not o.mine
-    order by o.n desc, s.last_updated_at desc`)
+    group by s.id
+    having count(distinct a.publisher_id) >= ${MAJOR_OUTLETS}
+      and not bool_or(a.publisher_id = ${publisherId})
+    order by count(distinct a.publisher_id) desc, s.last_updated_at desc`)
 
   return {
     days: PROFILE_DAYS,

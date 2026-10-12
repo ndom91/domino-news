@@ -16,7 +16,7 @@ import {
   storyListResponseSchema,
   userPreferencesSchema,
 } from '@dn/schemas'
-import { createUserAccount, setFeedback } from '@dn/server'
+import { clearCache, createUserAccount, setFeedback } from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedAndRunFixtures } from './drain.ts'
@@ -898,6 +898,7 @@ describe('publisher coverage', () => {
     if (!top || top.firstReports === 0) throw new Error('no first reporter')
 
     await h.ctx.pool.query(`update publisher set kind = 'official' where id = $1`, [top.id])
+    clearCache()
     try {
       const after = await list()
       const official = after.items.find((p) => p.id === top.id)
