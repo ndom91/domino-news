@@ -4,11 +4,13 @@ import {
   apiErrorSchema,
   type EvidenceResponse,
   evidenceResponseSchema,
+  type FailedJobsResponse,
   type FeedbackRequest,
   type FollowList,
   type FollowRequest,
   type ForYouResponse,
   type FrontPage,
+  failedJobsResponseSchema,
   followListSchema,
   forYouResponseSchema,
   frontPageSchema,
@@ -138,6 +140,11 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       }),
     getOpsStatus: (signal?: AbortSignalLike) =>
       request<OpsStatus>(opsStatusSchema, '/ops/status', { signal }),
+    getFailedJobs: (
+      query: { queue?: string | null; cursor?: string | null },
+      signal?: AbortSignalLike,
+    ) =>
+      request<FailedJobsResponse>(failedJobsResponseSchema, `/ops/failed${qs(query)}`, { signal }),
     getPreferences: (signal?: AbortSignalLike) =>
       request<UserPreferences>(userPreferencesSchema, '/me/preferences', { signal }),
     savePreferences: (body: UserPreferencesUpdate) =>
@@ -173,8 +180,11 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       request<LearnedSignals>(learnedSignalsSchema, '/me/signals', { method: 'POST', body }),
     getInsights: (signal?: AbortSignalLike) =>
       request<Insights>(insightsSchema, '/me/insights', { signal }),
-    runOpsAction: (action: OpsAction['action']) =>
-      request(z.object({ ok: z.boolean() }), '/ops/actions', { method: 'POST', body: { action } }),
+    runOpsAction: (body: OpsAction) =>
+      request(z.object({ ok: z.boolean(), count: z.optional(z.int()) }), '/ops/actions', {
+        method: 'POST',
+        body,
+      }),
   }
 }
 

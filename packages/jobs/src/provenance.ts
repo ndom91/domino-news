@@ -42,12 +42,17 @@ export async function withAnalysisRun<T extends { modelId: string; promptVersion
       .where(eq(schema.analysisRun.id, runId))
     return { runId, result }
   } catch (error) {
-    await db
-      .update(schema.analysisRun)
-      .set({ status: 'failed', completedAt: new Date(), error: String(error).slice(0, 500) })
-      .where(eq(schema.analysisRun.id, runId))
+    await markRunFailed(db, runId, error)
     throw error
   }
+}
+
+/** For output rejected after the call returned (e.g. ungrounded citations). */
+export async function markRunFailed(db: Db, runId: string, error: unknown) {
+  await db
+    .update(schema.analysisRun)
+    .set({ status: 'failed', completedAt: new Date(), error: String(error).slice(0, 500) })
+    .where(eq(schema.analysisRun.id, runId))
 }
 
 /** A generation call about one Story: queued on the GPU at the job's priority and recorded. */

@@ -9,6 +9,7 @@ import {
   insightsSchema,
   learnedSignalsSchema,
   narrativeListResponseSchema,
+  opsStatusSchema,
   searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
@@ -67,6 +68,7 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/publishers'],
       ['GET', '/api/v1/search?q=x'],
       ['GET', '/api/v1/ops/status'],
+      ['GET', '/api/v1/ops/failed'],
       ['POST', '/api/v1/ops/actions'],
       ['GET', '/api/v1/me/preferences'],
       ['GET', '/api/v1/me/follows'],
@@ -258,6 +260,104 @@ describe('/api/v1 write endpoints', () => {
     expect(bad.status).toBe(400)
   })
 
+  it('retries 5 times with backoff, and updates queues created with older settings', async () => {
+    const { createQueues } = await import('@dn/jobs')
+    const settings = async (name: string) =>
+      (
+        await h.ctx.pool.query(
+          `select retry_limit, retry_delay, retry_backoff, retry_delay_max from pgboss.queue where name = $1`,
+          [name],
+        )
+      ).rows[0]
+    // As an older deploy left it.
+    await h.ctx.pool.query(
+      `update pgboss.queue set retry_limit = 20, retry_delay = 10 where name = 'extract_claims'`,
+    )
+    await createQueues(await h.ctx.boss())
+    expect(await settings('extract_claims')).toEqual({
+      retry_limit: 5,
+      retry_delay: 60,
+      retry_backoff: true,
+      retry_delay_max: 3600,
+    })
+    expect((await settings('rebuild_search_projection')).retry_limit).toBe(0)
+  })
+
+  it('lists failed jobs with their target, and retries or dismisses them', async () => {
+    const { failedJobsResponseSchema } = await import('@dn/schemas')
+    const boss = await h.ctx.boss()
+    const { rows: stories } = await h.ctx.pool.query(
+      `select id, title from story where published_at is not null limit 1`,
+    )
+    const story = stories[0]
+    // Two jobs that fail on their only attempt, one with a Story as its target.
+    const fail = async (queue: string, data: object, message: string) => {
+      const id = await boss.send(queue, data, { retryLimit: 0 })
+      if (!id) throw new Error('job not created')
+      await h.ctx.pool.query(
+        `update pgboss.job set state = 'active', started_on = now() where id = $1`,
+        [id],
+      )
+      await boss.fail(queue, id, { message, stack: `Error: ${message}\n    at test` })
+      return id
+    }
+    const summaryJob = await fail(
+      'build_story_summary',
+      { targetId: story.id, inputFingerprint: 'f1', pipelineVersion: 'p2', priorityClass: 'fresh' },
+      'summary cites invalid observations: obs_x',
+    )
+    const claimsJob = await fail(
+      'extract_claims',
+      { targetId: 'sty_missing' },
+      'story_claims: response is not JSON',
+    )
+
+    const list = async (query = '') =>
+      failedJobsResponseSchema.parse(await (await call(`/api/v1/ops/failed${query}`)).json())
+    const all = await list()
+    expect(all.items.map((j) => j.id)).toEqual(expect.arrayContaining([summaryJob, claimsJob]))
+    const summary = all.items.find((j) => j.id === summaryJob)
+    expect(summary).toMatchObject({
+      queue: 'build_story_summary',
+      attempts: 1,
+      maxAttempts: 1,
+      error: 'summary cites invalid observations: obs_x',
+      target: { type: 'story', id: story.id, title: story.title },
+    })
+    expect(summary?.stack).toContain('at test')
+    // A target that no longer exists is just missing, not an error.
+    expect(all.items.find((j) => j.id === claimsJob)?.target).toBeNull()
+
+    const claimsOnly = await list('?queue=extract_claims')
+    expect(claimsOnly.items.every((j) => j.queue === 'extract_claims')).toBe(true)
+
+    // The page's failed counts match the list.
+    const status = opsStatusSchema.parse(await (await call('/api/v1/ops/status')).json())
+    expect(status.queues.find((q) => q.name === 'extract_claims')?.failed).toBe(
+      claimsOnly.items.length,
+    )
+
+    const state = async (id: string) =>
+      (await h.ctx.pool.query(`select state from pgboss.job where id = $1`, [id])).rows[0]?.state
+    const retried = await post('/api/v1/ops/actions', {
+      action: 'retry_jobs',
+      queue: 'build_story_summary',
+      ids: [summaryJob],
+    })
+    expect(await retried.json()).toMatchObject({ ok: true, count: 1 })
+    expect(await state(summaryJob)).toMatch(/created|retry/)
+
+    expect(
+      (await post('/api/v1/ops/actions', { action: 'dismiss_jobs', queue: 'extract_claims' }))
+        .status,
+    ).toBe(200)
+    expect(await state(claimsJob)).toBeUndefined()
+
+    const unknown = await post('/api/v1/ops/actions', { action: 'retry_jobs', queue: 'nope' })
+    expect(unknown.status).toBe(400)
+    await boss.deleteJob('build_story_summary', summaryJob)
+  })
+
   it('limits pipeline routes to admins', async () => {
     await createUserAccount(h.ctx.auth, {
       username: 'reader',
@@ -281,6 +381,7 @@ describe('/api/v1 write endpoints', () => {
         }),
       )
     expect((await asReader('/api/v1/ops/status')).status).toBe(403)
+    expect((await asReader('/api/v1/ops/failed')).status).toBe(403)
     expect((await asReader('/api/v1/publishers/bbc/evidence')).status).toBe(403)
     const review = await asReader('/api/v1/publishers/bbc/assessment', {
       method: 'POST',

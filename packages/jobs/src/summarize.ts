@@ -12,7 +12,7 @@ import {
 import { eq } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadStoryInput, withTransientBodies } from './inputs.ts'
-import { runStoryGeneration } from './provenance.ts'
+import { markRunFailed, runStoryGeneration } from './provenance.ts'
 
 /**
  * Generate, validate and record a grounded summary. Stale jobs (story inputs changed)
@@ -62,7 +62,10 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     } catch (error) {
       // Ungrounded citations are a model-output problem: retryable, never published.
       if (error instanceof DomainError && error.code === 'bad_request') {
-        throw new InvalidModelOutputError(error.message)
+        const invalid = new InvalidModelOutputError(error.message)
+        // Outside the rolled-back transaction, so the attempt shows as failed on /ops.
+        await markRunFailed(ctx.db, runId, invalid)
+        throw invalid
       }
       throw error
     }

@@ -21,7 +21,7 @@ import { listFollows, setFollow } from '../follows.ts'
 import { getForYou } from '../for-you.ts'
 import { getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
-import { getOpsStatus, runOpsAction } from '../ops.ts'
+import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
@@ -255,11 +255,23 @@ const routes: Route[] = [
     adminOnly: true,
   }),
   route(
+    'GET',
+    '/api/v1/ops/failed',
+    async ({ ctx, url }) =>
+      json(
+        await listFailedJobs(ctx, {
+          queue: url.searchParams.get('queue') || undefined,
+          cursor: url.searchParams.get('cursor') || undefined,
+        }),
+      ),
+    { adminOnly: true },
+  ),
+  route(
     'POST',
     '/api/v1/ops/actions',
     async ({ ctx, request }) => {
-      await runOpsAction(ctx, await readJson(request, opsActionSchema))
-      return json({ ok: true })
+      const result = await runOpsAction(ctx, await readJson(request, opsActionSchema))
+      return json({ ok: true, ...result })
     },
     { adminOnly: true },
   ),

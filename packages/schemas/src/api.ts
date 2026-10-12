@@ -420,14 +420,6 @@ export const opsStatusSchema = z.object({
     outboxFailed: z.int(),
     oldestOutboxAgeSeconds: z.nullable(z.number()),
   }),
-  recentFailures: z.array(
-    z.object({
-      id: z.string(),
-      queue: z.string(),
-      failedAt: z.nullable(z.string()),
-      error: z.nullable(z.string()),
-    }),
-  ),
   recentRuns: z.array(
     z.object({
       id: z.string(),
@@ -441,10 +433,62 @@ export const opsStatusSchema = z.object({
 })
 export type OpsStatus = z.infer<typeof opsStatusSchema>
 
-export const opsActionSchema = z.object({
-  action: z.enum(['pause_backfill', 'resume_backfill', 'poll_all_feeds', 'rebuild_search']),
-})
+export const opsActionSchema = z.discriminatedUnion('action', [
+  z.object({
+    action: z.enum(['pause_backfill', 'resume_backfill', 'poll_all_feeds', 'rebuild_search']),
+  }),
+  // Failed jobs: retry puts them back in the queue, dismiss deletes them. No ids = every
+  // failed job in the queue.
+  z.object({
+    action: z.enum(['retry_jobs', 'dismiss_jobs']),
+    queue: z.string(),
+    ids: z.optional(z.array(z.string()).check(z.minLength(1), z.maxLength(100))),
+  }),
+])
 export type OpsAction = z.infer<typeof opsActionSchema>
+
+// A job that used up its retries. pg-boss keeps it for 3 days (FAILED_JOB_RETENTION_DAYS).
+export const failedJobSchema = z.object({
+  id: z.string(),
+  queue: z.string(),
+  createdAt: z.string(),
+  failedAt: z.nullable(z.string()),
+  attempts: z.int(),
+  maxAttempts: z.int(),
+  error: z.nullable(z.string()),
+  stack: z.nullable(z.string()),
+  payload: z.unknown(),
+  // What the job was working on, when its payload names a Story or an article.
+  target: z.nullable(
+    z.object({
+      type: z.enum(['story', 'article']),
+      id: z.string(),
+      title: z.string(),
+      // Story page (published Stories only) or the article's own URL.
+      href: z.nullable(z.string()),
+    }),
+  ),
+  // The target's latest analysis runs for this job's operation, newest first.
+  runs: z.array(
+    z.object({
+      id: z.string(),
+      status: z.string(),
+      startedAt: z.string(),
+      modelId: z.string(),
+      promptVersion: z.string(),
+      error: z.nullable(z.string()),
+    }),
+  ),
+})
+export type FailedJob = z.infer<typeof failedJobSchema>
+
+export const failedJobsResponseSchema = z.object({
+  items: z.array(failedJobSchema),
+  pageInfo: pageInfoSchema,
+})
+export type FailedJobsResponse = z.infer<typeof failedJobsResponseSchema>
+
+export const FAILED_JOB_RETENTION_DAYS = 3
 
 const mixEntry = z.object({
   key: z.string(),

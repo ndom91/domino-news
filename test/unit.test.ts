@@ -31,7 +31,7 @@ import type { StoryRelation } from '@dn/schemas'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
 import { cx, layoutNarrative, THEME_TOKENS } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('normalizeArticleUrl', () => {
   it('collapses tracking params, www, fragments and trailing slashes', () => {
@@ -761,5 +761,89 @@ describe('hand-checked lean evidence', () => {
     }
     expect(bad(dnr)).toBe(true)
     expect(bad({ ...dnr, score: 0.8 })).toBe(false)
+  })
+})
+
+describe('local generation adapter', () => {
+  const article = (id: string) => ({
+    articleId: `art_${id}`,
+    observationId: `obs_${id}`,
+    publisher: id,
+    title: 't',
+    description: null,
+    publishedAt: null,
+  })
+  const story = {
+    storyId: 'sty_1',
+    title: 't',
+    summary: null,
+    firstObservedAt: '2026-10-10T00:00:00Z',
+    articles: [article('a'), article('b')],
+  }
+  // One chat completion with the given JSON content and finish reason.
+  const reply = (content: unknown, finish_reason = 'stop') =>
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          choices: [{ message: { content: JSON.stringify(content) }, finish_reason }],
+        }),
+      ),
+    )
+  const generation = async () => {
+    const { createLocalGeneration } = await import('@dn/inference')
+    return createLocalGeneration({
+      baseUrl: 'http://inference.test',
+      embeddingModel: 'e',
+      generationModel: 'g',
+    })
+  }
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sends numbered sources, never IDs', async () => {
+    const { summarizeStoryPrompt } = await import('@dn/inference')
+    const prompt = summarizeStoryPrompt({ story })
+    expect(prompt).toContain('"n": 2')
+    expect(prompt).not.toContain('art_a')
+    expect(prompt).not.toContain('obs_a')
+  })
+
+  it('maps the numbers the model cites back to article and observation IDs', async () => {
+    reply({
+      headline: 'h',
+      summary: 's[2]',
+      sources: [2],
+      regions: ['europe'],
+      desk: 'politics',
+      topics: [],
+    })
+    const { output } = await (await generation()).summarizeStory({ story })
+    expect(output.sourceArticleIds).toEqual(['art_b'])
+    expect(output.observationIds).toEqual(['obs_b'])
+  })
+
+  it('rejects a number outside the list', async () => {
+    reply({
+      claims: [
+        { proposition: 'A thing happened.', mentions: [{ n: 3, stance: 'asserts' }], evidence: [] },
+      ],
+    })
+    await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
+      /cites source 3, but there are 2/,
+    )
+  })
+
+  it('reports a truncated response as truncated, with its start', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () =>
+        Response.json({
+          choices: [{ message: { content: '{"claims": [{"propos' }, finish_reason: 'length' }],
+        }),
+      ),
+    )
+    await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
+      /truncated at 2400 tokens\. Starts: \{"claims"/,
+    )
   })
 })

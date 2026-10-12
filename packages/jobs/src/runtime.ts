@@ -20,28 +20,37 @@ import { feedIds } from './seed.ts'
 import { summarizeStory } from './summarize.ts'
 
 // `exclusive`: at most one created/retry/active job per singletonKey (task+target+fingerprint+version).
-// Generous retries with capped backoff let work survive an inference outage of a few hours.
+// 5 retries with exponential backoff (about 1, 2, 4, 8, 16 minutes) cover a short inference
+// outage without spending many GPU calls on output the model keeps getting wrong. Anything
+// that still fails waits on the Pipeline page to be retried by hand.
 const QUEUE_OPTIONS: Omit<Queue, 'name'> = {
   policy: 'exclusive',
-  retryLimit: 20,
-  retryDelay: 10,
+  retryLimit: 5,
+  retryDelay: 60,
   retryBackoff: true,
-  retryDelayMax: 600,
+  retryDelayMax: 3600,
   expireInSeconds: 15 * 60,
   retentionSeconds: 7 * 86_400,
   deleteAfterSeconds: 3 * 86_400,
 }
 
+function queueOptions(name: string): Omit<Queue, 'name'> {
+  // A rebuild re-creates collections; retrying a still-running one would orphan them.
+  return name === QUEUES.rebuildSearch
+    ? { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
+    : QUEUE_OPTIONS
+}
+
+/** Create missing queues, and bring existing ones up to the current options. */
 export async function createQueues(boss: PgBoss) {
   for (const name of Object.values(QUEUES)) {
-    const existing = await boss.getQueue(name)
-    if (existing) continue
-    // A rebuild re-creates collections; retrying a still-running one would orphan them.
-    const options =
-      name === QUEUES.rebuildSearch
-        ? { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
-        : QUEUE_OPTIONS
-    await boss.createQueue(name, options)
+    const { policy, ...options } = queueOptions(name)
+    if (await boss.getQueue(name)) {
+      // The policy can't change after creation; jobs already queued keep their own retry settings.
+      await boss.updateQueue(name, options)
+    } else {
+      await boss.createQueue(name, { policy, ...options })
+    }
   }
 }
 

@@ -2,13 +2,15 @@ import { DESK_SCOPES, DESKS, TOPIC_LABELS, TOPICS } from '@dn/schemas'
 import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
+// @5/@8/@6/@4/@3: sources are numbered and answers cite the numbers. The model used to copy
+// 30-character IDs back and dropped characters, which failed grounding checks.
 export const PROMPT_VERSIONS = {
-  matchStory: 'match-story@4',
-  summarizeStory: 'summarize-story@7',
-  classifyRelationship: 'classify-relationship@5',
+  matchStory: 'match-story@5',
+  summarizeStory: 'summarize-story@8',
+  classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
-  explainContext: 'explain-context@3',
-  extractClaims: 'extract-claims@2',
+  explainContext: 'explain-context@4',
+  extractClaims: 'extract-claims@3',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -22,10 +24,10 @@ Answer only with JSON that matches the requested schema.`
 
 const MAX_BODY_CHARS = 6000
 
-function articleData(a: ArticleInput) {
+// Models refer to sources by number ("n"); the adapter maps numbers back to IDs.
+function articleData(a: ArticleInput, n?: number) {
   return {
-    articleId: a.articleId,
-    observationId: a.observationId,
+    ...(n === undefined ? {} : { n }),
     publisher: a.publisher,
     sourceType: a.publisherKind ?? 'newsroom',
     publishedAt: a.publishedAt,
@@ -37,11 +39,10 @@ function articleData(a: ArticleInput) {
 
 function storyData(s: StoryInput) {
   return {
-    storyId: s.storyId,
     title: s.title,
     summary: s.summary,
     firstObservedAt: s.firstObservedAt,
-    articles: s.articles.map(articleData),
+    articles: s.articles.map((a, i) => articleData(a, i + 1)),
   }
 }
 
@@ -59,7 +60,7 @@ export function matchStoryPrompt(input: { article: ArticleInput; story: StoryInp
 Be conservative: only answer "same_development" when the primary event each side reports is the same.
 These differences do NOT make it a different development: another language, a different headline or angle,
 more or less detail, or an official statement versus news coverage of the same announcement, ruling or release.
-evidenceArticleIds must only contain articleId values from the EXISTING STORY that support your decision.
+evidenceArticles: the "n" of each EXISTING STORY article that supports your decision. Only use numbers from the list.
 
 NEW ARTICLE:
 ${data(articleData(input.article))}
@@ -77,8 +78,7 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
   Do not open with a list of who reported it. Lead with what happened. Where outlets agree, say so once; where they
   disagree, or only one outlet reports a detail, name the outlet.
   After each attributed statement, add a citation marker with the source's number "n" from the list, e.g. "according to X[2]". Use only numbers from the list.
-- sourceArticleIds: the articleId of every article you relied on.
-- observationIds: the observationId of every article you relied on.
+- sources: the "n" of every article you relied on.
 - regions: 1-3 regions where the events take place or that they directly affect, most relevant first. Not where the publishers are based. Pick from:
   north-america (US, Canada), latin-america (Mexico, Central and South America, Caribbean), europe (incl. UK, Ukraine, Russia), middle-east (Gulf, Levant, Iran, Israel, Turkey, Egypt), africa (excl. Egypt), south-asia (India, Pakistan, Bangladesh, Sri Lanka, Nepal, Afghanistan), east-asia (China, Japan, Koreas, Taiwan, Mongolia), southeast-asia (Indonesia, Philippines, Vietnam, Thailand, Malaysia, Singapore, Myanmar), oceania (Australia, New Zealand, Pacific islands), central-asia (Kazakhstan, Uzbekistan and neighbours).
   Use "global" only when no single region fits: worldwide events, or more than three regions equally involved.
@@ -91,7 +91,7 @@ ${TOPICS.map((t) => `  ${t} (${TOPIC_LABELS[t]})`).join('\n')}
 Do not copy sentences from the sources.
 
 SOURCE ARTICLES (numbered, in publishing order):
-${data(storyData(input.story).articles.map((a, i) => ({ n: i + 1, ...a })))}`
+${data(storyData(input.story).articles)}`
 }
 
 export function classifyRelationshipPrompt(input: { newer: StoryInput; older: StoryInput }) {
@@ -147,7 +147,7 @@ For each:
 - kind: "definition" (what a term means), "background" (who/what an entity is), or "prerequisite" (an earlier event needed to follow this one).
 - explanation: one or two neutral sentences: what it is and why it matters here. Stick to well-established
   background; do not add new claims about current events that the source articles do not report.
-- sourceObservationIds: observationId values of the source articles that mention the subject.
+- sources: the "n" of each source article that mentions the subject.
 Return an empty list if nothing needs explaining.
 
 SUMMARY:
@@ -166,16 +166,16 @@ A claim is a specific, checkable statement (who did/said what, numbers, outcomes
 Prefer claims that several sources address or that sources disagree on; skip details one source mentions in passing.
 An "official" source is the body's own statement: its stance on its own actions is "asserts".
 - proposition: one neutral sentence stating the claim itself, without "X reports that".
-- mentions: for each source article that addresses the claim, its articleId and stance:
+- mentions: for each source article that addresses the claim, its number "n" and stance:
   "asserts" (states it as fact), "denies" (disputes it), "quotes" (attributes it to someone else),
   "discusses" (mentions it without taking a position).
 - evidence: only if a PRIMARY SOURCE below is the document the claim is about (e.g. the court ruling, the bill):
-  its sourceReferenceId and relationship ("supports", "contradicts", "context", "inconclusive"). Otherwise [].
+  its number "p" and relationship ("supports", "contradicts", "context", "inconclusive"). Otherwise [].
 Use only the information below. Do not judge whether claims are true.
 
 SOURCE ARTICLES:
 ${data(storyData(input.story).articles)}
 
 PRIMARY SOURCES:
-${data(input.primarySources)}`
+${data(input.primarySources.map((p, i) => ({ p: i + 1, url: p.url, title: p.title })))}`
 }

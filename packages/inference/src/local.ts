@@ -1,8 +1,9 @@
 import {
-  claimsOutputSchema,
+  claimEvidenceRelationSchema,
+  claimStanceSchema,
+  contextKindSchema,
   narrativeTitleSchema,
   relationshipCandidateSchema,
-  storyContextOutputSchema,
   storyMatchSchema,
   storySummarySchema,
 } from '@dn/schemas'
@@ -109,9 +110,67 @@ export function createLocalEmbeddings(config: LocalConfig): EmbeddingProvider {
 
 const chatResponse = z.object({
   choices: z
-    .array(z.object({ message: z.object({ content: z.nullable(z.string()) }) }))
+    .array(
+      z.object({
+        message: z.object({ content: z.nullable(z.string()) }),
+        finish_reason: z.optional(z.nullable(z.string())),
+      }),
+    )
     .check(z.minLength(1)),
 })
+
+// What the model answers: sources by their number in the prompt ("n", "p"), never by ID.
+// `fromNumbers` below maps them back, so callers only ever see real IDs.
+const sourceNumbers = z.array(z.int()).check(z.minLength(1))
+const matchByNumber = z.object({
+  decision: storyMatchSchema.shape.decision,
+  evidenceArticles: z.array(z.int()),
+  rationale: z.string(),
+})
+const summaryByNumber = z.extend(
+  z.omit(storySummarySchema, { sourceArticleIds: true, observationIds: true }),
+  { sources: sourceNumbers },
+)
+const contextByNumber = z.object({
+  entries: z
+    .array(
+      z.object({
+        anchorText: z.string().check(z.minLength(2), z.maxLength(80)),
+        title: z.string(),
+        kind: contextKindSchema,
+        explanation: z.string(),
+        sources: sourceNumbers,
+      }),
+    )
+    .check(z.maxLength(4)),
+})
+const claimsByNumber = z.object({
+  claims: z
+    .array(
+      z.object({
+        proposition: z.string().check(z.minLength(8), z.maxLength(300)),
+        mentions: z
+          .array(z.object({ n: z.int(), stance: claimStanceSchema }))
+          .check(z.minLength(1)),
+        evidence: z.array(z.object({ p: z.int(), relationship: claimEvidenceRelationSchema })),
+      }),
+    )
+    .check(z.maxLength(5)),
+})
+
+/** The item a 1-based number in the prompt referred to; a number outside the list is invalid output. */
+function numbered<T>(name: string, list: readonly T[], n: number): T {
+  const item = list[n - 1]
+  if (item === undefined) {
+    throw new InvalidModelOutputError(`${name}: cites source ${n}, but there are ${list.length}`)
+  }
+  return item
+}
+
+// Most answers are short; summaries and claims list several sources per item.
+const MAX_TOKENS = { default: 1200, long: 2400 }
+// How much of a bad response to keep in the error, for the Pipeline page.
+const RESPONSE_EXCERPT_CHARS = 300
 
 export function createLocalGeneration(config: LocalConfig): GenerationProvider {
   async function generate<T>(
@@ -119,6 +178,7 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
     schema: z.ZodMiniType<T>,
     prompt: string,
     promptVersion: string,
+    maxTokens = MAX_TOKENS.default,
   ) {
     const json = chatResponse.parse(
       await post(
@@ -127,7 +187,7 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         {
           model: config.generationModel,
           temperature: 0.2,
-          max_tokens: 1200,
+          max_tokens: maxTokens,
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             { role: 'user', content: prompt },
@@ -140,12 +200,19 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         120_000,
       ),
     )
-    const content = json.choices[0]?.message.content ?? ''
+    const choice = json.choices[0]
+    const content = choice?.message.content ?? ''
+    const excerpt = content.slice(0, RESPONSE_EXCERPT_CHARS)
+    if (choice?.finish_reason === 'length') {
+      throw new InvalidModelOutputError(
+        `${name}: response truncated at ${maxTokens} tokens. Starts: ${excerpt}`,
+      )
+    }
     let parsed: unknown
     try {
       parsed = JSON.parse(content)
     } catch {
-      throw new InvalidModelOutputError(`${name}: response is not JSON`)
+      throw new InvalidModelOutputError(`${name}: response is not JSON. Starts: ${excerpt}`)
     }
     const result = schema.safeParse(parsed)
     if (!result.success) {
@@ -156,20 +223,44 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
 
   return {
     modelId: config.generationModel,
-    matchStory: (input) =>
-      generate(
+    matchStory: async (input) => {
+      const g = await generate(
         'story_match',
-        storyMatchSchema,
+        matchByNumber,
         matchStoryPrompt(input),
         PROMPT_VERSIONS.matchStory,
-      ),
-    summarizeStory: (input) =>
-      generate(
+      )
+      const { evidenceArticles, ...rest } = g.output
+      const articles = input.story.articles
+      return {
+        ...g,
+        output: {
+          ...rest,
+          evidenceArticleIds: evidenceArticles.map(
+            (n) => numbered('story_match', articles, n).articleId,
+          ),
+        },
+      }
+    },
+    summarizeStory: async (input) => {
+      const g = await generate(
         'story_summary',
-        storySummarySchema,
+        summaryByNumber,
         summarizeStoryPrompt(input),
         PROMPT_VERSIONS.summarizeStory,
-      ),
+        MAX_TOKENS.long,
+      )
+      const { sources, ...rest } = g.output
+      const used = sources.map((n) => numbered('story_summary', input.story.articles, n))
+      return {
+        ...g,
+        output: {
+          ...rest,
+          sourceArticleIds: used.map((a) => a.articleId),
+          observationIds: used.map((a) => a.observationId),
+        },
+      }
+    },
     classifyRelationship: (input) =>
       generate(
         'relationship_candidate',
@@ -177,20 +268,53 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         classifyRelationshipPrompt(input),
         PROMPT_VERSIONS.classifyRelationship,
       ),
-    explainContext: (input) =>
-      generate(
+    explainContext: async (input) => {
+      const g = await generate(
         'story_context',
-        storyContextOutputSchema,
+        contextByNumber,
         explainContextPrompt(input),
         PROMPT_VERSIONS.explainContext,
-      ),
-    extractClaims: (input) =>
-      generate(
+      )
+      const articles = input.story.articles
+      return {
+        ...g,
+        output: {
+          entries: g.output.entries.map(({ sources, ...entry }) => ({
+            ...entry,
+            sourceObservationIds: sources.map(
+              (n) => numbered('story_context', articles, n).observationId,
+            ),
+          })),
+        },
+      }
+    },
+    extractClaims: async (input) => {
+      const g = await generate(
         'story_claims',
-        claimsOutputSchema,
+        claimsByNumber,
         extractClaimsPrompt(input),
         PROMPT_VERSIONS.extractClaims,
-      ),
+        MAX_TOKENS.long,
+      )
+      const { articles } = input.story
+      return {
+        ...g,
+        output: {
+          claims: g.output.claims.map((c) => ({
+            proposition: c.proposition,
+            mentions: c.mentions.map((m) => ({
+              articleId: numbered('story_claims', articles, m.n).articleId,
+              stance: m.stance,
+            })),
+            evidence: c.evidence.map((e) => ({
+              sourceReferenceId: numbered('story_claims', input.primarySources, e.p)
+                .sourceReferenceId,
+              relationship: e.relationship,
+            })),
+          })),
+        },
+      }
+    },
     titleNarrative: (input) =>
       generate(
         'narrative_title',

@@ -29,6 +29,7 @@ export const queryKeys = {
   publishers: () => ['publishers'] as const,
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
   ops: () => ['ops', 'status'] as const,
+  failedJobs: (queue: string | null) => ['ops', 'failed', queue ?? 'all'] as const,
   preferences: () => ['me', 'preferences'] as const,
   insights: () => ['me', 'insights'] as const,
   follows: () => ['me', 'follows'] as const,
@@ -132,6 +133,13 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.ops(),
         queryFn: ({ signal }) => api.getOpsStatus(signal),
         refetchInterval: 5_000,
+      }),
+    failedJobs: (queue: string | null) =>
+      infiniteQueryOptions({
+        queryKey: queryKeys.failedJobs(queue),
+        queryFn: ({ pageParam, signal }) => api.getFailedJobs({ queue, cursor: pageParam }, signal),
+        initialPageParam: null as string | null,
+        getNextPageParam: (last) => last.pageInfo.nextCursor,
       }),
   }
 }

@@ -81,6 +81,22 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expectNoHorizontalOverflow(page)
 })
 
+test('pipeline page lists failed jobs, or says there are none', async ({ page }) => {
+  await signIn(page)
+  await page.goto('/ops')
+  await expect(page.getByRole('heading', { name: 'Failed jobs' })).toBeVisible()
+  const failed = page.locator('#failed-jobs details')
+  // The list loads after the page: wait for rows or the empty state before deciding.
+  await expect(failed.first().or(page.getByText(/No failed jobs/))).toBeVisible()
+  if ((await failed.count()) > 0) {
+    await failed.first().locator('summary').click()
+    await expect(failed.first().getByRole('button', { name: 'Retry job' })).toBeVisible()
+  } else {
+    await expect(page.getByText(/No failed jobs/)).toBeVisible()
+  }
+  await expectNoHorizontalOverflow(page)
+})
+
 test('keyboard users can reach main navigation', async ({ page }) => {
   await signIn(page)
   await page.goto('/', { waitUntil: 'networkidle' })
