@@ -9,6 +9,7 @@ import type { NarrativeListResponse } from '@dn/schemas'
 import { cx, deskKey, Notice, PeriodBar } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { DisclosureChevron } from '../../components/disclosure-chevron.tsx'
 import { Page, PageTitle } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
 
@@ -55,9 +56,7 @@ function NarrativesPage() {
                 <PeriodBar
                   title={
                     <>
-                      <span aria-hidden className="t-acc-chevron mr-2">
-                        ›
-                      </span>
+                      <DisclosureChevron size="0.7em" className="mr-2 align-baseline" />
                       {PERIOD_LABELS[g.period]}
                     </>
                   }

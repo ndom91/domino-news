@@ -1,6 +1,7 @@
 import { countryName, LEAN_MIX_MIN_RATED, plural } from '@dn/domain'
 import type { StoryLean as StoryLeanData } from '@dn/schemas'
 import { LeanSpread, SectionLabel } from '@dn/ui'
+import { DisclosureChevron } from './disclosure-chevron.tsx'
 import { RouterLink } from './link.tsx'
 
 const hasEnough = (m: StoryLeanData) =>
@@ -31,10 +32,8 @@ export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: str
       )}
       {others.length ? (
         <details className="t-acc mt-4 border-t border-border pt-3">
-          <summary className="cursor-pointer list-none type-label text-text-muted [&::-webkit-details-marker]:hidden">
-            <span aria-hidden className="t-acc-chevron mr-1.5">
-              ›
-            </span>
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 type-label text-text-muted [&::-webkit-details-marker]:hidden">
+            <DisclosureChevron />
             Other countries ({others.length})
           </summary>
           <div className="mt-4 flex flex-col gap-6">

@@ -5,6 +5,7 @@ import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tansta
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { z } from 'zod/mini'
+import { DisclosureChevron } from '../components/disclosure-chevron.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
@@ -363,7 +364,10 @@ function FailedJobRow({
   return (
     <details className="t-acc group">
       <summary className="flex cursor-pointer list-none gap-3 py-3 text-sm [&::-webkit-details-marker]:hidden">
-        <Chevron />
+        {/* A first-line-high box keeps the icon level with the queue name. */}
+        <span className="flex h-5 items-center">
+          <DisclosureChevron className="text-text-muted" />
+        </span>
         <span className="min-w-0 flex-1">
           <span className="flex flex-wrap items-baseline gap-x-3">
             <span className="text-xs font-semibold">{job.queue}</span>
@@ -464,27 +468,12 @@ function FailedJobRow({
   )
 }
 
-/**
- * Disclosure chevron in a fixed box on the first text line. As a stretched flex or grid item
- * it would rotate around the middle of the whole multi-line summary and drift into the text.
- */
-function Chevron() {
-  return (
-    <span
-      aria-hidden
-      className="t-acc-chevron flex size-5 flex-none items-center justify-center self-start leading-none text-text-muted"
-    >
-      ›
-    </span>
-  )
-}
-
 /** A detail that starts folded: long, rarely needed output (stack trace, payload). */
 function Fold({ label, children }: { label: string; children: ReactNode }) {
   return (
     <details className="t-acc py-4">
       <summary className="flex cursor-pointer list-none items-center gap-2 type-label text-text [&::-webkit-details-marker]:hidden">
-        <Chevron />
+        <DisclosureChevron />
         {label}
       </summary>
       <div className="mt-2">{children}</div>
