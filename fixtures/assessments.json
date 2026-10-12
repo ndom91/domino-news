@@ -29,11 +29,15 @@
         "reliabilityLevel": null,
         "reliability": "Not on Wikipedia's perennial sources list.",
         "countryContext": "AU",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre",
+        "leanEvidenceUrl": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "leanNote": "Audience score -0.04, Reuters Institute DNR 2017 via Fletcher, Cornia & Nielsen 2020 (relative to Australian audiences). ABC News."
       },
-      "sources": ["https://en.wikipedia.org/wiki/ABC_News_(Australia)"],
+      "sources": [
+        "https://doi.org/10.1177/1940161219892768",
+        "https://en.wikipedia.org/wiki/ABC_News_(Australia)",
+        "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f"
+      ],
       "notes": "No DNR polarisation data for Australia in the 2022 chapter; the University of Canberra's DNR Australia reports might have audience-lean data if a lean is wanted later."
     },
     {
@@ -349,15 +353,17 @@
         "reliabilityLevel": "reliable",
         "reliability": "Generally reliable (Wikipedia perennial sources: The Economist).",
         "countryContext": "GB",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "leanNote": "Audience score -0.05, Reuters Institute DNR 2017 via Fletcher, Cornia & Nielsen 2020 (relative to UK audiences). The Economist; a 2021 study of online readers alone gives -0.15."
       },
       "sources": [
-        "https://www.wikidata.org/wiki/Q180089",
+        "https://doi.org/10.1177/1940161219892768",
         "https://en.wikipedia.org/wiki/The_Economist_Group",
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
         "https://www.axios.com/2026/03/17/economist-sale-rothschild-stephen-smith",
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+        "https://www.wikidata.org/wiki/Q180089"
       ],
       "notes": "Stephen Smith stake (about 26.9%) comes from Axios, March 2026. Wikipedia still lists the Rothschilds at 21%. Exact current percentages need a check against the latest Economist Group annual report."
     },
@@ -369,13 +375,15 @@
         "reliabilityLevel": null,
         "reliability": "Not on Wikipedia's perennial sources list.",
         "countryContext": "ES",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "leanNote": "Audience score -0.07, Reuters Institute DNR 2017 via Fletcher, Cornia & Nielsen 2020 (relative to Spanish audiences). El País (domestic Spanish brand)."
       },
       "sources": [
+        "https://doi.org/10.1177/1940161219892768",
         "https://en.wikipedia.org/wiki/El_Pa%C3%ADs",
-        "https://en.wikipedia.org/wiki/PRISA"
+        "https://en.wikipedia.org/wiki/PRISA",
+        "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f"
       ],
       "notes": "PRISA's major shareholders not listed; check whether wp_rsp has an El País entry under another name (none was imported)."
     },
@@ -444,11 +452,15 @@
         "reliabilityLevel": null,
         "reliability": "Not on Wikipedia's perennial sources list.",
         "countryContext": "FR",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "centre_left",
+        "leanEvidenceUrl": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "leanNote": "Audience score -0.10, Reuters Institute DNR 2017 via Fletcher, Cornia & Nielsen 2020 (relative to French audiences). France 24; mostly its TV audience, online alone scores -0.02."
       },
-      "sources": ["https://en.wikipedia.org/wiki/France_24"],
+      "sources": [
+        "https://doi.org/10.1177/1940161219892768",
+        "https://en.wikipedia.org/wiki/France_24",
+        "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f"
+      ],
       "notes": "Classed as public_broadcaster (French public audiovisual sector). Wikipedia calls it 'state-owned publicly funded'. A reviewer may prefer 'state'."
     },
     {
@@ -1094,14 +1106,16 @@
         "reliabilityLevel": "reliable",
         "reliability": "Generally reliable (Wikipedia perennial sources: The Conversation).",
         "countryContext": "AU",
-        "lean": null,
-        "leanEvidenceUrl": null,
-        "leanNote": null
+        "lean": "left",
+        "leanEvidenceUrl": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "leanNote": "Audience score -0.22, Reuters Institute DNR 2017 via Fletcher, Cornia & Nielsen 2020 (relative to Australian audiences). The Conversation; small sample, 3.7% weekly reach."
       },
       "sources": [
+        "https://doi.org/10.1177/1940161219892768",
         "https://en.wikipedia.org/wiki/The_Conversation_(website)",
-        "https://theconversation.com/au/who-we-are",
-        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources"
+        "https://en.wikipedia.org/wiki/Wikipedia:Reliable_sources/Perennial_sources",
+        "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+        "https://theconversation.com/au/who-we-are"
       ],
       "notes": ""
     },

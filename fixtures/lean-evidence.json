@@ -4,7 +4,8 @@
     "allsides: rating as shown on the source page (US political scale). AllSides Media Bias Ratings by AllSides.com, CC BY-NC 4.0.",
     "reuters_dnr: audience score from the chart data behind the Reuters Institute DNR 2022 polarisation chapter (Datawrapper \"Get the data\"). -0.5 = all-left audience, +0.5 = all-right, 0 = matches the population.",
     "DNR score to step: |score| < 0.05 centre; 0.05 to < 0.20 centre-left/right; >= 0.20 left/right.",
-    "DNR scores are for the domestic brand: spiegel-international uses Spiegel, zdfheute uses ZDF."
+    "DNR scores are for the domestic brand: spiegel-international uses Spiegel, zdfheute uses ZDF.",
+    "DNR 2017 entries come from the per-brand tables in Fletcher, Cornia & Nielsen (2020), \"How Polarized are Online and Offline News Audiences?\", IJPP, doi:10.1177/1940161219892768 (accepted manuscript on ORA). Cross-platform scores, as for DNR 2022."
   ],
   "entries": [
     {
@@ -264,6 +265,56 @@
       "edition": 2022,
       "url": "https://reutersinstitute.politics.ox.ac.uk/digital-news-report/2022/have-news-audiences-become-more-polarised-over-time",
       "checkedAt": "2026-10-11"
+    },
+    {
+      "publisher": "elpais-en",
+      "source": "reuters_dnr",
+      "score": -0.07,
+      "lean": "centre_left",
+      "countryContext": "ES",
+      "edition": 2017,
+      "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+      "checkedAt": "2026-10-12"
+    },
+    {
+      "publisher": "france24",
+      "source": "reuters_dnr",
+      "score": -0.1,
+      "lean": "centre_left",
+      "countryContext": "FR",
+      "edition": 2017,
+      "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+      "checkedAt": "2026-10-12"
+    },
+    {
+      "publisher": "abc-au",
+      "source": "reuters_dnr",
+      "score": -0.04,
+      "lean": "centre",
+      "countryContext": "AU",
+      "edition": 2017,
+      "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+      "checkedAt": "2026-10-12"
+    },
+    {
+      "publisher": "theconversation",
+      "source": "reuters_dnr",
+      "score": -0.22,
+      "lean": "left",
+      "countryContext": "AU",
+      "edition": 2017,
+      "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+      "checkedAt": "2026-10-12"
+    },
+    {
+      "publisher": "economist",
+      "source": "reuters_dnr",
+      "score": -0.05,
+      "lean": "centre_left",
+      "countryContext": "GB",
+      "edition": 2017,
+      "url": "https://ora.ox.ac.uk/objects/uuid:d6b9a202-9a1c-41f7-881e-08256178aeb7/files/swp988j97f",
+      "checkedAt": "2026-10-12"
     }
   ]
 }
