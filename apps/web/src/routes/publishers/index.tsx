@@ -15,10 +15,12 @@ import {
   positionKey,
   SectionLabel,
   Select,
+  TextInput,
   Timestamp,
 } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
+import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
 import { RouterLink } from '../../components/link.tsx'
 import { Page, PageTitle } from '../../components/page.tsx'
@@ -36,8 +38,20 @@ const LEAN_FILTER_OPTIONS = [
 const matchesLean = (p: PublisherStats, lean: LeanFilter | undefined) =>
   !lean || (lean === 'not_assessed' ? p.lean === null : p.lean === lean)
 
+// Case- and accent-insensitive, so "agencia" finds Agência Brasil.
+const fold = (s: string) =>
+  s
+    .normalize('NFD')
+    .replace(/\p{Diacritic}/gu, '')
+    .toLowerCase()
+const matchesQuery = (p: PublisherStats, q: string) =>
+  !q || fold(`${p.name} ${p.domain}`).includes(fold(q))
+
 export const Route = createFileRoute('/publishers/')({
-  validateSearch: z.object({ lean: z.catch(z.optional(leanFilterSchema), undefined) }),
+  validateSearch: z.object({
+    q: z.catch(z.optional(z.string()), undefined),
+    lean: z.catch(z.optional(leanFilterSchema), undefined),
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(queries.publishers()),
   head: () => ({ meta: [{ title: 'Publishers · Domino News' }] }),
   component: PublishersPage,
@@ -63,9 +77,19 @@ function byRegion(items: PublisherStats[]) {
 function PublishersPage() {
   const { data } = useSuspenseQuery(queries.publishers())
   const isAdmin = Route.useRouteContext().session.user?.isAdmin ?? false
-  const { lean } = Route.useSearch()
+  const { q = '', lean } = Route.useSearch()
   const navigate = useNavigate({ from: Route.fullPath })
-  const shown = data.items.filter((p) => matchesLean(p, lean))
+  // The field keeps its own text so typing never waits on the router; it follows the URL on
+  // back and forward. (Keying it on the URL, like the select, would drop focus per keystroke.)
+  const [query, setQuery] = useState(q)
+  // What this field last wrote to the URL: the URL catching up with typing isn't a change to
+  // copy back (it could be a keystroke behind).
+  const written = useRef(q)
+  useEffect(() => {
+    if (q !== written.current) setQuery(q)
+  }, [q])
+  const shown = data.items.filter((p) => matchesQuery(p, query.trim()) && matchesLean(p, lean))
+  const filtered = Boolean(query.trim() || lean)
   return (
     <Page>
       <PageTitle meta={plural(data.items.length, 'publisher')}>Publishers</PageTitle>
@@ -75,19 +99,45 @@ function PublishersPage() {
       </p>
 
       <div className="mb-8 flex flex-wrap items-center gap-x-4 gap-y-2">
+        <TextInput
+          type="search"
+          name="q"
+          label="Search publishers"
+          hideLabel
+          placeholder="Search publishers…"
+          autoComplete="off"
+          spellCheck={false}
+          value={query}
+          onChange={(event) => {
+            setQuery(event.target.value)
+            written.current = event.target.value
+            navigate({
+              search: (prev) => ({ ...prev, q: event.target.value || undefined }),
+              replace: true,
+              resetScroll: false,
+            })
+          }}
+          className="w-72 max-sm:w-full"
+        />
         <Select
           // Keyed on the URL so back and forward reset the field.
           key={lean ?? 'any'}
           aria-label="Filter by political lean"
+          // Same height as the search field beside it.
+          className="min-h-tap"
           name="lean"
           options={LEAN_FILTER_OPTIONS}
           value={lean ?? null}
           onValueChange={(next) =>
-            navigate({ search: { lean: next ?? undefined }, replace: true, resetScroll: false })
+            navigate({
+              search: (prev) => ({ ...prev, lean: next ?? undefined }),
+              replace: true,
+              resetScroll: false,
+            })
           }
         />
         <p className="type-meta" aria-live="polite">
-          {lean ? `${plural(shown.length, 'publisher')} shown` : null}
+          {filtered ? `${plural(shown.length, 'publisher')} shown` : null}
         </p>
       </div>
 
