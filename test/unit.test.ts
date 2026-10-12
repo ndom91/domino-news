@@ -27,6 +27,7 @@ import {
   parseRspWikitext,
   wikidataEvidence,
 } from '@dn/jobs'
+import type { StoryRelation } from '@dn/schemas'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
 import { cx, layoutNarrative, THEME_TOKENS } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
@@ -143,6 +144,84 @@ describe('layoutNarrative', () => {
     ])
     // sty_reax's branch is its own primary, so sty_pillay does not list it again.
     expect(row('sty_pillay')?.secondary.map((s) => s.otherId)).not.toContain('sty_reax')
+  })
+
+  // Stories a..z one hour apart; edges as [child, parent, relation?].
+  const tree = (ids: string, links: [string, string, StoryRelation?][]) =>
+    layoutNarrative(
+      [...ids].map((id, i) => ({
+        id,
+        slug: id,
+        title: id,
+        summary: null,
+        firstObservedAt: new Date(Date.UTC(2026, 9, 1, i)).toISOString(),
+        lastUpdatedAt: new Date(Date.UTC(2026, 9, 1, i)).toISOString(),
+        sourceCount: 1,
+      })),
+      links.map(([from, to, relation = 'follows'], i) => ({
+        id: `e${i}`,
+        fromStoryId: from,
+        toStoryId: to,
+        relation,
+      })),
+    )
+  const lanes = (layout: ReturnType<typeof tree>) => layout.rows.map((r) => r.lane).join('')
+
+  it('keeps a chain on one lane, like a plain timeline', () => {
+    const layout = tree('abc', [
+      ['b', 'a'],
+      ['c', 'b'],
+    ])
+    expect(layout.laneCount).toBe(1)
+    expect(layout.rows.map((r) => [r.top[0], r.bottom[0]])).toEqual([
+      [null, 'solid'],
+      ['solid', 'solid'],
+      ['solid', null],
+    ])
+  })
+
+  it('continues the bigger subtree and branches the other child off at the parent', () => {
+    // a has children b (with its own child d) and c: b continues lane 0, c branches.
+    const layout = tree('abcd', [
+      ['b', 'a'],
+      ['c', 'a'],
+      ['d', 'b'],
+    ])
+    expect(lanes(layout)).toBe('0010')
+    expect(layout.rows[0]?.elbows).toEqual([{ lane: 1, segment: 'solid' }])
+    // c's line runs from a's marker down through b's row to c.
+    expect(layout.rows[1]?.top[1]).toBe('solid')
+    expect(layout.rows[1]?.bottom[1]).toBe('solid')
+    expect(layout.rows[2]?.bottom[1]).toBeNull()
+  })
+
+  it('reuses a lane once its branch has ended', () => {
+    const layout = tree('abcde', [
+      ['b', 'a'],
+      ['c', 'a', 'branches_from'],
+      ['d', 'b'],
+      ['e', 'd', 'branches_from'],
+    ])
+    expect(lanes(layout)).toBe('00101')
+    expect(layout.laneCount).toBe(2)
+  })
+
+  it('draws a loose parent link dashed and starts unlinked Stories in a free lane', () => {
+    const layout = tree('abc', [['c', 'a', 'related_to']])
+    expect(lanes(layout)).toBe('010')
+    expect(layout.rows[1]?.top[0]).toBe('dashed')
+    expect(layout.rows[1]?.bottom[1]).toBeNull()
+  })
+
+  it('caps the tree at four lanes', () => {
+    const layout = tree('abcdef', [
+      ['b', 'a'],
+      ['c', 'a', 'branches_from'],
+      ['d', 'a', 'branches_from'],
+      ['e', 'a', 'branches_from'],
+      ['f', 'a', 'branches_from'],
+    ])
+    expect(layout.laneCount).toBe(4)
   })
 })
 
