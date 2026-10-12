@@ -97,7 +97,8 @@ export function HeroStory({
           {linkHeadline ? (
             <Link
               to={`/stories/${story.slug}`}
-              className="hover:underline hover:decoration-[6px] hover:underline-offset-[10px]"
+              // The cards' fading underline, heavier for display size, in the fill's text colour.
+              className="link-headline decoration-[6px] underline-offset-[10px] hover:decoration-key-text"
             >
               {story.title}
             </Link>
