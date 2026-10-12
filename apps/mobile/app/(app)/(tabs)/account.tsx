@@ -403,8 +403,9 @@ export default function AccountScreen() {
                   setCountryPickerOpen(false)
                 }}
               />
-              {KNOWN_COUNTRIES.toSorted((a, b) => countryName(a).localeCompare(countryName(b))).map(
-                (country) => (
+              {[...KNOWN_COUNTRIES]
+                .sort((a, b) => countryName(a).localeCompare(countryName(b)))
+                .map((country) => (
                   <CountryChoice
                     active={settings.country === country}
                     disabled={disabled}
@@ -415,8 +416,7 @@ export default function AccountScreen() {
                       setCountryPickerOpen(false)
                     }}
                   />
-                ),
-              )}
+                ))}
             </ScrollView>
           </SafeAreaView>
         </View>

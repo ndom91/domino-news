@@ -143,9 +143,9 @@ function PublisherPicker() {
       .filter((follow) => follow.targetType === 'publisher')
       .map((follow) => follow.id),
   )
-  const newsrooms = publishers.data.items
+  const newsrooms = [...publishers.data.items]
     .filter((publisher) => publisher.kind === 'newsroom')
-    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .sort((a, b) => a.name.localeCompare(b.name))
   const groups = [...REGIONS.filter((region) => region !== 'global'), 'global' as const]
     .map((region) => ({
       region,
