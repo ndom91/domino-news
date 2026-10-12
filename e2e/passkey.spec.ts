@@ -24,6 +24,15 @@ test('register a passkey, sign out, and sign back in with it', async ({
     },
   })
 
+  // The login page offers passkeys in autofill on load, and this authenticator approves
+  // every prompt by itself, so autofill would sign in before the button is clicked. Turn it
+  // off to test the button deterministically.
+  await page.addInitScript(() => {
+    if (typeof PublicKeyCredential !== 'undefined') {
+      PublicKeyCredential.isConditionalMediationAvailable = async () => false
+    }
+  })
+
   await signIn(page)
 
   await page.goto('/account?tab=security', { waitUntil: 'networkidle' })

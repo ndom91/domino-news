@@ -15,8 +15,10 @@ export function useSignOut() {
     const { authClient } = await import('./auth-client.ts')
     await authClient.signOut()
     queryClient.removeQueries({ queryKey: queryKeys.session() })
-    await router.invalidate()
+    // Navigate before anything reloads the current page: re-running its guard as a signed-out
+    // user would redirect to /login?next=<this page>, and the next sign-in would land back here.
     await navigate({ to: '/login' })
+    await router.invalidate()
     // After leaving the page, so nothing still mounted refetches as a signed-out user.
     queryClient.clear()
   }
