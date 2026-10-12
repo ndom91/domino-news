@@ -56,7 +56,7 @@ export default function PublishersScreen() {
           <View style={styles.header}>
             <Text style={styles.heading}>Publishers</Text>
             <Text style={styles.intro}>
-              See the publishers Domino follows and how their reporting is used.
+              See the publishers Domino Wire follows and how their reporting is used.
             </Text>
             <TextInput
               accessibilityLabel="Search publishers by name or domain"

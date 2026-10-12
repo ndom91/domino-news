@@ -11,12 +11,16 @@ function withDevelopmentCleartext(config: ExpoConfig): ExpoConfig {
 }
 
 const config: ExpoConfig = {
-  name: 'Domino News',
+  name: 'Domino Wire',
+  description: 'Follow the news as it falls: one story, every source, and what came next.',
   slug: 'domino-news',
   scheme: 'dominonews',
   version: '0.0.0',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
+  backgroundColor: '#f3f1ec',
+  primaryColor: '#121212',
+  icon: '../web/public/icon-512.png',
   ios: developmentBuild
     ? {
         infoPlist: {
@@ -24,13 +28,27 @@ const config: ExpoConfig = {
         },
       }
     : undefined,
-  android: { package: 'dev.ndo.dominonews' },
+  android: {
+    package: 'dev.ndo.dominonews',
+    adaptiveIcon: {
+      foregroundImage: '../web/public/icon-maskable-512.png',
+      backgroundColor: '#f3f1ec',
+    },
+  },
   extra: { eas: { projectId: '433e551b-9dfb-4c06-9edf-59f8b0b5faa1' } },
   experiments: { typedRoutes: true },
   plugins: [
     'expo-router',
     'expo-secure-store',
     'expo-background-task',
+    [
+      'expo-splash-screen',
+      {
+        backgroundColor: '#f3f1ec',
+        image: '../web/public/icon-maskable-512.png',
+        imageWidth: 180,
+      },
+    ],
     ['expo-notifications', { color: '#ff4d1a', defaultChannel: 'for-you' }],
   ],
 }

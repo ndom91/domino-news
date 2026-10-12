@@ -188,7 +188,7 @@ export default function AccountScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Background alerts</Text>
           <Text style={styles.description}>
-            When your phone gives Domino News a background window, it checks For You and lets you
+            When your phone gives Domino Wire a background window, it checks For You and lets you
             know about a newly surfaced story.
           </Text>
           {forYouAlertsAvailable ? (
@@ -205,7 +205,7 @@ export default function AccountScreen() {
             </View>
           ) : (
             <Text style={styles.alertNote}>
-              Available in the installed Domino News development build.
+              Available in the installed Domino Wire development build.
             </Text>
           )}
           {alertsError ? (

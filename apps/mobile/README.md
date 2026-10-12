@@ -1,4 +1,4 @@
-# Domino News mobile
+# Domino Wire mobile
 
 Expo Router Android application. It consumes the same typed API client, Query options, domain formatting
 utilities and design tokens as the web app. iOS is deferred until its bundle identifier and native Google
@@ -29,7 +29,7 @@ server-side device registration and delivery worker, which the API does not curr
 
 1. Sign in to the existing `@ndom91/domino-news` EAS project with `pnpx eas-cli@latest login`.
 2. Build an installable APK with `pnpx eas-cli@latest build --platform android --profile development`.
-3. Install the APK from EAS, then run `pnpm --filter @dn/mobile start:dev-client` and open Domino News.
+3. Install the APK from EAS, then run `pnpm --filter @dn/mobile start:dev-client` and open Domino Wire.
 
 The development-client QR code starts with `exp+domino-news://`; it cannot be opened in Expo Go.
 
