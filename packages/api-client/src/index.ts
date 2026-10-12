@@ -64,12 +64,22 @@ export interface ApiClientOptions {
   /** e.g. "https://news.example.com" (no trailing slash). Empty string = same origin. */
   baseUrl: string
   fetch: Fetcher
-  /** Extra headers per request, e.g. `authorization: Bearer <token>` on native. */
-  headers?: () => Record<string, string>
+  /**
+   * Extra headers per request. On native with @better-auth/expo, pass the session cookie:
+   * `async () => ({ cookie: authClient.getCookie() })`.
+   */
+  headers?: () => Record<string, string> | Promise<Record<string, string>>
+  /** "include" (default) for browsers. Native sets "omit": it sends the cookie itself. */
+  credentials?: 'include' | 'omit'
 }
 
 /** Typed client for /api/v1. Framework-free; works in browsers, Node and React Native. */
-export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
+export function createApiClient({
+  baseUrl,
+  fetch,
+  headers,
+  credentials = 'include',
+}: ApiClientOptions) {
   async function request<T>(
     schema: z.ZodMiniType<T>,
     path: string,
@@ -77,16 +87,17 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
   ): Promise<T> {
     let res: FetchResponse
     try {
+      const extra = (await headers?.()) ?? {}
       res = await fetch(`${baseUrl}/api/v1${path}`, {
         method: init.method ?? 'GET',
         headers: {
           accept: 'application/json',
           ...(init.body !== undefined ? { 'content-type': 'application/json' } : {}),
-          ...headers?.(),
+          ...extra,
         },
         body: init.body !== undefined ? JSON.stringify(init.body) : undefined,
         signal: init.signal,
-        credentials: 'include',
+        credentials,
       })
     } catch (error) {
       throw new ApiError(0, 'network', String(error))

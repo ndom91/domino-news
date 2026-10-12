@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.15",
+    "@dn/api-client": "workspace:*",
     "@dn/db": "workspace:*",
     "@dn/domain": "workspace:*",
     "@dn/inference": "workspace:*",

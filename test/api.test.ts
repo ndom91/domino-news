@@ -1145,3 +1145,39 @@ describe('assessments:publish', () => {
     expect(again).toMatchObject({ published: 0, unchanged: first.published + first.unchanged })
   })
 })
+
+describe('Expo app sign-in', () => {
+  // Native fetch sends no Origin; @better-auth/expo/client sends the app scheme in expo-origin.
+  const signIn = (expoOrigin: string) =>
+    h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/sign-in/username', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'expo-origin': expoOrigin },
+        body: JSON.stringify({ username: 'contract', password: 'contract-password' }),
+      }),
+    )
+
+  it('signs in from the app scheme and reaches /api/v1 with the session cookie', async () => {
+    const res = await signIn('dominonews://')
+    expect(res.status).toBe(200)
+    // What authClient.getCookie() returns: name=value pairs, sent as a Cookie header.
+    const cookie = res.headers
+      .getSetCookie()
+      .map((c) => c.split(';')[0])
+      .join('; ')
+    expect(cookie).toContain('better-auth.session_token=')
+    const stories = await handleApiRequest(
+      h.ctx,
+      new Request('http://localhost:3000/api/v1/stories', { headers: { cookie } }),
+    )
+    expect(stories.status).toBe(200)
+  })
+
+  it('trusts only the app scheme (better-auth skips origin checks under test, so ask it)', async () => {
+    const auth = await h.ctx.auth.$context
+    expect(auth.isTrustedOrigin('dominonews://')).toBe(true)
+    expect(auth.isTrustedOrigin('evilapp://')).toBe(false)
+    // Expo Go's exp:// URLs are trusted in development only.
+    expect(auth.isTrustedOrigin('exp://192.168.1.20:8081')).toBe(false)
+  })
+})

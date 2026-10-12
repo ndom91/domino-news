@@ -1,3 +1,4 @@
+import { expo } from '@better-auth/expo'
 import { passkey } from '@better-auth/passkey'
 import { type Db, schema } from '@dn/db'
 import { betterAuth } from 'better-auth'
@@ -14,6 +15,8 @@ import { eq } from 'drizzle-orm'
  * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). disableSignUp doesn't
  * cover OAuth, so any Google account can sign up.
  * Roles: CLI-created accounts are admins by default; Google sign-ups are plain users.
+ * Mobile: the Expo app signs in through the expo() plugin. Native requests have no Origin, so
+ * the app sends its scheme in `expo-origin`, which must be listed in trustedOrigins.
  */
 export function createAuth(db: Db, env = process.env) {
   const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:4000'
@@ -21,12 +24,20 @@ export function createAuth(db: Db, env = process.env) {
   const googleClientSecret = env.GOOGLE_CLIENT_SECRET
   // Behind proxies X-Forwarded-For holds several hops, which better-auth won't trust, so rate
   // limits would fall back to one bucket shared by everyone. E.g. cf-connecting-ip behind Cloudflare.
+  // The Expo app's URL scheme (app.json "scheme"). Expo Go uses exp:// URLs, which are only
+  // trusted in development: anyone can open an exp:// URL.
+  const appScheme = env.EXPO_APP_SCHEME ?? 'dominonews'
+  const trustedOrigins = [
+    `${appScheme}://`,
+    ...(env.NODE_ENV === 'development' ? ['exp://', 'exp://**', 'exp://192.168.*.*:*/**'] : []),
+  ]
   const ipAddressHeaders = env.AUTH_IP_HEADERS?.split(',')
     .map((header) => header.trim().toLowerCase())
     .filter(Boolean)
   return betterAuth({
     baseURL,
     secret: env.BETTER_AUTH_SECRET,
+    trustedOrigins,
     database: drizzleAdapter(db, {
       provider: 'pg',
       schema: {
@@ -49,6 +60,7 @@ export function createAuth(db: Db, env = process.env) {
     plugins: [
       username(),
       bearer(),
+      expo(),
       // WebAuthn is bound to the public origin: rpID must be its hostname.
       passkey({ rpID: new URL(baseURL).hostname, rpName: 'Domino News', origin: baseURL }),
       // Writes cookies set by server-side auth.api calls (e.g. getSession's sliding refresh)

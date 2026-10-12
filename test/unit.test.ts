@@ -847,3 +847,26 @@ describe('local generation adapter', () => {
     )
   })
 })
+
+describe('API client on native', () => {
+  it('sends the session cookie from an async header hook, with credentials omitted', async () => {
+    const { createApiClient } = await import('@dn/api-client')
+    const calls: {
+      url: string
+      init: { headers?: Record<string, string>; credentials?: string }
+    }[] = []
+    const api = createApiClient({
+      baseUrl: 'https://news.example.com',
+      fetch: async (url, init) => {
+        calls.push({ url, init: init as (typeof calls)[number]['init'] })
+        return Response.json({ items: [], pageInfo: { nextCursor: null } })
+      },
+      headers: async () => ({ cookie: 'better-auth.session_token=abc' }),
+      credentials: 'omit',
+    })
+    await api.listNarratives()
+    expect(calls[0]?.url).toBe('https://news.example.com/api/v1/narratives')
+    expect(calls[0]?.init.headers?.cookie).toBe('better-auth.session_token=abc')
+    expect(calls[0]?.init.credentials).toBe('omit')
+  })
+})
