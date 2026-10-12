@@ -30,10 +30,7 @@ export function PublisherLogo({
   return (
     <span
       aria-hidden
-      className={cx(
-        'block flex-none border border-border bg-band-text',
-        className,
-      )}
+      className={cx('block flex-none border border-border bg-band-text', className)}
       // Padding in px: a percentage would resolve against the parent's width, not the tile's.
       style={{ width: size, height: size, padding: Math.round(size * 0.12) }}
     >
