@@ -24,6 +24,9 @@ export const Route = createFileRoute('/')({
     await Promise.all([
       context.queryClient.ensureQueryData(queries.front(deps.region)),
       context.queryClient.ensureInfiniteQueryData(queries.storyList(deps.region)),
+      // The For You rail (unfiltered front only), so it renders with the page instead of
+      // popping in after hydration. prefetch never throws: a failure just hides the rail.
+      deps.region ? null : context.queryClient.prefetchInfiniteQuery(queries.forYou()),
     ])
   },
   pendingComponent: FeedSkeleton,
@@ -165,8 +168,8 @@ function RegionFilter({ active }: { active: Region | null }) {
 }
 
 /**
- * The top of the reader's For You feed, above the chronological grid. Client-only: it appears
- * once the feed loads, and stays hidden until the reader picks or follows something.
+ * The top of the reader's For You feed, above the chronological grid. The loader prefetches
+ * it; it stays hidden until the reader picks or follows something.
  */
 function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
   const feed = useInfiniteQuery(queries.forYou())
