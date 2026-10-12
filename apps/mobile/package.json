@@ -1,0 +1,43 @@
+{
+  "name": "@dn/mobile",
+  "version": "0.0.0",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "format": "biome format --write .",
+    "lint": "biome lint .",
+    "check": "biome check .",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@better-auth/expo": "1.7.7",
+    "@dn/api-client": "workspace:*",
+    "@dn/design-tokens": "workspace:*",
+    "@dn/domain": "workspace:*",
+    "@dn/queries": "workspace:*",
+    "@dn/schemas": "workspace:*",
+    "@expo-google-fonts/archivo": "0.4.2",
+    "@tanstack/react-query": "5.104.1",
+    "better-auth": "1.7.7",
+    "expo": "57.0.26",
+    "expo-constants": "57.0.20",
+    "expo-font": "57.0.4",
+    "expo-linking": "57.0.11",
+    "expo-network": "57.0.2",
+    "expo-router": "57.0.24",
+    "expo-secure-store": "57.0.4",
+    "expo-system-ui": "57.0.4",
+    "expo-web-browser": "57.0.3",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-screens": "4.26.0",
+    "react-native-url-polyfill": "4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.4"
+  }
+}
