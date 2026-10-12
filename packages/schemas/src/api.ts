@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { DESKS, deskSchema } from './desks.ts'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
 import { REGIONS, regionSchema } from './regions.ts'
@@ -22,7 +22,7 @@ export const apiErrorSchema = z.object({
   error: z.object({
     code: apiErrorCodeSchema,
     message: z.string(),
-    issues: z.array(z.object({ path: z.string(), message: z.string() })).optional(),
+    issues: z.optional(z.array(z.object({ path: z.string(), message: z.string() }))),
   }),
 })
 export type ApiErrorBody = z.infer<typeof apiErrorSchema>
@@ -57,19 +57,19 @@ export const LEAN_LABELS: Record<PublisherLean, string> = {
 export const leanSideSchema = z.enum(['left', 'right'])
 export type LeanSide = z.infer<typeof leanSideSchema>
 
-export const publisherStatsSchema = publisherRefSchema.extend({
-  countryCode: z.string().nullable(),
+export const publisherStatsSchema = z.extend(publisherRefSchema, {
+  countryCode: z.nullable(z.string()),
   bodyPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
   kind: z.enum(['newsroom', 'official']),
-  license: z.string().nullable(),
-  storiesCovered: z.number().int().nonnegative(),
-  firstReports: z.number().int().nonnegative(),
-  exclusives: z.number().int().nonnegative(),
-  articleCount: z.number().int().nonnegative(),
-  lastSeenAt: z.string().nullable(),
+  license: z.nullable(z.string()),
+  storiesCovered: z.int().check(z.nonnegative()),
+  firstReports: z.int().check(z.nonnegative()),
+  exclusives: z.int().check(z.nonnegative()),
+  articleCount: z.int().check(z.nonnegative()),
+  lastSeenAt: z.nullable(z.string()),
   // From the latest reviewed assessment; null = not assessed.
-  lean: publisherLeanSchema.nullable(),
-  leanCountry: z.string().nullable(),
+  lean: z.nullable(publisherLeanSchema),
+  leanCountry: z.nullable(z.string()),
 })
 export type PublisherStats = z.infer<typeof publisherStatsSchema>
 
@@ -96,16 +96,16 @@ export type PublisherListResponse = z.infer<typeof publisherListResponseSchema>
 export const storySourceSchema = z.object({
   articleId: z.string(),
   title: z.string(),
-  description: z.string().nullable(),
+  description: z.nullable(z.string()),
   url: z.string(),
-  publishedAt: z.string().nullable(),
+  publishedAt: z.nullable(z.string()),
   observedAt: z.string(),
   publisher: publisherRefSchema,
   // Government, court, regulator or IGO rather than a newsroom.
   official: z.boolean(),
   citedInSummary: z.boolean(),
   // Number used by `[n]` markers in the summary; null if not cited.
-  citation: z.number().int().positive().nullable(),
+  citation: z.nullable(z.int().check(z.positive())),
 })
 export type StorySource = z.infer<typeof storySourceSchema>
 
@@ -116,7 +116,7 @@ export const summarySchema = z.object({
   format: z.enum(['paragraph', 'bullets']),
   createdAt: z.string(),
   origin: z.enum(['generated', 'edited']),
-  modelId: z.string().nullable(),
+  modelId: z.nullable(z.string()),
   citedArticleIds: z.array(z.string()),
 })
 export type Summary = z.infer<typeof summarySchema>
@@ -126,7 +126,7 @@ export const narrativeRefSchema = z.object({
   slug: z.string(),
   title: z.string(),
   // Desk of its most recently updated Story; drives the Narrative's colour.
-  desk: deskSchema.nullable(),
+  desk: z.nullable(deskSchema),
 })
 export type NarrativeRef = z.infer<typeof narrativeRefSchema>
 
@@ -134,15 +134,15 @@ export const storyListItemSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  summary: z.string().nullable(),
+  summary: z.nullable(z.string()),
   status: z.enum(['developing', 'ongoing', 'dormant']),
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
-  sourceCount: z.number().int().nonnegative(),
+  sourceCount: z.int().check(z.nonnegative()),
   regions: z.array(regionSchema),
   topics: z.array(topicSchema),
   // Null until the Story is summarised with a desk.
-  desk: deskSchema.nullable(),
+  desk: z.nullable(deskSchema),
   publishers: z.array(publisherRefSchema),
   narratives: z.array(narrativeRefSchema),
   // When each source reported (publishedAt, else first seen), for coverage traces.
@@ -152,19 +152,21 @@ export const storyListItemSchema = z.object({
       publisherName: z.string(),
       at: z.string(),
       // 0 = cited without a number (summaries written before citation numbers); null = not cited.
-      citation: z.number().int().nonnegative().nullable(),
+      citation: z.nullable(z.int().check(z.nonnegative())),
     }),
   ),
   // The Story's main typed link to an earlier Story, if any (shown as "Follows …").
-  relation: z.object({ type: storyRelationSchema, slug: z.string(), title: z.string() }).nullable(),
-  primarySource: z.object({ title: z.string().nullable(), url: z.string() }).nullable(),
+  relation: z.nullable(
+    z.object({ type: storyRelationSchema, slug: z.string(), title: z.string() }),
+  ),
+  primarySource: z.nullable(z.object({ title: z.nullable(z.string()), url: z.string() })),
   // This Story corrects an earlier one.
   correction: z.boolean(),
 })
 export type StoryListItem = z.infer<typeof storyListItemSchema>
 
 export const pageInfoSchema = z.object({
-  nextCursor: z.string().nullable(),
+  nextCursor: z.nullable(z.string()),
 })
 
 export const storyListResponseSchema = z.object({
@@ -185,7 +187,7 @@ export const relatedStorySchema = z.object({
 export const primarySourceSchema = z.object({
   id: z.string(),
   url: z.string(),
-  title: z.string().nullable(),
+  title: z.nullable(z.string()),
   kind: sourceReferenceKindSchema,
   discoveredAt: z.string(),
 })
@@ -214,7 +216,7 @@ export const storyClaimSchema = z.object({
   /** When the claim was extracted (claims are re-extracted when the summary changes). */
   createdAt: z.string(),
   /** Earliest publish (or first-seen) time among the articles that carry the claim. */
-  firstReportedAt: z.string().nullable(),
+  firstReportedAt: z.nullable(z.string()),
   mentions: z.array(
     z.object({
       stance: z.enum(['asserts', 'denies', 'quotes', 'discusses']),
@@ -226,7 +228,7 @@ export const storyClaimSchema = z.object({
     z.object({
       relationship: z.enum(['supports', 'contradicts', 'context', 'inconclusive']),
       url: z.string(),
-      title: z.string().nullable(),
+      title: z.nullable(z.string()),
     }),
   ),
 })
@@ -237,10 +239,10 @@ export type StoryClaim = z.infer<typeof storyClaimSchema>
 export const storyLeanSchema = z.object({
   country: z.string(),
   publishers: z.array(
-    z.object({ publisher: publisherRefSchema, lean: publisherLeanSchema.nullable() }),
+    z.object({ publisher: publisherRefSchema, lean: z.nullable(publisherLeanSchema) }),
   ),
   // Set when enough rated publishers sit mostly on one side (see `oneSidedCoverage`).
-  oneSided: leanSideSchema.nullable(),
+  oneSided: z.nullable(leanSideSchema),
 })
 export type StoryLean = z.infer<typeof storyLeanSchema>
 
@@ -251,12 +253,12 @@ export const storyDetailSchema = z.object({
   status: z.enum(['developing', 'ongoing', 'dormant']),
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
-  publishedAt: z.string().nullable(),
+  publishedAt: z.nullable(z.string()),
   regions: z.array(regionSchema),
   topics: z.array(topicSchema),
   // Null until the Story is summarised with a desk.
-  desk: deskSchema.nullable(),
-  summary: summarySchema.nullable(),
+  desk: z.nullable(deskSchema),
+  summary: z.nullable(summarySchema),
   summaryHistory: z.array(
     z.object({
       versionId: z.string(),
@@ -279,10 +281,10 @@ export const narrativeNodeSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  summary: z.string().nullable(),
+  summary: z.nullable(z.string()),
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
-  sourceCount: z.number().int().nonnegative(),
+  sourceCount: z.int().check(z.nonnegative()),
 })
 export type NarrativeNode = z.infer<typeof narrativeNodeSchema>
 
@@ -298,8 +300,8 @@ export const narrativeDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  desk: deskSchema.nullable(),
-  description: z.string().nullable(),
+  desk: z.nullable(deskSchema),
+  description: z.nullable(z.string()),
   createdAt: z.string(),
   updatedAt: z.string(),
   stories: z.array(narrativeNodeSchema),
@@ -313,9 +315,9 @@ export const narrativeListResponseSchema = z.object({
       id: z.string(),
       slug: z.string(),
       title: z.string(),
-      description: z.string().nullable(),
-      desk: deskSchema.nullable(),
-      storyCount: z.number().int().nonnegative(),
+      description: z.nullable(z.string()),
+      desk: z.nullable(deskSchema),
+      storyCount: z.int().check(z.nonnegative()),
       updatedAt: z.string(),
     }),
   ),
@@ -323,11 +325,11 @@ export const narrativeListResponseSchema = z.object({
 export type NarrativeListResponse = z.infer<typeof narrativeListResponseSchema>
 
 export const searchQuerySchema = z.object({
-  q: z.string().trim().min(1).max(200),
-  type: z.enum(['all', 'story', 'narrative']).default('all'),
-  publisher: z.string().optional(),
-  since: z.enum(['24h', '7d', '30d', 'all']).default('all'),
-  region: regionSchema.optional(),
+  q: z.string().check(z.trim(), z.minLength(1), z.maxLength(200)),
+  type: z._default(z.enum(['all', 'story', 'narrative']), 'all'),
+  publisher: z.optional(z.string()),
+  since: z._default(z.enum(['24h', '7d', '30d', 'all']), 'all'),
+  region: z.optional(regionSchema),
 })
 export type SearchQuery = z.infer<typeof searchQuerySchema>
 
@@ -337,23 +339,23 @@ export const searchHitSchema = z.discriminatedUnion('type', [
     id: z.string(),
     slug: z.string(),
     title: z.string(),
-    summary: z.string().nullable(),
+    summary: z.nullable(z.string()),
     lastUpdatedAt: z.string(),
-    sourceCount: z.number().int().nonnegative(),
+    sourceCount: z.int().check(z.nonnegative()),
     publisherNames: z.array(z.string()),
-    desk: deskSchema.nullable(),
+    desk: z.nullable(deskSchema),
     regions: z.array(regionSchema),
-    score: z.number().nullable(),
+    score: z.nullable(z.number()),
   }),
   z.object({
     type: z.literal('narrative'),
     id: z.string(),
     slug: z.string(),
     title: z.string(),
-    description: z.string().nullable(),
+    description: z.nullable(z.string()),
     updatedAt: z.string(),
-    storyCount: z.number().int().nonnegative(),
-    score: z.number().nullable(),
+    storyCount: z.int().check(z.nonnegative()),
+    score: z.nullable(z.number()),
   }),
 ])
 export type SearchHit = z.infer<typeof searchHitSchema>
@@ -366,8 +368,8 @@ export const searchResponseSchema = z.object({
 export type SearchResponse = z.infer<typeof searchResponseSchema>
 
 export const summaryEditRequestSchema = z.object({
-  headline: z.string().trim().min(1).max(200),
-  body: z.string().trim().min(1).max(4000),
+  headline: z.string().check(z.trim(), z.minLength(1), z.maxLength(200)),
+  body: z.string().check(z.trim(), z.minLength(1), z.maxLength(4000)),
   basedOnVersionId: z.string(),
 })
 export type SummaryEditRequest = z.infer<typeof summaryEditRequestSchema>
@@ -381,38 +383,38 @@ export const opsStatusSchema = z.object({
       publisherName: z.string(),
       url: z.string(),
       enabled: z.boolean(),
-      lastPolledAt: z.string().nullable(),
-      lastStatus: z.string().nullable(),
-      lastError: z.string().nullable(),
-      articleCount: z.number().int(),
+      lastPolledAt: z.nullable(z.string()),
+      lastStatus: z.nullable(z.string()),
+      lastError: z.nullable(z.string()),
+      articleCount: z.int(),
     }),
   ),
   queues: z.array(
     z.object({
       name: z.string(),
-      queued: z.number().int(),
-      active: z.number().int(),
-      failed: z.number().int(),
-      oldestQueuedAgeSeconds: z.number().nullable(),
+      queued: z.int(),
+      active: z.int(),
+      failed: z.int(),
+      oldestQueuedAgeSeconds: z.nullable(z.number()),
     }),
   ),
   pipeline: z.object({
-    articles: z.number().int(),
-    articlesEmbedded: z.number().int(),
-    articlesMatched: z.number().int(),
-    stories: z.number().int(),
-    storiesPublished: z.number().int(),
-    narratives: z.number().int(),
-    outboxPending: z.number().int(),
-    outboxFailed: z.number().int(),
-    oldestOutboxAgeSeconds: z.number().nullable(),
+    articles: z.int(),
+    articlesEmbedded: z.int(),
+    articlesMatched: z.int(),
+    stories: z.int(),
+    storiesPublished: z.int(),
+    narratives: z.int(),
+    outboxPending: z.int(),
+    outboxFailed: z.int(),
+    oldestOutboxAgeSeconds: z.nullable(z.number()),
   }),
   recentFailures: z.array(
     z.object({
       id: z.string(),
       queue: z.string(),
-      failedAt: z.string().nullable(),
-      error: z.string().nullable(),
+      failedAt: z.nullable(z.string()),
+      error: z.nullable(z.string()),
     }),
   ),
   recentRuns: z.array(
@@ -422,7 +424,7 @@ export const opsStatusSchema = z.object({
       status: z.string(),
       modelId: z.string(),
       startedAt: z.string(),
-      error: z.string().nullable(),
+      error: z.nullable(z.string()),
     }),
   ),
 })
@@ -442,15 +444,15 @@ const mixEntry = z.object({
 
 // Computed facts about what an outlet covers. No judgement or ratings.
 export const coverageProfileSchema = z.object({
-  days: z.number().int(),
-  storyCount: z.number().int().nonnegative(),
+  days: z.int(),
+  storyCount: z.int().check(z.nonnegative()),
   desks: z.array(mixEntry),
   regions: z.array(mixEntry),
   // Share of its Stories that also carry an official source (agency, court…); null if none.
-  officialShare: z.number().nullable(),
+  officialShare: z.nullable(z.number()),
   // Widely covered Stories from the last 7 days this outlet didn't cover.
   missedMajor: z.object({
-    count: z.number().int().nonnegative(),
+    count: z.int().check(z.nonnegative()),
     examples: z.array(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
   }),
 })
@@ -516,14 +518,14 @@ export const assessmentEvidenceSchema = z.object({
 export const publisherAssessmentSchema = z.object({
   id: z.string(),
   methodologyVersion: z.string(),
-  countryContext: z.string().nullable(),
-  fundingModel: fundingModelSchema.nullable(),
+  countryContext: z.nullable(z.string()),
+  fundingModel: z.nullable(fundingModelSchema),
   ownership: z.string(),
-  reliabilityLevel: reliabilityLevelSchema.nullable(),
+  reliabilityLevel: z.nullable(reliabilityLevelSchema),
   reliability: z.string(),
-  lean: publisherLeanSchema.nullable(),
-  leanEvidenceUrl: z.string().nullable(),
-  leanNote: z.string().nullable(),
+  lean: z.nullable(publisherLeanSchema),
+  leanEvidenceUrl: z.nullable(z.string()),
+  leanNote: z.nullable(z.string()),
   evidence: z.array(assessmentEvidenceSchema),
   reviewedAt: z.string(),
 })
@@ -532,68 +534,67 @@ export type PublisherAssessment = z.infer<typeof publisherAssessmentSchema>
 export const assessmentRequestSchema = z
   .object({
     fundingModel: fundingModelSchema,
-    ownership: z.string().trim().min(1).max(500),
+    ownership: z.string().check(z.trim(), z.minLength(1), z.maxLength(500)),
     // Null = not rated (e.g. the outlet isn't on Wikipedia's perennial sources list).
-    reliabilityLevel: reliabilityLevelSchema.nullable(),
-    reliability: z.string().trim().min(1).max(500),
-    countryContext: z.string().length(2).nullable(),
-    lean: publisherLeanSchema.nullable(),
-    leanEvidenceUrl: z.url().nullable(),
-    leanNote: z.string().trim().max(500).nullable(),
+    reliabilityLevel: z.nullable(reliabilityLevelSchema),
+    reliability: z.string().check(z.trim(), z.minLength(1), z.maxLength(500)),
+    countryContext: z.nullable(z.string().check(z.length(2))),
+    lean: z.nullable(publisherLeanSchema),
+    leanEvidenceUrl: z.nullable(z.url()),
+    leanNote: z.nullable(z.string().check(z.trim(), z.maxLength(500))),
   })
-  .refine((r) => r.lean === null || r.leanEvidenceUrl !== null, {
-    message: 'A lean needs a cited source',
-    path: ['leanEvidenceUrl'],
-  })
+  .check(
+    z.refine((r) => r.lean === null || r.leanEvidenceUrl !== null, {
+      message: 'A lean needs a cited source',
+      path: ['leanEvidenceUrl'],
+    }),
+  )
 export type AssessmentRequest = z.infer<typeof assessmentRequestSchema>
 
 export const evidenceResponseSchema = z.object({
   evidence: z.array(
-    assessmentEvidenceSchema.extend({
+    z.extend(assessmentEvidenceSchema, {
       retrievedAt: z.string(),
       // Hand-checked lean evidence only: the rating on our steps and its country.
-      lean: publisherLeanSchema.nullable(),
-      countryContext: z.string().nullable(),
+      lean: z.nullable(publisherLeanSchema),
+      countryContext: z.nullable(z.string()),
     }),
   ),
 })
 export type EvidenceResponse = z.infer<typeof evidenceResponseSchema>
 
-export const publisherDetailSchema = publisherStatsSchema.extend({
+export const publisherDetailSchema = z.extend(publisherStatsSchema, {
   profile: coverageProfileSchema,
-  assessment: publisherAssessmentSchema.nullable(),
+  assessment: z.nullable(publisherAssessmentSchema),
   languages: z.array(z.string()),
-  policyNote: z.string().nullable(),
-  policyReviewedAt: z.string().nullable(),
+  policyNote: z.nullable(z.string()),
+  policyReviewedAt: z.nullable(z.string()),
   recentStories: z.array(storyListItemSchema),
   coCoverage: z.array(
-    z.object({ publisher: publisherRefSchema, sharedStories: z.number().int().nonnegative() }),
+    z.object({ publisher: publisherRefSchema, sharedStories: z.int().check(z.nonnegative()) }),
   ),
 })
 export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 
 export const userPreferencesSchema = z.object({
   // For You picks. Empty = no preference. They rank Stories up, never hide others.
-  regions: z.array(regionSchema).max(REGIONS.length),
-  desks: z.array(deskSchema).max(DESKS.length),
-  topics: z.array(topicSchema).max(TOPICS.length),
+  regions: z.array(regionSchema).check(z.maxLength(REGIONS.length)),
+  desks: z.array(deskSchema).check(z.maxLength(DESKS.length)),
+  topics: z.array(topicSchema).check(z.maxLength(TOPICS.length)),
   rememberReads: z.boolean(),
   // ISO 3166-1 alpha-2. Picks which country's lean mix a Story shows first.
   // Null = use the country the request comes from.
-  country: z
-    .string()
-    .regex(/^[A-Z]{2}$/)
-    .nullable(),
+  country: z.nullable(z.string().check(z.regex(/^[A-Z]{2}$/))),
   // True once the reader has finished or skipped onboarding. Only ever set to true.
   onboarded: z.boolean(),
 })
 export type UserPreferences = z.infer<typeof userPreferencesSchema>
 
 // Saves only the fields sent, so one setting can change without resending the rest.
-export const userPreferencesUpdateSchema = userPreferencesSchema.partial()
+export const userPreferencesUpdateSchema = z.partial(userPreferencesSchema)
 export type UserPreferencesUpdate = z.infer<typeof userPreferencesUpdateSchema>
 
-export const readRequestSchema = z.object({ storyId: z.string().min(1) })
+export const readRequestSchema = z.object({ storyId: z.string().check(z.minLength(1)) })
 
 export const followTargetTypeSchema = z.enum(['narrative', 'publisher'])
 export type FollowTargetType = z.infer<typeof followTargetTypeSchema>
@@ -610,7 +611,7 @@ export type FollowList = z.infer<typeof followListSchema>
 // follow: false unfollows (the API router only supports GET and POST).
 export const followRequestSchema = z.object({
   targetType: followTargetTypeSchema,
-  targetId: z.string().min(1),
+  targetId: z.string().check(z.minLength(1)),
   follow: z.boolean(),
 })
 export type FollowRequest = z.infer<typeof followRequestSchema>
@@ -634,7 +635,7 @@ export const forYouResponseSchema = z.object({
       story: storyListItemSchema,
       reasons: z.array(forYouReasonSchema),
       // The reader's own tap on this card, if any ("less" cards are hidden).
-      feedback: feedbackSignalSchema.nullable(),
+      feedback: z.nullable(feedbackSignalSchema),
     }),
   ),
   pageInfo: pageInfoSchema,
@@ -646,8 +647,8 @@ export type SignalKind = z.infer<typeof signalKindSchema>
 
 // null clears the tap and reverses what it applied (undo).
 export const feedbackRequestSchema = z.object({
-  storyId: z.string().min(1),
-  signal: feedbackSignalSchema.nullable(),
+  storyId: z.string().check(z.minLength(1)),
+  signal: z.nullable(feedbackSignalSchema),
 })
 export type FeedbackRequest = z.infer<typeof feedbackRequestSchema>
 
@@ -672,7 +673,7 @@ const deskOrRegion = z.union([deskSchema, regionSchema])
 export const insightsSchema = z.object({
   // False when reading history is off; the page then offers the opt-in.
   enabled: z.boolean(),
-  readCount: z.number().int().nonnegative(),
+  readCount: z.int().check(z.nonnegative()),
   // Narratives you read in that have newer Stories you haven't opened.
   missedDevelopments: z.array(
     z.object({ narrative: narrativeRefSchema, stories: z.array(storyListItemSchema) }),
@@ -682,14 +683,14 @@ export const insightsSchema = z.object({
     z.object({
       kind: z.enum(['region', 'desk']),
       key: deskOrRegion,
-      storiesThisWeek: z.number().int().nonnegative(),
-      yourReads: z.number().int().nonnegative(),
+      storiesThisWeek: z.int().check(z.nonnegative()),
+      yourReads: z.int().check(z.nonnegative()),
     }),
   ),
   // Recent Stories that one side of the reader's country barely covers. Shown even with
   // reading history off: it is about coverage, not about the reader.
   oneSided: z.object({
-    country: z.string().nullable(),
+    country: z.nullable(z.string()),
     stories: z.array(z.object({ story: storyListItemSchema, lean: storyLeanSchema })),
   }),
 })
@@ -702,9 +703,9 @@ export const narrativeStepSchema = z.object({
   title: z.string(),
   firstObservedAt: z.string(),
   // Typed link to an earlier Story in the same Narrative.
-  relation: z.object({ type: storyRelationSchema, title: z.string(), at: z.string() }).nullable(),
+  relation: z.nullable(z.object({ type: storyRelationSchema, title: z.string(), at: z.string() })),
   // When a later Story corrected this one.
-  correctedAt: z.string().nullable(),
+  correctedAt: z.nullable(z.string()),
 })
 export type NarrativeStep = z.infer<typeof narrativeStepSchema>
 
@@ -712,8 +713,8 @@ export const developingNarrativeSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  desk: deskSchema.nullable(),
-  storyCount: z.number().int().nonnegative(),
+  desk: z.nullable(deskSchema),
+  storyCount: z.int().check(z.nonnegative()),
   since: z.string(),
   updatedAt: z.string(),
   steps: z.array(narrativeStepSchema),
@@ -724,15 +725,13 @@ export type DevelopingNarrative = z.infer<typeof developingNarrativeSchema>
 export const frontPageSchema = z.object({
   editionAt: z.string(),
   stats: z.object({
-    stories: z.number().int().nonnegative(),
-    publishers: z.number().int().nonnegative(),
+    stories: z.int().check(z.nonnegative()),
+    publishers: z.int().check(z.nonnegative()),
   }),
-  lead: storyDetailSchema.nullable(),
+  lead: z.nullable(storyDetailSchema),
   // "Story 3 of 6" within the lead's Narrative.
-  leadPosition: z
-    .object({ index: z.number().int().positive(), total: z.number().int() })
-    .nullable(),
+  leadPosition: z.nullable(z.object({ index: z.int().check(z.positive()), total: z.int() })),
   developing: z.array(developingNarrativeSchema),
-  narrativeCount: z.number().int().nonnegative(),
+  narrativeCount: z.int().check(z.nonnegative()),
 })
 export type FrontPage = z.infer<typeof frontPageSchema>

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import type { Desk } from './desks.ts'
 
 // Finer subjects than desks, for For You picks. A Story gets 0-3, tagged by generated

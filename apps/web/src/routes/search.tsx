@@ -11,13 +11,13 @@ import { Badge, Button, cx, deskKey, Notice, Reveal, Select, Skeleton, TextInput
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { type FormEvent, useId } from 'react'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 import { regionOptions } from '../lib/regions.ts'
 
 // Same filters as the API; the page also allows an empty query (no search yet).
-const searchParams = searchQuerySchema.extend({ q: z.string().optional().default('') })
+const searchParams = z.extend(searchQuerySchema, { q: z._default(z.optional(z.string()), '') })
 
 export const Route = createFileRoute('/search')({
   validateSearch: searchParams,

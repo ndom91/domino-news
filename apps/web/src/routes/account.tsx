@@ -14,7 +14,7 @@ import {
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import type { FormEvent, ReactNode } from 'react'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { FeedPicks } from '../components/feed-picks.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { ReadingHistoryToggle } from '../components/reading-history.tsx'
@@ -26,7 +26,7 @@ const TABS = ['preferences', 'following', 'security'] as const
 
 export const Route = createFileRoute('/account')({
   // An unknown tab falls back to Preferences instead of erroring.
-  validateSearch: z.object({ tab: z.enum(TABS).optional().catch(undefined) }),
+  validateSearch: z.object({ tab: z.catch(z.optional(z.enum(TABS)), undefined) }),
   // Passkeys load in the browser only (WebAuthn client); the rest renders on the server.
   loader: ({ context }) =>
     Promise.all([

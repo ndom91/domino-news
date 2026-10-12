@@ -6,7 +6,7 @@ import {
   storyMatchSchema,
   storySummarySchema,
 } from '@dn/schemas'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import {
   classifyRelationshipPrompt,
   explainContextPrompt,
@@ -108,13 +108,15 @@ export function createLocalEmbeddings(config: LocalConfig): EmbeddingProvider {
 }
 
 const chatResponse = z.object({
-  choices: z.array(z.object({ message: z.object({ content: z.string().nullable() }) })).min(1),
+  choices: z
+    .array(z.object({ message: z.object({ content: z.nullable(z.string()) }) }))
+    .check(z.minLength(1)),
 })
 
 export function createLocalGeneration(config: LocalConfig): GenerationProvider {
   async function generate<T>(
     name: string,
-    schema: z.ZodType<T>,
+    schema: z.ZodMiniType<T>,
     prompt: string,
     promptVersion: string,
   ) {

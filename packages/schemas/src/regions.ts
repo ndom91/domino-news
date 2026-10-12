@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 // Macro-regions a Story concerns. Deliberately coarse: a small enum keeps model output
 // reliable and works as feed chips. Country-level tags can come later.

@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { deskSchema } from './desks.ts'
 import { regionSchema } from './regions.ts'
 import { topicSchema } from './topics.ts'
@@ -18,20 +18,20 @@ export const storyMatchSchema = z.object({
 export type StoryMatch = z.infer<typeof storyMatchSchema>
 
 export const storySummarySchema = z.object({
-  headline: z.string().min(1).max(200),
-  summary: z.string().min(1).max(2000),
-  sourceArticleIds: z.array(z.string()).min(1),
-  observationIds: z.array(z.string()).min(1),
-  regions: z.array(regionSchema).min(1).max(3),
+  headline: z.string().check(z.minLength(1), z.maxLength(200)),
+  summary: z.string().check(z.minLength(1), z.maxLength(2000)),
+  sourceArticleIds: z.array(z.string()).check(z.minLength(1)),
+  observationIds: z.array(z.string()).check(z.minLength(1)),
+  regions: z.array(regionSchema).check(z.minLength(1), z.maxLength(3)),
   desk: deskSchema,
-  topics: z.array(topicSchema).max(3),
+  topics: z.array(topicSchema).check(z.maxLength(3)),
 })
 export type StorySummaryOutput = z.infer<typeof storySummarySchema>
 
 export const contextEntrySchema = z.object({
   title: z.string(),
   explanation: z.string(),
-  sourceObservationIds: z.array(z.string()).min(1),
+  sourceObservationIds: z.array(z.string()).check(z.minLength(1)),
 })
 export type ContextEntryOutput = z.infer<typeof contextEntrySchema>
 
@@ -41,12 +41,12 @@ export const contextKindSchema = z.enum(['definition', 'background', 'prerequisi
 export const storyContextOutputSchema = z.object({
   entries: z
     .array(
-      contextEntrySchema.extend({
-        anchorText: z.string().min(2).max(80),
+      z.extend(contextEntrySchema, {
+        anchorText: z.string().check(z.minLength(2), z.maxLength(80)),
         kind: contextKindSchema,
       }),
     )
-    .max(4),
+    .check(z.maxLength(4)),
 })
 export type StoryContextOutput = z.infer<typeof storyContextOutputSchema>
 
@@ -64,25 +64,25 @@ export type StoryRelation = z.infer<typeof storyRelationSchema>
 // The newer Story is always `from`; the established Story is `to`.
 export const relationshipCandidateSchema = z.object({
   decision: z.enum(['related', 'unrelated', 'uncertain']),
-  relation: storyRelationSchema.nullable(),
+  relation: z.nullable(storyRelationSchema),
   rationale: z.string(),
 })
 export type RelationshipCandidate = z.infer<typeof relationshipCandidateSchema>
 
 export const narrativeTitleSchema = z.object({
-  title: z.string().min(1).max(120),
-  description: z.string().max(400),
+  title: z.string().check(z.minLength(1), z.maxLength(120)),
+  description: z.string().check(z.maxLength(400)),
 })
 export type NarrativeTitle = z.infer<typeof narrativeTitleSchema>
 
 export const articleMetadataSchema = z.object({
-  title: z.string().min(1),
-  description: z.string().nullable(),
+  title: z.string().check(z.minLength(1)),
+  description: z.nullable(z.string()),
   canonicalUrl: z.url(),
-  publishedAt: z.iso.datetime().nullable(),
+  publishedAt: z.nullable(z.iso.datetime()),
   // Publisher-reported modification time (Atom <updated>, dc:modified), when present.
-  updatedAt: z.iso.datetime().nullable(),
-  externalGuid: z.string().nullable(),
+  updatedAt: z.nullable(z.iso.datetime()),
+  externalGuid: z.nullable(z.string()),
 })
 export type ArticleMetadata = z.infer<typeof articleMetadataSchema>
 
@@ -96,7 +96,7 @@ export const sourceReferenceKindSchema = z.enum([
 
 export const sourceReferenceCandidateSchema = z.object({
   url: z.url(),
-  title: z.string().nullable(),
+  title: z.nullable(z.string()),
   kind: sourceReferenceKindSchema,
 })
 export type SourceReferenceCandidate = z.infer<typeof sourceReferenceCandidateSchema>
@@ -114,13 +114,15 @@ export const claimsOutputSchema = z.object({
   claims: z
     .array(
       z.object({
-        proposition: z.string().min(8).max(300),
-        mentions: z.array(z.object({ articleId: z.string(), stance: claimStanceSchema })).min(1),
+        proposition: z.string().check(z.minLength(8), z.maxLength(300)),
+        mentions: z
+          .array(z.object({ articleId: z.string(), stance: claimStanceSchema }))
+          .check(z.minLength(1)),
         evidence: z.array(
           z.object({ sourceReferenceId: z.string(), relationship: claimEvidenceRelationSchema }),
         ),
       }),
     )
-    .max(5),
+    .check(z.maxLength(5)),
 })
 export type ClaimsOutput = z.infer<typeof claimsOutputSchema>

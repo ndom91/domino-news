@@ -3,12 +3,12 @@ import { Button, Marble, Notice, TextInput } from '@dn/ui'
 import { useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, redirect, useRouter } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { authClient } from '../lib/auth-client.ts'
 import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/login')({
-  validateSearch: z.object({ next: z.string().optional(), error: z.string().optional() }),
+  validateSearch: z.object({ next: z.optional(z.string()), error: z.optional(z.string()) }),
   beforeLoad: ({ context }) => {
     if (context.session.user) throw redirect({ to: '/' })
   },

@@ -13,7 +13,7 @@ import {
   summaryEditRequestSchema,
   userPreferencesUpdateSchema,
 } from '@dn/schemas'
-import { ZodError, z } from 'zod'
+import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import type { ServerContext } from '../context.ts'
 import { listSignals, setFeedback, updateSignals } from '../feedback.ts'
@@ -31,12 +31,9 @@ import { DomainError, editSummary } from '../story-service.ts'
 
 // Cursor format: "<ISO timestamp>|<story id>" (see listStories).
 const storyListQuery = z.object({
-  cursor: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}T[^|]+\|.+$/)
-    .optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(30),
-  region: regionSchema.optional(),
+  cursor: z.optional(z.string().check(z.regex(/^\d{4}-\d{2}-\d{2}T[^|]+\|.+$/))),
+  limit: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(100)), 30),
+  region: z.optional(regionSchema),
 })
 
 async function publisherIdOf(ctx: ServerContext, slug: string | undefined) {
@@ -75,7 +72,7 @@ function errorResponse(error: unknown) {
   let err: HttpError
   if (error instanceof HttpError) err = error
   else if (error instanceof DomainError) err = new HttpError(error.code, error.message)
-  else if (error instanceof ZodError) {
+  else if (error instanceof z.core.$ZodError) {
     err = new HttpError(
       'bad_request',
       'invalid request',
@@ -89,7 +86,7 @@ function errorResponse(error: unknown) {
   return json(body, STATUS[err.code])
 }
 
-async function readJson<T>(request: Request, parser: z.ZodType<T>): Promise<T> {
+async function readJson<T>(request: Request, parser: z.ZodMiniType<T>): Promise<T> {
   let raw: unknown
   try {
     raw = await request.json()
@@ -132,7 +129,7 @@ const LOGO_CACHE = 'public, max-age=31536000, immutable'
 // logo.dev has no logo for this publisher (or the slug is unknown): keep the 404 for a day.
 const NO_LOGO_CACHE = 'public, max-age=86400'
 
-const frontQuery = z.object({ region: regionSchema.optional() })
+const frontQuery = z.object({ region: z.optional(regionSchema) })
 
 const routes: Route[] = [
   // Public: keyed by our publisher slug, never a domain, so it can't be used as a general

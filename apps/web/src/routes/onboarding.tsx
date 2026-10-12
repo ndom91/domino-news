@@ -5,14 +5,14 @@ import { Button, Notice } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { Chips, FeedPicks } from '../components/feed-picks.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/onboarding')({
-  validateSearch: z.object({ next: z.string().optional() }),
+  validateSearch: z.object({ next: z.optional(z.string()) }),
   head: () => ({ meta: [{ title: 'Welcome · Domino News' }] }),
   component: OnboardingPage,
 })

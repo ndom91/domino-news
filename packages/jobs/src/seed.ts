@@ -3,21 +3,21 @@ import path from 'node:path'
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import { eq } from 'drizzle-orm'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 const publisherSeed = z.array(
   z.object({
     slug: z.string(),
     name: z.string(),
     domain: z.string(),
-    countryCode: z.string().nullable().optional(),
+    countryCode: z.optional(z.nullable(z.string())),
     languages: z.array(z.string()),
     articleBodyProcessingPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
-    kind: z.enum(['newsroom', 'official']).default('newsroom'),
-    license: z.string().nullable().optional(),
+    kind: z._default(z.enum(['newsroom', 'official']), 'newsroom'),
+    license: z.optional(z.nullable(z.string())),
     policyNote: z.string(),
     policyReviewedAt: z.string(),
-    feeds: z.array(z.object({ url: z.url(), title: z.string().optional() })),
+    feeds: z.array(z.object({ url: z.url(), title: z.optional(z.string()) })),
   }),
 )
 

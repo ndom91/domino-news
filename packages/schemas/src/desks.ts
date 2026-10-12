@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 // Which desk a Story belongs to: one per Story, set by generated summaries. Drives the
 // story-bar colour, so it stays a small fixed set that maps onto the six key colours.

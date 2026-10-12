@@ -18,7 +18,7 @@ import {
 } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { RouterLink } from '../../components/link.tsx'
 import { Page, PageTitle } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
@@ -36,7 +36,7 @@ const matchesLean = (p: PublisherStats, lean: LeanFilter | undefined) =>
   !lean || (lean === 'not_assessed' ? p.lean === null : p.lean === lean)
 
 export const Route = createFileRoute('/publishers/')({
-  validateSearch: z.object({ lean: leanFilterSchema.optional().catch(undefined) }),
+  validateSearch: z.object({ lean: z.catch(z.optional(leanFilterSchema), undefined) }),
   loader: ({ context }) => context.queryClient.ensureQueryData(queries.publishers()),
   head: () => ({ meta: [{ title: 'Publishers · Domino News' }] }),
   component: PublishersPage,

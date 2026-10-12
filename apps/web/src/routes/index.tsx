@@ -12,13 +12,13 @@ import {
 } from '@dn/ui'
 import { useInfiniteQuery, useSuspenseInfiniteQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import { RouterLink } from '../components/link.tsx'
 import { queries } from '../lib/api.ts'
 import { regionOptions } from '../lib/regions.ts'
 
 export const Route = createFileRoute('/')({
-  validateSearch: z.object({ region: regionSchema.optional() }),
+  validateSearch: z.object({ region: z.optional(regionSchema) }),
   loaderDeps: ({ search }) => ({ region: search.region ?? null }),
   loader: async ({ context, deps }) => {
     await Promise.all([

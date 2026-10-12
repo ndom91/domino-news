@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises'
 import path from 'node:path'
 import { publisherLeanSchema } from '@dn/schemas'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 // Hand-checked lean ratings (fixtures/lean-evidence.json). Neither source offers an open
 // download: AllSides sends its data on request and blocks automated fetches, and the Reuters
@@ -34,12 +34,12 @@ const entrySchema = z.discriminatedUnion('source', [
     publisher: z.string(),
     source: z.literal('reuters_dnr'),
     // Audience score as published, e.g. -0.21.
-    score: z.number().min(-0.5).max(0.5),
+    score: z.number().check(z.gte(-0.5), z.lte(0.5)),
     // Our step for that score, chosen by the person who read it off.
     lean: publisherLeanSchema,
-    countryContext: z.string().regex(/^[A-Z]{2}$/),
+    countryContext: z.string().check(z.regex(/^[A-Z]{2}$/)),
     // Report year, e.g. 2025.
-    edition: z.number().int(),
+    edition: z.int(),
     url: z.url(),
     checkedAt: z.iso.date(),
   }),

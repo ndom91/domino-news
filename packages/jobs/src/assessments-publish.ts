@@ -4,7 +4,7 @@ import { type Db, schema } from '@dn/db'
 import { type AssessmentRequest, assessmentRequestSchema } from '@dn/schemas'
 import { createAssessment, latestAssessment } from '@dn/server'
 import { eq, sql } from 'drizzle-orm'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 
 // Reviewed assessments kept in the repo (fixtures/assessments.json), so every environment
 // gets the same ones. Publishing goes through `createAssessment`, like the review form, so
@@ -15,8 +15,8 @@ export const assessmentsFileSchema = z.object({
     z.object({
       slug: z.string(),
       request: assessmentRequestSchema,
-      sources: z.array(z.url()).default([]),
-      notes: z.string().default(''),
+      sources: z._default(z.array(z.url()), []),
+      notes: z._default(z.string(), ''),
     }),
   ),
 })

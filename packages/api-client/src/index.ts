@@ -43,7 +43,7 @@ import {
   type UserPreferencesUpdate,
   userPreferencesSchema,
 } from '@dn/schemas'
-import { z } from 'zod'
+import { z } from 'zod/mini'
 import type { AbortSignalLike, Fetcher, FetchResponse } from './fetch.ts'
 
 export type { Fetcher }
@@ -69,7 +69,7 @@ export interface ApiClientOptions {
 /** Typed client for /api/v1. Framework-free; works in browsers, Node and React Native. */
 export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
   async function request<T>(
-    schema: z.ZodType<T>,
+    schema: z.ZodMiniType<T>,
     path: string,
     init: { method?: string; body?: unknown; signal?: AbortSignalLike } = {},
   ): Promise<T> {
@@ -155,7 +155,7 @@ export function createApiClient({ baseUrl, fetch, headers }: ApiClientOptions) {
       ),
     saveAssessment: (slug: string, body: AssessmentRequest) =>
       request<PublisherAssessment | null>(
-        publisherAssessmentSchema.nullable(),
+        z.nullable(publisherAssessmentSchema),
         `/publishers/${encodeURIComponent(slug)}/assessment`,
         { method: 'POST', body },
       ),
