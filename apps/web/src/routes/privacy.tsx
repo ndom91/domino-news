@@ -18,7 +18,7 @@ export const Route = createFileRoute('/privacy')({
 // Retention as implemented: sessions (auth.ts), reading history and taps (preferences.ts),
 // backups (scripts/deploy.sh). Update both together.
 const RETENTION = [
-  ['Account details', 'Until your account is deleted'],
+  ['Account details', 'Until you delete your account'],
   ['Sessions, with IP address and browser', '30 days after sign-in, then deleted'],
   ['Your picks, follows and country', 'Until you change them or your account is deleted'],
   ['For You thumbs up and down', '30 days; what they taught For You fades over 30 days'],
@@ -150,8 +150,15 @@ function PrivacyPage() {
           (Arts. 15–21 GDPR). Where you gave consent, you can withdraw it at any time.
         </p>
         <p>
-          To delete your account or use any of these rights, email{' '}
-          <Email address={OPERATOR.email} />. We reply within one month.
+          You can delete your account yourself, under Privacy & security on your{' '}
+          <Link to="/account" search={{ tab: 'security' }}>
+            account page
+          </Link>
+          . That deletes your account and everything tied to it straight away. Copies in our
+          database backups are deleted within 14 days, when old backups are pruned.
+        </p>
+        <p>
+          For anything else, email <Email address={OPERATOR.email} />. We reply within one month.
         </p>
         <p>
           You can also complain to a data protection authority, for example the one where you live.

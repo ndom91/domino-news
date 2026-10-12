@@ -82,8 +82,11 @@ function TermsPage() {
       <Section id="changes" title="Changes and ending">
         <p>
           We may update these terms. If a change matters, we’ll email you before it applies. You can
-          stop using Domino at any time; to have your account deleted, email{' '}
-          <Email address={OPERATOR.email} />.
+          stop using Domino at any time, and delete your account yourself on your{' '}
+          <Link to="/account" search={{ tab: 'security' }}>
+            account page
+          </Link>
+          . Questions: <Email address={OPERATOR.email} />.
         </p>
       </Section>
 
