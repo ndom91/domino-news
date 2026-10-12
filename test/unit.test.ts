@@ -390,6 +390,20 @@ describe('prompt inputs', () => {
     expect(prompt).toContain('"sourceType": "official"')
     expect(prompt).toContain('"sourceType": "newsroom"')
   })
+
+  it('only allow related_to for one nameable event, not a shared theme', async () => {
+    const { classifyRelationshipPrompt } = await import('@dn/inference')
+    const story = (storyId: string) => ({
+      storyId,
+      title: 't',
+      summary: null,
+      firstObservedAt: '2026-10-10T00:00:00Z',
+      articles: [],
+    })
+    const prompt = classifyRelationshipPrompt({ newer: story('n'), older: story('o') })
+    expect(prompt).toContain('You must be able to name that one event')
+    expect(prompt).toContain('When the only link is a theme, answer "unrelated"')
+  })
 })
 
 describe('assessment evidence parsing', () => {

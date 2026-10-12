@@ -1,5 +1,12 @@
 import { type Db, schema, withTransaction } from '@dn/db'
-import { type GraphEdge, ID_PREFIX, newId, slugify, validateNewEdge } from '@dn/domain'
+import {
+  type GraphEdge,
+  ID_PREFIX,
+  newId,
+  slugify,
+  TEMPORAL_RELATIONS,
+  validateNewEdge,
+} from '@dn/domain'
 import type { StoryInput } from '@dn/inference'
 import type { StoryRelation } from '@dn/schemas'
 import { type AnalysisJob, nearestByVector, touchNarrative, touchStory } from '@dn/server'
@@ -162,8 +169,12 @@ export async function edgesForValidation(db: Db, a: string, b: string): Promise<
   }))
 }
 
-/** Stories reachable from `storyId` through active edges (bounded BFS). */
-async function component(db: Db, storyId: string) {
+/**
+ * Stories reachable from `storyId` through active timeline edges (bounded BFS). Loose links
+ * (related_to, provides_context_for) stay on the Story pages but don't join Narratives:
+ * chained, they pulled unrelated Stories together.
+ */
+export async function narrativeComponent(db: Db, storyId: string) {
   const seen = new Set([storyId])
   let frontier = [storyId]
   while (frontier.length > 0 && seen.size < MAX_NARRATIVE_COMPONENT) {
@@ -173,6 +184,7 @@ async function component(db: Db, storyId: string) {
       .where(
         and(
           isNull(schema.storyRelationship.supersededAt),
+          inArray(schema.storyRelationship.relation, [...TEMPORAL_RELATIONS]),
           or(
             inArray(schema.storyRelationship.fromStoryId, frontier),
             inArray(schema.storyRelationship.toStoryId, frontier),
@@ -198,7 +210,7 @@ async function component(db: Db, storyId: string) {
  * component, or creates one. Narratives are never merged automatically.
  */
 async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: string) {
-  const members = await component(ctx.db, storyId)
+  const members = await narrativeComponent(ctx.db, storyId)
   if (members.length < 2) return
 
   const memberships = await ctx.db

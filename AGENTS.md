@@ -259,7 +259,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - A durable pg-boss pipeline with priorities, reserved fresh capacity, rate-limited and pausable backfill, retries, stale-job rejection, and per-model GPU concurrency caps.
 - Conservative Story matching (EmbeddingGemma shortlist, Gemma 4 decision, `uncertain` supported) and typed Story relationships with temporal and cycle validation.
 - Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones.
-- Narratives from connected Stories, with model-written titles.
+- Narratives from Stories joined by timeline links (follows, responds to, corrects, branches from), with model-written titles. Loose links (related to, background for) show on Story pages but don't join Narratives. After upgrading, `pnpm cli enrich:all --reset-graph` rebuilds existing Narratives under this rule.
 - **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
 - **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
 - **Regions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region, and the lead prefers a Story in one of the reader's regions.

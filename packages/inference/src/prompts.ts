@@ -5,7 +5,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@4',
   summarizeStory: 'summarize-story@7',
-  classifyRelationship: 'classify-relationship@4',
+  classifyRelationship: 'classify-relationship@5',
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@3',
   extractClaims: 'extract-claims@2',
@@ -102,12 +102,19 @@ Decide whether NEWER is a development connected to OLDER, and if so pick the rel
 - "responds_to": NEWER is a reaction/response (statement, protest, counter-move) to OLDER.
 - "corrects": NEWER corrects or retracts OLDER.
 - "provides_context_for": NEWER is background that helps explain OLDER.
-- "related_to": both are about the same specific event, decision or dispute, but none of the above fits.
+- "related_to": both report on the same specific event (one incident, announcement, ruling, meeting or deal),
+  but none of the above fits. You must be able to name that one event.
 NEWER does not need to be caused by OLDER. If NEWER explicitly reports an event in connection with OLDER
 (for example "hours after X, Y happened", or the same dispute moving forward), it is connected.
 Answer decision "unrelated" (relation null) when the only link is a shared person, country or organisation
 (for example both involve Donald Trump or the United States) or a broad subject area such as "politics",
 "technology" or "the war in Ukraine". A reader should be able to say exactly which event links them.
+These are also "unrelated":
+- the same institution acting on different matters (an IMF growth forecast and an IMF meeting agenda);
+- different events in the same region or conflict, unless one is a direct consequence of the other;
+- two meetings, conferences or summits that are in the news at the same time;
+- a shared theme such as AI, energy prices or debt.
+When the only link is a theme, answer "unrelated": a missing link costs less than a wrong one.
 Stories in different languages can be connected.
 Answer "uncertain" (relation null) when unsure.
 

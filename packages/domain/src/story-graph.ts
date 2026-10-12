@@ -5,7 +5,7 @@ import type { StoryRelation } from '@dn/schemas'
  * "A follows B" => { from: A, to: B, relation: 'follows' }.
  * Temporal relations require from.firstObservedAt >= to.firstObservedAt and must stay acyclic.
  */
-const TEMPORAL_RELATIONS: ReadonlySet<StoryRelation> = new Set([
+export const TEMPORAL_RELATIONS: ReadonlySet<StoryRelation> = new Set([
   'follows',
   'branches_from',
   'responds_to',

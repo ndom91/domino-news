@@ -938,6 +938,46 @@ describe('transient article bodies', () => {
   })
 })
 
+describe('narrative membership', () => {
+  it('joins Stories through timeline links, not loose ones', async () => {
+    const { db } = h.ctx
+    const { narrativeComponent } = await import('@dn/jobs')
+    const { newId, ID_PREFIX } = await import('@dn/domain')
+    const { rows: stories } = await h.ctx.pool.query<{ id: string }>(
+      `select s.id from story s where s.published_at is not null and not exists (
+         select 1 from story_relationship r where r.from_story_id = s.id or r.to_story_id = s.id
+       ) order by s.id limit 3`,
+    )
+    const [a, b, c] = stories
+    if (!a || !b || !c) throw new Error('need three stories')
+    const inserted = await db
+      .insert(schema.storyRelationship)
+      .values([
+        {
+          id: newId(ID_PREFIX.storyRelationship),
+          fromStoryId: b.id,
+          toStoryId: a.id,
+          relation: 'related_to',
+        },
+        {
+          id: newId(ID_PREFIX.storyRelationship),
+          fromStoryId: c.id,
+          toStoryId: a.id,
+          relation: 'follows',
+        },
+      ])
+      .returning()
+    try {
+      expect((await narrativeComponent(db, a.id)).sort()).toEqual([a.id, c.id].sort())
+      expect(await narrativeComponent(db, b.id)).toEqual([b.id])
+    } finally {
+      for (const e of inserted) {
+        await db.delete(schema.storyRelationship).where(eq(schema.storyRelationship.id, e.id))
+      }
+    }
+  })
+})
+
 describe('story graph reset', () => {
   it('removes relationships and narratives and drops narratives from search', async () => {
     const { db, ts } = h.ctx
