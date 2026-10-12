@@ -151,7 +151,7 @@
   ); /* 80 — long hero headline, Story page headline */
   --dn-text-display-sm: clamp(2.125rem, 4.2vw, 3.75rem); /* 60 — long Story page headline */
 
-  --dn-leading-display: 0.88;
+  --dn-leading-display: 1.04; /* room for the hover underline above the next line */
   --dn-leading-headline: 0.98;
   --dn-leading-tight: 1.1;
   --dn-leading-snug: 1.3;
