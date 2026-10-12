@@ -58,7 +58,8 @@ export function SummaryText({
 }) {
   let remaining = context
   // A no-break space keeps each marker on the word it cites, so it never starts a line or column.
-  const glued = text.replace(/\s+(?=\[\d+\])/g, '\u00a0')
+  // A word joiner does the same between adjacent markers, which may otherwise break at "][".
+  const glued = text.replace(/\s+(?=\[\d+\])/g, '\u00a0').replace(/\](?=\[\d+\])/g, ']\u2060')
   return (
     <>
       {splitCitations(glued).map((part, i) => {

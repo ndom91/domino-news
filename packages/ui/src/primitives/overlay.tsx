@@ -17,6 +17,8 @@ export interface PopoverProps {
   side?: 'top' | 'bottom' | 'left' | 'right'
   /** Also open on hover (desktop). Click, tap and keyboard always work. */
   openOnHover?: boolean
+  /** False when `trigger` isn't a `<button>`; Base UI then adds the button role and keys. */
+  nativeButton?: boolean
   className?: string
 }
 
@@ -27,11 +29,17 @@ export function Popover({
   children,
   side = 'bottom',
   openOnHover = false,
+  nativeButton = true,
   className,
 }: PopoverProps) {
   return (
     <BasePopover.Root>
-      <BasePopover.Trigger render={trigger} openOnHover={openOnHover} delay={120} />
+      <BasePopover.Trigger
+        render={trigger}
+        nativeButton={nativeButton}
+        openOnHover={openOnHover}
+        delay={120}
+      />
       <BasePopover.Portal>
         <BasePopover.Positioner side={side} sideOffset={8} collisionPadding={12} className="z-50">
           <BasePopover.Popup

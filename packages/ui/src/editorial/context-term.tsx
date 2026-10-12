@@ -13,14 +13,15 @@ export function ContextTerm({ item, children }: { item: StoryContextItem; childr
   return (
     <Popover
       title={item.title}
+      // A span, not a button: a button never wraps, so a long term would jump to its own line.
+      nativeButton={false}
       trigger={
-        <button
-          type="button"
+        <span
           data-context-term
           className="cursor-pointer text-inherit underline decoration-current/50 decoration-dotted decoration-2 underline-offset-4 hover:decoration-accent hover:decoration-solid"
         >
           {children}
-        </button>
+        </span>
       }
     >
       <ContextExplanation item={item} />
