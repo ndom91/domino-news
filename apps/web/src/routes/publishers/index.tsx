@@ -9,6 +9,7 @@ import {
 } from '@dn/schemas'
 import {
   CoverageMatrix,
+  LeanMark,
   Notice,
   PublisherLogo,
   positionKey,
@@ -209,11 +210,19 @@ function PublisherCard({ publisher: p }: { publisher: PublisherStats }) {
             {p.kind === 'official' ? ' · Official source' : ''}
           </span>
           {p.kind === 'newsroom' ? (
-            <span className="mt-1 type-meta">
-              {p.lean
-                ? `${LEAN_LABELS[p.lean]}${p.leanCountry ? ` (${p.leanCountry})` : ''}${p.leanBasis === 'estimated' ? ' · estimated' : ''}`
-                : 'Lean not assessed'}
-            </span>
+            p.lean ? (
+              <span className="mt-1.5 flex items-center gap-2 type-meta">
+                <LeanMark lean={p.lean} />
+                <span>
+                  {LEAN_LABELS[p.lean]}
+                  {/* The country code already sits top right; only name a different one. */}
+                  {p.leanCountry && p.leanCountry !== p.countryCode ? ` (${p.leanCountry})` : ''}
+                  {p.leanBasis === 'estimated' ? ' · estimated' : ''}
+                </span>
+              </span>
+            ) : (
+              <span className="mt-1 type-meta">Lean not assessed</span>
+            )
           ) : null}
         </span>
       </span>
