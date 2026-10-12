@@ -86,9 +86,10 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
     .map((p) => p.trim())
     .filter(Boolean)
   return (
+    // Two newspaper columns on wide screens: fills the main column at a readable line length.
     <div
       data-summary-detail
-      className="mt-10 flex max-w-reading flex-col gap-4 text-md leading-normal"
+      className="mt-10 max-w-reading text-md leading-normal lg:max-w-none lg:columns-2 lg:gap-x-column lg:[column-rule:1px_solid_var(--dn-border)] [&>p+p]:mt-4"
     >
       {paragraphs.map((text, i) => {
         const context = story.context.filter((c) => !shown.includes(c.anchorText))

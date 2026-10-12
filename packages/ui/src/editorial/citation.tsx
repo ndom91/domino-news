@@ -57,9 +57,11 @@ export function SummaryText({
   inherit?: boolean
 }) {
   let remaining = context
+  // A no-break space keeps each marker on the word it cites, so it never starts a line or column.
+  const glued = text.replace(/\s+(?=\[\d+\])/g, '\u00a0')
   return (
     <>
-      {splitCitations(text).map((part, i) => {
+      {splitCitations(glued).map((part, i) => {
         if ('citation' in part) {
           return (
             <CitationMarker
