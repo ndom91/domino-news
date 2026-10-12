@@ -1,0 +1,219 @@
+import { nativeTokens as t } from '@dn/design-tokens/native'
+import { formatDate, plural, TEMPORAL_RELATIONS } from '@dn/domain'
+import { DESK_LABELS, DESK_SLOT, type NarrativeDetail, type StoryRelation } from '@dn/schemas'
+import { useQuery } from '@tanstack/react-query'
+import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FollowToggle } from '../../../components/follow-toggle'
+import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
+import { isUnauthorized, queries } from '../../../lib/api'
+
+const RELATION_LABELS: Record<StoryRelation, string> = {
+  follows: 'Follows',
+  branches_from: 'Branches from',
+  responds_to: 'Responds to',
+  corrects: 'Corrects',
+  provides_context_for: 'Background for',
+  related_to: 'Related to',
+}
+
+export default function NarrativeScreen() {
+  const { slug } = useLocalSearchParams<{ slug: string }>()
+  const narrative = useQuery(queries.narrative(slug))
+
+  if (narrative.isPending) {
+    return (
+      <Screen>
+        <LoadingView label="Loading narrative" />
+      </Screen>
+    )
+  }
+  if (isUnauthorized(narrative.error)) return <Redirect href="/sign-in" />
+  if (narrative.isError || !narrative.data) {
+    return (
+      <Screen>
+        <MessageView
+          action={{ label: 'Try again', onPress: narrative.refetch }}
+          detail="This narrative may no longer be available."
+          title="Narrative unavailable"
+        />
+      </Screen>
+    )
+  }
+
+  return <NarrativeContent narrative={narrative.data} />
+}
+
+function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
+  const router = useRouter()
+  const stories = [...narrative.stories].sort((a, b) =>
+    a.firstObservedAt.localeCompare(b.firstObservedAt),
+  )
+  const first = stories[0]
+  const last = stories.at(-1)
+  const slot = narrative.desk ? DESK_SLOT[narrative.desk] : 0
+  const keyColor = t.color.narrative[slot] ?? t.color.narrative[0]
+  const keyText = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
+  const storiesById = new Map(stories.map((story) => [story.id, story]))
+
+  return (
+    <Screen>
+      <Stack.Screen options={{ title: 'Narrative' }} />
+      <ScrollView contentContainerStyle={uiStyles.content}>
+        <View style={[styles.deskBar, { backgroundColor: keyColor }]}>
+          <Text style={[styles.deskBarText, { color: keyText }]}>
+            {narrative.desk ? DESK_LABELS[narrative.desk] : 'Narrative'}
+          </Text>
+        </View>
+        <View style={styles.titleRow}>
+          <Text style={styles.title}>{narrative.title}</Text>
+          <FollowToggle name={narrative.title} targetId={narrative.id} targetType="narrative" />
+        </View>
+        {narrative.description ? (
+          <Text style={styles.description}>{narrative.description}</Text>
+        ) : null}
+        <Text style={styles.meta}>
+          {plural(stories.length, 'story', 'stories')}
+          {first && last
+            ? ` · ${formatDate(first.firstObservedAt)} to ${formatDate(last.firstObservedAt)}`
+            : ''}
+        </Text>
+
+        <View style={styles.timeline}>
+          <Text style={uiStyles.label}>Timeline</Text>
+          {stories.length === 0 ? (
+            <MessageView
+              detail="Stories will appear here when this narrative is updated."
+              title="No stories yet"
+            />
+          ) : (
+            stories.map((story, index) => {
+              const edge = narrative.edges.find((candidate) => {
+                if (
+                  candidate.fromStoryId !== story.id ||
+                  !TEMPORAL_RELATIONS.has(candidate.relation)
+                ) {
+                  return false
+                }
+                const earlier = storiesById.get(candidate.toStoryId)
+                return Boolean(
+                  earlier && earlier.firstObservedAt.localeCompare(story.firstObservedAt) <= 0,
+                )
+              })
+              const earlier = edge ? storiesById.get(edge.toStoryId) : undefined
+
+              return (
+                <View key={story.id} style={styles.timelineItem}>
+                  <View style={styles.markerColumn}>
+                    <View style={styles.marker} />
+                    {index < stories.length - 1 ? <View style={styles.line} /> : null}
+                  </View>
+                  <Pressable
+                    accessibilityHint="Opens this story"
+                    accessibilityLabel={story.title}
+                    accessibilityRole="link"
+                    onPress={() => router.push(`/stories/${story.slug}`)}
+                    style={({ pressed }) => [styles.story, pressed ? styles.pressed : null]}
+                  >
+                    <Text style={styles.storyDate}>{formatDate(story.firstObservedAt)}</Text>
+                    <Text style={styles.storyTitle}>{story.title}</Text>
+                    {story.summary ? (
+                      <Text numberOfLines={3} style={styles.storySummary}>
+                        {story.summary}
+                      </Text>
+                    ) : null}
+                    <Text style={styles.storyMeta}>{plural(story.sourceCount, 'report')}</Text>
+                    {edge && earlier ? (
+                      <Text style={styles.relation}>
+                        {RELATION_LABELS[edge.relation]}: {earlier.title}
+                      </Text>
+                    ) : null}
+                  </Pressable>
+                </View>
+              )
+            })
+          )}
+        </View>
+      </ScrollView>
+    </Screen>
+  )
+}
+
+const styles = StyleSheet.create({
+  deskBar: {
+    marginBottom: t.space[4],
+    minHeight: 30,
+    paddingHorizontal: t.space[3],
+    justifyContent: 'center',
+  },
+  deskBarText: {
+    fontFamily: t.font.bold,
+    fontSize: t.type.meta,
+    letterSpacing: 0.7,
+    textTransform: 'uppercase',
+  },
+  titleRow: { alignItems: 'flex-start', flexDirection: 'row', gap: t.space[3] },
+  title: {
+    color: t.color.text,
+    flex: 1,
+    fontFamily: t.font.black,
+    fontSize: 34,
+    letterSpacing: -0.8,
+    lineHeight: 35,
+  },
+  description: {
+    color: t.color.textSecondary,
+    fontFamily: t.font.regular,
+    fontSize: t.type.bodyLarge,
+    lineHeight: 25,
+    marginTop: t.space[3],
+  },
+  meta: {
+    color: t.color.textMuted,
+    fontFamily: t.font.medium,
+    fontSize: t.type.meta,
+    marginTop: t.space[4],
+  },
+  timeline: { gap: t.space[4], marginTop: t.space[10] },
+  timelineItem: { flexDirection: 'row', minHeight: 116 },
+  markerColumn: { alignItems: 'center', width: 24 },
+  marker: {
+    backgroundColor: t.color.accent,
+    borderColor: t.color.canvas,
+    borderRadius: 7,
+    borderWidth: 3,
+    height: 14,
+    marginTop: t.space[4],
+    width: 14,
+  },
+  line: { backgroundColor: t.color.borderStrong, flex: 1, marginVertical: t.space[1], width: 2 },
+  story: {
+    backgroundColor: t.color.surface,
+    borderColor: t.color.border,
+    borderWidth: StyleSheet.hairlineWidth,
+    flex: 1,
+    gap: t.space[2],
+    marginBottom: t.space[4],
+    padding: t.space[4],
+  },
+  storyDate: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
+  storyTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: 22, lineHeight: 24 },
+  storySummary: {
+    color: t.color.textSecondary,
+    fontFamily: t.font.regular,
+    fontSize: t.type.body,
+    lineHeight: 22,
+  },
+  storyMeta: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
+  relation: {
+    borderTopColor: t.color.border,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    color: t.color.textSecondary,
+    fontFamily: t.font.medium,
+    fontSize: t.type.meta,
+    lineHeight: 18,
+    marginTop: t.space[1],
+    paddingTop: t.space[2],
+  },
+  pressed: { opacity: 0.7 },
+})

@@ -1,21 +1,18 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { queryKeys, savePreferencesMutation } from '@dn/queries'
+import { countryName, KNOWN_COUNTRIES } from '@dn/domain'
 import {
-  DESK_LABELS,
-  DESK_SLOT,
-  DESKS,
-  REGION_LABELS,
-  REGIONS,
-  TOPIC_DESK,
-  TOPIC_LABELS,
-  TOPICS,
-  type UserPreferences,
-  type UserPreferencesUpdate,
-} from '@dn/schemas'
+  queryKeys,
+  savePreferencesMutation,
+  setFollowMutation,
+  updateSignalsMutation,
+} from '@dn/queries'
+import type { UserPreferences, UserPreferencesUpdate } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { FeedPicks } from '../../../components/feed-picks'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { api, isUnauthorized, queries } from '../../../lib/api'
 import { authClient } from '../../../lib/auth-client'
@@ -31,6 +28,8 @@ export default function AccountScreen() {
   const queryClient = useQueryClient()
   const session = authClient.useSession()
   const preferences = useQuery(queries.preferences())
+  const follows = useQuery(queries.follows())
+  const signals = useQuery(queries.signals())
   const save = useMutation({
     ...savePreferencesMutation(api, queryClient),
     onMutate: async (update: UserPreferencesUpdate) => {
@@ -55,6 +54,11 @@ export default function AccountScreen() {
   const [alertsEnabled, setAlertsEnabled] = useState(false)
   const [alertsPending, setAlertsPending] = useState(true)
   const [alertsError, setAlertsError] = useState<string | null>(null)
+  const [countryPickerOpen, setCountryPickerOpen] = useState(false)
+  const [confirmReadingHistoryOff, setConfirmReadingHistoryOff] = useState(false)
+  const [confirmSignalsReset, setConfirmSignalsReset] = useState(false)
+  const followSave = useMutation(setFollowMutation(api, queryClient))
+  const signalSave = useMutation(updateSignalsMutation(api, queryClient))
   const user = session.data?.user
 
   useEffect(() => {
@@ -144,43 +148,41 @@ export default function AccountScreen() {
           <Text style={styles.description}>
             Stories matching these move to the top of For You. Nothing else is hidden.
           </Text>
-          <PickGroup
+          <FeedPicks
             disabled={disabled}
-            label="Regions"
-            onToggle={(region) => save.mutate({ regions: toggle(settings.regions, region) })}
-            options={REGIONS}
-            selected={settings.regions}
-            titleFor={(region) => REGION_LABELS[region]}
+            onChange={(update) => save.mutate(update)}
+            sections={['regions', 'desks', 'topics']}
+            values={settings}
           />
-          <PickGroup
-            disabled={disabled}
-            label="Desks"
-            onToggle={(desk) => save.mutate({ desks: toggle(settings.desks, desk) })}
-            options={DESKS}
-            selected={settings.desks}
-            textColorFor={(desk) => t.color.narrativeText[DESK_SLOT[desk]] ?? t.color.bandText}
-            tintFor={(desk) => t.color.narrative[DESK_SLOT[desk]] ?? t.color.accent}
-            titleFor={(desk) => DESK_LABELS[desk]}
-          />
-          <Text style={styles.groupLabel}>Topics</Text>
-          {DESKS.map((desk) => (
-            <PickGroup
-              disabled={disabled}
-              key={desk}
-              label={DESK_LABELS[desk]}
-              onToggle={(topic) => save.mutate({ topics: toggle(settings.topics, topic) })}
-              options={TOPICS.filter((topic) => TOPIC_DESK[topic] === desk)}
-              selected={settings.topics}
-              textColorFor={() => t.color.narrativeText[DESK_SLOT[desk]] ?? t.color.bandText}
-              tintFor={() => t.color.narrative[DESK_SLOT[desk]] ?? t.color.accent}
-              titleFor={(topic) => TOPIC_LABELS[topic]}
-            />
-          ))}
           {save.isError ? (
             <Text accessibilityLiveRegion="polite" style={styles.error}>
               Your picks could not be saved. Try again.
             </Text>
           ) : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Country preference</Text>
+          <Text style={styles.description}>
+            Choose which country’s publisher lean context appears first on stories.
+          </Text>
+          <Pressable
+            accessibilityHint="Opens country choices"
+            accessibilityLabel={`Country preference: ${settings.country ? countryName(settings.country) : 'No country preference'}`}
+            accessibilityRole="button"
+            disabled={disabled}
+            onPress={() => setCountryPickerOpen(true)}
+            style={({ pressed }) => [
+              styles.selectionRow,
+              disabled ? styles.selectionRowDisabled : null,
+              pressed ? styles.pressed : null,
+            ]}
+          >
+            <Text style={styles.selectionLabel}>Country</Text>
+            <Text style={styles.selectionValue}>
+              {settings.country ? countryName(settings.country) : 'No country preference'}
+            </Text>
+          </Pressable>
         </View>
 
         <View style={styles.section}>
@@ -224,12 +226,143 @@ export default function AccountScreen() {
             <Switch
               accessibilityLabel="Remember what I read"
               disabled={disabled}
-              onValueChange={(rememberReads) => save.mutate({ rememberReads })}
+              onValueChange={(rememberReads) => {
+                if (!rememberReads && settings.rememberReads) setConfirmReadingHistoryOff(true)
+                else save.mutate({ rememberReads })
+              }}
               thumbColor={settings.rememberReads ? t.color.elevated : t.color.surface}
               trackColor={{ false: t.color.borderStrong, true: t.color.success }}
               value={settings.rememberReads}
             />
           </View>
+          <Pressable
+            accessibilityHint="Opens your Blindspot"
+            accessibilityLabel="View Blindspot"
+            accessibilityRole="button"
+            onPress={() => router.push('/blindspot')}
+            style={({ pressed }) => [styles.navigationRow, pressed ? styles.pressed : null]}
+          >
+            <View>
+              <Text style={styles.navigationTitle}>View Blindspot</Text>
+              <Text style={styles.navigationDetail}>
+                See gaps and new developments in your reading.
+              </Text>
+            </View>
+            <Text aria-hidden style={styles.navigationArrow}>
+              ›
+            </Text>
+          </Pressable>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Following</Text>
+          <Text style={styles.description}>
+            Stories from these publishers and narratives rank higher in For You.
+          </Text>
+          {follows.isPending ? <Text style={styles.note}>Loading follows…</Text> : null}
+          {follows.isError ? (
+            <Text style={styles.error}>Your follows could not be loaded.</Text>
+          ) : null}
+          {follows.data?.items.length === 0 ? (
+            <Text style={styles.note}>Follow publishers or narratives to tune your feed.</Text>
+          ) : null}
+          {follows.data?.items.map((follow) => (
+            <View key={`${follow.targetType}-${follow.id}`} style={styles.followRow}>
+              <Pressable
+                accessibilityHint={`Opens this ${follow.targetType}`}
+                accessibilityLabel={follow.title}
+                accessibilityRole="link"
+                onPress={() =>
+                  router.push(
+                    follow.targetType === 'narrative'
+                      ? `/narratives/${follow.slug}`
+                      : `/publishers/${follow.slug}`,
+                  )
+                }
+                style={({ pressed }) => [styles.followTarget, pressed ? styles.pressed : null]}
+              >
+                <Text style={styles.followTitle}>{follow.title}</Text>
+                <Text style={styles.followKind}>{follow.targetType}</Text>
+              </Pressable>
+              <Pressable
+                accessibilityLabel={`Unfollow ${follow.title}`}
+                accessibilityRole="button"
+                disabled={followSave.isPending}
+                onPress={() =>
+                  followSave.mutate({
+                    follow: false,
+                    targetId: follow.id,
+                    targetType: follow.targetType,
+                  })
+                }
+                style={({ pressed }) => [
+                  styles.unfollow,
+                  followSave.isPending ? styles.selectionRowDisabled : null,
+                  pressed ? styles.pressed : null,
+                ]}
+              >
+                <Text style={styles.unfollowText}>Unfollow</Text>
+              </Pressable>
+            </View>
+          ))}
+          {followSave.isError ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              That follow could not be updated. Try again.
+            </Text>
+          ) : null}
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Learned from your feedback</Text>
+          <Text style={styles.description}>
+            “More” and “Less” adjust these signals. You can remove a signal or start over.
+          </Text>
+          {signals.isPending ? <Text style={styles.note}>Loading learned signals…</Text> : null}
+          {signals.isError ? (
+            <Text style={styles.error}>Your learned signals could not be loaded.</Text>
+          ) : null}
+          {signals.data?.items.length === 0 ? (
+            <Text style={styles.note}>Use “More” or “Less” in For You to teach the feed.</Text>
+          ) : null}
+          {signals.data?.items.map((signal) => (
+            <View key={`${signal.kind}-${signal.key}`} style={styles.signalRow}>
+              <View style={styles.signalText}>
+                <Text style={styles.signalLabel}>{signal.label}</Text>
+                <Text style={styles.signalDetail}>
+                  {signal.kind} · {signal.weight > 0 ? 'More like this' : 'Less like this'}
+                </Text>
+              </View>
+              <Pressable
+                accessibilityLabel={`Remove learned signal for ${signal.label}`}
+                accessibilityRole="button"
+                disabled={signalSave.isPending}
+                onPress={() =>
+                  signalSave.mutate({ remove: { key: signal.key, kind: signal.kind } })
+                }
+                style={({ pressed }) => [
+                  styles.removeSignal,
+                  signalSave.isPending ? styles.selectionRowDisabled : null,
+                  pressed ? styles.pressed : null,
+                ]}
+              >
+                <Text style={styles.removeSignalText}>Remove</Text>
+              </Pressable>
+            </View>
+          ))}
+          {signals.data && signals.data.items.length > 0 ? (
+            <Button
+              disabled={signalSave.isPending}
+              onPress={() => setConfirmSignalsReset(true)}
+              tone="light"
+            >
+              Reset learned signals
+            </Button>
+          ) : null}
+          {signalSave.isError ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              Your learned signals could not be updated. Try again.
+            </Text>
+          ) : null}
         </View>
 
         {signOutError ? (
@@ -241,69 +374,144 @@ export default function AccountScreen() {
           {signingOut ? 'Signing out…' : 'Sign out'}
         </Button>
       </ScrollView>
+      <Modal
+        animationType="slide"
+        onRequestClose={() => setCountryPickerOpen(false)}
+        transparent
+        visible={countryPickerOpen}
+      >
+        <View accessibilityViewIsModal style={styles.sheetScrim}>
+          <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
+            <View style={styles.sheetHeader}>
+              <Text style={styles.sheetTitle}>Country preference</Text>
+              <Pressable
+                accessibilityLabel="Close country choices"
+                accessibilityRole="button"
+                onPress={() => setCountryPickerOpen(false)}
+                style={styles.close}
+              >
+                <Text style={styles.closeText}>Close</Text>
+              </Pressable>
+            </View>
+            <ScrollView contentContainerStyle={styles.countryList}>
+              <CountryChoice
+                active={settings.country === null}
+                disabled={disabled}
+                label="No country preference"
+                onPress={() => {
+                  save.mutate({ country: null })
+                  setCountryPickerOpen(false)
+                }}
+              />
+              {KNOWN_COUNTRIES.toSorted((a, b) => countryName(a).localeCompare(countryName(b))).map(
+                (country) => (
+                  <CountryChoice
+                    active={settings.country === country}
+                    disabled={disabled}
+                    key={country}
+                    label={countryName(country)}
+                    onPress={() => {
+                      save.mutate({ country })
+                      setCountryPickerOpen(false)
+                    }}
+                  />
+                ),
+              )}
+            </ScrollView>
+          </SafeAreaView>
+        </View>
+      </Modal>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setConfirmReadingHistoryOff(false)}
+        transparent
+        visible={confirmReadingHistoryOff}
+      >
+        <View accessibilityViewIsModal style={styles.dialogScrim}>
+          <View style={styles.dialog}>
+            <Text style={styles.dialogTitle}>Turn off reading history?</Text>
+            <Text style={styles.dialogText}>
+              Blindspot will stop recording stories you open and delete your saved reading history.
+            </Text>
+            <View style={styles.dialogActions}>
+              <Button onPress={() => setConfirmReadingHistoryOff(false)} tone="light">
+                Keep history
+              </Button>
+              <Button
+                disabled={disabled}
+                onPress={() => {
+                  save.mutate({ rememberReads: false })
+                  setConfirmReadingHistoryOff(false)
+                }}
+              >
+                Turn off history
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
+      <Modal
+        animationType="fade"
+        onRequestClose={() => setConfirmSignalsReset(false)}
+        transparent
+        visible={confirmSignalsReset}
+      >
+        <View accessibilityViewIsModal style={styles.dialogScrim}>
+          <View style={styles.dialog}>
+            <Text style={styles.dialogTitle}>Reset learned signals?</Text>
+            <Text style={styles.dialogText}>
+              This removes all feedback learned from your “More” and “Less” choices and restores any
+              stories hidden by “Less”.
+            </Text>
+            <View style={styles.dialogActions}>
+              <Button onPress={() => setConfirmSignalsReset(false)} tone="light">
+                Keep signals
+              </Button>
+              <Button
+                disabled={signalSave.isPending}
+                onPress={() => {
+                  signalSave.mutate({ reset: true })
+                  setConfirmSignalsReset(false)
+                }}
+              >
+                Reset signals
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </Screen>
   )
 }
 
-function PickGroup<T extends string>({
+function CountryChoice({
+  active,
   disabled,
   label,
-  onToggle,
-  options,
-  selected,
-  textColorFor,
-  tintFor,
-  titleFor,
+  onPress,
 }: {
+  active: boolean
   disabled: boolean
   label: string
-  onToggle: (value: T) => void
-  options: readonly T[]
-  selected: readonly T[]
-  textColorFor?: (value: T) => string
-  tintFor?: (value: T) => string
-  titleFor: (value: T) => string
+  onPress: () => void
 }) {
   return (
-    <View style={styles.pickGroup}>
-      <Text style={styles.groupLabel}>{label}</Text>
-      <View style={styles.chips}>
-        {options.map((option) => {
-          const picked = selected.includes(option)
-          const tint = tintFor?.(option)
-          return (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityState={{ disabled, selected: picked }}
-              disabled={disabled}
-              key={option}
-              onPress={() => onToggle(option)}
-              style={({ pressed }) => [
-                styles.chip,
-                picked ? styles.chipSelected : null,
-                picked && tint ? { backgroundColor: tint } : null,
-                pressed ? styles.pressed : null,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.chipText,
-                  picked ? styles.chipTextSelected : null,
-                  picked && textColorFor ? { color: textColorFor(option) } : null,
-                ]}
-              >
-                {titleFor(option)}
-              </Text>
-            </Pressable>
-          )
-        })}
-      </View>
-    </View>
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ disabled, selected: active }}
+      disabled={disabled}
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.countryChoice,
+        active ? styles.countryChoiceActive : null,
+        pressed ? styles.pressed : null,
+      ]}
+    >
+      <Text style={[styles.countryChoiceText, active ? styles.countryChoiceTextActive : null]}>
+        {label}
+      </Text>
+    </Pressable>
   )
-}
-
-function toggle<T>(items: readonly T[], item: T): T[] {
-  return items.includes(item) ? items.filter((value) => value !== item) : [...items, item]
 }
 
 const styles = StyleSheet.create({
@@ -323,28 +531,78 @@ const styles = StyleSheet.create({
     fontSize: t.type.body,
     lineHeight: 23,
   },
-  pickGroup: { gap: t.space[2] },
-  groupLabel: {
-    color: t.color.textMuted,
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
-  chip: {
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
-  chipSelected: { backgroundColor: t.color.band, borderColor: t.color.band },
-  chipText: { color: t.color.textSecondary, fontFamily: t.font.bold, fontSize: t.type.meta },
-  chipTextSelected: { color: t.color.bandText },
   switchRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   switchLabel: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  selectionRow: {
+    alignItems: 'center',
+    borderBottomColor: t.color.border,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: t.size.tap,
+  },
+  selectionRowDisabled: { opacity: 0.45 },
+  selectionLabel: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  selectionValue: {
+    color: t.color.textSecondary,
+    fontFamily: t.font.medium,
+    fontSize: t.type.body,
+  },
+  navigationRow: {
+    alignItems: 'center',
+    borderTopColor: t.color.border,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    minHeight: t.size.tap,
+    paddingTop: t.space[3],
+  },
+  navigationTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  navigationDetail: {
+    color: t.color.textSecondary,
+    fontFamily: t.font.regular,
+    fontSize: t.type.meta,
+    marginTop: t.space[1],
+  },
+  navigationArrow: { color: t.color.accentText, fontFamily: t.font.regular, fontSize: 32 },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.body, lineHeight: 22 },
+  note: {
+    color: t.color.textMuted,
+    fontFamily: t.font.regular,
+    fontSize: t.type.body,
+    lineHeight: 22,
+  },
+  followRow: {
+    alignItems: 'center',
+    borderBottomColor: t.color.border,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    gap: t.space[3],
+    minHeight: t.size.tap,
+  },
+  followTarget: { flex: 1, justifyContent: 'center', paddingVertical: t.space[2] },
+  followTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  followKind: {
+    color: t.color.textMuted,
+    fontFamily: t.font.medium,
+    fontSize: t.type.meta,
+    textTransform: 'capitalize',
+  },
+  unfollow: { justifyContent: 'center', minHeight: t.size.tap, paddingHorizontal: t.space[2] },
+  unfollowText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
+  signalRow: {
+    alignItems: 'center',
+    borderBottomColor: t.color.border,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    gap: t.space[3],
+    minHeight: t.size.tap,
+  },
+  signalText: { flex: 1, paddingVertical: t.space[2] },
+  signalLabel: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  signalDetail: { color: t.color.textMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
+  removeSignal: { justifyContent: 'center', minHeight: t.size.tap, paddingHorizontal: t.space[2] },
+  removeSignalText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
   alertNote: {
     color: t.color.textMuted,
     fontFamily: t.font.medium,
@@ -352,4 +610,48 @@ const styles = StyleSheet.create({
     lineHeight: 18,
   },
   pressed: { opacity: 0.68 },
+  sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
+  sheet: { backgroundColor: t.color.elevated, maxHeight: '82%', padding: t.space[5] },
+  sheetHeader: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: t.space[3],
+  },
+  sheetTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
+  close: {
+    alignItems: 'center',
+    borderColor: t.color.rule,
+    borderWidth: 1,
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+    paddingHorizontal: t.space[3],
+  },
+  closeText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
+  countryList: { gap: t.space[1], paddingBottom: t.space[3] },
+  countryChoice: { justifyContent: 'center', minHeight: t.size.tap, paddingHorizontal: t.space[3] },
+  countryChoiceActive: { backgroundColor: t.color.band },
+  countryChoiceText: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.body },
+  countryChoiceTextActive: { color: t.color.bandText, fontFamily: t.font.bold },
+  dialogScrim: {
+    alignItems: 'center',
+    backgroundColor: 'rgba(18, 18, 18, 0.48)',
+    flex: 1,
+    justifyContent: 'center',
+    padding: t.space[5],
+  },
+  dialog: {
+    backgroundColor: t.color.elevated,
+    gap: t.space[4],
+    maxWidth: 420,
+    padding: t.space[5],
+  },
+  dialogTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
+  dialogText: {
+    color: t.color.textSecondary,
+    fontFamily: t.font.regular,
+    fontSize: t.type.body,
+    lineHeight: 23,
+  },
+  dialogActions: { gap: t.space[2] },
 })

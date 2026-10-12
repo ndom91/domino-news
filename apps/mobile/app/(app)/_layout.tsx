@@ -1,14 +1,19 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { Redirect, Stack, useRouter } from 'expo-router'
+import { useQuery } from '@tanstack/react-query'
+import { Redirect, Stack, usePathname, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
 import { LoadingView, Screen } from '../../components/ui'
+import { queries } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
 import { listenForStoryNotifications } from '../../lib/for-you-alerts'
 
 export default function SignedInLayout() {
   const session = authClient.useSession()
   const router = useRouter()
+  const pathname = usePathname()
+  const preferences = useQuery({ ...queries.preferences(), enabled: Boolean(session.data) })
+  const onOnboarding = pathname === '/onboarding'
 
   useEffect(() => {
     if (!session.data) return
@@ -35,6 +40,16 @@ export default function SignedInLayout() {
     )
   }
   if (!session.data) return <Redirect href="/sign-in" />
+  if (!onOnboarding && preferences.isPending) {
+    return (
+      <Screen top>
+        <LoadingView label="Preparing your feed" />
+      </Screen>
+    )
+  }
+  if (!onOnboarding && preferences.data && !preferences.data.onboarded) {
+    return <Redirect href="/onboarding" />
+  }
 
   return (
     <Stack
@@ -50,9 +65,30 @@ export default function SignedInLayout() {
       }}
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       <Stack.Screen
         name="stories/[slug]"
         options={{ headerBackTitle: 'Back', headerTitle: 'Story' }}
+      />
+      <Stack.Screen
+        name="blindspot"
+        options={{ headerBackTitle: 'Account', headerTitle: 'Blindspot' }}
+      />
+      <Stack.Screen
+        name="narratives/index"
+        options={{ headerBackTitle: 'Back', headerTitle: 'Narratives' }}
+      />
+      <Stack.Screen
+        name="narratives/[slug]"
+        options={{ headerBackTitle: 'Back', headerTitle: 'Narrative' }}
+      />
+      <Stack.Screen
+        name="publishers/index"
+        options={{ headerBackTitle: 'Back', headerTitle: 'Publishers' }}
+      />
+      <Stack.Screen
+        name="publishers/[slug]"
+        options={{ headerBackTitle: 'Back', headerTitle: 'Publisher' }}
       />
     </Stack>
   )

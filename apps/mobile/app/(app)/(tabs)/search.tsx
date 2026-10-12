@@ -61,6 +61,7 @@ export default function SearchScreen() {
         {search.data ? (
           <SearchResults
             now={new Date().toISOString()}
+            onNarrativePress={(slug) => router.push(`/narratives/${slug}`)}
             results={search.data}
             onStoryPress={(slug) => router.push(`/stories/${slug}`)}
           />
@@ -72,10 +73,12 @@ export default function SearchScreen() {
 
 function SearchResults({
   now,
+  onNarrativePress,
   results,
   onStoryPress,
 }: {
   now: string
+  onNarrativePress: (slug: string) => void
   results: SearchResponse
   onStoryPress: (slug: string) => void
 }) {
@@ -98,6 +101,7 @@ function SearchResults({
           hit={hit}
           key={`${hit.type}-${hit.id}`}
           now={now}
+          onNarrativePress={onNarrativePress}
           onStoryPress={onStoryPress}
         />
       ))}
@@ -108,20 +112,21 @@ function SearchResults({
 function SearchResult({
   hit,
   now,
+  onNarrativePress,
   onStoryPress,
 }: {
   hit: SearchHit
   now: string
+  onNarrativePress: (slug: string) => void
   onStoryPress: (slug: string) => void
 }) {
   const content = <SearchResultContent hit={hit} now={now} />
-  if (hit.type === 'narrative') return <View style={styles.result}>{content}</View>
 
   return (
     <Pressable
       accessibilityLabel={hit.title}
       accessibilityRole="link"
-      onPress={() => onStoryPress(hit.slug)}
+      onPress={() => (hit.type === 'story' ? onStoryPress(hit.slug) : onNarrativePress(hit.slug))}
       style={({ pressed }) => [styles.result, pressed ? styles.resultPressed : null]}
     >
       {content}

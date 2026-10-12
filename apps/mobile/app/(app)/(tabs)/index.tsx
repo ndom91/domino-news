@@ -3,7 +3,7 @@ import { plural } from '@dn/domain'
 import type { StoryLead } from '@dn/schemas'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
@@ -48,8 +48,54 @@ export default function LatestScreen() {
 
   return (
     <Screen>
-      <ScrollView
+      <FlatList
         contentContainerStyle={uiStyles.content}
+        data={latest}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        keyExtractor={(story) => story.id}
+        ListEmptyComponent={
+          <MessageView
+            detail="New stories usually arrive within 15 minutes."
+            title="No stories yet"
+          />
+        }
+        ListFooterComponent={
+          stories.hasNextPage || stories.isFetchNextPageError ? (
+            <View style={styles.more}>
+              <Button disabled={stories.isFetchingNextPage} onPress={() => stories.fetchNextPage()}>
+                {moreLabel}
+              </Button>
+              {stories.isFetchNextPageError ? (
+                <Text accessibilityRole="alert" style={styles.pageError}>
+                  Couldn’t load older stories. Try again.
+                </Text>
+              ) : null}
+            </View>
+          ) : null
+        }
+        ListHeaderComponent={
+          <>
+            <View style={styles.edition}>
+              <Text style={styles.editionLabel}>The latest reporting</Text>
+              <Text style={styles.editionText}>
+                {plural(front.data.stats.stories, 'story')} in the last 24 hours
+              </Text>
+            </View>
+            {front.data.lead ? (
+              <View style={styles.lead}>
+                <Text style={uiStyles.eyebrow}>Lead story</Text>
+                <LeadStory story={front.data.lead} />
+              </View>
+            ) : null}
+            <View style={styles.latestHeader}>
+              <Text style={styles.section}>Latest</Text>
+              <Text accessibilityLiveRegion="polite" style={styles.count}>
+                {plural(latest.length, 'story', 'stories')}
+              </Text>
+            </View>
+          </>
+        }
+        ListHeaderComponentStyle={latest.length ? styles.listHeader : undefined}
         refreshControl={
           <RefreshControl
             onRefresh={refresh}
@@ -57,50 +103,8 @@ export default function LatestScreen() {
             tintColor={t.color.accentText}
           />
         }
-      >
-        <View style={styles.edition}>
-          <Text style={styles.editionLabel}>The latest reporting</Text>
-          <Text style={styles.editionText}>
-            {plural(front.data.stats.stories, 'story')} in the last 24 hours
-          </Text>
-        </View>
-        {front.data.lead ? (
-          <View style={styles.lead}>
-            <Text style={uiStyles.eyebrow}>Lead story</Text>
-            <LeadStory story={front.data.lead} />
-          </View>
-        ) : null}
-        <View style={styles.latestHeader}>
-          <Text style={styles.section}>Latest</Text>
-          <Text accessibilityLiveRegion="polite" style={styles.count}>
-            {plural(latest.length, 'story', 'stories')}
-          </Text>
-        </View>
-        {latest.length === 0 ? (
-          <MessageView
-            detail="New stories usually arrive within 15 minutes."
-            title="No stories yet"
-          />
-        ) : (
-          <View style={styles.list}>
-            {latest.map((story) => (
-              <StoryCard key={story.id} now={now} story={story} />
-            ))}
-          </View>
-        )}
-        {stories.hasNextPage || stories.isFetchNextPageError ? (
-          <View style={styles.more}>
-            <Button disabled={stories.isFetchingNextPage} onPress={() => stories.fetchNextPage()}>
-              {moreLabel}
-            </Button>
-            {stories.isFetchNextPageError ? (
-              <Text accessibilityRole="alert" style={styles.pageError}>
-                Couldn’t load older stories. Try again.
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-      </ScrollView>
+        renderItem={({ item }) => <StoryCard now={now} story={item} />}
+      />
     </Screen>
   )
 }
@@ -174,7 +178,8 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   count: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
-  list: { gap: t.space[3], marginTop: t.space[4] },
+  listHeader: { marginBottom: t.space[4] },
+  separator: { height: t.space[3] },
   more: { marginTop: t.space[6] },
   pageError: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
 })

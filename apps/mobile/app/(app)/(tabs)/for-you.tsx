@@ -5,7 +5,7 @@ import Feather from '@expo/vector-icons/Feather'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { useState } from 'react'
-import { Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { api, isUnauthorized, queries } from '../../../lib/api'
@@ -49,8 +49,53 @@ export default function ForYouScreen() {
 
   return (
     <Screen>
-      <ScrollView
+      <FlatList
         contentContainerStyle={uiStyles.content}
+        data={items}
+        ItemSeparatorComponent={() => <View style={styles.separator} />}
+        keyExtractor={(item) => item.story.id}
+        ListEmptyComponent={
+          <MessageView
+            detail="Check back soon for newly reported stories."
+            title="Nothing new yet"
+          />
+        }
+        ListFooterComponent={
+          feed.hasNextPage || feed.isFetchNextPageError ? (
+            <View style={styles.more}>
+              <Button disabled={feed.isFetchingNextPage} onPress={() => feed.fetchNextPage()}>
+                {moreLabel}
+              </Button>
+              {feed.isFetchNextPageError ? (
+                <Text accessibilityRole="alert" style={styles.pageError}>
+                  Couldn’t load more stories. Try again.
+                </Text>
+              ) : null}
+            </View>
+          ) : null
+        }
+        ListHeaderComponent={
+          <>
+            <View style={styles.masthead}>
+              <View style={styles.kickerMark} />
+              <Text style={styles.eyebrow}>Your edition</Text>
+              <Text style={styles.heading}>For You</Text>
+              <Text style={styles.intro}>
+                Ranked around the regions, desks and topics you pick. Wider news still appears.
+              </Text>
+            </View>
+            {!first?.personalised ? (
+              <View style={styles.setup}>
+                <Text style={styles.setupTitle}>Make this feed yours</Text>
+                <Text style={styles.setupText}>
+                  Pick what matters to you and matching stories will move to the top.
+                </Text>
+                <Button onPress={() => router.push('/account')}>Choose your picks</Button>
+              </View>
+            ) : null}
+          </>
+        }
+        ListHeaderComponentStyle={items.length ? styles.listHeader : undefined}
         refreshControl={
           <RefreshControl
             onRefresh={refresh}
@@ -58,49 +103,8 @@ export default function ForYouScreen() {
             tintColor={t.color.accentText}
           />
         }
-      >
-        <View style={styles.masthead}>
-          <View style={styles.kickerMark} />
-          <Text style={styles.eyebrow}>Your edition</Text>
-          <Text style={styles.heading}>For You</Text>
-          <Text style={styles.intro}>
-            Ranked around the regions, desks and topics you pick. Wider news still appears.
-          </Text>
-        </View>
-        {!first?.personalised ? (
-          <View style={styles.setup}>
-            <Text style={styles.setupTitle}>Make this feed yours</Text>
-            <Text style={styles.setupText}>
-              Pick what matters to you and matching stories will move to the top.
-            </Text>
-            <Button onPress={() => router.push('/account')}>Choose your picks</Button>
-          </View>
-        ) : null}
-        {items.length ? (
-          <View style={styles.list}>
-            {items.map((item) => (
-              <ForYouCard item={item} key={item.story.id} now={now} />
-            ))}
-          </View>
-        ) : (
-          <MessageView
-            detail="Check back soon for newly reported stories."
-            title="Nothing new yet"
-          />
-        )}
-        {feed.hasNextPage || feed.isFetchNextPageError ? (
-          <View style={styles.more}>
-            <Button disabled={feed.isFetchingNextPage} onPress={() => feed.fetchNextPage()}>
-              {moreLabel}
-            </Button>
-            {feed.isFetchNextPageError ? (
-              <Text accessibilityRole="alert" style={styles.pageError}>
-                Couldn’t load more stories. Try again.
-              </Text>
-            ) : null}
-          </View>
-        ) : null}
-      </ScrollView>
+        renderItem={({ item }) => <ForYouCard item={item} now={now} />}
+      />
     </Screen>
   )
 }
@@ -247,7 +251,8 @@ const styles = StyleSheet.create({
     fontSize: t.type.body,
     lineHeight: 23,
   },
-  list: { gap: t.space[6], marginTop: t.space[6] },
+  listHeader: { marginBottom: t.space[6] },
+  separator: { height: t.space[6] },
   card: { gap: t.space[2] },
   why: {
     borderLeftColor: t.color.accent,
