@@ -71,6 +71,7 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/search?q=x'],
       ['GET', '/api/v1/ops/status'],
       ['GET', '/api/v1/ops/failed'],
+      ['GET', '/api/v1/ops/match-health'],
       ['POST', '/api/v1/ops/actions'],
       ['GET', '/api/v1/me/preferences'],
       ['GET', '/api/v1/me/follows'],
@@ -300,6 +301,17 @@ describe('/api/v1 write endpoints', () => {
     expect((await settings('rebuild_search_projection')).retry_limit).toBe(0)
   })
 
+  it('reports match health from live data', async () => {
+    const { matchHealthSchema } = await import('@dn/schemas')
+    const h1 = matchHealthSchema.parse(await (await call('/api/v1/ops/match-health')).json())
+    const { rows } = await h.ctx.pool.query(
+      `select count(*)::int as n from story_article where removed_at is null and added_at > now() - interval '7 days'`,
+    )
+    const placed = h1.placements.newStory + h1.placements.embedding + h1.placements.model
+    expect(placed).toBe(rows[0].n)
+    expect(h1.splitPairs.threshold).toBe(0.9)
+  })
+
   it('lists failed jobs with their target, and retries or dismisses them', async () => {
     const { failedJobsResponseSchema } = await import('@dn/schemas')
     const boss = await h.ctx.boss()
@@ -399,6 +411,7 @@ describe('/api/v1 write endpoints', () => {
       )
     expect((await asReader('/api/v1/ops/status')).status).toBe(403)
     expect((await asReader('/api/v1/ops/failed')).status).toBe(403)
+    expect((await asReader('/api/v1/ops/match-health')).status).toBe(403)
     expect((await asReader('/api/v1/publishers/bbc/evidence')).status).toBe(403)
     const review = await asReader('/api/v1/publishers/bbc/assessment', {
       method: 'POST',

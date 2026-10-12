@@ -20,6 +20,8 @@ import {
   insightsSchema,
   type LearnedSignals,
   learnedSignalsSchema,
+  type MatchHealth,
+  matchHealthSchema,
   type NarrativeDetail,
   type NarrativeListResponse,
   narrativeDetailSchema,
@@ -163,6 +165,8 @@ export function createApiClient({
       }),
     getOpsStatus: (signal?: AbortSignalLike) =>
       request<OpsStatus>(opsStatusSchema, '/ops/status', { signal }),
+    getMatchHealth: (signal?: AbortSignalLike) =>
+      request<MatchHealth>(matchHealthSchema, '/ops/match-health', { signal }),
     getFailedJobs: (
       query: { queue?: string | null; cursor?: string | null },
       signal?: AbortSignalLike,

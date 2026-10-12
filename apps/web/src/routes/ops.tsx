@@ -1,5 +1,10 @@
 import { plural, relativeTime } from '@dn/domain'
-import { FAILED_JOB_RETENTION_DAYS, type FailedJob, type OpsAction } from '@dn/schemas'
+import {
+  FAILED_JOB_RETENTION_DAYS,
+  type FailedJob,
+  type MatchHealth,
+  type OpsAction,
+} from '@dn/schemas'
 import { Badge, Button, ConfirmDialog, Notice, SectionLabel, Skeleton, Tooltip } from '@dn/ui'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
@@ -200,6 +205,8 @@ function OpsPage() {
           </Table>
         </section>
       </div>
+
+      <MatchHealthSection />
 
       <section className="mt-10">
         <SectionLabel>Feeds</SectionLabel>
@@ -486,6 +493,121 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
     <div className="py-4">
       <p className="mb-2 type-label text-text">{label}</p>
       {children}
+    </div>
+  )
+}
+
+const pct = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '–')
+
+/** How well articles are grouped into stories. Computed on the server every 5 minutes. */
+function MatchHealthSection() {
+  const health = useQuery(queries.matchHealth())
+  return (
+    <section aria-labelledby="match-heading" className="mt-10">
+      <SectionLabel id="match-heading">Match health</SectionLabel>
+      {health.isPending ? (
+        <Skeleton className="h-28 w-full" />
+      ) : health.isError ? (
+        <Notice tone="error" title="Match health unavailable">
+          {health.error.message}
+        </Notice>
+      ) : (
+        <MatchHealthBody h={health.data} />
+      )}
+    </section>
+  )
+}
+
+function MatchHealthBody({ h }: { h: MatchHealth }) {
+  const { recent, previous } = h.stories
+  const placed = h.placements.newStory + h.placements.embedding + h.placements.model
+  return (
+    <>
+      <p className="mb-4 max-w-reading text-sm text-text-secondary">
+        Last 7 days. A falling share of one-article stories and few near-identical articles in
+        different stories mean matching groups well. Some close pairs are rightly separate (a second
+        attack, a roundup), so read the list before acting on the count. Updated{' '}
+        {relativeTime(h.computedAt)}.
+      </p>
+      <dl className="grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+        <StatText
+          label="One-article stories"
+          value={pct(recent.singletons, recent.total)}
+          note={`${recent.singletons} of ${recent.total} stories${
+            previous.total ? ` · ${pct(previous.singletons, previous.total)} the week before` : ''
+          }`}
+        />
+        <StatText
+          label="Articles placed"
+          value={String(placed)}
+          note={`${h.placements.newStory} new stories · ${h.placements.model} by the model · ${h.placements.embedding} by similarity`}
+        />
+        <StatText
+          label="Model match calls"
+          value={String(h.model.calls)}
+          note={`${h.model.pickedStory} chose a story · ${h.model.pickedNone} none${h.model.failed ? ` · ${h.model.failed} failed` : ''}`}
+        />
+        <StatText
+          label="Possible missed merges"
+          value={String(h.splitPairs.count)}
+          note={`article pairs ≥ ${h.splitPairs.threshold.toFixed(2)} similar, different stories (3 days)`}
+        />
+      </dl>
+      {h.splitPairs.worst.length > 0 ? (
+        <details className="t-acc group mt-4">
+          <summary className="flex cursor-pointer list-none items-center gap-2 type-label text-text [&::-webkit-details-marker]:hidden">
+            <DisclosureChevron />
+            Closest pairs in different stories
+          </summary>
+          <div className="mt-2">
+            <Table head={['Similarity', 'Article', 'Article']}>
+              {h.splitPairs.worst.map((p) => (
+                <tr key={`${p.a.title}|${p.b.title}`}>
+                  <Td>{p.similarity.toFixed(3)}</Td>
+                  <Td>
+                    <PairSide side={p.a} />
+                  </Td>
+                  <Td>
+                    <PairSide side={p.b} />
+                  </Td>
+                </tr>
+              ))}
+            </Table>
+          </div>
+        </details>
+      ) : null}
+    </>
+  )
+}
+
+function PairSide({ side }: { side: MatchHealth['splitPairs']['worst'][number]['a'] }) {
+  return (
+    <span className="block max-w-sm">
+      <span className="block font-medium">{side.title}</span>
+      <span className="block type-meta">
+        {side.publisher} · in{' '}
+        {side.storySlug ? (
+          <Link
+            to="/stories/$slug"
+            params={{ slug: side.storySlug }}
+            className="underline underline-offset-4"
+          >
+            {side.storyTitle}
+          </Link>
+        ) : (
+          <>“{side.storyTitle}” (unpublished)</>
+        )}
+      </span>
+    </span>
+  )
+}
+
+function StatText({ label, value, note }: { label: string; value: string; note?: string }) {
+  return (
+    <div className="border-b border-border py-4 pr-4">
+      <dt className="type-label text-text-muted">{label}</dt>
+      <dd className="mt-1 type-numeral">{value}</dd>
+      {note ? <dd className="mt-1 type-meta">{note}</dd> : null}
     </div>
   )
 }

@@ -34,6 +34,7 @@ export const queryKeys = {
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
   preview: (type: PreviewType, slug: string) => ['preview', type, slug] as const,
   ops: () => ['ops', 'status'] as const,
+  matchHealth: () => ['ops', 'match-health'] as const,
   failedJobs: (queue: string | null) => ['ops', 'failed', queue ?? 'all'] as const,
   preferences: () => ['me', 'preferences'] as const,
   insights: () => ['me', 'insights'] as const,
@@ -158,6 +159,14 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.ops(),
         queryFn: ({ signal }) => api.getOpsStatus(signal),
         refetchInterval: 5_000,
+      }),
+    // Computed on the server and cached there for 5 minutes; no need to poll faster.
+    matchHealth: () =>
+      queryOptions({
+        queryKey: queryKeys.matchHealth(),
+        queryFn: ({ signal }) => api.getMatchHealth(signal),
+        staleTime: 5 * 60_000,
+        refetchInterval: 5 * 60_000,
       }),
     failedJobs: (queue: string | null) =>
       infiniteQueryOptions({

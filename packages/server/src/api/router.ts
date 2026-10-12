@@ -22,6 +22,7 @@ import { listFollows, setFollow } from '../follows.ts'
 import { FOR_YOU_PAGE_SIZE, getForYou } from '../for-you.ts'
 import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
+import { getMatchHealth } from '../match-health.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
@@ -334,6 +335,9 @@ const routes: Route[] = [
     { adminOnly: true },
   ),
   route('GET', '/api/v1/ops/status', async ({ ctx }) => json(await getOpsStatus(ctx)), {
+    adminOnly: true,
+  }),
+  route('GET', '/api/v1/ops/match-health', async ({ ctx }) => json(await getMatchHealth(ctx)), {
     adminOnly: true,
   }),
   route(

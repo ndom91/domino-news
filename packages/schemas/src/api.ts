@@ -514,6 +514,49 @@ export type FailedJobsResponse = z.infer<typeof failedJobsResponseSchema>
 
 export const FAILED_JOB_RETENTION_DAYS = 3
 
+// How well articles are grouped into stories, from live data. See docs/006 "Match quality".
+export const matchHealthSchema = z.object({
+  computedAt: z.string(),
+  // Stories first seen in the last 7 days, and the 7 days before, for a trend.
+  stories: z.object({
+    recent: z.object({ total: z.int(), singletons: z.int() }),
+    previous: z.object({ total: z.int(), singletons: z.int() }),
+  }),
+  // How articles joined stories in the last 7 days.
+  placements: z.object({ newStory: z.int(), embedding: z.int(), model: z.int() }),
+  // The model's answers in the last 7 days.
+  model: z.object({
+    calls: z.int(),
+    pickedStory: z.int(),
+    pickedNone: z.int(),
+    failed: z.int(),
+  }),
+  // Near-identical articles from different publishers that sit in different stories: likely
+  // missed merges (last 3 days, within 48 hours of each other).
+  splitPairs: z.object({
+    count: z.int(),
+    threshold: z.number(),
+    worst: z.array(
+      z.object({
+        similarity: z.number(),
+        a: z.object({
+          title: z.string(),
+          publisher: z.string(),
+          storyTitle: z.string(),
+          storySlug: z.nullable(z.string()),
+        }),
+        b: z.object({
+          title: z.string(),
+          publisher: z.string(),
+          storyTitle: z.string(),
+          storySlug: z.nullable(z.string()),
+        }),
+      }),
+    ),
+  }),
+})
+export type MatchHealth = z.infer<typeof matchHealthSchema>
+
 const mixEntry = z.object({
   key: z.string(),
   // Share of this outlet's Stories vs share of all published Stories, both 0-1.
