@@ -16,7 +16,7 @@ export const Route = createFileRoute('/ops')({
   },
   // ?failed=<queue> filters the Failed jobs section to one queue.
   validateSearch: z.object({ failed: z.catch(z.optional(z.string()), undefined) }),
-  head: () => ({ meta: [{ title: 'Pipeline · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Pipeline · Domino Wire' }] }),
   component: OpsPage,
 })
 

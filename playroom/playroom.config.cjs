@@ -7,7 +7,7 @@ module.exports = {
   frameComponent: './src/frame.tsx',
   themes: './src/themes.ts',
   outputPath: './dist',
-  title: 'Domino News UI',
+  title: 'Domino Wire UI',
   widths: [375, 768, 1440],
   port: 9000,
   openBrowser: false,

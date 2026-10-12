@@ -1,4 +1,4 @@
-# Domino News docs
+# Domino Wire docs
 
 Read in numbered order. 001–005 are the architecture agreed before building (2026-10-10); 006 records what was actually built and why, and wins where they differ.
 

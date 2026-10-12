@@ -24,7 +24,7 @@ export const Route = createFileRoute('/search')({
   // Load outlets up front so a deep-linked ?publisher= shows as selected. Prefetch never
   // throws, so search still works if the outlet list fails.
   loader: ({ context }) => context.queryClient.prefetchQuery(queries.publishers()),
-  head: () => ({ meta: [{ title: 'Search · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Search · Domino Wire' }] }),
   component: SearchPage,
 })
 

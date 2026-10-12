@@ -10,7 +10,7 @@ export const Route = createFileRoute('/terms')({
       path: match.pathname,
       index: true,
       title: 'Terms of service',
-      description: 'The terms for using Domino News.',
+      description: 'The terms for using Domino Wire.',
     }),
   component: TermsPage,
 })

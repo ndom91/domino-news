@@ -1,4 +1,4 @@
-# Domino News
+# Domino Wire
 
 A news reader that shows you where every claim comes from.
 

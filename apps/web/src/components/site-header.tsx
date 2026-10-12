@@ -259,7 +259,7 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
           </nav>
         </div>
         <div className="mt-10 flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-t border-band-line pt-4 text-sm text-band-muted">
-          <p>© {new Date().getFullYear()} Domino News</p>
+          <p>© {new Date().getFullYear()} Domino Wire</p>
           <nav aria-label="Legal">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
               {LEGAL.map((item) => (

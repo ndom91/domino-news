@@ -15,7 +15,7 @@ import { queries } from '../../lib/api.ts'
 
 export const Route = createFileRoute('/narratives/')({
   loader: ({ context }) => context.queryClient.ensureQueryData(queries.narratives()),
-  head: () => ({ meta: [{ title: 'Narratives · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Narratives · Domino Wire' }] }),
   component: NarrativesPage,
 })
 

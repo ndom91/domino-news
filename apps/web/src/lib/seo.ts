@@ -2,7 +2,7 @@
 // link. TanStack keeps the deepest route's tag per name/property, so the root sets the
 // site-wide defaults and pages override what they need.
 
-export const SITE_NAME = 'Domino News'
+export const SITE_NAME = 'Domino Wire'
 export const SITE_DESCRIPTION =
   'Follow the news as it falls: one story, every source, and what came next.'
 
@@ -16,10 +16,10 @@ interface ShareImage {
 
 /** The site-wide share card, from the same template as story cards. Bump v after changing it. */
 export const DEFAULT_IMAGE: ShareImage = {
-  url: '/api/v1/og/site/default.png?v=1',
+  url: '/api/v1/og/site/default.png?v=2',
   width: 1200,
   height: 630,
-  alt: 'Domino News: follow the news as it falls',
+  alt: 'Domino Wire: follow the news as it falls',
 }
 
 export interface SeoInput {

@@ -93,7 +93,7 @@ function FeedPage() {
         {front.lead ? (
           <HeroStory story={front.lead} position={front.leadPosition} now={now} Link={RouterLink} />
         ) : (
-          <h1 className="sr-only">Domino News</h1>
+          <h1 className="sr-only">Domino Wire</h1>
         )}
 
         {!region ? <ForYouRail excludeId={front.lead?.id} now={now} /> : null}

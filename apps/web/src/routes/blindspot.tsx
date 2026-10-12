@@ -14,7 +14,7 @@ export const Route = createFileRoute('/blindspot')({
       context.queryClient.prefetchQuery(queries.insights()),
       context.queryClient.prefetchQuery(queries.preferences()),
     ]),
-  head: () => ({ meta: [{ title: 'Blindspot · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Blindspot · Domino Wire' }] }),
   component: BlindspotPage,
 })
 

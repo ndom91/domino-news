@@ -42,7 +42,7 @@ export const Route = createFileRoute('/publishers/')({
     lean: z.catch(z.optional(leanFilterSchema), undefined),
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(queries.publishers()),
-  head: () => ({ meta: [{ title: 'Publishers · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Publishers · Domino Wire' }] }),
   component: PublishersPage,
 })
 

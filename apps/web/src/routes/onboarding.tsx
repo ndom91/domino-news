@@ -13,7 +13,7 @@ import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/onboarding')({
   validateSearch: z.object({ next: z.optional(z.string()) }),
-  head: () => ({ meta: [{ title: 'Welcome · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Welcome · Domino Wire' }] }),
   component: OnboardingPage,
 })
 

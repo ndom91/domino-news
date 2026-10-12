@@ -10,7 +10,7 @@ export const Route = createFileRoute('/privacy')({
       path: match.pathname,
       index: true,
       title: 'Privacy policy',
-      description: 'What Domino News stores about you, why, for how long, and how to delete it.',
+      description: 'What Domino Wire stores about you, why, for how long, and how to delete it.',
     }),
   component: PrivacyPage,
 })

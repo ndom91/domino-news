@@ -1,4 +1,4 @@
-# Domino News: agent and contributor notes
+# Domino Wire: agent and contributor notes
 
 Planning and architecture live in [`docs/`](docs/README.md). Decisions taken while building are in [`docs/006-implementation-notes.md`](docs/006-implementation-notes.md).
 

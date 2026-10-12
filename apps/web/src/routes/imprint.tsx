@@ -10,7 +10,7 @@ export const Route = createFileRoute('/imprint')({
       path: match.pathname,
       index: true,
       title: 'Imprint',
-      description: 'Who runs Domino News and how to reach them.',
+      description: 'Who runs Domino Wire and how to reach them.',
     }),
   component: ImprintPage,
 })

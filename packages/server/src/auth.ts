@@ -84,7 +84,7 @@ export function createAuth(db: Db, env = process.env) {
       bearer(),
       expo(),
       // WebAuthn is bound to the public origin: rpID must be its hostname.
-      passkey({ rpID: new URL(baseURL).hostname, rpName: 'Domino News', origin: baseURL }),
+      passkey({ rpID: new URL(baseURL).hostname, rpName: 'Domino Wire', origin: baseURL }),
       // Writes cookies set by server-side auth.api calls (e.g. getSession's sliding refresh)
       // onto the TanStack Start response. Must stay last.
       tanstackStartCookies(),

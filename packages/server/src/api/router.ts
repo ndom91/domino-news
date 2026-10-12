@@ -217,7 +217,7 @@ const routes: Route[] = [
       if (params.type === 'site' && slug === 'default') {
         const png = await renderShareCard({
           title: 'Follow the news as it falls',
-          kicker: 'Domino News',
+          kicker: 'Domino Wire',
           description: 'One story, every source, and what came next.',
           desk: null,
           footnote: 'Every publisher, one story',

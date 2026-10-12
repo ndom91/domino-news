@@ -1,6 +1,6 @@
 # Notice
 
-Domino News: copyright © 2026 Nico Domino.
+Domino Wire: copyright © 2026 Nico Domino.
 
 The source code in this repository is licensed under the GNU Affero General Public License, version 3 only ([`LICENSE`](LICENSE)). If you run a modified version as a network service, AGPL section 13 requires you to offer its source to that service's users.
 

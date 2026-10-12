@@ -15,7 +15,7 @@ export const Route = createFileRoute('/for-you')({
     await context.queryClient.prefetchInfiniteQuery(queries.forYou())
     return { now: new Date().toISOString() }
   },
-  head: () => ({ meta: [{ title: 'For You · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'For You · Domino Wire' }] }),
   component: ForYouPage,
 })
 

@@ -33,7 +33,7 @@ export const Route = createFileRoute('/account')({
       context.queryClient.prefetchQuery(queries.preferences()),
       context.queryClient.prefetchQuery(queries.follows()),
     ]),
-  head: () => ({ meta: [{ title: 'Account · Domino News' }] }),
+  head: () => ({ meta: [{ title: 'Account · Domino Wire' }] }),
   component: AccountPage,
 })
 
