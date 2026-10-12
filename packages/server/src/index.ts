@@ -1,5 +1,6 @@
 export * from './assessments.ts'
 export * from './auth.ts'
+export * from './cache.ts'
 export * from './config.ts'
 export * from './context.ts'
 export * from './feedback.ts'

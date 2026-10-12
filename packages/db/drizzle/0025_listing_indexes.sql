@@ -1,0 +1,3 @@
+CREATE INDEX "article_publisher_seen_idx" ON "article" USING btree ("publisher_id","first_seen_at");--> statement-breakpoint
+CREATE INDEX "article_reported_at_idx" ON "article" USING btree ((coalesce("published_at", "first_seen_at")));--> statement-breakpoint
+CREATE INDEX "story_listed_idx" ON "story" USING btree ("last_updated_at" DESC NULLS FIRST,"id" DESC NULLS FIRST) WHERE "story"."published_at" is not null and "story"."merged_into_story_id" is null;

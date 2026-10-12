@@ -4,6 +4,7 @@ export default defineConfig({
   test: {
     include: ['test/**/*.test.ts', 'packages/**/*.test.ts'],
     globalSetup: ['./test/global-setup.ts'],
+    setupFiles: ['./test/setup.ts'],
     // Integration tests share one test database; run files sequentially.
     fileParallelism: false,
     testTimeout: 30_000,

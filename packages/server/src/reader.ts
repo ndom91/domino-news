@@ -22,8 +22,10 @@ import {
   isNull,
   lt,
   or,
+  type SQLWrapper,
   sql,
 } from 'drizzle-orm'
+import { cached, SHARED_TTL_MS } from './cache.ts'
 import { leanMixByStory } from './lean.ts'
 
 const iso = (d: Date) => d.toISOString()
@@ -71,33 +73,64 @@ async function publishersByStory(db: Db, storyIds: string[]) {
 }
 
 /**
- * A Narrative's desk: the one most of its Stories share (ties: most recently updated), so
- * its colour is stable. Outer column written literally (see AGENTS.md).
+ * Each Narrative's desk: the one most of its Stories share (ties: most recently updated), so
+ * its colour is stable. A subquery to join on `narrativeId`, computed once per Narrative;
+ * pass the ids (or a subquery of them) to limit the work, or omit them for all.
  */
-export const narrativeDesk = sql<Desk | null>`(
-  select s.desk from narrative_story ns join story s on s.id = ns.story_id
-  where ns.narrative_id = narrative.id and ns.removed_at is null and s.desk is not null
-  group by s.desk order by count(*) desc, max(s.last_updated_at) desc limit 1)`
+export function narrativeDesks(db: Db, narrativeIds?: string[] | SQLWrapper) {
+  return db
+    .selectDistinctOn([schema.narrativeStory.narrativeId], {
+      narrativeId: schema.narrativeStory.narrativeId,
+      desk: schema.story.desk,
+    })
+    .from(schema.narrativeStory)
+    .innerJoin(schema.story, eq(schema.story.id, schema.narrativeStory.storyId))
+    .where(
+      and(
+        narrativeIds ? inArray(schema.narrativeStory.narrativeId, narrativeIds) : undefined,
+        isNull(schema.narrativeStory.removedAt),
+        isNotNull(schema.story.desk),
+      ),
+    )
+    .groupBy(schema.narrativeStory.narrativeId, schema.story.desk)
+    .orderBy(
+      schema.narrativeStory.narrativeId,
+      desc(sql`count(*)`),
+      desc(sql`max(${schema.story.lastUpdatedAt})`),
+    )
+    .as('desks')
+}
+
+/** `narrativeDesks` for Narratives already loaded, keyed by id. */
+export async function deskByNarrative(db: Db, narrativeIds: string[]) {
+  if (narrativeIds.length === 0) return new Map<string, Desk | null>()
+  const rows = await db.select().from(narrativeDesks(db, narrativeIds))
+  return new Map(rows.map((r) => [r.narrativeId, r.desk]))
+}
 
 async function narrativesByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, NarrativeRef[]>()
   if (storyIds.length === 0) return map
+  const active = and(
+    inArray(schema.narrativeStory.storyId, storyIds),
+    isNull(schema.narrativeStory.removedAt),
+  )
+  const desks = narrativeDesks(
+    db,
+    db.select({ id: schema.narrativeStory.narrativeId }).from(schema.narrativeStory).where(active),
+  )
   const rows = await db
     .select({
       storyId: schema.narrativeStory.storyId,
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
-      desk: narrativeDesk,
+      desk: desks.desk,
     })
     .from(schema.narrativeStory)
     .innerJoin(schema.narrative, eq(schema.narrative.id, schema.narrativeStory.narrativeId))
-    .where(
-      and(
-        inArray(schema.narrativeStory.storyId, storyIds),
-        isNull(schema.narrativeStory.removedAt),
-      ),
-    )
+    .leftJoin(desks, eq(desks.narrativeId, schema.narrative.id))
+    .where(active)
   for (const { storyId, ...ref } of rows) {
     const list = map.get(storyId) ?? []
     list.push(ref)
@@ -529,10 +562,16 @@ async function relatedStories(db: Db, id: string): Promise<StoryDetail['related'
 }
 
 export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeDetail | null> {
+  const match = or(eq(schema.narrative.id, idOrSlug), eq(schema.narrative.slug, idOrSlug))
+  const desks = narrativeDesks(
+    db,
+    db.select({ id: schema.narrative.id }).from(schema.narrative).where(match),
+  )
   const [row] = await db
-    .select({ narrative: schema.narrative, desk: narrativeDesk })
+    .select({ narrative: schema.narrative, desk: desks.desk })
     .from(schema.narrative)
-    .where(or(eq(schema.narrative.id, idOrSlug), eq(schema.narrative.slug, idOrSlug)))
+    .leftJoin(desks, eq(desks.narrativeId, schema.narrative.id))
+    .where(match)
   if (!row) return null
   const { narrative, desk } = row
   const stories = await db
@@ -584,14 +623,18 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
 // already needs 2+ outlets, so 4 Stories marks a real thread rather than a pair.
 export const MIN_NARRATIVE_STORIES = 4
 
-export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
+/** The Narratives page, shared by all readers for SHARED_TTL_MS. */
+export function listNarratives(db: Db): Promise<NarrativeListResponse> {
+  return cached('narratives', SHARED_TTL_MS, () => loadNarratives(db))
+}
+
+async function loadNarratives(db: Db): Promise<NarrativeListResponse> {
   const rows = await db
     .select({
       id: schema.narrative.id,
       slug: schema.narrative.slug,
       title: schema.narrative.title,
       description: schema.narrative.description,
-      desk: narrativeDesk,
       updatedAt: schema.narrative.updatedAt,
       storyCount: sql<number>`count(${schema.story.id})::int`,
     })
@@ -612,8 +655,12 @@ export async function listNarratives(db: Db): Promise<NarrativeListResponse> {
     .orderBy(desc(schema.narrative.updatedAt))
     // Grouped by period on the page, with older periods collapsed.
     .limit(300)
+  const desks = await deskByNarrative(
+    db,
+    rows.map((r) => r.id),
+  )
   return {
-    items: rows.map((r) => ({ ...r, updatedAt: iso(r.updatedAt) })),
+    items: rows.map((r) => ({ ...r, desk: desks.get(r.id) ?? null, updatedAt: iso(r.updatedAt) })),
   }
 }
 

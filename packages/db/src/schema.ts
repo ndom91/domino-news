@@ -139,6 +139,9 @@ export const article = pgTable(
   (t) => [
     index('article_published_at_idx').on(t.publishedAt),
     index('article_pipeline_state_idx').on(t.pipelineState),
+    index('article_publisher_seen_idx').on(t.publisherId, t.firstSeenAt),
+    // "Reported at", as the front page stats and traces filter on it.
+    index('article_reported_at_idx').on(sql`(coalesce(${t.publishedAt}, ${t.firstSeenAt}))`),
   ],
 )
 
@@ -386,6 +389,10 @@ export const story = pgTable(
   (t) => [
     index('story_published_idx').on(t.publishedAt),
     index('story_last_updated_idx').on(t.lastUpdatedAt),
+    // The reader story list and lead pick: listed Stories, newest first.
+    index('story_listed_idx')
+      .on(t.lastUpdatedAt.desc().nullsFirst(), t.id.desc().nullsFirst())
+      .where(sql`${t.publishedAt} is not null and ${t.mergedIntoStoryId} is null`),
     index('story_regions_idx').using('gin', t.regions),
     index('story_topics_idx').using('gin', t.topics),
   ],

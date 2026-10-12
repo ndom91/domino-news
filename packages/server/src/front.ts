@@ -2,7 +2,8 @@ import { type Db, schema } from '@dn/db'
 import { pickLead } from '@dn/domain'
 import type { Desk, DevelopingNarrative, Edition, FrontPage, Region } from '@dn/schemas'
 import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { edgesWithin, getStoryLead, MIN_NARRATIVE_STORIES, narrativeDesk } from './reader.ts'
+import { cached, SHARED_TTL_MS } from './cache.ts'
+import { deskByNarrative, edgesWithin, getStoryLead, MIN_NARRATIVE_STORIES } from './reader.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
@@ -22,7 +23,7 @@ export async function getFrontPage(
   const [edition, { lead, leadPosition }, { developing, narrativeCount }] = await Promise.all([
     getEdition(db, now),
     leadStory(db, opts, now),
-    developingSection(db),
+    cached('developing', SHARED_TTL_MS, () => developingSection(db)),
   ])
 
   return {
@@ -36,6 +37,11 @@ export async function getFrontPage(
 
 /** The header strip: edition time and the last 24 hours' Story and publisher counts. */
 export async function getEdition(db: Db, now = new Date()): Promise<Edition> {
+  const stats = await cached('edition-stats', SHARED_TTL_MS, () => editionStats(db, now))
+  return { editionAt: now.toISOString(), stats }
+}
+
+async function editionStats(db: Db, now: Date) {
   const since = new Date(now.getTime() - DAY_MS)
   const [stats] = await db
     .select({
@@ -52,10 +58,7 @@ export async function getEdition(db: Db, now = new Date()): Promise<Edition> {
         sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt}) >= ${since}`,
       ),
     )
-  return {
-    editionAt: now.toISOString(),
-    stats: { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 },
-  }
+  return { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 }
 }
 
 async function leadStory(
@@ -99,7 +102,7 @@ async function leadStory(
 }
 
 async function developingSection(db: Db) {
-  const counted = db
+  const rows = await db
     .select({
       id: schema.narrative.id,
       slug: schema.narrative.slug,
@@ -124,20 +127,11 @@ async function developingSection(db: Db) {
     .having(sql`count(*) >= ${MIN_NARRATIVE_STORIES}`)
     .orderBy(desc(schema.narrative.updatedAt))
     .limit(DEVELOPING_COUNT)
-    .as('counted')
-  // narrativeDesk refers to "narrative", so it runs in an outer select over the 3 rows only.
-  const recent = await db
-    .select({
-      id: schema.narrative.id,
-      slug: counted.slug,
-      title: counted.title,
-      desk: narrativeDesk,
-      updatedAt: counted.updatedAt,
-      total: counted.total,
-    })
-    .from(counted)
-    .innerJoin(schema.narrative, eq(schema.narrative.id, counted.id))
-    .orderBy(desc(counted.updatedAt))
+  const desks = await deskByNarrative(
+    db,
+    rows.map((r) => r.id),
+  )
+  const recent = rows.map((r) => ({ ...r, desk: desks.get(r.id) ?? null }))
   const developing = await developingNarratives(db, recent)
   return { developing, narrativeCount: recent[0]?.total ?? 0 }
 }

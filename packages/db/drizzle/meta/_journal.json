@@ -176,6 +176,13 @@
       "when": 1791805125555,
       "tag": "0024_lean_basis",
       "breakpoints": true
+    },
+    {
+      "idx": 25,
+      "version": "7",
+      "when": 1791816622642,
+      "tag": "0025_listing_indexes",
+      "breakpoints": true
     }
   ]
 }

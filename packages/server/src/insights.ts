@@ -1,9 +1,10 @@
 import type { Db } from '@dn/db'
 import type { Desk, Insights, NarrativeRef, Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
+import { cached, SHARED_TTL_MS } from './cache.ts'
 import { leanMixByStory } from './lean.ts'
 import { getPreferences, READ_RETENTION_DAYS } from './preferences.ts'
-import { narrativeDesk, storyListItems } from './reader.ts'
+import { deskByNarrative, storyListItems } from './reader.ts'
 
 // Below this many reads, a reading mix says nothing, so no gaps are shown.
 const MIN_READS_FOR_GAPS = 5
@@ -13,6 +14,9 @@ const MIN_WEEK_STORIES = 5
 const ONE_SIDED_DAYS = 7
 const ONE_SIDED_CANDIDATES = 300
 const ONE_SIDED_SHOWN = 6
+// Missed developments: how many Narratives, and Stories in each.
+const MISSED_NARRATIVES = 5
+const MISSED_STORIES = 3
 
 /**
  * Blindspot insights, computed on request from the last READ_RETENTION_DAYS of reads.
@@ -24,25 +28,33 @@ export async function getInsights(
   requestCountry: string | null,
 ): Promise<Insights> {
   const prefs = await getPreferences(db, userId)
-  const oneSided = await oneSidedStories(db, prefs.country ?? requestCountry)
+  const country = prefs.country ?? requestCountry
+  const oneSided = cached(`one-sided:${country ?? ''}`, SHARED_TTL_MS, () =>
+    oneSidedStories(db, country),
+  )
   if (!prefs.rememberReads)
-    return { enabled: false, readCount: 0, missedDevelopments: [], gaps: [], oneSided }
+    return {
+      enabled: false,
+      readCount: 0,
+      missedDevelopments: [],
+      gaps: [],
+      oneSided: await oneSided,
+    }
 
-  const { rows: reads } = await db.execute<{
-    story_id: string
-    desk: Desk | null
-    regions: Region[]
-  }>(sql`
-    select r.story_id, s.desk, s.regions from reading_event r join story s on s.id = r.story_id
-    where r.user_id = ${userId} and r.read_at > now() - make_interval(days => ${READ_RETENTION_DAYS})
-      and s.published_at is not null`)
+  const [{ rows: reads }, missed] = await Promise.all([
+    db.execute<{ story_id: string; desk: Desk | null; regions: Region[] }>(sql`
+      select r.story_id, s.desk, s.regions from reading_event r join story s on s.id = r.story_id
+      where r.user_id = ${userId} and r.read_at > now() - make_interval(days => ${READ_RETENTION_DAYS})
+        and s.published_at is not null`),
+    missedDevelopments(db, userId),
+  ])
 
   return {
     enabled: true,
     readCount: reads.length,
-    missedDevelopments: await missedDevelopments(db, userId),
+    missedDevelopments: missed,
     gaps: reads.length >= MIN_READS_FOR_GAPS ? await gaps(db, reads) : [],
-    oneSided,
+    oneSided: await oneSided,
   }
 }
 
@@ -88,12 +100,13 @@ async function oneSidedStories(db: Db, country: string | null): Promise<Insights
 
 /** Narratives you read in, with Stories published since your last read there. */
 async function missedDevelopments(db: Db, userId: string) {
+  // Only what's shown: the MISSED_NARRATIVES with the most new Stories (ties: the most
+  // recently updated), and the MISSED_STORIES newest Stories in each.
   const { rows } = await db.execute<{
     narrative_id: string
     slug: string
     title: string
     story_id: string
-    desk: Desk | null
   }>(sql`
     with reads as (
       select story_id, read_at from reading_event
@@ -103,35 +116,52 @@ async function missedDevelopments(db: Db, userId: string) {
       select ns.narrative_id, max(r.read_at) as last_read
       from reads r join narrative_story ns on ns.story_id = r.story_id and ns.removed_at is null
       group by ns.narrative_id
+    ),
+    missed as (
+      select f.narrative_id, s.id as story_id,
+        row_number() over (partition by f.narrative_id order by s.last_updated_at desc) as rank,
+        count(*) over (partition by f.narrative_id) as n,
+        max(s.last_updated_at) over (partition by f.narrative_id) as latest
+      from read_narratives f
+      join narrative_story ns on ns.narrative_id = f.narrative_id and ns.removed_at is null
+      join story s on s.id = ns.story_id
+      where s.published_at > f.last_read and s.merged_into_story_id is null
+        and s.id not in (select story_id from reads)
+    ),
+    top as (
+      select distinct narrative_id, n, latest from missed
+      order by n desc, latest desc limit ${MISSED_NARRATIVES}
     )
-    select narrative.id as narrative_id, narrative.slug, narrative.title, s.id as story_id,
-      ${narrativeDesk} as desk
-    from read_narratives f
-    join narrative on narrative.id = f.narrative_id
-    join narrative_story ns on ns.narrative_id = f.narrative_id and ns.removed_at is null
-    join story s on s.id = ns.story_id
-    where s.published_at > f.last_read and s.merged_into_story_id is null
-      and s.id not in (select story_id from reads)
-    order by s.last_updated_at desc`)
+    select t.narrative_id, nar.slug, nar.title, m.story_id
+    from top t
+    join narrative nar on nar.id = t.narrative_id
+    join missed m on m.narrative_id = t.narrative_id and m.rank <= ${MISSED_STORIES}
+    order by t.n desc, t.latest desc, m.rank`)
 
-  const byNarrative = new Map<string, { narrative: NarrativeRef; ids: string[] }>()
+  const byNarrative = new Map<string, { narrative: Omit<NarrativeRef, 'desk'>; ids: string[] }>()
   for (const r of rows) {
     const entry = byNarrative.get(r.narrative_id) ?? {
-      narrative: { id: r.narrative_id, slug: r.slug, title: r.title, desk: r.desk },
+      narrative: { id: r.narrative_id, slug: r.slug, title: r.title },
       ids: [],
     }
     entry.ids.push(r.story_id)
     byNarrative.set(r.narrative_id, entry)
   }
-  const top = [...byNarrative.values()].sort((a, b) => b.ids.length - a.ids.length).slice(0, 5)
-  const stories = await storyListItems(
-    db,
-    top.flatMap((t) => t.ids.slice(0, 3)),
-  )
+  const top = [...byNarrative.values()]
+  const [desks, stories] = await Promise.all([
+    deskByNarrative(
+      db,
+      top.map((t) => t.narrative.id),
+    ),
+    storyListItems(
+      db,
+      top.flatMap((t) => t.ids),
+    ),
+  ])
   const byId = new Map(stories.map((s) => [s.id, s]))
   return top.map((t) => ({
-    narrative: t.narrative,
-    stories: t.ids.slice(0, 3).flatMap((id) => byId.get(id) ?? []),
+    narrative: { ...t.narrative, desk: desks.get(t.narrative.id) ?? null },
+    stories: t.ids.flatMap((id) => byId.get(id) ?? []),
   }))
 }
 

@@ -11,6 +11,7 @@ import {
   type Topic,
 } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
+import { cached, SHARED_TTL_MS } from './cache.ts'
 import { learnedWeights, narrativeTitles, signalLabel, storyFeedback } from './feedback.ts'
 import { listFollows } from './follows.ts'
 import { getPreferences } from './preferences.ts'
@@ -124,7 +125,7 @@ export async function getForYou(
       ),
     })),
     storyFeedback(db, userId),
-    windowStories(db),
+    cached('for-you-window', SHARED_TTL_MS, () => windowStories(db)),
   ])
   const picks = {
     regions: prefs.regions,
