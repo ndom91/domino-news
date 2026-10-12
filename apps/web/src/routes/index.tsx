@@ -18,7 +18,7 @@ import { queries } from '../lib/api.ts'
 import { regionOptions } from '../lib/regions.ts'
 
 export const Route = createFileRoute('/')({
-  validateSearch: z.object({ region: z.optional(regionSchema) }),
+  validateSearch: z.object({ region: z.catch(z.optional(regionSchema), undefined) }),
   loaderDeps: ({ search }) => ({ region: search.region ?? null }),
   loader: async ({ context, deps }) => {
     await Promise.all([

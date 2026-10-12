@@ -222,6 +222,8 @@ describe('layoutNarrative', () => {
       ['f', 'a', 'branches_from'],
     ])
     expect(layout.laneCount).toBe(4)
+    // e and f both land in the last lane: one elbow to it, not two.
+    expect(layout.rows[0]?.elbows.map((e) => e.lane)).toEqual([1, 2, 3])
   })
 })
 

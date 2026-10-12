@@ -96,7 +96,13 @@ export function layoutNarrative(
     const lane = laneOf.get(id) ?? 0
     const segment = LOOSE.has(e.relation) ? 'dashed' : 'solid'
     const parentLane = laneOf.get(e.toStoryId) ?? 0
-    if (lane !== parentLane) elbows[from]?.push({ lane, segment })
+    if (lane !== parentLane) {
+      // Over the lane cap two branches can share a lane: one elbow, solid if either is.
+      const row = elbows[from] ?? []
+      const same = row.find((e) => e.lane === lane)
+      if (!same) row.push({ lane, segment })
+      else if (segment === 'solid') same.segment = 'solid'
+    }
     for (let r = from; r <= to; r++) {
       if (r > from) setIfEmpty(top[r], lane, segment)
       if (r < to) setIfEmpty(bottom[r], lane, segment)
