@@ -66,7 +66,7 @@ export interface ApiClientOptions {
   fetch: Fetcher
   /**
    * Extra headers per request. On native with @better-auth/expo, pass the session cookie:
-   * `async () => ({ cookie: authClient.getCookie() })`.
+   * `async () => ({ cookie: await authClient.getCookie() })`.
    */
   headers?: () => Record<string, string> | Promise<Record<string, string>>
   /** "include" (default) for browsers. Native sets "omit": it sends the cookie itself. */

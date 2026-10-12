@@ -73,7 +73,7 @@ Fixture and model embeddings live in different vector spaces. When you switch mo
 The server is ready for an Expo client through better-auth's `expo()` plugin:
 
 - Native requests carry no `Origin`; `@better-auth/expo/client` sends the app scheme in `expo-origin`, which must be in `trustedOrigins`. Set the scheme with `EXPO_APP_SCHEME` (default `dominonews`, matching `app.json`). Expo Go's `exp://` URLs are trusted only when `NODE_ENV=development`.
-- The app talks to `/api/v1` with `@dn/api-client` and the session cookie: `createApiClient({ baseUrl, fetch, credentials: 'omit', headers: async () => ({ cookie: authClient.getCookie() }) })`. Bearer tokens (`set-auth-token`) also work.
+- The app talks to `/api/v1` with `@dn/api-client` and the session cookie: `createApiClient({ baseUrl, fetch, credentials: 'omit', headers: async () => ({ cookie: await authClient.getCookie() }) })`. Bearer tokens (`set-auth-token`) also work.
 - Native fetch isn't subject to CORS, so `/api/v1` needs no CORS headers for the app (only Expo web would).
 - To reach the dev server from a phone, run `pnpm dev --host` (Vite binds to localhost otherwise) and point the app at `http://<LAN IP>:4000`.
 - Not supported on native yet: passkeys (WebAuthn needs a native passkey library plus `assetlinks.json` / `apple-app-site-association` on the site) and Google sign-in (needs Android and iOS OAuth client IDs).

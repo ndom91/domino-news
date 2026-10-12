@@ -32,12 +32,20 @@ export function countryFromHeader(value: string | null | undefined): string | nu
   return /^[A-Z]{2}$/.test(code) && code !== 'XX' && code !== 'T1' ? code : null
 }
 
-const countryNames = new Intl.DisplayNames(['en'], { type: 'region' })
+// Built on first use: React Native's Hermes may lack Intl.DisplayNames, and creating it at
+// import time would break every importer of @dn/domain there.
+let countryNames: Intl.DisplayNames | null | undefined
 
 /** "United Kingdom" for "GB"; the code itself if Intl doesn't know it. */
 export function countryName(code: string): string {
+  if (countryNames === undefined) {
+    countryNames =
+      typeof Intl.DisplayNames === 'function'
+        ? new Intl.DisplayNames(['en'], { type: 'region' })
+        : null
+  }
   try {
-    return countryNames.of(code) ?? code
+    return countryNames?.of(code) ?? code
   } catch {
     return code
   }
