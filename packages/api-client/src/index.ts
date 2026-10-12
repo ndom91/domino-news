@@ -27,9 +27,12 @@ import {
   type OpsAction,
   type OpsStatus,
   opsStatusSchema,
+  type Preview,
+  type PreviewType,
   type PublisherAssessment,
   type PublisherDetail,
   type PublisherListResponse,
+  previewSchema,
   publisherAssessmentSchema,
   publisherDetailSchema,
   publisherListResponseSchema,
@@ -151,6 +154,11 @@ export function createApiClient({
       request<PublisherListResponse>(publisherListResponseSchema, '/publishers', { signal }),
     getPublisher: (slug: string, signal?: AbortSignalLike) =>
       request<PublisherDetail>(publisherDetailSchema, `/publishers/${encodeURIComponent(slug)}`, {
+        signal,
+      }),
+    /** Public: works without a session (share cards, signed-out teasers). */
+    getPreview: (type: PreviewType, slug: string, signal?: AbortSignalLike) =>
+      request<Preview>(previewSchema, `/previews/${type}/${encodeURIComponent(slug)}`, {
         signal,
       }),
     getOpsStatus: (signal?: AbortSignalLike) =>

@@ -17,6 +17,8 @@ interface SessionInfo {
   // Saved preference, else the request's country (Cloudflare); null when neither is known.
   country: string | null
   features: { summaryEditing: boolean; googleSignIn: boolean }
+  /** Public origin ("https://domino-wire.ndo.dev"), for absolute URLs in share tags. */
+  origin: string
 }
 
 // Web-only convenience for route guards. API clients authenticate per request instead.
@@ -48,6 +50,10 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
         summaryEditing: ctx.config.enableSummaryEditing,
         googleSignIn: ctx.config.googleSignIn,
       },
+      // BETTER_AUTH_URL is the public origin in every deployment; the request is a fallback.
+      origin:
+        process.env.BETTER_AUTH_URL?.replace(/\/$/, '') ??
+        `${headers.get('x-forwarded-proto') ?? 'http'}://${headers.get('host') ?? 'localhost:4000'}`,
     }
   },
 )

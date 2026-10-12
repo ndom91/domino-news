@@ -19,7 +19,9 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SearchRouteImport } from './routes/search'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as NarrativesIndexRouteImport } from './routes/narratives/index'
 import { Route as NarrativesSlugRouteImport } from './routes/narratives/$slug'
@@ -79,9 +81,19 @@ const PrivacyRoute = PrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => rootRouteImport,
 } as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SearchRoute = SearchRouteImport.update({
   id: '/search',
   path: '/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -136,7 +148,9 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
@@ -157,7 +171,9 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
@@ -179,7 +195,9 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/narratives/$slug': typeof NarrativesSlugRoute
   '/publishers/$slug': typeof PublishersSlugRoute
@@ -202,7 +220,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/ops'
     | '/privacy'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
@@ -223,7 +243,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/ops'
     | '/privacy'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
@@ -244,7 +266,9 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/ops'
     | '/privacy'
+    | '/robots.txt'
     | '/search'
+    | '/sitemap.xml'
     | '/terms'
     | '/narratives/$slug'
     | '/publishers/$slug'
@@ -266,7 +290,9 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   OpsRoute: typeof OpsRoute
   PrivacyRoute: typeof PrivacyRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   NarrativesSlugRoute: typeof NarrativesSlugRoute
   PublishersSlugRoute: typeof PublishersSlugRoute
@@ -349,11 +375,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PrivacyRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/search': {
       id: '/search'
       path: '/search'
       fullPath: '/search'
       preLoaderRoute: typeof SearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -426,7 +466,9 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   OpsRoute: OpsRoute,
   PrivacyRoute: PrivacyRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   NarrativesSlugRoute: NarrativesSlugRoute,
   PublishersSlugRoute: PublishersSlugRoute,

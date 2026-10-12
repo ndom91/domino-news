@@ -5,18 +5,46 @@ import { createFileRoute } from '@tanstack/react-router'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
+import { PreviewTeaser } from '../../components/preview-teaser.tsx'
 import { orNotFound, queries } from '../../lib/api.ts'
+import { seo } from '../../lib/seo.ts'
 
 export const Route = createFileRoute('/narratives/$slug')({
   loader: async ({ context, params }) => {
+    // Signed out (e.g. from a shared link): only the public teaser.
+    if (context.preview) {
+      const preview = await orNotFound(
+        context.queryClient.ensureQueryData(queries.preview('narrative', params.slug)),
+      )
+      return { preview, title: preview.title }
+    }
     const n = await orNotFound(context.queryClient.ensureQueryData(queries.narrative(params.slug)))
-    return { title: n.title }
+    return { preview: null, title: n.title }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.title} · Domino News` : 'Narrative' }],
-  }),
-  component: NarrativePage,
+  head: ({ loaderData, match, params }) => {
+    const preview = loaderData?.preview
+    return seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      title: loaderData?.title ?? 'Narrative',
+      description: preview?.description,
+      image: preview
+        ? {
+            url: `/api/v1/og/narrative/${params.slug}.png?v=${encodeURIComponent(preview.version)}`,
+            width: 1200,
+            height: 630,
+            alt: preview.title,
+          }
+        : undefined,
+    })
+  },
+  component: NarrativeRoute,
 })
+
+function NarrativeRoute() {
+  const { preview } = Route.useLoaderData()
+  return preview ? <PreviewTeaser preview={preview} /> : <NarrativePage />
+}
 
 function NarrativePage() {
   const { slug } = Route.useParams()

@@ -5,6 +5,7 @@ import type {
   FollowList,
   FollowRequest,
   LearnedSignals,
+  PreviewType,
   Region,
   SearchQuery,
   SignalsRequest,
@@ -31,6 +32,7 @@ export const queryKeys = {
   search: (query: Partial<SearchQuery> & { q: string }) => ['search', query] as const,
   publishers: () => ['publishers'] as const,
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
+  preview: (type: PreviewType, slug: string) => ['preview', type, slug] as const,
   ops: () => ['ops', 'status'] as const,
   failedJobs: (queue: string | null) => ['ops', 'failed', queue ?? 'all'] as const,
   preferences: () => ['me', 'preferences'] as const,
@@ -100,6 +102,12 @@ export function createQueries(api: ApiClient) {
       queryOptions({
         queryKey: queryKeys.publisher(slug),
         queryFn: ({ signal }) => api.getPublisher(slug, signal),
+        staleTime: 60_000,
+      }),
+    preview: (type: PreviewType, slug: string) =>
+      queryOptions({
+        queryKey: queryKeys.preview(type, slug),
+        queryFn: ({ signal }) => api.getPreview(type, slug, signal),
         staleTime: 60_000,
       }),
     preferences: () =>

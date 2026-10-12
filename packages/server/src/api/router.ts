@@ -1,4 +1,4 @@
-import { countryFromHeader } from '@dn/domain'
+import { countryFromHeader, formatDate, plural } from '@dn/domain'
 import {
   type ApiErrorBody,
   type ApiErrorCode,
@@ -6,6 +6,7 @@ import {
   feedbackRequestSchema,
   followRequestSchema,
   opsActionSchema,
+  previewTypeSchema,
   readRequestSchema,
   regionSchema,
   searchQuerySchema,
@@ -23,6 +24,7 @@ import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
+import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
@@ -158,6 +160,74 @@ const routes: Route[] = [
       // A passing failure (rate limit, outage, no key) must not be pinned at Cloudflare.
       const cache = !result || result.missing === 'none' ? NO_LOGO_CACHE : 'no-store'
       return new Response(null, { status: 404, headers: { 'cache-control': cache } })
+    },
+    { public: true },
+  ),
+  // Public: what a signed-out visitor or a link-preview crawler sees (see previews.ts).
+  route(
+    'GET',
+    '/api/v1/previews/:type/:slug',
+    async ({ ctx, params }) => {
+      const type = previewTypeSchema.safeParse(params.type)
+      const preview = type.success ? await getPreview(ctx.db, type.data, params.slug ?? '') : null
+      if (!preview) throw new HttpError('not_found', 'nothing to preview')
+      return json(preview)
+    },
+    { public: true },
+  ),
+  // Public share image (og:image). The URL carries ?v=<preview version>, so a new summary
+  // gets a new URL and each version can be cached for good. Publishers use their logo instead;
+  // /api/v1/og/site/default.png is the site-wide card.
+  route(
+    'GET',
+    '/api/v1/og/:type/:slug.png',
+    async ({ ctx, params }) => {
+      const notFound = () =>
+        new Response(null, { status: 404, headers: { 'cache-control': NO_LOGO_CACHE } })
+      const slug = params.slug ?? ''
+      // Loaded on demand: satori, resvg and the fonts stay out of every other request.
+      const { renderShareCard, storyFootnote } = await import('../og/card.ts')
+      if (params.type === 'story') {
+        const story = await getStory(ctx.db, slug)
+        if (!story) return notFound()
+        const png = await renderShareCard({
+          ...storyPreview(story),
+          ...storyFootnote(
+            story.sources.map((s) => s.publisher.name),
+            story.publishedAt ?? story.lastUpdatedAt,
+          ),
+        })
+        return new Response(new Uint8Array(png), {
+          headers: { 'content-type': 'image/png', 'cache-control': LOGO_CACHE },
+        })
+      }
+      if (params.type === 'narrative') {
+        const narrative = await getNarrative(ctx.db, slug)
+        if (!narrative) return notFound()
+        const png = await renderShareCard({
+          ...narrativePreview(narrative),
+          footnote: plural(narrative.stories.length, 'story', 'stories'),
+          date: formatDate(narrative.updatedAt),
+        })
+        return new Response(new Uint8Array(png), {
+          headers: { 'content-type': 'image/png', 'cache-control': LOGO_CACHE },
+        })
+      }
+      // The site-wide card: public pages and the fallback for everything else.
+      if (params.type === 'site' && slug === 'default') {
+        const png = await renderShareCard({
+          title: 'Follow the news as it falls',
+          kicker: 'Domino News',
+          description: 'One story, every source, and what came next.',
+          desk: null,
+          footnote: 'Every publisher, one story',
+          date: '',
+        })
+        return new Response(new Uint8Array(png), {
+          headers: { 'content-type': 'image/png', 'cache-control': LOGO_CACHE },
+        })
+      }
+      return notFound()
     },
     { public: true },
   ),

@@ -20,24 +20,53 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../../components/link.tsx'
+import { PreviewTeaser } from '../../components/preview-teaser.tsx'
 import { StoryLean } from '../../components/story-lean.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
+import { seo } from '../../lib/seo.ts'
 
 export const Route = createFileRoute('/stories/$slug')({
   loader: async ({ context, params }) => {
+    // Signed out (e.g. from a shared link): only the public teaser, never the full story.
+    if (context.preview) {
+      const preview = await orNotFound(
+        context.queryClient.ensureQueryData(queries.preview('story', params.slug)),
+      )
+      return { preview, title: preview.title, now: new Date().toISOString() }
+    }
     const story = await orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug)))
     // The narrative graph renders in the server HTML instead of as a skeleton.
     const narrative = story.narratives[0]
     if (narrative) await context.queryClient.prefetchQuery(queries.narrative(narrative.slug))
     // Window end for the Source Trace, fixed at load so SSR and hydration agree.
-    return { title: story.title, now: new Date().toISOString() }
+    return { preview: null, title: story.title, now: new Date().toISOString() }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.title} · Domino News` : 'Story' }],
-  }),
-  component: StoryPage,
+  head: ({ loaderData, match, params }) => {
+    const preview = loaderData?.preview
+    return seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      title: loaderData?.title ?? 'Story',
+      description: preview?.description,
+      type: 'article',
+      image: preview
+        ? {
+            url: `/api/v1/og/story/${params.slug}.png?v=${encodeURIComponent(preview.version)}`,
+            width: 1200,
+            height: 630,
+            alt: preview.title,
+          }
+        : undefined,
+    })
+  },
+  component: StoryRoute,
 })
+
+function StoryRoute() {
+  const { preview } = Route.useLoaderData()
+  return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
+}
 
 /** Newest extraction time. ISO strings sort chronologically, so a string max is enough. */
 const latestAt = (items: { createdAt: string }[]) =>

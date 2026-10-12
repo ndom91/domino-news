@@ -1,9 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Email, LegalPage, Section } from '../components/legal.tsx'
 import { OPERATOR } from '../lib/operator.ts'
+import { seo } from '../lib/seo.ts'
 
 export const Route = createFileRoute('/privacy')({
-  head: () => ({ meta: [{ title: 'Privacy policy · Domino News' }] }),
+  head: ({ match }) =>
+    seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      index: true,
+      title: 'Privacy policy',
+      description: 'What Domino News stores about you, why, for how long, and how to delete it.',
+    }),
   component: PrivacyPage,
 })
 

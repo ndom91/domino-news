@@ -1,9 +1,17 @@
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { Email, LegalPage, Section } from '../components/legal.tsx'
 import { OPERATOR } from '../lib/operator.ts'
+import { seo } from '../lib/seo.ts'
 
 export const Route = createFileRoute('/terms')({
-  head: () => ({ meta: [{ title: 'Terms of service · Domino News' }] }),
+  head: ({ match }) =>
+    seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      index: true,
+      title: 'Terms of service',
+      description: 'The terms for using Domino News.',
+    }),
   component: TermsPage,
 })
 

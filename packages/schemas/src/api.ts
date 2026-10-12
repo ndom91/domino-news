@@ -318,6 +318,26 @@ export const narrativeDetailSchema = z.object({
 })
 export type NarrativeDetail = z.infer<typeof narrativeDetailSchema>
 
+/**
+ * What a signed-out visitor (or a link-preview crawler) may see of a page: enough for a share
+ * card and a teaser, never the full content. Served without a session.
+ */
+export const previewTypeSchema = z.enum(['story', 'narrative', 'publisher'])
+export type PreviewType = z.infer<typeof previewTypeSchema>
+export const previewSchema = z.object({
+  type: previewTypeSchema,
+  slug: z.string(),
+  title: z.string(),
+  /** Desk, or desk · narrative: a small label above the title. */
+  kicker: z.string(),
+  /** One plain-text sentence, no citations. */
+  description: z.nullable(z.string()),
+  desk: z.nullable(deskSchema),
+  /** Changes when the share image should: the summary version, or the last update. */
+  version: z.string(),
+})
+export type Preview = z.infer<typeof previewSchema>
+
 export const narrativeListResponseSchema = z.object({
   items: z.array(
     z.object({

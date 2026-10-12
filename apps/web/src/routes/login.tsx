@@ -5,6 +5,7 @@ import { createFileRoute, Link, redirect, useRouter } from '@tanstack/react-rout
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
 import { authClient } from '../lib/auth-client.ts'
+import { seo } from '../lib/seo.ts'
 import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/login')({
@@ -12,7 +13,9 @@ export const Route = createFileRoute('/login')({
   beforeLoad: ({ context }) => {
     if (context.session.user) throw redirect({ to: '/' })
   },
-  head: () => ({ meta: [{ title: 'Sign in · Domino News' }] }),
+  // The landing page for signed-out visitors: indexed, with the site's own title.
+  head: ({ match }) =>
+    seo({ origin: match.context.session.origin, path: match.pathname, index: true }),
   component: LoginPage,
 })
 

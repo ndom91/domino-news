@@ -1,9 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Email, LegalPage, Section } from '../components/legal.tsx'
 import { OPERATOR } from '../lib/operator.ts'
+import { seo } from '../lib/seo.ts'
 
 export const Route = createFileRoute('/imprint')({
-  head: () => ({ meta: [{ title: 'Imprint · Domino News' }] }),
+  head: ({ match }) =>
+    seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      index: true,
+      title: 'Imprint',
+      description: 'Who runs Domino News and how to reach them.',
+    }),
   component: ImprintPage,
 })
 

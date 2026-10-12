@@ -16,12 +16,16 @@ import type { ReactNode } from 'react'
 import { NotFoundPage } from '../components/not-found.tsx'
 import { PublicHeader, SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { queries } from '../lib/api.ts'
+import { seo } from '../lib/seo.ts'
 import { getSessionInfo } from '../lib/session.ts'
 import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
 
 // Readable without an account: the imprint and privacy policy must be reachable by anyone.
 const PUBLIC_PATHS = new Set(['/login', '/about', '/privacy', '/terms', '/imprint'])
+// Signed out, these show a teaser (title, one sentence, sign-in button) instead of redirecting,
+// so shared links preview properly. The routes load public preview data when `preview` is set.
+const PREVIEW_PATH = /^\/(stories|narratives|publishers)\/[^/]+\/?$/
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
   beforeLoad: async ({ context, location }) => {
@@ -32,26 +36,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       queryFn: () => getSessionInfo(),
       staleTime: Number.POSITIVE_INFINITY,
     })
-    // The whole app sits behind login, apart from the public pages.
-    if (!session.user && !PUBLIC_PATHS.has(location.pathname)) {
+    // The whole app sits behind login, apart from the public pages and share teasers.
+    const preview = !session.user && PREVIEW_PATH.test(location.pathname)
+    if (!session.user && !preview && !PUBLIC_PATHS.has(location.pathname)) {
       throw redirect({ to: '/login', search: { next: location.href } })
     }
     // First visit: onboarding once, then back to where they were going.
     if (session.user && !session.user.onboarded && location.pathname !== '/onboarding') {
       throw redirect({ to: '/onboarding', search: { next: location.href } })
     }
-    return { session }
+    return { session, preview }
   },
   // The header strip; in the server HTML so it doesn't pop in after hydration.
   loader: async ({ context }) => {
     if (context.session.user) await context.queryClient.ensureQueryData(queries.edition())
   },
-  head: () => ({
+  // Site-wide defaults (noindex, default share card); pages override them with seo().
+  head: ({ match }) => ({
     meta: [
       { charSet: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
-      { title: 'Domino News' },
-      { name: 'robots', content: 'noindex' },
+      // The dark edition strip tops every page in both themes, so mobile browser chrome blends
+      // with it. (One value: TanStack keeps one meta per name, so media variants would collapse.)
+      { name: 'theme-color', content: '#121212' },
+      ...seo({ origin: match.context.session.origin, path: match.pathname }).meta,
     ],
     links: [
       // Start the font download with the CSS, not after it's parsed, so text rarely paints

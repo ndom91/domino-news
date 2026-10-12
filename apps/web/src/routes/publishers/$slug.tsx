@@ -1,4 +1,4 @@
-import { countryName, formatDate, languageName, plural, pluralWord } from '@dn/domain'
+import { countryName, formatDate, languageName, logoUrl, plural, pluralWord } from '@dn/domain'
 import { saveAssessmentMutation } from '@dn/queries'
 import {
   type CoverageProfile,
@@ -43,18 +43,44 @@ import type { FormEvent } from 'react'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
+import { PreviewTeaser } from '../../components/preview-teaser.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
+import { seo } from '../../lib/seo.ts'
 
 export const Route = createFileRoute('/publishers/$slug')({
   loader: async ({ context, params }) => {
+    // Signed out (e.g. from a shared link): only the public teaser.
+    if (context.preview) {
+      const preview = await orNotFound(
+        context.queryClient.ensureQueryData(queries.preview('publisher', params.slug)),
+      )
+      return { preview, name: preview.title, now: new Date().toISOString() }
+    }
     const p = await orNotFound(context.queryClient.ensureQueryData(queries.publisher(params.slug)))
-    return { name: p.name, now: new Date().toISOString() }
+    return { preview: null, name: p.name, now: new Date().toISOString() }
   },
-  head: ({ loaderData }) => ({
-    meta: [{ title: loaderData ? `${loaderData.name} · Domino News` : 'Publisher' }],
-  }),
-  component: PublisherPage,
+  head: ({ loaderData, match, params }) => {
+    const preview = loaderData?.preview
+    return seo({
+      origin: match.context.session.origin,
+      path: match.pathname,
+      title: loaderData?.name ?? 'Publisher',
+      description: preview?.description,
+      type: 'profile',
+      // The publisher's own logo: square, so the small card layout.
+      card: preview ? 'summary' : undefined,
+      image: preview
+        ? { url: logoUrl(params.slug), width: 128, height: 128, alt: preview.title }
+        : undefined,
+    })
+  },
+  component: PublisherRoute,
 })
+
+function PublisherRoute() {
+  const { preview } = Route.useLoaderData()
+  return preview ? <PreviewTeaser preview={preview} /> : <PublisherPage />
+}
 
 function PublisherPage() {
   const { slug } = Route.useParams()
