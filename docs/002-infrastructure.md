@@ -4,7 +4,7 @@
 
 ## Production setup
 
-Live at **https://loombeat.ndo.dev** since 2026-10-10.
+Live at **https://domino-wire.ndo.dev** since 2026-10-10.
 
 ```text
 Browser ──► Cloudflare (DNS, proxy, TLS) ──► Traefik (separate machine) ──► Docker host 10.0.22.64:4000
@@ -16,7 +16,7 @@ Docker host ──► inference server (plain HTTP over Tailscale)
 - **Ingress:** Traefik on another machine receives the proxied traffic and forwards to the web container. So `.env` sets `WEB_BIND=10.0.22.64` (the LXC's LAN address); the default `127.0.0.1` would be unreachable from Traefik. Postgres and Typesense stay on `127.0.0.1`.
 - **Firewall:** the Proxmox firewall must allow port 4000 to the LXC. A block there shows up as a Cloudflare 504.
 - **Inference:** `INFERENCE_MODE=local`, with `INFERENCE_BASE_URL` pointing at the inference server over Tailscale. Tailscale encrypts the link, so plain HTTP is fine and `INFERENCE_CA_CERT` stays empty.
-- **Auth:** `BETTER_AUTH_URL=https://loombeat.ndo.dev`. Set `AUTH_IP_HEADERS=cf-connecting-ip` only if the origin accepts traffic from Cloudflare alone; otherwise the header can be spoofed.
+- **Auth:** `BETTER_AUTH_URL=https://domino-wire.ndo.dev`. Set `AUTH_IP_HEADERS=cf-connecting-ip` only if the origin accepts traffic from Cloudflare alone; otherwise the header can be spoofed.
 - **Deploy and update:** `scripts/deploy.sh up` the first time, then `scripts/deploy.sh update` (pull, rebuild, migrate, restart, re-seed). `scripts/deploy.sh user <name>` creates an admin login.
 - **Not set up yet:** off-host backups and monitoring.
 - **Troubleshooting order for a 5xx:** container status (`scripts/deploy.sh status`), `WEB_BIND`, the Proxmox firewall, then Traefik.
