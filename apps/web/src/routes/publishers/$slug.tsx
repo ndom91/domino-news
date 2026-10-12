@@ -1,4 +1,4 @@
-import { formatDate, plural, pluralWord } from '@dn/domain'
+import { countryName, formatDate, languageName, plural, pluralWord } from '@dn/domain'
 import { saveAssessmentMutation } from '@dn/queries'
 import {
   type CoverageProfile,
@@ -36,6 +36,7 @@ import {
   Textarea,
   TextInput,
 } from '@dn/ui'
+import { ArrowSquareOutIcon, GlobeHemisphereWestIcon, TranslateIcon } from '@phosphor-icons/react'
 import { useMutation, useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import type { FormEvent } from 'react'
@@ -74,19 +75,36 @@ function PublisherPage() {
                 <h1 className="type-headline-lg">{p.name}</h1>
                 <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
               </div>
-              <p className="mt-2 type-meta">
-                <a
-                  href={`https://${p.domain}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="underline underline-offset-3 hover:text-text"
-                >
-                  {p.domain} ↗
-                </a>
-                {p.countryCode ? ` · ${p.countryCode}` : ''}
-                {p.kind === 'official' ? ' · Official source' : ''}
-                {p.languages.length ? ` · ${p.languages.join(', ')}` : ''}
-              </p>
+              {/* Spaced items with a muted icon each, rather than a dotted run of codes. */}
+              <ul className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 type-meta">
+                <li>
+                  <a
+                    href={`https://${p.domain}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 underline underline-offset-3 hover:text-text"
+                  >
+                    {p.domain}
+                    <ArrowSquareOutIcon size={14} aria-hidden />
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                </li>
+                {p.countryCode ? (
+                  <li className="inline-flex items-center gap-1.5">
+                    <GlobeHemisphereWestIcon size={14} aria-hidden />
+                    <span className="sr-only">Country: </span>
+                    {countryName(p.countryCode)}
+                  </li>
+                ) : null}
+                {p.languages.length ? (
+                  <li className="inline-flex items-center gap-1.5">
+                    <TranslateIcon size={14} aria-hidden />
+                    <span className="sr-only">Languages: </span>
+                    {p.languages.map(languageName).join(', ')}
+                  </li>
+                ) : null}
+                {p.kind === 'official' ? <li>Official source</li> : null}
+              </ul>
             </div>
           </div>
 

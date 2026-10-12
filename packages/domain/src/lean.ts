@@ -50,3 +50,20 @@ export function countryName(code: string): string {
     return code
   }
 }
+
+let languageNames: Intl.DisplayNames | null | undefined
+
+/** "English" for "en"; the code itself if Intl doesn't know it. */
+export function languageName(code: string): string {
+  if (languageNames === undefined) {
+    languageNames =
+      typeof Intl.DisplayNames === 'function'
+        ? new Intl.DisplayNames(['en'], { type: 'language' })
+        : null
+  }
+  try {
+    return languageNames?.of(code) ?? code
+  } catch {
+    return code
+  }
+}
