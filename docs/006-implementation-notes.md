@@ -150,3 +150,14 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 - **Reader country:** `user_preference.country`, else `CF-IPCountry` (forwarded by the SSR API bridge). Cloudflare's `XX` and `T1` count as unknown. The header is never stored.
 - **Lean evidence import:** AllSides blocks automated fetches (403) and sends its CSV only on request; the Reuters Institute publishes outlet audience scores only as charts, with no licence statement. Hence a hand-checked file instead of a scraper. Evidence rows carry a structured `lean` and `country_context` for the form pre-fill; assessments still freeze only source, dimension, value and URL. Methodology is now `assessment@2`.
 
+
+## Match quality evaluation
+
+- **Answer key:** `fixtures/match-eval/set-1` holds 334 real articles from 7–13 Oct 2026 (Riyadh airport attacks, the Ukraine "energy ceasefire", Hurricane Simon, plus 100 random), grouped into 145 stories by `docs/story-granularity.md`. The grouping was model-drafted and accepted, with 10 manual moves.
+- **Harness:** `pnpm cli match:eval --name set-1 --label <run>` replays matching with the production decision core and scores B-cubed precision (over-merging), recall (fragmentation) and F1. Results go to `fixtures/match-eval/results/`.
+
+| Run | Prompt | Policy | F1 | Precision | Recall | Stories (145) |
+| --- | --- | --- | --- | --- | --- | --- |
+| baseline | match-story@5 | autoSame 0.93, llmMin 0.72, 3 candidates | 76.9% | 81.0% | 73.2% | 162 |
+
+Baseline errors: the ceasefire announcement was split into 9 stories, and one 55-article story drifted across both Riyadh attacks, the closure and analysis pieces.
