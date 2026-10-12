@@ -13,7 +13,7 @@ import {
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import type { FormEvent, ReactNode } from 'react'
+import { type FormEvent, type ReactNode, useState } from 'react'
 import { z } from 'zod/mini'
 import { FeedPicks } from '../components/feed-picks.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
@@ -65,6 +65,7 @@ function AccountPage() {
       <>
         <PasskeysSection />
         <ReadingHistorySection />
+        <DangerZone />
       </>
     ),
   }
@@ -131,14 +132,21 @@ function SettingsRow({
 
 const passkeysKey = ['account', 'passkeys'] as const
 
+// Passkeys shown before "View all": e2e runs and device churn can leave dozens.
+const PASSKEYS_SHOWN = 5
+
 function PasskeysSection() {
   const queryClient = useQueryClient()
+  const [showAll, setShowAll] = useState(false)
   const passkeys = useQuery({
     queryKey: passkeysKey,
     queryFn: async () => {
       const { data, error } = await authClient.passkey.listUserPasskeys()
       if (error) throw new Error(error.message ?? 'Could not load passkeys')
-      return data ?? []
+      // Newest first, so the collapsed list shows the most recent.
+      return [...(data ?? [])].sort(
+        (a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime(),
+      )
     },
   })
   const add = useMutation({
@@ -177,50 +185,67 @@ function PasskeysSection() {
       ) : passkeys.data.length === 0 ? (
         <p className="mb-6 text-sm text-text-muted">No passkeys yet.</p>
       ) : (
-        <ul className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule">
-          {passkeys.data.map((p) => (
-            <Reveal
-              as="li"
-              key={p.id}
-              className="flex flex-wrap items-center justify-between gap-3 py-3"
-            >
-              <div>
-                <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
-                <p className="type-meta">
-                  {p.createdAt ? (
-                    <Timestamp
-                      at={new Date(p.createdAt).toISOString()}
-                      format="datetime"
-                      prefix="Added"
-                    />
-                  ) : (
-                    'Added earlier'
-                  )}
-                  {p.backedUp ? ' · synced' : ''}
-                </p>
-              </div>
-              <ConfirmDialog
-                trigger={
-                  <Button
-                    size="sm"
-                    variant="danger"
-                    loading={remove.isPending && remove.variables === p.id}
-                    aria-label={`Remove ${p.name || 'unnamed passkey'}`}
-                  >
-                    Remove
-                  </Button>
-                }
-                title="Remove this passkey?"
-                confirmLabel="Remove passkey"
-                destructive
-                onConfirm={() => remove.mutate(p.id)}
+        <>
+          <ul
+            id="passkey-list"
+            className="mb-6 flex flex-col divide-y divide-border border-y-2 border-rule"
+          >
+            {(showAll ? passkeys.data : passkeys.data.slice(0, PASSKEYS_SHOWN)).map((p) => (
+              <Reveal
+                as="li"
+                key={p.id}
+                className="flex flex-wrap items-center justify-between gap-3 py-3"
               >
-                You will no longer be able to sign in with {p.name || 'this passkey'}. Your password
-                keeps working.
-              </ConfirmDialog>
-            </Reveal>
-          ))}
-        </ul>
+                <div>
+                  <p className="font-semibold">{p.name || 'Unnamed passkey'}</p>
+                  <p className="type-meta">
+                    {p.createdAt ? (
+                      <Timestamp
+                        at={new Date(p.createdAt).toISOString()}
+                        format="datetime"
+                        prefix="Added"
+                      />
+                    ) : (
+                      'Added earlier'
+                    )}
+                    {p.backedUp ? ' · synced' : ''}
+                  </p>
+                </div>
+                <ConfirmDialog
+                  trigger={
+                    <Button
+                      size="sm"
+                      variant="danger"
+                      loading={remove.isPending && remove.variables === p.id}
+                      aria-label={`Remove ${p.name || 'unnamed passkey'}`}
+                    >
+                      Remove
+                    </Button>
+                  }
+                  title="Remove this passkey?"
+                  confirmLabel="Remove passkey"
+                  destructive
+                  onConfirm={() => remove.mutate(p.id)}
+                >
+                  You will no longer be able to sign in with {p.name || 'this passkey'}. Your
+                  password keeps working.
+                </ConfirmDialog>
+              </Reveal>
+            ))}
+          </ul>
+          {passkeys.data.length > PASSKEYS_SHOWN ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              aria-expanded={showAll}
+              aria-controls="passkey-list"
+              onClick={() => setShowAll(!showAll)}
+              className="-mt-3 mb-6"
+            >
+              {showAll ? 'Show fewer' : `View all ${passkeys.data.length} passkeys`}
+            </Button>
+          ) : null}
+        </>
       )}
 
       <form onSubmit={onAdd} className="flex flex-wrap items-end gap-3">
@@ -259,6 +284,81 @@ function SignOutButton() {
     <Button size="sm" variant="danger" loading={pending} onClick={signOut}>
       Sign out
     </Button>
+  )
+}
+
+/**
+ * Self-serve account deletion. better-auth wants the password, or for accounts without one
+ * (Google, passkeys only) a session under a day old; otherwise the reader signs in again.
+ */
+function DangerZone() {
+  const queryClient = useQueryClient()
+  const [password, setPassword] = useState('')
+  const accounts = useQuery({
+    queryKey: ['account', 'linked'],
+    queryFn: async () => {
+      const { data, error } = await authClient.listAccounts()
+      if (error) throw new Error(error.message ?? 'Could not load your sign-in methods')
+      return data ?? []
+    },
+  })
+  const hasPassword = accounts.data?.some((a) => a.providerId === 'credential') ?? false
+  const remove = useMutation({
+    mutationFn: async () => {
+      const { error } = await authClient.deleteUser(hasPassword ? { password } : {})
+      if (error) {
+        if (error.code === 'SESSION_EXPIRED')
+          throw new Error('For your security, sign out, sign in again, then delete your account.')
+        throw new Error(error.message ?? 'Your account was not deleted.')
+      }
+    },
+    onSuccess: () => {
+      queryClient.clear()
+      // A full load: nothing cached from the deleted account survives.
+      window.location.assign('/login')
+    },
+    onSettled: () => setPassword(''),
+  })
+
+  return (
+    <SettingsRow
+      id="danger-zone"
+      title="Danger zone"
+      description="Deleting your account removes your preferences, follows, reading history, feedback and passkeys. It can’t be undone."
+    >
+      <ConfirmDialog
+        trigger={
+          <Button variant="danger" loading={remove.isPending} disabled={accounts.isPending}>
+            Delete account
+          </Button>
+        }
+        title="Delete your account?"
+        confirmLabel="Delete account"
+        destructive
+        onConfirm={() => remove.mutate()}
+        onCancel={() => setPassword('')}
+      >
+        <p>Everything tied to your account is deleted straight away. This can’t be undone.</p>
+        {hasPassword ? (
+          <TextInput
+            label="Your password"
+            name="password"
+            type="password"
+            autoComplete="current-password"
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
+            className="mt-4"
+          />
+        ) : null}
+      </ConfirmDialog>
+      {remove.isError ? (
+        <Reveal className="mt-4">
+          <Notice tone="error" title="Account not deleted">
+            {remove.error.message}
+          </Notice>
+        </Reveal>
+      ) : null}
+    </SettingsRow>
   )
 }
 

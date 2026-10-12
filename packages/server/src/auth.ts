@@ -3,6 +3,7 @@ import { passkey } from '@better-auth/passkey'
 import { type Db, schema } from '@dn/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
+import { APIError } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { eq } from 'drizzle-orm'
@@ -53,8 +54,29 @@ export function createAuth(db: Db, env = process.env) {
       googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {},
-    // input: false keeps clients from setting their own role at sign-up or via update-user.
-    user: { additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } } },
+    user: {
+      // input: false keeps clients from setting their own role at sign-up or via update-user.
+      additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } },
+      // Self-serve deletion (POST /api/auth/delete-user). better-auth asks for the password, or
+      // a session under a day old for accounts without one. Reading data, follows, feedback
+      // and passkeys cascade.
+      deleteUser: {
+        enabled: true,
+        // Published assessments keep their reviewer: they're append-only history.
+        beforeDelete: async (user) => {
+          const [reviewed] = await db
+            .select({ id: schema.publisherAssessment.id })
+            .from(schema.publisherAssessment)
+            .where(eq(schema.publisherAssessment.reviewedBy, user.id))
+            .limit(1)
+          if (reviewed)
+            throw new APIError('BAD_REQUEST', {
+              message:
+                'This account has published publisher assessments, so it can’t be deleted here. Ask an operator to remove it.',
+            })
+        },
+      },
+    },
     session: { expiresIn: 60 * 60 * 24 * 30 },
     advanced: ipAddressHeaders?.length ? { ipAddress: { ipAddressHeaders } } : undefined,
     plugins: [
