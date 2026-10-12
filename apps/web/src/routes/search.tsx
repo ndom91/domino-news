@@ -8,9 +8,9 @@ import {
   searchQuerySchema,
 } from '@dn/schemas'
 import { Badge, Button, cx, deskKey, Notice, Reveal, Select, Skeleton, TextInput } from '@dn/ui'
-import { useQuery } from '@tanstack/react-query'
+import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
-import { type FormEvent, useId } from 'react'
+import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { z } from 'zod/mini'
 import { Page, PageTitle } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
@@ -37,42 +37,89 @@ const SINCE_OPTIONS = [
 
 const REGION_OPTIONS = regionOptions('Any region')
 
+// Search after a pause in typing: long enough to skip mid-word queries, short enough to feel
+// live. One- and two-letter queries wait for Enter (they match almost everything).
+const DEBOUNCE_MS = 300
+const MIN_LIVE_LENGTH = 3
+
 function SearchPage() {
   const search = Route.useSearch()
   const navigate = useNavigate({ from: '/search' })
-  const results = useQuery(queries.search(search))
+  // Keep the last results on screen while the next query loads, instead of a skeleton per pause.
+  const results = useQuery({ ...queries.search(search), placeholderData: keepPreviousData })
   const publishers = useQuery(queries.publishers())
   const sinceId = useId()
   const pubId = useId()
   const regionId = useId()
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    const form = new FormData(event.currentTarget)
+  const formRef = useRef<HTMLFormElement>(null)
+  // The query field keeps its own text so typing never waits on the router or loses focus;
+  // it follows the URL on back and forward. `written` is what it last sent, so the URL
+  // catching up (possibly a keystroke behind) isn't copied back over newer typing.
+  const [query, setQuery] = useState(search.q)
+  const written = useRef(search.q)
+  useEffect(() => {
+    if (search.q !== written.current) {
+      written.current = search.q
+      setQuery(search.q)
+    }
+  }, [search.q])
+
+  // Reads the whole form, so a pending query and the filters always go together. A select
+  // passes its new value in `set`: its hidden input only updates after the change event.
+  // `push` adds a history entry (Enter, filter changes); typing replaces the current one.
+  function apply({ push, set = {} }: { push: boolean; set?: Record<string, string | null> }) {
+    const form = formRef.current
+    if (!form) return
+    const data = new FormData(form)
+    const field = (name: string) => (name in set ? set[name] : data.get(name)) ?? ''
+    const q = String(field('q')).trim()
+    written.current = q
     navigate({
       search: {
-        q: String(form.get('q') ?? '').trim(),
+        q,
         type: search.type,
-        since: (form.get('since') as typeof search.since) ?? 'all',
-        publisher: String(form.get('publisher') ?? '') || undefined,
-        region: regionSchema.safeParse(form.get('region')).data,
+        since: (String(field('since')) || 'all') as typeof search.since,
+        publisher: String(field('publisher')) || undefined,
+        region: regionSchema.safeParse(field('region')).data,
       },
+      replace: !push,
     })
+  }
+
+  // Debounced live search while typing.
+  useEffect(() => {
+    const q = query.trim()
+    if (q === written.current || (q.length > 0 && q.length < MIN_LIVE_LENGTH)) return
+    const timer = setTimeout(() => apply({ push: false }), DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  })
+
+  function onSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    apply({ push: true })
   }
 
   return (
     <Page>
       <PageTitle>Search</PageTitle>
       <search className="block max-w-4xl">
-        {/* Keyed on the URL so back/forward remounts the fields with the current filters. */}
-        <form key={JSON.stringify(search)} onSubmit={onSubmit} className="flex flex-col gap-3">
+        {/* Keyed on the filters (not the query) so back/forward resets the selects without
+            remounting the field being typed in. */}
+        <form
+          ref={formRef}
+          key={JSON.stringify({ ...search, q: undefined })}
+          onSubmit={onSubmit}
+          className="flex flex-col gap-3"
+        >
           <div className="flex gap-2">
             <TextInput
               label="Search stories and narratives"
               hideLabel
               name="q"
               type="search"
-              defaultValue={search.q}
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
               placeholder="Search stories and narratives"
               className="flex-1"
               // Only on an empty search: on mobile it would pop the keyboard over the results.
@@ -86,7 +133,13 @@ function SearchPage() {
             <label htmlFor={sinceId} className="type-label">
               Updated
             </label>
-            <Select id={sinceId} name="since" options={SINCE_OPTIONS} defaultValue={search.since} />
+            <Select
+              id={sinceId}
+              name="since"
+              options={SINCE_OPTIONS}
+              defaultValue={search.since}
+              onValueChange={(since) => apply({ push: true, set: { since } })}
+            />
             <label htmlFor={pubId} className="type-label">
               Publisher
             </label>
@@ -98,6 +151,7 @@ function SearchPage() {
                 ...(publishers.data?.items.map((p) => ({ value: p.slug, label: p.name })) ?? []),
               ]}
               defaultValue={search.publisher ?? null}
+              onValueChange={(publisher) => apply({ push: true, set: { publisher } })}
             />
             <label htmlFor={regionId} className="type-label">
               Region
@@ -107,6 +161,7 @@ function SearchPage() {
               name="region"
               options={REGION_OPTIONS}
               defaultValue={search.region ?? null}
+              onValueChange={(region) => apply({ push: true, set: { region } })}
             />
           </div>
         </form>
