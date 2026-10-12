@@ -1,13 +1,17 @@
 import { readFile, writeFile } from 'node:fs/promises'
 import { parseArgs } from 'node:util'
 import {
+  CANDIDATE_WINDOW_SECONDS,
   createQueues,
   type FixtureVariant,
   feedIds,
   importAssessmentEvidence,
+  matchPolicy,
+  NEIGHBOURS,
   pollFeed,
   publishAssessments,
   reviewHtml,
+  runMatchEval,
   sampleMatchSet,
   seedPublishers,
   writeJson,
@@ -42,6 +46,8 @@ const USAGE = `Usage: pnpm cli <command> [options]
   match:sample --name n --seed <title regex> [--seed …] [--days 6] [--random 100] [--neighbour-min 0.8]
                                     Draw a match evaluation set into fixtures/match-eval/<name>.json
   match:review --name n             Write a review page for its labels (reviewed labels, else the draft)
+  match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k]
+                                    Replay matching over a labelled set and score it (B-cubed)
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
@@ -64,6 +70,10 @@ const { positionals, values } = parseArgs({
     days: { type: 'string', default: '6' },
     random: { type: 'string', default: '100' },
     'neighbour-min': { type: 'string', default: '0.8' },
+    label: { type: 'string', default: 'current' },
+    'auto-same': { type: 'string' },
+    'llm-min': { type: 'string' },
+    candidates: { type: 'string' },
     all: { type: 'boolean', default: false },
   },
 })
@@ -144,6 +154,39 @@ try {
       const out = `${dir}/${values.name}.review.html`
       await writeFile(out, reviewHtml(set, labels))
       console.log(`open ${out}`)
+      break
+    }
+    case 'match:eval': {
+      if (!values.name) throw new Error('--name required')
+      const base = matchPolicy(ctx.inference.mode)
+      const policy = {
+        autoSame: values['auto-same'] ? Number(values['auto-same']) : base.autoSame,
+        llmMin: values['llm-min'] ? Number(values['llm-min']) : base.llmMin,
+        maxCandidates: values.candidates ? Number(values.candidates) : base.maxCandidates,
+      }
+      const r = await runMatchEval(ctx, {
+        name: values.name,
+        label: values.label,
+        policy,
+        neighbours: NEIGHBOURS,
+        windowSeconds: CANDIDATE_WINDOW_SECONDS,
+        log: (msg) => console.log(`[eval] ${msg}`),
+      })
+      const pct = (n: number) => `${(n * 100).toFixed(1)}%`
+      console.log(
+        `${r.set} · ${r.label} · ${r.promptVersion} · ${JSON.stringify(r.policy)}\n` +
+          `  F1 ${pct(r.score.f1)}  precision ${pct(r.score.precision)} (over-merging)  recall ${pct(r.score.recall)} (fragmentation)\n` +
+          `  stories ${r.score.predictedStories} vs ${r.score.labelledStories} labelled · singletons ${r.score.predictedSingletons} vs ${r.score.labelledSingletons}\n` +
+          `  model calls ${r.modelCalls} new, ${r.cachedCalls} cached, ${r.failedCalls} invalid\n` +
+          `  most fragmented:\n${r.fragmented
+            .slice(0, 8)
+            .map((f) => `    ${f.pieces} pieces · ${f.size} articles · ${f.title}`)
+            .join('\n')}\n` +
+          `  most over-merged:\n${r.overMerged
+            .slice(0, 5)
+            .map((o) => `    ${o.size} articles mixing: ${o.labelled.join(' | ')}`)
+            .join('\n')}`,
+      )
       break
     }
     case 'backfill:pause':

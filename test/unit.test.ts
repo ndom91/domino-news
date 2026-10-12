@@ -854,3 +854,47 @@ describe('match label review page', () => {
     expect(html).not.toContain('<img src=x')
   })
 })
+
+describe('match evaluation', () => {
+  const map = (o: Record<string, string>) => new Map(Object.entries(o))
+
+  it('scores B-cubed precision (over-merging) and recall (fragmentation)', async () => {
+    const { bcubed } = await import('@dn/jobs')
+    const gold = map({ a: 'X', b: 'X', c: 'Y', d: 'Y' })
+    expect(bcubed(gold, gold)).toMatchObject({ precision: 1, recall: 1, f1: 1 })
+    // Everything in one story: perfect recall, half precision.
+    const one = bcubed(map({ a: '1', b: '1', c: '1', d: '1' }), gold)
+    expect(one.recall).toBe(1)
+    expect(one.precision).toBe(0.5)
+    // Everything split: perfect precision, half recall.
+    const split = bcubed(map({ a: '1', b: '2', c: '3', d: '4' }), gold)
+    expect(split.precision).toBe(1)
+    expect(split.recall).toBe(0.5)
+    expect(split).toMatchObject({ predictedSingletons: 4, labelledSingletons: 0 })
+  })
+
+  it('replays matching in publish order with the production decision rules', async () => {
+    const { replayMatching } = await import('@dn/jobs')
+    const at = (h: number) => new Date(Date.UTC(2026, 9, 12, h)).toISOString()
+    const articles = [
+      { id: 'a', publishedAt: at(1), embedding: [1, 0] },
+      { id: 'b', publishedAt: at(2), embedding: [0.99, 0.14] }, // very close to a: attaches without the model
+      { id: 'c', publishedAt: at(3), embedding: [0.8, 0.6] }, // mid band: the model decides
+      { id: 'd', publishedAt: at(4), embedding: [0, 1] }, // far from all: new story
+    ]
+    const asked: string[] = []
+    const policy = { autoSame: 0.95, llmMin: 0.7, maxCandidates: 3 }
+    const run = () =>
+      replayMatching(articles, policy, { neighbours: 12, windowSeconds: 86_400 }, async (id) => {
+        asked.push(id)
+        return id === 'c'
+      })
+    const result = await run()
+    expect(result.get('b')).toBe(result.get('a'))
+    expect(result.get('c')).toBe(result.get('a'))
+    expect(result.get('d')).not.toBe(result.get('a'))
+    expect(asked).toEqual(['c'])
+    // Deterministic: the same inputs give the same stories.
+    expect([...(await run())]).toEqual([...result])
+  })
+})

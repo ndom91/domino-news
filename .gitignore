@@ -20,3 +20,5 @@ docs/*-handoff.zip
 
 # Generated review pages for match labels (pnpm cli match:review)
 fixtures/match-eval/*.review.html
+# Cached model decisions for match evaluation runs (pnpm cli match:eval)
+fixtures/match-eval/cache/
