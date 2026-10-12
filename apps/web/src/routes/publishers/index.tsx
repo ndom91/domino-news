@@ -8,9 +8,7 @@ import {
   type Region,
 } from '@dn/schemas'
 import {
-  CoverageMatrix,
   LeanMark,
-  Notice,
   PublisherLogo,
   positionKey,
   SectionLabel,
@@ -22,7 +20,6 @@ import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
 import { useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
-import { RouterLink } from '../../components/link.tsx'
 import { Page, PageTitle } from '../../components/page.tsx'
 import { queries } from '../../lib/api.ts'
 
@@ -173,17 +170,6 @@ function PublishersPage() {
           </section>
         ))}
       </div>
-
-      <section aria-labelledby="matrix-heading" className="mt-16">
-        <SectionLabel id="matrix-heading">Who covered what</SectionLabel>
-        {data.matrix.stories.length === 0 ? (
-          <Notice title="No shared stories yet">
-            The matrix fills in once several publishers report the same story.
-          </Notice>
-        ) : (
-          <CoverageMatrix matrix={data.matrix} Link={RouterLink} />
-        )}
-      </section>
 
       {isAdmin ? (
         <section aria-labelledby="outlets-heading" className="mt-12">

@@ -5,7 +5,6 @@ import type {
   PublisherDetail,
   PublisherLean,
   PublisherListResponse,
-  PublisherRef,
   PublisherStats,
 } from '@dn/schemas'
 import { eq, sql } from 'drizzle-orm'
@@ -103,51 +102,8 @@ async function statsRows(db: Db, slug?: string) {
   )
 }
 
-const MATRIX_STORIES = 12
-
-/** Most widely covered recent Stories × outlets: who covered what, and who was first. */
-async function coverageMatrix(db: Db, publishers: PublisherRef[]) {
-  const { rows } = await db.execute<{
-    story_id: string
-    publisher_id: string
-    first: boolean
-  }>(sql`
-    with ${LINKS},
-    top as (
-      select ps.story_id from per_story ps
-      join story s on s.id = ps.story_id
-      where ps.outlets > 1
-      order by ps.outlets desc, s.last_updated_at desc
-      limit ${MATRIX_STORIES}
-    )
-    select distinct l.story_id, l.publisher_id, bool_or(l.at = ps.first_at) over (partition by l.story_id, l.publisher_id) as first
-    from links l join per_story ps using (story_id)
-    where l.newsroom and l.story_id in (select story_id from top)`)
-  const storyIds = [...new Set(rows.map((r) => r.story_id))]
-  const stories = await storyListItems(db, storyIds)
-  const covered = new Set(rows.map((r) => r.publisher_id))
-  return {
-    publishers: publishers.filter((p) => covered.has(p.id)),
-    stories: stories
-      .sort(
-        (a, b) => b.sourceCount - a.sourceCount || b.lastUpdatedAt.localeCompare(a.lastUpdatedAt),
-      )
-      .map((s) => ({
-        id: s.id,
-        slug: s.slug,
-        title: s.title,
-        lastUpdatedAt: s.lastUpdatedAt,
-        coverage: rows
-          .filter((r) => r.story_id === s.id)
-          .map((r) => ({ publisherId: r.publisher_id, first: r.first })),
-      })),
-  }
-}
-
 export async function listPublishers(db: Db): Promise<PublisherListResponse> {
-  const items = await statsRows(db)
-  const refs = items.map(({ id, slug, name, domain }) => ({ id, slug, name, domain }))
-  return { items, matrix: await coverageMatrix(db, refs) }
+  return { items: await statsRows(db) }
 }
 
 export async function publisherDomainBySlug(db: Db, slug: string): Promise<string | null> {

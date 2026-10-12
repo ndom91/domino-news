@@ -1,5 +1,4 @@
 import type {
-  CoverageMatrix,
   CoverageProfile,
   Desk,
   DevelopingNarrative,
@@ -530,20 +529,6 @@ export const fixtureNarrative: NarrativeDetail = {
     { id: 'e2', fromStoryId: 'sty_trump', toStoryId: 'sty_pillay', relation: 'related_to' },
     { id: 'e3', fromStoryId: 'sty_reax', toStoryId: 'sty_pillay', relation: 'branches_from' },
   ],
-}
-
-export const fixtureCoverage: CoverageMatrix = {
-  publishers: [P.meridian, P.southbank, P.civic, P.calder, P.lakeshore, P.halden],
-  stories: fixtureLatest.slice(0, 4).map((s) => ({
-    id: s.id,
-    slug: s.slug,
-    title: s.title,
-    lastUpdatedAt: s.lastUpdatedAt,
-    coverage: s.publishers.map((p, i) => ({
-      publisherId: p.id,
-      first: i === s.publishers.length - 1,
-    })),
-  })),
 }
 
 export const fixtureAssessment: PublisherAssessment = {

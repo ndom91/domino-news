@@ -79,23 +79,8 @@ export const publisherStatsSchema = z.extend(publisherRefSchema, {
 })
 export type PublisherStats = z.infer<typeof publisherStatsSchema>
 
-export const coverageMatrixSchema = z.object({
-  publishers: z.array(publisherRefSchema),
-  stories: z.array(
-    z.object({
-      id: z.string(),
-      slug: z.string(),
-      title: z.string(),
-      lastUpdatedAt: z.string(),
-      coverage: z.array(z.object({ publisherId: z.string(), first: z.boolean() })),
-    }),
-  ),
-})
-export type CoverageMatrix = z.infer<typeof coverageMatrixSchema>
-
 export const publisherListResponseSchema = z.object({
   items: z.array(publisherStatsSchema),
-  matrix: coverageMatrixSchema,
 })
 export type PublisherListResponse = z.infer<typeof publisherListResponseSchema>
 

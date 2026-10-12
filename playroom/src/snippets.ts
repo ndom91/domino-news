@@ -97,11 +97,6 @@ export default [
   },
   {
     group: 'Editorial',
-    name: 'CoverageMatrix',
-    code: '<CoverageMatrix matrix={fixtureCoverage} />',
-  },
-  {
-    group: 'Editorial',
     name: 'ClaimList',
     code: '<div className="max-w-reading"><ClaimList claims={fixtureLead.claims} /></div>',
   },

@@ -887,14 +887,9 @@ describe('publisher coverage', () => {
       expect(p.exclusives).toBeLessThanOrEqual(p.storiesCovered)
       expect(p.firstReports).toBeLessThanOrEqual(p.storiesCovered)
     }
-    // Every matrix row is a multi-outlet story with exactly one-or-more first reporters.
-    for (const story of body.matrix.stories) {
-      expect(story.coverage.length).toBeGreaterThan(1)
-      expect(story.coverage.some((c) => c.first)).toBe(true)
-    }
   })
 
-  it('keeps official sources out of first-report, only-source and matrix stats', async () => {
+  it('keeps official sources out of first-report and only-source stats', async () => {
     const { publisherListResponseSchema } = await import('@dn/schemas')
     const list = async () =>
       publisherListResponseSchema.parse(await (await call('/api/v1/publishers')).json())
@@ -912,7 +907,6 @@ describe('publisher coverage', () => {
         firstReports: 0,
         exclusives: 0,
       })
-      expect(after.matrix.publishers.some((p) => p.id === top.id)).toBe(false)
 
       const [story] = await h.ctx.pool
         .query(
