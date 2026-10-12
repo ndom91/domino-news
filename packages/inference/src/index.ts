@@ -7,7 +7,12 @@ import type { InferenceProviders } from './types.ts'
 export { createCloudGeneration } from './cloud.ts'
 export * from './fixture.ts'
 export * from './local.ts'
-export { classifyRelationshipPrompt, PROMPT_VERSIONS, summarizeStoryPrompt } from './prompts.ts'
+export {
+  classifyRelationshipPrompt,
+  explainContextPrompt,
+  PROMPT_VERSIONS,
+  summarizeStoryPrompt,
+} from './prompts.ts'
 export * from './types.ts'
 
 export function createInferenceFromEnv(env = process.env): InferenceProviders {

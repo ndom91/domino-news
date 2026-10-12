@@ -46,7 +46,7 @@ export const storyContextOutputSchema = z.object({
         kind: contextKindSchema,
       }),
     )
-    .check(z.maxLength(4)),
+    .check(z.maxLength(6)),
 })
 export type StoryContextOutput = z.infer<typeof storyContextOutputSchema>
 

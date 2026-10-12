@@ -9,7 +9,7 @@ export const PROMPT_VERSIONS = {
   summarizeStory: 'summarize-story@8',
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
-  explainContext: 'explain-context@4',
+  explainContext: 'explain-context@5',
   extractClaims: 'extract-claims@3',
 } as const
 
@@ -137,10 +137,12 @@ ${data(input.stories.map((s) => ({ title: s.title, summary: s.summary, firstObse
 }
 
 export function explainContextPrompt(input: { story: StoryInput; summary: string }) {
-  return `A general reader sees this news SUMMARY. Pick at most 4 names, organisations, places, terms or earlier
-events in it that such a reader may not know and that matter for understanding the story. Skip obvious ones:
-countries, major political parties, household-name institutions and agencies (e.g. "European Union", "United Nations", "NATO", "FBI", "CDC"),
-generic words (e.g. "sanctions", "president"), and news outlets or publishers.
+  return `A general reader sees this news SUMMARY. Pick up to 6 names, organisations, places, terms or earlier
+events in it that such a reader may not know and that help in understanding the story. Good candidates: acronyms,
+officials and political parties outside the reader's own country, laws, treaties and programmes, places below
+country level, and earlier events the summary refers to. If unsure whether a general reader knows it, include it.
+Skip only the obvious: countries, household-name institutions and agencies (e.g. "European Union", "United Nations",
+"NATO", "FBI", "CDC"), generic words (e.g. "sanctions", "president"), and news outlets or publishers.
 For each:
 - anchorText: the exact words as they appear in SUMMARY (case-sensitive, verbatim).
 - title: the canonical name of the subject (e.g. "International Criminal Court").

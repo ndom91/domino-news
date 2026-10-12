@@ -404,6 +404,22 @@ describe('prompt inputs', () => {
     expect(prompt).toContain('You must be able to name that one event')
     expect(prompt).toContain('When the only link is a theme, answer "unrelated"')
   })
+
+  it('ask for up to 6 context terms and lean towards including them', async () => {
+    const { explainContextPrompt } = await import('@dn/inference')
+    const prompt = explainContextPrompt({
+      story: {
+        storyId: 's',
+        title: 't',
+        summary: null,
+        firstObservedAt: '2026-10-10T00:00:00Z',
+        articles: [],
+      },
+      summary: 's',
+    })
+    expect(prompt).toContain('Pick up to 6')
+    expect(prompt).toContain('If unsure whether a general reader knows it, include it')
+  })
 })
 
 describe('assessment evidence parsing', () => {

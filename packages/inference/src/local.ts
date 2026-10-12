@@ -142,7 +142,7 @@ const contextByNumber = z.object({
         sources: sourceNumbers,
       }),
     )
-    .check(z.maxLength(4)),
+    .check(z.maxLength(6)),
 })
 const claimsByNumber = z.object({
   claims: z
