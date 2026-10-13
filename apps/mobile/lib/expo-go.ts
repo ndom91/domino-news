@@ -1,3 +1,4 @@
 import Constants from 'expo-constants'
 
-export const isExpoGo = Constants.expoGoConfig !== null
+// Standalone builds can report this as undefined; only Expo Go supplies its config object.
+export const isExpoGo = Boolean(Constants.expoGoConfig)
