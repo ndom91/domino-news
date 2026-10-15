@@ -41,6 +41,7 @@ export const queryKeys = {
   follows: () => ['me', 'follows'] as const,
   forYou: () => ['for-you'] as const,
   forYouRail: () => ['for-you', 'rail'] as const,
+  hiddenStories: () => ['me', 'hidden-stories'] as const,
   signals: () => ['me', 'signals'] as const,
   evidence: (slug: string) => ['publishers', 'evidence', slug] as const,
 }
@@ -143,6 +144,11 @@ export function createQueries(api: ApiClient) {
         queryFn: ({ signal }) => api.getForYou({ limit: 5 }, signal),
         staleTime: 60_000,
       }),
+    hiddenStories: () =>
+      queryOptions({
+        queryKey: queryKeys.hiddenStories(),
+        queryFn: ({ signal }) => api.getHiddenStories(signal),
+      }),
     signals: () =>
       queryOptions({
         queryKey: queryKeys.signals(),
@@ -233,8 +239,9 @@ export function setFollowMutation(api: ApiClient, queryClient: QueryClient) {
 export function feedbackMutation(api: ApiClient, queryClient: QueryClient) {
   return {
     mutationFn: (body: FeedbackRequest) => api.setFeedback(body),
-    onSuccess: (signals: LearnedSignals) => {
+    onSuccess: async (signals: LearnedSignals) => {
       queryClient.setQueryData(queryKeys.signals(), signals)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.hiddenStories() })
     },
   }
 }

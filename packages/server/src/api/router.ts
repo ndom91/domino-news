@@ -17,7 +17,7 @@ import {
 import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import type { ServerContext } from '../context.ts'
-import { listSignals, setFeedback, updateSignals } from '../feedback.ts'
+import { listHiddenStories, listSignals, setFeedback, updateSignals } from '../feedback.ts'
 import { listFollows, setFollow } from '../follows.ts'
 import { FOR_YOU_PAGE_SIZE, getForYou } from '../for-you.ts'
 import { getEdition, getFrontPage } from '../front.ts'
@@ -298,6 +298,9 @@ const routes: Route[] = [
   ),
   route('POST', '/api/v1/me/feedback', async ({ ctx, request, userId }) =>
     json(await setFeedback(ctx.db, userId, await readJson(request, feedbackRequestSchema))),
+  ),
+  route('GET', '/api/v1/me/hidden-stories', async ({ ctx, userId }) =>
+    json(await listHiddenStories(ctx.db, userId)),
   ),
   route('GET', '/api/v1/me/signals', async ({ ctx, userId }) =>
     json(await listSignals(ctx.db, userId)),

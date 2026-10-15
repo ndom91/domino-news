@@ -1,6 +1,7 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { countryName, KNOWN_COUNTRIES } from '@dn/domain'
 import {
+  feedbackMutation,
   queryKeys,
   savePreferencesMutation,
   setFollowMutation,
@@ -13,6 +14,7 @@ import { useEffect, useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { FeedPicks } from '../../../components/feed-picks'
+import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { api, isUnauthorized, queries } from '../../../lib/api'
 import { authClient } from '../../../lib/auth-client'
@@ -30,6 +32,7 @@ export default function AccountScreen() {
   const preferences = useQuery(queries.preferences())
   const follows = useQuery(queries.follows())
   const signals = useQuery(queries.signals())
+  const hiddenStories = useQuery(queries.hiddenStories())
   const save = useMutation({
     ...savePreferencesMutation(api, queryClient),
     onMutate: async (update: UserPreferencesUpdate) => {
@@ -60,6 +63,7 @@ export default function AccountScreen() {
   const [confirmSignalsReset, setConfirmSignalsReset] = useState(false)
   const followSave = useMutation(setFollowMutation(api, queryClient))
   const signalSave = useMutation(updateSignalsMutation(api, queryClient))
+  const feedbackSave = useMutation(feedbackMutation(api, queryClient))
   const user = session.data?.user
 
   useEffect(() => {
@@ -380,6 +384,36 @@ export default function AccountScreen() {
           ) : null}
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Hidden from For You</Text>
+          {hiddenStories.isPending ? (
+            <Text style={styles.note}>Loading hidden stories…</Text>
+          ) : null}
+          {hiddenStories.isError ? (
+            <Text style={styles.error}>Hidden stories could not be loaded.</Text>
+          ) : null}
+          {hiddenStories.data?.items.length === 0 ? (
+            <Text style={styles.note}>No stories are hidden.</Text>
+          ) : null}
+          {hiddenStories.data?.items.map((story) => (
+            <View key={story.id} style={styles.hiddenStory}>
+              <StoryCard now={new Date().toISOString()} story={story} />
+              <Button
+                disabled={feedbackSave.isPending}
+                onPress={() => feedbackSave.mutate({ storyId: story.id, signal: null })}
+                tone="light"
+              >
+                Show in For You
+              </Button>
+            </View>
+          ))}
+          {feedbackSave.isError ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              That story could not be restored. Try again.
+            </Text>
+          ) : null}
+        </View>
+
         {signOutError ? (
           <Text accessibilityLiveRegion="polite" style={styles.error}>
             {signOutError}
@@ -550,6 +584,7 @@ const styles = StyleSheet.create({
   heading: { color: t.color.bandText, fontFamily: t.font.black, fontSize: 42, letterSpacing: -1.5 },
   name: { color: t.color.bandMuted, fontFamily: t.font.semibold, fontSize: t.type.bodyLarge },
   section: { gap: t.space[4], marginTop: t.space[8] },
+  hiddenStory: { gap: t.space[2] },
   sectionTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
   description: {
     color: t.color.textSecondary,

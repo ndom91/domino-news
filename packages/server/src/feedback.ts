@@ -12,6 +12,7 @@ import {
   type Topic,
 } from '@dn/schemas'
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
+import { storyListItems } from './reader.ts'
 import { DomainError } from './story-service.ts'
 
 // A learned weight halves every HALF_LIFE_DAYS without new feedback, and stays within
@@ -144,6 +145,24 @@ export async function storyFeedback(db: Db, userId: string) {
     .from(schema.userStoryFeedback)
     .where(eq(schema.userStoryFeedback.userId, userId))
   return new Map(rows.map((r) => [r.storyId, r.signal]))
+}
+
+/** Stories a reader hid with "Less", newest first, so each choice can be undone. */
+export async function listHiddenStories(db: Db, userId: string) {
+  const rows = await db
+    .select({ storyId: schema.userStoryFeedback.storyId })
+    .from(schema.userStoryFeedback)
+    .where(
+      and(eq(schema.userStoryFeedback.userId, userId), eq(schema.userStoryFeedback.signal, 'less')),
+    )
+    .orderBy(sql`${schema.userStoryFeedback.createdAt} desc`)
+    .limit(20)
+  return {
+    items: await storyListItems(
+      db,
+      rows.map((row) => row.storyId),
+    ),
+  }
 }
 
 export function signalLabel(

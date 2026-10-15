@@ -782,6 +782,9 @@ export const feedbackRequestSchema = z.object({
 })
 export type FeedbackRequest = z.infer<typeof feedbackRequestSchema>
 
+export const hiddenStoriesSchema = z.object({ items: z.array(storyListItemSchema) })
+export type HiddenStories = z.infer<typeof hiddenStoriesSchema>
+
 export const learnedSignalSchema = z.object({
   kind: signalKindSchema,
   key: z.string(),

@@ -16,6 +16,8 @@ import {
   followListSchema,
   forYouResponseSchema,
   frontPageSchema,
+  type HiddenStories,
+  hiddenStoriesSchema,
   type Insights,
   insightsSchema,
   type LearnedSignals,
@@ -201,6 +203,8 @@ export function createApiClient({
       request<ForYouResponse>(forYouResponseSchema, `/for-you${qs(opts)}`, { signal }),
     setFeedback: (body: FeedbackRequest) =>
       request<LearnedSignals>(learnedSignalsSchema, '/me/feedback', { method: 'POST', body }),
+    getHiddenStories: (signal?: AbortSignalLike) =>
+      request<HiddenStories>(hiddenStoriesSchema, '/me/hidden-stories', { signal }),
     getSignals: (signal?: AbortSignalLike) =>
       request<LearnedSignals>(learnedSignalsSchema, '/me/signals', { signal }),
     updateSignals: (body: SignalsRequest) =>
