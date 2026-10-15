@@ -4,7 +4,7 @@ import { isExpoGo } from './expo-go'
 type StoryListener = (storySlug: string) => void
 type Subscription = { remove: () => void }
 
-const unavailableMessage = 'Background alerts require an installed development build.'
+const unavailableMessage = 'Push alerts require an installed app build.'
 
 export const forYouAlertsAvailable = !isExpoGo
 
@@ -45,4 +45,16 @@ export async function listenForStoryNotifications(listener: StoryListener): Prom
     if (response) await Notifications.clearLastNotificationResponseAsync()
   })
   return Notifications.addNotificationResponseReceivedListener(openStory)
+}
+
+export async function listenForPushTokenChanges(): Promise<Subscription> {
+  if (isExpoGo) return { remove: () => {} }
+  const Notifications = await import('expo-notifications')
+  return Notifications.addPushTokenListener(({ data }) => {
+    void (async () => {
+      try {
+        await (await taskModule()).refreshForYouPushToken(data)
+      } catch {}
+    })()
+  })
 }

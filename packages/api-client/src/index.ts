@@ -36,6 +36,7 @@ import {
   type PublisherAssessment,
   type PublisherDetail,
   type PublisherListResponse,
+  type PushSubscriptionRequest,
   previewSchema,
   publisherAssessmentSchema,
   publisherDetailSchema,
@@ -203,6 +204,17 @@ export function createApiClient({
       request<ForYouResponse>(forYouResponseSchema, `/for-you${qs(opts)}`, { signal }),
     setFeedback: (body: FeedbackRequest) =>
       request<LearnedSignals>(learnedSignalsSchema, '/me/feedback', { method: 'POST', body }),
+    savePushSubscription: (body: PushSubscriptionRequest) =>
+      request<{ saved: boolean }>(z.object({ saved: z.boolean() }), '/me/push-subscriptions', {
+        method: 'POST',
+        body,
+      }),
+    removePushSubscription: (token: string) =>
+      request<{ removed: boolean }>(
+        z.object({ removed: z.boolean() }),
+        '/me/push-subscriptions/remove',
+        { method: 'POST', body: { token } },
+      ),
     getHiddenStories: (signal?: AbortSignalLike) =>
       request<HiddenStories>(hiddenStoriesSchema, '/me/hidden-stories', { signal }),
     getSignals: (signal?: AbortSignalLike) =>

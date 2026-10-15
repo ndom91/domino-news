@@ -90,11 +90,11 @@ export default function AccountScreen() {
   async function signOut() {
     setSigningOut(true)
     setSignOutError(null)
+    try {
+      await disableForYouAlerts()
+    } catch {}
     const result = await authClient.signOut()
     if (!result.error) {
-      try {
-        await disableForYouAlerts()
-      } catch {}
       queryClient.clear()
       router.replace('/sign-in')
       return

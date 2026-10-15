@@ -7,6 +7,7 @@ import {
   followRequestSchema,
   opsActionSchema,
   previewTypeSchema,
+  pushSubscriptionRequestSchema,
   readRequestSchema,
   regionSchema,
   searchQuerySchema,
@@ -27,6 +28,7 @@ import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
+import { removePushSubscription, savePushSubscription } from '../push-subscriptions.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
@@ -299,6 +301,16 @@ const routes: Route[] = [
   route('POST', '/api/v1/me/feedback', async ({ ctx, request, userId }) =>
     json(await setFeedback(ctx.db, userId, await readJson(request, feedbackRequestSchema))),
   ),
+  route('POST', '/api/v1/me/push-subscriptions', async ({ ctx, request, userId }) => {
+    const { token } = await readJson(request, pushSubscriptionRequestSchema)
+    await savePushSubscription(ctx.db, userId, token)
+    return json({ saved: true })
+  }),
+  route('POST', '/api/v1/me/push-subscriptions/remove', async ({ ctx, request, userId }) => {
+    const { token } = await readJson(request, pushSubscriptionRequestSchema)
+    await removePushSubscription(ctx.db, userId, token)
+    return json({ removed: true })
+  }),
   route('GET', '/api/v1/me/hidden-stories', async ({ ctx, userId }) =>
     json(await listHiddenStories(ctx.db, userId)),
   ),

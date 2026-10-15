@@ -782,6 +782,11 @@ export const feedbackRequestSchema = z.object({
 })
 export type FeedbackRequest = z.infer<typeof feedbackRequestSchema>
 
+export const pushSubscriptionRequestSchema = z.object({
+  token: z.string().check(z.regex(/^(?:Exponent|Expo)PushToken\[[^\]]+\]$/)),
+})
+export type PushSubscriptionRequest = z.infer<typeof pushSubscriptionRequestSchema>
+
 export const hiddenStoriesSchema = z.object({ items: z.array(storyListItemSchema) })
 export type HiddenStories = z.infer<typeof hiddenStoriesSchema>
 

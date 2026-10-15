@@ -6,7 +6,7 @@ import { StyleSheet } from 'react-native'
 import { LoadingView, Screen } from '../../components/ui'
 import { queries } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
-import { listenForStoryNotifications } from '../../lib/for-you-alerts'
+import { listenForPushTokenChanges, listenForStoryNotifications } from '../../lib/for-you-alerts'
 
 export default function SignedInLayout() {
   const session = authClient.useSession()
@@ -19,6 +19,7 @@ export default function SignedInLayout() {
     if (!session.data) return
 
     let subscription: { remove: () => void } | undefined
+    let tokenSubscription: { remove: () => void } | undefined
     let disposed = false
     void listenForStoryNotifications((storySlug) => {
       router.push({ pathname: '/stories/[slug]', params: { slug: storySlug } })
@@ -26,9 +27,14 @@ export default function SignedInLayout() {
       if (disposed) nextSubscription.remove()
       else subscription = nextSubscription
     })
+    void listenForPushTokenChanges().then((nextSubscription) => {
+      if (disposed) nextSubscription.remove()
+      else tokenSubscription = nextSubscription
+    })
     return () => {
       disposed = true
       subscription?.remove()
+      tokenSubscription?.remove()
     }
   }, [router, session.data])
 

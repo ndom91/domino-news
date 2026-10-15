@@ -839,6 +839,21 @@ export const userFollow = pgTable(
   (t) => [primaryKey({ columns: [t.userId, t.targetType, t.targetId] })],
 )
 
+// Expo tokens are device-specific. A token may move between accounts, so it is the primary key.
+export const pushSubscription = pgTable(
+  'push_subscription',
+  {
+    token: text('token').primaryKey(),
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    createdAt: ts('created_at').notNull().defaultNow(),
+    updatedAt: ts('updated_at').notNull().defaultNow(),
+    lastNotifiedAt: ts('last_notified_at'),
+  },
+  (t) => [index('push_subscription_user_idx').on(t.userId)],
+)
+
 // One row per user and Story (latest read wins), kept for READ_RETENTION_DAYS. Only
 // written while the user has opted in; insights are computed from it on request.
 export const readingEvent = pgTable(

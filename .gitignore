@@ -9,6 +9,7 @@ dist
 *.tsbuildinfo
 .env
 .env.local
+/loombeat-*.json
 backups/
 infra/compose/certs/*.pem
 playwright-report
