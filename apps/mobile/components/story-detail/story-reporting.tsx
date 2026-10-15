@@ -68,9 +68,9 @@ export function StoryReporting({
           </Pressable>
         </View>
       ))}
-      {shownSources.length < orderedSources.length ? (
-        <Button onPress={() => setExpanded(true)} tone="light">
-          {`View all ${plural(orderedSources.length, 'report')}`}
+      {orderedSources.length > 5 ? (
+        <Button onPress={() => setExpanded((current) => !current)} tone="light">
+          {expanded ? 'Show fewer reports' : `View all ${plural(orderedSources.length, 'report')}`}
         </Button>
       ) : null}
     </View>
