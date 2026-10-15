@@ -1,4 +1,5 @@
 import { ApiError } from '@dn/api-client'
+import { nativeTokens as t } from '@dn/design-tokens/native'
 import { Archivo_400Regular } from '@expo-google-fonts/archivo/400Regular'
 import { Archivo_500Medium } from '@expo-google-fonts/archivo/500Medium'
 import { Archivo_600SemiBold } from '@expo-google-fonts/archivo/600SemiBold'
@@ -8,7 +9,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
 import { Stack } from 'expo-router'
 import { useState } from 'react'
-import { View } from 'react-native'
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 export default function RootLayout() {
@@ -33,7 +34,18 @@ export default function RootLayout() {
     Archivo_900Black,
   })
 
-  if (!fontsLoaded && !fontError) return <View />
+  if (!fontsLoaded && !fontError) {
+    return (
+      <View
+        accessibilityLabel="Loading Domino Wire"
+        accessibilityRole="progressbar"
+        style={styles.loading}
+      >
+        <ActivityIndicator color={t.color.accentText} />
+        <Text style={styles.loadingText}>Loading Domino Wire…</Text>
+      </View>
+    )
+  }
 
   return (
     <SafeAreaProvider>
@@ -46,3 +58,14 @@ export default function RootLayout() {
     </SafeAreaProvider>
   )
 }
+
+const styles = StyleSheet.create({
+  loading: {
+    alignItems: 'center',
+    backgroundColor: t.color.canvas,
+    flex: 1,
+    gap: t.space[3],
+    justifyContent: 'center',
+  },
+  loadingText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.body },
+})
