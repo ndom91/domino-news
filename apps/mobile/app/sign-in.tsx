@@ -106,6 +106,7 @@ export default function SignInScreen() {
             <View style={styles.fields}>
               <Text style={styles.label}>Username</Text>
               <TextInput
+                accessibilityLabel="Username"
                 autoCapitalize="none"
                 autoComplete="username"
                 autoCorrect={false}
@@ -120,6 +121,7 @@ export default function SignInScreen() {
               />
               <Text style={styles.label}>Password</Text>
               <TextInput
+                accessibilityLabel="Password"
                 autoComplete="current-password"
                 editable={!isPending}
                 onChangeText={setPassword}
