@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "964993019342",
+    "project_id": "loombeat",
+    "storage_bucket": "loombeat.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:964993019342:android:4b2b4de51373128395cf9f",
+        "android_client_info": {
+          "package_name": "dev.ndo.dominonews"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "964993019342-sdvfo1bgo4ld4fls40dv2l2cmv421oof.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDYowO7IV9I_R4qDKds_3ef30w7fh7DUhg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "964993019342-sdvfo1bgo4ld4fls40dv2l2cmv421oof.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -30,6 +30,7 @@ const config: ExpoConfig = {
     : undefined,
   android: {
     package: 'dev.ndo.dominonews',
+    googleServicesFile: './google-services.json',
     adaptiveIcon: {
       foregroundImage: '../web/public/icon-maskable-512.png',
       backgroundColor: '#f3f1ec',
