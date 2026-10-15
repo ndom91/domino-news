@@ -17,7 +17,7 @@
       "environment": "preview",
       "distribution": "internal",
       "android": {
-        "buildType": "apk"
+        "gradleCommand": ":app:assembleRelease -x lint -x lintVitalRelease"
       }
     }
   }
