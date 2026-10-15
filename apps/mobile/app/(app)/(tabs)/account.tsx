@@ -395,7 +395,11 @@ export default function AccountScreen() {
         transparent
         visible={countryPickerOpen}
       >
-        <View accessibilityViewIsModal style={styles.sheetScrim}>
+        <View
+          accessibilityLabel="Country preference"
+          accessibilityViewIsModal
+          style={styles.sheetScrim}
+        >
           <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
             <View style={styles.sheetHeader}>
               <Text style={styles.sheetTitle}>Country preference</Text>
@@ -441,7 +445,11 @@ export default function AccountScreen() {
         transparent
         visible={confirmReadingHistoryOff}
       >
-        <View accessibilityViewIsModal style={styles.dialogScrim}>
+        <View
+          accessibilityLabel="Turn off reading history confirmation"
+          accessibilityViewIsModal
+          style={styles.dialogScrim}
+        >
           <View style={styles.dialog}>
             <Text style={styles.dialogTitle}>Turn off reading history?</Text>
             <Text style={styles.dialogText}>
@@ -470,7 +478,11 @@ export default function AccountScreen() {
         transparent
         visible={confirmSignalsReset}
       >
-        <View accessibilityViewIsModal style={styles.dialogScrim}>
+        <View
+          accessibilityLabel="Reset learned signals confirmation"
+          accessibilityViewIsModal
+          style={styles.dialogScrim}
+        >
           <View style={styles.dialog}>
             <Text style={styles.dialogTitle}>Reset learned signals?</Text>
             <Text style={styles.dialogText}>
