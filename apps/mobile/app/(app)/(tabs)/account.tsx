@@ -55,6 +55,7 @@ export default function AccountScreen() {
   const [alertsPending, setAlertsPending] = useState(true)
   const [alertsError, setAlertsError] = useState<string | null>(null)
   const [countryPickerOpen, setCountryPickerOpen] = useState(false)
+  const [countryError, setCountryError] = useState<string | null>(null)
   const [confirmReadingHistoryOff, setConfirmReadingHistoryOff] = useState(false)
   const [confirmSignalsReset, setConfirmSignalsReset] = useState(false)
   const followSave = useMutation(setFollowMutation(api, queryClient))
@@ -110,6 +111,17 @@ export default function AccountScreen() {
     } finally {
       setAlertsPending(false)
     }
+  }
+
+  function saveCountry(country: UserPreferences['country']) {
+    setCountryError(null)
+    save.mutate(
+      { country },
+      {
+        onError: () => setCountryError('Your country preference could not be saved. Try again.'),
+        onSuccess: () => setCountryPickerOpen(false),
+      },
+    )
   }
 
   if (preferences.isPending)
@@ -171,7 +183,10 @@ export default function AccountScreen() {
             accessibilityLabel={`Country preference: ${settings.country ? countryName(settings.country) : 'No country preference'}`}
             accessibilityRole="button"
             disabled={disabled}
-            onPress={() => setCountryPickerOpen(true)}
+            onPress={() => {
+              setCountryError(null)
+              setCountryPickerOpen(true)
+            }}
             style={({ pressed }) => [
               styles.selectionRow,
               disabled ? styles.selectionRowDisabled : null,
@@ -398,10 +413,7 @@ export default function AccountScreen() {
                 active={settings.country === null}
                 disabled={disabled}
                 label="No country preference"
-                onPress={() => {
-                  save.mutate({ country: null })
-                  setCountryPickerOpen(false)
-                }}
+                onPress={() => saveCountry(null)}
               />
               {[...KNOWN_COUNTRIES]
                 .sort((a, b) => countryName(a).localeCompare(countryName(b)))
@@ -411,13 +423,15 @@ export default function AccountScreen() {
                     disabled={disabled}
                     key={country}
                     label={countryName(country)}
-                    onPress={() => {
-                      save.mutate({ country })
-                      setCountryPickerOpen(false)
-                    }}
+                    onPress={() => saveCountry(country)}
                   />
                 ))}
             </ScrollView>
+            {countryError ? (
+              <Text accessibilityLiveRegion="polite" style={styles.error}>
+                {countryError}
+              </Text>
+            ) : null}
           </SafeAreaView>
         </View>
       </Modal>
