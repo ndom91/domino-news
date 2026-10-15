@@ -95,7 +95,7 @@ function publisherMeta(publisher: PublisherStats): string {
   const kind = publisher.kind === 'official' ? 'Official source' : 'Newsroom'
   const country = publisher.countryCode ? countryName(publisher.countryCode) : 'International'
   const lean = publisher.lean ? LEAN_LABELS[publisher.lean] : 'Not assessed'
-  return `${kind} - ${country} - ${lean}`
+  return `${kind} · ${country} · ${lean}`
 }
 
 const styles = StyleSheet.create({

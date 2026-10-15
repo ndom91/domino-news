@@ -69,7 +69,7 @@ export default function PublisherScreen() {
             data.kind === 'official' ? 'Official source' : 'Newsroom',
           ]
             .filter(Boolean)
-            .join(' - ')}
+            .join(' · ')}
         </Text>
 
         <View style={styles.counts}>
