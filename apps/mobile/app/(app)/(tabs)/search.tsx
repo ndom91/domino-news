@@ -13,9 +13,10 @@ export default function SearchScreen() {
   const [draft, setDraft] = useState('')
   const [submitted, setSubmitted] = useState('')
   const search = useQuery(queries.search({ q: submitted }))
+  const canSubmit = draft.trim().length > 0
 
   function submit() {
-    setSubmitted(draft.trim())
+    if (canSubmit) setSubmitted(draft.trim())
   }
 
   if (isUnauthorized(search.error)) return <Redirect href="/sign-in" />
@@ -41,8 +42,14 @@ export default function SearchScreen() {
           <Pressable
             accessibilityLabel="Search"
             accessibilityRole="button"
+            accessibilityState={{ disabled: !canSubmit }}
+            disabled={!canSubmit}
             onPress={submit}
-            style={({ pressed }) => [styles.submit, pressed ? styles.submitPressed : null]}
+            style={({ pressed }) => [
+              styles.submit,
+              !canSubmit ? styles.submitDisabled : null,
+              pressed ? styles.submitPressed : null,
+            ]}
           >
             <Text style={styles.submitText}>Search</Text>
           </Pressable>
@@ -186,6 +193,7 @@ const styles = StyleSheet.create({
     minWidth: 88,
     paddingHorizontal: t.space[3],
   },
+  submitDisabled: { opacity: 0.45 },
   submitPressed: { opacity: 0.72 },
   submitText: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.body },
   help: {
