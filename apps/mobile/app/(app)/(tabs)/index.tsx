@@ -9,6 +9,7 @@ import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../com
 import { isUnauthorized, queries } from '../../../lib/api'
 
 export default function LatestScreen() {
+  const router = useRouter()
   const front = useQuery(queries.front())
   const stories = useInfiniteQuery(queries.storyList())
 
@@ -81,6 +82,27 @@ export default function LatestScreen() {
                 {plural(front.data.stats.stories, 'story')} in the last 24 hours
               </Text>
             </View>
+            <View style={styles.explore}>
+              <Text style={uiStyles.label}>Explore</Text>
+              <View style={styles.exploreLinks}>
+                <Pressable
+                  accessibilityHint="Browses connected stories over time"
+                  accessibilityRole="link"
+                  onPress={() => router.push('/narratives')}
+                  style={({ pressed }) => [styles.exploreLink, pressed ? styles.pressed : null]}
+                >
+                  <Text style={styles.exploreLinkText}>Narratives</Text>
+                </Pressable>
+                <Pressable
+                  accessibilityHint="Browses news publishers"
+                  accessibilityRole="link"
+                  onPress={() => router.push('/publishers')}
+                  style={({ pressed }) => [styles.exploreLink, pressed ? styles.pressed : null]}
+                >
+                  <Text style={styles.exploreLinkText}>Publishers</Text>
+                </Pressable>
+              </View>
+            </View>
             {front.data.lead ? (
               <View style={styles.lead}>
                 <Text style={uiStyles.eyebrow}>Lead story</Text>
@@ -139,6 +161,17 @@ const styles = StyleSheet.create({
   },
   editionLabel: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
   editionText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
+  explore: { gap: t.space[2], marginTop: t.space[5] },
+  exploreLinks: { flexDirection: 'row', gap: t.space[2] },
+  exploreLink: {
+    alignItems: 'center',
+    borderColor: t.color.rule,
+    borderWidth: 1,
+    flex: 1,
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+  },
+  exploreLinkText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
   lead: { gap: t.space[3], marginTop: t.space[6] },
   leadStory: {
     backgroundColor: t.color.surface,
