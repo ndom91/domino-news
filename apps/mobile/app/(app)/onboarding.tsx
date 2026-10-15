@@ -128,7 +128,13 @@ function PublisherPicker() {
   const follows = useQuery(queries.follows())
   const save = useMutation(setFollowMutation(api, queryClient))
 
-  if (publishers.isPending || follows.isPending) return <LoadingView label="Loading publishers" />
+  if (publishers.isPending || follows.isPending) {
+    return (
+      <View style={styles.publisherLoading}>
+        <LoadingView label="Loading publishers" />
+      </View>
+    )
+  }
   if (publishers.isError || follows.isError) {
     return (
       <MessageView
@@ -201,6 +207,7 @@ const styles = StyleSheet.create({
     lineHeight: 23,
   },
   picker: { marginTop: t.space[8] },
+  publisherLoading: { minHeight: 180 },
   publisherGroups: { gap: t.space[5] },
   actions: {
     borderTopColor: t.color.rule,
