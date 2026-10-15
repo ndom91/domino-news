@@ -1,4 +1,4 @@
 import Constants from 'expo-constants'
 
-// Standalone builds can report this as undefined; only Expo Go supplies its config object.
-export const isExpoGo = Boolean(Constants.expoGoConfig)
+// Development clients also use Expo's store-client environment; app ownership identifies Expo Go itself.
+export const isExpoGo = Constants.appOwnership === 'expo'
