@@ -167,7 +167,6 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
           ]}
         >
           <Feather color={t.color.text} name="thumbs-up" size={18} />
-          <Text style={styles.feedbackText}>More</Text>
         </Pressable>
         <Pressable
           accessibilityLabel="Less like this"
@@ -181,7 +180,6 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
           style={({ pressed }) => [styles.feedbackButton, pressed ? styles.pressed : null]}
         >
           <Feather color={t.color.text} name="thumbs-down" size={18} />
-          <Text style={styles.feedbackText}>Less</Text>
         </Pressable>
       </View>
       {feedback.isError ? <Text style={styles.error}>Couldn’t save that. Try again.</Text> : null}
@@ -276,15 +274,11 @@ const styles = StyleSheet.create({
   feedback: { flexDirection: 'row', gap: t.space[2], justifyContent: 'flex-end' },
   feedbackButton: {
     alignItems: 'center',
-    flexDirection: 'row',
-    gap: t.space[2],
     justifyContent: 'center',
     minHeight: t.size.tap,
-    minWidth: 92,
-    paddingHorizontal: t.space[3],
+    minWidth: t.size.tap,
   },
   feedbackButtonSelected: { backgroundColor: t.color.successSubtle },
-  feedbackText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
   hiddenCard: { backgroundColor: t.color.sunken, gap: t.space[3], padding: t.space[4] },
   hiddenHeading: { alignItems: 'center', flexDirection: 'row', gap: t.space[2] },
   hiddenTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
