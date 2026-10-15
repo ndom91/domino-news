@@ -11,7 +11,10 @@
   },
   "dependencies": {
     "@dn/api-client": "workspace:*",
-    "@dn/schemas": "workspace:*",
-    "@tanstack/react-query": "5.104.1"
+    "@dn/schemas": "workspace:*"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": "^5.104.1",
+    "react": "^19.2.0"
   }
 }
