@@ -9,9 +9,10 @@ import {
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
-import { Linking, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
 import { StoryCard } from '../../../components/story-card'
+import { openExternalLink } from '../../../components/story-detail/open-external-link'
 import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
 
@@ -56,7 +57,7 @@ export default function PublisherScreen() {
           accessibilityHint="Opens the publisher website"
           accessibilityLabel={`Open ${data.domain}`}
           accessibilityRole="link"
-          onPress={() => Linking.openURL(`https://${data.domain}`)}
+          onPress={() => void openExternalLink(`https://${data.domain}`)}
           style={({ pressed }) => [styles.domainLink, pressed ? styles.pressed : null]}
         >
           <Text style={styles.domain}>{data.domain}</Text>
