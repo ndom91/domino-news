@@ -182,7 +182,11 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
           <Feather color={t.color.text} name="thumbs-down" size={18} />
         </Pressable>
       </View>
-      {feedback.isError ? <Text style={styles.error}>Couldn’t save that. Try again.</Text> : null}
+      {feedback.isError ? (
+        <Text accessibilityLiveRegion="polite" style={styles.error}>
+          Couldn’t save that. Try again.
+        </Text>
+      ) : null}
     </View>
   )
 }
