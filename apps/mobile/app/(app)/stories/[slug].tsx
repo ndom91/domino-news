@@ -1,7 +1,8 @@
+import { nativeTokens as t } from '@dn/design-tokens/native'
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
-import { ScrollView } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StoryBackground } from '../../../components/story-detail/story-background'
 import { StoryClaims } from '../../../components/story-detail/story-claims'
 import { StoryConnections } from '../../../components/story-detail/story-connections'
@@ -48,6 +49,21 @@ export default function StoryScreen() {
       <ScrollView contentContainerStyle={uiStyles.content}>
         <StoryHeader story={data} />
         <StoryLeanMeter country={preferences.data?.country ?? null} mix={data.leanMix} />
+        {preferences.isError ? (
+          <View style={styles.preferenceError}>
+            <Text accessibilityLiveRegion="polite" style={styles.preferenceErrorText}>
+              Your country preference could not load, so publisher context may not match your
+              setting.
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => preferences.refetch()}
+              style={({ pressed }) => [styles.retry, pressed ? styles.pressed : null]}
+            >
+              <Text style={styles.retryText}>Try again</Text>
+            </Pressable>
+          </View>
+        ) : null}
         <StoryBackground entries={data.context} />
         <StoryClaims claims={data.claims} sources={data.sources} />
         <StoryReporting
@@ -65,3 +81,11 @@ export default function StoryScreen() {
     </Screen>
   )
 }
+
+const styles = StyleSheet.create({
+  preferenceError: { gap: t.space[2], marginTop: t.space[4] },
+  preferenceErrorText: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
+  retry: { alignSelf: 'flex-start', justifyContent: 'center', minHeight: t.size.tap },
+  retryText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
+  pressed: { opacity: 0.7 },
+})
