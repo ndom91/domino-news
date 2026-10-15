@@ -1,7 +1,7 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import type { StoryContextItem } from '@dn/schemas'
 import { useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
@@ -48,10 +48,10 @@ function BackgroundSheet({
 }) {
   return (
     <Modal animationType="slide" onRequestClose={onClose} transparent visible={entry !== null}>
-      <View style={styles.sheetScrim}>
+      <View accessibilityViewIsModal style={styles.sheetScrim}>
         <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
           {entry ? (
-            <>
+            <ScrollView contentContainerStyle={styles.sheetContent}>
               <View style={styles.sheetHeader}>
                 <Text style={styles.sheetTitle}>{entry.title}</Text>
                 <Pressable
@@ -85,7 +85,7 @@ function BackgroundSheet({
                   ))}
                 </View>
               ) : null}
-            </>
+            </ScrollView>
           ) : null}
         </SafeAreaView>
       </View>
@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
   },
   pressed: { opacity: 0.7 },
   sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.color.elevated, gap: t.space[4], padding: t.space[5] },
+  sheet: { backgroundColor: t.color.elevated, maxHeight: '85%' },
+  sheetContent: { gap: t.space[4], padding: t.space[5] },
   sheetHeader: {
     alignItems: 'center',
     flexDirection: 'row',
