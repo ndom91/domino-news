@@ -1,6 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate } from '@dn/domain'
-import { REGION_LABELS, type StoryDetail } from '@dn/schemas'
+import { DESK_LABELS, REGION_LABELS, type StoryDetail } from '@dn/schemas'
 import { StyleSheet, Text, View } from 'react-native'
 
 // StoryHeader renders the story identity and available summary text.
@@ -13,7 +13,7 @@ export function StoryHeader({ story }: { story: StoryDetail }) {
   return (
     <>
       <Text style={styles.eyebrow}>
-        {story.desk ?? 'Story'}
+        {story.desk ? DESK_LABELS[story.desk] : 'Story'}
         {regions ? ` · ${regions}` : ''}
       </Text>
       <Text style={styles.title}>{story.title}</Text>
