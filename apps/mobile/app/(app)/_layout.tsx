@@ -81,10 +81,6 @@ export default function SignedInLayout() {
         options={{ headerBackTitle: 'Account', headerTitle: 'Blindspot' }}
       />
       <Stack.Screen
-        name="narratives/index"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Narratives' }}
-      />
-      <Stack.Screen
         name="narratives/[slug]"
         options={{ headerBackTitle: 'Back', headerTitle: 'Narrative' }}
       />

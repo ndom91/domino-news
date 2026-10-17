@@ -39,6 +39,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
+        name="narratives"
+        options={{
+          title: 'Narratives',
+          tabBarAccessibilityLabel: 'Connected story narratives',
+          tabBarIcon: ({ color, size }) => <Feather color={color} name="git-branch" size={size} />,
+        }}
+      />
+      <Tabs.Screen
         name="search"
         options={{
           title: 'Search',
