@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { longDate, plural } from '@dn/domain'
+import { longDate } from '@dn/domain'
 import { useQuery } from '@tanstack/react-query'
 import { StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -7,7 +7,6 @@ import { queries } from '../lib/api'
 
 export function EditionStrip() {
   const edition = useQuery(queries.edition())
-  const stats = edition.data?.stats
   const date = edition.data ? longDate(edition.data.editionAt) : 'Domino Wire'
 
   return (
@@ -20,11 +19,6 @@ export function EditionStrip() {
           <Text numberOfLines={1} style={styles.date}>
             {date}
           </Text>
-          {stats ? (
-            <Text numberOfLines={1} style={styles.stats}>
-              {plural(stats.stories, 'story')} · {plural(stats.publishers, 'publisher')}
-            </Text>
-          ) : null}
         </View>
       </View>
     </SafeAreaView>
@@ -54,12 +48,6 @@ const styles = StyleSheet.create({
     color: t.color.bandText,
     fontFamily: t.font.bold,
     fontSize: t.type.meta,
-    textAlign: 'right',
-  },
-  stats: {
-    color: t.color.bandMuted,
-    fontFamily: t.font.medium,
-    fontSize: 11,
     textAlign: 'right',
   },
 })

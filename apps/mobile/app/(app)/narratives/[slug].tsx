@@ -87,57 +87,66 @@ function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
               title="No stories yet"
             />
           ) : (
-            stories.map((story, index) => {
-              const edge = narrative.edges.find((candidate) => {
-                if (
-                  candidate.fromStoryId !== story.id ||
-                  !TEMPORAL_RELATIONS.has(candidate.relation)
-                ) {
-                  return false
-                }
-                const earlier = storiesById.get(candidate.toStoryId)
-                return Boolean(
-                  earlier && earlier.firstObservedAt.localeCompare(story.firstObservedAt) <= 0,
-                )
-              })
-              const earlier = edge ? storiesById.get(edge.toStoryId) : undefined
+            <View style={styles.timelineItems}>
+              {stories.map((story, index) => {
+                const edge = narrative.edges.find((candidate) => {
+                  if (
+                    candidate.fromStoryId !== story.id ||
+                    !TEMPORAL_RELATIONS.has(candidate.relation)
+                  ) {
+                    return false
+                  }
+                  const earlier = storiesById.get(candidate.toStoryId)
+                  return Boolean(
+                    earlier && earlier.firstObservedAt.localeCompare(story.firstObservedAt) <= 0,
+                  )
+                })
+                const earlier = edge ? storiesById.get(edge.toStoryId) : undefined
 
-              return (
-                <View key={story.id} style={styles.timelineItem}>
-                  <View style={styles.markerColumn}>
-                    <View style={styles.marker} />
-                    {index < stories.length - 1 ? <View style={styles.line} /> : null}
-                  </View>
-                  <Pressable
-                    accessibilityHint="Opens this story"
-                    accessibilityLabel={story.title}
-                    accessibilityRole="link"
-                    onPress={() => router.push(`/stories/${story.slug}`)}
-                    style={({ pressed }) => [styles.story, pressed ? styles.pressed : null]}
+                return (
+                  <View
+                    key={story.id}
+                    style={
+                      index === stories.length - 1 ? styles.timelineItemLast : styles.timelineItem
+                    }
                   >
-                    <Text style={styles.storyDate}>{formatDate(story.firstObservedAt)}</Text>
-                    <Text style={styles.storyTitle}>{story.title}</Text>
-                    {story.summary ? (
-                      <Text numberOfLines={3} style={styles.storySummary}>
-                        {story.summary}
-                      </Text>
-                    ) : null}
-                    <Text style={styles.storyMeta}>{plural(story.sourceCount, 'report')}</Text>
-                    {edge && earlier ? (
-                      <Text style={styles.relation}>
-                        {RELATION_LABELS[edge.relation]}: {earlier.title}
-                      </Text>
-                    ) : null}
-                  </Pressable>
-                </View>
-              )
-            })
+                    <View style={styles.markerColumn}>
+                      <View style={styles.marker} />
+                      {index < stories.length - 1 ? <View style={styles.line} /> : null}
+                    </View>
+                    <Pressable
+                      accessibilityHint="Opens this story"
+                      accessibilityLabel={story.title}
+                      accessibilityRole="link"
+                      onPress={() => router.push(`/stories/${story.slug}`)}
+                      style={({ pressed }) => [styles.story, pressed ? styles.pressed : null]}
+                    >
+                      <Text style={styles.storyDate}>{formatDate(story.firstObservedAt)}</Text>
+                      <Text style={styles.storyTitle}>{story.title}</Text>
+                      {story.summary ? (
+                        <Text numberOfLines={3} style={styles.storySummary}>
+                          {story.summary}
+                        </Text>
+                      ) : null}
+                      <Text style={styles.storyMeta}>{plural(story.sourceCount, 'report')}</Text>
+                      {edge && earlier ? (
+                        <Text style={styles.relation}>
+                          {RELATION_LABELS[edge.relation]}: {earlier.title}
+                        </Text>
+                      ) : null}
+                    </Pressable>
+                  </View>
+                )
+              })}
+            </View>
           )}
         </View>
       </ScrollView>
     </Screen>
   )
 }
+
+const markerCenter = t.space[4] + 7
 
 const styles = StyleSheet.create({
   deskBar: {
@@ -175,8 +184,10 @@ const styles = StyleSheet.create({
     marginTop: t.space[4],
   },
   timeline: { gap: t.space[4], marginTop: t.space[10] },
-  timelineItem: { flexDirection: 'row', minHeight: 116 },
-  markerColumn: { alignItems: 'center', width: 24 },
+  timelineItems: { gap: 0 },
+  timelineItem: { flexDirection: 'row', minHeight: 116, paddingBottom: t.space[4] },
+  timelineItemLast: { flexDirection: 'row', minHeight: 116 },
+  markerColumn: { alignItems: 'center', position: 'relative', width: 24 },
   marker: {
     backgroundColor: t.color.accent,
     borderColor: t.color.canvas,
@@ -186,14 +197,19 @@ const styles = StyleSheet.create({
     marginTop: t.space[4],
     width: 14,
   },
-  line: { backgroundColor: t.color.borderStrong, flex: 1, marginVertical: t.space[1], width: 2 },
+  line: {
+    backgroundColor: t.color.borderStrong,
+    bottom: -(markerCenter + t.space[4]),
+    position: 'absolute',
+    top: markerCenter,
+    width: 2,
+  },
   story: {
     backgroundColor: t.color.surface,
     borderColor: t.color.border,
     borderWidth: StyleSheet.hairlineWidth,
     flex: 1,
     gap: t.space[2],
-    marginBottom: t.space[4],
     padding: t.space[4],
   },
   storyDate: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
