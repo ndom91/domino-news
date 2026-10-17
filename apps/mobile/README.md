@@ -17,13 +17,23 @@ uses native Google Play services. A development build sets `APP_VARIANT=developm
 
 ## For You alerts
 
-The Account screen can enable local background alerts for new stories in **For You**. The installed Android
-app periodically refreshes the authenticated feed when Android grants it a background window, then shows a
-local notification for a newly surfaced story. This is best-effort: the OS controls the cadence (15 minutes
-is the requested minimum) and force-quitting the app stops it. Tapping the notification opens the story.
+The Account screen registers this device's Expo push token for **For You** alerts. The app is configured for
+FCM, receives notification taps and opens the named Story. Server-side delivery is required before enrolled
+devices receive remote alerts.
 
-These are not server-originated remote push notifications yet. That requires an Expo/FCM project plus a
-server-side device registration and delivery worker, which the API does not currently provide.
+## Local Preview APK
+
+Use the production-style Preview APK for native Google sign-in and push-notification testing:
+
+1. In `apps/mobile/.env`, set `EXPO_PUBLIC_API_URL` to your HTTPS API origin and
+   `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` to the OAuth 2.0 **Web application** client ID.
+2. Run `pnpm mobile:build:preview` from the repository root.
+3. Install `apps/mobile/dist/domino-wire-preview.apk` on the device.
+
+The command reads only these two public values from the ignored `.env` before EAS stages the project, so they
+are embedded in the APK. It requires an authenticated EAS CLI and Android build prerequisites on the local
+machine. It sets `APP_VARIANT=preview`, so the APK deliberately does not permit an insecure `http://` LAN API
+URL. The Android OAuth client and its signing-certificate fingerprint remain configured separately.
 
 ## Android development build
 

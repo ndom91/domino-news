@@ -18,6 +18,7 @@
     "test": "vitest run",
     "test:e2e": "playwright test",
     "playroom": "pnpm --filter @dn/playroom start",
+    "mobile:build:preview": "pnpm --filter @dn/mobile build:preview:local",
     "db:generate": "pnpm --filter @dn/db generate",
     "db:migrate": "pnpm --filter @dn/db migrate",
     "cli": "pnpm --filter @dn/worker cli"
