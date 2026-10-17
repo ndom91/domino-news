@@ -34,12 +34,12 @@ export function StoryBackground({ entries }: { entries: StoryContextItem[] }) {
           </Pressable>
         ))}
       </View>
-      <BackgroundSheet entry={selected} onClose={() => setSelected(null)} />
+      <ContextSheet entry={selected} onClose={() => setSelected(null)} />
     </>
   )
 }
 
-function BackgroundSheet({
+export function ContextSheet({
   entry,
   onClose,
 }: {

@@ -1,14 +1,27 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate } from '@dn/domain'
 import { DESK_LABELS, REGION_LABELS, type StoryDetail } from '@dn/schemas'
+import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { ContextSheet } from './story-background'
+import { SummaryText } from './summary-text'
 
 // StoryHeader renders the story identity and available summary text.
 export function StoryHeader({ story }: { story: StoryDetail }) {
+  const [selectedContext, setSelectedContext] = useState<StoryDetail['context'][number] | null>(
+    null,
+  )
   const regions = story.regions.map((region) => REGION_LABELS[region]).join(' · ')
   const summary = story.summary
   const detail = summary?.detail
   const detailParagraphs = detail ? detail.split(/\n\s*\n/) : []
+  let shown = ''
+
+  const summaryText = (text: string) => {
+    const context = story.context.filter((item) => !shown.includes(item.anchorText))
+    shown += `\n${text}`
+    return <SummaryText context={context} onContextPress={setSelectedContext} text={text} />
+  }
 
   return (
     <>
@@ -20,17 +33,18 @@ export function StoryHeader({ story }: { story: StoryDetail }) {
       <Text style={styles.time}>First reported {formatDate(story.firstObservedAt)}</Text>
       {summary ? (
         <View style={styles.summary}>
-          <Text style={styles.summaryHeadline}>{summary.headline}</Text>
-          <Text style={styles.summaryBody}>{summary.body}</Text>
+          <Text style={styles.summaryHeadline}>{summaryText(summary.headline)}</Text>
+          <Text style={styles.summaryBody}>{summaryText(summary.body)}</Text>
           {detailParagraphs.map((paragraph) => (
             <Text key={`${summary.versionId}-${paragraph}`} style={styles.summaryDetail}>
-              {paragraph}
+              {summaryText(paragraph)}
             </Text>
           ))}
         </View>
       ) : (
         <Text style={styles.pending}>This story is still being summarised.</Text>
       )}
+      <ContextSheet entry={selectedContext} onClose={() => setSelectedContext(null)} />
     </>
   )
 }
