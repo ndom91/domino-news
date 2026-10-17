@@ -1,7 +1,16 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import type { StoryContextItem } from '@dn/schemas'
-import { useState } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import {
+  Animated,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
@@ -46,48 +55,73 @@ export function ContextSheet({
   entry: StoryContextItem | null
   onClose: () => void
 }) {
+  const { height } = useWindowDimensions()
+  const translateY = useRef(new Animated.Value(height)).current
+
+  useEffect(() => {
+    if (!entry) return
+    translateY.setValue(height)
+    Animated.timing(translateY, {
+      duration: 250,
+      toValue: 0,
+      useNativeDriver: true,
+    }).start()
+  }, [entry, height, translateY])
+
+  const close = () => {
+    Animated.timing(translateY, {
+      duration: 150,
+      toValue: height,
+      useNativeDriver: true,
+    }).start(({ finished }) => {
+      if (finished) onClose()
+    })
+  }
+
   return (
-    <Modal animationType="slide" onRequestClose={onClose} transparent visible={entry !== null}>
+    <Modal animationType="none" onRequestClose={close} transparent visible={entry !== null}>
       <View accessibilityViewIsModal style={styles.sheetScrim}>
-        <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
-          {entry ? (
-            <ScrollView contentContainerStyle={styles.sheetContent}>
-              <View style={styles.sheetHeader}>
-                <Text style={styles.sheetTitle}>{entry.title}</Text>
-                <Pressable
-                  accessibilityLabel={`Close ${entry.title}`}
-                  accessibilityRole="button"
-                  onPress={onClose}
-                  style={({ pressed }) => [styles.close, pressed ? styles.pressed : null]}
-                >
-                  <Text style={styles.closeText}>Close</Text>
-                </Pressable>
-              </View>
-              <Text style={styles.sheetBody}>{entry.explanation}</Text>
-              {entry.sources.length > 0 ? (
-                <View style={styles.grounding}>
-                  <Text style={styles.groundingLabel}>Grounding sources</Text>
-                  {entry.sources.map((source) => (
-                    <Pressable
-                      accessibilityHint="Opens the publisher’s article"
-                      accessibilityLabel={`${source.publisherName}: ${source.title}`}
-                      accessibilityRole="link"
-                      key={source.articleId}
-                      onPress={() => void openExternalLink(source.url)}
-                      style={({ pressed }) => [
-                        styles.groundingLink,
-                        pressed ? styles.pressed : null,
-                      ]}
-                    >
-                      <Text style={styles.groundingPublisher}>{source.publisherName}</Text>
-                      <Text style={styles.groundingTitle}>{source.title}</Text>
-                    </Pressable>
-                  ))}
+        <Animated.View style={[styles.sheetMotion, { transform: [{ translateY }] }]}>
+          <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
+            {entry ? (
+              <ScrollView contentContainerStyle={styles.sheetContent}>
+                <View style={styles.sheetHeader}>
+                  <Text style={styles.sheetTitle}>{entry.title}</Text>
+                  <Pressable
+                    accessibilityLabel={`Close ${entry.title}`}
+                    accessibilityRole="button"
+                    onPress={close}
+                    style={({ pressed }) => [styles.close, pressed ? styles.pressed : null]}
+                  >
+                    <Text style={styles.closeText}>Close</Text>
+                  </Pressable>
                 </View>
-              ) : null}
-            </ScrollView>
-          ) : null}
-        </SafeAreaView>
+                <Text style={styles.sheetBody}>{entry.explanation}</Text>
+                {entry.sources.length > 0 ? (
+                  <View style={styles.grounding}>
+                    <Text style={styles.groundingLabel}>Grounding sources</Text>
+                    {entry.sources.map((source) => (
+                      <Pressable
+                        accessibilityHint="Opens the publisher’s article"
+                        accessibilityLabel={`${source.publisherName}: ${source.title}`}
+                        accessibilityRole="link"
+                        key={source.articleId}
+                        onPress={() => void openExternalLink(source.url)}
+                        style={({ pressed }) => [
+                          styles.groundingLink,
+                          pressed ? styles.pressed : null,
+                        ]}
+                      >
+                        <Text style={styles.groundingPublisher}>{source.publisherName}</Text>
+                        <Text style={styles.groundingTitle}>{source.title}</Text>
+                      </Pressable>
+                    ))}
+                  </View>
+                ) : null}
+              </ScrollView>
+            ) : null}
+          </SafeAreaView>
+        </Animated.View>
       </View>
     </Modal>
   )
@@ -113,6 +147,7 @@ const styles = StyleSheet.create({
   pressed: { opacity: 0.7 },
   sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.color.elevated, maxHeight: '85%' },
+  sheetMotion: { maxHeight: '85%' },
   sheetContent: { gap: t.space[4], padding: t.space[5] },
   sheetHeader: {
     alignItems: 'center',
