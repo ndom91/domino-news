@@ -1,5 +1,5 @@
 import { type Db, schema } from '@dn/db'
-import { and, eq } from 'drizzle-orm'
+import { and, eq, sql } from 'drizzle-orm'
 
 export async function savePushSubscription(db: Db, userId: string, token: string) {
   await db
@@ -7,7 +7,12 @@ export async function savePushSubscription(db: Db, userId: string, token: string
     .values({ token, userId })
     .onConflictDoUpdate({
       target: schema.pushSubscription.token,
-      set: { userId, updatedAt: new Date() },
+      set: {
+        userId,
+        updatedAt: new Date(),
+        generation: sql`case when ${schema.pushSubscription.userId} = ${userId} then ${schema.pushSubscription.generation} else ${schema.pushSubscription.generation} + 1 end`,
+        lastNotifiedAt: sql`case when ${schema.pushSubscription.userId} = ${userId} then ${schema.pushSubscription.lastNotifiedAt} else null end`,
+      },
     })
 }
 

@@ -35,4 +35,5 @@ export const ID_PREFIX = {
   claim: 'clm',
   contextEntry: 'ctx',
   contextEntryVersion: 'ctxv',
+  pushDelivery: 'pdl',
 } as const

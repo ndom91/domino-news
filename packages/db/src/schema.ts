@@ -87,6 +87,15 @@ export const claimEvidenceRelation = pgEnum('claim_evidence_relation', [
 
 export const contextKind = pgEnum('context_kind', ['definition', 'background', 'prerequisite'])
 
+export const pushDeliveryStatus = pgEnum('push_delivery_status', [
+  'planned',
+  'sending',
+  'accepted',
+  'delivered',
+  'failed',
+  'unknown',
+])
+
 // Sources and ingest
 
 export const publisher = pgTable('publisher', {
@@ -849,9 +858,34 @@ export const pushSubscription = pgTable(
       .references(() => authUser.id, { onDelete: 'cascade' }),
     createdAt: ts('created_at').notNull().defaultNow(),
     updatedAt: ts('updated_at').notNull().defaultNow(),
+    generation: integer('generation').notNull().default(1),
     lastNotifiedAt: ts('last_notified_at'),
   },
   (t) => [index('push_subscription_user_idx').on(t.userId)],
+)
+
+export const pushDelivery = pgTable(
+  'push_delivery',
+  {
+    id: text('id').primaryKey(),
+    userId: text('user_id').notNull().references(() => authUser.id),
+    token: text('token').notNull(),
+    subscriptionGeneration: integer('subscription_generation').notNull(),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    expoTicketId: text('expo_ticket_id').unique(),
+    status: pushDeliveryStatus('status').notNull().default('planned'),
+    error: text('error'),
+    receiptCheckedAt: ts('receipt_checked_at'),
+    createdAt: createdAt(),
+    sentAt: ts('sent_at'),
+    deliveredAt: ts('delivered_at'),
+  },
+  (t) => [
+    uniqueIndex('push_delivery_subscription_story_idx').on(t.token, t.subscriptionGeneration, t.storyId),
+    index('push_delivery_receipt_idx').on(t.status, t.receiptCheckedAt),
+  ],
 )
 
 // One row per user and Story (latest read wins), kept for READ_RETENTION_DAYS. Only
