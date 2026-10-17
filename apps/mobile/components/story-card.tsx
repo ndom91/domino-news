@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { plural, shortRelative } from '@dn/domain'
+import { plural, shortRelative, stripCitations } from '@dn/domain'
 import { DESK_LABELS, DESK_SLOT, type StoryListItem } from '@dn/schemas'
 import { useRouter } from 'expo-router'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
@@ -35,7 +35,7 @@ export function StoryCard({ story, now }: { story: StoryListItem; now: string })
         <Text style={styles.title}>{story.title}</Text>
         {story.summary ? (
           <Text numberOfLines={3} style={styles.summary}>
-            {story.summary}
+            {stripCitations(story.summary).replace(/\s+([.,;:])/g, '$1')}
           </Text>
         ) : null}
         {publishers ? (

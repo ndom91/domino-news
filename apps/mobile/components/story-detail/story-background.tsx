@@ -79,8 +79,22 @@ export function ContextSheet({
   }
 
   return (
-    <Modal animationType="none" onRequestClose={close} transparent visible={entry !== null}>
+    <Modal
+      animationType="none"
+      navigationBarTranslucent
+      onRequestClose={close}
+      statusBarTranslucent
+      transparent
+      visible={entry !== null}
+    >
       <View accessibilityViewIsModal style={styles.sheetScrim}>
+        <Pressable
+          accessibilityHint="Closes the definition"
+          accessibilityLabel="Close definition"
+          accessibilityRole="button"
+          onPress={close}
+          style={StyleSheet.absoluteFill}
+        />
         <Animated.View style={[styles.sheetMotion, { transform: [{ translateY }] }]}>
           <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
             {entry ? (
