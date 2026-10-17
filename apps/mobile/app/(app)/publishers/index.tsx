@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { PublisherLogo } from '../../../components/publisher-logo'
 import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
 
@@ -81,7 +82,10 @@ export default function PublishersScreen() {
             onPress={() => router.push(`/publishers/${item.slug}`)}
             style={({ pressed }) => [styles.item, pressed ? styles.pressed : null]}
           >
-            <Text style={styles.name}>{item.name}</Text>
+            <View style={styles.nameRow}>
+              <PublisherLogo size={32} slug={item.slug} />
+              <Text style={styles.name}>{item.name}</Text>
+            </View>
             <Text style={styles.domain}>{item.domain}</Text>
             <Text style={styles.meta}>{publisherMeta(item)}</Text>
           </Pressable>
@@ -131,6 +135,7 @@ const styles = StyleSheet.create({
     paddingVertical: t.space[4],
   },
   pressed: { opacity: 0.7 },
+  nameRow: { alignItems: 'center', flexDirection: 'row', gap: t.space[2] },
   name: {
     color: t.color.text,
     fontFamily: t.font.bold,

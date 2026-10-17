@@ -11,6 +11,7 @@ import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
+import { PublisherLogo } from '../../../components/publisher-logo'
 import { StoryCard } from '../../../components/story-card'
 import { openExternalLink } from '../../../components/story-detail/open-external-link'
 import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
@@ -50,7 +51,10 @@ export default function PublisherScreen() {
       <ScrollView contentContainerStyle={uiStyles.content}>
         <Text style={uiStyles.eyebrow}>Publisher</Text>
         <View style={styles.titleRow}>
-          <Text style={styles.title}>{data.name}</Text>
+          <View style={styles.titleLockup}>
+            <PublisherLogo size={48} slug={data.slug} />
+            <Text style={styles.title}>{data.name}</Text>
+          </View>
           <FollowToggle name={data.name} targetId={data.id} targetType="publisher" />
         </View>
         <Pressable
@@ -108,7 +112,10 @@ export default function PublisherScreen() {
                 onPress={() => router.push(`/publishers/${coverage.publisher.slug}`)}
                 style={({ pressed }) => [styles.coverage, pressed ? styles.pressed : null]}
               >
-                <Text style={styles.coverageName}>{coverage.publisher.name}</Text>
+                <View style={styles.coverageTitle}>
+                  <PublisherLogo size={28} slug={coverage.publisher.slug} />
+                  <Text style={styles.coverageName}>{coverage.publisher.name}</Text>
+                </View>
                 <Text style={styles.coverageCount}>
                   {plural(coverage.sharedStories, 'shared story')}
                 </Text>
@@ -181,6 +188,7 @@ const styles = StyleSheet.create({
     gap: t.space[3],
     marginTop: t.space[2],
   },
+  titleLockup: { alignItems: 'center', flex: 1, flexDirection: 'row', gap: t.space[3] },
   title: {
     color: t.color.text,
     flex: 1,
@@ -238,6 +246,7 @@ const styles = StyleSheet.create({
     gap: t.space[1],
     paddingVertical: t.space[3],
   },
+  coverageTitle: { alignItems: 'center', flexDirection: 'row', gap: t.space[2] },
   coverageName: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
   coverageCount: { color: t.color.textMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
   stories: { gap: t.space[5] },

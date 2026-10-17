@@ -3,6 +3,7 @@ import { formatDate, hostnameOf, plural } from '@dn/domain'
 import type { StorySource } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { PublisherLogo } from '../publisher-logo'
 import { Button, uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
 
@@ -42,6 +43,7 @@ export function StoryReporting({
             onPress={() => onPublisherPress(source.publisher.slug)}
             style={({ pressed }) => [styles.publisher, pressed ? styles.pressed : null]}
           >
+            <PublisherLogo size={28} slug={source.publisher.slug} />
             <Text style={styles.publisherText}>{source.publisher.name}</Text>
           </Pressable>
           <Pressable
@@ -96,7 +98,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingBottom: t.space[3],
   },
-  publisher: { justifyContent: 'center', minHeight: t.size.tap },
+  publisher: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], minHeight: t.size.tap },
   publisherText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
   article: { gap: t.space[1], minHeight: t.size.tap, paddingBottom: t.space[1] },
   title: {
