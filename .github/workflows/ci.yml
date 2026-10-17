@@ -63,13 +63,15 @@ jobs:
           (cd apps/worker && pnpm start > ../../worker.log 2>&1 &)
           (cd apps/worker && pnpm start:indexer > ../../indexer.log 2>&1 &)
           pnpm cli ingest
-          # Fixture data settles in about 15s; fail fast instead of burning minutes.
-          for i in $(seq 1 30); do
-            published=$(pnpm --silent cli status | jq '.pipeline.storiesPublished' || echo 0)
-            [ "${published:-0}" -gt 5 ] && exit 0
+          # Wait for the worker to finish enrichment too: E2E opens context popovers.
+          for i in $(seq 1 60); do
+            status=$(pnpm --silent cli status || echo '{}')
+            published=$(jq '.pipeline.storiesPublished // 0' <<<"$status")
+            pending=$(jq '[.queues[]? | .queued + .active] | add // 0' <<<"$status")
+            [ "$published" -gt 5 ] && [ "$pending" -eq 0 ] && exit 0
             sleep 2
           done
-          echo "pipeline did not publish stories in time" && exit 1
+          echo "pipeline did not settle in time" && exit 1
       - run: |
           pnpm build
           (cd apps/web && pnpm start > ../../web.log 2>&1 &)

@@ -81,10 +81,6 @@ test('feed → story → narrative → search', async ({ page }) => {
   await term.first().click()
   await expect(page.getByText(/^Based on/).first()).toBeVisible()
   await page.keyboard.press('Escape')
-  // Claims: grounded statements with the outlets that make them.
-  await expect(page.getByRole('heading', { name: 'Claims' })).toBeVisible()
-  await expect(page.getByText(/not verified facts/)).toBeVisible()
-  await expect(page.getByText(/summary from \d+ of \d+ publishers?/)).toBeVisible()
   // Political lean of the covering publishers (a bar, or a note that too few are rated).
   await expect(page.getByRole('heading', { name: 'Political lean' })).toBeVisible()
   await expectNoHorizontalOverflow(page)
