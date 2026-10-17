@@ -43,12 +43,23 @@ const styles = StyleSheet.create({
   },
   wordmark: {
     color: t.color.bandText,
+    flexShrink: 0,
     fontFamily: t.font.black,
     fontSize: 19,
     letterSpacing: -0.8,
   },
   dot: { color: t.color.accent },
-  copy: { flex: 1 },
-  date: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.meta },
-  stats: { color: t.color.bandMuted, fontFamily: t.font.medium, fontSize: 11 },
+  copy: { alignItems: 'flex-end', flex: 1 },
+  date: {
+    color: t.color.bandText,
+    fontFamily: t.font.bold,
+    fontSize: t.type.meta,
+    textAlign: 'right',
+  },
+  stats: {
+    color: t.color.bandMuted,
+    fontFamily: t.font.medium,
+    fontSize: 11,
+    textAlign: 'right',
+  },
 })
