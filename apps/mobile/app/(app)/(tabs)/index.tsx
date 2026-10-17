@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { plural } from '@dn/domain'
+import { plural, stripCitations } from '@dn/domain'
 import type { StoryLead } from '@dn/schemas'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
@@ -122,7 +122,7 @@ function LeadStory({ story }: { story: StoryLead }) {
       <Text style={styles.leadTitle}>{story.title}</Text>
       {story.summary ? (
         <Text numberOfLines={5} style={styles.leadSummary}>
-          {story.summary.body}
+          {stripCitations(story.summary.body).replace(/\s+([.,;:])/g, '$1')}
         </Text>
       ) : null}
       <Text style={styles.leadMeta}>{plural(story.sources.length, 'report')}</Text>

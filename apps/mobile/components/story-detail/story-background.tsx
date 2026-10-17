@@ -11,7 +11,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
 
@@ -56,6 +56,7 @@ export function ContextSheet({
   onClose: () => void
 }) {
   const { height } = useWindowDimensions()
+  const insets = useSafeAreaInsets()
   const translateY = useRef(new Animated.Value(height)).current
 
   useEffect(() => {
@@ -95,6 +96,7 @@ export function ContextSheet({
           onPress={close}
           style={StyleSheet.absoluteFill}
         />
+        <View pointerEvents="none" style={[styles.navigationBarFill, { height: insets.bottom }]} />
         <Animated.View style={[styles.sheetMotion, { transform: [{ translateY }] }]}>
           <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
             {entry ? (
@@ -162,6 +164,13 @@ const styles = StyleSheet.create({
   sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.color.elevated, maxHeight: '85%' },
   sheetMotion: { maxHeight: '85%' },
+  navigationBarFill: {
+    backgroundColor: t.color.elevated,
+    bottom: 0,
+    left: 0,
+    position: 'absolute',
+    right: 0,
+  },
   sheetContent: { gap: t.space[4], padding: t.space[5] },
   sheetHeader: {
     alignItems: 'center',

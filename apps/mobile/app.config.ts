@@ -42,6 +42,7 @@ const config: ExpoConfig = {
     'expo-router',
     'expo-secure-store',
     'expo-background-task',
+    ['expo-navigation-bar', { enforceContrast: false, style: 'dark' }],
     [
       'expo-splash-screen',
       {
