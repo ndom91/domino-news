@@ -16,13 +16,17 @@ export const Route = createFileRoute('/privacy')({
 })
 
 // Retention as implemented: sessions (auth.ts), reading history and taps (preferences.ts),
-// backups (scripts/deploy.sh). Update both together.
+// push deliveries (push-delivery.ts), backups (scripts/deploy.sh). Update both together.
 const RETENTION = [
   ['Account details', 'Until you delete your account'],
   ['Sessions, with IP address and browser', '30 days after sign-in, then deleted'],
   ['Your picks, follows and country', 'Until you change them or your account is deleted'],
   ['For You thumbs up and down', '30 days; what they taught For You fades over 30 days'],
   ['Reading history (only if you turn it on)', '30 days; deleted at once when you turn it off'],
+  [
+    'Push-notification token and delivery record',
+    'Token until you disable alerts or delete your account; delivery record 30 days',
+  ],
   ['Database backups', '14 days'],
 ] as const
 
@@ -75,6 +79,11 @@ function PrivacyPage() {
             publishers from your country first. It isn’t stored unless you pick a country yourself
             (Art. 6(1)(f) GDPR).
           </li>
+          <li>
+            <strong>Push alerts, only if you allow them:</strong> your device’s push token and a
+            record of each alert. We use them to send a newly published For You story no more than
+            once every four hours (consent, Art. 6(1)(a) GDPR).
+          </li>
         </ul>
         <p>
           We don’t build a profile of your political views, and we don’t use your data for
@@ -107,6 +116,10 @@ function PrivacyPage() {
           <li>
             <strong>Google</strong>, only if you choose to sign in with Google. Google’s own privacy
             policy applies to that sign-in.
+          </li>
+          <li>
+            <strong>Expo</strong> delivers push alerts. It receives your device’s push token and the
+            alert’s title and text.
           </li>
         </ul>
         <p>We don’t sell or share your data with anyone else.</p>

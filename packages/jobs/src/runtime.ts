@@ -3,6 +3,7 @@ import {
   PRIORITY,
   processOutboxBatch,
   pruneDeliveredEvents,
+  prunePushDeliveries,
   pruneReaderHistory,
   QUEUES,
   rebuildSearchIndex,
@@ -15,6 +16,7 @@ import { embedArticles } from './embed.ts'
 import { explainStoryContext } from './explain-context.ts'
 import { pollFeed } from './ingest.ts'
 import { matchArticle } from './match.ts'
+import { deliverForYouPushes } from './push-delivery.ts'
 import { relateStory } from './relate.ts'
 import { feedIds } from './seed.ts'
 import { summarizeStory } from './summarize.ts'
@@ -125,10 +127,17 @@ export async function startWorkers(ctx: WorkerContext) {
   await boss.work(QUEUES.pruneEvents, async () => {
     const result = await pruneDeliveredEvents(ctx.db, ctx.config.eventRetentionDays)
     const reads = await pruneReaderHistory(ctx.db)
+    await prunePushDeliveries(ctx.db)
     console.log(`[prune_delivered_events] ${JSON.stringify({ ...result, ...reads })}`)
   })
   await boss.work(QUEUES.rebuildSearch, async () => {
     await rebuildSearchIndex(ctx.db, ctx.ts)
+  })
+  await boss.work(QUEUES.deliverPush, async () => {
+    const result = await deliverForYouPushes(ctx)
+    if (result.alerted || result.invalidTokens || result.receiptsChecked) {
+      console.log(`[deliver_expo_push] ${JSON.stringify(result)}`)
+    }
   })
 
   const genSlots = Math.max(1, ctx.config.generationConcurrency)
@@ -177,6 +186,9 @@ export async function startWorkers(ctx: WorkerContext) {
   await boss.schedule(QUEUES.pollAllFeeds, ctx.config.feedPollCron, null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.admitBackfill, '* * * * *', null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.pruneEvents, '17 3 * * *', null, { singletonKey: 'cron' })
+  await boss.schedule(QUEUES.deliverPush, ctx.config.expoPushDeliveryCron, null, {
+    singletonKey: 'cron',
+  })
 }
 
 /** Outbox -> Typesense loop for the separate indexer process. */

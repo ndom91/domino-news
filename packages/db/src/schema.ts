@@ -868,7 +868,9 @@ export const pushDelivery = pgTable(
   'push_delivery',
   {
     id: text('id').primaryKey(),
-    userId: text('user_id').notNull().references(() => authUser.id),
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id),
     token: text('token').notNull(),
     subscriptionGeneration: integer('subscription_generation').notNull(),
     storyId: text('story_id')
@@ -883,7 +885,11 @@ export const pushDelivery = pgTable(
     deliveredAt: ts('delivered_at'),
   },
   (t) => [
-    uniqueIndex('push_delivery_subscription_story_idx').on(t.token, t.subscriptionGeneration, t.storyId),
+    uniqueIndex('push_delivery_subscription_story_idx').on(
+      t.token,
+      t.subscriptionGeneration,
+      t.storyId,
+    ),
     index('push_delivery_receipt_idx').on(t.status, t.receiptCheckedAt),
   ],
 )

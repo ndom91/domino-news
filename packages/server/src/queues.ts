@@ -11,6 +11,7 @@ export const QUEUES = {
   admitBackfill: 'admit_backfill',
   rebuildSearch: 'rebuild_search_projection',
   pruneEvents: 'prune_delivered_events',
+  deliverPush: 'deliver_expo_push',
 } as const
 
 // Everything keyed on a Story's current summary version.

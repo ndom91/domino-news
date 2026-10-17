@@ -26,6 +26,8 @@ export function readConfig(env = process.env) {
     enableSummaryEditing: env.ENABLE_SUMMARY_EDITING === 'true',
     googleSignIn: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
     eventRetentionDays: num('EVENT_RETENTION_DAYS', 7),
+    expoPushDeliveryCron: env.EXPO_PUSH_DELIVERY_CRON ?? '*/5 * * * *',
+    expoAccessToken: env.EXPO_ACCESS_TOKEN || undefined,
     // Secret (sk_) key for logo.dev. Without it publishers show no logo.
     logoDevApiKey: env.LOGO_DEV_API_KEY || undefined,
   }

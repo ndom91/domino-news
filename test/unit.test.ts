@@ -19,12 +19,14 @@ import {
 } from '@dn/domain'
 import {
   findRspEntry,
+  forYouExpoMessage,
   isStaleItem,
   isWireCopy,
   leanEvidenceFileSchema,
   leanEvidenceRow,
   parseFeed,
   parseRspWikitext,
+  sendExpoPush,
   wikidataEvidence,
 } from '@dn/jobs'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
@@ -797,6 +799,66 @@ describe('local generation adapter', () => {
     await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
       /truncated at 2400 tokens\. Starts: \{"claims"/,
     )
+  })
+})
+
+describe('Expo push delivery', () => {
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('sends the story slug in an Expo payload', async () => {
+    const fetch = vi.fn(async () => Response.json({ data: [{ status: 'ok', id: 'ticket_1' }] }))
+    vi.stubGlobal('fetch', fetch)
+
+    await expect(
+      sendExpoPush([
+        {
+          to: 'ExponentPushToken[token]',
+          title: 'For You',
+          body: 'A story happened.',
+          sound: 'default',
+          channelId: 'for-you',
+          data: { storySlug: 'a-story' },
+        },
+      ]),
+    ).resolves.toEqual([{ status: 'ok', id: 'ticket_1' }])
+
+    expect(fetch).toHaveBeenCalledWith(
+      'https://exp.host/--/api/v2/push/send',
+      expect.objectContaining({
+        body: expect.stringContaining('"storySlug":"a-story"'),
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+      }),
+    )
+  })
+
+  it('removes source citations from the notification body', () => {
+    expect(
+      forYouExpoMessage('ExponentPushToken[token]', {
+        slug: 'a-story',
+        summary: 'A story happened[1, 2].',
+        title: 'A story happened',
+      }),
+    ).toMatchObject({ body: 'A story happened.', data: { storySlug: 'a-story' } })
+  })
+
+  it('rejects malformed Expo ticket responses', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => Response.json({ data: [] })),
+    )
+    await expect(
+      sendExpoPush([
+        {
+          to: 'ExponentPushToken[token]',
+          title: 'For You',
+          body: 'A story happened.',
+          sound: 'default',
+          channelId: 'for-you',
+          data: { storySlug: 'a-story' },
+        },
+      ]),
+    ).rejects.toThrow('invalid ticket response')
   })
 })
 
