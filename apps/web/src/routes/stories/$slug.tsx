@@ -3,7 +3,6 @@ import { REGION_LABELS, type StoryDetail } from '@dn/schemas'
 import {
   Badge,
   Button,
-  ClaimList,
   ContextExplanation,
   HeroStory,
   leadCitations,
@@ -69,10 +68,6 @@ function StoryRoute() {
   const { preview } = Route.useLoaderData()
   return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
 }
-
-/** Newest extraction time. ISO strings sort chronologically, so a string max is enough. */
-const latestAt = (items: { createdAt: string }[]) =>
-  items.reduce((latest, item) => (item.createdAt > latest ? item.createdAt : latest), '')
 
 /**
  * The summary's longer detail, below the lead. Citations lead where the lead's do; a context
@@ -164,23 +159,6 @@ function StoryPage() {
         <div className="min-w-0">
           {story.summary?.detail ? (
             <SummaryDetail story={story} detail={story.summary.detail} />
-          ) : null}
-
-          {story.claims.length > 0 ? (
-            <section aria-labelledby="claims-heading">
-              <SectionHeader
-                id="claims-heading"
-                rule
-                title="Claims"
-                meta={
-                  <>
-                    Statements in the reporting, not verified facts ·{' '}
-                    <Timestamp at={latestAt(story.claims)} prefix="Extracted" />
-                  </>
-                }
-              />
-              <ClaimList claims={story.claims} />
-            </section>
           ) : null}
 
           <section aria-labelledby="sources-heading">

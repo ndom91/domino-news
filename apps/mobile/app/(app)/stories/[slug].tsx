@@ -4,7 +4,6 @@ import { Redirect, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StoryBackground } from '../../../components/story-detail/story-background'
-import { StoryClaims } from '../../../components/story-detail/story-claims'
 import { StoryConnections } from '../../../components/story-detail/story-connections'
 import { StoryHeader } from '../../../components/story-detail/story-header'
 import { StoryReporting } from '../../../components/story-detail/story-reporting'
@@ -65,7 +64,6 @@ export default function StoryScreen() {
           </View>
         ) : null}
         <StoryBackground entries={data.context} />
-        <StoryClaims claims={data.claims} sources={data.sources} />
         <StoryReporting
           onPublisherPress={(publisherSlug) => router.push(`/publishers/${publisherSlug}`)}
           sources={data.sources}
