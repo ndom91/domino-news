@@ -33,7 +33,9 @@ Use the production-style Preview APK for native Google sign-in and push-notifica
 The command reads only these two public values from the ignored `.env` before EAS stages the project, so they
 are embedded in the APK. It requires an authenticated EAS CLI and Android build prerequisites on the local
 machine. It sets `APP_VARIANT=preview`, so the APK deliberately does not permit an insecure `http://` LAN API
-URL. The Android OAuth client and its signing-certificate fingerprint remain configured separately.
+URL. The command uses `ANDROID_HOME` when set, otherwise the standard macOS Android Studio SDK at
+`~/Library/Android/sdk`; set `ANDROID_HOME` if your SDK is elsewhere. The Android OAuth client and its
+signing-certificate fingerprint remain configured separately.
 
 ## Android development build
 
