@@ -190,10 +190,37 @@ export async function pushTicketsAwaitingReceipt(db: Db) {
         eq(schema.pushDelivery.status, 'accepted'),
         isNotNull(schema.pushDelivery.expoTicketId),
         sql`${schema.pushDelivery.sentAt} <= now() - interval '15 minutes'`,
+        sql`${schema.pushDelivery.sentAt} > now() - interval '24 hours'`,
         sql`(${schema.pushDelivery.receiptCheckedAt} is null or ${schema.pushDelivery.receiptCheckedAt} <= now() - interval '5 minutes')`,
       ),
     )
+    .orderBy(schema.pushDelivery.sentAt)
     .limit(1000)
+}
+
+/** Requests that could have reached Expo are deliberately quarantined, never resent. */
+export async function reconcileStalePushDeliveries(db: Db) {
+  const sending = await db
+    .update(schema.pushDelivery)
+    .set({ error: 'Push request outcome was not recorded', status: 'unknown' })
+    .where(
+      and(
+        eq(schema.pushDelivery.status, 'sending'),
+        sql`${schema.pushDelivery.sentAt} < now() - interval '15 minutes'`,
+      ),
+    )
+    .returning({ id: schema.pushDelivery.id })
+  const expired = await db
+    .update(schema.pushDelivery)
+    .set({ error: 'Expo receipt was not available within 24 hours', status: 'unknown' })
+    .where(
+      and(
+        eq(schema.pushDelivery.status, 'accepted'),
+        sql`${schema.pushDelivery.sentAt} < now() - interval '24 hours'`,
+      ),
+    )
+    .returning({ id: schema.pushDelivery.id })
+  return { sending: sending.length, expired: expired.length }
 }
 
 export async function recordPushReceipts(

@@ -13,6 +13,14 @@ export async function savePushSubscription(db: Db, userId: string, token: string
         generation: sql`case when ${schema.pushSubscription.userId} = ${userId} then ${schema.pushSubscription.generation} else ${schema.pushSubscription.generation} + 1 end`,
         lastNotifiedAt: sql`case when ${schema.pushSubscription.userId} = ${userId} then ${schema.pushSubscription.lastNotifiedAt} else null end`,
       },
+      // Do not transfer a token while its current owner has a request in flight.
+      // The app retries registration, while the sender can finish without exposing its alert.
+      where: sql`not exists (
+        select 1 from push_delivery delivery
+        where delivery.token = ${schema.pushSubscription.token}
+          and delivery.subscription_generation = ${schema.pushSubscription.generation}
+          and delivery.status = 'sending'
+      )`,
     })
 }
 

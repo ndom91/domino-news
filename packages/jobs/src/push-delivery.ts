@@ -8,6 +8,7 @@ import {
   newlyPublishedStoryIds,
   pushRecipientsReadyForAlert,
   pushTicketsAwaitingReceipt,
+  reconcileStalePushDeliveries,
   recordPushReceipts,
   recordPushSendResults,
   removeInvalidPushSubscription,
@@ -43,10 +44,12 @@ export function forYouExpoMessage(token: string, story: PushStory): ExpoMessage 
 }
 
 export async function deliverForYouPushes(ctx: WorkerContext) {
+  const reconciled = await reconcileStalePushDeliveries(ctx.db)
   const receipts = await collectExpoReceipts(ctx)
   const recipients = await pushRecipientsReadyForAlert(ctx.db)
   let alerted = 0
   let invalidTokens = receipts.invalidTokens
+  let failed = receipts.failed
 
   for (const recipient of recipients) {
     const newStoryIds = await newlyPublishedStoryIds(ctx.db, recipient.since)
@@ -70,45 +73,55 @@ export async function deliverForYouPushes(ctx: WorkerContext) {
     })
     if (intents.length === 0) continue
 
-    const messages = intents.map((intent) => forYouExpoMessage(intent.token, item.story))
-    let results: ExpoResult[]
-    try {
-      results = await sendExpoPush(messages, ctx.config.expoAccessToken)
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Unknown Expo Push Service error'
-      await markPushDeliveriesUnknown(
-        ctx.db,
-        intents.map((intent) => intent.id),
-        message,
-      )
-      console.error(`[deliver_expo_push] ambiguous send for ${recipient.userId}: ${message}`)
-      continue
-    }
-    const accepted = results.flatMap((result, index) => {
-      const intent = intents[index]
-      return result?.status === 'ok' && intent ? [{ id: intent.id, ticketId: result.id }] : []
-    })
-    const rejected = results.flatMap((result, index) => {
-      const intent = intents[index]
-      return result?.status === 'error' && intent
-        ? [{ id: intent.id, error: result.error, intent }]
-        : []
-    })
-
-    await recordPushSendResults(ctx.db, accepted, rejected)
-    for (const rejectedIntent of rejected) {
-      if (rejectedIntent.error !== 'DeviceNotRegistered') continue
-      await removeInvalidPushSubscription(ctx.db, {
-        userId: recipient.userId,
-        token: rejectedIntent.intent.token,
-        generation: rejectedIntent.intent.subscriptionGeneration,
+    let sent = false
+    for (const batch of chunks(intents, EXPO_BATCH_SIZE)) {
+      const messages = batch.map((intent) => forYouExpoMessage(intent.token, item.story))
+      let results: ExpoResult[]
+      try {
+        results = await sendExpoPush(messages, ctx.config.expoAccessToken)
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Unknown Expo Push Service error'
+        await markPushDeliveriesUnknown(
+          ctx.db,
+          batch.map((intent) => intent.id),
+          message,
+        )
+        console.error(`[deliver_expo_push] ambiguous send for ${recipient.userId}: ${message}`)
+        continue
+      }
+      const accepted = results.flatMap((result, index) => {
+        const intent = batch[index]
+        return result?.status === 'ok' && intent ? [{ id: intent.id, ticketId: result.id }] : []
       })
-      invalidTokens++
+      const rejected = results.flatMap((result, index) => {
+        const intent = batch[index]
+        return result?.status === 'error' && intent
+          ? [{ id: intent.id, error: result.error, intent }]
+          : []
+      })
+
+      await recordPushSendResults(ctx.db, accepted, rejected)
+      failed += rejected.length
+      if (rejected.length) {
+        console.error(
+          `[deliver_expo_push] ${rejected.length} Expo ticket error(s): ${rejected.map((result) => result.error).join(', ')}`,
+        )
+      }
+      for (const rejectedIntent of rejected) {
+        if (rejectedIntent.error !== 'DeviceNotRegistered') continue
+        await removeInvalidPushSubscription(ctx.db, {
+          userId: recipient.userId,
+          token: rejectedIntent.intent.token,
+          generation: rejectedIntent.intent.subscriptionGeneration,
+        })
+        invalidTokens++
+      }
+      if (accepted.length) sent = true
     }
-    if (accepted.length) alerted++
+    if (sent) alerted++
   }
 
-  return { alerted, invalidTokens, receiptsChecked: receipts.checked }
+  return { alerted, invalidTokens, receiptsChecked: receipts.checked, failed, reconciled }
 }
 
 async function collectExpoReceipts(ctx: WorkerContext) {
@@ -116,6 +129,7 @@ async function collectExpoReceipts(ctx: WorkerContext) {
     (delivery): delivery is typeof delivery & { ticketId: string } => delivery.ticketId !== null,
   )
   let checked = 0
+  let failedCount = 0
   const invalidSubscriptions: { userId: string; token: string; generation: number }[] = []
 
   for (const batch of chunks(pending, EXPO_BATCH_SIZE)) {
@@ -131,6 +145,7 @@ async function collectExpoReceipts(ctx: WorkerContext) {
       if (receipt.status === 'ok') delivered.push(delivery.id)
       else {
         failed.push({ id: delivery.id, error: receipt.error })
+        failedCount++
         if (receipt.error === 'DeviceNotRegistered') {
           invalidSubscriptions.push({
             userId: delivery.userId,
@@ -150,27 +165,26 @@ async function collectExpoReceipts(ctx: WorkerContext) {
   }
   for (const subscription of invalidSubscriptions)
     await removeInvalidPushSubscription(ctx.db, subscription)
-  return { checked, invalidTokens: invalidSubscriptions.length }
+  if (failedCount) console.error(`[deliver_expo_push] ${failedCount} Expo receipt error(s)`)
+  return { checked, invalidTokens: invalidSubscriptions.length, failed: failedCount }
 }
 
 export async function sendExpoPush(
   messages: ExpoMessage[],
   accessToken?: string,
 ): Promise<ExpoResult[]> {
-  const results: ExpoResult[] = []
-  for (const batch of chunks(messages, EXPO_BATCH_SIZE)) {
-    const response = await fetch(EXPO_PUSH_URL, {
-      method: 'POST',
-      headers: {
-        'content-type': 'application/json',
-        ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
-      },
-      body: JSON.stringify(batch),
-    })
-    if (!response.ok) throw new Error(`Expo Push Service returned ${response.status}`)
-    results.push(...parseExpoResults(await response.json(), batch.length))
-  }
-  return results
+  if (messages.length > EXPO_BATCH_SIZE)
+    throw new Error('Expo Push Service batch exceeds 100 messages')
+  const response = await fetch(EXPO_PUSH_URL, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      ...(accessToken ? { authorization: `Bearer ${accessToken}` } : {}),
+    },
+    body: JSON.stringify(messages),
+  })
+  if (!response.ok) throw new Error(`Expo Push Service returned ${response.status}`)
+  return parseExpoResults(await response.json(), messages.length)
 }
 
 async function getExpoReceipts(ticketIds: string[], accessToken?: string) {

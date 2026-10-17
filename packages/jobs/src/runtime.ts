@@ -135,7 +135,7 @@ export async function startWorkers(ctx: WorkerContext) {
   })
   await boss.work(QUEUES.deliverPush, async () => {
     const result = await deliverForYouPushes(ctx)
-    if (result.alerted || result.invalidTokens || result.receiptsChecked) {
+    if (result.alerted || result.invalidTokens || result.receiptsChecked || result.failed) {
       console.log(`[deliver_expo_push] ${JSON.stringify(result)}`)
     }
   })
