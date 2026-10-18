@@ -3,6 +3,7 @@ import { formatDate, plural, TEMPORAL_RELATIONS } from '@dn/domain'
 import { DESK_LABELS, DESK_SLOT, type NarrativeDetail, type StoryRelation } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
 import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
@@ -46,6 +47,7 @@ export default function NarrativeScreen() {
 
 function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
   const router = useRouter()
+  const [lastMarkerCenter, setLastMarkerCenter] = useState<number | null>(null)
   const stories = [...narrative.stories].sort((a, b) =>
     a.firstObservedAt.localeCompare(b.firstObservedAt),
   )
@@ -88,6 +90,12 @@ function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
             />
           ) : (
             <View style={styles.timelineItems}>
+              {lastMarkerCenter ? (
+                <View
+                  pointerEvents="none"
+                  style={[styles.rail, { height: lastMarkerCenter - markerCenter }]}
+                />
+              ) : null}
               {stories.map((story, index) => {
                 const edge = narrative.edges.find((candidate) => {
                   if (
@@ -106,13 +114,17 @@ function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
                 return (
                   <View
                     key={story.id}
+                    onLayout={
+                      index === stories.length - 1
+                        ? (event) => setLastMarkerCenter(event.nativeEvent.layout.y + markerCenter)
+                        : undefined
+                    }
                     style={
                       index === stories.length - 1 ? styles.timelineItemLast : styles.timelineItem
                     }
                   >
                     <View style={styles.markerColumn}>
                       <View style={styles.marker} />
-                      {index < stories.length - 1 ? <View style={styles.line} /> : null}
                     </View>
                     <Pressable
                       accessibilityHint="Opens this story"
@@ -184,10 +196,10 @@ const styles = StyleSheet.create({
     marginTop: t.space[4],
   },
   timeline: { gap: t.space[4], marginTop: t.space[10] },
-  timelineItems: { gap: 0 },
+  timelineItems: { gap: 0, position: 'relative' },
   timelineItem: { flexDirection: 'row', minHeight: 116, paddingBottom: t.space[4] },
   timelineItemLast: { flexDirection: 'row', minHeight: 116 },
-  markerColumn: { alignItems: 'center', position: 'relative', width: 24 },
+  markerColumn: { alignItems: 'center', width: 24 },
   marker: {
     backgroundColor: t.color.accent,
     borderColor: t.color.canvas,
@@ -196,10 +208,11 @@ const styles = StyleSheet.create({
     height: 14,
     marginTop: t.space[4],
     width: 14,
+    zIndex: 1,
   },
-  line: {
+  rail: {
     backgroundColor: t.color.borderStrong,
-    bottom: -(markerCenter + t.space[4]),
+    left: 11,
     position: 'absolute',
     top: markerCenter,
     width: 2,

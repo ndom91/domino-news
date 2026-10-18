@@ -93,8 +93,8 @@ const styles = StyleSheet.create({
   summaryDetail: {
     color: t.color.textSecondary,
     fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 24,
+    fontSize: t.type.bodyLarge,
+    lineHeight: 27,
   },
   pending: {
     color: t.color.textMuted,

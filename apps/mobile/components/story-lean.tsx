@@ -159,10 +159,10 @@ function barLabel(
 const styles = StyleSheet.create({
   section: { gap: t.space[3], marginTop: t.space[10] },
   label: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.bold,
-    fontSize: t.type.label,
-    letterSpacing: 0.5,
+    color: t.color.text,
+    fontFamily: t.font.black,
+    fontSize: t.type.body,
+    letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
   empty: {
