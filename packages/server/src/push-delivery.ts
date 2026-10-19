@@ -30,7 +30,9 @@ export async function pushRecipientsReadyForAlert(db: Db): Promise<PushRecipient
       select user_id, coalesce(max(last_notified_at), min(created_at)) as since
       from push_subscription
       group by user_id
-      having coalesce(max(last_notified_at), min(created_at)) <= now() - interval '4 hours'
+      -- The first alert is immediate. The four-hour limit applies only after an alert was sent.
+      having max(last_notified_at) is null
+        or max(last_notified_at) <= now() - interval '4 hours'
       -- Change ordering every delivery run so non-matching readers cannot starve later readers.
       order by md5(user_id || floor(extract(epoch from now()) / 300)::text)
       limit ${DELIVERY_BATCH_SIZE}
