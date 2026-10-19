@@ -435,7 +435,7 @@ async function storyLeadParts(
   },
 ) {
   const id = story.id
-  const [versions, cited, sources, narratives, context] = await Promise.all([
+  const [versions, current, cited, sources, narratives, context] = await Promise.all([
     db
       .select({
         version: schema.storySummaryVersion,
@@ -448,7 +448,26 @@ async function storyLeadParts(
       )
       .leftJoin(schema.analysisRun, eq(schema.analysisRun.id, schema.interpretation.analysisRunId))
       .where(eq(schema.storySummaryVersion.storyId, id))
-      .orderBy(desc(schema.storySummaryVersion.createdAt)),
+      .orderBy(desc(schema.storySummaryVersion.createdAt))
+      .limit(10),
+    story.currentSummaryId
+      ? db
+          .select({
+            version: schema.storySummaryVersion,
+            modelId: schema.analysisRun.modelId,
+          })
+          .from(schema.storySummaryVersion)
+          .leftJoin(
+            schema.interpretation,
+            eq(schema.interpretation.id, schema.storySummaryVersion.interpretationId),
+          )
+          .leftJoin(
+            schema.analysisRun,
+            eq(schema.analysisRun.id, schema.interpretation.analysisRunId),
+          )
+          .where(eq(schema.storySummaryVersion.id, story.currentSummaryId))
+          .then(([version]) => version ?? null)
+      : null,
     story.currentSummaryId
       ? db
           .select({
@@ -486,7 +505,6 @@ async function storyLeadParts(
     narrativesByStory(db, [id]),
     storyContext(db, id),
   ])
-  const current = versions.find((v) => v.version.id === story.currentSummaryId)
   const body = current?.version.body ?? ''
   const detail = current?.version.detail ?? null
   const citedIds = new Set(cited.map((c) => c.articleId))

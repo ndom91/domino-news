@@ -232,7 +232,7 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
             </p>
           </div>
           <nav aria-label="Footer">
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-base font-semibold leading-tight">
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-base font-semibold leading-snug">
               {user ? (
                 <>
                   {navFor(user).map((item) => (
