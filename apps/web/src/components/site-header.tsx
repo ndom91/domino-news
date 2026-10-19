@@ -231,8 +231,8 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
               Domino has verified.
             </p>
           </div>
-          <nav aria-label="Footer" className="border-t-2 border-band-text pt-3">
-            <ul className="grid grid-cols-2 gap-x-6 gap-y-2 text-base font-semibold">
+          <nav aria-label="Footer">
+            <ul className="grid grid-cols-2 gap-x-6 gap-y-1 text-base font-semibold leading-tight">
               {user ? (
                 <>
                   {navFor(user).map((item) => (
