@@ -755,9 +755,9 @@ describe('publisher assessments', () => {
     })
   const review = {
     fundingModel: 'public_broadcaster',
-    ownership: 'Public broadcaster funded by the licence fee',
+    ownership: '',
     reliabilityLevel: 'reliable',
-    reliability: 'Generally reliable (Wikipedia perennial sources)',
+    reliability: '',
     countryContext: 'GB',
     lean: null,
     leanEvidenceUrl: null,

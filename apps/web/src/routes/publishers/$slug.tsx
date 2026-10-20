@@ -417,18 +417,16 @@ function AssessmentEditor({ publisher }: { publisher: PublisherDetail }) {
           defaultValue={current?.fundingModel ?? 'commercial'}
         />
         <Textarea
-          label="Ownership and funding"
+          label="Ownership and funding (optional)"
           name="ownership"
           rows={2}
-          required
           maxLength={500}
           defaultValue={current?.ownership ?? ''}
         />
         <Textarea
-          label="Reliability"
+          label="Reliability (optional)"
           name="reliability"
           rows={2}
-          required
           maxLength={500}
           defaultValue={current?.reliability ?? ''}
         />

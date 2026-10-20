@@ -659,10 +659,11 @@ export type PublisherAssessment = z.infer<typeof publisherAssessmentSchema>
 export const assessmentRequestSchema = z
   .object({
     fundingModel: fundingModelSchema,
-    ownership: z.string().check(z.trim(), z.minLength(1), z.maxLength(500)),
+    // A review can publish a sourced lean before ownership research is complete.
+    ownership: z.string().check(z.maxLength(500)),
     // Null = not rated (e.g. the outlet isn't on Wikipedia's perennial sources list).
     reliabilityLevel: z.nullable(reliabilityLevelSchema),
-    reliability: z.string().check(z.trim(), z.minLength(1), z.maxLength(500)),
+    reliability: z.string().check(z.maxLength(500)),
     countryContext: z.nullable(z.string().check(z.length(2))),
     lean: z.nullable(publisherLeanSchema),
     // Missing = sourced. Only meaningful with a lean.
