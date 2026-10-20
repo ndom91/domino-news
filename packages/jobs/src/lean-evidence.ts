@@ -53,7 +53,7 @@ const entrySchema = z.discriminatedUnion('source', [
       applicable: z.boolean(),
       lean: z.nullable(publisherLeanSchema),
       countryContext: z.string().check(z.regex(/^[A-Z]{2}$/)),
-      // Low-confidence estimates are not recorded at all. Null when left–right doesn't apply.
+      // Null when research is inconclusive or left–right doesn't apply.
       confidence: z.nullable(z.enum(['high', 'medium'])),
       rubric: z.string().check(z.regex(/^lean-estimate@\d+$/)),
       rationale: z.string().check(z.minLength(1), z.maxLength(400)),
@@ -62,14 +62,14 @@ const entrySchema = z.discriminatedUnion('source', [
       estimatedAt: z.iso.date(),
     })
     .check(
-      z.refine((e) => (e.lean === null) === !e.applicable, {
-        message: 'An estimate has a lean exactly when left–right applies',
-      }),
       z.refine((e) => e.applicable || Boolean(e.axisNote), {
         message: 'Say which divide applies instead',
       }),
+      z.refine((e) => e.applicable || e.lean === null, {
+        message: 'An inapplicable axis cannot have a lean',
+      }),
       z.refine((e) => (e.lean === null) === (e.confidence === null), {
-        message: 'A lean needs a confidence, and only a lean has one',
+        message: 'Only a published lean has a confidence',
       }),
     ),
 ])
@@ -90,7 +90,9 @@ export async function loadLeanEvidence(fixtureDir: string): Promise<LeanEvidence
 export function leanEvidenceRow(e: LeanEvidenceEntry) {
   if (e.source === 'domino_estimate') {
     const value = e.applicable
-      ? `Domino estimate (${e.rubric}, ${e.confidence} confidence): ${e.rationale}`
+      ? e.lean === null
+        ? `Domino research (${e.rubric}): insufficient evidence to estimate a lean. ${e.rationale}`
+        : `Domino estimate (${e.rubric}, ${e.confidence} confidence): ${e.rationale}`
       : `Domino research (${e.rubric}): left–right lean doesn't apply. ${e.axisNote}`
     const [url = ''] = e.sources
     return {

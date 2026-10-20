@@ -763,6 +763,117 @@
       ],
       "estimatedAt": "2026-10-12",
       "axisNote": "Nigeria's party and media divides follow ethnic, regional and religious lines, patronage and pro-incumbent vs independent, not a left–right ideology."
+    },
+    {
+      "publisher": "the19th",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "The 19th describes its gender- and race-focused reporting mission, but no systematic placement or two independent indicators establish a position on the US left–right axis.",
+      "sources": ["https://19thnews.org/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "insideclimatenews",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Inside Climate News describes itself as a nonpartisan climate newsroom with editorial independence, but no systematic placement or two independent indicators establish a position on the US left–right axis.",
+      "sources": [
+        "https://insideclimatenews.org/about/",
+        "https://insideclimatenews.org/about/editorial-independence/"
+      ],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "scroll",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "IN",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Available material establishes Scroll.in's ownership and editorial leadership, but not a systematic placement or two independent indicators supporting a left–right estimate in India.",
+      "sources": ["https://en.wikipedia.org/wiki/Scroll.in"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "dailymaverick",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "ZA",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Daily Maverick says it has no political-party affiliation and separates opinion from news, but no systematic placement or two independent indicators support a left–right estimate in South Africa.",
+      "sources": ["https://www.dailymaverick.co.za/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "mg",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "ZA",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Research confirms Mail & Guardian's historical alternative-press and investigative role, but no current systematic placement or two independent indicators support a left–right estimate in South Africa.",
+      "sources": ["https://doi.org/10.36615/jcsa.v24i1.1766"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "groundup",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "ZA",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "GroundUp's stated public-interest and human-rights remit is not enough by itself to place it on South Africa's left–right axis; no systematic placement or second independent indicator was found.",
+      "sources": ["https://groundup.org.za/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "japantimes",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "JP",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "The Japan Times publishes news and a distinct opinion section, but available ownership material does not provide a systematic placement or two independent indicators for a left–right estimate in Japan.",
+      "sources": ["https://www.japantimes.co.jp/about-us/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "koreaherald",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "KR",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Available ownership material does not provide a systematic placement or two independent indicators for a left–right estimate of The Korea Herald in South Korea.",
+      "sources": ["https://en.wikipedia.org/wiki/The_Korea_Herald"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "batimes",
+      "source": "domino_estimate",
+      "applicable": true,
+      "lean": null,
+      "countryContext": "AR",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Buenos Aires Times is Editorial Perfil's English-language publication, but available ownership material does not provide a systematic placement or two independent indicators for an Argentine left–right estimate.",
+      "sources": ["https://www.batimes.com.ar/about-us"],
+      "estimatedAt": "2026-10-20"
     }
   ]
 }

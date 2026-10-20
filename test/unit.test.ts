@@ -666,7 +666,7 @@ describe('hand-checked lean evidence', () => {
     })
   })
 
-  it('accepts estimates only with a lean, or with a note when left–right does not apply', () => {
+  it('accepts published estimates, inconclusive research, and inapplicable axes', () => {
     const estimate = {
       publisher: 'groundup',
       source: 'domino_estimate',
@@ -682,8 +682,12 @@ describe('hand-checked lean evidence', () => {
     const ok = (entry: unknown) => leanEvidenceFileSchema.safeParse({ entries: [entry] }).success
     expect(ok(estimate)).toBe(true)
     expect(ok({ ...estimate, confidence: 'low' })).toBe(false)
-    expect(ok({ ...estimate, lean: null })).toBe(false)
+    const inconclusive = { ...estimate, lean: null, confidence: null }
+    expect(ok(inconclusive)).toBe(true)
     expect(ok({ ...estimate, applicable: false, lean: null, confidence: null })).toBe(false)
+    expect(ok({ ...estimate, applicable: false, axisNote: 'Pro-government vs independent.' })).toBe(
+      false,
+    )
     expect(ok({ ...estimate, confidence: null })).toBe(false)
     const notApplicable = {
       ...estimate,
@@ -696,6 +700,9 @@ describe('hand-checked lean evidence', () => {
     const [entry] = leanEvidenceFileSchema.parse({ entries: [notApplicable] }).entries
     if (!entry) throw new Error('no entry')
     expect(leanEvidenceRow(entry)).toMatchObject({ source: 'domino_estimate', lean: null })
+    const [inconclusiveEntry] = leanEvidenceFileSchema.parse({ entries: [inconclusive] }).entries
+    if (!inconclusiveEntry) throw new Error('no entry')
+    expect(leanEvidenceRow(inconclusiveEntry).value).toContain('insufficient evidence')
   })
 
   it('rejects AllSides outside the US scale, unknown ratings and out-of-range scores', () => {
