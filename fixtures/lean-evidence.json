@@ -407,6 +407,58 @@
       "checkedAt": "2026-10-20"
     },
     {
+      "publisher": "globalvoices",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "NL",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Global Voices is a multilingual international community of writers, translators and human-rights activists, not a Dutch domestic political outlet.",
+      "axisNote": "Its reporting spans many countries and does not belong on a Netherlands left–right media axis.",
+      "sources": ["https://globalvoices.org/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "mongabay",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Mongabay is a global nonprofit newsroom focused on nature and planetary challenges, with local reporting across multiple countries and languages.",
+      "axisNote": "Its specialist global environmental remit does not place it on the US domestic left–right media axis.",
+      "sources": ["https://mongabay.org/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "restofworld",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "US",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Rest of World is a nonprofit technology publication reporting from regions outside wealthy Western countries through locally based journalists.",
+      "axisNote": "Its cross-border technology remit does not place it on the US domestic left–right media axis.",
+      "sources": ["https://restofworld.org/about/"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
+      "publisher": "meduza",
+      "source": "domino_estimate",
+      "applicable": false,
+      "lean": null,
+      "countryContext": "LV",
+      "confidence": null,
+      "rubric": "lean-estimate@1",
+      "rationale": "Meduza is an independent Russian outlet operating in exile from Latvia after Russian state pressure and censorship.",
+      "axisNote": "Its relevant distinction is independent exile media versus the Russian state media system, not Latvia's left–right media axis.",
+      "sources": ["https://meduza.io/en/pages/about"],
+      "estimatedAt": "2026-10-20"
+    },
+    {
       "publisher": "al-monitor",
       "source": "domino_estimate",
       "applicable": false,
