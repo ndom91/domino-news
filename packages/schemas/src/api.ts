@@ -35,7 +35,8 @@ export const publisherRefSchema = z.object({
 })
 export type PublisherRef = z.infer<typeof publisherRefSchema>
 
-// Lean is always relative to one country's media (countryContext), never a global axis.
+// Lean labels are shown simply, but their evidence and comparisons remain relative to one
+// country's media (countryContext); they are never a global political axis.
 export const publisherLeanSchema = z.enum([
   'left',
   'centre_left',

@@ -58,9 +58,9 @@ function AboutPage() {
           <li>Ownership comes from Wikidata and the publishers’ own pages.</li>
         </ul>
         <p>
-          Lean is always relative to the publisher’s own country: “centre-right” in the UK isn’t the
-          same as in the US. Where a country’s politics don’t divide into left and right, we say so
-          instead of forcing a label.
+          Lean labels are kept simple, but their evidence and story-level comparisons remain
+          country-relative: “centre-right” in the UK isn’t the same as in the US. Where a country’s
+          politics don’t divide into left and right, we say so instead of forcing a label.
         </p>
       </Section>
 

@@ -8,8 +8,8 @@ const hasEnough = (m: StoryLeanData) =>
 
 /**
  * The lean mix of a Story's publishers: the reader's country in full (else the best-rated
- * one), other countries compact below it. Leans are only comparable within one country, so
- * each gets its own bar. Countries with too few ratings are named in the footnote.
+ * one), other countries compact below it. Labels are simple, but comparisons remain within a
+ * country, so each gets its own bar. Countries with too few ratings are named in the footnote.
  */
 export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: string | null }) {
   if (mix.length === 0) return null
@@ -43,9 +43,9 @@ export function StoryLean({ mix, country }: { mix: StoryLeanData[]; country: str
         </div>
       ) : null}
       <p className="mt-4 text-xs text-text-muted">
-        Each publisher’s lean is relative to its own country’s media, from our reviewed assessments.
-        Most come from audience surveys or ratings; where none exists, we estimate it from public
-        research and say so. Estimates never mark a story as one-sided.
+        Labels are simple, but each bar only compares publishers in one country, using reviewed
+        assessments. Most come from audience surveys or ratings; where none exists, we estimate it
+        from public research and say so. Estimates never mark a story as one-sided.
         {main && thin.length
           ? ` Too few rated publishers to show: ${thin.map((m) => countryName(m.country)).join(', ')}.`
           : null}

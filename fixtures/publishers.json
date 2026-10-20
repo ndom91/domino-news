@@ -1232,5 +1232,167 @@
         "title": "The Dispatch"
       }
     ]
+  },
+  {
+    "slug": "independent",
+    "name": "The Independent",
+    "domain": "independent.co.uk",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt does not name AI agents or restrict the World RSS feed, but the publisher's terms have not been reviewed for automated article-body analysis. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.independent.co.uk/news/world/rss",
+        "title": "World news"
+      }
+    ]
+  },
+  {
+    "slug": "dailymail",
+    "name": "Daily Mail",
+    "domain": "dailymail.co.uk",
+    "countryCode": "GB",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt says content is for personal, non-commercial use and prohibits automated scraping, text and data mining, and AI/LLM development without written permission. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.dailymail.co.uk/articles.rss",
+        "title": "Latest articles"
+      }
+    ]
+  },
+  {
+    "slug": "zeit",
+    "name": "DIE ZEIT",
+    "domain": "zeit.de",
+    "countryCode": "DE",
+    "languages": ["de"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt blocks named AI agents, reserves commercial text and data mining rights under § 44b UrhG, and prohibits automated collection without permission. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://newsfeed.zeit.de/index",
+        "title": "Latest news"
+      }
+    ]
+  },
+  {
+    "slug": "welt",
+    "name": "WELT",
+    "domain": "welt.de",
+    "countryCode": "DE",
+    "languages": ["de"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt blocks a broad set of named AI and dataset crawlers. The general crawler rules allow the RSS path, but the publisher's article-body reuse terms have not been verified. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.welt.de/feeds/latest.rss",
+        "title": "Latest news"
+      }
+    ]
+  },
+  {
+    "slug": "bild",
+    "name": "BILD",
+    "domain": "bild.de",
+    "countryCode": "DE",
+    "languages": ["de"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "BILD provides an RSS feed, but article-body reuse and automated-analysis permissions have not been verified. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.bild.de/rssfeeds/rss3-20745882,feed=alles.bild.html",
+        "title": "Top stories"
+      }
+    ]
+  },
+  {
+    "slug": "nrk",
+    "name": "NRK",
+    "domain": "nrk.no",
+    "countryCode": "NO",
+    "languages": ["no"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt says NRK does not permit text and data mining or AI use without express written permission. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.nrk.no/toppsaker.rss",
+        "title": "Top stories"
+      }
+    ]
+  },
+  {
+    "slug": "aftenposten",
+    "name": "Aftenposten",
+    "domain": "aftenposten.no",
+    "countryCode": "NO",
+    "languages": ["no"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "RSS feed is available, but article-body reuse and automated-analysis permissions have not been verified. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.aftenposten.no/rss",
+        "title": "Latest news"
+      }
+    ]
+  },
+  {
+    "slug": "wsj",
+    "name": "The Wall Street Journal",
+    "domain": "wsj.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Paywalled. robots.txt says automated collection of content or data is prohibited without Dow Jones's express written permission. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
+        "title": "World news"
+      }
+    ]
+  },
+  {
+    "slug": "axios",
+    "name": "Axios",
+    "domain": "axios.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "kind": "newsroom",
+    "license": "all-rights-reserved",
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt blocks named dataset and AI crawlers, including CCBot and Diffbot. The general rules allow the RSS feed, but article-body reuse permissions have not been verified. Metadata only.",
+    "policyReviewedAt": "2026-10-20",
+    "feeds": [
+      {
+        "url": "https://www.axios.com/feeds/feed.rss",
+        "title": "Latest news"
+      }
+    ]
   }
 ]
