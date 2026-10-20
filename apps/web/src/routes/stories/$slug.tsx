@@ -205,7 +205,7 @@ function StoryPage() {
         </div>
 
         <aside className="flex flex-col gap-10 pt-12">
-          <StoryLean mix={story.leanMix} country={session.country} />
+          <StoryLean mix={story.leanMix} />
 
           {story.context.length > 0 ? (
             <section aria-labelledby="background-heading">

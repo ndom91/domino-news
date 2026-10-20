@@ -386,7 +386,7 @@ function CountrySection() {
     <SettingsRow
       id="country"
       title="Your country"
-      description="Stories show this country’s publisher comparison first. Lean labels stay simple, while comparisons remain country-specific. Blindspot lists stories that one side of its media barely covers."
+      description="Story pages use a shared political-lean scale. Blindspot uses your country to find stories that one side of its media barely covers."
     >
       <Select
         aria-label="Your country"

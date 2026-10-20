@@ -21,21 +21,19 @@ const HATCH = {
 }
 
 /**
- * Who covered a Story in one country, by each publisher's reviewed lean. Unrated publishers
- * always get their own hatched segment, so a bar built on a few ratings never looks like
- * the whole picture. The rows below carry every number and name; the bar repeats them.
+ * Who covered a Story, by each publisher's reviewed lean. Unrated publishers always get their
+ * own hatched segment, so a bar built on a few ratings never looks like the whole picture. The
+ * rows below carry every number and name; the bar repeats them.
  */
 export function LeanSpread({
   lean,
-  countryLabel,
   Link = DefaultLink,
   compact = false,
   className,
 }: {
   lean: StoryLean
-  countryLabel: string
   Link?: LinkLike
-  /** One line of names instead of the labelled rows, for countries after the reader's own. */
+  /** One line of names instead of the labelled rows. */
   compact?: boolean
   className?: string
 }) {
@@ -51,7 +49,7 @@ export function LeanSpread({
   return (
     <figure className={className}>
       <figcaption className="mb-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-        <span className="type-label text-text-muted">Publishers in {countryLabel}</span>
+        <span className="type-label text-text-muted">Covering publishers</span>
         <span className="type-meta">
           {rated} of {plural(lean.publishers.length, 'publisher')} rated
           {estimated ? `, ${estimated} estimated` : null}
@@ -110,7 +108,7 @@ export function LeanSpread({
 
       {lean.oneSided ? (
         <p className="mt-3 border-l-2 border-text pl-3 text-sm font-bold">
-          Mostly covered by {lean.oneSided}-leaning publishers in {countryLabel}
+          Mostly covered by {lean.oneSided}-leaning publishers
         </p>
       ) : null}
     </figure>

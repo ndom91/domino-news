@@ -35,8 +35,8 @@ export const publisherRefSchema = z.object({
 })
 export type PublisherRef = z.infer<typeof publisherRefSchema>
 
-// Lean labels are shown simply, but their evidence and comparisons remain relative to one
-// country's media (countryContext); they are never a global political axis.
+// Lean labels use Domino's shared product scale. countryContext preserves the source market for
+// the evidence behind an assessment and for country-specific insights.
 export const publisherLeanSchema = z.enum([
   'left',
   'centre_left',
