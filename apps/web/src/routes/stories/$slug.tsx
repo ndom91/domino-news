@@ -1,5 +1,5 @@
 import { formatDate, hostnameOf, plural } from '@dn/domain'
-import { REGION_LABELS, type StoryDetail } from '@dn/schemas'
+import { REGION_LABELS, type StoryDetail, type StoryUpdateEvent } from '@dn/schemas'
 import {
   Badge,
   Button,
@@ -101,6 +101,83 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
   )
 }
 
+function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
+  if (update.summaryDiff) {
+    return (
+      <div className="mt-3 max-w-reading border-l-2 border-accent pl-4">
+        <p className="type-label text-text-muted">Updated summary</p>
+        <p className="mt-1 text-sm leading-normal">{update.summaryDiff.current}</p>
+        {update.summaryDiff.previous ? (
+          <details className="t-acc mt-3 text-sm">
+            <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+              Compare with the previous summary
+            </summary>
+            <div className="mt-3 grid gap-4 border-t border-border pt-3 md:grid-cols-2">
+              <div>
+                <p className="type-label text-text-muted">Before</p>
+                <p className="mt-1 leading-normal text-text-secondary">
+                  {update.summaryDiff.previous}
+                </p>
+              </div>
+              <div>
+                <p className="type-label text-accent-text">Now</p>
+                <p className="mt-1 leading-normal">{update.summaryDiff.current}</p>
+              </div>
+            </div>
+          </details>
+        ) : null}
+      </div>
+    )
+  }
+  if (update.relatedStory) {
+    return (
+      <p className="mt-3 text-sm text-text-secondary">
+        <Link
+          to="/stories/$slug"
+          params={{ slug: update.relatedStory.slug }}
+          className="link-inline font-semibold"
+        >
+          {update.relatedStory.title}
+        </Link>
+      </p>
+    )
+  }
+  if (update.sources.length === 0) return null
+  return (
+    <ul className="mt-3 flex max-w-reading flex-col gap-3">
+      {update.sources.map((source) => (
+        <li key={source.url} className="border-l-2 border-border pl-4 text-sm">
+          <a
+            href={source.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-inline font-semibold"
+          >
+            {source.title} ↗
+          </a>
+          {source.publisher ? <p className="mt-1 type-meta">{source.publisher.name}</p> : null}
+          {source.description ? (
+            <p className="mt-1 leading-normal text-text-secondary">{source.description}</p>
+          ) : null}
+        </li>
+      ))}
+    </ul>
+  )
+}
+
+function updateTitle(update: StoryUpdateEvent) {
+  switch (update.kind) {
+    case 'summary_revision':
+      return 'Summary revised'
+    case 'new_primary_source':
+      return 'Primary document added'
+    case 'correction_or_clarification':
+      return 'Correction or clarification'
+    default:
+      return update.description
+  }
+}
+
 function StoryPage() {
   const { slug } = Route.useParams()
   const { now } = Route.useLoaderData()
@@ -174,29 +251,13 @@ function StoryPage() {
               <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
                 {updates.items.map((update) => (
                   <li key={update.id} className="py-4 first:pt-3">
-                    <p className="text-md font-semibold leading-snug">{update.description}</p>
+                    <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
                     <Timestamp
                       at={update.createdAt}
                       format="datetime"
                       className="mt-1 block type-meta"
                     />
-                    {update.sources.length > 0 ? (
-                      <p className="mt-2 text-sm text-text-secondary">
-                        {update.sources.map((source, index) => (
-                          <span key={source.url}>
-                            {index > 0 ? ', ' : null}
-                            <a
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="link-inline"
-                            >
-                              {source.publisher?.name ?? source.title} ↗
-                            </a>
-                          </span>
-                        ))}
-                      </p>
-                    ) : null}
+                    <UpdateDetail update={update} />
                   </li>
                 ))}
               </ol>

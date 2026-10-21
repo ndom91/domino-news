@@ -138,6 +138,7 @@ async function loadUpdates(
       description: schema.storyUpdateEvent.description,
       origin: schema.storyUpdateEvent.origin,
       createdAt: schema.storyUpdateEvent.createdAt,
+      summaryVersionId: schema.storyUpdateEvent.summaryVersionId,
       relatedStoryId: schema.storyUpdateEvent.relatedStoryId,
       relatedSlug: schema.story.slug,
       relatedTitle: schema.story.title,
@@ -154,11 +155,15 @@ async function loadUpdates(
     .limit(limit)
   if (events.length === 0) return []
   const eventIds = events.map((event) => event.id)
-  const [articleSources, primarySources] = await Promise.all([
+  const summaryVersionIds = events.flatMap((event) =>
+    event.summaryVersionId ? [event.summaryVersionId] : [],
+  )
+  const [articleSources, primarySources, summaries] = await Promise.all([
     db
       .select({
         eventId: schema.storyUpdateEventSource.eventId,
         title: schema.articleRevision.title,
+        description: schema.articleRevision.description,
         url: schema.article.canonicalUrl,
         publisher: {
           id: schema.publisher.id,
@@ -187,7 +192,26 @@ async function loadUpdates(
         eq(schema.sourceReference.id, schema.storyUpdateEventSource.sourceReferenceId),
       )
       .where(inArray(schema.storyUpdateEventSource.eventId, eventIds)),
+    summaryVersionIds.length
+      ? db
+          .select({
+            id: schema.storySummaryVersion.id,
+            body: schema.storySummaryVersion.body,
+            supersedesVersionId: schema.storySummaryVersion.supersedesVersionId,
+          })
+          .from(schema.storySummaryVersion)
+          .where(inArray(schema.storySummaryVersion.id, summaryVersionIds))
+      : Promise.resolve([]),
   ])
+  const previousIds = summaries.flatMap((summary) =>
+    summary.supersedesVersionId ? [summary.supersedesVersionId] : [],
+  )
+  const previous = previousIds.length
+    ? await db
+        .select({ id: schema.storySummaryVersion.id, body: schema.storySummaryVersion.body })
+        .from(schema.storySummaryVersion)
+        .where(inArray(schema.storySummaryVersion.id, previousIds))
+    : []
   return events.map((event) => ({
     id: event.id,
     storyId: event.storyId,
@@ -198,12 +222,24 @@ async function loadUpdates(
     relatedStory: event.relatedStoryId
       ? { id: event.relatedStoryId, slug: event.relatedSlug ?? '', title: event.relatedTitle ?? '' }
       : null,
+    summaryDiff: event.summaryVersionId
+      ? (() => {
+          const current = summaries.find((summary) => summary.id === event.summaryVersionId)
+          if (!current) return null
+          return {
+            previous:
+              previous.find((summary) => summary.id === current.supersedesVersionId)?.body ?? null,
+            current: current.body,
+          }
+        })()
+      : null,
     sources: [
       ...articleSources
         .filter((source) => source.eventId === event.id)
         .map((source) => ({
           type: 'article' as const,
           title: source.title,
+          description: source.description,
           url: source.url,
           publisher: source.publisher,
         })),
@@ -212,6 +248,7 @@ async function loadUpdates(
         .map((source) => ({
           type: 'primary_source' as const,
           title: source.title ?? 'Primary source',
+          description: null,
           url: source.url,
           publisher: null,
         })),

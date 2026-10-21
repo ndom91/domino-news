@@ -295,10 +295,13 @@ export const storyUpdateEventSchema = z.object({
   origin: z.enum(['system', 'model', 'editor']),
   createdAt: z.string(),
   relatedStory: z.nullable(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
+  // Exact stored summary versions; the client can show a reader-controlled before/after comparison.
+  summaryDiff: z.nullable(z.object({ previous: z.nullable(z.string()), current: z.string() })),
   sources: z.array(
     z.object({
       type: z.enum(['article', 'primary_source']),
       title: z.string(),
+      description: z.nullable(z.string()),
       url: z.string(),
       publisher: z.nullable(publisherRefSchema),
     }),
