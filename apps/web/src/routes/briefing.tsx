@@ -1,9 +1,9 @@
 import type { BriefingResponse, ForYouReason } from '@dn/schemas'
-import { Notice, SectionHeader, StoryItem, StoryItemSkeleton } from '@dn/ui'
+import { Notice, StoryItem, StoryItemSkeleton } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { RouterLink } from '../components/link.tsx'
-import { Page, PageTitle } from '../components/page.tsx'
+import { Page } from '../components/page.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/briefing')({
@@ -21,11 +21,19 @@ function BriefingPage() {
   const { data: briefing } = useSuspenseQuery(queries.briefing())
   return (
     <Page>
-      <PageTitle meta={briefing.since ? 'Updated since your last briefing' : 'Your first briefing'}>
-        Briefing
-      </PageTitle>
+      <header className="grid pb-2 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
+        <div>
+          <p className="mb-3 type-label text-accent-text">Your news desk</p>
+          <h1 className="type-display-md text-[clamp(2.5rem,4vw,4rem)]">Briefing</h1>
+        </div>
+        <p className="mt-6 border-l-2 border-rule pl-4 text-base leading-snug text-text-secondary md:mt-0">
+          {briefing.since
+            ? 'What changed since your last briefing.'
+            : 'Your first briefing: a considered view of the news now.'}
+        </p>
+      </header>
       {!briefing.personalised ? (
-        <Notice tone="neutral" title="Make this briefing yours" className="mb-10 max-w-reading">
+        <Notice tone="neutral" title="Make this briefing yours" className="mt-8 max-w-reading">
           Pick the regions, desks and topics you care about, or follow a narrative or publisher.
           Important stories still appear even without picks.
           <Link
@@ -38,7 +46,7 @@ function BriefingPage() {
         </Notice>
       ) : null}
       {briefing.sections.length ? (
-        <div className="flex flex-col gap-12 pb-16">
+        <div className="flex flex-col gap-16 pt-10 pb-16 md:gap-20">
           {briefing.sections.map((section) => (
             <BriefingSection key={section.kind} section={section} now={now} />
           ))}
@@ -59,11 +67,15 @@ function BriefingSection({
 }) {
   return (
     <section aria-labelledby={`briefing-${section.kind}`}>
-      <SectionHeader title={section.title} id={`briefing-${section.kind}`} />
-      <p className="-mt-5 mb-7 max-w-reading text-base text-text-secondary">
-        {section.description}
-      </p>
-      <div className="grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
+      <div className="border-t-2 border-rule pt-4">
+        <h2 id={`briefing-${section.kind}`} className="type-period">
+          {section.title}
+        </h2>
+        <p className="mt-2 max-w-reading text-base leading-snug text-text-secondary">
+          {section.description}
+        </p>
+      </div>
+      <div className="mt-8 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {section.items.map((item) => (
           <article key={item.story.id} className="flex flex-col">
             <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />

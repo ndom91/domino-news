@@ -37,7 +37,7 @@ export async function openBriefing(
   userId: string,
 ): Promise<{ since: Date | null; openedAt: Date }> {
   const openedAt = new Date()
-  const { rows } = await db.execute<{ briefing_last_opened_at: Date | null }>(sql`
+  const { rows } = await db.execute<{ briefing_last_opened_at: string | Date | null }>(sql`
     with previous as (
       select briefing_last_opened_at from user_preference where user_id = ${userId}
     ), saved as (
@@ -48,7 +48,8 @@ export async function openBriefing(
     )
     select briefing_last_opened_at from previous
   `)
-  return { since: rows[0]?.briefing_last_opened_at ?? null, openedAt }
+  const previous = rows[0]?.briefing_last_opened_at
+  return { since: previous ? new Date(previous) : null, openedAt }
 }
 
 /** Saves only the fields given. Turning reading history off deletes it. */
