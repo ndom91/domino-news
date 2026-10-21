@@ -17,7 +17,7 @@ import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as OpsRouteImport } from './routes/ops'
+import { Route as PipelineRouteImport } from './routes/pipeline'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SearchRouteImport } from './routes/search'
@@ -71,9 +71,9 @@ const OnboardingRoute = OnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OpsRoute = OpsRouteImport.update({
-  id: '/ops',
-  path: '/ops',
+const PipelineRoute = PipelineRouteImport.update({
+  id: '/pipeline',
+  path: '/pipeline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
@@ -146,7 +146,7 @@ export interface FileRoutesByFullPath {
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/ops': typeof OpsRoute
+  '/pipeline': typeof PipelineRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -169,7 +169,7 @@ export interface FileRoutesByTo {
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/ops': typeof OpsRoute
+  '/pipeline': typeof PipelineRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -193,7 +193,7 @@ export interface FileRoutesById {
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
-  '/ops': typeof OpsRoute
+  '/pipeline': typeof PipelineRoute
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/search': typeof SearchRoute
@@ -218,7 +218,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/login'
     | '/onboarding'
-    | '/ops'
+    | '/pipeline'
     | '/privacy'
     | '/robots.txt'
     | '/search'
@@ -241,7 +241,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/login'
     | '/onboarding'
-    | '/ops'
+    | '/pipeline'
     | '/privacy'
     | '/robots.txt'
     | '/search'
@@ -264,7 +264,7 @@ export interface FileRouteTypes {
     | '/imprint'
     | '/login'
     | '/onboarding'
-    | '/ops'
+    | '/pipeline'
     | '/privacy'
     | '/robots.txt'
     | '/search'
@@ -288,7 +288,7 @@ export interface RootRouteChildren {
   ImprintRoute: typeof ImprintRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
-  OpsRoute: typeof OpsRoute
+  PipelineRoute: typeof PipelineRoute
   PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SearchRoute: typeof SearchRoute
@@ -361,11 +361,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/ops': {
-      id: '/ops'
-      path: '/ops'
-      fullPath: '/ops'
-      preLoaderRoute: typeof OpsRouteImport
+    '/pipeline': {
+      id: '/pipeline'
+      path: '/pipeline'
+      fullPath: '/pipeline'
+      preLoaderRoute: typeof PipelineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/privacy': {
@@ -464,7 +464,7 @@ const rootRouteChildren: RootRouteChildren = {
   ImprintRoute: ImprintRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
-  OpsRoute: OpsRoute,
+  PipelineRoute: PipelineRoute,
   PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SearchRoute: SearchRoute,

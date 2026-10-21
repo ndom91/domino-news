@@ -52,7 +52,7 @@ e2e/, test/       Playwright and Vitest suites
 
 ### Fixture mode
 
-The default `.env.example` runs fixture ingest and fixture inference. Older fixture items count as backfill and are admitted at `BACKFILL_ADMIT_PER_MINUTE` (20/min), so the full set settles in 2–3 minutes. Watch progress on **Pipeline** (`/ops`).
+The default `.env.example` runs fixture ingest and fixture inference. Older fixture items count as backfill and are admitted at `BACKFILL_ADMIT_PER_MINUTE` (20/min), so the full set settles in 2–3 minutes. Watch progress on **Pipeline** (`/pipeline`).
 
 A Story is published only once `MIN_PUBLISH_OUTLETS` (default 2) newsroom publishers cover it, so single-outlet fixture Stories stay hidden. CI sets it to 1 so e2e data settles quickly.
 
@@ -257,7 +257,7 @@ Follow these for any UI work in `apps/web` and `packages/ui`. They come from the
 - Format dates and times with the `@dn/domain` helpers (`Intl`-based). Relative times can differ between server and client, so pass a loader-fixed `now` or render them client-side.
 
 **Copy**
-- Write for readers, not operators. No pipeline terms (poll, backfill, embedding, outbox, CLI commands) outside `/ops`.
+- Write for readers, not operators. No pipeline terms (poll, backfill, embedding, outbox, CLI commands) outside `/pipeline`.
 - One name per thing: **publisher** (not outlet or source), **story** (not development), **narrative**.
 - Pluralise counts with `plural()`. Use "…" (not "...") and curly quotes in UI text. Button labels say exactly what happens ("Remove passkey", not "Submit").
 

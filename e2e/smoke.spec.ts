@@ -117,7 +117,7 @@ test('feed → story → narrative → search', async ({ page }) => {
 
 test('pipeline page lists failed jobs, or says there are none', async ({ page }) => {
   await signIn(page)
-  await page.goto('/ops')
+  await page.goto('/pipeline')
   await expect(page.getByRole('heading', { name: 'Failed jobs' })).toBeVisible()
   const failed = page.locator('#failed-jobs li > details')
   // The list loads after the page: wait for rows or the empty state before deciding.

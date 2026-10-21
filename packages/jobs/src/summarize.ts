@@ -64,7 +64,7 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
       // Ungrounded citations are a model-output problem: retryable, never published.
       if (error instanceof DomainError && error.code === 'bad_request') {
         const invalid = new InvalidModelOutputError(error.message)
-        // Outside the rolled-back transaction, so the attempt shows as failed on /ops.
+        // Outside the rolled-back transaction, so the attempt shows as failed on /pipeline.
         await markRunFailed(ctx.db, runId, invalid)
         throw invalid
       }

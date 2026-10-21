@@ -16,7 +16,7 @@ const NAV = [
   { to: '/narratives', label: 'Narratives', exact: false },
   { to: '/publishers', label: 'Publishers', exact: false },
   { to: '/search', label: 'Search', exact: false },
-  { to: '/ops', label: 'Pipeline', exact: false, adminOnly: true },
+  { to: '/pipeline', label: 'Pipeline', exact: false, adminOnly: true },
 ] as const
 
 const navFor = (user: { isAdmin: boolean }) =>

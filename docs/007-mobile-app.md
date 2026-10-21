@@ -54,7 +54,7 @@ The server is ready. See `packages/server/src/auth.ts` and AGENTS.md "Mobile app
 - **Public sign-up is disabled.** Accounts come from `pnpm cli user:create`, or from Google sign-in when that's configured.
 - **App scheme:** `dominonews` by default (`EXPO_APP_SCHEME`). It must equal `"scheme"` in the app's `app.json`. The server trusts `dominonews://`.
 - **Expo Go:** its `exp://…` URLs are trusted only when the server runs with `NODE_ENV=development`. A production build must use the app scheme.
-- **Sessions last 30 days.** Each user has a `role` (`admin` | `user`), and only admins can use `/ops` and publisher assessment review.
+- **Sessions last 30 days.** Each user has a `role` (`admin` | `user`), and only admins can use `/pipeline` and publisher assessment review.
 
 **Client setup** (better-auth's Expo guide: https://better-auth.com/docs/integrations/expo):
 
@@ -138,7 +138,7 @@ export const queries = createQueries(api)
 
 ## 8. What to build first
 
-- **Product scope:** follow the web app's reader features: front page, story, narrative, search, For You, Blindspot, publishers and account. Admin screens (`/ops`, assessment review) can stay web-only.
+- **Product scope:** follow the web app's reader features: front page, story, narrative, search, For You, Blindspot, publishers and account. Admin screens (`/pipeline`, assessment review) can stay web-only.
 - **Story view-models:** keep them in shared packages where both apps need the same derived data, such as the lean mix grouping or citation numbering. Native-only presentation stays in the app.
 - **Context entries:** a desktop popover becomes a native bottom sheet (004 §6). Share the data, not the component.
 - **Out of scope for now** (004 §2): push notifications, deep links beyond auth callbacks, offline-first storage and store subscriptions. Don't design contracts that rule them out.

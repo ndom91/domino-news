@@ -15,7 +15,7 @@ import { DisclosureChevron } from '../components/disclosure-chevron.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
-export const Route = createFileRoute('/ops')({
+export const Route = createFileRoute('/pipeline')({
   // UI guard only; the /api/v1/ops endpoints enforce admin themselves.
   beforeLoad: ({ context }) => {
     if (!context.session.user?.isAdmin) throw redirect({ to: '/' })
@@ -161,7 +161,7 @@ function OpsPage() {
                 <Td>
                   {q.failed > 0 ? (
                     <Link
-                      to="/ops"
+                      to="/pipeline"
                       search={{ failed: q.name }}
                       hash="failed-jobs"
                       aria-label={`${plural(q.failed, 'failed job')} in ${q.name}`}
@@ -211,6 +211,8 @@ function OpsPage() {
 
       <FeedsSection feeds={s.feeds} />
 
+      <FeedErrorsSection feeds={s.feeds} />
+
       <FailedJobs queue={failed ?? null} />
     </Page>
   )
@@ -234,7 +236,7 @@ function FailedJobs({ queue }: { queue: string | null }) {
             <>
               Showing <span className="font-semibold text-text">{queue}</span> ·{' '}
               <Link
-                to="/ops"
+                to="/pipeline"
                 search={{}}
                 hash="failed-jobs"
                 className="underline underline-offset-4"
@@ -526,6 +528,65 @@ function FeedsSection({ feeds }: { feeds: OpsStatus['feeds'] }) {
           {expanded ? 'Show fewer feeds' : `Show all ${feeds.length} feeds`}
         </Button>
       ) : null}
+    </section>
+  )
+}
+
+/** Feed polling failures, kept separately from model-job failures because they retry on the next poll. */
+function FeedErrorsSection({ feeds }: { feeds: OpsStatus['feeds'] }) {
+  const failures = feeds.filter((feed) => feed.lastStatus === 'error')
+  if (failures.length === 0) return null
+  return (
+    <section id="feed-errors" aria-labelledby="feed-errors-heading" className="mt-10 scroll-mt-24">
+      <SectionLabel id="feed-errors-heading">Feed errors</SectionLabel>
+      <p className="mb-4 text-sm text-text-secondary">
+        {plural(failures.length, 'feed')} could not be polled. Each will retry on its next scheduled
+        poll.
+      </p>
+      <ul className="flex flex-col divide-y divide-border border-y border-border">
+        {failures.map((feed) => (
+          <li key={feed.id}>
+            <details className="t-acc group">
+              <summary className="flex cursor-pointer list-none gap-3 py-3 text-sm [&::-webkit-details-marker]:hidden">
+                <span className="flex h-5 items-center">
+                  <DisclosureChevron className="text-text-muted" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap items-baseline gap-x-3">
+                    <span className="font-semibold">{feed.publisherName}</span>
+                    <span className="type-meta">
+                      {feed.lastPolledAt
+                        ? `failed ${relativeTime(feed.lastPolledAt)}`
+                        : 'not polled'}
+                    </span>
+                  </span>
+                  <span className="block truncate text-error">
+                    {feed.lastError ?? 'No error message'}
+                  </span>
+                  <span className="block truncate text-text-secondary">{feed.url}</span>
+                </span>
+              </summary>
+              <div className="mb-5 ml-7 border-l-2 border-border-strong pl-5">
+                <Detail label="Error">
+                  <pre className="bg-error-subtle p-3 text-xs whitespace-pre-wrap break-words text-error">
+                    {feed.lastError ?? 'No error message'}
+                  </pre>
+                </Detail>
+                <Detail label="Feed URL">
+                  <a
+                    href={feed.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="break-all text-sm underline underline-offset-4"
+                  >
+                    {feed.url}
+                  </a>
+                </Detail>
+              </div>
+            </details>
+          </li>
+        ))}
+      </ul>
     </section>
   )
 }

@@ -738,7 +738,7 @@ export const authUser = pgTable('auth_user', {
   image: text('image'),
   username: text('username').unique(),
   displayUsername: text('display_username'),
-  // 'admin' | 'user'; admins can see the pipeline (/ops) and run its actions.
+  // 'admin' | 'user'; admins can see the pipeline (/pipeline) and run its actions.
   role: text('role').notNull().default('user'),
   createdAt: ts('created_at').notNull().defaultNow(),
   updatedAt: ts('updated_at').notNull().defaultNow(),

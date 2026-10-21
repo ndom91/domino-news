@@ -11,7 +11,7 @@ let cached: { at: number; value: MatchHealth } | null = null
 
 type Side = MatchHealth['splitPairs']['worst'][number]['a']
 
-/** Live match quality signals for /ops. Cached for 5 minutes per server process. */
+/** Live match quality signals for /pipeline. Cached for 5 minutes per server process. */
 export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<MatchHealth> {
   if (cached && Date.now() - cached.at < CACHE_MS) return cached.value
   const { db } = ctx
