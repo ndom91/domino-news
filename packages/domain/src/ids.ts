@@ -36,4 +36,6 @@ export const ID_PREFIX = {
   contextEntry: 'ctx',
   contextEntryVersion: 'ctxv',
   pushDelivery: 'pdl',
+  storyUpdateEvent: 'sue',
+  storyUpdateEventSource: 'sues',
 } as const

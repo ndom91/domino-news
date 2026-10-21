@@ -9,7 +9,13 @@ import {
 } from '@dn/domain'
 import type { StoryInput } from '@dn/inference'
 import type { StoryRelation } from '@dn/schemas'
-import { type AnalysisJob, nearestByVector, touchNarrative, touchStory } from '@dn/server'
+import {
+  type AnalysisJob,
+  nearestByVector,
+  recordStoryUpdate,
+  touchNarrative,
+  touchStory,
+} from '@dn/server'
 import { and, asc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
@@ -126,7 +132,7 @@ async function createEdgeIfRelated(
     return false
   }
   await withTransaction(ctx.pool, async (tx) => {
-    await tx.db
+    const added = await tx.db
       .insert(schema.storyRelationship)
       .values({
         id: newId(ID_PREFIX.storyRelationship),
@@ -135,6 +141,17 @@ async function createEdgeIfRelated(
         confidence: similarity,
       })
       .onConflictDoNothing()
+      .returning({ id: schema.storyRelationship.id })
+    if (added.length && relation === 'corrects') {
+      await recordStoryUpdate(tx.db, {
+        storyId: edge.fromStoryId,
+        kind: 'correction_or_clarification',
+        description: 'A related story corrects or clarifies this reporting.',
+        origin: 'system',
+        relatedStoryId: edge.toStoryId,
+        analysisRunId: runId,
+      })
+    }
     await touchStory(tx.db, edge.fromStoryId, 'story.related', null)
     await touchStory(tx.db, edge.toStoryId, 'story.related', null)
   })

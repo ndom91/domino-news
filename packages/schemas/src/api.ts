@@ -276,6 +276,39 @@ export const storyDetailSchema = z.object({
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 
+export const storyUpdateKindSchema = z.enum([
+  'new_reporting',
+  'official_response',
+  'consequence',
+  'new_primary_source',
+  'correction_or_clarification',
+  'analysis',
+  'summary_revision',
+])
+export type StoryUpdateKind = z.infer<typeof storyUpdateKindSchema>
+
+export const storyUpdateEventSchema = z.object({
+  id: z.string(),
+  storyId: z.string(),
+  kind: storyUpdateKindSchema,
+  description: z.string(),
+  origin: z.enum(['system', 'model', 'editor']),
+  createdAt: z.string(),
+  relatedStory: z.nullable(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
+  sources: z.array(
+    z.object({
+      type: z.enum(['article', 'primary_source']),
+      title: z.string(),
+      url: z.string(),
+      publisher: z.nullable(publisherRefSchema),
+    }),
+  ),
+})
+export type StoryUpdateEvent = z.infer<typeof storyUpdateEventSchema>
+
+export const storyUpdatesResponseSchema = z.object({ items: z.array(storyUpdateEventSchema) })
+export type StoryUpdatesResponse = z.infer<typeof storyUpdatesResponseSchema>
+
 // What the lead block (HeroStory) shows; the front page sends only this.
 export const storyLeadSchema = z.extend(
   z.pick(storyDetailSchema, {
@@ -802,6 +835,8 @@ export const briefingSectionSchema = z.object({
       story: storyListItemSchema,
       reasons: z.array(forYouReasonSchema),
       feedback: z.nullable(feedbackSignalSchema),
+      // Separate from personal ranking reasons: this is the observable Story change.
+      update: z.nullable(z.object({ kind: storyUpdateKindSchema, description: z.string() })),
     }),
   ),
 })

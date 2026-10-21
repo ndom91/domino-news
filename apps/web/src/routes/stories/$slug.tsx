@@ -37,6 +37,7 @@ export const Route = createFileRoute('/stories/$slug')({
       return { preview, title: preview.title, now: new Date().toISOString() }
     }
     const story = await orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug)))
+    await context.queryClient.prefetchQuery(queries.storyUpdates(params.slug))
     // The narrative graph renders in the server HTML instead of as a skeleton.
     const narrative = story.narratives[0]
     if (narrative) await context.queryClient.prefetchQuery(queries.narrative(narrative.slug))
@@ -107,6 +108,7 @@ function StoryPage() {
   // Summary versions are an editorial detail; readers only see the current summary.
   const isAdmin = session.user?.isAdmin ?? false
   const { data: story } = useSuspenseQuery(queries.story(slug))
+  const { data: updates } = useSuspenseQuery(queries.storyUpdates(slug))
   // Opt-in reading history, recorded from the browser so SSR and prefetches don't count.
   // Best effort: a lost read only makes the Blindspot insights slightly less complete.
   const rememberReads = session.user?.rememberReads ?? false
@@ -159,6 +161,46 @@ function StoryPage() {
         <div className="min-w-0">
           {story.summary?.detail ? (
             <SummaryDetail story={story} detail={story.summary.detail} />
+          ) : null}
+
+          {updates.items.length > 0 ? (
+            <section aria-labelledby="updates-heading">
+              <SectionHeader
+                id="updates-heading"
+                rule
+                title="What changed"
+                meta={plural(updates.items.length, 'update')}
+              />
+              <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
+                {updates.items.map((update) => (
+                  <li key={update.id} className="py-4 first:pt-3">
+                    <p className="text-md font-semibold leading-snug">{update.description}</p>
+                    <Timestamp
+                      at={update.createdAt}
+                      format="datetime"
+                      className="mt-1 block type-meta"
+                    />
+                    {update.sources.length > 0 ? (
+                      <p className="mt-2 text-sm text-text-secondary">
+                        {update.sources.map((source, index) => (
+                          <span key={source.url}>
+                            {index > 0 ? ', ' : null}
+                            <a
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="link-inline"
+                            >
+                              {source.publisher?.name ?? source.title} ↗
+                            </a>
+                          </span>
+                        ))}
+                      </p>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </section>
           ) : null}
 
           <section aria-labelledby="sources-heading">

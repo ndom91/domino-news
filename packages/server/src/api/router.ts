@@ -36,6 +36,7 @@ import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { DomainError, editSummary } from '../story-service.ts'
+import { listNarrativeUpdates, listStoryUpdates } from '../story-updates.ts'
 
 // Cursor format: "<ISO timestamp>|<story id>" (see listStories).
 const storyListQuery = z.object({
@@ -251,6 +252,11 @@ const routes: Route[] = [
     if (!story) throw new HttpError('not_found', 'story not found')
     return json(story)
   }),
+  route('GET', '/api/v1/stories/:id/updates', async ({ ctx, params }) => {
+    const updates = await listStoryUpdates(ctx.db, params.id ?? '')
+    if (!updates) throw new HttpError('not_found', 'story not found')
+    return json(updates)
+  }),
   route('POST', '/api/v1/stories/:id/summary', async ({ ctx, request, params, userId }) => {
     if (!ctx.config.enableSummaryEditing)
       throw new HttpError('forbidden', 'summary editing is disabled')
@@ -271,6 +277,11 @@ const routes: Route[] = [
     const narrative = await getNarrative(ctx.db, params.id ?? '')
     if (!narrative) throw new HttpError('not_found', 'narrative not found')
     return json(narrative)
+  }),
+  route('GET', '/api/v1/narratives/:id/updates', async ({ ctx, params }) => {
+    const updates = await listNarrativeUpdates(ctx.db, params.id ?? '')
+    if (!updates) throw new HttpError('not_found', 'narrative not found')
+    return json(updates)
   }),
   route('GET', '/api/v1/publishers', async ({ ctx }) => json(await listPublishers(ctx.db))),
   route('GET', '/api/v1/publishers/:slug', async ({ ctx, params }) => {

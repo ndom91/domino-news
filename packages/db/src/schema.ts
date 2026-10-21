@@ -565,6 +565,60 @@ export const storySourceReference = pgTable(
   (t) => [primaryKey({ columns: [t.storyId, t.sourceReferenceId] })],
 )
 
+// Reader-facing, append-only explanation of an observable change to a Story. This is distinct
+// from the outbox: it is canonical reader data, not delivery bookkeeping.
+export const storyUpdateEvent = pgTable(
+  'story_update_event',
+  {
+    id: text('id').primaryKey(),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    kind: text('kind')
+      .$type<
+        | 'new_reporting'
+        | 'official_response'
+        | 'consequence'
+        | 'new_primary_source'
+        | 'correction_or_clarification'
+        | 'analysis'
+        | 'summary_revision'
+      >()
+      .notNull(),
+    description: text('description').notNull(),
+    origin: text('origin').$type<'system' | 'model' | 'editor'>().notNull(),
+    summaryVersionId: text('summary_version_id').references(() => storySummaryVersion.id),
+    relatedStoryId: text('related_story_id').references(() => story.id),
+    analysisRunId: text('analysis_run_id').references(() => analysisRun.id),
+    supersededAt: ts('superseded_at'),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    index('story_update_event_story_idx').on(t.storyId, t.createdAt),
+    index('story_update_event_recent_idx').on(t.createdAt.desc()),
+  ],
+)
+
+// An event may cite one or more articles or primary documents, never an ambiguous target.
+export const storyUpdateEventSource = pgTable(
+  'story_update_event_source',
+  {
+    id: text('id').primaryKey(),
+    eventId: text('event_id')
+      .notNull()
+      .references(() => storyUpdateEvent.id),
+    articleId: text('article_id').references(() => article.id),
+    sourceReferenceId: text('source_reference_id').references(() => sourceReference.id),
+  },
+  (t) => [
+    index('story_update_event_source_event_idx').on(t.eventId),
+    check(
+      'story_update_event_source_one_target',
+      sql`(${t.articleId} is null) <> (${t.sourceReferenceId} is null)`,
+    ),
+  ],
+)
+
 // Context entries: reusable background explanations shown as popovers on Story summaries.
 // Explanations are versioned (append-only trigger); entries are shared across Stories.
 

@@ -16,6 +16,7 @@ import {
   searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
+  storyUpdatesResponseSchema,
   userPreferencesSchema,
 } from '@dn/schemas'
 import { clearCache, createUserAccount, setFeedback } from '@dn/server'
@@ -66,9 +67,11 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/edition'],
       ['GET', '/api/v1/stories'],
       ['GET', '/api/v1/stories/x'],
+      ['GET', '/api/v1/stories/x/updates'],
       ['POST', '/api/v1/stories/x/summary'],
       ['GET', '/api/v1/narratives'],
       ['GET', '/api/v1/narratives/x'],
+      ['GET', '/api/v1/narratives/x/updates'],
       ['GET', '/api/v1/publishers'],
       ['GET', '/api/v1/search?q=x'],
       ['GET', '/api/v1/ops/status'],
@@ -124,6 +127,16 @@ describe('/api/v1 contracts', () => {
     expect(detail.sources.length).toBeGreaterThan(0)
     // The Story page's longer text: more than one paragraph in fixture mode.
     expect(detail.summary?.detail?.split('\n\n').length).toBeGreaterThan(1)
+  })
+
+  it('returns the source-linked update timeline for a story', async () => {
+    const list = storyListResponseSchema.parse(await (await call('/api/v1/stories?limit=1')).json())
+    const story = list.items[0]
+    if (!story) throw new Error('empty list')
+    const updates = storyUpdatesResponseSchema.parse(
+      await (await call(`/api/v1/stories/${story.slug}/updates`)).json(),
+    )
+    expect(updates.items).toEqual(expect.any(Array))
   })
 
   it('paginates with a stable cursor', async () => {

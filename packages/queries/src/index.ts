@@ -30,8 +30,10 @@ export const queryKeys = {
   front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
+  storyUpdates: (id: string) => ['stories', 'updates', id] as const,
   narratives: () => ['narratives'] as const,
   narrative: (id: string) => ['narratives', 'detail', id] as const,
+  narrativeUpdates: (id: string) => ['narratives', 'updates', id] as const,
   search: (query: Partial<SearchQuery> & { q: string }) => ['search', query] as const,
   publishers: () => ['publishers'] as const,
   publisher: (slug: string) => ['publishers', 'detail', slug] as const,
@@ -85,6 +87,12 @@ export function createQueries(api: ApiClient) {
         queryFn: ({ signal }) => api.getStory(id, signal),
         staleTime: 30_000,
       }),
+    storyUpdates: (id: string) =>
+      queryOptions({
+        queryKey: queryKeys.storyUpdates(id),
+        queryFn: ({ signal }) => api.getStoryUpdates(id, signal),
+        staleTime: 30_000,
+      }),
     narratives: () =>
       queryOptions({
         queryKey: queryKeys.narratives(),
@@ -96,6 +104,12 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.narrative(id),
         queryFn: ({ signal }) => api.getNarrative(id, signal),
         staleTime: 60_000,
+      }),
+    narrativeUpdates: (id: string) =>
+      queryOptions({
+        queryKey: queryKeys.narrativeUpdates(id),
+        queryFn: ({ signal }) => api.getNarrativeUpdates(id, signal),
+        staleTime: 30_000,
       }),
     search: (query: Partial<SearchQuery> & { q: string }) =>
       queryOptions({

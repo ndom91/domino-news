@@ -52,10 +52,12 @@ import {
   type SignalsRequest,
   type StoryDetail,
   type StoryListResponse,
+  type StoryUpdatesResponse,
   type SummaryEditRequest,
   searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
+  storyUpdatesResponseSchema,
   type UserPreferences,
   type UserPreferencesUpdate,
   userPreferencesSchema,
@@ -149,6 +151,14 @@ export function createApiClient({
     ) => request<StoryListResponse>(storyListResponseSchema, `/stories${qs(opts)}`, { signal }),
     getStory: (id: string, signal?: AbortSignalLike) =>
       request<StoryDetail>(storyDetailSchema, `/stories/${encodeURIComponent(id)}`, { signal }),
+    getStoryUpdates: (id: string, signal?: AbortSignalLike) =>
+      request<StoryUpdatesResponse>(
+        storyUpdatesResponseSchema,
+        `/stories/${encodeURIComponent(id)}/updates`,
+        {
+          signal,
+        },
+      ),
     editSummary: (id: string, body: SummaryEditRequest) =>
       request<StoryDetail>(storyDetailSchema, `/stories/${encodeURIComponent(id)}/summary`, {
         method: 'POST',
@@ -160,6 +170,12 @@ export function createApiClient({
       request<NarrativeDetail>(narrativeDetailSchema, `/narratives/${encodeURIComponent(id)}`, {
         signal,
       }),
+    getNarrativeUpdates: (id: string, signal?: AbortSignalLike) =>
+      request<StoryUpdatesResponse>(
+        storyUpdatesResponseSchema,
+        `/narratives/${encodeURIComponent(id)}/updates`,
+        { signal },
+      ),
     search: (query: Partial<SearchQuery> & { q: string }, signal?: AbortSignalLike) =>
       request<SearchResponse>(searchResponseSchema, `/search${qs(query)}`, { signal }),
     listPublishers: (signal?: AbortSignalLike) =>

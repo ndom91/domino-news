@@ -1,7 +1,15 @@
 import { formatDate, plural } from '@dn/domain'
-import { cx, deskKey, NarrativeActivity, NarrativeGraph, SectionLabel } from '@dn/ui'
+import {
+  cx,
+  deskKey,
+  NarrativeActivity,
+  NarrativeGraph,
+  SectionHeader,
+  SectionLabel,
+  Timestamp,
+} from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
@@ -19,6 +27,7 @@ export const Route = createFileRoute('/narratives/$slug')({
       return { preview, title: preview.title }
     }
     const n = await orNotFound(context.queryClient.ensureQueryData(queries.narrative(params.slug)))
+    await context.queryClient.prefetchQuery(queries.narrativeUpdates(params.slug))
     return { preview: null, title: n.title }
   },
   head: ({ loaderData, match, params }) => {
@@ -49,6 +58,7 @@ function NarrativeRoute() {
 function NarrativePage() {
   const { slug } = Route.useParams()
   const { data: narrative } = useSuspenseQuery(queries.narrative(slug))
+  const { data: updates } = useSuspenseQuery(queries.narrativeUpdates(slug))
   const first = narrative.stories[0]
   const last = narrative.stories[narrative.stories.length - 1]
   return (
@@ -86,6 +96,42 @@ function NarrativePage() {
           <div className="border-t-2 border-rule">
             <NarrativeGraph narrative={narrative} Link={RouterLink} />
           </div>
+          {updates.items.length > 0 ? (
+            <section aria-labelledby="updates-heading">
+              <SectionHeader
+                id="updates-heading"
+                rule
+                title="Recent updates"
+                meta={plural(updates.items.length, 'update')}
+              />
+              <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
+                {updates.items.map((update) => {
+                  const story = narrative.stories.find((item) => item.id === update.storyId)
+                  return (
+                    <li key={update.id} className="py-4 first:pt-3">
+                      {story ? (
+                        <Link
+                          to="/stories/$slug"
+                          params={{ slug: story.slug }}
+                          className="type-label text-accent-text"
+                        >
+                          {story.title}
+                        </Link>
+                      ) : null}
+                      <p className="mt-1 text-md font-semibold leading-snug">
+                        {update.description}
+                      </p>
+                      <Timestamp
+                        at={update.createdAt}
+                        format="datetime"
+                        className="mt-1 block type-meta"
+                      />
+                    </li>
+                  )
+                })}
+              </ol>
+            </section>
+          ) : null}
           <p className="mt-8 max-w-reading text-xs text-text-muted">
             Links between stories are proposed by a language model from the stories' summaries and
             checked for consistent ordering.

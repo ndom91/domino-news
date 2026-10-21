@@ -8,6 +8,7 @@ import {
   ENRICHMENT_QUEUES,
   newsroomOutletCount,
   recordGeneratedSummary,
+  recordStoryUpdate,
 } from '@dn/server'
 import { eq } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
@@ -134,9 +135,19 @@ async function recordPrimarySources(db: Db, storyId: string, articleId: string, 
       .onConflictDoUpdate({ target: schema.sourceReference.url, set: { url } })
       .returning({ id: schema.sourceReference.id })
     if (!ref) continue
-    await db
+    const added = await db
       .insert(schema.storySourceReference)
       .values({ storyId, sourceReferenceId: ref.id, observationId, addedAt: now })
       .onConflictDoNothing()
+      .returning({ sourceReferenceId: schema.storySourceReference.sourceReferenceId })
+    if (added.length) {
+      await recordStoryUpdate(db, {
+        storyId,
+        kind: 'new_primary_source',
+        description: 'A primary source was added to this story.',
+        origin: 'system',
+        sourceReferenceIds: [ref.id],
+      })
+    }
   }
 }

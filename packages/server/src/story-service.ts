@@ -4,6 +4,7 @@ import { ID_PREFIX, newId, renumberCitations, slugify } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
 import { and, countDistinct, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
+import { recordStoryUpdate } from './story-updates.ts'
 
 export function sha256(input: string) {
   return createHash('sha256').update(input).digest('hex')
@@ -110,7 +111,10 @@ export async function attachArticleToStory(
     matchMethod: input.matchMethod,
   })
   const [story] = await db
-    .select({ firstObservedAt: schema.story.firstObservedAt })
+    .select({
+      firstObservedAt: schema.story.firstObservedAt,
+      publishedAt: schema.story.publishedAt,
+    })
     .from(schema.story)
     .where(eq(schema.story.id, input.storyId))
   if (story && input.observedAt < story.firstObservedAt) {
@@ -120,6 +124,22 @@ export async function attachArticleToStory(
       .where(eq(schema.story.id, input.storyId))
   }
   await refreshFingerprint(db, input.storyId)
+  if (story?.publishedAt) {
+    const [article] = await db
+      .select({ publisher: schema.publisher.name })
+      .from(schema.article)
+      .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+      .where(eq(schema.article.id, input.articleId))
+    await recordStoryUpdate(db, {
+      storyId: input.storyId,
+      kind: 'new_reporting',
+      description: article
+        ? `New reporting from ${article.publisher}.`
+        : 'New reporting was added.',
+      origin: 'system',
+      articleIds: [input.articleId],
+    })
+  }
   await touchStory(db, input.storyId, 'story.article_added', now)
 }
 
@@ -167,14 +187,15 @@ export async function recordGeneratedSummary(
     .for('update')
   if (!story) throw new DomainError('not_found', `story ${input.storyId} not found`)
   if (story.inputFingerprint !== input.inputFingerprint) return { status: 'stale' }
-  if (story.currentSummaryId) {
+  const supersedesVersionId = story.currentSummaryId
+  if (supersedesVersionId) {
     // Same inputs already summarised (retry/duplicate) or a human edit on these inputs wins.
     // Exceptions: a generated summary from before desk tagging may be refreshed to get one,
     // and a forced refresh replaces any generated summary.
     const [current] = await db
       .select()
       .from(schema.storySummaryVersion)
-      .where(eq(schema.storySummaryVersion.id, story.currentSummaryId))
+      .where(eq(schema.storySummaryVersion.id, supersedesVersionId))
     const refresh = current?.editedByUserId === null && (story.desk === null || input.force)
     if (current?.inputFingerprint === input.inputFingerprint && !refresh) return { status: 'stale' }
   }
@@ -266,6 +287,16 @@ export async function recordGeneratedSummary(
     })
     .where(eq(schema.story.id, story.id))
   await touchStory(db, story.id, 'story.summary_updated')
+  if (supersedesVersionId) {
+    await recordStoryUpdate(db, {
+      storyId: story.id,
+      kind: 'summary_revision',
+      description: 'The story summary was updated with the latest reporting.',
+      origin: 'system',
+      summaryVersionId: versionId,
+      articleIds: citedArticles,
+    })
+  }
   return { status: 'recorded', versionId }
 }
 
@@ -332,5 +363,13 @@ export async function editSummary(
     .set({ currentSummaryId: versionId, title: input.headline })
     .where(eq(schema.story.id, story.id))
   await touchStory(db, story.id, 'story.summary_edited')
+  await recordStoryUpdate(db, {
+    storyId: story.id,
+    kind: 'summary_revision',
+    description: 'The story summary was edited.',
+    origin: 'editor',
+    summaryVersionId: versionId,
+    articleIds: sources.map((source) => source.articleId),
+  })
   return versionId
 }

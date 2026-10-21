@@ -79,7 +79,12 @@ function BriefingSection({
         {section.items.map((item) => (
           <article key={item.story.id} className="flex flex-col">
             <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />
-            <p className="mt-3 type-meta text-text-muted">{reasonText(item.reasons)}</p>
+            {item.update ? (
+              <p className="mt-3 text-sm font-semibold leading-snug text-text-secondary">
+                {item.update.description}
+              </p>
+            ) : null}
+            <p className="mt-2 type-meta text-text-muted">{reasonText(item.reasons)}</p>
           </article>
         ))}
       </div>
