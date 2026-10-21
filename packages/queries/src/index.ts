@@ -5,6 +5,8 @@ import type {
   FollowList,
   FollowRequest,
   LearnedSignals,
+  MutedPublisherList,
+  MutedPublisherRequest,
   PreviewType,
   Region,
   SearchQuery,
@@ -24,6 +26,7 @@ export const queryKeys = {
   stories: () => ['stories'] as const,
   edition: () => ['edition'] as const,
   fronts: () => ['front'] as const,
+  briefing: () => ['briefing'] as const,
   front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
@@ -39,6 +42,7 @@ export const queryKeys = {
   preferences: () => ['me', 'preferences'] as const,
   insights: () => ['me', 'insights'] as const,
   follows: () => ['me', 'follows'] as const,
+  mutedPublishers: () => ['me', 'muted-publishers'] as const,
   forYou: () => ['for-you'] as const,
   forYouRail: () => ['for-you', 'rail'] as const,
   hiddenStories: () => ['me', 'hidden-stories'] as const,
@@ -53,6 +57,12 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.front(region),
         queryFn: ({ signal }) => api.getFrontPage({ region }, signal),
         staleTime: 30_000,
+      }),
+    briefing: () =>
+      queryOptions({
+        queryKey: queryKeys.briefing(),
+        queryFn: ({ signal }) => api.getBriefing(signal),
+        staleTime: 60_000,
       }),
     edition: () =>
       queryOptions({
@@ -127,6 +137,12 @@ export function createQueries(api: ApiClient) {
       queryOptions({
         queryKey: queryKeys.follows(),
         queryFn: ({ signal }) => api.getFollows(signal),
+        staleTime: 5 * 60_000,
+      }),
+    mutedPublishers: () =>
+      queryOptions({
+        queryKey: queryKeys.mutedPublishers(),
+        queryFn: ({ signal }) => api.getMutedPublishers(signal),
         staleTime: 5 * 60_000,
       }),
     forYou: () =>
@@ -207,6 +223,7 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
         queryClient.invalidateQueries({ queryKey: queryKeys.session() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.insights() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.briefing() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.fronts() }),
       ])
     },
@@ -228,6 +245,20 @@ export function setFollowMutation(api: ApiClient, queryClient: QueryClient) {
     onSuccess: async (follows: FollowList) => {
       queryClient.setQueryData(queryKeys.follows(), follows)
       await queryClient.invalidateQueries({ queryKey: queryKeys.forYou() })
+      await queryClient.invalidateQueries({ queryKey: queryKeys.briefing() })
+    },
+  }
+}
+
+export function setMutedPublisherMutation(api: ApiClient, queryClient: QueryClient) {
+  return {
+    mutationFn: (body: MutedPublisherRequest) => api.setMutedPublisher(body),
+    onSuccess: async (muted: MutedPublisherList) => {
+      queryClient.setQueryData(queryKeys.mutedPublishers(), muted)
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.briefing() }),
+      ])
     },
   }
 }

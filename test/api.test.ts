@@ -3,12 +3,14 @@ import { pickLead } from '@dn/domain'
 import { publishAssessments } from '@dn/jobs'
 import {
   apiErrorSchema,
+  briefingResponseSchema,
   evidenceResponseSchema,
   followListSchema,
   forYouResponseSchema,
   frontPageSchema,
   insightsSchema,
   learnedSignalsSchema,
+  mutedPublisherListSchema,
   narrativeListResponseSchema,
   opsStatusSchema,
   searchResponseSchema,
@@ -76,6 +78,9 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/me/preferences'],
       ['GET', '/api/v1/me/follows'],
       ['POST', '/api/v1/me/follows'],
+      ['GET', '/api/v1/me/muted-publishers'],
+      ['POST', '/api/v1/me/muted-publishers'],
+      ['GET', '/api/v1/briefing'],
       ['GET', '/api/v1/for-you'],
       ['POST', '/api/v1/me/feedback'],
       ['GET', '/api/v1/me/signals'],
@@ -674,6 +679,39 @@ describe('For You feedback', () => {
       items.map((i) => ({ ...i, weight: Math.round(i.weight * 1000) / 1000 }))
     expect(rounded(raced)).toEqual(rounded(alone.items))
     await post('/api/v1/me/signals', { reset: true })
+  })
+})
+
+describe('Briefing', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+
+  it('keeps one comparison checkpoint and lets readers mute publishers', async () => {
+    await h.ctx.pool.query(
+      `update story set last_updated_at = now() where published_at is not null`,
+    )
+    const first = briefingResponseSchema.parse(await (await call('/api/v1/briefing')).json())
+    expect(first.since).toBeNull()
+    expect(first.openedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
+    const second = briefingResponseSchema.parse(await (await call('/api/v1/briefing')).json())
+    expect(second.since).toBe(first.openedAt)
+
+    const { rows } = await h.ctx.pool.query(
+      `select p.id from publisher p join article a on a.publisher_id = p.id limit 1`,
+    )
+    const publisherId = rows[0].id as string
+    const muted = mutedPublisherListSchema.parse(
+      await (await post('/api/v1/me/muted-publishers', { publisherId, muted: true })).json(),
+    )
+    expect(muted.items.some((publisher) => publisher.id === publisherId)).toBe(true)
+    const restored = mutedPublisherListSchema.parse(
+      await (await post('/api/v1/me/muted-publishers', { publisherId, muted: false })).json(),
+    )
+    expect(restored.items.some((publisher) => publisher.id === publisherId)).toBe(false)
   })
 })
 

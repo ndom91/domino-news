@@ -799,6 +799,8 @@ export const userPreference = pgTable('user_preference', {
   rememberReads: boolean('remember_reads').notNull().default(false),
   // ISO 3166-1 alpha-2 for the Story lean mix. Null = use the request's country.
   country: text('country'),
+  // The only Briefing activity retained: its most recent open. This is not reading history.
+  briefingLastOpenedAt: ts('briefing_last_opened_at'),
   updatedAt: ts('updated_at').notNull().defaultNow(),
 })
 
@@ -846,6 +848,22 @@ export const userFollow = pgTable(
     createdAt: createdAt(),
   },
   (t) => [primaryKey({ columns: [t.userId, t.targetType, t.targetId] })],
+)
+
+// A publisher mute only affects this reader's personalised briefing. It never changes a Story
+// or suppresses reporting from other publishers covering it.
+export const userPublisherMute = pgTable(
+  'user_publisher_mute',
+  {
+    userId: text('user_id')
+      .notNull()
+      .references(() => authUser.id, { onDelete: 'cascade' }),
+    publisherId: text('publisher_id')
+      .notNull()
+      .references(() => publisher.id, { onDelete: 'cascade' }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.userId, t.publisherId] })],
 )
 
 // Expo tokens are device-specific. A token may move between accounts, so it is the primary key.

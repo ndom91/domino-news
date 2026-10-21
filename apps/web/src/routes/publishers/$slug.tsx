@@ -42,6 +42,7 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import type { FormEvent } from 'react'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
+import { MutePublisherButton } from '../../components/mute-publisher-button.tsx'
 import { Page } from '../../components/page.tsx'
 import { PreviewTeaser } from '../../components/preview-teaser.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
@@ -99,7 +100,10 @@ function PublisherPage() {
               <p className="type-label text-text-muted">Publisher</p>
               <div className="mt-2 flex flex-wrap items-start justify-between gap-4">
                 <h1 className="type-headline-lg">{p.name}</h1>
-                <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
+                <div className="flex flex-wrap gap-2">
+                  <FollowButton targetType="publisher" targetId={p.id} name={p.name} />
+                  <MutePublisherButton publisherId={p.id} name={p.name} />
+                </div>
               </div>
               {/* Spaced items with a muted icon each, rather than a dotted run of codes. */}
               <ul className="mt-2 flex flex-wrap items-center gap-x-5 gap-y-1 type-meta">

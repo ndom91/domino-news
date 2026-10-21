@@ -726,6 +726,22 @@ export type UserPreferences = z.infer<typeof userPreferencesSchema>
 export const userPreferencesUpdateSchema = z.partial(userPreferencesSchema)
 export type UserPreferencesUpdate = z.infer<typeof userPreferencesUpdateSchema>
 
+export const mutedPublisherSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  name: z.string(),
+})
+export type MutedPublisher = z.infer<typeof mutedPublisherSchema>
+
+export const mutedPublisherListSchema = z.object({ items: z.array(mutedPublisherSchema) })
+export type MutedPublisherList = z.infer<typeof mutedPublisherListSchema>
+
+export const mutedPublisherRequestSchema = z.object({
+  publisherId: z.string().check(z.minLength(1)),
+  muted: z.boolean(),
+})
+export type MutedPublisherRequest = z.infer<typeof mutedPublisherRequestSchema>
+
 export const readRequestSchema = z.object({ storyId: z.string().check(z.minLength(1)) })
 
 export const followTargetTypeSchema = z.enum(['narrative', 'publisher'])
@@ -773,6 +789,31 @@ export const forYouResponseSchema = z.object({
   pageInfo: pageInfoSchema,
 })
 export type ForYouResponse = z.infer<typeof forYouResponseSchema>
+
+export const briefingSectionKindSchema = z.enum(['essential', 'following', 'for_you', 'outside'])
+export type BriefingSectionKind = z.infer<typeof briefingSectionKindSchema>
+
+export const briefingSectionSchema = z.object({
+  kind: briefingSectionKindSchema,
+  title: z.string(),
+  description: z.string(),
+  items: z.array(
+    z.object({
+      story: storyListItemSchema,
+      reasons: z.array(forYouReasonSchema),
+      feedback: z.nullable(feedbackSignalSchema),
+    }),
+  ),
+})
+
+export const briefingResponseSchema = z.object({
+  // Null on the reader's first visit. Subsequent requests compare against this checkpoint.
+  since: z.nullable(z.string()),
+  openedAt: z.string(),
+  personalised: z.boolean(),
+  sections: z.array(briefingSectionSchema),
+})
+export type BriefingResponse = z.infer<typeof briefingResponseSchema>
 
 export const signalKindSchema = z.enum(['topic', 'desk', 'region', 'narrative'])
 export type SignalKind = z.infer<typeof signalKindSchema>

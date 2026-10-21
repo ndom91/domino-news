@@ -1,5 +1,10 @@
 import { countryName, KNOWN_COUNTRIES } from '@dn/domain'
-import { savePreferencesMutation, setFollowMutation, updateSignalsMutation } from '@dn/queries'
+import {
+  savePreferencesMutation,
+  setFollowMutation,
+  setMutedPublisherMutation,
+  updateSignalsMutation,
+} from '@dn/queries'
 import {
   Button,
   ConfirmDialog,
@@ -58,6 +63,7 @@ function AccountPage() {
     following: (
       <>
         <FollowingSection />
+        <MutedPublishersSection />
         <LearnedSignals />
       </>
     ),
@@ -410,7 +416,7 @@ function FeedSection() {
     <SettingsRow
       id="your-feed"
       title="Your feed"
-      description="Stories matching these move to the top of For You, and your regions lead the front page. Nothing else is hidden."
+      description="Stories matching these move to the top of Briefing, and your regions lead the front page. Nothing else is hidden."
     >
       <div className="grid grid-cols-2 gap-x-column gap-y-6 max-md:grid-cols-1">
         <FeedPicks sections={['regions', 'desks']} />
@@ -428,7 +434,7 @@ function FollowingSection() {
     <SettingsRow
       id="following"
       title="Following"
-      description="Stories from narratives and publishers you follow rank higher in For You."
+      description="Stories from narratives and publishers you follow rank higher in Briefing."
     >
       {follows.data?.items.length ? (
         <ul className="flex flex-col divide-y divide-border border-y border-border">
@@ -461,6 +467,40 @@ function FollowingSection() {
         <p className="text-sm text-text-muted">
           Nothing yet. Use Follow on a narrative or publisher page.
         </p>
+      )}
+    </SettingsRow>
+  )
+}
+
+function MutedPublishersSection() {
+  const queryClient = useQueryClient()
+  const muted = useQuery(queries.mutedPublishers())
+  const change = useMutation(setMutedPublisherMutation(api, queryClient))
+  return (
+    <SettingsRow
+      id="muted-publishers"
+      title="Muted publishers"
+      description="Muted publishers do not shape your Briefing. A story still appears when other publishers report it."
+    >
+      {muted.data?.items.length ? (
+        <ul className="flex flex-col divide-y divide-border border-y border-border">
+          {muted.data.items.map((publisher) => (
+            <li key={publisher.id} className="flex items-center justify-between gap-3 py-2.5">
+              <span>{publisher.name}</span>
+              <Button
+                size="sm"
+                variant="ghost"
+                aria-label={`Unmute ${publisher.name}`}
+                loading={change.isPending && change.variables?.publisherId === publisher.id}
+                onClick={() => change.mutate({ publisherId: publisher.id, muted: false })}
+              >
+                Unmute
+              </Button>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-sm text-text-muted">No muted publishers.</p>
       )}
     </SettingsRow>
   )

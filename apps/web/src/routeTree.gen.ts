@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlindspotRouteImport } from './routes/blindspot'
+import { Route as BriefingRouteImport } from './routes/briefing'
 import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LoginRouteImport } from './routes/login'
@@ -49,6 +50,11 @@ const AccountRoute = AccountRouteImport.update({
 const BlindspotRoute = BlindspotRouteImport.update({
   id: '/blindspot',
   path: '/blindspot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BriefingRoute = BriefingRouteImport.update({
+  id: '/briefing',
+  path: '/briefing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForYouRoute = ForYouRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
@@ -165,6 +172,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
@@ -189,6 +197,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
+  '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/login': typeof LoginRoute
@@ -214,6 +223,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blindspot'
+    | '/briefing'
     | '/for-you'
     | '/imprint'
     | '/login'
@@ -237,6 +247,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blindspot'
+    | '/briefing'
     | '/for-you'
     | '/imprint'
     | '/login'
@@ -260,6 +271,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/account'
     | '/blindspot'
+    | '/briefing'
     | '/for-you'
     | '/imprint'
     | '/login'
@@ -284,6 +296,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   AccountRoute: typeof AccountRoute
   BlindspotRoute: typeof BlindspotRoute
+  BriefingRoute: typeof BriefingRoute
   ForYouRoute: typeof ForYouRoute
   ImprintRoute: typeof ImprintRoute
   LoginRoute: typeof LoginRoute
@@ -331,6 +344,13 @@ declare module '@tanstack/react-router' {
       path: '/blindspot'
       fullPath: '/blindspot'
       preLoaderRoute: typeof BlindspotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/briefing': {
+      id: '/briefing'
+      path: '/briefing'
+      fullPath: '/briefing'
+      preLoaderRoute: typeof BriefingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-you': {
@@ -460,6 +480,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   AccountRoute: AccountRoute,
   BlindspotRoute: BlindspotRoute,
+  BriefingRoute: BriefingRoute,
   ForYouRoute: ForYouRoute,
   ImprintRoute: ImprintRoute,
   LoginRoute: LoginRoute,

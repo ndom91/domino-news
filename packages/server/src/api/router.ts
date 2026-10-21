@@ -5,6 +5,7 @@ import {
   assessmentRequestSchema,
   feedbackRequestSchema,
   followRequestSchema,
+  mutedPublisherRequestSchema,
   opsActionSchema,
   previewTypeSchema,
   pushSubscriptionRequestSchema,
@@ -17,6 +18,7 @@ import {
 } from '@dn/schemas'
 import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
+import { getBriefing } from '../briefing.ts'
 import type { ServerContext } from '../context.ts'
 import { listHiddenStories, listSignals, setFeedback, updateSignals } from '../feedback.ts'
 import { listFollows, setFollow } from '../follows.ts'
@@ -24,6 +26,7 @@ import { FOR_YOU_PAGE_SIZE, getForYou } from '../for-you.ts'
 import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
 import { getMatchHealth } from '../match-health.ts'
+import { listMutedPublishers, setMutedPublisher } from '../muted-publishers.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
@@ -295,6 +298,14 @@ const routes: Route[] = [
   route('GET', '/api/v1/me/follows', async ({ ctx, userId }) =>
     json(await listFollows(ctx.db, userId)),
   ),
+  route('GET', '/api/v1/me/muted-publishers', async ({ ctx, userId }) =>
+    json(await listMutedPublishers(ctx.db, userId)),
+  ),
+  route('POST', '/api/v1/me/muted-publishers', async ({ ctx, request, userId }) =>
+    json(
+      await setMutedPublisher(ctx.db, userId, await readJson(request, mutedPublisherRequestSchema)),
+    ),
+  ),
   route('POST', '/api/v1/me/follows', async ({ ctx, request, userId }) =>
     json(await setFollow(ctx.db, userId, await readJson(request, followRequestSchema))),
   ),
@@ -322,6 +333,9 @@ const routes: Route[] = [
   ),
   route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
     json(await getForYou(ctx.db, userId, forYouQuery.parse(Object.fromEntries(url.searchParams)))),
+  ),
+  route('GET', '/api/v1/briefing', async ({ ctx, userId }) =>
+    json(await getBriefing(ctx.db, userId)),
   ),
   route('POST', '/api/v1/me/reads', async ({ ctx, request, userId }) => {
     const { storyId } = await readJson(request, readRequestSchema)

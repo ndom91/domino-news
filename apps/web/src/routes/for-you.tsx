@@ -3,7 +3,7 @@ import { DESK_LABELS, type ForYouReason, type ForYouResponse, TOPIC_LABELS } fro
 import { Button, cx, IconButton, Notice, Popover, Skeleton, StoryItem } from '@dn/ui'
 import { InfoIcon, ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Link } from '@tanstack/react-router'
+import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { type CSSProperties, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from '../components/link.tsx'
@@ -11,6 +11,9 @@ import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/for-you')({
+  beforeLoad: () => {
+    throw redirect({ to: '/briefing', replace: true })
+  },
   loader: async ({ context }) => {
     await context.queryClient.prefetchInfiniteQuery(queries.forYou())
     return { now: new Date().toISOString() }

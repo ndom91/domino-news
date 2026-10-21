@@ -13,6 +13,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
       topics: schema.userPreference.topics,
       rememberReads: schema.userPreference.rememberReads,
       country: schema.userPreference.country,
+      briefingLastOpenedAt: schema.userPreference.briefingLastOpenedAt,
       onboardedAt: schema.userPreference.onboardedAt,
     })
     .from(schema.userPreference)
@@ -25,6 +26,29 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
     country: row?.country ?? null,
     onboarded: Boolean(row?.onboardedAt),
   }
+}
+
+/**
+ * Advances the sole Briefing activity checkpoint and returns its prior value. This deliberately
+ * stores neither individual reading activity nor a visit history.
+ */
+export async function openBriefing(
+  db: Db,
+  userId: string,
+): Promise<{ since: Date | null; openedAt: Date }> {
+  const openedAt = new Date()
+  const { rows } = await db.execute<{ briefing_last_opened_at: Date | null }>(sql`
+    with previous as (
+      select briefing_last_opened_at from user_preference where user_id = ${userId}
+    ), saved as (
+      insert into user_preference (user_id, briefing_last_opened_at, updated_at)
+      values (${userId}, ${openedAt}, ${openedAt})
+      on conflict (user_id) do update set briefing_last_opened_at = excluded.briefing_last_opened_at,
+        updated_at = excluded.updated_at
+    )
+    select briefing_last_opened_at from previous
+  `)
+  return { since: rows[0]?.briefing_last_opened_at ?? null, openedAt }
 }
 
 /** Saves only the fields given. Turning reading history off deletes it. */

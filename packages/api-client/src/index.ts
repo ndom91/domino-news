@@ -2,6 +2,8 @@ import {
   type ApiErrorCode,
   type AssessmentRequest,
   apiErrorSchema,
+  type BriefingResponse,
+  briefingResponseSchema,
   type Edition,
   type EvidenceResponse,
   editionSchema,
@@ -23,7 +25,10 @@ import {
   type LearnedSignals,
   learnedSignalsSchema,
   type MatchHealth,
+  type MutedPublisherList,
+  type MutedPublisherRequest,
   matchHealthSchema,
+  mutedPublisherListSchema,
   type NarrativeDetail,
   type NarrativeListResponse,
   narrativeDetailSchema,
@@ -134,6 +139,8 @@ export function createApiClient({
   return {
     getFrontPage: (opts: { region?: Region | null } = {}, signal?: AbortSignalLike) =>
       request<FrontPage>(frontPageSchema, `/front${qs({ region: opts.region })}`, { signal }),
+    getBriefing: (signal?: AbortSignalLike) =>
+      request<BriefingResponse>(briefingResponseSchema, '/briefing', { signal }),
     getEdition: (signal?: AbortSignalLike) =>
       request<Edition>(editionSchema, '/edition', { signal }),
     listStories: (
@@ -200,6 +207,13 @@ export function createApiClient({
       request<FollowList>(followListSchema, '/me/follows', { signal }),
     setFollow: (body: FollowRequest) =>
       request<FollowList>(followListSchema, '/me/follows', { method: 'POST', body }),
+    getMutedPublishers: (signal?: AbortSignalLike) =>
+      request<MutedPublisherList>(mutedPublisherListSchema, '/me/muted-publishers', { signal }),
+    setMutedPublisher: (body: MutedPublisherRequest) =>
+      request<MutedPublisherList>(mutedPublisherListSchema, '/me/muted-publishers', {
+        method: 'POST',
+        body,
+      }),
     getForYou: (opts: { cursor?: string | null; limit?: number } = {}, signal?: AbortSignalLike) =>
       request<ForYouResponse>(forYouResponseSchema, `/for-you${qs(opts)}`, { signal }),
     setFeedback: (body: FeedbackRequest) =>

@@ -181,8 +181,8 @@ function ForYouRail({ excludeId, now }: { excludeId?: string; now: string }) {
         title="For you"
         id="for-you-heading"
         meta={
-          <Link to="/for-you" className="link-inline font-semibold">
-            More for you
+          <Link to="/briefing" className="link-inline font-semibold">
+            Your briefing
           </Link>
         }
       />

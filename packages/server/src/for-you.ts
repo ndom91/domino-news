@@ -14,6 +14,7 @@ import { sql } from 'drizzle-orm'
 import { cached, SHARED_TTL_MS } from './cache.ts'
 import { learnedWeights, narrativeTitles, signalLabel, storyFeedback } from './feedback.ts'
 import { listFollows } from './follows.ts'
+import { mutedPublisherIds } from './muted-publishers.ts'
 import { getPreferences } from './preferences.ts'
 import { storyListItems } from './reader.ts'
 
@@ -114,7 +115,7 @@ export async function getForYou(
   userId: string,
   opts: { cursor?: string | null; limit?: number } = {},
 ): Promise<ForYouResponse> {
-  const [prefs, follows, learned, feedback, rows] = await Promise.all([
+  const [prefs, follows, learned, feedback, rows, muted] = await Promise.all([
     getPreferences(db, userId),
     listFollows(db, userId),
     learnedWeights(db, userId).then(async (signals) => ({
@@ -126,6 +127,7 @@ export async function getForYou(
     })),
     storyFeedback(db, userId),
     cached('for-you-window', SHARED_TTL_MS, () => windowStories(db)),
+    mutedPublisherIds(db, userId),
   ])
   const picks = {
     regions: prefs.regions,
@@ -151,6 +153,9 @@ export async function getForYou(
   // "Less like this" Stories are hidden from the reader's feed until they undo it.
   const ranked = rows
     .filter((r) => feedback.get(r.id) !== 'less')
+    // A Story survives when another publisher covers it. A mute suppresses one source, not
+    // independently useful coverage of the same development.
+    .filter((r) => r.publisher_ids.some((id) => !muted.has(id)))
     .map((r) => ({
       id: r.id,
       ...scoreStory(
@@ -161,7 +166,7 @@ export async function getForYou(
           ageHours: Number(r.age_hours),
           outlets: r.outlets,
           narrativeIds: r.narrative_ids,
-          publisherIds: r.publisher_ids,
+          publisherIds: r.publisher_ids.filter((id) => !muted.has(id)),
         },
         picks,
       ),
