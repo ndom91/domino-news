@@ -1,10 +1,13 @@
+import { feedbackMutation } from '@dn/queries'
 import type { BriefingResponse, ForYouReason } from '@dn/schemas'
-import { Notice, StoryItem, StoryItemSkeleton } from '@dn/ui'
-import { useSuspenseQuery } from '@tanstack/react-query'
+import { Button, IconButton, Notice, StoryItem, StoryItemSkeleton } from '@dn/ui'
+import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
+import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import { RouterLink } from '../components/link.tsx'
 import { Page } from '../components/page.tsx'
-import { queries } from '../lib/api.ts'
+import { api, queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/briefing')({
   loader: async ({ context }) => {
@@ -21,12 +24,12 @@ function BriefingPage() {
   const { data: briefing } = useSuspenseQuery(queries.briefing())
   return (
     <Page>
-      <header className="grid pb-2 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
+      <header className="grid border-b-2 border-rule pb-5 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
         <div>
           <p className="mb-3 type-label text-accent-text">Your news desk</p>
           <h1 className="type-display-md text-[clamp(2.5rem,4vw,4rem)]">Briefing</h1>
         </div>
-        <p className="mt-6 border-l-2 border-rule pl-4 text-base leading-snug text-text-secondary md:mt-0">
+        <p className="mt-6 text-base leading-snug text-text-secondary md:mt-0">
           {briefing.since
             ? 'What changed since your last briefing.'
             : 'Your first briefing: a considered view of the news now.'}
@@ -46,9 +49,9 @@ function BriefingPage() {
         </Notice>
       ) : null}
       {briefing.sections.length ? (
-        <div className="flex flex-col gap-16 pt-10 pb-16 md:gap-20">
-          {briefing.sections.map((section) => (
-            <BriefingSection key={section.kind} section={section} now={now} />
+        <div className="flex flex-col gap-16 pt-4 pb-16 md:gap-20">
+          {briefing.sections.map((section, index) => (
+            <BriefingSection key={section.kind} section={section} now={now} first={index === 0} />
           ))}
         </div>
       ) : (
@@ -61,13 +64,15 @@ function BriefingPage() {
 function BriefingSection({
   section,
   now,
+  first,
 }: {
   section: BriefingResponse['sections'][number]
   now: string
+  first: boolean
 }) {
   return (
     <section aria-labelledby={`briefing-${section.kind}`}>
-      <div className="border-t-2 border-rule pt-4">
+      <div className={first ? 'pt-4' : 'border-t-2 border-rule pt-4'}>
         <h2 id={`briefing-${section.kind}`} className="type-period">
           {section.title}
         </h2>
@@ -77,18 +82,102 @@ function BriefingSection({
       </div>
       <div className="mt-8 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {section.items.map((item) => (
-          <article key={item.story.id} className="flex flex-col">
-            <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />
-            {item.update ? (
-              <p className="mt-3 text-sm font-semibold leading-snug text-text-secondary">
-                {item.update.description}
-              </p>
-            ) : null}
-            <p className="mt-2 type-meta text-text-muted">{reasonText(item.reasons)}</p>
-          </article>
+          <BriefingCard key={item.story.id} item={item} now={now} />
         ))}
       </div>
     </section>
+  )
+}
+
+function BriefingCard({
+  item,
+  now,
+}: {
+  item: BriefingResponse['sections'][number]['items'][number]
+  now: string
+}) {
+  const queryClient = useQueryClient()
+  const save = useMutation(feedbackMutation(api, queryClient))
+  const [feedback, setFeedback] = useState(item.feedback)
+  const [hidden, setHidden] = useState(false)
+
+  function send(signal: 'more' | 'less' | null, onError?: () => void) {
+    const previous = feedback
+    setFeedback(signal)
+    save.mutate(
+      { storyId: item.story.id, signal },
+      {
+        onError: () => {
+          setFeedback(previous)
+          onError?.()
+        },
+      },
+    )
+  }
+
+  if (hidden) {
+    return (
+      <article
+        className="flex min-h-44 flex-col justify-center border-l-2 border-border px-4"
+        aria-live="polite"
+      >
+        <p className="font-semibold">Hidden from your Briefing</p>
+        <p className="mt-1 text-sm leading-normal text-text-secondary">
+          You’ll see fewer stories like “{item.story.title}”.
+        </p>
+        <div className="mt-4">
+          <Button
+            size="sm"
+            loading={save.isPending}
+            onClick={() => {
+              setHidden(false)
+              send(null)
+            }}
+          >
+            Undo
+          </Button>
+        </div>
+      </article>
+    )
+  }
+
+  return (
+    <article className="flex flex-col">
+      <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />
+      {item.update ? (
+        <p className="mt-3 text-sm font-semibold leading-snug text-text-secondary">
+          {item.update.description}
+        </p>
+      ) : null}
+      <div className="mt-2 flex items-center justify-between gap-3">
+        <p className="type-meta text-text-muted">{reasonText(item.reasons)}</p>
+        <div className="-mr-2 flex shrink-0">
+          <IconButton
+            label={`More stories like ${item.story.title}`}
+            className="text-text-muted hover:not-data-disabled:border-text-muted hover:not-data-disabled:text-text aria-pressed:text-text"
+            aria-pressed={feedback === 'more'}
+            disabled={save.isPending}
+            icon={<ThumbsUpIcon size={20} weight={feedback === 'more' ? 'fill' : 'regular'} />}
+            onClick={() => send(feedback === 'more' ? null : 'more')}
+          />
+          <IconButton
+            label={`Fewer stories like ${item.story.title}`}
+            className="text-text-muted hover:not-data-disabled:border-text-muted hover:not-data-disabled:text-text"
+            disabled={save.isPending}
+            icon={<ThumbsDownIcon size={20} />}
+            onClick={() => {
+              setHidden(true)
+              send('less', () => setHidden(false))
+            }}
+          />
+        </div>
+      </div>
+      {save.isError ? (
+        <p role="alert" className="mt-2 text-sm text-error">
+          Couldn’t save that. Try again.
+        </p>
+      ) : null}
+    </article>
   )
 }
 
