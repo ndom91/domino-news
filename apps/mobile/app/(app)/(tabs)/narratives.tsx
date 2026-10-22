@@ -63,7 +63,9 @@ export default function NarrativesScreen() {
         ListHeaderComponentStyle={narratives.data.items.length ? styles.listHeader : undefined}
         refreshControl={
           <RefreshControl
-            onRefresh={narratives.refetch}
+            onRefresh={async () => {
+              await narratives.refetch()
+            }}
             refreshing={narratives.isRefetching}
             tintColor={t.color.accentText}
           />

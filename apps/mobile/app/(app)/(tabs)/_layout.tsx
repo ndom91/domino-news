@@ -27,7 +27,13 @@ export default function TabLayout() {
         options={{
           title: 'Latest',
           tabBarAccessibilityLabel: 'Latest stories',
-          tabBarIcon: ({ color, size }) => <Feather color={color} name="home" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              color={typeof color === 'string' ? color : t.color.textMuted}
+              name="home"
+              size={size}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -35,7 +41,13 @@ export default function TabLayout() {
         options={{
           title: 'For You',
           tabBarAccessibilityLabel: 'Stories picked for you',
-          tabBarIcon: ({ color, size }) => <Feather color={color} name="compass" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              color={typeof color === 'string' ? color : t.color.textMuted}
+              name="compass"
+              size={size}
+            />
+          ),
         }}
       />
       <Tabs.Screen
@@ -43,21 +55,39 @@ export default function TabLayout() {
         options={{
           title: 'Narratives',
           tabBarAccessibilityLabel: 'Connected story narratives',
-          tabBarIcon: ({ color, size }) => <Feather color={color} name="git-branch" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              color={typeof color === 'string' ? color : t.color.textMuted}
+              name="git-branch"
+              size={size}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
           title: 'Search',
-          tabBarIcon: ({ color, size }) => <Feather color={color} name="search" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              color={typeof color === 'string' ? color : t.color.textMuted}
+              name="search"
+              size={size}
+            />
+          ),
         }}
       />
       <Tabs.Screen
         name="account"
         options={{
           title: 'Account',
-          tabBarIcon: ({ color, size }) => <Feather color={color} name="user" size={size} />,
+          tabBarIcon: ({ color, size }) => (
+            <Feather
+              color={typeof color === 'string' ? color : t.color.textMuted}
+              name="user"
+              size={size}
+            />
+          ),
         }}
       />
     </Tabs>

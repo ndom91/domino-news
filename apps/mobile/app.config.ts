@@ -37,7 +37,7 @@ const config: ExpoConfig = {
     },
   },
   extra: { eas: { projectId: '433e551b-9dfb-4c06-9edf-59f8b0b5faa1' } },
-  experiments: { typedRoutes: true },
+  experiments: { reactCompiler: true, typedRoutes: true },
   plugins: [
     'expo-router',
     'expo-secure-store',

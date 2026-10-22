@@ -72,7 +72,7 @@ export default function ForYouScreen() {
                 </Text>
               ) : null}
             </View>
-          ) : null
+          ) : undefined
         }
         ListHeaderComponent={
           <>

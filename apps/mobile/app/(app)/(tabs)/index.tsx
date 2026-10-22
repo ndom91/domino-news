@@ -71,7 +71,7 @@ export default function LatestScreen() {
                 </Text>
               ) : null}
             </View>
-          ) : null
+          ) : undefined
         }
         ListHeaderComponent={
           <>
