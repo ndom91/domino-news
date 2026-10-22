@@ -353,7 +353,7 @@ function InferenceControls({ settings }: { settings: OpsStatus['inference']['set
   const action = useOpsAction()
   const formKey = `${settings.publishedSummaryDebounceSeconds}:${settings.summaryUpdateAssessmentMaxArticles}`
   return (
-    <section aria-labelledby="inference-controls-heading" className="mt-10 max-w-reading">
+    <section aria-labelledby="inference-controls-heading" className="mt-10 max-w-3xl">
       <SectionLabel id="inference-controls-heading">Inference controls</SectionLabel>
       <p className="mb-4 text-sm text-text-secondary">
         These changes apply to newly scheduled published-story updates. They do not restart workers
@@ -361,7 +361,7 @@ function InferenceControls({ settings }: { settings: OpsStatus['inference']['set
       </p>
       <form
         key={formKey}
-        className="grid gap-4 border-t-2 border-rule pt-4 sm:grid-cols-2"
+        className="border-y-2 border-text"
         onSubmit={(event) => {
           event.preventDefault()
           const values = new FormData(event.currentTarget)
@@ -374,27 +374,54 @@ function InferenceControls({ settings }: { settings: OpsStatus['inference']['set
           })
         }}
       >
-        <TextInput
-          name="debounceSeconds"
-          type="number"
-          min={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}
-          max={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max}
-          step={30}
-          defaultValue={settings.publishedSummaryDebounceSeconds}
-          label="Published-story debounce (seconds)"
-          description={`${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}–${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max} seconds. Batches a burst of new reporting into one assessment.`}
-        />
-        <TextInput
-          name="maxAssessmentArticles"
-          type="number"
-          min={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}
-          max={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max}
-          step={1}
-          defaultValue={settings.summaryUpdateAssessmentMaxArticles}
-          label="Assessment articles"
-          description={`${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}–${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max} distinct publishers considered for each update assessment.`}
-        />
-        <div className="sm:col-span-2">
+        <fieldset>
+          <legend className="sr-only">Published-story update controls</legend>
+          <div className="divide-y divide-border">
+            <div className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_11rem] sm:items-center">
+              <div>
+                <h3 className="type-label text-text">Published-story debounce</h3>
+                <p className="mt-1 text-sm text-text-secondary">
+                  Wait before assessing a burst of reporting.{' '}
+                  {INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}–
+                  {INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max} seconds.
+                </p>
+              </div>
+              <TextInput
+                name="debounceSeconds"
+                type="number"
+                inputMode="numeric"
+                min={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}
+                max={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max}
+                step={30}
+                defaultValue={settings.publishedSummaryDebounceSeconds}
+                label="Published-story debounce in seconds"
+                hideLabel
+              />
+            </div>
+            <div className="grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_11rem] sm:items-center">
+              <div>
+                <h3 className="type-label text-text">Assessment articles</h3>
+                <p className="mt-1 text-sm text-text-secondary">
+                  Distinct publishers considered for each update.{' '}
+                  {INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}–
+                  {INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max} publishers.
+                </p>
+              </div>
+              <TextInput
+                name="maxAssessmentArticles"
+                type="number"
+                inputMode="numeric"
+                min={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}
+                max={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max}
+                step={1}
+                defaultValue={settings.summaryUpdateAssessmentMaxArticles}
+                label="Assessment article count"
+                hideLabel
+              />
+            </div>
+          </div>
+        </fieldset>
+        <div className="flex flex-wrap items-center gap-3 border-t border-border py-4">
           <Button
             type="submit"
             variant="primary"
@@ -409,18 +436,18 @@ function InferenceControls({ settings }: { settings: OpsStatus['inference']['set
           ) : null}
         </div>
       </form>
-      <dl className="mt-8 grid grid-cols-2 border-t border-border sm:grid-cols-2">
-        <StatText
-          label="Embedding concurrency"
-          value={String(settings.embeddingConcurrency)}
-          note="Set by EMBEDDING_CONCURRENCY · restart required"
-        />
-        <StatText
-          label="Generation concurrency"
-          value={String(settings.generationConcurrency)}
-          note="Set by GENERATION_CONCURRENCY · restart required"
-        />
-      </dl>
+      <section aria-labelledby="runtime-capacity-heading" className="mt-8">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h3 id="runtime-capacity-heading" className="type-label text-text">
+            Worker capacity
+          </h3>
+          <p className="type-meta">Set in the environment · restart required</p>
+        </div>
+        <dl className="mt-3 grid grid-cols-2 border-t border-border">
+          <StatText label="Embedding" value={String(settings.embeddingConcurrency)} />
+          <StatText label="Generation" value={String(settings.generationConcurrency)} />
+        </dl>
+      </section>
     </section>
   )
 }
