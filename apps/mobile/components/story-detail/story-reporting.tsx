@@ -7,6 +7,8 @@ import { PublisherLogo } from '../publisher-logo'
 import { Button, uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
 
+const EXCERPT_MAX_LENGTH = 360
+
 // StoryReporting renders the publisher articles covering a story.
 export function StoryReporting({
   onPublisherPress,
@@ -55,7 +57,7 @@ export function StoryReporting({
           >
             <Text style={styles.title}>{source.title}</Text>
             {source.description ? (
-              <Text style={styles.description}>{source.description}</Text>
+              <Text style={styles.description}>{firstParagraph(source.description)}</Text>
             ) : null}
             <Text style={styles.metadata}>
               {source.official ? 'Official source · ' : ''}
@@ -77,6 +79,14 @@ export function StoryReporting({
       ) : null}
     </View>
   )
+}
+
+function firstParagraph(text: string) {
+  const paragraph = (text.trim().split(/\n\s*\n/, 1)[0] ?? '').replace(/\s+/g, ' ')
+  if (paragraph.length <= EXCERPT_MAX_LENGTH) return paragraph
+
+  const boundary = paragraph.lastIndexOf(' ', EXCERPT_MAX_LENGTH)
+  return `${paragraph.slice(0, boundary > 0 ? boundary : EXCERPT_MAX_LENGTH)}…`
 }
 
 const styles = StyleSheet.create({

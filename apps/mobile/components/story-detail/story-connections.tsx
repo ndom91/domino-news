@@ -1,8 +1,9 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { formatDate, hostnameOf } from '@dn/domain'
+import { formatDate, hostnameOf, plural } from '@dn/domain'
 import type { NarrativeRef, StoryDetail, StoryRelation } from '@dn/schemas'
+import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { uiStyles } from '../ui'
+import { Button, uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
 
 const RELATION_LABELS: Record<StoryRelation, string> = {
@@ -25,6 +26,7 @@ const INCOMING_RELATION_LABELS: Record<StoryRelation, string> = {
 
 type PrimarySource = StoryDetail['primarySources'][number]
 type RelatedStory = StoryDetail['related'][number]
+const RELATED_STORIES_LIMIT = 5
 
 // StoryConnections renders the narrative, related stories, and primary documents.
 export function StoryConnections({
@@ -40,6 +42,9 @@ export function StoryConnections({
   primarySources: PrimarySource[]
   related: RelatedStory[]
 }) {
+  const [relatedExpanded, setRelatedExpanded] = useState(false)
+  const shownRelated = relatedExpanded ? related : related.slice(0, RELATED_STORIES_LIMIT)
+
   return (
     <>
       {narrative ? (
@@ -62,7 +67,7 @@ export function StoryConnections({
         {related.length === 0 ? (
           <Text style={styles.empty}>No connected stories found yet.</Text>
         ) : (
-          related.map((story) => (
+          shownRelated.map((story) => (
             <Pressable
               accessibilityHint="Opens this story"
               accessibilityLabel={story.title}
@@ -78,6 +83,13 @@ export function StoryConnections({
             </Pressable>
           ))
         )}
+        {related.length > RELATED_STORIES_LIMIT ? (
+          <Button onPress={() => setRelatedExpanded((current) => !current)} tone="light">
+            {relatedExpanded
+              ? 'Show fewer connected stories'
+              : `View all ${plural(related.length, 'connected story')}`}
+          </Button>
+        ) : null}
       </View>
       <View style={styles.section}>
         <Text style={uiStyles.label}>Primary sources</Text>
