@@ -8,6 +8,7 @@ import {
   DomainError,
   ENRICHMENT_QUEUES,
   newsroomOutletCount,
+  QUEUES,
   recordGeneratedSummary,
   recordStoryUpdate,
 } from '@dn/server'
@@ -15,6 +16,9 @@ import { and, eq, gt, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadArticles, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { markRunFailed, runStoryGeneration } from './provenance.ts'
+import { likelyCorroboration } from './summary-update-prefilter.ts'
+
+const MAX_ASSESSMENT_ARTICLES = 5
 
 /**
  * Generate, validate and record a grounded summary. Stale jobs (story inputs changed)
@@ -105,9 +109,13 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
       const ref = { url: a.url, title: a.title, kind: 'official_statement' as const }
       await recordPrimarySources(tx.db, story.id, a.articleId, [ref])
     }
-    // Enrichment keyed on the new summary version: relationships, context and claims.
+    // Revisions update a Story, not its connections to other Stories. Context and claims follow
+    // the new summary, while relationship inference remains initial-summary work.
     const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
-    for (const queue of ENRICHMENT_QUEUES) await sendInTx(ctx, tx, queue, next.data, next.options)
+    const queues = assessment
+      ? ENRICHMENT_QUEUES.filter((queue) => queue !== QUEUES.relateStory)
+      : ENRICHMENT_QUEUES
+    for (const queue of queues) await sendInTx(ctx, tx, queue, next.data, next.options)
     return recorded
   })
   return outcome
@@ -143,7 +151,7 @@ async function assessSummaryUpdate(
     .where(eq(schema.storySummaryVersion.id, priorSummaryVersionId))
   if (!prior) return null
   const additions = await ctx.db
-    .select({ articleId: schema.storyArticle.articleId })
+    .select({ articleId: schema.storyArticle.articleId, addedAt: schema.storyArticle.addedAt })
     .from(schema.storyArticle)
     .where(
       and(
@@ -152,11 +160,26 @@ async function assessSummaryUpdate(
         gt(schema.storyArticle.addedAt, prior.createdAt),
       ),
     )
-  const articles = await loadArticles(
-    ctx.db,
-    additions.map((addition) => addition.articleId),
+  const articles = assessmentArticles(
+    await loadArticles(
+      ctx.db,
+      additions.map((addition) => addition.articleId),
+    ),
+    additions,
   )
   if (articles.length === 0) return null
+  if (likelyCorroboration(prior.body, articles)) {
+    return {
+      runId: 'metadata-prefilter',
+      output: {
+        changeKind: null,
+        outcome: 'corroboration_only',
+        note: '',
+        sourceArticleIds: [],
+        observationIds: [],
+      },
+    }
+  }
   const pairFingerprint = `${priorSummaryVersionId}:${inputFingerprint}`
   const { runId, result } = await runStoryGeneration(
     ctx,
@@ -210,6 +233,27 @@ async function assessSummaryUpdate(
   if (!raced) throw new Error('summary update assessment was not recorded')
 
   return { runId: raced.analysisRunId, output: assessmentOutput(raced) }
+}
+
+function assessmentArticles(
+  articles: LoadedArticle[],
+  additions: { articleId: string; addedAt: Date }[],
+) {
+  const addedAt = new Map(additions.map((addition) => [addition.articleId, addition.addedAt]))
+  const newest = articles.toSorted((a, b) => {
+    const aAddedAt = addedAt.get(a.articleId)
+    const bAddedAt = addedAt.get(b.articleId)
+    return (bAddedAt?.getTime() ?? 0) - (aAddedAt?.getTime() ?? 0)
+  })
+  const publishers = new Set<string>()
+  const out: LoadedArticle[] = []
+  for (const article of newest) {
+    if (publishers.has(article.publisher)) continue
+    publishers.add(article.publisher)
+    out.push(article)
+    if (out.length === MAX_ASSESSMENT_ARTICLES) break
+  }
+  return out
 }
 
 function assessmentOutput(

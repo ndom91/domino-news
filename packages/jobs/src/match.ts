@@ -6,6 +6,7 @@ import {
   attachArticleToStory,
   createStoryWithArticle,
   nearestByVector,
+  PUBLISHED_SUMMARY_DEBOUNCE_SECONDS,
   QUEUES,
   refreshFingerprint,
 } from '@dn/server'
@@ -293,7 +294,7 @@ async function enqueueSummary(
   const job = analysisJob(storyId, story.fingerprint, priorityClass)
   await sendInTx(ctx, tx, QUEUES.summarizeStory, job.data, {
     ...job.options,
-    // Published Stories wait longer so a burst of matched coverage becomes one assessment.
-    startAfter: story.publishedAt ? 30 : 5,
+    // Published Stories batch a reporting burst into one update assessment.
+    startAfter: story.publishedAt ? PUBLISHED_SUMMARY_DEBOUNCE_SECONDS : 5,
   })
 }
