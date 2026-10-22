@@ -1,4 +1,4 @@
-import { schema } from '@dn/db'
+import { type Db, schema } from '@dn/db'
 import type {
   FailedJob,
   FailedJobsResponse,
@@ -6,7 +6,9 @@ import type {
   OpsAction,
   OpsStatus,
 } from '@dn/schemas'
+import { INFERENCE_SETTINGS_LIMITS } from '@dn/schemas'
 import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { cached } from './cache.ts'
 import type { ServerContext } from './context.ts'
 import { PRIORITY, QUEUES } from './queues.ts'
 import { DomainError } from './story-service.ts'
@@ -14,11 +16,7 @@ import { DomainError } from './story-service.ts'
 const BACKFILL_PAUSED = 'backfill_paused'
 const INFERENCE_SETTINGS = 'inference_settings'
 const INFERENCE_WINDOW_HOURS = 24
-const MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS = 30
-const MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS = 900
-const MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES = 1
-const MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES = 10
-
+const INFERENCE_METRICS_CACHE_MS = 30_000
 type InferenceSettings = {
   publishedSummaryDebounceSeconds: number
   summaryUpdateAssessmentMaxArticles: number
@@ -45,15 +43,19 @@ export async function setInferenceSettings(
 ) {
   if (
     settings.publishedSummaryDebounceSeconds === undefined ||
-    settings.publishedSummaryDebounceSeconds < MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS ||
-    settings.publishedSummaryDebounceSeconds > MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS ||
+    settings.publishedSummaryDebounceSeconds <
+      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min ||
+    settings.publishedSummaryDebounceSeconds >
+      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max ||
     settings.summaryUpdateAssessmentMaxArticles === undefined ||
-    settings.summaryUpdateAssessmentMaxArticles < MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES ||
-    settings.summaryUpdateAssessmentMaxArticles > MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES
+    settings.summaryUpdateAssessmentMaxArticles <
+      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min ||
+    settings.summaryUpdateAssessmentMaxArticles >
+      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max
   ) {
     throw new DomainError(
       'bad_request',
-      `Debounce must be ${MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS}–${MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS} seconds and assessment articles ${MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES}–${MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES}.`,
+      `Debounce must be ${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}–${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max} seconds and assessment articles ${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}–${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max}.`,
     )
   }
   const value: InferenceSettings = {
@@ -77,12 +79,12 @@ function isInferenceSettings(value: unknown): value is InferenceSettings {
   return (
     typeof debounce === 'number' &&
     Number.isInteger(debounce) &&
-    debounce >= MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS &&
-    debounce <= MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS &&
+    debounce >= INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min &&
+    debounce <= INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max &&
     typeof maxArticles === 'number' &&
     Number.isInteger(maxArticles) &&
-    maxArticles >= MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES &&
-    maxArticles <= MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES
+    maxArticles >= INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min &&
+    maxArticles <= INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max
   )
 }
 
@@ -111,6 +113,43 @@ const inList = (values: string[]) =>
     values.map((v) => sql`${v}`),
     sql`, `,
   )})`
+
+async function inferenceMetrics(db: Db) {
+  const [summaryJobResult, assessmentResult] = await Promise.all([
+    db.execute<{
+      completed: number
+      corroboration_only: number
+      prefiltered: number
+      recorded: number
+      stale: number
+      uncertain: number
+    }>(sql`
+      select
+        count(*)::int as completed,
+        count(*) filter (where output->>'status' = 'corroboration_only')::int as corroboration_only,
+        count(*) filter (where output->>'status' = 'corroboration_prefilter')::int as prefiltered,
+        count(*) filter (where output->>'status' = 'recorded')::int as recorded,
+        count(*) filter (where output->>'status' = 'stale')::int as stale,
+        count(*) filter (where output->>'status' = 'uncertain')::int as uncertain
+      from pgboss.job
+      where name = ${QUEUES.summarizeStory}
+        and state = 'completed'
+        and completed_on >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`),
+    db.execute<{
+      average_duration_seconds: number | null
+      failed: number
+      succeeded: number
+    }>(sql`
+      select
+        round(avg(extract(epoch from completed_at - started_at)) filter (where completed_at is not null), 1)::real as average_duration_seconds,
+        count(*) filter (where status = 'failed')::int as failed,
+        count(*) filter (where status = 'succeeded')::int as succeeded
+      from analysis_run
+      where operation = 'summary_update_assessment'
+        and started_at >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`),
+  ])
+  return { summaryJobs: summaryJobResult.rows[0], updateAssessments: assessmentResult.rows[0] }
+}
 
 export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
   const { db } = ctx
@@ -149,38 +188,6 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     group by name`)
   const byQueue = new Map(queueRows.map((q) => [q.name, q]))
 
-  const summaryJobMetrics = db.execute<{
-    completed: number
-    corroboration_only: number
-    prefiltered: number
-    recorded: number
-    stale: number
-    uncertain: number
-  }>(sql`
-    select
-      count(*)::int as completed,
-      count(*) filter (where output->>'status' = 'corroboration_only')::int as corroboration_only,
-      count(*) filter (where output->>'status' = 'corroboration_prefilter')::int as prefiltered,
-      count(*) filter (where output->>'status' = 'recorded')::int as recorded,
-      count(*) filter (where output->>'status' = 'stale')::int as stale,
-      count(*) filter (where output->>'status' = 'uncertain')::int as uncertain
-    from pgboss.job
-    where name = ${QUEUES.summarizeStory}
-      and state = 'completed'
-      and completed_on >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`)
-  const assessmentMetrics = db.execute<{
-    average_duration_seconds: number | null
-    failed: number
-    succeeded: number
-  }>(sql`
-    select
-      round(avg(extract(epoch from completed_at - started_at)) filter (where completed_at is not null), 1)::real as average_duration_seconds,
-      count(*) filter (where status = 'failed')::int as failed,
-      count(*) filter (where status = 'succeeded')::int as succeeded
-    from analysis_run
-    where operation = 'summary_update_assessment'
-      and started_at >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`)
-
   const scalar = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
   // Matches the outbox_pending_idx partial index (no full-table scan).
   const outboxPending = and(
@@ -208,8 +215,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     narratives,
     outboxPendingCount,
     outboxFailed,
-    summaryJobResult,
-    assessmentResult,
+    metrics,
     settings,
   ] = await Promise.all([
     scalar(db.select({ n: count }).from(schema.article)),
@@ -227,12 +233,10 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     scalar(
       db.select({ n: count }).from(schema.outboxEvent).where(isNotNull(schema.outboxEvent.deadAt)),
     ),
-    summaryJobMetrics,
-    assessmentMetrics,
+    cached('ops-inference-metrics', INFERENCE_METRICS_CACHE_MS, () => inferenceMetrics(db)),
     getInferenceSettings(ctx),
   ])
-  const summaryJobs = summaryJobResult.rows[0]
-  const updateAssessments = assessmentResult.rows[0]
+  const { summaryJobs, updateAssessments } = metrics
 
   return {
     inferenceMode: ctx.inference.mode,

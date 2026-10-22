@@ -298,7 +298,7 @@ function coalesceNewReporting(events: StoryUpdatesResponse['items']) {
       continue
     }
     let end = index + 1
-    while (events[end]?.kind === 'new_reporting') end++
+    while (events[end]?.kind === 'new_reporting' && events[end]?.storyId === first.storyId) end++
     const group = events.slice(index, end)
     if (group.length === 1) {
       out.push(first)

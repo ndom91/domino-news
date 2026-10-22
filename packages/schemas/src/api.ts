@@ -516,6 +516,11 @@ export const opsStatusSchema = z.object({
 })
 export type OpsStatus = z.infer<typeof opsStatusSchema>
 
+export const INFERENCE_SETTINGS_LIMITS = {
+  publishedSummaryDebounceSeconds: { min: 30, max: 900 },
+  summaryUpdateAssessmentMaxArticles: { min: 1, max: 10 },
+} as const
+
 export const inferenceSettingsUpdateSchema = z.object({
   publishedSummaryDebounceSeconds: z.int().check(z.nonnegative()),
   summaryUpdateAssessmentMaxArticles: z.int().check(z.positive()),

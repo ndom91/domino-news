@@ -16,7 +16,6 @@ export const QUEUES = {
 
 // Everything keyed on a Story's current summary version.
 export const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
-export const PUBLISHED_SUMMARY_DEBOUNCE_SECONDS = 180
 
 export type JobClass = 'interactive' | 'fresh' | 'backfill'
 

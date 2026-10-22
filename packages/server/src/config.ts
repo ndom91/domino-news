@@ -1,3 +1,5 @@
+import { INFERENCE_SETTINGS_LIMITS } from '@dn/schemas'
+
 // Central env parsing for server-side processes (web, worker, indexer).
 export function readConfig(env = process.env) {
   const num = (key: string, fallback: number) => {
@@ -22,12 +24,17 @@ export function readConfig(env = process.env) {
     backfillAdmitPerMinute: num('BACKFILL_ADMIT_PER_MINUTE', 20),
     embeddingConcurrency: num('EMBEDDING_CONCURRENCY', 2),
     generationConcurrency: num('GENERATION_CONCURRENCY', 2),
-    publishedSummaryDebounceSeconds: boundedNum('PUBLISHED_SUMMARY_DEBOUNCE_SECONDS', 180, 30, 900),
+    publishedSummaryDebounceSeconds: boundedNum(
+      'PUBLISHED_SUMMARY_DEBOUNCE_SECONDS',
+      180,
+      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min,
+      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max,
+    ),
     summaryUpdateAssessmentMaxArticles: boundedNum(
       'SUMMARY_UPDATE_ASSESSMENT_MAX_ARTICLES',
       5,
-      1,
-      10,
+      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min,
+      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max,
     ),
     summaryMaxAgeHours: num('SUMMARY_MAX_AGE_HOURS', 24 * 14),
     // A Story is summarised (and so published) only once this many distinct newsroom

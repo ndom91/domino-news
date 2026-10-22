@@ -2,6 +2,7 @@ import { plural, relativeTime } from '@dn/domain'
 import {
   FAILED_JOB_RETENTION_DAYS,
   type FailedJob,
+  INFERENCE_SETTINGS_LIMITS,
   type MatchHealth,
   type OpsAction,
   type OpsStatus,
@@ -376,22 +377,22 @@ function InferenceControls({ settings }: { settings: OpsStatus['inference']['set
         <TextInput
           name="debounceSeconds"
           type="number"
-          min={30}
-          max={900}
+          min={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}
+          max={INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max}
           step={30}
           defaultValue={settings.publishedSummaryDebounceSeconds}
           label="Published-story debounce (seconds)"
-          description="30–900 seconds. Batches a burst of new reporting into one assessment."
+          description={`${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}–${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max} seconds. Batches a burst of new reporting into one assessment.`}
         />
         <TextInput
           name="maxAssessmentArticles"
           type="number"
-          min={1}
-          max={10}
+          min={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}
+          max={INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max}
           step={1}
           defaultValue={settings.summaryUpdateAssessmentMaxArticles}
           label="Assessment articles"
-          description="1–10 distinct publishers considered for each update assessment."
+          description={`${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}–${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max} distinct publishers considered for each update assessment.`}
         />
         <div className="sm:col-span-2">
           <Button

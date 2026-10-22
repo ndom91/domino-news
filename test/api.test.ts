@@ -11,6 +11,7 @@ import {
   insightsSchema,
   learnedSignalsSchema,
   mutedPublisherListSchema,
+  narrativeDetailSchema,
   narrativeListResponseSchema,
   opsStatusSchema,
   searchResponseSchema,
@@ -166,6 +167,42 @@ describe('/api/v1 contracts', () => {
       item.description.startsWith('Additional reporting'),
     )
     expect(grouped?.sources).toHaveLength(1)
+  })
+
+  it('does not group reporting updates from different stories in a narrative', async () => {
+    const narratives = narrativeListResponseSchema.parse(
+      await (await call('/api/v1/narratives')).json(),
+    )
+    const narrative = narratives.items[0]
+    if (!narrative) throw new Error('empty narratives')
+    const detail = narrativeDetailSchema.parse(
+      await (await call(`/api/v1/narratives/${narrative.slug}`)).json(),
+    )
+    const [first, second] = detail.stories
+    if (!first || !second) throw new Error('narrative needs two stories')
+    // Isolate this pair so an existing reporting burst on either Story cannot join the sentinel.
+    await h.ctx.pool.query(
+      `update story_update_event set superseded_at = now() where story_id in ($1, $2)`,
+      [first.id, second.id],
+    )
+    await recordStoryUpdate(h.ctx.db, {
+      storyId: first.id,
+      kind: 'new_reporting',
+      description: 'Sentinel report one.',
+      origin: 'system',
+    })
+    await recordStoryUpdate(h.ctx.db, {
+      storyId: second.id,
+      kind: 'new_reporting',
+      description: 'Sentinel report two.',
+      origin: 'system',
+    })
+    const updates = storyUpdatesResponseSchema.parse(
+      await (await call(`/api/v1/narratives/${narrative.slug}/updates`)).json(),
+    )
+    expect(updates.items.map((item) => item.description)).toEqual(
+      expect.arrayContaining(['Sentinel report one.', 'Sentinel report two.']),
+    )
   })
 
   it('paginates with a stable cursor', async () => {
