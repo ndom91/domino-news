@@ -695,7 +695,7 @@ function FeedsSection({ feeds }: { feeds: OpsStatus['feeds'] }) {
   const shown = expanded ? sorted : sorted.slice(0, FEEDS_SHOWN)
   const errors = feeds.filter((f) => f.lastStatus === 'error').length
   return (
-    <section aria-labelledby="feeds-heading" className="mt-10">
+    <section aria-labelledby="feeds-heading">
       <SectionLabel id="feeds-heading">Feeds</SectionLabel>
       <p className="mb-2 type-meta" aria-live="polite">
         {plural(feeds.length, 'feed')}
@@ -802,7 +802,7 @@ function FeedErrorsSection({ feeds }: { feeds: OpsStatus['feeds'] }) {
 function MatchHealthSection() {
   const health = useQuery(queries.matchHealth())
   return (
-    <section aria-labelledby="match-heading" className="mt-10">
+    <section aria-labelledby="match-heading">
       <SectionLabel id="match-heading">Match health</SectionLabel>
       {health.isPending ? (
         <MatchHealthSkeleton />
