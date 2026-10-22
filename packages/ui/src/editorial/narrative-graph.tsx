@@ -20,13 +20,19 @@ const MARK_Y = 19
 export function NarrativeGraph({
   narrative,
   currentStoryId,
+  storyIds,
   Link = DefaultLink,
 }: {
   narrative: NarrativeDetail
   currentStoryId?: string
+  /** Optional chronological slice, used by the Story page's collapsed long timelines. */
+  storyIds?: readonly string[]
   Link?: LinkLike
 }) {
-  const { rows } = layoutNarrative(narrative.stories, narrative.edges)
+  const stories = storyIds
+    ? narrative.stories.filter((story) => storyIds.includes(story.id))
+    : narrative.stories
+  const { rows } = layoutNarrative(stories, narrative.edges)
   const byId = new Map(narrative.stories.map((s) => [s.id, s]))
   const highlightId = currentStoryId ?? rows.at(-1)?.node.id
   const storyLink = (id: string) => {
@@ -40,7 +46,7 @@ export function NarrativeGraph({
 
   return (
     <ol
-      aria-label={`${plural(narrative.stories.length, 'story', 'stories')}, oldest first`}
+      aria-label={`${plural(stories.length, 'story', 'stories')}, oldest first`}
       className={cx(deskKey(narrative.desk), 'flex flex-col')}
       // Desk colour for the line and markers; without a desk the neutral key nearly vanishes
       // on the dark canvas, so use the strong border colour instead.

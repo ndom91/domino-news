@@ -1,5 +1,10 @@
 import { formatDate, hostnameOf, plural } from '@dn/domain'
-import { REGION_LABELS, type StoryDetail, type StoryUpdateEvent } from '@dn/schemas'
+import {
+  type NarrativeDetail,
+  REGION_LABELS,
+  type StoryDetail,
+  type StoryUpdateEvent,
+} from '@dn/schemas'
 import {
   Badge,
   Button,
@@ -238,6 +243,111 @@ function updateTitle(update: StoryUpdateEvent) {
   }
 }
 
+const TIMELINE_BOOKEND_SIZE = 3
+const TIMELINE_COLLAPSE_AT = 12
+
+/** Keeps a Story page's development view legible; the Narrative page remains the full record. */
+function NarrativeBookends({
+  narrative,
+  currentStoryId,
+}: {
+  narrative: NarrativeDetail
+  currentStoryId: string
+}) {
+  const stories = [...narrative.stories].sort(
+    (a, b) => a.firstObservedAt.localeCompare(b.firstObservedAt) || a.id.localeCompare(b.id),
+  )
+  if (stories.length <= TIMELINE_COLLAPSE_AT) {
+    return (
+      <NarrativeGraph narrative={narrative} currentStoryId={currentStoryId} Link={RouterLink} />
+    )
+  }
+  const opening = stories.slice(0, TIMELINE_BOOKEND_SIZE)
+  const recent = stories.slice(-TIMELINE_BOOKEND_SIZE)
+  const bookendIds = new Set([...opening, ...recent].map((story) => story.id))
+  const currentIndex = stories.findIndex((story) => story.id === currentStoryId)
+  const current = currentIndex >= 0 ? stories[currentIndex] : undefined
+  const between = stories.filter(
+    (story) => !bookendIds.has(story.id) && story.id !== currentStoryId,
+  )
+  const indexById = new Map(stories.map((story, index) => [story.id, index]))
+  const beforeCurrent = current
+    ? between.filter((story) => (indexById.get(story.id) ?? 0) < currentIndex)
+    : between
+  const afterCurrent = current
+    ? between.filter((story) => (indexById.get(story.id) ?? 0) > currentIndex)
+    : []
+
+  return (
+    <div>
+      <NarrativeGraph
+        narrative={narrative}
+        currentStoryId={currentStoryId}
+        storyIds={opening.map((story) => story.id)}
+        Link={RouterLink}
+      />
+      <TimelineDisclosure
+        narrative={narrative}
+        currentStoryId={currentStoryId}
+        stories={beforeCurrent}
+      />
+      {current && !bookendIds.has(current.id) ? (
+        <NarrativeGraph
+          narrative={narrative}
+          currentStoryId={currentStoryId}
+          storyIds={[current.id]}
+          Link={RouterLink}
+        />
+      ) : null}
+      <TimelineDisclosure
+        narrative={narrative}
+        currentStoryId={currentStoryId}
+        stories={afterCurrent}
+      />
+      <NarrativeGraph
+        narrative={narrative}
+        currentStoryId={currentStoryId}
+        storyIds={recent.map((story) => story.id)}
+        Link={RouterLink}
+      />
+      <Link
+        to="/narratives/$slug"
+        params={{ slug: narrative.slug }}
+        className="mt-5 inline-block link-inline text-sm font-semibold"
+      >
+        View full narrative
+      </Link>
+    </div>
+  )
+}
+
+function TimelineDisclosure({
+  narrative,
+  currentStoryId,
+  stories,
+}: {
+  narrative: NarrativeDetail
+  currentStoryId: string
+  stories: NarrativeDetail['stories']
+}) {
+  if (stories.length === 0) return null
+  return (
+    <details className="t-acc border-b border-border px-3 py-4">
+      <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+        Show {plural(stories.length, 'intervening development')}
+      </summary>
+      <div className="mt-4">
+        <NarrativeGraph
+          narrative={narrative}
+          currentStoryId={currentStoryId}
+          storyIds={stories.map((story) => story.id)}
+          Link={RouterLink}
+        />
+      </div>
+    </details>
+  )
+}
+
 function StoryPage() {
   const { slug } = Route.useParams()
   const { now } = Route.useLoaderData()
@@ -355,11 +465,7 @@ function StoryPage() {
                 }
               />
               <Reveal>
-                <NarrativeGraph
-                  narrative={narrative.data}
-                  currentStoryId={story.id}
-                  Link={RouterLink}
-                />
+                <NarrativeBookends narrative={narrative.data} currentStoryId={story.id} />
               </Reveal>
             </section>
           ) : narrativeRef && narrative.isPending ? (
