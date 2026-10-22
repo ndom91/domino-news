@@ -1,7 +1,10 @@
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import type { StoryUpdateKind, StoryUpdatesResponse } from '@dn/schemas'
-import { and, desc, eq, inArray, isNull, or, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm'
+
+export const GENERIC_SUMMARY_REVISION_DESCRIPTION =
+  'The story summary was updated with the latest reporting.'
 
 /**
  * Records a reader-visible change alongside its exact Story-local source targets. Callers must
@@ -149,13 +152,19 @@ async function loadUpdates(
       and(
         inArray(schema.storyUpdateEvent.storyId, storyIds),
         isNull(schema.storyUpdateEvent.supersededAt),
+        or(
+          ne(schema.storyUpdateEvent.kind, 'summary_revision'),
+          ne(schema.storyUpdateEvent.origin, 'system'),
+          ne(schema.storyUpdateEvent.description, GENERIC_SUMMARY_REVISION_DESCRIPTION),
+        ),
       ),
     )
     .orderBy(desc(schema.storyUpdateEvent.createdAt))
     .limit(limit)
-  if (events.length === 0) return []
-  const eventIds = events.map((event) => event.id)
-  const summaryVersionIds = events.flatMap((event) =>
+  const visibleEvents = coalesceSummaryRevisions(events)
+  if (visibleEvents.length === 0) return []
+  const eventIds = visibleEvents.map((event) => event.id)
+  const summaryVersionIds = visibleEvents.flatMap((event) =>
     event.summaryVersionId ? [event.summaryVersionId] : [],
   )
   const [articleSources, primarySources, summaries] = await Promise.all([
@@ -212,7 +221,7 @@ async function loadUpdates(
         .from(schema.storySummaryVersion)
         .where(inArray(schema.storySummaryVersion.id, previousIds))
     : []
-  return events.map((event) => ({
+  return visibleEvents.map((event) => ({
     id: event.id,
     storyId: event.storyId,
     kind: event.kind,
@@ -254,4 +263,21 @@ async function loadUpdates(
         })),
     ],
   }))
+}
+
+function coalesceSummaryRevisions<
+  T extends { kind: StoryUpdateKind; summaryVersionId: string | null },
+>(events: T[]) {
+  const versions = new Set<string>()
+  const out: T[] = []
+  for (const event of events) {
+    if (event.kind !== 'summary_revision' || !event.summaryVersionId) {
+      out.push(event)
+      continue
+    }
+    if (versions.has(event.summaryVersionId)) continue
+    versions.add(event.summaryVersionId)
+    out.push(event)
+  }
+  return out
 }

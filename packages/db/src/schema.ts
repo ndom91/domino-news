@@ -554,6 +554,16 @@ export const summaryUpdateAssessment = pgTable(
       .notNull()
       .references(() => storySummaryVersion.id),
     inputFingerprint: text('input_fingerprint').notNull(),
+    changeKind: text('change_kind')
+      .$type<
+        | 'new_fact'
+        | 'status_change'
+        | 'official_response'
+        | 'consequence'
+        | 'correction'
+        | 'new_perspective'
+      >()
+      .notNull(),
     outcome: text('outcome').$type<'material' | 'corroboration_only' | 'uncertain'>().notNull(),
     note: text('note').notNull(),
     sourceArticleIds: jsonb('source_article_ids').$type<string[]>().notNull(),

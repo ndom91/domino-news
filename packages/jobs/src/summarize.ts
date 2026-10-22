@@ -177,6 +177,8 @@ async function assessSummaryUpdate(
   // Corroboration and uncertainty deliberately leave no reader-facing domain record. A completed
   // job is not retried, while material outcomes need durable deduplication before summarising.
   if (result.output.outcome !== 'material') return { runId, output: result.output }
+  const changeKind = result.output.changeKind
+  if (!changeKind) throw new Error('material assessment has no change kind')
   const inserted = await ctx.db
     .insert(schema.summaryUpdateAssessment)
     .values({
@@ -184,6 +186,7 @@ async function assessSummaryUpdate(
       storyId,
       priorSummaryVersionId,
       inputFingerprint,
+      changeKind,
       outcome: result.output.outcome,
       note: result.output.note,
       sourceArticleIds: result.output.sourceArticleIds,
@@ -213,6 +216,7 @@ function assessmentOutput(
   row: typeof schema.summaryUpdateAssessment.$inferSelect,
 ): SummaryUpdateAssessment {
   return {
+    changeKind: row.changeKind,
     outcome: row.outcome,
     note: row.note,
     sourceArticleIds: row.sourceArticleIds,
@@ -222,17 +226,26 @@ function assessmentOutput(
 
 function validateAssessment(output: SummaryUpdateAssessment, articles: LoadedArticle[]) {
   if (output.outcome !== 'material') {
-    if (output.note || output.sourceArticleIds.length || output.observationIds.length) {
+    if (
+      output.changeKind ||
+      output.note ||
+      output.sourceArticleIds.length ||
+      output.observationIds.length
+    ) {
       throw new Error('non-material assessment includes a note or sources')
     }
     return
   }
   if (
     !output.note ||
+    !output.changeKind ||
     output.sourceArticleIds.length === 0 ||
     output.sourceArticleIds.length !== output.observationIds.length
   ) {
     throw new Error('material assessment has no grounded note or sources')
+  }
+  if (/latest reporting|summary (was )?updated/i.test(output.note)) {
+    throw new Error('material assessment note is generic')
   }
   const observations = new Map(
     articles.map((article) => [article.articleId, article.observationId]),

@@ -293,6 +293,7 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
       return {
         ...g,
         output: {
+          changeKind: g.output.changeKind,
           outcome: g.output.outcome,
           note: g.output.note,
           sourceArticleIds: used.map((article) => article.articleId),

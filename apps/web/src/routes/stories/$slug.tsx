@@ -112,7 +112,7 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
       <div className="mt-3 max-w-reading border-l-2 border-accent pl-4 text-sm leading-normal">
         <p>{update.description}</p>
         <SummaryVersions summaryDiff={update.summaryDiff} />
-        <UpdateSources sources={update.sources} />
+        <SupportingSources sources={update.sources} />
       </div>
     )
   }
@@ -129,30 +129,29 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
       </p>
     )
   }
-  return <UpdateSources sources={update.sources} />
+  return <SupportingSources sources={update.sources} />
 }
 
-function UpdateSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
+function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
   if (sources.length === 0) return null
   return (
-    <ul className="mt-3 flex max-w-reading flex-col gap-3">
+    <p className="mt-3 max-w-reading text-sm text-text-secondary">
+      <span className="font-semibold text-text">Supported by: </span>
       {sources.map((source) => (
-        <li key={source.url} className="border-l-2 border-border pl-4 text-sm">
+        <span key={source.url}>
           <a
             href={source.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="link-inline font-semibold"
+            title={source.title}
+            className="link-inline"
           >
-            {source.title} ↗
+            {source.publisher?.name ?? source.title}
           </a>
-          {source.publisher ? <p className="mt-1 type-meta">{source.publisher.name}</p> : null}
-          {source.description ? (
-            <p className="mt-1 leading-normal text-text-secondary">{source.description}</p>
-          ) : null}
-        </li>
+          {source === sources.at(-1) ? null : ', '}
+        </span>
       ))}
-    </ul>
+    </p>
   )
 }
 
@@ -194,7 +193,7 @@ function SummaryVersion({ label, text }: { label: string; text: string }) {
 function updateTitle(update: StoryUpdateEvent) {
   switch (update.kind) {
     case 'summary_revision':
-      return 'Summary revised'
+      return null
     case 'new_primary_source':
       return 'Primary document added'
     case 'correction_or_clarification':
@@ -417,7 +416,9 @@ function StoryPage() {
               <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
                 {updates.items.map((update) => (
                   <li key={update.id} className="py-4 first:pt-3">
-                    <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
+                    {updateTitle(update) ? (
+                      <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
+                    ) : null}
                     <Timestamp
                       at={update.createdAt}
                       format="datetime"

@@ -173,12 +173,14 @@ export function createFixtureGeneration(): GenerationProvider {
       return {
         output: material
           ? {
+              changeKind: 'new_fact' as const,
               outcome: 'material' as const,
               note: `Added reporting from ${article.publisher} about ${truncate(article.title, 160)}.`,
               sourceArticleIds: [article.articleId],
               observationIds: [article.observationId],
             }
           : {
+              changeKind: null,
               outcome: 'corroboration_only' as const,
               note: '',
               sourceArticleIds: [],

@@ -136,8 +136,11 @@ new article metadata below. Do not infer changes within publisher pages or facts
 - outcome "material": a new fact, status change, official response, consequence, correction, or genuinely new perspective.
 - outcome "corroboration_only": the reporting repeats or confirms the existing summary.
 - outcome "uncertain": metadata does not support a confident conclusion. Prefer this over guessing.
-- note: for material only, one concise reader-facing sentence beginning with a verb such as "Added", "Updated" or
-  "Clarified". State only what the cited new reporting supports. Otherwise use an empty string.
+- changeKind: for material only, choose new_fact, status_change, official_response, consequence, correction or
+  new_perspective. Otherwise null.
+- note: for material only, one concise reader-facing sentence that names the specific new proposition absent from the
+  prior summary. Begin with "Added", "Updated" or "Clarified". Never write generic text such as "latest reporting"
+  or merely say the summary changed. State only what the cited new reporting supports. Otherwise use an empty string.
 - sources: for material only, the number of every new article supporting the note. Otherwise use [].
 
 PRIOR SUMMARY:

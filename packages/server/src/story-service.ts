@@ -4,7 +4,7 @@ import { ID_PREFIX, newId, renumberCitations, slugify } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
 import { and, countDistinct, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
-import { recordStoryUpdate } from './story-updates.ts'
+import { GENERIC_SUMMARY_REVISION_DESCRIPTION, recordStoryUpdate } from './story-updates.ts'
 
 export function sha256(input: string) {
   return createHash('sha256').update(input).digest('hex')
@@ -293,8 +293,7 @@ export async function recordGeneratedSummary(
     await recordStoryUpdate(db, {
       storyId: story.id,
       kind: 'summary_revision',
-      description:
-        input.revision?.description ?? 'The story summary was updated with the latest reporting.',
+      description: input.revision?.description ?? GENERIC_SUMMARY_REVISION_DESCRIPTION,
       origin: input.revision ? 'model' : 'system',
       summaryVersionId: versionId,
       articleIds: input.revision?.articleIds ?? citedArticles,
