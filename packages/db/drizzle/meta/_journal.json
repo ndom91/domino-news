@@ -232,6 +232,13 @@
       "when": 1792666503830,
       "tag": "0032_eminent_lorna_dane",
       "breakpoints": true
+    },
+    {
+      "idx": 33,
+      "version": "7",
+      "when": 1792668395009,
+      "tag": "0033_abnormal_squadron_sinister",
+      "breakpoints": true
     }
   ]
 }

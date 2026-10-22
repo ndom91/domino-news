@@ -425,6 +425,9 @@ export const storyArticle = pgTable(
   },
   (t) => [
     index('story_article_story_idx').on(t.storyId),
+    index('story_article_active_added_idx')
+      .on(t.storyId, t.addedAt.desc())
+      .where(sql`${t.removedAt} is null`),
     // An article belongs to at most one active Story.
     uniqueIndex('story_article_active_article_uq')
       .on(t.articleId)

@@ -12,13 +12,14 @@ import {
   recordGeneratedSummary,
   recordStoryUpdate,
 } from '@dn/server'
-import { and, eq, gt, isNull } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadArticles, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { markRunFailed, runStoryGeneration } from './provenance.ts'
 import { likelyCorroboration } from './summary-update-prefilter.ts'
 
 const MAX_ASSESSMENT_ARTICLES = 5
+const MAX_ASSESSMENT_CANDIDATES = MAX_ASSESSMENT_ARTICLES * 3
 
 /**
  * Generate, validate and record a grounded summary. Stale jobs (story inputs changed)
@@ -160,6 +161,8 @@ async function assessSummaryUpdate(
         gt(schema.storyArticle.addedAt, prior.createdAt),
       ),
     )
+    .orderBy(desc(schema.storyArticle.addedAt))
+    .limit(MAX_ASSESSMENT_CANDIDATES)
   const articles = assessmentArticles(
     await loadArticles(
       ctx.db,

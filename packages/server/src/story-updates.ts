@@ -114,6 +114,7 @@ export async function latestStoryUpdatesSince(
       and(
         inArray(schema.storyUpdateEvent.storyId, storyIds),
         isNull(schema.storyUpdateEvent.supersededAt),
+        readerVisibleUpdate(),
         // The checkpoint is the previous successful Briefing open, so equality belongs to the
         // earlier visit and must not be repeated.
         sql`${schema.storyUpdateEvent.createdAt} > ${since}`,
@@ -152,11 +153,7 @@ async function loadUpdates(
       and(
         inArray(schema.storyUpdateEvent.storyId, storyIds),
         isNull(schema.storyUpdateEvent.supersededAt),
-        or(
-          ne(schema.storyUpdateEvent.kind, 'summary_revision'),
-          ne(schema.storyUpdateEvent.origin, 'system'),
-          ne(schema.storyUpdateEvent.description, GENERIC_SUMMARY_REVISION_DESCRIPTION),
-        ),
+        readerVisibleUpdate(),
       ),
     )
     .orderBy(desc(schema.storyUpdateEvent.createdAt))
@@ -263,6 +260,14 @@ async function loadUpdates(
         })),
     ],
   }))
+}
+
+function readerVisibleUpdate() {
+  return or(
+    ne(schema.storyUpdateEvent.kind, 'summary_revision'),
+    ne(schema.storyUpdateEvent.origin, 'system'),
+    ne(schema.storyUpdateEvent.description, GENERIC_SUMMARY_REVISION_DESCRIPTION),
+  )
 }
 
 function coalesceSummaryRevisions<

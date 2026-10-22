@@ -1,0 +1,1 @@
+CREATE INDEX "story_article_active_added_idx" ON "story_article" USING btree ("story_id","added_at" DESC NULLS LAST) WHERE "story_article"."removed_at" is null;
