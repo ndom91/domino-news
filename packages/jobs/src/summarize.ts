@@ -57,7 +57,9 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
       ? await assessSummaryUpdate(ctx, job, story.id, story.currentSummaryId, job.inputFingerprint)
       : null
   if (assessment && assessment.output.outcome !== 'material')
-    return { status: assessment.output.outcome }
+    return {
+      status: assessment.prefiltered ? 'corroboration_prefilter' : assessment.output.outcome,
+    }
 
   const input = await loadStoryInput(ctx.db, story.id)
   if (!input || input.articles.length === 0) return { status: 'no_articles' }
@@ -129,7 +131,7 @@ async function assessSummaryUpdate(
   storyId: string,
   priorSummaryVersionId: string,
   inputFingerprint: string,
-) {
+): Promise<AssessmentResult | null> {
   const [known] = await ctx.db
     .select()
     .from(schema.summaryUpdateAssessment)
@@ -141,7 +143,7 @@ async function assessSummaryUpdate(
       ),
     )
   if (known) {
-    return { runId: known.analysisRunId, output: assessmentOutput(known) }
+    return { prefiltered: false, runId: known.analysisRunId, output: assessmentOutput(known) }
   }
   const [prior] = await ctx.db
     .select({
@@ -173,6 +175,7 @@ async function assessSummaryUpdate(
   if (articles.length === 0) return null
   if (likelyCorroboration(prior.body, articles)) {
     return {
+      prefiltered: true,
       runId: 'metadata-prefilter',
       output: {
         changeKind: null,
@@ -202,7 +205,9 @@ async function assessSummaryUpdate(
   }
   // Corroboration and uncertainty deliberately leave no reader-facing domain record. A completed
   // job is not retried, while material outcomes need durable deduplication before summarising.
-  if (result.output.outcome !== 'material') return { runId, output: result.output }
+  if (result.output.outcome !== 'material') {
+    return { prefiltered: false, runId, output: result.output }
+  }
   const changeKind = result.output.changeKind
   if (!changeKind) throw new Error('material assessment has no change kind')
   const inserted = await ctx.db
@@ -222,7 +227,7 @@ async function assessSummaryUpdate(
     .onConflictDoNothing()
     .returning()
   const row = inserted[0]
-  if (row) return { runId, output: result.output }
+  if (row) return { prefiltered: false, runId, output: result.output }
   const [raced] = await ctx.db
     .select()
     .from(schema.summaryUpdateAssessment)
@@ -235,7 +240,13 @@ async function assessSummaryUpdate(
     )
   if (!raced) throw new Error('summary update assessment was not recorded')
 
-  return { runId: raced.analysisRunId, output: assessmentOutput(raced) }
+  return { prefiltered: false, runId: raced.analysisRunId, output: assessmentOutput(raced) }
+}
+
+type AssessmentResult = {
+  prefiltered: boolean
+  runId: string
+  output: SummaryUpdateAssessment
 }
 
 function assessmentArticles(

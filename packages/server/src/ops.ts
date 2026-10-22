@@ -6,6 +6,7 @@ import { PRIORITY, QUEUES } from './queues.ts'
 import { DomainError } from './story-service.ts'
 
 const BACKFILL_PAUSED = 'backfill_paused'
+const INFERENCE_WINDOW_HOURS = 24
 
 export async function isBackfillPaused(ctx: Pick<ServerContext, 'db'>) {
   const [row] = await ctx.db
@@ -70,6 +71,38 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     group by name`)
   const byQueue = new Map(queueRows.map((q) => [q.name, q]))
 
+  const summaryJobMetrics = db.execute<{
+    completed: number
+    corroboration_only: number
+    prefiltered: number
+    recorded: number
+    stale: number
+    uncertain: number
+  }>(sql`
+    select
+      count(*)::int as completed,
+      count(*) filter (where output->>'status' = 'corroboration_only')::int as corroboration_only,
+      count(*) filter (where output->>'status' = 'corroboration_prefilter')::int as prefiltered,
+      count(*) filter (where output->>'status' = 'recorded')::int as recorded,
+      count(*) filter (where output->>'status' = 'stale')::int as stale,
+      count(*) filter (where output->>'status' = 'uncertain')::int as uncertain
+    from pgboss.job
+    where name = ${QUEUES.summarizeStory}
+      and state = 'completed'
+      and completed_on >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`)
+  const assessmentMetrics = db.execute<{
+    average_duration_seconds: number | null
+    failed: number
+    succeeded: number
+  }>(sql`
+    select
+      round(avg(extract(epoch from completed_at - started_at)) filter (where completed_at is not null), 1)::real as average_duration_seconds,
+      count(*) filter (where status = 'failed')::int as failed,
+      count(*) filter (where status = 'succeeded')::int as succeeded
+    from analysis_run
+    where operation = 'summary_update_assessment'
+      and started_at >= now() - make_interval(hours => ${INFERENCE_WINDOW_HOURS})`)
+
   const scalar = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
   // Matches the outbox_pending_idx partial index (no full-table scan).
   const outboxPending = and(
@@ -97,6 +130,8 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     narratives,
     outboxPendingCount,
     outboxFailed,
+    summaryJobResult,
+    assessmentResult,
   ] = await Promise.all([
     scalar(db.select({ n: count }).from(schema.article)),
     scalar(db.select({ n: count }).from(schema.articleEmbedding)),
@@ -113,7 +148,11 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     scalar(
       db.select({ n: count }).from(schema.outboxEvent).where(isNotNull(schema.outboxEvent.deadAt)),
     ),
+    summaryJobMetrics,
+    assessmentMetrics,
   ])
+  const summaryJobs = summaryJobResult.rows[0]
+  const updateAssessments = assessmentResult.rows[0]
 
   return {
     inferenceMode: ctx.inference.mode,
@@ -142,6 +181,22 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
       outboxPending: outboxPendingCount,
       outboxFailed,
       oldestOutboxAgeSeconds: oldestOutbox?.s ?? null,
+    },
+    inference: {
+      windowHours: INFERENCE_WINDOW_HOURS,
+      summaryJobs: {
+        completed: summaryJobs?.completed ?? 0,
+        corroborationOnly: summaryJobs?.corroboration_only ?? 0,
+        prefiltered: summaryJobs?.prefiltered ?? 0,
+        recorded: summaryJobs?.recorded ?? 0,
+        stale: summaryJobs?.stale ?? 0,
+        uncertain: summaryJobs?.uncertain ?? 0,
+      },
+      updateAssessments: {
+        averageDurationSeconds: updateAssessments?.average_duration_seconds ?? null,
+        failed: updateAssessments?.failed ?? 0,
+        succeeded: updateAssessments?.succeeded ?? 0,
+      },
     },
     recentRuns: runs.map((r) => ({
       id: r.id,

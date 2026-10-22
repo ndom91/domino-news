@@ -481,6 +481,22 @@ export const opsStatusSchema = z.object({
     outboxFailed: z.int(),
     oldestOutboxAgeSeconds: z.nullable(z.number()),
   }),
+  inference: z.object({
+    windowHours: z.int(),
+    summaryJobs: z.object({
+      completed: z.int(),
+      corroborationOnly: z.int(),
+      prefiltered: z.int(),
+      recorded: z.int(),
+      stale: z.int(),
+      uncertain: z.int(),
+    }),
+    updateAssessments: z.object({
+      averageDurationSeconds: z.nullable(z.number()),
+      failed: z.int(),
+      succeeded: z.int(),
+    }),
+  }),
   recentRuns: z.array(
     z.object({
       id: z.string(),

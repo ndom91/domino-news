@@ -149,6 +149,8 @@ function OpsPage() {
         />
       </dl>
 
+      <InferenceSection inference={s.inference} />
+
       <div className="mt-10 grid gap-10 lg:grid-cols-2">
         <section className="min-w-0">
           <SectionLabel>Queues</SectionLabel>
@@ -215,6 +217,42 @@ function OpsPage() {
 
       <FailedJobs queue={failed ?? null} />
     </Page>
+  )
+}
+
+function InferenceSection({ inference }: { inference: OpsStatus['inference'] }) {
+  const jobs = inference.summaryJobs
+  const assessments = inference.updateAssessments
+  return (
+    <section aria-labelledby="inference-heading" className="mt-10">
+      <SectionLabel id="inference-heading">Inference work</SectionLabel>
+      <p className="mb-4 max-w-reading text-sm text-text-secondary">
+        Last {inference.windowHours} hours. Stale summary jobs are queue churn that exited before
+        inference; compare them with recorded summaries before adding stronger coalescing.
+      </p>
+      <dl className="grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+        <StatText
+          label="Summary jobs"
+          value={String(jobs.completed)}
+          note={`${jobs.recorded} recorded · ${jobs.stale} stale`}
+        />
+        <StatText
+          label="Metadata skips"
+          value={String(jobs.prefiltered)}
+          note={`${jobs.corroborationOnly} model corroborations · ${jobs.uncertain} uncertain`}
+        />
+        <StatText
+          label="Update assessments"
+          value={String(assessments.succeeded)}
+          note={`${assessments.failed} failed · ${duration(assessments.averageDurationSeconds)} average`}
+        />
+        <StatText
+          label="No revision"
+          value={String(jobs.corroborationOnly + jobs.uncertain)}
+          note="Assessment found no material update"
+        />
+      </dl>
+    </section>
   )
 }
 
@@ -474,6 +512,7 @@ function Detail({ label, children }: { label: string; children: ReactNode }) {
 }
 
 const pct = (part: number, whole: number) => (whole ? `${Math.round((part / whole) * 100)}%` : '–')
+const duration = (seconds: number | null) => (seconds === null ? '–' : `${seconds.toFixed(1)}s`)
 
 /** How well articles are grouped into stories. Computed on the server every 5 minutes. */
 const FEEDS_SHOWN = 5
