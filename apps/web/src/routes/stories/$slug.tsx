@@ -163,7 +163,7 @@ function SummaryVersions({
 }) {
   if (!summaryDiff.previous) return null
   return (
-    <details className="t-acc mt-3 border-t border-border pt-3">
+    <details className="t-acc mt-3">
       <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
         Compare summary versions
       </summary>
@@ -413,18 +413,20 @@ function StoryPage() {
                 title="What changed"
                 meta={plural(updates.items.length, 'update')}
               />
-              <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
+              <ol className="flex flex-col divide-y divide-border border-t border-border">
                 {updates.items.map((update) => (
                   <li key={update.id} className="py-4 first:pt-3">
-                    {updateTitle(update) ? (
-                      <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
-                    ) : null}
-                    <Timestamp
-                      at={update.createdAt}
-                      format="datetime"
-                      className="mt-1 block type-meta"
-                    />
-                    <UpdateDetail update={update} />
+                    <div className="max-w-reading">
+                      {updateTitle(update) ? (
+                        <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
+                      ) : null}
+                      <Timestamp
+                        at={update.createdAt}
+                        format="datetime"
+                        className="mt-1 block type-meta"
+                      />
+                      <UpdateDetail update={update} />
+                    </div>
                   </li>
                 ))}
               </ol>
