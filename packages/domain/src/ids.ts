@@ -38,4 +38,5 @@ export const ID_PREFIX = {
   pushDelivery: 'pdl',
   storyUpdateEvent: 'sue',
   storyUpdateEventSource: 'sues',
+  summaryUpdateAssessment: 'sua',
 } as const

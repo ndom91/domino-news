@@ -542,6 +542,36 @@ export const storySummarySource = pgTable(
   (t) => [primaryKey({ columns: [t.summaryVersionId, t.articleId] })],
 )
 
+// One durable verdict for a published Story's prior-summary/current-input pair.
+export const summaryUpdateAssessment = pgTable(
+  'summary_update_assessment',
+  {
+    id: text('id').primaryKey(),
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    priorSummaryVersionId: text('prior_summary_version_id')
+      .notNull()
+      .references(() => storySummaryVersion.id),
+    inputFingerprint: text('input_fingerprint').notNull(),
+    outcome: text('outcome').$type<'material' | 'corroboration_only' | 'uncertain'>().notNull(),
+    note: text('note').notNull(),
+    sourceArticleIds: jsonb('source_article_ids').$type<string[]>().notNull(),
+    observationIds: jsonb('observation_ids').$type<string[]>().notNull(),
+    analysisRunId: text('analysis_run_id')
+      .notNull()
+      .references(() => analysisRun.id),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    uniqueIndex('summary_update_assessment_pair_uq').on(
+      t.storyId,
+      t.priorSummaryVersionId,
+      t.inputFingerprint,
+    ),
+  ],
+)
+
 export const sourceReference = pgTable('source_reference', {
   id: text('id').primaryKey(),
   url: text('url').notNull().unique(),

@@ -6,9 +6,11 @@ import {
   relationshipCandidateSchema,
   storyMatchSchema,
   storySummarySchema,
+  summaryUpdateAssessmentSchema,
 } from '@dn/schemas'
 import { z } from 'zod/mini'
 import {
+  assessSummaryUpdatePrompt,
   chooseStoryPrompt,
   classifyRelationshipPrompt,
   explainContextPrompt,
@@ -132,6 +134,10 @@ const matchByNumber = z.object({
 const summaryByNumber = z.extend(
   z.omit(storySummarySchema, { sourceArticleIds: true, observationIds: true }),
   { sources: sourceNumbers },
+)
+const summaryUpdateByNumber = z.extend(
+  z.omit(summaryUpdateAssessmentSchema, { sourceArticleIds: true, observationIds: true }),
+  { sources: z.array(z.int()) },
 )
 const contextByNumber = z.object({
   entries: z
@@ -271,6 +277,26 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
           ...rest,
           sourceArticleIds: used.map((a) => a.articleId),
           observationIds: used.map((a) => a.observationId),
+        },
+      }
+    },
+    assessSummaryUpdate: async (input) => {
+      const g = await generate(
+        'summary_update_assessment',
+        summaryUpdateByNumber,
+        assessSummaryUpdatePrompt(input),
+        PROMPT_VERSIONS.assessSummaryUpdate,
+      )
+      const used = g.output.sources.map((n) =>
+        numbered('summary_update_assessment', input.update.articles, n),
+      )
+      return {
+        ...g,
+        output: {
+          outcome: g.output.outcome,
+          note: g.output.note,
+          sourceArticleIds: used.map((article) => article.articleId),
+          observationIds: used.map((article) => article.observationId),
         },
       }
     },

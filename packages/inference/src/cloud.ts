@@ -13,6 +13,7 @@ export function createCloudGeneration(): GenerationProvider {
     matchStory: disabled,
     chooseStory: disabled,
     summarizeStory: disabled,
+    assessSummaryUpdate: disabled,
     classifyRelationship: disabled,
     titleNarrative: disabled,
     explainContext: disabled,

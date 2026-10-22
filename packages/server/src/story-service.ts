@@ -178,6 +178,8 @@ export async function recordGeneratedSummary(
     shownArticleIds?: string[]
     /** Replace a generated summary on unchanged inputs (`pnpm cli summaries:refresh --all`). */
     force?: boolean
+    /** Reader-facing, source-grounded explanation for a material assessed update. */
+    revision?: { description: string; articleIds: string[]; analysisRunId: string }
   },
 ): Promise<{ status: 'recorded'; versionId: string } | { status: 'stale' }> {
   const [story] = await db
@@ -291,10 +293,12 @@ export async function recordGeneratedSummary(
     await recordStoryUpdate(db, {
       storyId: story.id,
       kind: 'summary_revision',
-      description: 'The story summary was updated with the latest reporting.',
-      origin: 'system',
+      description:
+        input.revision?.description ?? 'The story summary was updated with the latest reporting.',
+      origin: input.revision ? 'model' : 'system',
       summaryVersionId: versionId,
-      articleIds: citedArticles,
+      articleIds: input.revision?.articleIds ?? citedArticles,
+      analysisRunId: input.revision?.analysisRunId,
     })
   }
   return { status: 'recorded', versionId }

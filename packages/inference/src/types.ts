@@ -6,6 +6,7 @@ import type {
   StoryContextOutput,
   StoryMatch,
   StorySummaryOutput,
+  SummaryUpdateAssessment,
 } from '@dn/schemas'
 
 /** Publisher-controlled text. Always treated as untrusted data, never as instructions. */
@@ -38,6 +39,12 @@ export interface StoryInput {
   articles: ArticleInput[]
 }
 
+export interface SummaryUpdateInput {
+  storyId: string
+  previousSummary: string
+  articles: ArticleInput[]
+}
+
 export interface Generated<T> {
   output: T
   modelId: string
@@ -59,6 +66,9 @@ export interface GenerationProvider {
     stories: StoryInput[]
   }): Promise<Generated<StoryChoice>>
   summarizeStory(input: { story: StoryInput }): Promise<Generated<StorySummaryOutput>>
+  assessSummaryUpdate(input: {
+    update: SummaryUpdateInput
+  }): Promise<Generated<SummaryUpdateAssessment>>
   classifyRelationship(input: {
     newer: StoryInput
     older: StoryInput

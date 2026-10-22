@@ -37,6 +37,15 @@ export const storySummarySchema = z.object({
 })
 export type StorySummaryOutput = z.infer<typeof storySummarySchema>
 
+// Decides whether newly attached reporting warrants replacing a published Story summary.
+export const summaryUpdateAssessmentSchema = z.object({
+  outcome: z.enum(['material', 'corroboration_only', 'uncertain']),
+  note: z.string().check(z.maxLength(300)),
+  sourceArticleIds: z.array(z.string()),
+  observationIds: z.array(z.string()),
+})
+export type SummaryUpdateAssessment = z.infer<typeof summaryUpdateAssessmentSchema>
+
 export const contextEntrySchema = z.object({
   title: z.string(),
   explanation: z.string(),

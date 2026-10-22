@@ -1,4 +1,4 @@
-import { formatDate, hostnameOf, plural } from '@dn/domain'
+import { formatDate, hostnameOf, plural, stripCitations } from '@dn/domain'
 import {
   type NarrativeDetail,
   REGION_LABELS,
@@ -110,12 +110,9 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (update.summaryDiff) {
     return (
       <div className="mt-3 max-w-reading border-l-2 border-accent pl-4 text-sm leading-normal">
-        <p className="type-label text-text-muted">Summary changes</p>
-        {update.summaryDiff.previous ? (
-          <SummaryDiff before={update.summaryDiff.previous} after={update.summaryDiff.current} />
-        ) : (
-          <p className="mt-1">{update.summaryDiff.current}</p>
-        )}
+        <p>{update.description}</p>
+        <SummaryVersions summaryDiff={update.summaryDiff} />
+        <UpdateSources sources={update.sources} />
       </div>
     )
   }
@@ -132,10 +129,14 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
       </p>
     )
   }
-  if (update.sources.length === 0) return null
+  return <UpdateSources sources={update.sources} />
+}
+
+function UpdateSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
+  if (sources.length === 0) return null
   return (
     <ul className="mt-3 flex max-w-reading flex-col gap-3">
-      {update.sources.map((source) => (
+      {sources.map((source) => (
         <li key={source.url} className="border-l-2 border-border pl-4 text-sm">
           <a
             href={source.url}
@@ -155,79 +156,39 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   )
 }
 
-type DiffPart = { kind: 'added' | 'removed'; text: string }
-
-/** Exact word-level change set, omitting text shared by both immutable summary versions. */
-function SummaryDiff({ before, after }: { before: string; after: string }) {
-  const parts = summaryChangeParts(before, after)
+// SummaryVersions keeps the complete immutable texts available without turning rewrites into a word diff.
+function SummaryVersions({
+  summaryDiff,
+}: {
+  summaryDiff: NonNullable<StoryUpdateEvent['summaryDiff']>
+}) {
+  if (!summaryDiff.previous) return null
   return (
-    <p className="mt-1">
-      {parts.map((part, index) =>
-        part.kind === 'added' ? (
-          <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: LCS parts are positional output
-            key={index}
-          >
-            {index > 0 ? ' ' : null}
-            <ins className="border-b-2 border-accent font-medium no-underline">{part.text}</ins>
-          </span>
-        ) : (
-          <span
-            // biome-ignore lint/suspicious/noArrayIndexKey: LCS parts are positional output
-            key={index}
-          >
-            {index > 0 ? ' ' : null}
-            <del className="text-text-muted decoration-1">{part.text}</del>
-          </span>
-        ),
-      )}
-    </p>
+    <details className="t-acc mt-3 border-t border-border pt-3">
+      <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+        Compare summary versions
+      </summary>
+      <div className="mt-3 flex flex-col gap-4">
+        <SummaryVersion label="Before" text={summaryDiff.previous} />
+        <SummaryVersion label="After" text={summaryDiff.current} />
+      </div>
+    </details>
   )
 }
 
-function summaryChangeParts(before: string, after: string): DiffPart[] {
-  const oldTokens = before.match(/\s+|[^\s]+/g) ?? []
-  const newTokens = after.match(/\s+|[^\s]+/g) ?? []
-  const lcs = Array.from(
-    { length: oldTokens.length + 1 },
-    () => new Uint16Array(newTokens.length + 1),
+function SummaryVersion({ label, text }: { label: string; text: string }) {
+  const paragraphs = stripCitations(text).split(/\n\s*\n/)
+  return (
+    <div>
+      <p className="type-label text-text-muted">{label}</p>
+      <div className="mt-1 flex flex-col gap-2 text-text-secondary">
+        {paragraphs.map((paragraph, index) => (
+          // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs are positional summary text
+          <p key={index}>{paragraph}</p>
+        ))}
+      </div>
+    </div>
   )
-  for (let oldIndex = oldTokens.length - 1; oldIndex >= 0; oldIndex--) {
-    for (let newIndex = newTokens.length - 1; newIndex >= 0; newIndex--) {
-      const row = lcs[oldIndex]
-      const nextRow = lcs[oldIndex + 1]
-      if (!row || !nextRow) continue
-      row[newIndex] =
-        oldTokens[oldIndex] === newTokens[newIndex]
-          ? (nextRow[newIndex + 1] ?? 0) + 1
-          : Math.max(nextRow[newIndex] ?? 0, row[newIndex + 1] ?? 0)
-    }
-  }
-  const changes: DiffPart[] = []
-  let oldIndex = 0
-  let newIndex = 0
-  const add = (kind: DiffPart['kind'], text: string) => {
-    const prior = changes.at(-1)
-    if (prior?.kind === kind) prior.text += text
-    else changes.push({ kind, text })
-  }
-  while (oldIndex < oldTokens.length || newIndex < newTokens.length) {
-    if (oldTokens[oldIndex] === newTokens[newIndex]) {
-      oldIndex++
-      newIndex++
-    } else if (
-      newIndex < newTokens.length &&
-      (oldIndex === oldTokens.length ||
-        (lcs[oldIndex]?.[newIndex + 1] ?? 0) >= (lcs[oldIndex + 1]?.[newIndex] ?? 0))
-    ) {
-      add('added', newTokens[newIndex] ?? '')
-      newIndex++
-    } else {
-      add('removed', oldTokens[oldIndex] ?? '')
-      oldIndex++
-    }
-  }
-  return changes
 }
 
 function updateTitle(update: StoryUpdateEvent) {
@@ -245,6 +206,38 @@ function updateTitle(update: StoryUpdateEvent) {
 
 const TIMELINE_BOOKEND_SIZE = 3
 const TIMELINE_COLLAPSE_AT = 12
+const CONNECTED_STORIES_LIMIT = 5
+
+function connectedStories(stories: StoryDetail['related']) {
+  const temporal = new Set(['follows', 'responds_to', 'corrects'])
+  return stories.toSorted((a, b) => {
+    const aTemporal = temporal.has(a.relation)
+    const bTemporal = temporal.has(b.relation)
+    if (aTemporal !== bTemporal) return aTemporal ? -1 : 1
+    return b.lastUpdatedAt.localeCompare(a.lastUpdatedAt) || a.id.localeCompare(b.id)
+  })
+}
+
+function ConnectedStoryList({ stories }: { stories: StoryDetail['related'] }) {
+  return (
+    <ul className="flex flex-col divide-y divide-border">
+      {stories.map((story) => (
+        <li key={`${story.id}-${story.relation}-${story.direction}`} className="py-3 first:pt-0">
+          <p className="type-label text-text-muted">
+            {relationLabel(story.relation, story.direction)}
+          </p>
+          <Link
+            to="/stories/$slug"
+            params={{ slug: story.slug }}
+            className="mt-1 block type-headline text-[1.25rem] link-headline"
+          >
+            {story.title}
+          </Link>
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 /** Keeps a Story page's development view legible; the Narrative page remains the full record. */
 function NarrativeBookends({
@@ -371,6 +364,9 @@ function StoryPage() {
     enabled: Boolean(narrativeRef),
   })
   const regions = story.regions.map((r) => REGION_LABELS[r]).join(', ')
+  const related = connectedStories(story.related)
+  const shownRelated = related.slice(0, CONNECTED_STORIES_LIMIT)
+  const hiddenRelated = related.slice(CONNECTED_STORIES_LIMIT)
 
   return (
     // No Page wrapper: the lead block sets its own top spacing, as on the front page.
@@ -497,22 +493,24 @@ function StoryPage() {
             {story.related.length === 0 ? (
               <p className="text-sm text-text-muted">No connected stories found yet.</p>
             ) : (
-              <ul className="flex flex-col divide-y divide-border">
-                {story.related.map((r) => (
-                  <li key={`${r.id}-${r.relation}-${r.direction}`} className="py-3 first:pt-0">
-                    <p className="type-label text-text-muted">
-                      {relationLabel(r.relation, r.direction)}
-                    </p>
-                    <Link
-                      to="/stories/$slug"
-                      params={{ slug: r.slug }}
-                      className="mt-1 block type-headline text-[1.25rem] link-headline"
-                    >
-                      {r.title}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <>
+                <ConnectedStoryList stories={shownRelated} />
+                {hiddenRelated.length > 0 ? (
+                  <details className="t-acc mt-3 border-t border-border pt-3">
+                    <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+                      Show{' '}
+                      {plural(
+                        hiddenRelated.length,
+                        'more connected story',
+                        'more connected stories',
+                      )}
+                    </summary>
+                    <div className="mt-3">
+                      <ConnectedStoryList stories={hiddenRelated} />
+                    </div>
+                  </details>
+                ) : null}
+              </>
             )}
           </section>
 

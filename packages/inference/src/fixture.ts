@@ -164,6 +164,30 @@ export function createFixtureGeneration(): GenerationProvider {
         promptVersion: PROMPT_VERSIONS.summarizeStory,
       }
     },
+    async assessSummaryUpdate({ update }) {
+      const article = update.articles[0]
+      if (!article) throw new Error('assessSummaryUpdate requires at least one article')
+      const text = `${article.title} ${article.description ?? ''}`.toLowerCase()
+      const prior = update.previousSummary.toLowerCase()
+      const material = text.split(/\W+/).some((word) => word.length > 5 && !prior.includes(word))
+      return {
+        output: material
+          ? {
+              outcome: 'material' as const,
+              note: `Added reporting from ${article.publisher} about ${truncate(article.title, 160)}.`,
+              sourceArticleIds: [article.articleId],
+              observationIds: [article.observationId],
+            }
+          : {
+              outcome: 'corroboration_only' as const,
+              note: '',
+              sourceArticleIds: [],
+              observationIds: [],
+            },
+        modelId,
+        promptVersion: PROMPT_VERSIONS.assessSummaryUpdate,
+      }
+    },
     async classifyRelationship({ newer, older }) {
       const score = jaccard(storyTokens(newer), storyTokens(older))
       const related = score >= 0.08

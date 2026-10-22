@@ -1,6 +1,7 @@
 import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import { InvalidModelOutputError } from '@dn/inference'
+import type { SummaryUpdateAssessment } from '@dn/schemas'
 import {
   type AnalysisJob,
   analysisJob,
@@ -10,9 +11,9 @@ import {
   recordGeneratedSummary,
   recordStoryUpdate,
 } from '@dn/server'
-import { eq } from 'drizzle-orm'
+import { and, eq, gt, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
-import { type LoadedArticle, loadStoryInput, withTransientBodies } from './inputs.ts'
+import { type LoadedArticle, loadArticles, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { markRunFailed, runStoryGeneration } from './provenance.ts'
 
 /**
@@ -38,6 +39,20 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
   if ((await newsroomOutletCount(ctx.db, story.id)) < ctx.config.minPublishOutlets) {
     return { status: 'below_outlet_threshold' }
   }
+  if (story.currentSummaryId && !job.force) {
+    const [current] = await ctx.db
+      .select({ inputFingerprint: schema.storySummaryVersion.inputFingerprint })
+      .from(schema.storySummaryVersion)
+      .where(eq(schema.storySummaryVersion.id, story.currentSummaryId))
+    if (current?.inputFingerprint === job.inputFingerprint) return { status: 'stale' }
+  }
+
+  const assessment =
+    story.currentSummaryId && !job.force
+      ? await assessSummaryUpdate(ctx, job, story.id, story.currentSummaryId, job.inputFingerprint)
+      : null
+  if (assessment && assessment.output.outcome !== 'material')
+    return { status: assessment.output.outcome }
 
   const input = await loadStoryInput(ctx.db, story.id)
   if (!input || input.articles.length === 0) return { status: 'no_articles' }
@@ -60,6 +75,13 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
         inputFingerprint: job.inputFingerprint,
         shownArticleIds: input.articles.map((a) => a.articleId),
         force: job.force,
+        revision: assessment
+          ? {
+              description: assessment.output.note,
+              articleIds: assessment.output.sourceArticleIds,
+              analysisRunId: assessment.runId,
+            }
+          : undefined,
       })
     } catch (error) {
       // Ungrounded citations are a model-output problem: retryable, never published.
@@ -89,6 +111,139 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     return recorded
   })
   return outcome
+}
+
+// assessSummaryUpdate records one material verdict for a prior-summary/current-input pair.
+async function assessSummaryUpdate(
+  ctx: WorkerContext,
+  job: AnalysisJob,
+  storyId: string,
+  priorSummaryVersionId: string,
+  inputFingerprint: string,
+) {
+  const [known] = await ctx.db
+    .select()
+    .from(schema.summaryUpdateAssessment)
+    .where(
+      and(
+        eq(schema.summaryUpdateAssessment.storyId, storyId),
+        eq(schema.summaryUpdateAssessment.priorSummaryVersionId, priorSummaryVersionId),
+        eq(schema.summaryUpdateAssessment.inputFingerprint, inputFingerprint),
+      ),
+    )
+  if (known) {
+    return { runId: known.analysisRunId, output: assessmentOutput(known) }
+  }
+  const [prior] = await ctx.db
+    .select({
+      body: schema.storySummaryVersion.body,
+      createdAt: schema.storySummaryVersion.createdAt,
+    })
+    .from(schema.storySummaryVersion)
+    .where(eq(schema.storySummaryVersion.id, priorSummaryVersionId))
+  if (!prior) return null
+  const additions = await ctx.db
+    .select({ articleId: schema.storyArticle.articleId })
+    .from(schema.storyArticle)
+    .where(
+      and(
+        eq(schema.storyArticle.storyId, storyId),
+        isNull(schema.storyArticle.removedAt),
+        gt(schema.storyArticle.addedAt, prior.createdAt),
+      ),
+    )
+  const articles = await loadArticles(
+    ctx.db,
+    additions.map((addition) => addition.articleId),
+  )
+  if (articles.length === 0) return null
+  const pairFingerprint = `${priorSummaryVersionId}:${inputFingerprint}`
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
+    { operation: 'summary_update_assessment', storyId, inputFingerprint: pairFingerprint },
+    () =>
+      ctx.inference.generation.assessSummaryUpdate({
+        update: { storyId, previousSummary: prior.body, articles },
+      }),
+  )
+  try {
+    validateAssessment(result.output, articles)
+  } catch (error) {
+    const invalid = new InvalidModelOutputError(String(error))
+    await markRunFailed(ctx.db, runId, invalid)
+    throw invalid
+  }
+  // Corroboration and uncertainty deliberately leave no reader-facing domain record. A completed
+  // job is not retried, while material outcomes need durable deduplication before summarising.
+  if (result.output.outcome !== 'material') return { runId, output: result.output }
+  const inserted = await ctx.db
+    .insert(schema.summaryUpdateAssessment)
+    .values({
+      id: newId(ID_PREFIX.summaryUpdateAssessment),
+      storyId,
+      priorSummaryVersionId,
+      inputFingerprint,
+      outcome: result.output.outcome,
+      note: result.output.note,
+      sourceArticleIds: result.output.sourceArticleIds,
+      observationIds: result.output.observationIds,
+      analysisRunId: runId,
+    })
+    .onConflictDoNothing()
+    .returning()
+  const row = inserted[0]
+  if (row) return { runId, output: result.output }
+  const [raced] = await ctx.db
+    .select()
+    .from(schema.summaryUpdateAssessment)
+    .where(
+      and(
+        eq(schema.summaryUpdateAssessment.storyId, storyId),
+        eq(schema.summaryUpdateAssessment.priorSummaryVersionId, priorSummaryVersionId),
+        eq(schema.summaryUpdateAssessment.inputFingerprint, inputFingerprint),
+      ),
+    )
+  if (!raced) throw new Error('summary update assessment was not recorded')
+
+  return { runId: raced.analysisRunId, output: assessmentOutput(raced) }
+}
+
+function assessmentOutput(
+  row: typeof schema.summaryUpdateAssessment.$inferSelect,
+): SummaryUpdateAssessment {
+  return {
+    outcome: row.outcome,
+    note: row.note,
+    sourceArticleIds: row.sourceArticleIds,
+    observationIds: row.observationIds,
+  }
+}
+
+function validateAssessment(output: SummaryUpdateAssessment, articles: LoadedArticle[]) {
+  if (output.outcome !== 'material') {
+    if (output.note || output.sourceArticleIds.length || output.observationIds.length) {
+      throw new Error('non-material assessment includes a note or sources')
+    }
+    return
+  }
+  if (
+    !output.note ||
+    output.sourceArticleIds.length === 0 ||
+    output.sourceArticleIds.length !== output.observationIds.length
+  ) {
+    throw new Error('material assessment has no grounded note or sources')
+  }
+  const observations = new Map(
+    articles.map((article) => [article.articleId, article.observationId]),
+  )
+  for (let index = 0; index < output.sourceArticleIds.length; index++) {
+    const articleId = output.sourceArticleIds[index]
+    const observationId = output.observationIds[index]
+    if (!articleId || !observationId || observations.get(articleId) !== observationId) {
+      throw new Error('assessment cites an article outside the new active reporting')
+    }
+  }
 }
 
 type SourceRef = {

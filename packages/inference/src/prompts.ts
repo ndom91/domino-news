@@ -1,5 +1,5 @@
 import { DESK_SCOPES, DESKS, TOPIC_LABELS, TOPICS } from '@dn/schemas'
-import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
+import type { ArticleInput, PrimarySourceInput, StoryInput, SummaryUpdateInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 // match-story@6: granularity rules from docs/story-granularity.md (reaction waves are one
@@ -9,6 +9,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput } from './types.ts'
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@6',
   summarizeStory: 'summarize-story@9',
+  assessSummaryUpdate: 'assess-summary-update@1',
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@5',
@@ -127,6 +128,23 @@ Do not copy sentences from the sources.
 
 SOURCE ARTICLES (numbered, in publishing order):
 ${data(storyData(input.story).articles)}`
+}
+
+export function assessSummaryUpdatePrompt(input: { update: SummaryUpdateInput }) {
+  return `Decide whether NEW REPORTING materially changes the existing summary. Use only the prior summary and the
+new article metadata below. Do not infer changes within publisher pages or facts not stated there.
+- outcome "material": a new fact, status change, official response, consequence, correction, or genuinely new perspective.
+- outcome "corroboration_only": the reporting repeats or confirms the existing summary.
+- outcome "uncertain": metadata does not support a confident conclusion. Prefer this over guessing.
+- note: for material only, one concise reader-facing sentence beginning with a verb such as "Added", "Updated" or
+  "Clarified". State only what the cited new reporting supports. Otherwise use an empty string.
+- sources: for material only, the number of every new article supporting the note. Otherwise use [].
+
+PRIOR SUMMARY:
+${data({ summary: input.update.previousSummary })}
+
+NEW REPORTING (numbered):
+${data(input.update.articles.map((article, index) => articleData(article, index + 1)))}`
 }
 
 export function classifyRelationshipPrompt(input: { newer: StoryInput; older: StoryInput }) {

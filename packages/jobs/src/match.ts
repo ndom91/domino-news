@@ -286,14 +286,14 @@ async function enqueueSummary(
   priorityClass: AnalysisJob['priorityClass'],
 ) {
   const [story] = await tx.db
-    .select({ fingerprint: schema.story.inputFingerprint })
+    .select({ fingerprint: schema.story.inputFingerprint, publishedAt: schema.story.publishedAt })
     .from(schema.story)
     .where(eq(schema.story.id, storyId))
   if (!story?.fingerprint) return
   const job = analysisJob(storyId, story.fingerprint, priorityClass)
   await sendInTx(ctx, tx, QUEUES.summarizeStory, job.data, {
     ...job.options,
-    // Short delay lets sibling articles from the same poll land before summarising.
-    startAfter: 5,
+    // Published Stories wait longer so a burst of matched coverage becomes one assessment.
+    startAfter: story.publishedAt ? 30 : 5,
   })
 }
