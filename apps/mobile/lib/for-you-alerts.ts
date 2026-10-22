@@ -22,6 +22,11 @@ export async function enableForYouAlerts(): Promise<void> {
   await (await taskModule()).enableForYouAlerts()
 }
 
+export async function syncForYouAlerts(): Promise<void> {
+  if (isExpoGo) return
+  await (await taskModule()).syncForYouAlerts()
+}
+
 export async function disableForYouAlerts(): Promise<void> {
   if (isExpoGo) return
   await (await taskModule()).disableForYouAlerts()

@@ -21,6 +21,16 @@ export async function forYouAlertsEnabled(): Promise<boolean> {
   return Boolean(await SecureStore.getItemAsync(PUSH_TOKEN_KEY))
 }
 
+/** Re-register an existing opt-in after app updates or server-side subscription loss. */
+export async function syncForYouAlerts(): Promise<void> {
+  if (!(await forYouAlertsEnabled())) return
+
+  const projectId = expoProjectId()
+  if (!projectId) throw new Error('Push notifications are not configured for this app.')
+  const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
+  await saveToken(token)
+}
+
 export async function enableForYouAlerts(): Promise<void> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
@@ -36,7 +46,7 @@ export async function enableForYouAlerts(): Promise<void> {
   if (status !== 'granted')
     throw new Error('Allow notifications in your device settings to turn on alerts.')
 
-  const projectId = Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId
+  const projectId = expoProjectId()
   if (!projectId) throw new Error('Push notifications are not configured for this app.')
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
   await saveToken(token)
@@ -62,6 +72,10 @@ async function removeToken(token: string) {
     method: 'POST',
     body: JSON.stringify({ token }),
   })
+}
+
+function expoProjectId() {
+  return Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId
 }
 
 async function request(path: string, init: RequestInit) {
