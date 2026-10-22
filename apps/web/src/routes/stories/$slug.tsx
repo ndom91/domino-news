@@ -104,28 +104,13 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (update.summaryDiff) {
     return (
-      <div className="mt-3 max-w-reading border-l-2 border-accent pl-4">
-        <p className="type-label text-text-muted">Updated summary</p>
-        <p className="mt-1 text-sm leading-normal">{update.summaryDiff.current}</p>
+      <div className="mt-3 max-w-reading border-l-2 border-accent pl-4 text-sm leading-normal">
+        <p className="type-label text-text-muted">Summary changes</p>
         {update.summaryDiff.previous ? (
-          <details className="t-acc mt-3 text-sm">
-            <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
-              Compare with the previous summary
-            </summary>
-            <div className="mt-3 grid gap-4 border-t border-border pt-3 md:grid-cols-2">
-              <div>
-                <p className="type-label text-text-muted">Before</p>
-                <p className="mt-1 leading-normal text-text-secondary">
-                  {update.summaryDiff.previous}
-                </p>
-              </div>
-              <div>
-                <p className="type-label text-accent-text">Now</p>
-                <p className="mt-1 leading-normal">{update.summaryDiff.current}</p>
-              </div>
-            </div>
-          </details>
-        ) : null}
+          <SummaryDiff before={update.summaryDiff.previous} after={update.summaryDiff.current} />
+        ) : (
+          <p className="mt-1">{update.summaryDiff.current}</p>
+        )}
       </div>
     )
   }
@@ -163,6 +148,81 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
       ))}
     </ul>
   )
+}
+
+type DiffPart = { kind: 'added' | 'removed'; text: string }
+
+/** Exact word-level change set, omitting text shared by both immutable summary versions. */
+function SummaryDiff({ before, after }: { before: string; after: string }) {
+  const parts = summaryChangeParts(before, after)
+  return (
+    <p className="mt-1">
+      {parts.map((part, index) =>
+        part.kind === 'added' ? (
+          <span
+            // biome-ignore lint/suspicious/noArrayIndexKey: LCS parts are positional output
+            key={index}
+          >
+            {index > 0 ? ' ' : null}
+            <ins className="border-b-2 border-accent font-medium no-underline">{part.text}</ins>
+          </span>
+        ) : (
+          <span
+            // biome-ignore lint/suspicious/noArrayIndexKey: LCS parts are positional output
+            key={index}
+          >
+            {index > 0 ? ' ' : null}
+            <del className="text-text-muted decoration-1">{part.text}</del>
+          </span>
+        ),
+      )}
+    </p>
+  )
+}
+
+function summaryChangeParts(before: string, after: string): DiffPart[] {
+  const oldTokens = before.match(/\s+|[^\s]+/g) ?? []
+  const newTokens = after.match(/\s+|[^\s]+/g) ?? []
+  const lcs = Array.from(
+    { length: oldTokens.length + 1 },
+    () => new Uint16Array(newTokens.length + 1),
+  )
+  for (let oldIndex = oldTokens.length - 1; oldIndex >= 0; oldIndex--) {
+    for (let newIndex = newTokens.length - 1; newIndex >= 0; newIndex--) {
+      const row = lcs[oldIndex]
+      const nextRow = lcs[oldIndex + 1]
+      if (!row || !nextRow) continue
+      row[newIndex] =
+        oldTokens[oldIndex] === newTokens[newIndex]
+          ? (nextRow[newIndex + 1] ?? 0) + 1
+          : Math.max(nextRow[newIndex] ?? 0, row[newIndex + 1] ?? 0)
+    }
+  }
+  const changes: DiffPart[] = []
+  let oldIndex = 0
+  let newIndex = 0
+  const add = (kind: DiffPart['kind'], text: string) => {
+    const prior = changes.at(-1)
+    if (prior?.kind === kind) prior.text += text
+    else changes.push({ kind, text })
+  }
+  while (oldIndex < oldTokens.length || newIndex < newTokens.length) {
+    if (oldTokens[oldIndex] === newTokens[newIndex]) {
+      oldIndex++
+      newIndex++
+    } else if (
+      newIndex < newTokens.length &&
+      (oldIndex === oldTokens.length ||
+        (lcs[oldIndex]?.[newIndex + 1] ?? 0) >= (lcs[oldIndex + 1]?.[newIndex] ?? 0))
+    ) {
+      add('added', newTokens[newIndex] ?? '')
+      newIndex++
+    } else {
+      add('removed', oldTokens[oldIndex] ?? '')
+      oldIndex++
+    }
+  }
+  return changes
 }
 
 function updateTitle(update: StoryUpdateEvent) {
