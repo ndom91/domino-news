@@ -4,8 +4,21 @@ import { eq, inArray } from 'drizzle-orm'
 import type { Job } from 'pg-boss'
 import { sendInTx, type WorkerContext } from './context.ts'
 
+const MAX_EMBEDDING_DOCUMENT_CHARS = 6000
+
+export function embeddingDocument(title: string, description: string | null) {
+  const text = description ?? ''
+  const available = Math.max(0, MAX_EMBEDDING_DOCUMENT_CHARS - title.length)
+  return {
+    title: title.slice(0, MAX_EMBEDDING_DOCUMENT_CHARS),
+    text: text.length > available ? text.slice(0, available) : text,
+  }
+}
+
 /**
  * Embed a batch of articles (title + description only) in one inference call.
+ * Each document is bounded independently so a malformed feed cannot exceed the embedding model's
+ * context window or block the rest of the batch.
  * Jobs whose revision is no longer current are skipped as stale.
  */
 export async function embedArticles(ctx: WorkerContext, jobs: Job<AnalysisJob>[]) {
@@ -36,7 +49,7 @@ export async function embedArticles(ctx: WorkerContext, jobs: Job<AnalysisJob>[]
       : 'backfill'
   const vectors = await ctx.gpu.embeddings.run(cls, () =>
     ctx.inference.embeddings.embedDocuments(
-      current.map(({ row }) => ({ title: row.title, text: row.description ?? '' })),
+      current.map(({ row }) => embeddingDocument(row.title, row.description)),
     ),
   )
 

@@ -29,7 +29,14 @@ export function decodeEntities(input: string): string {
 
 export function stripHtml(input: string): string {
   // Decode first so entity-encoded markup (&lt;p&gt;) is stripped too.
-  return decodeEntities(decodeEntities(input).replace(/<[^>]*>/g, ' '))
+  const decoded = decodeEntities(decodeEntities(input))
+  // RSS descriptions occasionally contain a whole page's stylesheet or script. Removing only
+  // tags would retain that unreadable content in article metadata and model inputs.
+  return decodeEntities(
+    decoded
+      .replace(/<(?:script|style|template)\b[^>]*>[\s\S]*?<\/(?:script|style|template)\s*>/gi, ' ')
+      .replace(/<[^>]*>/g, ' '),
+  )
     .replace(/[\u200B-\u200D\u2060\uFEFF]/g, '')
     .replace(/\s+/g, ' ')
     .trim()

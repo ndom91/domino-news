@@ -18,6 +18,7 @@ import {
   zoneName,
 } from '@dn/domain'
 import {
+  embeddingDocument,
   findRspEntry,
   forYouExpoMessage,
   isStaleItem,
@@ -124,6 +125,22 @@ describe('parseFeed', () => {
     const { items } = parseFeed(xml)
     expect(items).toHaveLength(1)
     expect(items[0]).toMatchObject({ title: 'Quake', description: 'Details here' })
+  })
+  it('drops stylesheet content from descriptions', () => {
+    const xml = `<rss><channel><item>
+      <title>One</title><link>https://ex.com/a</link>
+      <description><![CDATA[<style>.hero { background: red; }</style><p>Readable reporting.</p>]]></description>
+    </item></channel></rss>`
+    const { items } = parseFeed(xml)
+    expect(items[0]?.description).toBe('Readable reporting.')
+  })
+})
+
+describe('embeddingDocument', () => {
+  it('keeps embedding input within the document limit', () => {
+    const document = embeddingDocument('Headline', 'a'.repeat(7000))
+    expect(document.title).toBe('Headline')
+    expect(document.title.length + document.text.length).toBe(6000)
   })
 })
 
