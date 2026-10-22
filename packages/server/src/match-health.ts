@@ -5,15 +5,31 @@ import type { ServerContext } from './context.ts'
 const SPLIT_THRESHOLD = 0.9
 // Closest pairs returned for the list; the count covers all of them.
 const SPLIT_PAIRS_LISTED = 25
-// The split-pair search compares embeddings pairwise; the page refreshes every few seconds.
+// The split-pair search compares embeddings pairwise, so sample recent reporting to keep it
+// diagnostic work rather than an unbounded production query.
+const SPLIT_PAIR_SAMPLE_LIMIT = 150
 const CACHE_MS = 5 * 60_000
 let cached: { at: number; value: MatchHealth } | null = null
+let pending: Promise<MatchHealth> | null = null
 
 type Side = MatchHealth['splitPairs']['worst'][number]['a']
 
 /** Live match quality signals for /pipeline. Cached for 5 minutes per server process. */
 export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<MatchHealth> {
   if (cached && Date.now() - cached.at < CACHE_MS) return cached.value
+  if (pending) return pending
+  pending = loadMatchHealth(ctx).then((value) => {
+    cached = { at: Date.now(), value }
+    return value
+  })
+  try {
+    return await pending
+  } finally {
+    pending = null
+  }
+}
+
+async function loadMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<MatchHealth> {
   const { db } = ctx
 
   const { rows: storyRows } = await db.execute<{
@@ -67,13 +83,15 @@ export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<Ma
     b_slug: string | null
     total: number
   }>(sql`
-    with a as (
+    with a as materialized (
       select ae.article_id, ae.embedding, sa.story_id, ar.publisher_id,
         coalesce(ar.published_at, ar.first_seen_at) as at
       from article_embedding ae
       join story_article sa on sa.article_id = ae.article_id and sa.removed_at is null
       join article ar on ar.id = ae.article_id
       where coalesce(ar.published_at, ar.first_seen_at) > now() - interval '3 days'
+      order by coalesce(ar.published_at, ar.first_seen_at) desc, ae.article_id desc
+      limit ${SPLIT_PAIR_SAMPLE_LIMIT}
     ), pairs as (
       select x.article_id as a, y.article_id as b, x.story_id as sa, y.story_id as sb,
         1 - (x.embedding <=> y.embedding) as similarity
@@ -124,6 +142,7 @@ export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<Ma
     },
     splitPairs: {
       count: pairs[0]?.total ?? 0,
+      sampleLimit: SPLIT_PAIR_SAMPLE_LIMIT,
       threshold: SPLIT_THRESHOLD,
       worst: pairs.map((p) => ({
         similarity: Number(p.similarity),
@@ -132,6 +151,5 @@ export async function getMatchHealth(ctx: Pick<ServerContext, 'db'>): Promise<Ma
       })),
     },
   }
-  cached = { at: Date.now(), value }
   return value
 }

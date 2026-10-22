@@ -604,6 +604,7 @@ export const matchHealthSchema = z.object({
   // missed merges (last 3 days, within 48 hours of each other).
   splitPairs: z.object({
     count: z.int(),
+    sampleLimit: z.int(),
     threshold: z.number(),
     worst: z.array(
       z.object({

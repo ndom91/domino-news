@@ -287,6 +287,18 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         assessSummaryUpdatePrompt(input),
         PROMPT_VERSIONS.assessSummaryUpdate,
       )
+      if (g.output.outcome !== 'material') {
+        return {
+          ...g,
+          output: {
+            changeKind: null,
+            outcome: g.output.outcome,
+            note: '',
+            sourceArticleIds: [],
+            observationIds: [],
+          },
+        }
+      }
       const used = g.output.sources.map((n) =>
         numbered('summary_update_assessment', input.update.articles, n),
       )

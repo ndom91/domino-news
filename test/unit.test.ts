@@ -800,6 +800,25 @@ describe('local generation adapter', () => {
     expect(output.observationIds).toEqual(['obs_b'])
   })
 
+  it('drops material-only fields from a non-material assessment', async () => {
+    reply({
+      changeKind: 'new_fact',
+      outcome: 'corroboration_only',
+      note: 'Added a fact.',
+      sources: [1],
+    })
+    const { output } = await (await generation()).assessSummaryUpdate({
+      update: { storyId: 'sty_1', previousSummary: 'Existing summary.', articles: [article('a')] },
+    })
+    expect(output).toEqual({
+      changeKind: null,
+      outcome: 'corroboration_only',
+      note: '',
+      sourceArticleIds: [],
+      observationIds: [],
+    })
+  })
+
   it('rejects a number outside the list', async () => {
     reply({
       claims: [

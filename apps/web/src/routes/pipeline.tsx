@@ -64,15 +64,12 @@ function OpsPage() {
     action.isPending && action.variables && actionKey(action.variables) === a
 
   if (status.isPending) {
-    return (
-      <Page>
-        <Skeleton className="h-40 w-full" />
-      </Page>
-    )
+    return <PipelineSkeleton />
   }
   if (status.isError) {
     return (
       <Page>
+        <PageTitle>Pipeline</PageTitle>
         <Notice tone="error" title="Pipeline status unavailable">
           {status.error.message}
         </Notice>
@@ -189,6 +186,41 @@ function OpsPage() {
           },
         ]}
       />
+    </Page>
+  )
+}
+
+function PipelineSkeleton() {
+  return (
+    <Page>
+      <PageTitle>Pipeline</PageTitle>
+      <div className="-mt-4 flex gap-2" aria-hidden="true">
+        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-9 w-28" />
+        <Skeleton className="h-9 w-36" />
+      </div>
+      <div className="mt-8 flex gap-6 border-b border-border pb-0" aria-hidden="true">
+        <Skeleton className="mb-3 h-4 w-16" />
+        <Skeleton className="mb-3 h-4 w-16" />
+        <Skeleton className="mb-3 h-4 w-16" />
+        <Skeleton className="mb-3 h-4 w-16" />
+      </div>
+      <div className="mt-8" aria-busy="true">
+        <span className="sr-only">Loading pipeline status…</span>
+        <dl className="grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+          {['articles', 'stories', 'narratives', 'outbox'].map((key) => (
+            <div key={key} className="border-b border-border py-4 pr-4">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="mt-3 h-7 w-12" />
+              <Skeleton className="mt-2 h-3 w-28" />
+            </div>
+          ))}
+        </dl>
+        <div className="mt-10 grid gap-10 lg:grid-cols-2">
+          <Skeleton className="h-52 w-full" />
+          <Skeleton className="h-52 w-full" />
+        </div>
+      </div>
     </Page>
   )
 }
@@ -465,7 +497,7 @@ function FailedJobs({ queue }: { queue: string | null }) {
         </Notice>
       ) : null}
       {jobs.isPending ? (
-        <Skeleton className="h-24 w-full" />
+        <FailedJobsSkeleton />
       ) : jobs.isError ? (
         <Notice tone="error" title="Failed jobs could not be loaded">
           {jobs.error.message}
@@ -772,7 +804,7 @@ function MatchHealthSection() {
     <section aria-labelledby="match-heading" className="mt-10">
       <SectionLabel id="match-heading">Match health</SectionLabel>
       {health.isPending ? (
-        <Skeleton className="h-28 w-full" />
+        <MatchHealthSkeleton />
       ) : health.isError ? (
         <Notice tone="error" title="Match health unavailable">
           {health.error.message}
@@ -781,6 +813,41 @@ function MatchHealthSection() {
         <MatchHealthBody h={health.data} />
       )}
     </section>
+  )
+}
+
+function MatchHealthSkeleton() {
+  return (
+    <div className="mt-4" aria-busy="true">
+      <span className="sr-only">Loading match health…</span>
+      <Skeleton className="h-4 w-full max-w-reading" />
+      <Skeleton className="mt-2 h-4 w-3/4 max-w-reading" />
+      <dl className="mt-4 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+        {['singletons', 'placements', 'model', 'merges'].map((key) => (
+          <div key={key} className="border-b border-border py-4 pr-4">
+            <Skeleton className="h-3 w-20" />
+            <Skeleton className="mt-3 h-7 w-12" />
+            <Skeleton className="mt-2 h-3 w-28" />
+          </div>
+        ))}
+      </dl>
+      <Skeleton className="mt-6 h-24 w-full" />
+    </div>
+  )
+}
+
+function FailedJobsSkeleton() {
+  return (
+    <div className="border-y border-border" aria-busy="true">
+      <span className="sr-only">Loading failed jobs…</span>
+      {[1, 2, 3].map((row) => (
+        <div key={row} className="flex flex-col gap-2 border-b border-border py-3 last:border-b-0">
+          <Skeleton className="h-4 w-56" />
+          <Skeleton className="h-3 w-2/3" />
+          <Skeleton className="h-3 w-1/3" />
+        </div>
+      ))}
+    </div>
   )
 }
 
@@ -816,7 +883,7 @@ function MatchHealthBody({ h }: { h: MatchHealth }) {
         <StatText
           label="Possible missed merges"
           value={String(h.splitPairs.count)}
-          note={`article pairs ≥ ${h.splitPairs.threshold.toFixed(2)} similar, different stories (3 days)`}
+          note={`article pairs ≥ ${h.splitPairs.threshold.toFixed(2)} similar in the latest ${h.splitPairs.sampleLimit} reports`}
         />
       </dl>
       <ClosestPairs pairs={h.splitPairs.worst} />
