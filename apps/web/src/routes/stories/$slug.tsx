@@ -109,7 +109,7 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (update.summaryDiff) {
     return (
-      <div className="mt-3 max-w-reading border-l-2 border-accent pl-4 text-sm leading-normal">
+      <div className="mt-3 max-w-reading text-sm leading-normal">
         <p>{update.description}</p>
         <SummaryVersions summaryDiff={update.summaryDiff} />
         <SupportingSources sources={update.sources} />
@@ -193,7 +193,7 @@ function SummaryVersion({ label, text }: { label: string; text: string }) {
 function updateTitle(update: StoryUpdateEvent) {
   switch (update.kind) {
     case 'summary_revision':
-      return null
+      return 'Summary updated'
     case 'new_primary_source':
       return 'Primary document added'
     case 'correction_or_clarification':
