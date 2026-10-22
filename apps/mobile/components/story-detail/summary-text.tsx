@@ -64,8 +64,8 @@ const styles = StyleSheet.create({
     // Nested Text cannot use Pressable's hitSlop. Its vertical padding gives short inline terms
     // a reliable 44 px touch target while preserving text wrapping.
     paddingVertical: 10,
-    borderBottomColor: t.color.accentText,
-    borderBottomWidth: 2,
-    borderStyle: 'dotted',
+    textDecorationColor: t.color.accent,
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
   },
 })
