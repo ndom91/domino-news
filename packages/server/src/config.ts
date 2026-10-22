@@ -6,6 +6,11 @@ export function readConfig(env = process.env) {
     if (!Number.isFinite(value)) throw new Error(`${key} must be a number`)
     return value
   }
+  const boundedNum = (key: string, fallback: number, min: number, max: number) => {
+    const value = num(key, fallback)
+    if (value < min || value > max) throw new Error(`${key} must be between ${min} and ${max}`)
+    return value
+  }
   return {
     databaseUrl: env.DATABASE_URL ?? 'postgres://dn:dn@localhost:5442/dn',
     typesenseUrl: env.TYPESENSE_URL ?? 'http://localhost:8108',
@@ -17,6 +22,13 @@ export function readConfig(env = process.env) {
     backfillAdmitPerMinute: num('BACKFILL_ADMIT_PER_MINUTE', 20),
     embeddingConcurrency: num('EMBEDDING_CONCURRENCY', 2),
     generationConcurrency: num('GENERATION_CONCURRENCY', 2),
+    publishedSummaryDebounceSeconds: boundedNum('PUBLISHED_SUMMARY_DEBOUNCE_SECONDS', 180, 30, 900),
+    summaryUpdateAssessmentMaxArticles: boundedNum(
+      'SUMMARY_UPDATE_ASSESSMENT_MAX_ARTICLES',
+      5,
+      1,
+      10,
+    ),
     summaryMaxAgeHours: num('SUMMARY_MAX_AGE_HOURS', 24 * 14),
     // A Story is summarised (and so published) only once this many distinct newsroom
     // publishers cover it. Official sources attach but don't count.

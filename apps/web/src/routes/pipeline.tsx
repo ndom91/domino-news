@@ -6,7 +6,17 @@ import {
   type OpsAction,
   type OpsStatus,
 } from '@dn/schemas'
-import { Badge, Button, ConfirmDialog, Notice, SectionLabel, Skeleton, Tooltip } from '@dn/ui'
+import {
+  Badge,
+  Button,
+  ConfirmDialog,
+  Notice,
+  SectionLabel,
+  Skeleton,
+  Tabs,
+  TextInput,
+  Tooltip,
+} from '@dn/ui'
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, Link, redirect } from '@tanstack/react-router'
 import { type ReactNode, useState } from 'react'
@@ -20,11 +30,16 @@ export const Route = createFileRoute('/pipeline')({
   beforeLoad: ({ context }) => {
     if (!context.session.user?.isAdmin) throw redirect({ to: '/' })
   },
-  // ?failed=<queue> filters the Failed jobs section to one queue.
-  validateSearch: z.object({ failed: z.catch(z.optional(z.string()), undefined) }),
+  // ?failed=<queue> filters the Failed jobs section to one queue; section keeps diagnostics linkable.
+  validateSearch: z.object({
+    failed: z.catch(z.optional(z.string()), undefined),
+    section: z.catch(z.optional(z.enum(['overview', 'inference', 'sources', 'health'])), undefined),
+  }),
   head: () => ({ meta: [{ title: 'Pipeline · Domino Wire' }] }),
   component: OpsPage,
 })
+
+type PipelineSection = 'overview' | 'inference' | 'sources' | 'health'
 
 /** Runs an ops action and refreshes the status and failed-jobs views. */
 function useOpsAction() {
@@ -42,7 +57,8 @@ const actionKey = (a: OpsAction) =>
 // Internal diagnostics. Polls every 5s; not a production admin console.
 function OpsPage() {
   const status = useQuery(queries.ops())
-  const { failed } = Route.useSearch()
+  const { failed, section } = Route.useSearch()
+  const navigate = Route.useNavigate()
   const action = useOpsAction()
   const running = (a: OpsAction['action']) =>
     action.isPending && action.variables && actionKey(action.variables) === a
@@ -65,6 +81,7 @@ function OpsPage() {
   }
   const s = status.data
   const p = s.pipeline
+  const activeSection: PipelineSection = section ?? 'overview'
 
   return (
     <Page>
@@ -134,28 +151,78 @@ function OpsPage() {
         </Notice>
       ) : null}
 
-      <dl className="mt-8 grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
+      <Tabs
+        aria-label="Pipeline sections"
+        className="mt-8"
+        value={activeSection}
+        onValueChange={(next) => navigate({ search: { failed, section: next } })}
+        tabs={[
+          {
+            value: 'overview',
+            label: 'Overview',
+            content: <OverviewSection pipeline={p} queues={s.queues} recentRuns={s.recentRuns} />,
+          },
+          {
+            value: 'inference',
+            label: 'Inference',
+            content: <InferenceSection inference={s.inference} />,
+          },
+          {
+            value: 'sources',
+            label: 'Sources',
+            content: (
+              <>
+                <FeedsSection feeds={s.feeds} />
+                <FeedErrorsSection feeds={s.feeds} />
+              </>
+            ),
+          },
+          {
+            value: 'health',
+            label: 'Health',
+            content: (
+              <>
+                <MatchHealthSection />
+                <FailedJobs queue={failed ?? null} />
+              </>
+            ),
+          },
+        ]}
+      />
+    </Page>
+  )
+}
+
+function OverviewSection({
+  pipeline,
+  queues,
+  recentRuns,
+}: Pick<OpsStatus, 'pipeline' | 'queues' | 'recentRuns'>) {
+  return (
+    <>
+      <dl className="grid grid-cols-2 border-t-2 border-rule sm:grid-cols-4">
         <Stat
           label="Articles"
-          value={p.articles}
-          note={`${p.articlesEmbedded} embedded · ${p.articlesMatched} in stories`}
+          value={pipeline.articles}
+          note={`${pipeline.articlesEmbedded} embedded · ${pipeline.articlesMatched} in stories`}
         />
-        <Stat label="Stories" value={p.stories} note={`${p.storiesPublished} published`} />
-        <Stat label="Narratives" value={p.narratives} />
+        <Stat
+          label="Stories"
+          value={pipeline.stories}
+          note={`${pipeline.storiesPublished} published`}
+        />
+        <Stat label="Narratives" value={pipeline.narratives} />
         <Stat
           label="Search outbox"
-          value={p.outboxPending}
-          note={`${p.outboxFailed} dead · oldest ${p.oldestOutboxAgeSeconds ?? 0}s`}
+          value={pipeline.outboxPending}
+          note={`${pipeline.outboxFailed} dead · oldest ${pipeline.oldestOutboxAgeSeconds ?? 0}s`}
         />
       </dl>
-
-      <InferenceSection inference={s.inference} />
-
       <div className="mt-10 grid gap-10 lg:grid-cols-2">
-        <section className="min-w-0">
-          <SectionLabel>Queues</SectionLabel>
+        <section className="min-w-0" aria-labelledby="queues-heading">
+          <SectionLabel id="queues-heading">Queues</SectionLabel>
           <Table head={['Queue', 'Queued', 'Active', 'Failed', 'Oldest']}>
-            {s.queues.map((q) => (
+            {queues.map((q) => (
               <tr key={q.name}>
                 <Td mono>{q.name}</Td>
                 <Td>{q.queued}</Td>
@@ -164,7 +231,7 @@ function OpsPage() {
                   {q.failed > 0 ? (
                     <Link
                       to="/pipeline"
-                      search={{ failed: q.name }}
+                      search={{ failed: q.name, section: 'health' }}
                       hash="failed-jobs"
                       aria-label={`${plural(q.failed, 'failed job')} in ${q.name}`}
                       className="text-error underline underline-offset-4"
@@ -180,10 +247,10 @@ function OpsPage() {
             ))}
           </Table>
         </section>
-        <section className="min-w-0">
-          <SectionLabel>Recent analysis runs</SectionLabel>
+        <section className="min-w-0" aria-labelledby="runs-heading">
+          <SectionLabel id="runs-heading">Recent analysis runs</SectionLabel>
           <Table head={['Operation', 'Model', 'Status', 'Started']}>
-            {s.recentRuns.map((r) => (
+            {recentRuns.map((r) => (
               <tr key={r.id}>
                 <Td mono>{r.operation}</Td>
                 <Td mono>{r.modelId}</Td>
@@ -208,15 +275,7 @@ function OpsPage() {
           </Table>
         </section>
       </div>
-
-      <MatchHealthSection />
-
-      <FeedsSection feeds={s.feeds} />
-
-      <FeedErrorsSection feeds={s.feeds} />
-
-      <FailedJobs queue={failed ?? null} />
-    </Page>
+    </>
   )
 }
 
@@ -224,7 +283,7 @@ function InferenceSection({ inference }: { inference: OpsStatus['inference'] }) 
   const jobs = inference.summaryJobs
   const assessments = inference.updateAssessments
   return (
-    <section aria-labelledby="inference-heading" className="mt-10">
+    <section aria-labelledby="inference-heading">
       <SectionLabel id="inference-heading">Inference work</SectionLabel>
       <p className="mb-4 max-w-reading text-sm text-text-secondary">
         Last {inference.windowHours} hours. Stale summary jobs are queue churn that exited before
@@ -252,6 +311,83 @@ function InferenceSection({ inference }: { inference: OpsStatus['inference'] }) 
           note="Assessment found no material update"
         />
       </dl>
+      <InferenceControls settings={inference.settings} />
+    </section>
+  )
+}
+
+function InferenceControls({ settings }: { settings: OpsStatus['inference']['settings'] }) {
+  const action = useOpsAction()
+  const formKey = `${settings.publishedSummaryDebounceSeconds}:${settings.summaryUpdateAssessmentMaxArticles}`
+  return (
+    <section aria-labelledby="inference-controls-heading" className="mt-10 max-w-reading">
+      <SectionLabel id="inference-controls-heading">Inference controls</SectionLabel>
+      <p className="mb-4 text-sm text-text-secondary">
+        These changes apply to newly scheduled published-story updates. They do not restart workers
+        or alter jobs already queued.
+      </p>
+      <form
+        key={formKey}
+        className="grid gap-4 border-t-2 border-rule pt-4 sm:grid-cols-2"
+        onSubmit={(event) => {
+          event.preventDefault()
+          const values = new FormData(event.currentTarget)
+          action.mutate({
+            action: 'update_inference_settings',
+            settings: {
+              publishedSummaryDebounceSeconds: Number(values.get('debounceSeconds')),
+              summaryUpdateAssessmentMaxArticles: Number(values.get('maxAssessmentArticles')),
+            },
+          })
+        }}
+      >
+        <TextInput
+          name="debounceSeconds"
+          type="number"
+          min={30}
+          max={900}
+          step={30}
+          defaultValue={settings.publishedSummaryDebounceSeconds}
+          label="Published-story debounce (seconds)"
+          description="30–900 seconds. Batches a burst of new reporting into one assessment."
+        />
+        <TextInput
+          name="maxAssessmentArticles"
+          type="number"
+          min={1}
+          max={10}
+          step={1}
+          defaultValue={settings.summaryUpdateAssessmentMaxArticles}
+          label="Assessment articles"
+          description="1–10 distinct publishers considered for each update assessment."
+        />
+        <div className="sm:col-span-2">
+          <Button
+            type="submit"
+            variant="primary"
+            loading={action.isPending && action.variables?.action === 'update_inference_settings'}
+          >
+            Save inference controls
+          </Button>
+          {action.isError && action.variables?.action === 'update_inference_settings' ? (
+            <p className="mt-2 text-sm font-semibold text-error" role="alert">
+              {action.error.message}
+            </p>
+          ) : null}
+        </div>
+      </form>
+      <dl className="mt-8 grid grid-cols-2 border-t border-border sm:grid-cols-2">
+        <StatText
+          label="Embedding concurrency"
+          value={String(settings.embeddingConcurrency)}
+          note="Set by EMBEDDING_CONCURRENCY · restart required"
+        />
+        <StatText
+          label="Generation concurrency"
+          value={String(settings.generationConcurrency)}
+          note="Set by GENERATION_CONCURRENCY · restart required"
+        />
+      </dl>
     </section>
   )
 }
@@ -275,7 +411,7 @@ function FailedJobs({ queue }: { queue: string | null }) {
               Showing <span className="font-semibold text-text">{queue}</span> ·{' '}
               <Link
                 to="/pipeline"
-                search={{}}
+                search={{ section: 'health' }}
                 hash="failed-jobs"
                 className="underline underline-offset-4"
               >

@@ -7,6 +7,7 @@ import {
   analysisJob,
   DomainError,
   ENRICHMENT_QUEUES,
+  getInferenceSettings,
   newsroomOutletCount,
   QUEUES,
   recordGeneratedSummary,
@@ -17,9 +18,6 @@ import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadArticles, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { markRunFailed, runStoryGeneration } from './provenance.ts'
 import { likelyCorroboration } from './summary-update-prefilter.ts'
-
-const MAX_ASSESSMENT_ARTICLES = 5
-const MAX_ASSESSMENT_CANDIDATES = MAX_ASSESSMENT_ARTICLES * 3
 
 /**
  * Generate, validate and record a grounded summary. Stale jobs (story inputs changed)
@@ -54,7 +52,14 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
 
   const assessment =
     story.currentSummaryId && !job.force
-      ? await assessSummaryUpdate(ctx, job, story.id, story.currentSummaryId, job.inputFingerprint)
+      ? await assessSummaryUpdate(
+          ctx,
+          job,
+          story.id,
+          story.currentSummaryId,
+          job.inputFingerprint,
+          (await getInferenceSettings(ctx)).summaryUpdateAssessmentMaxArticles,
+        )
       : null
   if (assessment && assessment.output.outcome !== 'material')
     return {
@@ -131,6 +136,7 @@ async function assessSummaryUpdate(
   storyId: string,
   priorSummaryVersionId: string,
   inputFingerprint: string,
+  maxArticles: number,
 ): Promise<AssessmentResult | null> {
   const [known] = await ctx.db
     .select()
@@ -164,13 +170,14 @@ async function assessSummaryUpdate(
       ),
     )
     .orderBy(desc(schema.storyArticle.addedAt))
-    .limit(MAX_ASSESSMENT_CANDIDATES)
+    .limit(maxArticles * 3)
   const articles = assessmentArticles(
     await loadArticles(
       ctx.db,
       additions.map((addition) => addition.articleId),
     ),
     additions,
+    maxArticles,
   )
   if (articles.length === 0) return null
   if (likelyCorroboration(prior.body, articles)) {
@@ -252,6 +259,7 @@ type AssessmentResult = {
 function assessmentArticles(
   articles: LoadedArticle[],
   additions: { articleId: string; addedAt: Date }[],
+  maxArticles: number,
 ) {
   const addedAt = new Map(additions.map((addition) => [addition.articleId, addition.addedAt]))
   const newest = articles.toSorted((a, b) => {
@@ -265,7 +273,7 @@ function assessmentArticles(
     if (publishers.has(article.publisher)) continue
     publishers.add(article.publisher)
     out.push(article)
-    if (out.length === MAX_ASSESSMENT_ARTICLES) break
+    if (out.length === maxArticles) break
   }
   return out
 }

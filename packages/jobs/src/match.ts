@@ -5,8 +5,8 @@ import {
   analysisJob,
   attachArticleToStory,
   createStoryWithArticle,
+  getInferenceSettings,
   nearestByVector,
-  PUBLISHED_SUMMARY_DEBOUNCE_SECONDS,
   QUEUES,
   refreshFingerprint,
 } from '@dn/server'
@@ -292,9 +292,13 @@ async function enqueueSummary(
     .where(eq(schema.story.id, storyId))
   if (!story?.fingerprint) return
   const job = analysisJob(storyId, story.fingerprint, priorityClass)
+  const { publishedSummaryDebounceSeconds } = await getInferenceSettings({
+    config: ctx.config,
+    db: tx.db,
+  })
   await sendInTx(ctx, tx, QUEUES.summarizeStory, job.data, {
     ...job.options,
     // Published Stories batch a reporting burst into one update assessment.
-    startAfter: story.publishedAt ? PUBLISHED_SUMMARY_DEBOUNCE_SECONDS : 5,
+    startAfter: story.publishedAt ? publishedSummaryDebounceSeconds : 5,
   })
 }

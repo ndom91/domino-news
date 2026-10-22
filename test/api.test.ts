@@ -19,8 +19,9 @@ import {
   storyUpdatesResponseSchema,
   userPreferencesSchema,
 } from '@dn/schemas'
-import { clearCache, createUserAccount, setFeedback } from '@dn/server'
+import { clearCache, createUserAccount, recordStoryUpdate, setFeedback } from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
+import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { seedAndRunFixtures } from './drain.ts'
 import { createTestContext, truncateAll } from './harness.ts'
@@ -137,6 +138,34 @@ describe('/api/v1 contracts', () => {
       await (await call(`/api/v1/stories/${story.slug}/updates`)).json(),
     )
     expect(updates.items).toEqual(expect.any(Array))
+  })
+
+  it('groups consecutive reporting updates while retaining their sources', async () => {
+    const list = storyListResponseSchema.parse(await (await call('/api/v1/stories?limit=1')).json())
+    const story = list.items[0]
+    if (!story) throw new Error('empty list')
+    const [article] = await h.ctx.db
+      .select({ articleId: schema.storyArticle.articleId })
+      .from(schema.storyArticle)
+      .where(eq(schema.storyArticle.storyId, story.id))
+      .limit(1)
+    if (!article) throw new Error('story needs an article')
+    for (let i = 0; i < 2; i++) {
+      await recordStoryUpdate(h.ctx.db, {
+        storyId: story.id,
+        kind: 'new_reporting',
+        description: 'New reporting was added.',
+        origin: 'system',
+        articleIds: [article.articleId],
+      })
+    }
+    const updates = storyUpdatesResponseSchema.parse(
+      await (await call(`/api/v1/stories/${story.slug}/updates`)).json(),
+    )
+    const grouped = updates.items.find((item) =>
+      item.description.startsWith('Additional reporting'),
+    )
+    expect(grouped?.sources).toHaveLength(1)
   })
 
   it('paginates with a stable cursor', async () => {
@@ -291,6 +320,26 @@ describe('/api/v1 write endpoints', () => {
     expect(await queued('poll_all_feeds')).toBe(1)
     expect((await post('/api/v1/ops/actions', { action: 'rebuild_search' })).status).toBe(200)
     expect(await queued('rebuild_search_projection')).toBe(1)
+
+    expect(
+      (
+        await post('/api/v1/ops/actions', {
+          action: 'update_inference_settings',
+          settings: { publishedSummaryDebounceSeconds: 240, summaryUpdateAssessmentMaxArticles: 4 },
+        })
+      ).status,
+    ).toBe(200)
+    const status = opsStatusSchema.parse(await (await call('/api/v1/ops/status')).json())
+    expect(status.inference.settings).toMatchObject({
+      publishedSummaryDebounceSeconds: 240,
+      summaryUpdateAssessmentMaxArticles: 4,
+    })
+
+    const invalidSettings = await post('/api/v1/ops/actions', {
+      action: 'update_inference_settings',
+      settings: { publishedSummaryDebounceSeconds: 1, summaryUpdateAssessmentMaxArticles: 4 },
+    })
+    expect(invalidSettings.status).toBe(400)
 
     const bad = await post('/api/v1/ops/actions', { action: 'drop_database' })
     expect(bad.status).toBe(400)

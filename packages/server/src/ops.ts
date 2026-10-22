@@ -1,12 +1,90 @@
 import { schema } from '@dn/db'
-import type { FailedJob, FailedJobsResponse, OpsAction, OpsStatus } from '@dn/schemas'
+import type {
+  FailedJob,
+  FailedJobsResponse,
+  InferenceSettingsUpdate,
+  OpsAction,
+  OpsStatus,
+} from '@dn/schemas'
 import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
 import type { ServerContext } from './context.ts'
 import { PRIORITY, QUEUES } from './queues.ts'
 import { DomainError } from './story-service.ts'
 
 const BACKFILL_PAUSED = 'backfill_paused'
+const INFERENCE_SETTINGS = 'inference_settings'
 const INFERENCE_WINDOW_HOURS = 24
+const MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS = 30
+const MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS = 900
+const MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES = 1
+const MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES = 10
+
+type InferenceSettings = {
+  publishedSummaryDebounceSeconds: number
+  summaryUpdateAssessmentMaxArticles: number
+}
+
+export async function getInferenceSettings(
+  ctx: Pick<ServerContext, 'config' | 'db'>,
+): Promise<InferenceSettings> {
+  const fallback = {
+    publishedSummaryDebounceSeconds: ctx.config.publishedSummaryDebounceSeconds,
+    summaryUpdateAssessmentMaxArticles: ctx.config.summaryUpdateAssessmentMaxArticles,
+  }
+  const [row] = await ctx.db
+    .select({ value: schema.pipelineControl.value })
+    .from(schema.pipelineControl)
+    .where(eq(schema.pipelineControl.key, INFERENCE_SETTINGS))
+  if (!row || !isInferenceSettings(row.value)) return fallback
+  return row.value
+}
+
+export async function setInferenceSettings(
+  ctx: Pick<ServerContext, 'db'>,
+  settings: InferenceSettingsUpdate,
+) {
+  if (
+    settings.publishedSummaryDebounceSeconds === undefined ||
+    settings.publishedSummaryDebounceSeconds < MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS ||
+    settings.publishedSummaryDebounceSeconds > MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS ||
+    settings.summaryUpdateAssessmentMaxArticles === undefined ||
+    settings.summaryUpdateAssessmentMaxArticles < MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES ||
+    settings.summaryUpdateAssessmentMaxArticles > MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES
+  ) {
+    throw new DomainError(
+      'bad_request',
+      `Debounce must be ${MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS}–${MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS} seconds and assessment articles ${MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES}–${MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES}.`,
+    )
+  }
+  const value: InferenceSettings = {
+    publishedSummaryDebounceSeconds: settings.publishedSummaryDebounceSeconds,
+    summaryUpdateAssessmentMaxArticles: settings.summaryUpdateAssessmentMaxArticles,
+  }
+  await ctx.db
+    .insert(schema.pipelineControl)
+    .values({ key: INFERENCE_SETTINGS, value })
+    .onConflictDoUpdate({
+      target: schema.pipelineControl.key,
+      set: { value, updatedAt: new Date() },
+    })
+}
+
+function isInferenceSettings(value: unknown): value is InferenceSettings {
+  if (!value || typeof value !== 'object') return false
+  const settings = value as Partial<InferenceSettings>
+  const debounce = settings.publishedSummaryDebounceSeconds
+  const maxArticles = settings.summaryUpdateAssessmentMaxArticles
+  return (
+    typeof debounce === 'number' &&
+    Number.isInteger(debounce) &&
+    debounce >= MIN_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS &&
+    debounce <= MAX_PUBLISHED_SUMMARY_DEBOUNCE_SECONDS &&
+    typeof maxArticles === 'number' &&
+    Number.isInteger(maxArticles) &&
+    maxArticles >= MIN_SUMMARY_UPDATE_ASSESSMENT_ARTICLES &&
+    maxArticles <= MAX_SUMMARY_UPDATE_ASSESSMENT_ARTICLES
+  )
+}
 
 export async function isBackfillPaused(ctx: Pick<ServerContext, 'db'>) {
   const [row] = await ctx.db
@@ -132,6 +210,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     outboxFailed,
     summaryJobResult,
     assessmentResult,
+    settings,
   ] = await Promise.all([
     scalar(db.select({ n: count }).from(schema.article)),
     scalar(db.select({ n: count }).from(schema.articleEmbedding)),
@@ -150,6 +229,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     ),
     summaryJobMetrics,
     assessmentMetrics,
+    getInferenceSettings(ctx),
   ])
   const summaryJobs = summaryJobResult.rows[0]
   const updateAssessments = assessmentResult.rows[0]
@@ -183,6 +263,11 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
       oldestOutboxAgeSeconds: oldestOutbox?.s ?? null,
     },
     inference: {
+      settings: {
+        ...settings,
+        embeddingConcurrency: ctx.config.embeddingConcurrency,
+        generationConcurrency: ctx.config.generationConcurrency,
+      },
       windowHours: INFERENCE_WINDOW_HOURS,
       summaryJobs: {
         completed: summaryJobs?.completed ?? 0,
@@ -348,6 +433,10 @@ async function failedIds(ctx: ServerContext, queue: string, ids?: string[]) {
 }
 
 export async function runOpsAction(ctx: ServerContext, input: OpsAction) {
+  if (input.action === 'update_inference_settings') {
+    await setInferenceSettings(ctx, input.settings)
+    return { count: 1 }
+  }
   if (input.action === 'retry_jobs' || input.action === 'dismiss_jobs') {
     if (!(Object.values(QUEUES) as string[]).includes(input.queue)) {
       throw new DomainError('bad_request', `unknown queue ${input.queue}`)

@@ -218,7 +218,7 @@ async function loadUpdates(
         .from(schema.storySummaryVersion)
         .where(inArray(schema.storySummaryVersion.id, previousIds))
     : []
-  return visibleEvents.map((event) => ({
+  const updates = visibleEvents.map((event) => ({
     id: event.id,
     storyId: event.storyId,
     kind: event.kind,
@@ -260,6 +260,7 @@ async function loadUpdates(
         })),
     ],
   }))
+  return coalesceNewReporting(updates)
 }
 
 function readerVisibleUpdate() {
@@ -285,4 +286,49 @@ function coalesceSummaryRevisions<
     out.push(event)
   }
   return out
+}
+
+function coalesceNewReporting(events: StoryUpdatesResponse['items']) {
+  const out: StoryUpdatesResponse['items'] = []
+  for (let index = 0; index < events.length; ) {
+    const first = events[index]
+    if (first?.kind !== 'new_reporting') {
+      if (first) out.push(first)
+      index++
+      continue
+    }
+    let end = index + 1
+    while (events[end]?.kind === 'new_reporting') end++
+    const group = events.slice(index, end)
+    if (group.length === 1) {
+      out.push(first)
+      index = end
+      continue
+    }
+    const sources = uniqueSources(group.flatMap((event) => event.sources))
+    const publishers = [
+      ...new Set(sources.flatMap((source) => (source.publisher ? [source.publisher.name] : []))),
+    ]
+    out.push({
+      ...first,
+      description: publishers.length
+        ? `Additional reporting from ${formatList(publishers)}.`
+        : 'Additional reporting was added.',
+      sources,
+    })
+    index = end
+  }
+  return out
+}
+
+function uniqueSources(sources: StoryUpdatesResponse['items'][number]['sources']) {
+  const byUrl = new Map<string, (typeof sources)[number]>()
+  for (const source of sources) byUrl.set(source.url, source)
+  return [...byUrl.values()]
+}
+
+function formatList(values: string[]) {
+  if (values.length < 2) return values[0] ?? ''
+  if (values.length === 2) return `${values[0]} and ${values[1]}`
+  return `${values.slice(0, -1).join(', ')}, and ${values.at(-1)}`
 }

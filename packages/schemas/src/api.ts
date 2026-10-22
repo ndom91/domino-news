@@ -482,6 +482,12 @@ export const opsStatusSchema = z.object({
     oldestOutboxAgeSeconds: z.nullable(z.number()),
   }),
   inference: z.object({
+    settings: z.object({
+      publishedSummaryDebounceSeconds: z.int().check(z.nonnegative()),
+      summaryUpdateAssessmentMaxArticles: z.int().check(z.positive()),
+      embeddingConcurrency: z.int().check(z.positive()),
+      generationConcurrency: z.int().check(z.positive()),
+    }),
     windowHours: z.int(),
     summaryJobs: z.object({
       completed: z.int(),
@@ -510,9 +516,19 @@ export const opsStatusSchema = z.object({
 })
 export type OpsStatus = z.infer<typeof opsStatusSchema>
 
+export const inferenceSettingsUpdateSchema = z.object({
+  publishedSummaryDebounceSeconds: z.int().check(z.nonnegative()),
+  summaryUpdateAssessmentMaxArticles: z.int().check(z.positive()),
+})
+export type InferenceSettingsUpdate = z.infer<typeof inferenceSettingsUpdateSchema>
+
 export const opsActionSchema = z.discriminatedUnion('action', [
   z.object({
     action: z.enum(['pause_backfill', 'resume_backfill', 'poll_all_feeds', 'rebuild_search']),
+  }),
+  z.object({
+    action: z.literal('update_inference_settings'),
+    settings: inferenceSettingsUpdateSchema,
   }),
   // Failed jobs: retry puts them back in the queue, dismiss deletes them. No ids = every
   // failed job in the queue.
