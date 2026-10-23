@@ -41,16 +41,6 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
-    'expo-background-task',
-    [
-      'expo-build-properties',
-      {
-        android: {
-          extraProguardRules:
-            '-keep class * extends androidx.room.RoomDatabase { <init>(); }\n-keep class * extends androidx.work.InputMerger { <init>(); }',
-        },
-      },
-    ],
     ['expo-navigation-bar', { enforceContrast: false, style: 'dark' }],
     [
       'expo-splash-screen',

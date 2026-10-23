@@ -1,5 +1,6 @@
 import type { NotificationResponse } from 'expo-notifications'
 import { isExpoGo } from './expo-go'
+import type { ForYouAlertsStatus } from './for-you-alerts-task'
 
 type StoryListener = (storySlug: string) => void
 type Subscription = { remove: () => void }
@@ -18,13 +19,18 @@ export async function forYouAlertsEnabled(): Promise<boolean> {
   return (await taskModule()).forYouAlertsEnabled()
 }
 
-export async function enableForYouAlerts(): Promise<void> {
-  await (await taskModule()).enableForYouAlerts()
+export async function enableForYouAlerts(): Promise<ForYouAlertsStatus> {
+  return (await taskModule()).enableForYouAlerts()
 }
 
-export async function syncForYouAlerts(): Promise<void> {
-  if (isExpoGo) return
-  await (await taskModule()).syncForYouAlerts()
+export async function forYouAlertsStatus(): Promise<ForYouAlertsStatus> {
+  if (isExpoGo) return { enabled: false, registered: false }
+  return (await taskModule()).forYouAlertsStatus()
+}
+
+export async function syncForYouAlerts(): Promise<ForYouAlertsStatus> {
+  if (isExpoGo) return { enabled: false, registered: false }
+  return (await taskModule()).syncForYouAlerts()
 }
 
 export async function disableForYouAlerts(): Promise<void> {

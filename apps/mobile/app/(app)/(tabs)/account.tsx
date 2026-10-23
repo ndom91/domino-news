@@ -10,20 +10,17 @@ import {
 import type { UserPreferences, UserPreferencesUpdate } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { AlertSettings } from '../../../components/account/alert-settings'
+import { ConfirmationDialog } from '../../../components/account/confirmation-dialog'
 import { FeedPicks } from '../../../components/feed-picks'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { api, isUnauthorized, queries } from '../../../lib/api'
 import { authClient } from '../../../lib/auth-client'
-import {
-  disableForYouAlerts,
-  enableForYouAlerts,
-  forYouAlertsAvailable,
-  forYouAlertsEnabled,
-} from '../../../lib/for-you-alerts'
+import { disableForYouAlerts } from '../../../lib/for-you-alerts'
 
 export default function AccountScreen() {
   const router = useRouter()
@@ -54,9 +51,6 @@ export default function AccountScreen() {
   })
   const [signingOut, setSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
-  const [alertsEnabled, setAlertsEnabled] = useState(false)
-  const [alertsPending, setAlertsPending] = useState(true)
-  const [alertsError, setAlertsError] = useState<string | null>(null)
   const [countryPickerOpen, setCountryPickerOpen] = useState(false)
   const [countryError, setCountryError] = useState<string | null>(null)
   const [confirmReadingHistoryOff, setConfirmReadingHistoryOff] = useState(false)
@@ -66,33 +60,20 @@ export default function AccountScreen() {
   const feedbackSave = useMutation(feedbackMutation(api, queryClient))
   const user = session.data?.user
 
-  useEffect(() => {
-    let mounted = true
-    void forYouAlertsEnabled()
-      .then((enabled) => {
-        if (mounted) setAlertsEnabled(enabled)
-      })
-      .catch((error) => {
-        if (mounted) {
-          setAlertsError(
-            error instanceof Error ? error.message : 'Could not check background alerts.',
-          )
-        }
-      })
-      .finally(() => {
-        if (mounted) setAlertsPending(false)
-      })
-    return () => {
-      mounted = false
-    }
-  }, [])
-
   async function signOut() {
     setSigningOut(true)
     setSignOutError(null)
     try {
       await disableForYouAlerts()
-    } catch {}
+    } catch (error) {
+      setSigningOut(false)
+      setSignOutError(
+        error instanceof Error
+          ? `Could not turn off alerts before signing out: ${error.message}`
+          : 'Could not turn off alerts before signing out. Check your connection and try again.',
+      )
+      return
+    }
     const result = await authClient.signOut()
     if (!result.error) {
       queryClient.clear()
@@ -101,20 +82,6 @@ export default function AccountScreen() {
     }
     setSigningOut(false)
     setSignOutError(result.error.message ?? 'Could not sign out. Try again.')
-  }
-
-  async function toggleAlerts(enabled: boolean) {
-    setAlertsPending(true)
-    setAlertsError(null)
-    try {
-      if (enabled) await enableForYouAlerts()
-      else await disableForYouAlerts()
-      setAlertsEnabled(enabled)
-    } catch (error) {
-      setAlertsError(error instanceof Error ? error.message : 'Could not update background alerts.')
-    } finally {
-      setAlertsPending(false)
-    }
   }
 
   function saveCountry(country: UserPreferences['country']) {
@@ -204,35 +171,7 @@ export default function AccountScreen() {
           </Pressable>
         </View>
 
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Background alerts</Text>
-          <Text style={styles.description}>
-            When your phone gives Domino Wire a background window, it checks For You and lets you
-            know about a newly surfaced story.
-          </Text>
-          {forYouAlertsAvailable ? (
-            <View style={styles.switchRow}>
-              <Text style={styles.switchLabel}>Alert me about For You</Text>
-              <Switch
-                accessibilityLabel="Alert me about For You"
-                disabled={alertsPending}
-                onValueChange={toggleAlerts}
-                thumbColor={alertsEnabled ? t.color.elevated : t.color.surface}
-                trackColor={{ false: t.color.borderStrong, true: t.color.success }}
-                value={alertsEnabled}
-              />
-            </View>
-          ) : (
-            <Text style={styles.alertNote}>
-              Available in the installed Domino Wire development build.
-            </Text>
-          )}
-          {alertsError ? (
-            <Text accessibilityLiveRegion="polite" style={styles.error}>
-              {alertsError}
-            </Text>
-          ) : null}
-        </View>
+        <AlertSettings />
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Reading history</Text>
@@ -473,73 +412,32 @@ export default function AccountScreen() {
           </SafeAreaView>
         </View>
       </Modal>
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setConfirmReadingHistoryOff(false)}
-        transparent
+      <ConfirmationDialog
+        cancelLabel="Keep history"
+        confirmLabel="Turn off history"
+        detail="Blindspot will stop recording stories you open and delete your saved reading history."
+        onCancel={() => setConfirmReadingHistoryOff(false)}
+        onConfirm={() => {
+          save.mutate({ rememberReads: false })
+          setConfirmReadingHistoryOff(false)
+        }}
+        pending={disabled}
+        title="Turn off reading history?"
         visible={confirmReadingHistoryOff}
-      >
-        <View
-          accessibilityLabel="Turn off reading history confirmation"
-          accessibilityViewIsModal
-          style={styles.dialogScrim}
-        >
-          <View style={styles.dialog}>
-            <Text style={styles.dialogTitle}>Turn off reading history?</Text>
-            <Text style={styles.dialogText}>
-              Blindspot will stop recording stories you open and delete your saved reading history.
-            </Text>
-            <View style={styles.dialogActions}>
-              <Button onPress={() => setConfirmReadingHistoryOff(false)} tone="light">
-                Keep history
-              </Button>
-              <Button
-                disabled={disabled}
-                onPress={() => {
-                  save.mutate({ rememberReads: false })
-                  setConfirmReadingHistoryOff(false)
-                }}
-              >
-                Turn off history
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
-      <Modal
-        animationType="fade"
-        onRequestClose={() => setConfirmSignalsReset(false)}
-        transparent
+      />
+      <ConfirmationDialog
+        cancelLabel="Keep signals"
+        confirmLabel="Reset signals"
+        detail="This removes all feedback learned from your “More” and “Less” choices and restores any stories hidden by “Less”."
+        onCancel={() => setConfirmSignalsReset(false)}
+        onConfirm={() => {
+          signalSave.mutate({ reset: true })
+          setConfirmSignalsReset(false)
+        }}
+        pending={signalSave.isPending}
+        title="Reset learned signals?"
         visible={confirmSignalsReset}
-      >
-        <View
-          accessibilityLabel="Reset learned signals confirmation"
-          accessibilityViewIsModal
-          style={styles.dialogScrim}
-        >
-          <View style={styles.dialog}>
-            <Text style={styles.dialogTitle}>Reset learned signals?</Text>
-            <Text style={styles.dialogText}>
-              This removes all feedback learned from your “More” and “Less” choices and restores any
-              stories hidden by “Less”.
-            </Text>
-            <View style={styles.dialogActions}>
-              <Button onPress={() => setConfirmSignalsReset(false)} tone="light">
-                Keep signals
-              </Button>
-              <Button
-                disabled={signalSave.isPending}
-                onPress={() => {
-                  signalSave.mutate({ reset: true })
-                  setConfirmSignalsReset(false)
-                }}
-              >
-                Reset signals
-              </Button>
-            </View>
-          </View>
-        </View>
-      </Modal>
+      />
     </Screen>
   )
 }
@@ -664,12 +562,6 @@ const styles = StyleSheet.create({
   signalDetail: { color: t.color.textMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
   removeSignal: { justifyContent: 'center', minHeight: t.size.tap, paddingHorizontal: t.space[2] },
   removeSignalText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
-  alertNote: {
-    color: t.color.textMuted,
-    fontFamily: t.font.medium,
-    fontSize: t.type.meta,
-    lineHeight: 18,
-  },
   pressed: { opacity: 0.68 },
   sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
   sheet: { backgroundColor: t.color.elevated, maxHeight: '82%', padding: t.space[5] },
@@ -694,25 +586,4 @@ const styles = StyleSheet.create({
   countryChoiceActive: { backgroundColor: t.color.band },
   countryChoiceText: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.body },
   countryChoiceTextActive: { color: t.color.bandText, fontFamily: t.font.bold },
-  dialogScrim: {
-    alignItems: 'center',
-    backgroundColor: 'rgba(18, 18, 18, 0.48)',
-    flex: 1,
-    justifyContent: 'center',
-    padding: t.space[5],
-  },
-  dialog: {
-    backgroundColor: t.color.elevated,
-    gap: t.space[4],
-    maxWidth: 420,
-    padding: t.space[5],
-  },
-  dialogTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
-  dialogText: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 23,
-  },
-  dialogActions: { gap: t.space[2] },
 })

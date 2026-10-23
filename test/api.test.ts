@@ -14,6 +14,7 @@ import {
   narrativeDetailSchema,
   narrativeListResponseSchema,
   opsStatusSchema,
+  pushSubscriptionStatusSchema,
   searchResponseSchema,
   storyDetailSchema,
   storyListResponseSchema,
@@ -63,6 +64,30 @@ afterAll(async () => {
 })
 
 describe('/api/v1 contracts', () => {
+  it('reports whether this reader has registered a push token', async () => {
+    const token = 'ExpoPushToken[contract-device]'
+
+    const before = await call(`/api/v1/me/push-subscriptions?token=${encodeURIComponent(token)}`)
+    expect(pushSubscriptionStatusSchema.parse(await before.json())).toEqual({ registered: false })
+
+    const saved = await call('/api/v1/me/push-subscriptions', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    expect(saved.status).toBe(200)
+
+    const registered = await call(`/api/v1/me/push-subscriptions?token=${encodeURIComponent(token)}`)
+    expect(pushSubscriptionStatusSchema.parse(await registered.json())).toEqual({ registered: true })
+
+    const removed = await call('/api/v1/me/push-subscriptions/remove', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ token }),
+    })
+    expect(removed.status).toBe(200)
+  })
+
   it('requires authentication on every route', async () => {
     const routes: [string, string][] = [
       ['GET', '/api/v1/front'],
@@ -88,6 +113,9 @@ describe('/api/v1 contracts', () => {
       ['GET', '/api/v1/briefing'],
       ['GET', '/api/v1/for-you'],
       ['POST', '/api/v1/me/feedback'],
+      ['GET', '/api/v1/me/push-subscriptions?token=ExpoPushToken%5Btoken%5D'],
+      ['POST', '/api/v1/me/push-subscriptions'],
+      ['POST', '/api/v1/me/push-subscriptions/remove'],
       ['GET', '/api/v1/me/signals'],
       ['POST', '/api/v1/me/signals'],
       ['POST', '/api/v1/me/preferences'],

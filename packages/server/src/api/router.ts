@@ -31,7 +31,11 @@ import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
-import { removePushSubscription, savePushSubscription } from '../push-subscriptions.ts'
+import {
+  pushSubscriptionRegistered,
+  removePushSubscription,
+  savePushSubscription,
+} from '../push-subscriptions.ts'
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
@@ -323,6 +327,10 @@ const routes: Route[] = [
   route('POST', '/api/v1/me/feedback', async ({ ctx, request, userId }) =>
     json(await setFeedback(ctx.db, userId, await readJson(request, feedbackRequestSchema))),
   ),
+  route('GET', '/api/v1/me/push-subscriptions', async ({ ctx, url, userId }) => {
+    const { token } = pushSubscriptionRequestSchema.parse(Object.fromEntries(url.searchParams))
+    return json({ registered: await pushSubscriptionRegistered(ctx.db, userId, token) })
+  }),
   route('POST', '/api/v1/me/push-subscriptions', async ({ ctx, request, userId }) => {
     const { token } = await readJson(request, pushSubscriptionRequestSchema)
     await savePushSubscription(ctx.db, userId, token)

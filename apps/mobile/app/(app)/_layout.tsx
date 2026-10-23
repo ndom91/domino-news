@@ -16,11 +16,12 @@ export default function SignedInLayout() {
   const session = authClient.useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const userId = session.data?.user.id
   const preferences = useQuery({ ...queries.preferences(), enabled: Boolean(session.data) })
   const onOnboarding = pathname === '/onboarding'
 
   useEffect(() => {
-    if (!session.data) return
+    if (!userId) return
 
     let subscription: { remove: () => void } | undefined
     let tokenSubscription: { remove: () => void } | undefined
@@ -43,7 +44,7 @@ export default function SignedInLayout() {
       subscription?.remove()
       tokenSubscription?.remove()
     }
-  }, [router, session.data])
+  }, [router, userId])
 
   if (session.isPending) {
     return (

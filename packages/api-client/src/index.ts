@@ -42,10 +42,12 @@ import {
   type PublisherDetail,
   type PublisherListResponse,
   type PushSubscriptionRequest,
+  type PushSubscriptionStatus,
   previewSchema,
   publisherAssessmentSchema,
   publisherDetailSchema,
   publisherListResponseSchema,
+  pushSubscriptionStatusSchema,
   type Region,
   type SearchQuery,
   type SearchResponse,
@@ -239,6 +241,11 @@ export function createApiClient({
         method: 'POST',
         body,
       }),
+    getPushSubscriptionStatus: (token: string) =>
+      request<PushSubscriptionStatus>(
+        pushSubscriptionStatusSchema,
+        `/me/push-subscriptions${qs({ token })}`,
+      ),
     removePushSubscription: (token: string) =>
       request<{ removed: boolean }>(
         z.object({ removed: z.boolean() }),

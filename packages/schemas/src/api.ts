@@ -906,6 +906,9 @@ export const pushSubscriptionRequestSchema = z.object({
 })
 export type PushSubscriptionRequest = z.infer<typeof pushSubscriptionRequestSchema>
 
+export const pushSubscriptionStatusSchema = z.object({ registered: z.boolean() })
+export type PushSubscriptionStatus = z.infer<typeof pushSubscriptionStatusSchema>
+
 export const hiddenStoriesSchema = z.object({ items: z.array(storyListItemSchema) })
 export type HiddenStories = z.infer<typeof hiddenStoriesSchema>
 

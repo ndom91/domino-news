@@ -2,11 +2,12 @@ import Constants from 'expo-constants'
 import * as Notifications from 'expo-notifications'
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
-import { authClient } from './auth-client'
-import { apiUrl } from './config'
+import { api } from './api'
 
 const PUSH_TOKEN_KEY = 'dominonews.expo-push-token'
 const CHANNEL_ID = 'for-you'
+
+export type ForYouAlertsStatus = { enabled: boolean; registered: boolean }
 
 Notifications.setNotificationHandler({
   handleNotification: async () => ({
@@ -21,17 +22,26 @@ export async function forYouAlertsEnabled(): Promise<boolean> {
   return Boolean(await SecureStore.getItemAsync(PUSH_TOKEN_KEY))
 }
 
+export async function forYouAlertsStatus(): Promise<ForYouAlertsStatus> {
+  const token = await SecureStore.getItemAsync(PUSH_TOKEN_KEY)
+  if (!token) return { enabled: false, registered: false }
+
+  const { registered } = await api.getPushSubscriptionStatus(token)
+  return { enabled: true, registered }
+}
+
 /** Re-register an existing opt-in after app updates or server-side subscription loss. */
-export async function syncForYouAlerts(): Promise<void> {
-  if (!(await forYouAlertsEnabled())) return
+export async function syncForYouAlerts(): Promise<ForYouAlertsStatus> {
+  if (!(await forYouAlertsEnabled())) return { enabled: false, registered: false }
 
   const projectId = expoProjectId()
   if (!projectId) throw new Error('Push notifications are not configured for this app.')
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
   await saveToken(token)
+  return { enabled: true, registered: true }
 }
 
-export async function enableForYouAlerts(): Promise<void> {
+export async function enableForYouAlerts(): Promise<ForYouAlertsStatus> {
   if (Platform.OS === 'android') {
     await Notifications.setNotificationChannelAsync(CHANNEL_ID, {
       importance: Notifications.AndroidImportance.DEFAULT,
@@ -50,6 +60,7 @@ export async function enableForYouAlerts(): Promise<void> {
   if (!projectId) throw new Error('Push notifications are not configured for this app.')
   const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
   await saveToken(token)
+  return { enabled: true, registered: true }
 }
 
 export async function disableForYouAlerts(): Promise<void> {
@@ -63,27 +74,14 @@ export async function refreshForYouPushToken(token: string) {
 }
 
 async function saveToken(token: string) {
-  await request('/me/push-subscriptions', { method: 'POST', body: JSON.stringify({ token }) })
+  await api.savePushSubscription({ token })
   await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token)
 }
 
 async function removeToken(token: string) {
-  await request('/me/push-subscriptions/remove', {
-    method: 'POST',
-    body: JSON.stringify({ token }),
-  })
+  await api.removePushSubscription(token)
 }
 
 function expoProjectId() {
   return Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId
-}
-
-async function request(path: string, init: RequestInit) {
-  const cookie = await authClient.getCookie()
-  if (!cookie || !apiUrl) throw new Error('Sign in again to update notifications.')
-  const response = await fetch(`${apiUrl}/api/v1${path}`, {
-    ...init,
-    headers: { cookie, 'content-type': 'application/json' },
-  })
-  if (!response.ok) throw new Error('Could not update notifications. Try again.')
 }

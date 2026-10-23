@@ -17,9 +17,9 @@ uses native Google Play services. A development build sets `APP_VARIANT=developm
 
 ## For You alerts
 
-The Account screen registers this device's Expo push token for **For You** alerts. The app is configured for
-FCM, receives notification taps and opens the named Story. Server-side delivery is required before enrolled
-devices receive remote alerts.
+The Account screen registers this device's Expo push token for **For You** alerts. The server sends the
+notifications through Expo/FCM, and the app opens the named Story when the reader taps one. The Account
+screen confirms that the server has the device registration.
 
 ## Local Preview APK
 
@@ -53,9 +53,9 @@ a release or EAS Update), configure `EXPO_PUBLIC_API_URL` and `EXPO_PUBLIC_GOOGL
 environment that build uses. The local development client gets these values from `apps/mobile/.env` through
 Metro.
 
-No Metro configuration is required with Expo SDK 57: its monorepo resolver discovers the workspace
+No Metro configuration is required with Expo SDK 58: its monorepo resolver discovers the workspace
 root and preserves package exports. If that changes, start with `pnpm --filter @dn/mobile start --clear`.
-`expo install --check` currently identifies newer SDK 57 patch releases, but they are intentionally
+`expo install --check` currently identifies newer SDK 58 patch releases, but they are intentionally
 not installable until they pass the workspace's seven-day minimum release age.
 
 The app scheme is `dominonews`, matching `EXPO_APP_SCHEME` on the server. Android uses the permanent
