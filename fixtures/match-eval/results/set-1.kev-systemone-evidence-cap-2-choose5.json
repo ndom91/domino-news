@@ -1,0 +1,212 @@
+{
+  "set": "set-1",
+  "label": "kev-systemone-evidence-cap-2-choose5",
+  "ranAt": "2026-10-23T14:58:28.046Z",
+  "policy": {
+    "autoSame": 0.93,
+    "llmMin": 0.72,
+    "maxCandidates": 5,
+    "storyArticles": "anchored",
+    "ranking": "best",
+    "judging": "choose"
+  },
+  "promptVersion": "match-story@6",
+  "modelId": "kev-systemone-evidence-cap-2@1",
+  "score": {
+    "precision": 0.7919627153960815,
+    "recall": 0.7586539294332528,
+    "f1": 0.7749505695084227,
+    "predictedStories": 155,
+    "labelledStories": 145,
+    "predictedSingletons": 126,
+    "labelledSingletons": 116
+  },
+  "modelCalls": 226,
+  "cachedCalls": 0,
+  "failedCalls": 0,
+  "errors": {
+    "notRetrieved": 8,
+    "rankedTooLow": 1,
+    "modelSaidNo": 25,
+    "joinedWrongStory": 31,
+    "wrongJoinByModel": 24,
+    "wrongJoinByEmbedding": 0,
+    "correct": 245
+  },
+  "fragmented": [
+    {
+      "title": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+      "size": 25,
+      "pieces": 7
+    },
+    {
+      "title": "Riyadh airport closure and flight cancellations",
+      "size": 11,
+      "pieces": 6
+    },
+    {
+      "title": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+      "size": 17,
+      "pieces": 5
+    },
+    {
+      "title": "Countries condemn the Houthi attacks on Riyadh airport",
+      "size": 6,
+      "pieces": 5
+    },
+    {
+      "title": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+      "size": 39,
+      "pieces": 4
+    },
+    {
+      "title": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+      "size": 32,
+      "pieces": 4
+    },
+    {
+      "title": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+      "size": 7,
+      "pieces": 3
+    },
+    {
+      "title": "EU says it will welcome energy truce \"when it holds\"",
+      "size": 3,
+      "pieces": 3
+    },
+    {
+      "title": "Trump says Ukraine should get a new president",
+      "size": 17,
+      "pieces": 2
+    },
+    {
+      "title": "Hurricane Simon hits Mexico's Pacific coast",
+      "size": 13,
+      "pieces": 2
+    },
+    {
+      "title": "Zelensky and UK criticise the US-Russia diesel deal",
+      "size": 4,
+      "pieces": 2
+    },
+    {
+      "title": "Houthis warn travellers to stay away from Saudi airports",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Top oil executives dropped from Riyadh WPC Energy Congress",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Flash flood on Budhi Gandaki river hits Nepal villages",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Countries warn against travel to Saudi Arabia",
+      "size": 2,
+      "pieces": 2
+    }
+  ],
+  "overMerged": [
+    {
+      "size": 40,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Countries condemn the Houthi attacks on Riyadh airport",
+        "Riyadh airport closure and flight cancellations",
+        "Houthis warn travellers to stay away from Saudi airports",
+        "Iran urges Saudi diplomacy after Houthi escalation",
+        "Why are Houthi missiles breaking through Saudi Arabia’s air defences?",
+        "Is the Yemen war entering a new phase?",
+        "Here’s the biggest news you missed this weekend"
+      ]
+    },
+    {
+      "size": 43,
+      "labelled": [
+        "Trump announces Russia-Ukraine \"energy ceasefire\"",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire",
+        "EU says it will welcome energy truce \"when it holds\"",
+        "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+        "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+        "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+        "‘Trump is really mad’: White House source says president expects Ukraine to stop striking Russian oil refineries"
+      ]
+    },
+    {
+      "size": 27,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Riyadh airport closure and flight cancellations",
+        "Houthis warn travellers to stay away from Saudi airports",
+        "Riyadh airport attacks another dangerous moment in already tense conflict",
+        "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions"
+      ]
+    },
+    {
+      "size": 9,
+      "labelled": [
+        "Trump and Putin agree deal to release Russian diesel",
+        "Zelensky and UK criticise the US-Russia diesel deal",
+        "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+        "Republican senator says Trump diesel agreement with Russia may be illegal",
+        "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy"
+      ]
+    },
+    {
+      "size": 5,
+      "labelled": [
+        "US considers joining Saudi strikes on the Houthis",
+        "Riyadh airport closure and flight cancellations",
+        "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy"
+      ]
+    },
+    {
+      "size": 6,
+      "labelled": [
+        "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Riyadh airport closure and flight cancellations",
+        "Manila opens largest OFW service center in Taipei"
+      ]
+    },
+    {
+      "size": 3,
+      "labelled": [
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Timeline: Houthis escalate attacks on Saudi airports"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "The Kyiv Independent: Russia wants sanctions lifted in exchange for halting strikes on Ukrainian energy infrastructure",
+        "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "What to expect from Apple’s ‘Welcome Home’ event",
+        "The new Apple TV could have a built-in mic and a remote with a speaker"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Pope Leo announces medical update",
+        "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?"
+      ]
+    }
+  ]
+}
