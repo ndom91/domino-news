@@ -1,0 +1,188 @@
+{
+  "set": "set-1",
+  "label": "laya-systemone-choose5-safe-options",
+  "ranAt": "2026-10-23T09:39:11.354Z",
+  "policy": {
+    "autoSame": 0.93,
+    "llmMin": 0.72,
+    "maxCandidates": 5,
+    "storyArticles": "anchored",
+    "ranking": "best",
+    "judging": "choose"
+  },
+  "promptVersion": "match-story@6",
+  "modelId": "laya-systemone-safe-options@1",
+  "score": {
+    "precision": 0.3855828947840051,
+    "recall": 0.9801550744664517,
+    "f1": 0.5534458870722065,
+    "predictedStories": 81,
+    "labelledStories": 145,
+    "predictedSingletons": 68,
+    "labelledSingletons": 116
+  },
+  "modelCalls": 226,
+  "cachedCalls": 0,
+  "failedCalls": 0,
+  "errors": {
+    "notRetrieved": 1,
+    "rankedTooLow": 0,
+    "modelSaidNo": 1,
+    "joinedWrongStory": 3,
+    "wrongJoinByModel": 66,
+    "wrongJoinByEmbedding": 0,
+    "correct": 263
+  },
+  "fragmented": [
+    {
+      "title": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+      "size": 39,
+      "pieces": 2
+    },
+    {
+      "title": "Hurricane Simon hits Mexico's Pacific coast",
+      "size": 13,
+      "pieces": 2
+    },
+    {
+      "title": "Zelensky and UK criticise the US-Russia diesel deal",
+      "size": 4,
+      "pieces": 2
+    },
+    {
+      "title": "EU says it will welcome energy truce \"when it holds\"",
+      "size": 3,
+      "pieces": 2
+    }
+  ],
+  "overMerged": [
+    {
+      "size": 123,
+      "labelled": [
+        "Houthi missiles hit Riyadh airport, killing three (Oct 9)",
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Countries condemn the Houthi attacks on Riyadh airport",
+        "US considers joining Saudi strikes on the Houthis",
+        "Riyadh airport closure and flight cancellations",
+        "Houthis warn travellers to stay away from Saudi airports",
+        "Countries warn against travel to Saudi Arabia",
+        "FAA tells US airlines to exercise caution over Saudi Arabia",
+        "Top oil executives dropped from Riyadh WPC Energy Congress",
+        "Iran urges Saudi diplomacy after Houthi escalation",
+        "Yemeni government forces advance against Houthis",
+        "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+        "Yemen’s Houthis release video of drone attacks on gov’t forces",
+        "Fear and uncertainty for civilians as Yemen’s capital comes under attack",
+        "Riyadh attack: Iran cannot distance itself from outsourced Houthi violence",
+        "Riyadh airport attacks another dangerous moment in already tense conflict",
+        "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions",
+        "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+        "Why are Houthi missiles breaking through Saudi Arabia’s air defences?",
+        "Strike on Riyadh: What options for the Saudi-led coalition?",
+        "Saudi Arabia is increasingly under siege",
+        "Iran calls U.S. response \"insufficient\" amid stalled talks to end the war",
+        "Turkiye highway crash kills 11, injures 27 after tour bus hits truck",
+        "Is the Yemen war entering a new phase?",
+        "Manchester City block out the noise to defeat Liverpool at Anfield",
+        "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says",
+        "Here’s the biggest news you missed this weekend",
+        "Military police’s role to be expanded to combat: MND",
+        "Manila opens largest OFW service center in Taipei",
+        "Line platform gives farmers helping hand: institute",
+        "Timeline: Houthis escalate attacks on Saudi airports",
+        "Clashes reported in Yemen as Houthis advance towards Taiz",
+        "Pakistan looking to raise more than $1bn under govt push for privatisation, says finance minister",
+        "Saudi Arabia says oil supply to continue to flow despite Riyadh attacks",
+        "Saudi energy minister says attacks testing infrastructure, vows response"
+      ]
+    },
+    {
+      "size": 104,
+      "labelled": [
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Trump and Putin agree deal to release Russian diesel",
+        "Zelensky and UK criticise the US-Russia diesel deal",
+        "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+        "Trump says Ukraine should get a new president",
+        "UK and Germany back Zelensky after Trump call",
+        "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+        "Zelensky offers elections if Russia agrees 60-day ceasefire",
+        "Trump announces Russia-Ukraine \"energy ceasefire\"",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire",
+        "EU says it will welcome energy truce \"when it holds\"",
+        "Russia called its strikes on Ukrainian data centers a ‘forced digital detox.’ Zelensky says Kyiv has answered by hitting a data center belonging to Russian tech giant Yandex.",
+        "The Kyiv Independent: Russia wants sanctions lifted in exchange for halting strikes on Ukrainian energy infrastructure",
+        "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+        "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief",
+        "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+        "Republican senator says Trump diesel agreement with Russia may be illegal",
+        "US threatens to halt weapons procurement for Ukraine over strikes on Russian energy sites, FT reports",
+        "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+        "Zelenskyy risks rupture with Trump as midterms pressure mounts",
+        "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+        "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+        "‘Trump is really mad’: White House source says president expects Ukraine to stop striking Russian oil refineries",
+        "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Thousands detained ahead of Delhi protest against CEC",
+        "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+        "India’s crackdown on youth protesters: What next?"
+      ]
+    },
+    {
+      "size": 3,
+      "labelled": [
+        "'No lesson learnt': KP emergency evokes grim October memories",
+        "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power",
+        "DPM Dar defends emergency and governor's rule in KP, says measures not politically motivated"
+      ]
+    },
+    {
+      "size": 14,
+      "labelled": [
+        "Hurricane Simon hits Mexico's Pacific coast",
+        "Hurricane Isaias kills four in the US"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Flash flood on Budhi Gandaki river hits Nepal villages",
+        "Amid heartache of Nepal flooding disaster, fear remains"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Press Remarks by Commissioner Lahbib at the Foreign Affairs Council on Development",
+        "Latest news bulletin | October 11th, 2026 – Evening"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Kenya’s Eliud Kipchoge wins his first marathon in three years in Melbourne",
+        "Man pushes cousin 42km in Melbourne Marathon, carries him over line"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "What to expect from Apple’s ‘Welcome Home’ event",
+        "The new Apple TV could have a built-in mic and a remote with a speaker"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Pope Leo announces medical update",
+        "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?"
+      ]
+    }
+  ]
+}
