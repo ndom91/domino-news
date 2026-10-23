@@ -775,6 +775,15 @@ describe('local generation adapter', () => {
       generationModel: 'g',
     })
   }
+  const decision = async () => {
+    const { createLocalStoryChoiceDecision } = await import('@dn/inference')
+    return createLocalStoryChoiceDecision({
+      baseUrl: 'http://inference.test',
+      embeddingModel: 'e',
+      generationModel: 'g',
+      decisionModel: 'kev',
+    })
+  }
   afterEach(() => vi.unstubAllGlobals())
 
   it('sends numbered sources, never IDs', async () => {
@@ -798,6 +807,20 @@ describe('local generation adapter', () => {
     const { output } = await (await generation()).summarizeStory({ story })
     expect(output.sourceArticleIds).toEqual(['art_b'])
     expect(output.observationIds).toEqual(['obs_b'])
+  })
+
+  it('maps a System One Story choice and keeps article bodies out of its compact input', async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({ answers: { story: { choice: 'story_2', confidence: 0.91 } } }),
+    )
+    vi.stubGlobal('fetch', fetch)
+    const { output } = await (await decision()).chooseStory({
+      article: { ...article('new'), body: 'Transient article body.' },
+      stories: [story, { ...story, storyId: 'sty_2', title: 'Second story' }],
+    })
+    expect(output).toEqual({ storyId: 'sty_2', rationale: '', confidence: 0.91 })
+    const [, options] = fetch.mock.calls[0] ?? []
+    expect(String(options?.body)).not.toContain('Transient article body.')
   })
 
   it('drops material-only fields from a non-material assessment', async () => {
@@ -842,6 +865,15 @@ describe('local generation adapter', () => {
     await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
       /truncated at 2400 tokens\. Starts: \{"claims"/,
     )
+  })
+})
+
+describe('Story decision acceptance', () => {
+  it('accepts only a confident positive match', async () => {
+    const { acceptsStoryDecision } = await import('@dn/jobs')
+    expect(acceptsStoryDecision({ storyId: 'sty_1', confidence: 0.8 }, 0.8)).toBe(true)
+    expect(acceptsStoryDecision({ storyId: 'sty_1', confidence: 0.79 }, 0.8)).toBe(false)
+    expect(acceptsStoryDecision({ storyId: null, confidence: 1 }, 0.8)).toBe(false)
   })
 })
 

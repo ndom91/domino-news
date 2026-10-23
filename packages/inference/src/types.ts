@@ -84,10 +84,20 @@ export interface GenerationProvider {
   }): Promise<Generated<ClaimsOutput>>
 }
 
+/** A bounded-choice model used to accept only high-confidence Story matches. */
+export interface StoryChoiceDecisionProvider {
+  readonly modelId: string
+  chooseStory(input: {
+    article: ArticleInput
+    stories: StoryInput[]
+  }): Promise<Generated<StoryChoice & { confidence: number }>>
+}
+
 export interface InferenceProviders {
   mode: 'fixture' | 'local'
   embeddings: EmbeddingProvider
   generation: GenerationProvider
+  decision?: StoryChoiceDecisionProvider
 }
 
 /** Endpoint unreachable, timed out or returned 5xx. Retry later; nothing was produced. */

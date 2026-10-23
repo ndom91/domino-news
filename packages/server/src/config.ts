@@ -24,6 +24,7 @@ export function readConfig(env = process.env) {
     backfillAdmitPerMinute: num('BACKFILL_ADMIT_PER_MINUTE', 20),
     embeddingConcurrency: num('EMBEDDING_CONCURRENCY', 2),
     generationConcurrency: num('GENERATION_CONCURRENCY', 2),
+    matchDecisionConfidence: boundedNum('MATCH_DECISION_CONFIDENCE', 0.8, 0, 1),
     publishedSummaryDebounceSeconds: boundedNum(
       'PUBLISHED_SUMMARY_DEBOUNCE_SECONDS',
       180,

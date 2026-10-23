@@ -1,7 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs'
 import tls from 'node:tls'
 import { createFixtureEmbeddings, createFixtureGeneration } from './fixture.ts'
-import { createLocalEmbeddings, createLocalGeneration } from './local.ts'
+import {
+  createLocalEmbeddings,
+  createLocalGeneration,
+  createLocalStoryChoiceDecision,
+} from './local.ts'
 import type { InferenceProviders } from './types.ts'
 
 export { createCloudGeneration } from './cloud.ts'
@@ -28,10 +32,14 @@ export function createInferenceFromEnv(env = process.env): InferenceProviders {
     embeddingModel: env.INFERENCE_EMBEDDING_MODEL ?? 'embeddinggemma-2',
     generationModel: env.INFERENCE_GENERATION_MODEL ?? 'gemma-4-26B-A4B',
   }
+  const decisionModel = env.INFERENCE_MATCH_DECISION_MODEL
   return {
     mode,
     embeddings: createLocalEmbeddings(config),
     generation: createLocalGeneration(config),
+    ...(decisionModel
+      ? { decision: createLocalStoryChoiceDecision({ ...config, decisionModel }) }
+      : {}),
   }
 }
 

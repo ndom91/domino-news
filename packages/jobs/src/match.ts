@@ -1,5 +1,6 @@
 import { type Db, schema, type TxContext, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
+import { InferenceUnavailableError, InvalidModelOutputError } from '@dn/inference'
 import {
   type AnalysisJob,
   analysisJob,
@@ -47,6 +48,13 @@ export function matchPolicy(mode: keyof typeof THRESHOLDS): MatchPolicy {
 
 class NotIndexedYetError extends Error {}
 export class CandidatesChangedError extends Error {}
+
+export function acceptsStoryDecision(
+  output: { storyId: string | null; confidence: number },
+  threshold: number,
+) {
+  return output.storyId !== null && output.confidence >= threshold
+}
 
 /** Best similarity per Story among the neighbours, using canonical membership from Postgres. */
 async function rankCandidateStories(
@@ -178,6 +186,43 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
         )
       ).filter((s) => s !== null)
       if (!articleInput || stories.length === 0) return { storyId: null }
+      const decisionProvider = ctx.inference.decision
+      if (decisionProvider) {
+        try {
+          const { runId, result } = await withAnalysisRun(
+            ctx.db,
+            {
+              operation: 'story_match',
+              targetType: 'article',
+              targetId: job.targetId,
+              inputFingerprint: `${job.inputFingerprint}|decision|${storyIds.join(',')}`,
+              modelId: decisionProvider.modelId,
+            },
+            () =>
+              ctx.gpu.generation.run(job.priorityClass, () =>
+                decisionProvider.chooseStory({ article: articleInput, stories }),
+              ),
+          )
+          await recordMatchInterpretation(
+            ctx,
+            runId,
+            job.targetId,
+            articleInput.observationId,
+            result.output,
+          )
+          if (acceptsStoryDecision(result.output, ctx.config.matchDecisionConfidence)) {
+            return { storyId: result.output.storyId, runId }
+          }
+        } catch (error) {
+          if (
+            !(
+              error instanceof InferenceUnavailableError || error instanceof InvalidModelOutputError
+            )
+          ) {
+            throw error
+          }
+        }
+      }
       const { runId, result } = await withAnalysisRun(
         ctx.db,
         {
