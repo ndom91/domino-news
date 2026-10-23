@@ -1,0 +1,176 @@
+{
+  "set": "set-1",
+  "label": "kev-systemone-compact-choose5-safe-options",
+  "ranAt": "2026-10-23T11:12:29.236Z",
+  "policy": {
+    "autoSame": 0.93,
+    "llmMin": 0.72,
+    "maxCandidates": 5,
+    "storyArticles": "anchored",
+    "ranking": "best",
+    "judging": "choose"
+  },
+  "promptVersion": "match-story@6",
+  "modelId": "kev-systemone-compact-safe-options@1",
+  "score": {
+    "precision": 0.9255848468182317,
+    "recall": 0.6493854189429218,
+    "f1": 0.7632668585369081,
+    "predictedStories": 196,
+    "labelledStories": 145,
+    "predictedSingletons": 160,
+    "labelledSingletons": 116
+  },
+  "modelCalls": 226,
+  "cachedCalls": 0,
+  "failedCalls": 0,
+  "errors": {
+    "notRetrieved": 17,
+    "rankedTooLow": 2,
+    "modelSaidNo": 40,
+    "joinedWrongStory": 46,
+    "wrongJoinByModel": 8,
+    "wrongJoinByEmbedding": 0,
+    "correct": 221
+  },
+  "fragmented": [
+    {
+      "title": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+      "size": 39,
+      "pieces": 16
+    },
+    {
+      "title": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+      "size": 17,
+      "pieces": 9
+    },
+    {
+      "title": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+      "size": 32,
+      "pieces": 7
+    },
+    {
+      "title": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+      "size": 25,
+      "pieces": 7
+    },
+    {
+      "title": "Riyadh airport closure and flight cancellations",
+      "size": 11,
+      "pieces": 6
+    },
+    {
+      "title": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+      "size": 7,
+      "pieces": 5
+    },
+    {
+      "title": "Countries condemn the Houthi attacks on Riyadh airport",
+      "size": 6,
+      "pieces": 5
+    },
+    {
+      "title": "Hurricane Simon hits Mexico's Pacific coast",
+      "size": 13,
+      "pieces": 4
+    },
+    {
+      "title": "EU says it will welcome energy truce \"when it holds\"",
+      "size": 3,
+      "pieces": 3
+    },
+    {
+      "title": "Trump says Ukraine should get a new president",
+      "size": 17,
+      "pieces": 2
+    },
+    {
+      "title": "Zelensky and UK criticise the US-Russia diesel deal",
+      "size": 4,
+      "pieces": 2
+    },
+    {
+      "title": "Top oil executives dropped from Riyadh WPC Energy Congress",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Flash flood on Budhi Gandaki river hits Nepal villages",
+      "size": 3,
+      "pieces": 2
+    },
+    {
+      "title": "Countries warn against travel to Saudi Arabia",
+      "size": 2,
+      "pieces": 2
+    },
+    {
+      "title": "Iran urges Saudi diplomacy after Houthi escalation",
+      "size": 2,
+      "pieces": 2
+    }
+  ],
+  "overMerged": [
+    {
+      "size": 30,
+      "labelled": [
+        "Trump announces Russia-Ukraine \"energy ceasefire\"",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire",
+        "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+        "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+        "Wie Trumps Ölkrise zur Ukraine-Frage wird"
+      ]
+    },
+    {
+      "size": 19,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Riyadh airport closure and flight cancellations"
+      ]
+    },
+    {
+      "size": 17,
+      "labelled": [
+        "Trump says Ukraine should get a new president",
+        "UK and Germany back Zelensky after Trump call",
+        "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash"
+      ]
+    },
+    {
+      "size": 9,
+      "labelled": [
+        "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+        "Second strike on Riyadh airport a day later kills one (Oct 11)"
+      ]
+    },
+    {
+      "size": 6,
+      "labelled": [
+        "Trump and Putin agree deal to release Russian diesel",
+        "Zelensky and UK criticise the US-Russia diesel deal"
+      ]
+    },
+    {
+      "size": 4,
+      "labelled": [
+        "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+        "Russia hits Ukrainian power plants despite announced energy ceasefire"
+      ]
+    },
+    {
+      "size": 3,
+      "labelled": [
+        "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+        "Trump says Ukraine should get a new president"
+      ]
+    },
+    {
+      "size": 2,
+      "labelled": [
+        "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "Saudi energy minister says attacks testing infrastructure, vows response"
+      ]
+    }
+  ]
+}
