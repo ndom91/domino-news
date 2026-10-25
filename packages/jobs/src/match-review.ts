@@ -28,20 +28,22 @@ export function reviewHtml(set: EvalSet, labels: Labels): string {
 <meta charset="utf-8">
 <title>Review ${set.name} · Domino match labels</title>
 <style>
-  :root { color-scheme: light dark; --b: #8884; --dim: #888; font: 14px/1.45 system-ui, sans-serif; }
-  body { margin: 0; }
-  header { position: sticky; top: 0; z-index: 2; display: flex; gap: 12px; align-items: center; flex-wrap: wrap;
-    padding: 10px 16px; background: Canvas; border-bottom: 1px solid var(--b); }
+  :root { color-scheme: light; --bg:#f6f5f4; --surface:#fff; --text:#2e3436; --b:#d0cfcc; --dim:#5e5c64; --accent:#3584e4; --ok:#2ec27e; font: 15px/1.5 system-ui, sans-serif; }
+  body { margin: 0; color:var(--text); background:var(--bg); }
+  header { position: sticky; top: 0; z-index: 2; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;
+    padding: 12px 20px; background: var(--surface); border-bottom: 1px solid var(--b); }
   header h1 { font-size: 16px; margin: 0 8px 0 0; }
-  main { padding: 16px; display: grid; gap: 14px; grid-template-columns: repeat(auto-fill, minmax(460px, 1fr)); align-items: start; }
-  .card { border: 1px solid var(--b); border-radius: 6px; padding: 10px 12px; }
+  main { max-width: 1320px; margin:0 auto; padding: 24px; display:grid; grid-template-columns: 260px minmax(0, 1fr); gap:20px; align-items:start; }
+  #queue { position:sticky; top:82px; background:var(--surface); border:1px solid var(--b); border-radius:10px; padding:12px; max-height:calc(100vh - 110px); overflow:auto; }
+  #queue h2 { font-size:13px; margin:0 0 8px; } .queue-item { width:100%; text-align:left; border:0; border-left:3px solid transparent; background:transparent; padding:8px; border-radius:5px; color:var(--text); cursor:pointer; } .queue-item:hover { background:#f2f2f2; } .queue-item.active { background:#e7f0fd; border-left-color:var(--accent); } .queue-item.done { color:var(--dim); } .queue-count { color:var(--dim); font-size:12px; }
+  #groups { min-width:0; } .card { background:var(--surface); border: 1px solid var(--b); border-radius:10px; padding:18px 20px; box-shadow:0 1px 2px #0000000d; }
   .card.low { border-left: 4px solid #d33; } .card.medium { border-left: 4px solid #e90; }
-  .card.done { opacity: .55; }
+  .card.done { opacity: .72; }
   .card h2 { font-size: 14px; margin: 0; display: flex; gap: 8px; align-items: center; }
   .card h2 input { flex: 1; font: inherit; font-weight: 600; border: 1px solid transparent; background: none; padding: 2px; }
   .card h2 input:focus { border-color: var(--b); }
   .reason { color: var(--dim); font-size: 12px; margin: 4px 0 8px; }
-  .tools { display: flex; gap: 8px; flex-wrap: wrap; font-size: 12px; margin-bottom: 6px; }
+  .tools { display: flex; gap: 8px; flex-wrap: wrap; font-size: 13px; margin:12px 0; } button { min-height:32px; cursor:pointer; } button.primary { background:var(--accent); color:white; border-color:var(--accent); }
   ol { margin: 0; padding-left: 18px; } li { margin: 6px 0; }
   .t { font-weight: 600; } .m { color: var(--dim); font-size: 12px; }
   .d { color: var(--dim); font-size: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -52,24 +54,26 @@ export function reviewHtml(set: EvalSet, labels: Labels): string {
   li[draggable] { cursor: grab; }
   .card.over { outline: 3px dashed Highlight; outline-offset: 2px; }
   .card.dragging, li.dragging { opacity: .4; }
-  #undo:disabled { opacity: .4; }
+  #undo:disabled { opacity: .4; } .hidden { display:none; } @media (max-width:800px) { main { grid-template-columns:1fr; padding:12px; } #queue { position:static; max-height:220px; } }
 </style>
 </head>
 <body>
 <header>
   <h1>Review ${set.name}</h1>
-  <span id="stats"></span>
+  <span id="stats" aria-live="polite"></span>
+  <button id="prev" type="button">Previous</button><button id="next" type="button">Next</button>
   <input type="search" id="q" placeholder="Filter titles…" aria-label="Filter titles">
   <label><input type="checkbox" id="hideDone"> Hide reviewed</label>
   <button id="export">Export labels.json</button>
   <button id="import" title="Load a labels.json you exported earlier">Import…</button>
   <input type="file" id="importFile" accept="application/json,.json" hidden>
+  <button id="keepNext" class="primary" type="button">Keep group & next</button>
   <button id="undo" disabled title="Undo the last change (⌘Z / Ctrl+Z)">Undo</button>
   <button id="reset" title="Discard local edits and reload the draft">Reset</button>
   <span class="m">Drag a story's ⠿ onto another to merge; drag an article onto a story to move it.</span>
   <a href="https://github.com/ndom91/domino-news/blob/main/docs/story-granularity.md" target="_blank" rel="noreferrer">Rules</a>
 </header>
-<main id="groups"></main>
+<main id="content" tabindex="-1"><aside id="queue" aria-label="Review queue"></aside><section id="groups" aria-label="Current story group"></section></main>
 <script id="data" type="application/json">${data}</script>
 <script>
 const { set, labels: initial } = JSON.parse(document.getElementById('data').textContent)
@@ -121,9 +125,14 @@ function render() {
   const groups = [...state.groups].sort((a, b) =>
     (a.done - b.done) || (order[a.confidence ?? 'high'] - order[b.confidence ?? 'high']) || b.articleIds.length - a.articleIds.length)
   const done = state.groups.filter(g => g.done).length
-  document.getElementById('stats').textContent = state.groups.length + ' groups · ' + done + ' reviewed · ' +
-    state.groups.filter(g => g.articleIds.length === 1).length + ' singletons'
-  document.getElementById('groups').innerHTML = groups.map(g => {
+  if (!groups.some(g => g.id === state.active)) state.active = (groups.find(g => !g.done) ?? groups[0])?.id
+  const activeIndex = groups.findIndex(g => g.id === state.active)
+  const active = groups[activeIndex]
+  document.getElementById('stats').textContent = (activeIndex + 1) + ' of ' + groups.length + ' · ' + done + ' reviewed'
+  document.getElementById('prev').disabled = activeIndex <= 0
+  document.getElementById('next').disabled = activeIndex >= groups.length - 1
+  document.getElementById('queue').innerHTML = '<h2>Review queue <span class="queue-count">' + done + '/' + groups.length + '</span></h2>' + groups.map((g, i) => '<button type="button" class="queue-item ' + (g.id === state.active ? 'active ' : '') + (g.done ? 'done' : '') + '" data-select-group="' + esc(g.id) + '"><span class="queue-count">' + (i + 1) + ' · ' + g.articleIds.length + '</span><br>' + esc(g.title).slice(0, 80) + '</button>').join('')
+  document.getElementById('groups').innerHTML = [active].filter(Boolean).map(g => {
     const arts = g.articleIds.map(id => byId.get(id)).sort((a, b) => a.publishedAt.localeCompare(b.publishedAt))
     const visible = !q || g.title.toLowerCase().includes(q) || arts.some(a => a.title.toLowerCase().includes(q))
     const hidden = !visible || (hideDone && g.done)
@@ -145,7 +154,7 @@ document.addEventListener('change', e => {
   const t = e.target
   if (t.dataset.move && t.value) moveArticle(t.dataset.move, t.value)
   else if (t.dataset.merge && t.value) mergeInto(t.dataset.merge, t.value)
-  else if (t.dataset.done) { remember(); state.groups.find(g => g.id === t.dataset.done).done = t.checked; save() }
+  else if (t.dataset.done) { remember(); state.groups.find(g => g.id === t.dataset.done).done = t.checked; if (t.checked) state.active = ([...state.groups].find(g => !g.done && g.id !== t.dataset.done) ?? state.groups.find(g => g.id === t.dataset.done))?.id; save() }
   else if (t.dataset.rename) { remember(); state.groups.find(g => g.id === t.dataset.rename).title = t.value; save() }
   else if (t.id === 'hideDone') render()
 })
@@ -191,6 +200,10 @@ document.addEventListener('drop', e => {
   if (d.group) mergeInto(d.group, card.dataset.g)
   else moveArticle(d.article, card.dataset.g)
 })
+document.getElementById('prev').addEventListener('click', () => { const groups=[...state.groups].sort((a,b)=>(a.done-b.done)||(order[a.confidence ?? 'high']-order[b.confidence ?? 'high'])||b.articleIds.length-a.articleIds.length); const i=groups.findIndex(g=>g.id===state.active); state.active=groups[Math.max(0,i-1)]?.id; save() })
+document.getElementById('next').addEventListener('click', () => { const groups=[...state.groups].sort((a,b)=>(a.done-b.done)||(order[a.confidence ?? 'high']-order[b.confidence ?? 'high'])||b.articleIds.length-a.articleIds.length); const i=groups.findIndex(g=>g.id===state.active); state.active=groups[Math.min(groups.length-1,i+1)]?.id; save() })
+document.getElementById('keepNext').addEventListener('click', () => { const group=state.groups.find(g=>g.id===state.active); if (!group) return; remember(); group.done=true; const next=[...state.groups].find(g=>!g.done); state.active=(next ?? group).id; save() })
+document.addEventListener('click', e => { const id=e.target.closest?.('[data-select-group]')?.dataset.selectGroup; if (id) { state.active=id; save() } })
 document.getElementById('undo').addEventListener('click', undo)
 document.getElementById('import').addEventListener('click', () => document.getElementById('importFile').click())
 document.getElementById('importFile').addEventListener('change', async e => {
