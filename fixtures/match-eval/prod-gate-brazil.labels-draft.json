@@ -1,0 +1,1696 @@
+{
+  "set": "prod-gate-brazil",
+  "guide": "docs/story-granularity.md",
+  "groups": [
+    {
+      "id": "g1",
+      "title": "Ajayi Elebire Elite Basketball Camp: 40 players advance from Lagos screening to Ekiti",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ae9hnq34rwxcg85czfk2gn"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g2",
+      "title": "Brazilian court orders Meta to prove Lula and Bolsonaro get equal treatment",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5an5pp14tjcx9hmptqgpyyv",
+        "art_01m5bjat9kwve4kqd6p59t0dm0",
+        "art_01m5d0q9b8ayrw2a0zx9echg9f",
+        "art_01m5d6rg6zgygfs9fnjes6n1cw",
+        "art_01m5dgz6dch6pcc795tbjmpgpv",
+        "art_01m5dhtgjw4v2nqb9n2arz9z12",
+        "art_01m5dyqwpf8g0a079je7wtvngx"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g3",
+      "title": "Brazil's government says $4 billion budget reshuffle needed for Lula measures in 2027",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5an59fgt7wq237d2vymxg8s"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g4",
+      "title": "A elei\u00e7\u00e3o das Big Techs",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5an4wpr9vyj8vm6baz4j74w"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g5",
+      "title": "How a US political venture capital firm is trying to influence Brazil\u2019s election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d5tzgt1qrhr7qgjcswhfy6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g6",
+      "title": "Lula diz que vai entregar amanh\u00e3 ao TSE pedido de abertura de sigilo",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5b8wv0zfbbtp2a7e17hb271",
+        "art_01m5d5v1y4rjy9tbrv73gp7x7v",
+        "art_01m5d442at7c0ade2y94w35fx2",
+        "art_01m5gctyz35d2w3ek928fbkfzq",
+        "art_01m5jgmqhx458mzawzehbsh9fp"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g7",
+      "title": "Children among six killed in Russian drone strike on Ukraine park",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5b9rma4p9yh56zehk18nhmr"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g8",
+      "title": "Scientific journey",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5agw3jap229sd39qkts2zhb"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g9",
+      "title": "Lula, Bolsonaro trade insults in Brazil poll debate",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5agw4k3ybedr4hpm8s3dqx0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g10",
+      "title": "Fl\u00e1vio faz motociata no Par\u00e1; Lula participa de marcha no RS",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5bt2m0m2zpm6x3dekp8yg30"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g11",
+      "title": "PHC issues notices in petitions challenging governor\u2019s rule, emergency in KP; hearing adjourned till Nov 10",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5c0y1s7ax5z4f0t7p4q6hxj"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g12",
+      "title": "Morning news brief",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5c8mwpx5m4s9ba9gf9kp5fn"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g13",
+      "title": "Queer classic: This Bengali novel from the 1920s is a tender exploration of love between two boys",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cmn62b2mpf0a91dyc5xeez"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g14",
+      "title": "Confira a agenda dos presidenci\u00e1veis nesta ter\u00e7a-feira (20)",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cq83hd40rcjdqscxvdb65q",
+        "art_01m5e25r7pt6h1jxc3kb3ake6z"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g15",
+      "title": "Arzttermine: Deutlich l\u00e4ngere Wartezeit 2027 erwartet",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ctn5hff3enq0gpwekg93y0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g16",
+      "title": "Brazil's Bolsonaro courts events sector with pledge to restore tax breaks ahead of election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ctnk24v6wmfbf4x547jgjm"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g17",
+      "title": "Brazil election puts unprecedented Indigenous ministry at risk if Fl\u00e1vio Bolsonaro wins",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cvhn03d448gh76trfx75vz"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g18",
+      "title": "Nach Protesten kursieren KI-Bilder und ungepr\u00fcfte Infos",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cvgjq1dfhb089rc5hm8kdy"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g19",
+      "title": "Paddy Power owner blames tax rises for plan to shed up to 1,400 jobs",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cwd1a91vnxd1a049748q8z",
+        "art_01m5d0pey7m65f13ny0fkaq3fd"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g20",
+      "title": "Brazil's Lula, Flavio Bolsonaro tied ahead of runoff vote",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5cy3ka9q0tfe0hvmqssb042",
+        "art_01m5d1jtxv17gv040vgks1jt6f",
+        "art_01m5fbc4raq08tcct1m8rcfmj0",
+        "art_01m5jgmhefqa1sy25vhrr39g11",
+        "art_01m5jvsa1n8v5d8hf9nsvbm8cg",
+        "art_01m5k589nv2f6s767sr36zhgbf",
+        "art_01m5mdjvhg9zdw133trz0c0rh1",
+        "art_01m5mp6ate91wjbww395fcth88",
+        "art_01m5pvnhvvwz1m49pzxngjwqfp",
+        "art_01m5qa9s7kn9nddme98ngsgjhc",
+        "art_01m5r34yb89jvmrz3k5qeaae9b",
+        "art_01m5s5fg2psjx46mttcppssk1r"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g21",
+      "title": "Flavio Bolsonaro\u2019s \u2018corrupto\u2019 stunt sparks viral meme before Brazil election runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d0q517zm1c2wv5hze14gn9"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g22",
+      "title": "\u2018Stay alive\u2019: Brazil\u2019s Indigenous people mobilize to vote for Lula to protect their rights",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d2j32vpr023p8c9v1spba0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g23",
+      "title": "Anw\u00e4ltin kl\u00e4rt auf - Gibt es Mietminderung, wenn es zu Hause spukt?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d1heq8wbneecbd64znee41"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g24",
+      "title": "Fl\u00e1vio Bolsonaro: The heir to Brazil's far-right dynasty",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d38f6mser9smqedztzw20x",
+        "art_01m5ezb1rajg1ft00wdexshjr5",
+        "art_01m5fc7g6q716m7stpx1wtv9nz",
+        "art_01m5m0phpd1qc87waqaet2kjj6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g25",
+      "title": "With selfies and squats, Brazil's Lula fights for one last comeback",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d43vkd9sjn457k65c48swf"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g26",
+      "title": "Esporte: conhe\u00e7a as propostas de Fl\u00e1vio Bolsonaro e Lula para a \u00e1rea",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5d6rtsp1whj15rt5q51k1x8",
+        "art_01m5d8e4t2pz1qaj6377pzpdtt"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g27",
+      "title": "Lula challenges Bolsonaro to release personal records before election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5db0vkwf4a69f786n524wdj",
+        "art_01m5htb6rsx3xm4pkb5nyawx6q"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g28",
+      "title": "For Lula, Brazil's sovereignty is at stake in final election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5db0bz1212mh8rt82xwfcsk"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g29",
+      "title": "Nonpartisan coalition of religious leaders plans to counter voter intimidation on Election Day",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5dedr8spq08fb5d3e4grmvw"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g30",
+      "title": "Brazil\u2019s presidential candidates push to have one another disqualified ahead of run-off",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5djpvr7n4hqkpfz66y3y5e0",
+        "art_01m5j9rzp4gv5hn0jm3727wbv1",
+        "art_01m5jbg4qjppg71zrqz71gts78",
+        "art_01m5p737y0pspmhz9xpezj4vz3"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g31",
+      "title": "Hospitais do Rio de Janeiro, Fl\u00e1vio Bolsonaro e a acusa\u00e7\u00e3o de Lula na Band",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5dn8w2sjqdqpnej38g7aw04"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g32",
+      "title": "Brazil again accuses Milei of election interference after Lula remark",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5dv9phqbt1csn0w2zz7dx4d",
+        "art_01m5ecfpzxzgx2d6xm0s8wqvwk",
+        "art_01m5fmsd78zfkka5dp1kyzxnf9"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g33",
+      "title": "The risks of trusting personal AI agents with your money, data",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5dzjg56pd2gkwwrcgfhnwdn"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g34",
+      "title": "Comit\u00ea da Meta aponta falhas de modera\u00e7\u00e3o nas elei\u00e7\u00f5es brasileiras",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5e31cme85jwe0398b71b02k"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g35",
+      "title": "Das Fernduell der Maga-Erben zeigt interessante Differenzen",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5e6ehhqjnd7fm5akq8fwahz"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g36",
+      "title": "K\u00fcnstliche Wasserstra\u00dfe: Eine neue Herzkammer f\u00fcr den Nord-Ostsee-Kanal",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5e7a8rw7zt5k9gt7aawzpas"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g37",
+      "title": "Why a Bengaluru company\u2019s \u2018hiring ban\u2019 on men from four northern states is flawed",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5edatf0q9qvd1qecjdhg75p"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g38",
+      "title": "Brazil\u2019s presidential candidates seek to disqualify each other",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ear60ndbnj0nde1yk2dw70",
+        "art_01m5ee6sh65x85vchw9ers52re",
+        "art_01m5ejf9ez7sk7y1g6sxfm1bfd"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g39",
+      "title": "Barcelona suffers first loss of season, falls 4-2 to PSG",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ehmc2pbcws2m8357bbj898"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g40",
+      "title": "Starlink access in Ukraine a decision for Musk, not White House, Rubio says",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5eqkkvw2k5tx2r6tawqmtxk"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g41",
+      "title": "A.I. Election Videos Are Flooding Brazil. Could They Sway the Vote?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5evwkggd2bqefbt7ph6ef90"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g42",
+      "title": "US invokes rarely used torture law in revamped case against Maduro",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5f1226ajxs2ca1cz9adqs0g"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g43",
+      "title": "DOSB-Pr\u00e4sidentschaft: Engelhardt tritt gegen Mronz an",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5f3m9rjkkbg8bnj2mxhghbw"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g44",
+      "title": "Confira a agenda dos presidenci\u00e1veis nesta quarta-feira (21)",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5f686vm0gry0rw1z1yp5qxg"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g45",
+      "title": "Burkina Faso's parliament unanimously votes to reinstate the death penalty",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fd2af4mdhnzfw9kb6jnyhc"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g46",
+      "title": "Neuer VfB-Rekord - Seimen kann auch K\u00f6nigsklasse!",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fbbjhwd2pjewqeyf9s4vdq"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g47",
+      "title": "Can Lula, now the underdog, pull off one last trick?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fesbth9tatrqx9kb7v3a8t"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g48",
+      "title": "Lula da Silva loosens the purse strings at the end of the campaign for Brazil\u2019s tight election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5feswcphqc9dppa4nqsp8c5"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g49",
+      "title": "Some Brazilians long associated with the left now shift towards Flavio Bolsonaro",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fj89extytv9038efjhg472"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g50",
+      "title": "Nuclear collaboration completes its mission",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fj87a29ek3ncss1ftpmvgv"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g51",
+      "title": "Kremlin says 'ready' to resume 3-way talks with US and Ukraine mid-November",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fky7ckgx3n7d7p1z2h6xr5"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g52",
+      "title": "Why social media has become an election issue in Brazil\u2019s presidential race",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fwhpqzbjp42jes9qwxm5dg"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g53",
+      "title": "Star Wars Zero Company is a must-play strategy game at 20 percent off",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fvp83cgd1f2vw03q2nhfey"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g54",
+      "title": "Qatar, Turkiye, Pakistan and Indonesia sign \u2018Badr\u2019 defence pact",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fxddfzb23ghbjwaday5h22"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g55",
+      "title": "ONU aponta falta de isen\u00e7\u00e3o da Meta em elei\u00e7\u00e3o brasileira",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g2j57trpvnxas8q2r05dr9"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g56",
+      "title": "Software: SAP legt starkes Wachstum bei Cloudvertr\u00e4gen hin",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g3ctkx9z7wpj80ke8h24mb"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g57",
+      "title": "Fl\u00e1vio Bolsonaro imp\u00f5e condi\u00e7\u00f5es para liberar sigilos",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g5zzhrh22bga8jyekpv7d0",
+        "art_01m5gbz60dmzdapnkfgcjtt0wz",
+        "art_01m5gyw2rk3vhrr1ed86kfdzpp",
+        "art_01m5h0kbsbzv4tpfx571s5hkwa"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g58",
+      "title": "U.S. Embassy says Carney government brushing off 'potential interference' in midterms",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g53tjt11ersh3ht18hz738"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g59",
+      "title": "Ukraine says this drone can fly injured soldiers off the front line | About That",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g5z8kawwemewf093cqw0m2"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g60",
+      "title": "Collins enlists Manchin to woo moderates as she distances herself from Trump",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5g9c3nsnxw5hw2dcdcwhzy1"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g61",
+      "title": "Taiwan and Kansas sign trade MOU",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5fnmytn6tygawtx2sz2fn6x"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g62",
+      "title": "Minist\u00e9rio P\u00fablico encurrala Meta para barrar bloqueios e restri\u00e7\u00f5es nas elei\u00e7\u00f5es",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5gfcrcn4mthy8e9jsrxr5v6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g63",
+      "title": "Nunes Marques suspende postagens ilegais contra campanha de Lula",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5gkpq2wv471rd1y81rq897k"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g64",
+      "title": "Campanha de Lula entra com a\u00e7\u00e3o no TSE para cassar chapa de Fl\u00e1vio",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5gyw2szq7dez2djqe0tjsm6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g65",
+      "title": "North Korea prepares to restart propaganda loudspeakers as ties sour with South",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5gx54ytg2vkrhder099ravr"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g66",
+      "title": "Lula hopes older voters can help power him to victory against Flavio Bolsonaro",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hea112kgc62tnm5v25efte",
+        "art_01m5hma07rm0738ax55vbfzbej"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g67",
+      "title": "Brazil\u2019s weird economy needs serious reform",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hgvrksm54pwkffyj9j38g2"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g68",
+      "title": "Brazil\u2019s president appeals to undecided voters ahead of run-off",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hgwy9d7z3kbs7vevf8mh34",
+        "art_01m5m5vsdk3bd71m4r8c3h9k3q"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g69",
+      "title": "Shark nicknamed \u2018Bukangi\u2019 foils rescue attempts, returns to South Korean canal",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hgwefzbf67r5x1k0m0d885"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g70",
+      "title": "Sicherheitsl\u00fccke in PHP: Sicherheitsl\u00fccken l\u00f6sen Millionen von Cyberattacken aus",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hhqj50em63z69033z5km6p"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g71",
+      "title": "Ministerpr\u00e4sidentenwahl in Sachsen-Anhalt - Erster CDU-Mann torpediert Anti-Siegmund-Plan",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hhqhds9va9vxecwvvtr1ds"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g72",
+      "title": "Autumn wreaths and \u2018doorscaping\u2019: why we need more life in our front gardens",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hqqp5g4ba3v5ss6z7ffx3f"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g73",
+      "title": "Erika Hilton, lawmaker: \u2018There could be a coup in Brazil. This time within the law, not like that horror show\u2019",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hn5v945htzzw3jz34wqn7v"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g74",
+      "title": "2027: What Nigeria must do to stop post-election violence \u2013 Pro-democracy activist",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hn5sr46b7zkgwmgp0b5cmh"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g75",
+      "title": "L\u00e4nderfinanzausgleich: Baden-W\u00fcrttemberg offen f\u00fcr Pr\u00fcfung von \u00abExtremismusklausel\u00bb",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hqr39p60mwq7fjyq4j0794"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g76",
+      "title": "Direitos Humanos: planos de Lula e Fl\u00e1vio refletem diferen\u00e7a hist\u00f3rica",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hv6kefnscy9v4fptcrmkbr"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g77",
+      "title": "Confira a agenda dos presidenci\u00e1veis nesta quinta-feira (22)",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hw24hq04fyy9j7pw167twd",
+        "art_01m5k8p96s2w05xr05kavkjm81"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g78",
+      "title": "Brazil's sprawling favelas require long-term urban planning solutions",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5htavq4rn73y9j8fc94p9zx"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g79",
+      "title": "\u2018Justice is hope\u2019: Here are Leonen\u2019s 9 promises as aspiring chief justice",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5htb94ftz7fjxke8se6aekr"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g80",
+      "title": "School Teachers\u2019 Review Body remit letter: working conditions for 2027",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hxs1npec7h9hq0pvs4nbzd"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g81",
+      "title": "Brazil's Congress's shift to the right could change Latin America's powerhouse. Here\u2019s what to know",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5hyk9619snk1rg0c4e1r0bp",
+        "art_01m5mw5mcmeyhrxrb5qcnse5qe"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g82",
+      "title": "The Amazon at a crossroads: Brazilians\u2019 vote also decides the rainforest\u2019s future",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jcc48z6wypd6g55spzx4n7"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g83",
+      "title": "Mamdani expected to face legal trouble over PETA-backed horse carriage ban",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5j6bey85napm2kk9wx08ybw"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g84",
+      "title": "Elei\u00e7\u00f5es: entidades v\u00e3o checar informa\u00e7\u00f5es ao vivo durante debate",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5j9stgz7ftkmy9bdjemjkbs"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g85",
+      "title": "Moment Romanian gang use cruel cash machine trick on pensioners in crime spree that netted \u00a340,000",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5j9s3axtsr2spfqg02ssgdf"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g86",
+      "title": "Foreign national beaten to death by a mob in South Africa",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jd7pytngbgdkmtyvmanepk"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g87",
+      "title": "Australia pastor case 'canary in the coal mine' for American Christian freedoms: TPUSA leader",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jfrtnc310437sjxwpgkk2t"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g88",
+      "title": "Juventus fight back to draw with Rennes as Leverkusen go top",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jhfcsfjztw2medmz55168q"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g89",
+      "title": "Presidente do TSE pede \u00e0 Meta relat\u00f3rio sobre canal Ex\u00e9rcito do Lula",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jm2strv8ndk4yqywytd857",
+        "art_01m5nny7j231yq07p5e55rsrn0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g90",
+      "title": "\u00abJetzt erst recht\u00bb: Gladbach-Pr\u00e4sident Bonhof trotzt R\u00fccktrittsforderung",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jm1r35nek91drmjef62rwv"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g91",
+      "title": "Law firm at the heart of Prince Harry's disastrous hacking claim against the Daily Mail's publisher calls in insolvency experts",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jwmxn67yebajmjca3w94z0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g92",
+      "title": "Mendon\u00e7a diz que Fl\u00e1vio e Lula podem divulgar sigilos",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jvt6e9rrcbmqeg5aqe25ac"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g93",
+      "title": "Use MFA, patch, beware of scammers: 5 ways to keep safe online in the wake of AI-supercharged hacking",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5jybjqtpv5n49dky20d9bfh"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g94",
+      "title": "Brazil\u2019s election puts at risk country\u2019s role as a bulwark against Trump interventionism in the Americas",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kdtpawxdq9nx9w0pfp8abe"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g95",
+      "title": "How Lula turned four lessons from the presidential elections in Colombia into a comeback in Brazil\u2019s Sunday runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kdtp9ynqfd5z87r47svwx6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g96",
+      "title": "Authorities in France ban some student protests",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5j81wnte147h60my5hdzgnw"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g97",
+      "title": "Hollywood remembers actor Tom Skerritt",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5k63bant1ja4bzbczhe3rx4"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g98",
+      "title": "Brazil\u2019s election and the battle for the Amazon \u2013 podcast",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5k8p33krxbrvmmbww57497r"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g99",
+      "title": "Vorg\u00e4ngerin Leavitt f\u00e4llt \u201eein brutales Urteil\u201c \u00fcber Katiie Zacharia",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kacdvbrtbmwy0a95955r5a"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g100",
+      "title": "Welfarism is dead",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5keny1aq3w3e0wkmsk6hxe8"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g101",
+      "title": "Review: \u2018Doosra\u2019 tries to force-fit two incompatible ideas",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kh8wh5tjgcwqnftstc9xnp"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g102",
+      "title": "Shisha-Bars und Kneipen im Visier - Gro\u00dfe Razzia in Karlsruhe",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5knhqt4eaxpefb9262d4vm9"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g103",
+      "title": "\ud83c\udde7\ud83c\uddf7 Brazil: Why should you care about the country's elections?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ksv4px75frrz3k7rjc6757",
+        "art_01m5myrb3305gtx7hjgzqrspnw",
+        "art_01m5ngrk9dqnm4rmeh9vfqnek0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g104",
+      "title": "Brazil court orders government to provide transportation for Indigenous voters in Sunday\u2019s runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kstek3sz0db9nnp01xwraa"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g105",
+      "title": "A polarized Brazil heads to presidential vote Sunday with economy, corruption top of mind",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kx8qxh9jy25vtmmbmsh6wh"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g106",
+      "title": "Billionaire Brazilian brothers emerge as Bolsonaro\u2019s foes in presidential runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5kzv8sdm2wkcpph5jgvb8b3"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g107",
+      "title": "Brazil may turn right-wing again \u2014 this is why South Africans should care",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5ks0168y5b26smssmqcqv74"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g108",
+      "title": "Meet Trump\u2019s favorite House Republican candidate",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m0qe7xxr5d3wpbyfkmsqzy"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g109",
+      "title": "As Brazil Prepares for Election Runoff, a Town Offers Clues to Bolsonaro\u2019s Rise",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m0pgad1yavge7w39p5fvvy"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g110",
+      "title": "T\u00f6tungsdelikt: Frau mit 19 Stichen get\u00f6tet: Verd\u00e4chtiger Ex-Freund gefasst",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m1hvgf2pq1zzvkr8btrfbr"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g111",
+      "title": "Foreign diplomats in Brazil discuss quick recognition of runoff winner",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m44e7bw6qpzz9dhdwv76hx"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g112",
+      "title": "Racismo e intoler\u00e2ncia religiosa atravessam debate eleitoral no Brasil",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m7k8ffv90cjvywfnaqqzat"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g113",
+      "title": "Bernie Sanders and Democratic lawmakers demand answers from Meta over alleged favoritism toward Bolsonaro in Brazil election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m7k0mrmkavgcxcksskke8s"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g114",
+      "title": "Awaiting Machado's return, Venezuela opposition looks ahead to elections",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m7j9hfxn10pzpf2957s5zt"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g115",
+      "title": "Two Indigenous Brazilians denied their language interpreter at election voting booth",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5m8ekxmmmw33fyfrb336yy0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g116",
+      "title": "Confira a agenda dos presidenci\u00e1veis nesta sexta-feira (23)",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mb0yamedfq6xsyhpgxyc6z"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g117",
+      "title": "Stichwahl in Brasilien: Kommt jetzt der n\u00e4chste Bolsonaro an die Macht?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mcpvexfj7st8sh9mcpd6rx",
+        "art_01m5qw9atrecvxxs8qf10fr6a6",
+        "art_01m5rqrpmdp50dpjpw50a7sc88",
+        "art_01m5rxsek7tyz3as1wt0ck37f5"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g118",
+      "title": "Fl\u00e1vio prop\u00f5e retomada de privatiza\u00e7\u00f5es; Lula quer fortalecer empresas",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5meews6hf8tej06ahjzn4v8"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g119",
+      "title": "Dortmund to reward football supporters who don\u2019t use phone during matches",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5meekde1dkpahh0xcyme094"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g120",
+      "title": "TSE d\u00e1 24h para Meta e X explicarem distribui\u00e7\u00e3o de material pol\u00edtico",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mh16x6m7x2vesdxsc3n597"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g121",
+      "title": "Brazil's Lula opens state toolbox to woo voters in runoff against Bolsonaro. Here's what is on offer",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mjq3ybwtz1df4mmxx10rvx"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g122",
+      "title": "Nobody Wants This creator says she disagrees with Adam Brody\u2019s \u2018free Palestine\u2019 comments",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mkkfcwqws4exwwdc3xgkjs"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g123",
+      "title": "Latin America's right-wing swing looms large over nature summit",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mw5b9br38bw33msrs8gv6s",
+        "art_01m5s5g9bdga0qa5vvhrqdb1fv"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g124",
+      "title": "Drei Reformen f\u00fcr drei Generationen - Mehr Geld im Alter: Was f\u00fcr Sie drin ist",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5myqjbst3q5var9raca5x05"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g125",
+      "title": "Ohio could decide control of the Senate. Its rural voters might decide the winner",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5n19nv7ezybq1z9ykck3m06"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g126",
+      "title": "Midterms: Namen bei Wahl zu \u00e4hnlich? Trump befiehlt Klage gegen Alaska",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5n256bwn23qzr2q1sz9ahab"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g127",
+      "title": "Environmental officials fear new wave of harassment if Flavio Bolsonaro wins in Brazil",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5n31n6xe5ecggv4edq24agc"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g128",
+      "title": "Mendon\u00e7a reitera que Lula e Fl\u00e1vio podem abrir sigilos por ato pr\u00f3prio",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5n5m93n76nrf4jzmmwpd15x"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g129",
+      "title": "Brazil\u2019s rapid election count puts spotlight on voting security ahead of US midterms",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5n5ks9bwax2bzemxeqxm1ns"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g130",
+      "title": "Military Police officer under probe over alleged abuse",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5mte1hr2xfhcb7cg2pgcssm"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g131",
+      "title": "Milei in dead heat with Peronism, one year out from election, polls show",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p1ykv5bf0p7f3hadensecg"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g132",
+      "title": "Lula, Bolsonaro hold calmer debate before Brazil election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p12tm0tg0srdabv7vpapwn"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g133",
+      "title": "Bolsonaro and Lula clash on living costs, corruption in final Brazil election debate",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p4ggb35xrmnhk3vkw1mkjh",
+        "art_01m5p5c0tn7f3p48hc8a3cn6eq",
+        "art_01m5p7yrafvgygww80vap7y9bw",
+        "art_01m5p8t4fv3ss39cem37zxvhvb",
+        "art_01m5pnp7sp4bgkagm2mxxf15bk",
+        "art_01m5qcvf76j92z4nsjphx48t8c",
+        "art_01m5shgwhmkmv2639m1mfhbbhe"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g134",
+      "title": "Sagawa Express says 53 million sets of personal info possibly compromised",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p5ccjbw0w745xr0h7mx68h"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g135",
+      "title": "How Brazil's changing working class is reshaping the presidential race",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p5byha3azm8ef6x8p3k663"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g136",
+      "title": "Friedrich Merz: \u00bbDer Friedrich hat uns ein bisschen aufgemischt\u00ab",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5p8s1gcw9sqrezx67jh1mqj"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g137",
+      "title": "Iran says US military not allowed to enter Gulf \u2018under any circumstances\u2019",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pag2arxsmksjhn5ft2hyz4"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g138",
+      "title": "Stengt for togtrafikk mellom Lysaker og Nationaltheatret",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pfmt4typkk5tvhw68kn1cd"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g139",
+      "title": "Hochtaunuskreis: Mann bedroht Rettungskr\u00e4fte mit Pfefferpistole",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pgg7dd1e9c22w9hxtws4r3"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g140",
+      "title": "The heir to Jair: Flavio Bolsonaro battles to reclaim father\u2019s rule of Brazil in razor-tight election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pggk4ec1wzbk1zs74wtxm5"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g141",
+      "title": "In Brazil\u2019s elections, big techs\u2019 transparency and cooperation policies translate as governance washing, according to this expert",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pj7q4hxvjcp6k3qv74727n"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g142",
+      "title": "Why Brazil\u2019s Election Could Come Down to Crime",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pk2scegp0aj5ftz84pzs1j"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g143",
+      "title": "Could Lula Be on the Brink of Defeat in Brazil\u2019s Election?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pk2sbn58yv9ghrs4atzg4w",
+        "art_01m5q9dwbc049m0xsj7zbcxgzy"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g144",
+      "title": "The Other Bolsonaro Who Could Become Brazil\u2019s Next President",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pk2s9j57pzq227bpgpgz24"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g145",
+      "title": "Kriminalit\u00e4t: DB-Mitarbeiter im Einsatz angegriffen",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pnnc3y8tsdhw115ntzc20r"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g146",
+      "title": "Lebanon's Aoun vows end to neglect of Tripoli in first presidential visit to city in 15 years",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pmsva5sah3xcyjq7r3gxjb"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g147",
+      "title": "With his first smartphone, Lula seeks to catch up to Brazil's online generation",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pqc6dm8n7ddv1z1e0m7bey"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g148",
+      "title": "Footage shows smoke plumes after deadly strike on Russian factory",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5pvpjh5dz2ymfer8sf3jkfd"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g149",
+      "title": "Trump's war on drug cartels could gain powerful new ally after pivotal election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q2j31xcd75tb8arfr0wr5a"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g150",
+      "title": "\u201eIch bleibe wachsam und k\u00e4mpfe aktiv\u201c - Carla Bruni f\u00fcrchtet, Alkoholsucht zu vererben",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q1pmdn1gkyspj2f32d5r9y"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g151",
+      "title": "Confira a agenda dos presidenci\u00e1veis neste s\u00e1bado (24)",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q54y3p8qnp2pdy9cspc3z1",
+        "art_01m5r5srce5fyd6k0sr6d82y2v"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g152",
+      "title": "Do abstaining voters hold the key to Brazil\u2019s 2026 presidential election?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q54v73b6ys18q869wdxqj6"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g153",
+      "title": "Inmet: Domingo de elei\u00e7\u00e3o ser\u00e1 chuvoso em boa parte do pa\u00eds; confira",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q6w673k642jj26056335nf"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g154",
+      "title": "Gesundheitsreform: Demonstration gegen Einsparungen im Gesundheitswesen",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5q7pc78kr1qq84jdz0cxz2e"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g155",
+      "title": "As Brazil votes again, Lula remains a crucial bulwark against Trump in the region",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qcvwwvdamvt6tkpt8ngrg8",
+        "art_01m5ra148f1satkre30myseexy"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g156",
+      "title": "Libya's Dbeibah says ready to address Egypt's maritime concerns",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qdpt4trhzg5jeyy2myfbx9"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g157",
+      "title": "Rallies, opinion polls and a final debate - Brazil gets ready for Sunday's knife-edge presidential election",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qh56262qnhmx80xt7rj9sn",
+        "art_01m5qzqy168jh1y9z5ve1eawd3",
+        "art_01m5r8a6hhftgz0m5xqm91bkn0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g158",
+      "title": "More than one million Lula supporters rally on eve of Brazilian election runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qjw4s3whn6cc18a4378veg",
+        "art_01m5qzqxzsegaxafhv39x3tshf"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g159",
+      "title": "Amea\u00e7as, persegui\u00e7\u00e3o e mortes: ind\u00edgenas denunciam aumento da viol\u00eancia pol\u00edtica",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qjvwx6pwy1gjme5a4m5a59"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g160",
+      "title": "Inside the Trump-administration campaign to return Brazil\u2019s Bolsonaro clan to power",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qyvgt7w0mr7k8c0h2cj2mb"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g161",
+      "title": "Who are the candidates in Brazil's presidential election?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5qzq0q040qrmwgyw5v2hwz5"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g162",
+      "title": "Stichwahl in Brasilien: Lula und Bolsonaro treten vor Stichwahl bei Kundgebungen auf",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5r350e5kv6v5s6213axsr96"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g163",
+      "title": "Brazil's Lula, Bolsonaro close arguments to voters ahead of nail-biting election runoff",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5r6k4e3j0xe2a3qrh72h5ks"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g164",
+      "title": "Voters in Brazil head to polls as Lula goes up against Bolsonaro's son",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5rw1zm1zt8w0kxtj3k1c5st"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g165",
+      "title": "Em Bras\u00edlia, atos por Lula e Fl\u00e1vio ficam a 2 km de dist\u00e2ncia",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5r8azwavq53by9a8j8zchwb"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g166",
+      "title": "Lateinamerika: Wahllokale ge\u00f6ffnet: Brasilien w\u00e4hlt Pr\u00e4sidenten",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5r89tjfya9542w43n75a6xg"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g167",
+      "title": "Brazilians head to the polls with left-winger and son of Trump ally neck and neck",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5rebamr7cz9jfxk41c00pdf",
+        "art_01m5rymkeptf20866harkmcvn9",
+        "art_01m5s16xdq1hangtsg5s9dn44y",
+        "art_01m5s7685j125j5z5tg4ev6jn0",
+        "art_01m5smyrjesewz8tjbakdy1tb2"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g168",
+      "title": "Wahl in Brasilien: \u00bbDurch mich flie\u00dft Bolsonaro-Blut\u00ab",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5rn66kn9pxa8x8pq9x3e6fs"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g169",
+      "title": "Kim Jong-un's surprise trip to China",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5rpx3cpf69y53gsnvdhn02t"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g170",
+      "title": "Brazil faces a tense Lula vs Bolsonaro runoff with US influence over Latin America at stake",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5rtb32kwmed7830rrta36ge",
+        "art_01m5rv75r0mmje3dssm9pc3z3r",
+        "art_01m5s221thfq6z0k4xdbb6kh7e",
+        "art_01m5s5g9af84cntzyam42ft6q1",
+        "art_01m5scbps8cnxct54bf8pcvery",
+        "art_01m5sexs2sgy3kb1rq5s58ez90",
+        "art_01m5sk793mw2rz382amde0ayaa",
+        "art_01m5sjc7fgkx6wtcdzhyrsh1dk",
+        "art_01m5sjc7era4t7710aecgyk11h",
+        "art_01m5sjbt3pnzy6ga267yjzhxrw",
+        "art_01m5spnmp0bkek7d1kgsyq4pwr",
+        "art_01m5spn59tzngx5p2vn4r3dehv",
+        "art_01m5ss7q2zwpksb7c7bypa8asj",
+        "art_01m5st3072ks2yh4d7pjv4wjjt"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g171",
+      "title": "Haftbefehl erlassen: Angriff mit Messer: 28-J\u00e4hriger lebensgef\u00e4hrlich verletzt",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5s76dvrd9vjxt50tbgmkt41"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g172",
+      "title": "Der geopolitische Erdrutsch, der auf einen Bolsonaro-Sieg folgen w\u00fcrde",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5samhatsesvzp50vmdtf920",
+        "art_01m5sqgsm5k4pnv76zb1qmbbgk"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g173",
+      "title": "Ukraine-Russia war latest: Drone strikes kill three in Belgorod and injure five at Russian industrial plant",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5se2mzv4g65y7gb4hecv2s3"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g174",
+      "title": "Innenminister: Hagels Ansage zu Halloween: \u00abBei Gewalt greifen wir durch\u00bb",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5sfs7v34ft3nxh3s1gpat54"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g175",
+      "title": "Ao votar no Rio de Janeiro, Fl\u00e1vio diz que representa a mudan\u00e7a",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5sjcq62gt9eqq671h9aeaf8"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g176",
+      "title": "Motorists have shelled out extra \u00a310billion at the pumps because of Iran war, research shows, piling pressure on Chancellor John Healey to ditch Labour's planned Fuel Duty hike in the Budget",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5sk7931fyvd13pky4dkfced"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g177",
+      "title": "What are Brazilian voters' main concerns?",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5sk6z1hw2s8b0wawt8xd3kz"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g178",
+      "title": "Elei\u00e7\u00f5es: ind\u00edgenas e quilombolas t\u00eam transporte garantido",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5spnyyxjt9r4rcg3czva7x0"
+      ],
+      "confidence": "unreviewed"
+    },
+    {
+      "id": "g179",
+      "title": "Lula vota e enaltece mobiliza\u00e7\u00e3o popular: \"nunca vi nada igual\"",
+      "reason": "Production matcher grouping; review and correct before use for training.",
+      "articleIds": [
+        "art_01m5srd126s4v2egrzfr8hmzx2"
+      ],
+      "confidence": "unreviewed"
+    }
+  ]
+}
