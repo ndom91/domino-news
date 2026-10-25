@@ -1,22 +1,20 @@
-import { type Db, schema, type TxContext, withTransaction } from '@dn/db'
+import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import { InferenceUnavailableError, InvalidModelOutputError } from '@dn/inference'
 import {
   type AnalysisJob,
-  analysisJob,
   attachArticleToStory,
   createStoryWithArticle,
-  getInferenceSettings,
   nearestByVector,
-  QUEUES,
   refreshFingerprint,
 } from '@dn/server'
 import { and, eq, inArray, isNull } from 'drizzle-orm'
-import { sendInTx, type WorkerContext } from './context.ts'
+import type { WorkerContext } from './context.ts'
 import { loadArticles, loadStoryInput } from './inputs.ts'
 import { admitMatchFollower } from './match-admission.ts'
 import { decideMatch, type MatchPolicy, rankStories } from './match-core.ts'
 import { withAnalysisRun } from './provenance.ts'
+import { debounceStorySummary } from './summary-debounce.ts'
 
 // Cosine-similarity bands. Above `autoSame` we attach without asking the model; between
 // `llmMin` and `autoSame` the model decides; below `llmMin` the article starts a new Story.
@@ -122,7 +120,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
         .set({ pipelineState: 'matched' })
         .where(eq(schema.article.id, job.targetId))
       await refreshFingerprint(tx.db, existing.storyId)
-      await enqueueSummary(ctx, tx, existing.storyId, job.priorityClass)
+      await debounceStorySummary(ctx, tx, existing.storyId, job.priorityClass)
     })
     return { status: 'already_matched', storyId: existing.storyId }
   }
@@ -300,7 +298,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
       .update(schema.article)
       .set({ pipelineState: 'matched' })
       .where(eq(schema.article.id, job.targetId))
-    await enqueueSummary(ctx, tx, id, job.priorityClass)
+    await debounceStorySummary(ctx, tx, id, job.priorityClass)
     return id
   })
   return {
@@ -332,28 +330,5 @@ async function recordMatchInterpretation(
     interpretationId: id,
     observationId,
     relationship: 'derived_from',
-  })
-}
-
-async function enqueueSummary(
-  ctx: WorkerContext,
-  tx: TxContext,
-  storyId: string,
-  priorityClass: AnalysisJob['priorityClass'],
-) {
-  const [story] = await tx.db
-    .select({ fingerprint: schema.story.inputFingerprint, publishedAt: schema.story.publishedAt })
-    .from(schema.story)
-    .where(eq(schema.story.id, storyId))
-  if (!story?.fingerprint) return
-  const job = analysisJob(storyId, story.fingerprint, priorityClass)
-  const { publishedSummaryDebounceSeconds } = await getInferenceSettings({
-    config: ctx.config,
-    db: tx.db,
-  })
-  await sendInTx(ctx, tx, QUEUES.summarizeStory, job.data, {
-    ...job.options,
-    // Published Stories batch a reporting burst into one update assessment.
-    startAfter: story.publishedAt ? publishedSummaryDebounceSeconds : 5,
   })
 }

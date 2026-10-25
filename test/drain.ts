@@ -1,3 +1,4 @@
+import { schema } from '@dn/db'
 import {
   createQueues,
   embedArticles,
@@ -5,6 +6,7 @@ import {
   extractStoryClaims,
   matchArticle,
   relateStory,
+  releaseSummaryDebounce,
   summarizeStory,
   type WorkerContext,
 } from '@dn/jobs'
@@ -19,6 +21,11 @@ export async function drainPipeline(ctx: WorkerContext, maxRounds = 50) {
     await processOutboxBatch(ctx.db, ctx.ts, 500)
     const perJob: Record<string, (job: AnalysisJob) => Promise<unknown>> = {
       [QUEUES.matchArticle]: (job) => matchArticle(ctx, job),
+      [QUEUES.releaseSummaryDebounce]: async (job) => {
+        // Tests drain delayed work immediately, so make its durable quiet period due too.
+        await ctx.db.update(schema.summaryDebounce).set({ dueAt: new Date(0) })
+        return releaseSummaryDebounce(ctx, job)
+      },
       [QUEUES.summarizeStory]: (job) => summarizeStory(ctx, job),
       [QUEUES.relateStory]: (job) => relateStory(ctx, job),
       [QUEUES.generateContext]: (job) => explainStoryContext(ctx, job),

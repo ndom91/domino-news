@@ -964,6 +964,73 @@ describe('concurrent matching', () => {
   })
 })
 
+describe('summary debounce', () => {
+  it('keeps one pending wake-up and releases only the latest Story fingerprint', async () => {
+    const { withTransaction } = await import('@dn/db')
+    const { newId, ID_PREFIX } = await import('@dn/domain')
+    const { debounceStorySummary, releaseSummaryDebounce } = await import('@dn/jobs')
+    const storyId = newId(ID_PREFIX.story)
+    await h.ctx.db.insert(schema.story).values({
+      id: storyId,
+      slug: `debounce-${storyId}`,
+      title: 'Debounce test Story',
+      firstObservedAt: new Date(),
+      lastUpdatedAt: new Date(),
+      inputFingerprint: 'fingerprint-1',
+    })
+    const schedule = (priorityClass: 'backfill' | 'fresh' | 'interactive') =>
+      withTransaction(h.ctx.pool, (tx) => debounceStorySummary(h.ctx, tx, storyId, priorityClass))
+    expect(await schedule('backfill')).toMatchObject({ status: 'scheduled' })
+    await h.ctx.db
+      .update(schema.story)
+      .set({ inputFingerprint: 'fingerprint-2' })
+      .where(eq(schema.story.id, storyId))
+    expect(await schedule('fresh')).toMatchObject({ status: 'extended' })
+    expect(
+      await h.ctx.db
+        .select({ priorityClass: schema.summaryDebounce.priorityClass })
+        .from(schema.summaryDebounce)
+        .where(eq(schema.summaryDebounce.storyId, storyId)),
+    ).toEqual([{ priorityClass: 'fresh' }])
+    const { rows: wakes } = await h.ctx.pool.query<{ n: number }>(
+      `select count(*)::int as n from pgboss.job where name = 'release_summary_debounce' and data->>'targetId' = $1`,
+      [storyId],
+    )
+    expect(wakes[0]?.n).toBe(1)
+    await h.ctx.db
+      .update(schema.summaryDebounce)
+      .set({ dueAt: new Date(Date.now() - 1000) })
+      .where(eq(schema.summaryDebounce.storyId, storyId))
+    expect(
+      await releaseSummaryDebounce(h.ctx, {
+        targetId: storyId,
+        inputFingerprint: 'fingerprint-1',
+        pipelineVersion: 'p2',
+        priorityClass: 'fresh',
+      }),
+    ).toEqual({ status: 'released', inputFingerprint: 'fingerprint-2' })
+    const { rows: summaries } = await h.ctx.pool.query<{ fingerprint: string }>(
+      `select data->>'inputFingerprint' as fingerprint from pgboss.job where name = 'build_story_summary' and data->>'targetId' = $1 order by created_on desc`,
+      [storyId],
+    )
+    expect(summaries[0]?.fingerprint).toBe('fingerprint-2')
+    await h.ctx.db
+      .update(schema.story)
+      .set({ inputFingerprint: 'fingerprint-3' })
+      .where(eq(schema.story.id, storyId))
+    expect(await schedule('fresh')).toMatchObject({ status: 'scheduled' })
+    expect(await schedule('interactive')).toEqual({ status: 'immediate' })
+    expect(
+      await h.ctx.db
+        .select()
+        .from(schema.summaryDebounce)
+        .where(eq(schema.summaryDebounce.storyId, storyId)),
+    ).toHaveLength(0)
+    await h.ctx.pool.query(`delete from pgboss.job where data->>'targetId' = $1`, [storyId])
+    await h.ctx.db.delete(schema.story).where(eq(schema.story.id, storyId))
+  })
+})
+
 describe('story graph validation', () => {
   it('detects a cycle from the reachable edge subset', async () => {
     const { db } = h.ctx

@@ -21,6 +21,7 @@ import { deliverForYouPushes } from './push-delivery.ts'
 import { relateStory } from './relate.ts'
 import { feedIds } from './seed.ts'
 import { summarizeStory } from './summarize.ts'
+import { releaseSummaryDebounce } from './summary-debounce.ts'
 
 // `exclusive`: at most one created/retry/active job per singletonKey (task+target+fingerprint+version).
 // 5 retries with exponential backoff (about 1, 2, 4, 8, 16 minutes) cover a short inference
@@ -41,7 +42,7 @@ function queueOptions(name: string): Omit<Queue, 'name'> {
   // A rebuild re-creates collections; retrying a still-running one would orphan them.
   if (name === QUEUES.rebuildSearch)
     return { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
-  if (name === QUEUES.resumeMatchArticle)
+  if (name === QUEUES.resumeMatchArticle || name === QUEUES.releaseSummaryDebounce)
     return { ...QUEUE_OPTIONS, retryLimit: 5, retryDelay: 3, retryBackoff: true, retryDelayMax: 24 }
   return QUEUE_OPTIONS
 }
@@ -184,6 +185,11 @@ export async function startWorkers(ctx: WorkerContext) {
     QUEUES.summarizeStory,
     genSlots,
     each((job) => summarizeStory(ctx, job)),
+  )
+  await boss.work<AnalysisJob>(
+    QUEUES.releaseSummaryDebounce,
+    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: 1 },
+    each((job) => releaseSummaryDebounce(ctx, job)),
   )
   await workWithReservedSlots(
     boss,

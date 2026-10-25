@@ -38,7 +38,7 @@
 ```text
 poll_feed ──► article + revision + observation ──(same tx)──► embed_article
 embed_article ──► article_embedding + outbox(article) ──► match_article (+2s)
-match_article ──► attach to Story | new Story ──► build_story_summary (+5s)
+match_article ──► attach to Story | new Story ──► release_summary_debounce ──► build_story_summary
 build_story_summary ──► summary version + publish + outbox(story) ──► relate_story
 relate_story ──► story embedding, typed edges, narrative membership
 indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
@@ -51,6 +51,7 @@ indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
 - **Archive items:** in live mode, feed items published more than `MAX_ARTICLE_AGE_DAYS` (default 3) ago are skipped at ingest. Some feeds (CDC) return years of history. Fixture feeds are frozen captures, so the cutoff doesn't apply to them.
 - **Backfill:** articles older than `FRESH_WINDOW_HOURS` are marked `pending_backfill`. A once-a-minute producer admits `BACKFILL_ADMIT_PER_MINUTE` of them (newest first) while total queued embeddings stay under 50. Pausing stops admission (ops page or `pnpm cli backfill:pause`).
 - **Matching** runs in parallel (reserved fresh slots like embed/summarise). Only the final write is serialised: it takes a Postgres advisory lock, re-checks the candidate Stories, and retries the job if a neighbour joined a Story it never evaluated, so two near-identical articles cannot both create a Story. Very-close articles first seen within two minutes use a durable 45-second admission lease: the oldest runs the normal matcher, followers wait without inference, then run the same matcher once the leader has a Story. Expiry and a separate resume queue recover from a failed leader; followers are never attached automatically.
+- **Summary debounce:** each Story has at most one durable pending summary fingerprint. Another attachment replaces it and restarts the quiet period (5 seconds before first publication, `PUBLISHED_SUMMARY_DEBOUNCE_SECONDS` after publication). The wake-up releases only the latest fingerprint; early or stale wake-ups reschedule or exit. Interactive work bypasses and clears the debounce.
 - **Relating** runs with concurrency 1, so graph edits do not race.
 - **Retries:** 20 attempts, 10s initial, exponential, capped at 10 minutes: this rides out an inference outage of several hours. The local adapter also retries 502/503/429 twice in-call. Failed jobs stay in pg-boss and appear on the Pipeline page.
 - **Transient bodies:** fetched only for publishers with `transient_body_allowed`, held in memory for one inference call, never logged or queued. Outbound links matching primary-document patterns become `source_reference` rows. Of 65 seeded publishers, **10 are `transient_body_allowed`** (Global Voices, Mongabay, Agência Pública and seven official sources under CC BY, OGL or public domain). The rest are `metadata_only` because their licences are non-commercial, unverified or block AI agents. Pages whose author metadata names AP, Reuters or AFP never yield a body. Federal Register and EU Commission pages can't be fetched as plain HTML yet, so they fall back to metadata. Reviews were best-effort, not legal advice (see `policyNote` and `license` in `fixtures/publishers.json`).

@@ -419,6 +419,17 @@ export const story = pgTable(
   ],
 )
 
+/** Latest desired summary input while a Story waits for a quiet reporting period. */
+export const summaryDebounce = pgTable('summary_debounce', {
+  storyId: text('story_id')
+    .primaryKey()
+    .references(() => story.id),
+  inputFingerprint: text('input_fingerprint').notNull(),
+  priorityClass: text('priority_class').notNull(),
+  dueAt: ts('due_at').notNull(),
+  updatedAt: ts('updated_at').notNull().defaultNow(),
+})
+
 export const storyArticle = pgTable(
   'story_article',
   {
