@@ -106,6 +106,8 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
   )
 }
 
+const STORY_UPDATES_SHOWN = 5
+
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (update.summaryDiff) {
     return (
@@ -355,8 +357,10 @@ function StoryPage() {
     if (rememberReads) api.recordRead(story.id).catch(() => {})
   }, [rememberReads, story.id])
   const [editing, setEditing] = useState(false)
+  const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
   const editButtonRef = useRef<HTMLButtonElement>(null)
   const publisherCount = new Set(story.sources.map((s) => s.publisher.id)).size
+  const showAllUpdates = expandedUpdatesFor === story.id
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
     ...queries.narrative(narrativeRef?.slug ?? ''),
@@ -413,23 +417,44 @@ function StoryPage() {
                 title="What changed"
                 meta={plural(updates.items.length, 'update')}
               />
-              <ol className="flex flex-col divide-y divide-border border-t border-border">
-                {updates.items.map((update) => (
-                  <li key={update.id} className="py-4 first:pt-3">
-                    <div className="max-w-reading">
-                      {updateTitle(update) ? (
-                        <p className="text-md font-semibold leading-snug">{updateTitle(update)}</p>
-                      ) : null}
-                      <Timestamp
-                        at={update.createdAt}
-                        format="datetime"
-                        className="mt-1 block type-meta"
-                      />
-                      <UpdateDetail update={update} />
-                    </div>
-                  </li>
-                ))}
+              <ol
+                id="story-updates-list"
+                className="flex flex-col divide-y divide-border border-t border-border"
+              >
+                {(showAllUpdates ? updates.items : updates.items.slice(0, STORY_UPDATES_SHOWN)).map(
+                  (update) => (
+                    <li key={update.id} className="py-4 first:pt-3">
+                      <div className="max-w-reading">
+                        {updateTitle(update) ? (
+                          <p className="text-md font-semibold leading-snug">
+                            {updateTitle(update)}
+                          </p>
+                        ) : null}
+                        <Timestamp
+                          at={update.createdAt}
+                          format="datetime"
+                          className="mt-1 block type-meta"
+                        />
+                        <UpdateDetail update={update} />
+                      </div>
+                    </li>
+                  ),
+                )}
               </ol>
+              {updates.items.length > STORY_UPDATES_SHOWN ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-4"
+                  aria-expanded={showAllUpdates}
+                  aria-controls="story-updates-list"
+                  onClick={() =>
+                    setExpandedUpdatesFor((current) => (current === story.id ? null : story.id))
+                  }
+                >
+                  {showAllUpdates ? 'Show fewer changes' : 'View all changes'}
+                </Button>
+              ) : null}
             </section>
           ) : null}
 
