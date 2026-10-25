@@ -11,6 +11,11 @@ sign-in configuration are chosen.
 2. Start the web/API server with `NODE_ENV=development pnpm dev --host`.
 3. Start Expo Go with `pnpm --filter @dn/mobile start`. Its QR code starts with `exp://`.
 
+Start `pnpm dev:worker` as well when testing a low-coverage Story that does not have context or
+claims yet. Opening its detail screen admits that optional enrichment at interactive priority; the
+shared Story query polls briefly and updates the screen when the exact summary version is ready.
+Previously generated Stories can still be read with the worker stopped.
+
 Expo Go supports username/password sign-in. Google sign-in needs a custom development build because it
 uses native Google Play services. A development build sets `APP_VARIANT=development` to allow a LAN
 `http://` API; production builds require HTTPS and intentionally do not enable cleartext transport.
