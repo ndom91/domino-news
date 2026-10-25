@@ -400,6 +400,8 @@ export const story = pgTable(
     version: integer('version').notNull().default(1),
     mergedIntoStoryId: text('merged_into_story_id'),
     embedding: vector('embedding', { dimensions: EMBEDDING_DIMENSIONS }),
+    embeddingModelId: text('embedding_model_id'),
+    embeddingSummaryId: text('embedding_summary_id'),
     // Macro-regions the Story concerns (`REGIONS` in @dn/schemas), set by generated summaries.
     regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
     // Desk (`DESKS` in @dn/schemas), set by generated summaries; null until then.

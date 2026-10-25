@@ -7,8 +7,8 @@ import {
   TEMPORAL_RELATIONS,
   validateNewEdge,
 } from '@dn/domain'
-import type { StoryInput } from '@dn/inference'
-import type { StoryRelation } from '@dn/schemas'
+import { PROMPT_VERSIONS, type StoryInput } from '@dn/inference'
+import { relationshipCandidateSchema, type StoryRelation } from '@dn/schemas'
 import {
   type AnalysisJob,
   nearestByVector,
@@ -36,14 +36,29 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
   const input = await loadStoryInput(ctx.db, story.id)
   if (!input) return { status: 'stale' }
 
-  const [vector] = await ctx.gpu.embeddings.run(job.priorityClass, () =>
-    ctx.inference.embeddings.embedDocuments([{ title: input.title, text: input.summary ?? '' }]),
-  )
-  if (!vector) throw new Error('empty story embedding')
-  await withTransaction(ctx.pool, async (tx) => {
-    await tx.db.update(schema.story).set({ embedding: vector }).where(eq(schema.story.id, story.id))
-    await touchStory(tx.db, story.id, 'story.embedded', null)
-  })
+  let vector = story.embedding
+  if (
+    !vector ||
+    story.embeddingModelId !== ctx.inference.embeddings.modelId ||
+    story.embeddingSummaryId !== story.currentSummaryId
+  ) {
+    const [generated] = await ctx.gpu.embeddings.run(job.priorityClass, () =>
+      ctx.inference.embeddings.embedDocuments([{ title: input.title, text: input.summary ?? '' }]),
+    )
+    if (!generated) throw new Error('empty story embedding')
+    vector = generated
+    await withTransaction(ctx.pool, async (tx) => {
+      await tx.db
+        .update(schema.story)
+        .set({
+          embedding: vector,
+          embeddingModelId: ctx.inference.embeddings.modelId,
+          embeddingSummaryId: story.currentSummaryId,
+        })
+        .where(eq(schema.story.id, story.id))
+      await touchStory(tx.db, story.id, 'story.embedded', null)
+    })
+  }
 
   const { relateMin } = THRESHOLDS[ctx.inference.mode]
   const candidates = (
@@ -96,27 +111,21 @@ async function createEdgeIfRelated(
   const selfIsNewer = selfFirstObservedAt >= other.firstObservedAt
   const newer = selfIsNewer ? self : otherInput
   const older = selfIsNewer ? otherInput : self
-  const { runId, result } = await runStoryGeneration(
+  const newerSummaryId = selfIsNewer ? job.inputFingerprint : other.currentSummaryId
+  const olderSummaryId = selfIsNewer ? other.currentSummaryId : job.inputFingerprint
+  if (!newerSummaryId || !olderSummaryId) return false
+  const assessment = await assessStoryRelationship(
     ctx,
     job,
-    {
-      operation: 'story_relationship',
-      storyId: newer.storyId,
-      inputFingerprint: `${newer.storyId}|${older.storyId}|${job.inputFingerprint}`,
-    },
-    () => ctx.inference.generation.classifyRelationship({ newer, older }),
+    newer,
+    older,
+    newerSummaryId,
+    olderSummaryId,
+    similarity,
   )
-  await ctx.db.insert(schema.interpretation).values({
-    id: newId(ID_PREFIX.interpretation),
-    type: 'story_relationship',
-    subjectType: 'story',
-    subjectId: newer.storyId,
-    output: { ...result.output, olderStoryId: older.storyId, similarity },
-    analysisRunId: runId,
-  })
-  if (result.output.decision !== 'related') return false
+  if (assessment.output.decision !== 'related') return false
   // "Related" without a specific type still deserves a (symmetric) link.
-  const relation = result.output.relation ?? 'related_to'
+  const relation = assessment.output.relation ?? 'related_to'
 
   const edge = { fromStoryId: newer.storyId, toStoryId: older.storyId, relation }
   const verdict = validateNewEdge(
@@ -137,7 +146,7 @@ async function createEdgeIfRelated(
       .values({
         id: newId(ID_PREFIX.storyRelationship),
         ...edge,
-        analysisRunId: runId,
+        analysisRunId: assessment.runId,
         confidence: similarity,
       })
       .onConflictDoNothing()
@@ -149,13 +158,68 @@ async function createEdgeIfRelated(
         description: 'A related story corrects or clarifies this reporting.',
         origin: 'system',
         relatedStoryId: edge.toStoryId,
-        analysisRunId: runId,
+        analysisRunId: assessment.runId,
       })
     }
     await touchStory(tx.db, edge.fromStoryId, 'story.related', null)
     await touchStory(tx.db, edge.toStoryId, 'story.related', null)
   })
   return true
+}
+
+/** Reuse only an exact pair/model/prompt decision; validation still happens at edge insertion. */
+async function assessStoryRelationship(
+  ctx: WorkerContext,
+  job: AnalysisJob,
+  newer: StoryInput,
+  older: StoryInput,
+  newerSummaryId: string,
+  olderSummaryId: string,
+  similarity: number,
+) {
+  const inputFingerprint = `${newer.storyId}:${newerSummaryId}|${older.storyId}:${olderSummaryId}`
+  const [cached] = await ctx.db
+    .select({ runId: schema.analysisRun.id, output: schema.interpretation.output })
+    .from(schema.analysisRun)
+    .innerJoin(
+      schema.interpretation,
+      eq(schema.interpretation.analysisRunId, schema.analysisRun.id),
+    )
+    .where(
+      and(
+        eq(schema.analysisRun.operation, 'story_relationship'),
+        eq(schema.analysisRun.status, 'succeeded'),
+        eq(schema.analysisRun.targetType, 'story'),
+        eq(schema.analysisRun.targetId, newer.storyId),
+        eq(schema.analysisRun.modelId, ctx.inference.generation.modelId),
+        eq(schema.analysisRun.promptVersion, PROMPT_VERSIONS.classifyRelationship),
+        eq(schema.analysisRun.inputFingerprint, inputFingerprint),
+        eq(schema.interpretation.type, 'story_relationship'),
+      ),
+    )
+    .limit(1)
+  const parsed = cached ? relationshipCandidateSchema.safeParse(cached.output) : null
+  if (cached && parsed?.success) return { runId: cached.runId, output: parsed.data }
+
+  const { runId, result } = await runStoryGeneration(
+    ctx,
+    job,
+    {
+      operation: 'story_relationship',
+      storyId: newer.storyId,
+      inputFingerprint,
+    },
+    () => ctx.inference.generation.classifyRelationship({ newer, older }),
+  )
+  await ctx.db.insert(schema.interpretation).values({
+    id: newId(ID_PREFIX.interpretation),
+    type: 'story_relationship',
+    subjectType: 'story',
+    subjectId: newer.storyId,
+    output: { ...result.output, olderStoryId: older.storyId, similarity },
+    analysisRunId: runId,
+  })
+  return { runId, output: result.output }
 }
 
 /**

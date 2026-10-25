@@ -13,7 +13,7 @@ import {
 import { and, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { drainPipeline } from './drain.ts'
-import { createTestContext, truncateAll } from './harness.ts'
+import { createFakeTypesense, createTestContext, truncateAll } from './harness.ts'
 
 let h: Awaited<ReturnType<typeof createTestContext>>
 const n = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
@@ -1028,6 +1028,89 @@ describe('summary debounce', () => {
     ).toHaveLength(0)
     await h.ctx.pool.query(`delete from pgboss.job where data->>'targetId' = $1`, [storyId])
     await h.ctx.db.delete(schema.story).where(eq(schema.story.id, storyId))
+  })
+})
+
+describe('incremental relationships', () => {
+  it('reuses exact Story embeddings and relationship decisions', async () => {
+    const { relateStory } = await import('@dn/jobs')
+    const { rows: edges } = await h.ctx.pool.query<{
+      id: string
+      from_story_id: string
+      to_story_id: string
+      analysis_run_id: string
+    }>(`select r.id, r.from_story_id, r.to_story_id, r.analysis_run_id
+        from story_relationship r
+        join analysis_run a on a.id = r.analysis_run_id
+        join story newer on newer.id = r.from_story_id
+        join story older on older.id = r.to_story_id
+        where a.input_fingerprint = newer.id || ':' || newer.current_summary_id || '|' ||
+          older.id || ':' || older.current_summary_id
+        limit 1`)
+    const edge = edges[0]
+    if (!edge) throw new Error('no current generated relationship')
+    const [[newer], [older]] = await Promise.all([
+      h.ctx.db
+        .select({
+          summaryId: schema.story.currentSummaryId,
+          embedding: schema.story.embedding,
+        })
+        .from(schema.story)
+        .where(eq(schema.story.id, edge.from_story_id)),
+      h.ctx.db
+        .select({ embedding: schema.story.embedding })
+        .from(schema.story)
+        .where(eq(schema.story.id, edge.to_story_id)),
+    ])
+    if (!newer?.summaryId || !newer.embedding || !older?.embedding)
+      throw new Error('relationship cache inputs missing')
+    const job = {
+      targetId: edge.from_story_id,
+      inputFingerprint: newer.summaryId,
+      pipelineVersion: 'p2',
+      priorityClass: 'fresh' as const,
+    }
+    const isolated = createFakeTypesense()
+    await isolated.upsert('stories', { id: edge.to_story_id, embedding: older.embedding })
+    const classify = vi.spyOn(h.ctx.inference.generation, 'classifyRelationship')
+    const embed = vi.spyOn(h.ctx.inference.embeddings, 'embedDocuments')
+    await h.ctx.db.delete(schema.storyRelationship).where(eq(schema.storyRelationship.id, edge.id))
+    await relateStory({ ...h.ctx, ts: isolated }, job)
+    expect(classify).not.toHaveBeenCalled()
+    expect(embed).not.toHaveBeenCalled()
+    expect(
+      await h.ctx.db
+        .select()
+        .from(schema.storyRelationship)
+        .where(
+          and(
+            eq(schema.storyRelationship.fromStoryId, edge.from_story_id),
+            eq(schema.storyRelationship.toStoryId, edge.to_story_id),
+          ),
+        ),
+    ).toHaveLength(1)
+
+    await h.ctx.db
+      .update(schema.analysisRun)
+      .set({ promptVersion: 'classify-relationship@old' })
+      .where(eq(schema.analysisRun.id, edge.analysis_run_id))
+    await h.ctx.db
+      .update(schema.story)
+      .set({ embeddingModelId: 'old-model' })
+      .where(eq(schema.story.id, edge.from_story_id))
+    await h.ctx.db
+      .delete(schema.storyRelationship)
+      .where(
+        and(
+          eq(schema.storyRelationship.fromStoryId, edge.from_story_id),
+          eq(schema.storyRelationship.toStoryId, edge.to_story_id),
+        ),
+      )
+    await relateStory({ ...h.ctx, ts: isolated }, job)
+    expect(classify).toHaveBeenCalledTimes(1)
+    expect(embed).toHaveBeenCalledTimes(1)
+    classify.mockRestore()
+    embed.mockRestore()
   })
 })
 
