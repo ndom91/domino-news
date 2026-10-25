@@ -1,0 +1,2739 @@
+{
+  "set": "prod-gate-france",
+  "guide": "docs/story-granularity.md",
+  "groups": [
+    {
+      "id": "g1",
+      "title": "France protests: Who are the people arrested during the unrest?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ade9v91dked50jnechvnhe",
+        "art_01m5af5hy3qrb60q7d7tsv1rab",
+        "art_01m5asf22fnrgbexhvb8te7pmz",
+        "art_01m5dbw26qrcerp0sqbpr2rw9m",
+        "art_01m5fd37pkr1p5e99w97ea83mw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g2",
+      "title": "Explainer-France in turmoil: What might follow a weekend of riots?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ade21c6ty4njyrhssgvmez",
+        "art_01m5agw9pq9jw32cg5nxzggt34",
+        "art_01m5ap0aawpn6d23y4e5ehvhvx",
+        "art_01m5b8vvvs8swkbx9xaj3q32s8",
+        "art_01m5c9h4522n007tdv6tqp3v9d",
+        "art_01m5cx7ks2wbxf9pqgr7cxpb9m",
+        "art_01m5cwcs8azdtc8n0tzx3ddw3x",
+        "art_01m5d0pjr7q1wv5b4qc3pc88ej",
+        "art_01m5e19ff7sr9sqyhbg5zvx293",
+        "art_01m5f688jwg1gtm2z5qmffzk6x",
+        "art_01m5fesnback5ex3ke4xdeg1h2",
+        "art_01m5g6004ca8g6ns6q2ncka3h6",
+        "art_01m5g600348kk0y0zd9ym05641",
+        "art_01m5haw424pe8z99aw3wqngh7x",
+        "art_01m5hg0w94akde94tn38zg2j0m",
+        "art_01m5hp3g02sg2217y1jmg78q7e",
+        "art_01m5j4kwxcg7qjrjg2c0p8s6yg",
+        "art_01m5jam676kptd1hfqawta9fvr",
+        "art_01m5pbbs7eg0nngvz6ffp80frx"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g3",
+      "title": "France wants curfews in some areas after weekend of riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ade9sx1mwfhn24sgagmh86",
+        "art_01m5ake6q9prbwz77fvsa81k7a",
+        "art_01m5an59gms11jnc2zk1prgejx",
+        "art_01m5ap0m0y4pjgygdg86mxk69g",
+        "art_01m5aqqa9h30wdmtqtbx8gse2d",
+        "art_01m5asehnrc337armrb65n5hp5",
+        "art_01m5at9hvz9rx9fmn0zydvh318",
+        "art_01m5atadwt4qp6rt257txv0mfd",
+        "art_01m5b76e1cye6gtz15vhq7ejb1",
+        "art_01m5bd60a1zfs3mtyammys247p",
+        "art_01m5bewvzjg75c0ka0b467yb0a",
+        "art_01m5asew7gbh1nct65v2byfqw7",
+        "art_01m5b6acwj2rzfxbmx6neyabcs",
+        "art_01m5b4kr3patt97g4yr11skxn5",
+        "art_01m5b6aft8ep84228kbddcpja8",
+        "art_01m5b8vvq2s111pt2r1ketjghh",
+        "art_01m5bhfj9v2dnst0jv662cn574",
+        "art_01m5c2n4b12pmh6rzwwmpj3eyb",
+        "art_01m5c2ne8qcyqep8ep6w2cyvga",
+        "art_01m5cb7krksqqmymh926dyaphz",
+        "art_01m5cc3np9emz9ccshs2n33jn3",
+        "art_01m5ccyyvvt91p2qcbpmfhg1k5",
+        "art_01m5d0p0f71z229epqv4ht5ya1",
+        "art_01m5cjyn0b4r42y6z4zy9frpm7",
+        "art_01m5cr2wmcsf6h0e2r3yybh48z",
+        "art_01m5cstew7eh8ezspzz99c92ky",
+        "art_01m5d1ka5tvsk41kfqpy2q8t0h",
+        "art_01m5dbw277fyq7c97jfhrh5wke",
+        "art_01m5dqva7pp692th1m2ex2sgjg",
+        "art_01m5d38cg39nafgvscgytwwgdk",
+        "art_01m5efx29k2d5rmx2hnkmnj7cw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g4",
+      "title": "K\u00f6nnten die Proteste nach Deutschland \u00fcberschwappen?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ae9bmtkprd5ms8zx0xq1g6",
+        "art_01m5fkykcrwyryr0hyar77knfd",
+        "art_01m5fttv05mab49n96tyd21h1d",
+        "art_01m5g1nt8xthdttyxe8109z2h7",
+        "art_01m5k0y3qafkxmccrfhytngf2j",
+        "art_01m5kc39fw621z2hq6q5n84em1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g5",
+      "title": "Violent far-left riots in France are 'chilling warning' for Americans at home, Mike Johnson says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5af5jy9st125x0kmjwdwz5y",
+        "art_01m5b6bj000xtv4xep1mvzm90v",
+        "art_01m5b6b55jhw901b2fz8hjyaxk",
+        "art_01m5bjaahk6vts0tgg9g81n7dz",
+        "art_01m5crz4715v2r4b600taw6bhp",
+        "art_01m5cstet20zznsfxf4hsh1jp5",
+        "art_01m5d0q085bvkg9t8nz6fqf9zp",
+        "art_01m5dp4dyjwgq4tecm68gfhc0f",
+        "art_01m5f4fs4p3rgwkdyr6zqn0m8a",
+        "art_01m5f5bnpnqn33m8qwsny58rt1",
+        "art_01m5f5bjqb967nb1hzt8tt82yp",
+        "art_01m5f9nr8sfwfkgzdzne3rbp05",
+        "art_01m5fj89b45wxnxyewpftjrt1w",
+        "art_01m5fzzge18fh2zaxd9jdv4wk2",
+        "art_01m5fzzgce6mztkamgcge4daxc",
+        "art_01m5g53kz6fnhedzefsnd1qqs1",
+        "art_01m5g9d4x0qds23hkcmsb23w34",
+        "art_01m5ga87am82qnk5ehs6d731tp",
+        "art_01m5gr04mt7szjqxryj3a57ghg",
+        "art_01m5h5r29awbd8z69b19bx8ywn",
+        "art_01m5hhqn4n6x3hp6xgc2vjnga1",
+        "art_01m5hkemhqx5mf1dte7refabfr",
+        "art_01m5hrkcd3vp3xwydjj5s3bx65",
+        "art_01m5j5fntkep246fn0ybmdk2d0",
+        "art_01m5j82m4mvtq8xnz6p4gng70c",
+        "art_01m5j9rz5h57jrdf1q0fz7cfq0",
+        "art_01m5m8ebjdyznnj7mv9sxaf6s2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g6",
+      "title": "After looting spree, France tells online resellers to crack down on traffic of stolen goods",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5af4pfwx4tc2d4vwz8r1j6x",
+        "art_01m5agw9qjmj2tpa6r56rydzcf",
+        "art_01m5c6y29dveg2z94hewtckb89",
+        "art_01m5b21xnbe88djsj5vh383vvc",
+        "art_01m5en121y8ythc44y58kev7me"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g7",
+      "title": "France protests escalating into riots are a political gift for Marine Le Pen and far-right",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5akeb9tz47aj3ddxx7cmrqs",
+        "art_01m5b21xp5t1xwe1b0vtzzsbzk",
+        "art_01m5b21xnsaejp1fv5zxv60ywf",
+        "art_01m5d1gxp9h33tr3kcs35y97kb",
+        "art_01m5e9ws3mnf0cb1drqmw4jca1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g8",
+      "title": "Ferocious criticism from all sides underlines Macron\u2019s isolation",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5agwn1t7jezc3jkx4j2315f",
+        "art_01m5agway5wxk739jg1p3bnwpj",
+        "art_01m5aykg3fkxdsgzx32gwyfe19",
+        "art_01m5j81whbncpt5r1ps3gn4stf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g9",
+      "title": "Video report: Could we see France\u2019s chaotic protests spread to the UK?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pd8a6gzbm6j2ykxz67q6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g10",
+      "title": "From France to Albania, social unrest is setting Europe's streets ablaze",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ahqc539w32cnpcx1jgvqrw",
+        "art_01m5b3r5ktwk9934cdtjktzeep",
+        "art_01m5d0pc5armk9jtqbvr9s11vj",
+        "art_01m5dkj5z5scewrheh6x86qs04",
+        "art_01m5e5m4m9jzqsgr0snshsj0aq",
+        "art_01m5ev1x1yet7zx3sh6q9yjbcj",
+        "art_01m5evxbypxh56wbwy333j2ydy",
+        "art_01m5f7ycjadrx8sgjvxws52wgq",
+        "art_01m5hbr5mzyyhhjvywrf938r5m",
+        "art_01m5hyk23qahvh79ec96jpx447",
+        "art_01m5j767w5xaz9vcrg5t8dnndd",
+        "art_01m5kjz5zn2atrh157yzcjgd9q",
+        "art_01m5pesfyf713ydv7znehqxhfb",
+        "art_01m5qqzvgmktsq9msah9221vz1",
+        "art_01m5rbqmv6he1rn30jc6fwgypm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g11",
+      "title": "France: \u2018localised\u2019 curfews announced after weekend of violence",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ahthjgkkbrfkswwsnwpz38",
+        "art_01m5arkr1qpnv9zmhjr2x75krm",
+        "art_01m5asenygchs57qmtm4gzp7wf",
+        "art_01m5agw33w3rsqdwxbtjpgjj0b",
+        "art_01m5bm22z1cy0k3bwz0wmzq6m0",
+        "art_01m5c62tzhx27t0tg8fakcq445",
+        "art_01m5cgchckvtpsxktg3s8qtwa1",
+        "art_01m5cx83jhr5mtmq36yrmyhm0m",
+        "art_01m5cvhh0cxjs7bkv2h8vgnawj",
+        "art_01m5cx8h4hp0serxh6zcjazc09",
+        "art_01m5d0phqt7czr2pdab2jq22bp",
+        "art_01m5d0psvxkgmgkswfzb1jvh1s",
+        "art_01m5d43bfmcmg3e8yv756g9yp2",
+        "art_01m5d43dkbe6jh0z00ppcabz7c",
+        "art_01m5dfa1edyhrft7zdt9c27jbx",
+        "art_01m5djpvtxprk9ecmd4kk4nxrm",
+        "art_01m5dva62tf79m57mcjv1vpzkc",
+        "art_01m5dzkaf3drm0z373982r04k8",
+        "art_01m5e90stpf39rqvz2z1n943nv",
+        "art_01m5ear5zbca84vm0rdm714mtb",
+        "art_01m5edb26d4zgb6vzddrv4b2te",
+        "art_01m5evxf9heky0g9zxmyyahkvv",
+        "art_01m5f06qa8z9whyen5cf32e1mt",
+        "art_01m5f1xzxvr497m7vm1he6rqh5",
+        "art_01m5f11h407hjkt1wehxwnh61b",
+        "art_01m5fah1ec17xcb5re0nn38fsd",
+        "art_01m5fc729ngnz844be94gxjmc9",
+        "art_01m5fdyth9tver1angwa1x1ez3",
+        "art_01m5fj89e1ptj5fhwfv81kqxge",
+        "art_01m5ha1ar8y6656gsj9s68hnhz",
+        "art_01m5hn5fpp0vbm5m5gy677p4v9",
+        "art_01m5hpw9e5m03xbegsww2w7wpk",
+        "art_01m5hpwwwxcrcvby1ncs899c6g",
+        "art_01m5hrm5f2tjbpydzvxhd59r6d",
+        "art_01m5j82fht1m146rbd4qw3akvq",
+        "art_01m5j8y1s1nwd5bv1cw0h1zahy",
+        "art_01m5j15mzwr06wh2nwakepf82j",
+        "art_01m5hw280e2v3tjq0459syrdae",
+        "art_01m5hwy0d391rea9rx31xvtk57",
+        "art_01m5hwxqadqypjx3h0rkgq0ytd",
+        "art_01m5hwx1cqncj9dec0e5ne98ck",
+        "art_01m5j3ra7f5t6f8k5rtzn9gwjz",
+        "art_01m5j6ahjrpd0771dmby9fxbfd",
+        "art_01m5j760gszzgdgngsf033c9s9",
+        "art_01m5jbfra1xp7vrp7fgnbqr2qx",
+        "art_01m5jey3g15x8wjmgycrzjm43x",
+        "art_01m5jm2c3dmb3s94v6xw12jxbt",
+        "art_01m5jwmndte4cwrye3g4xg1e67",
+        "art_01m5j81wnte147h60my5hdzgnw",
+        "art_01m5k635ftmcstx57nmtfdz3xk",
+        "art_01m5kzvk0qk6ap8381p6sngwt5",
+        "art_01m5m5w1dw1f0h78yzt23052fh",
+        "art_01m5m9a27vd2j7b7q74hfxtvxr",
+        "art_01m5mhw5aqaj5p5xhy1y7mbk2k",
+        "art_01m5mx0vrnxhq7g70ke3nypsjg",
+        "art_01m5mjq6g97j6112erjkaasq8a",
+        "art_01m5mq1g75ded0kt183eabt6mj",
+        "art_01m5nhkw5h2j82ddfmka4jdz9j",
+        "art_01m5nyg4166s52dyregwtd4q68",
+        "art_01m5p5bw95kseyq65rqyd5byjs",
+        "art_01m5q48jegv8338p9qtfppr687",
+        "art_01m5qdpwxtz2kmmxf2h28hbync",
+        "art_01m5pggt1vb1rvz17r8xft39cf",
+        "art_01m5q48ffzx537qw075mbcz4dj",
+        "art_01m5pr8jxega9xmbhq9q6yezhv",
+        "art_01m5pxcncd0qdx8ps9mq42mf6j",
+        "art_01m5q1q8hdyd7rehnshpcrj9fd",
+        "art_01m5q1q4m3pdhf89scre0jr5qa",
+        "art_01m5q3d0m9h3kns2zr25xr4ykk",
+        "art_01m5q48xt6yk85mna883z4cezt",
+        "art_01m5q9def3bhsqs7n8sqhf5xj9",
+        "art_01m5q7pw7q8cw85qmde4194m5r",
+        "art_01m5q8hw786sz101yj30q02cyk",
+        "art_01m5qdqse9we98dqm70dx4038n",
+        "art_01m5qbzzvnkxth8dsasnrv3fx0",
+        "art_01m5qj0pw3hvr38p4xw55fcxmw",
+        "art_01m5qndwp9bhanr4xp2kk9wefw",
+        "art_01m5qkqnbdce43kepr44zettne",
+        "art_01m5qq4j0myqdbaq9vmd5nk9cw",
+        "art_01m5qspwj6tzh18maabgc88v90",
+        "art_01m5qtjgggnm8atgyd3zb3d7h4",
+        "art_01m5r29dfcppezts2jdy33d0jv",
+        "art_01m5sfsbvazaq25tpns776fp9a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g12",
+      "title": "The French Teen Maimed During School Unrest by Tear Gas Grenade",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5am9kwba1xzd78qnnh637wd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g13",
+      "title": "European stocks fall on unrest in France as Nasdaq bounces",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b0ah0qjcvar8ewqqw9e60e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g14",
+      "title": "Italy Faces Parallel Protests in the North and South",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5an510y0vty7t9c8xet4za1",
+        "art_01m5bz6yk9eg9dr2sey9t9yf26",
+        "art_01m5c2n4hksskbapcad6kfj4xm",
+        "art_01m5c3gvq234faqrjwggfjmz2v",
+        "art_01m5fet7vcgajxz2dg5qk0h0c8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g15",
+      "title": "Walz-era fraud scandal takes center stage as Klobuchar, GOP rival clash in debate: 'Why didn't you do more?'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aqr1ky96gq1mvznytna0m9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g16",
+      "title": "\u2018Crucial opportunity to act\u2019 as study finds most of Europe\u2019s wild bee species in decline",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5asewrbgkzpfeq8c6vxq179"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g17",
+      "title": "Hungary and Poland defend tough migration policies as France reels from violent unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5atad1ybphahcqz2b3tcq22"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g18",
+      "title": "French far right seeks to capitalise on protests with calls for law and order",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5av5ynp8tyy7q216sz49tz2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g19",
+      "title": "France faces reckoning with public order policing after violent protest weekend",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aw1b3kz4kf9cf3d3bbthjd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g20",
+      "title": "France riots: AI photos falsely depict elderly couple \u2018stripped and robbed\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5awwvvpy7z8x496d6qxpvxf",
+        "art_01m5cvgjq1dfhb089rc5hm8kdy",
+        "art_01m5f4fwprefch2z31bvfpsjsy",
+        "art_01m5ffnd2zf9v3fakwff6cj9gg",
+        "art_01m5ffntj92f8q2k19pr35e72s",
+        "art_01m5fmsazyrs2tqjfv3ekeh1rx",
+        "art_01m5fhcayc1amycpebqvgj04zd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g21",
+      "title": "Italy to dispatch 500 troops to 'defend Milan' after protests and looting",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pczbr889ra31kseebaby",
+        "art_01m5bakq1ktphqz4v6qphzb11f",
+        "art_01m5bjaarp0nsaw6tfbk35r2a2",
+        "art_01m5cksmhtcxb3zrceg4d4br7t",
+        "art_01m5d2cy04a1gq4vq35cq66mvd",
+        "art_01m5dazth8mht58ktr6920ersf",
+        "art_01m5djpvtnpbpng9658qtrtt73",
+        "art_01m5dhtgmbd9y8nbvk3qzwykne",
+        "art_01m5dv989k1byz5hr1hvse6rwf",
+        "art_01m5dv9r51zj8dkpxpy05j3b1c",
+        "art_01m5ecg1gs7p71tjy2pj0cc5hz",
+        "art_01m5evxfathxsnert9dnebt9bw",
+        "art_01m5ezbb3qdbnehyqrjdzae403",
+        "art_01m5fj89hfxzark8h6henazk9h",
+        "art_01m5fkykekvt3z1t74r7y8j2mf",
+        "art_01m5mcqpfjdas0sej8r8pkf4tg",
+        "art_01m5q48f7zn1xqztjq2ab6he4j"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g22",
+      "title": "\u2018We are the shame of Europe\u2019: France imposes curfews to stop growing riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pcz3kmrmrvpk98fpgnr6",
+        "art_01m5bca8a8sr6ycxf9cesm9p6v",
+        "art_01m5cr2xbj1ncb8r438ym5hns2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g23",
+      "title": "Clean up begins after French riots but police remain",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b80t8g468zvyr3nebsvpk0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g24",
+      "title": "Beleaguered Macron cites US-Iran war as factor in protests amid Trump, Vance criticism",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b3rq3826c295mrh3a6z6t2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g25",
+      "title": "France in turmoil: What might follow a weekend of riots?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b9rhyw0cehp9x6ypc023q7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g26",
+      "title": "Travel agencies closely watching European protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5agw39dyc0e3s8608xa266c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g27",
+      "title": "Kumanjayi Little Baby review finds extensive failings",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bfqty1dn5yydxafymqrz6b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g28",
+      "title": "Trump warns Kansans that US will 'burn' like France if Democrats win",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bgkpfvgba9w1j4p45pjprf",
+        "art_01m5d0pjqdx7kt84jtfsz5jn0d",
+        "art_01m5c8nsr42dz1gs17ys38dms3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g29",
+      "title": "French riots lay bare risks and opportunities for 2027 election candidates",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bhfa48s8xw0r907x7zcy3b",
+        "art_01m5cjy8nvaqr25bmm1g93wx0r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g30",
+      "title": "Zelenskyy accuses US of delaying Patriot missile shipment",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bjazrmtnea3wqcqw85yjyd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g31",
+      "title": "Finance minister pledges support for global 'AI basic society'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bk6h0bwb78fcsxhc1bbtt9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g32",
+      "title": "Two arrested as protests reignite over tree removal for Victorian highway",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bs623mdz7dqddfjzcmtqx5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g33",
+      "title": "How safe havens stack up as tech, energy and France fears grip markets",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5brb64enj98bkzmy8vsj9sb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g34",
+      "title": "Asian Para Games trace roots to Japanese disability sports pioneer",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bs6qdnp8h5qr8yezhbwbwg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g35",
+      "title": "Indonesia to deploy more than 9,000 security officers at protests marking Prabowo's two years in power",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bvs1d7a3r0wyqey9pnd4h2",
+        "art_01m5mjq3wrkcfy11nd21q4kv31"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g36",
+      "title": "How France\u2019s worst rioting in years erupted and how the government responded",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bxfknv6pv8sbj9081q9te8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g37",
+      "title": "UEFA demands FIFA disclose World Cup sale documents by Nov. 2",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bxg80fwd149p4tcqbgrk3q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g38",
+      "title": "Malaysian government working to ensure its students\u2019 safety amid unrest in France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bybnv6gmhegdcycvjcwv2x",
+        "art_01m5e25gk6pbf6eg4athtrmwjq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g39",
+      "title": "Japan needs higher interest rates",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c6y3f6t1vx66dysgg6h3ja"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g40",
+      "title": "Attack on Australian politician follows years of threats to public figures",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bybnsnjv153wfre0qz2nfe"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g41",
+      "title": "Macron talks energy crisis during UAE visit, WFP to cut Gaza food aid and Dubai tests autonomous wheelchairs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bz75cp9fx8zq61tragsxy7",
+        "art_01m5cb86gxaqrvs64enkpgh6sx",
+        "art_01m5cstevyg0dra7tfmn178rdx",
+        "art_01m5cy3wss7ebbz7zggsagrq4a",
+        "art_01m5d4zcykb3cz31neqcnjvbrw",
+        "art_01m5d6rpbtgd879pr0eg3ekbbv",
+        "art_01m5fdydna6tj243z5pdbr8xfw",
+        "art_01m5fet0aq2j12a5scdf3mzazt",
+        "art_01m5fky7a5kcc8ykpd2hry74ab",
+        "art_01m5hawfdhj4j6frgxykzs82hk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g42",
+      "title": "French riots hold a warning for British reformers",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c2n15jx1r67ehdgc4qybw3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g43",
+      "title": "As weight-loss drug users turn to dietary supplements, doctors and regulators raise flags",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c62v102f2yr3cj8q5zf3mc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g44",
+      "title": "France protests are \u2018outburst of resentment\u2019 against Macron",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c6ytjrz95gngdva98rxg4f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g45",
+      "title": "India asks citizens in Italy, Albania to exercise caution amid unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cacbhr18bw84xsk8vfj3k4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g46",
+      "title": "Lee Moon Won Bio secures patent for hair-loss care platform",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c6yf5wkk3pcd5dh4wx6xnp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g47",
+      "title": "French protests: Is it game over for Macron\u2019s centrists before elections?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c8p0pwa70h730w6bw11qhv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g48",
+      "title": "France Protests Show Europe\u2019s Shift Away From Centrist Politics",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c9gt3rj77wqdx25wwyw1td"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g49",
+      "title": "The Louvre Museum blocked as France grapples with growing protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cb86hkmcjgh7vkkaeg7xbq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g50",
+      "title": "Albanians set fire to government buildings and clash with riot police in latest protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cksg9hctykhbcyeq79bkjr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g51",
+      "title": "French retailers begin filing insurance claims after weekend of looting",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ccyyz872syesvgq2r4dadw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g52",
+      "title": "Some synagogues canceled prayers as French Jews faced warnings amid violent protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ccyzdq53h17p4hacxphvnf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g53",
+      "title": "Miss South Africa 2026 finale tickets on sale as Ndlovu Youth Choir and JAZZWRLD join line-up",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cdtam7fhs3j32fb2cjghvt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g54",
+      "title": "France arrests man, calls in anti-terror police over town hall protest fire",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cfhd9p1vbb6pfrbc8zq81f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g55",
+      "title": "Female British tourist's calf is torn off by projectile after being caught up in French riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pj12b83m55zfc04sdap2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g56",
+      "title": "The White House tests its election playbook in California ahead of the midterms",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cjy8h2frpfg5qpt8rxwmxd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g57",
+      "title": "Portuguese police clear housing protest camps, arresting 55",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cgcxdsm3fm9sye6e6gzne0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g58",
+      "title": "Global 'Chaos Inc' grows to 101 groups with plans for new rounds of demonstrations",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ch7jy61jknt8eyhs3tp9kf",
+        "art_01m5fnn7fnpkdmfww6vyryhztt",
+        "art_01m5n4r3tjrprcw1nbmt3q42kr",
+        "art_01m5n5ks86sza0381xfw3gg7ef"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g59",
+      "title": "Euro steadies as French protests ease; pound and yen firm",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cjy63nx1f71pcexh4vzpcb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g60",
+      "title": "Dollar dips on AI worries, euro edges up despite French unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cwcpsymexn489hhd5pjd2p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g61",
+      "title": "France braces for looting and riots 'Act II' as 'pathetic' Macron loses control of the country despite overnight curfews bringing temporary reprieve",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0phe468axr1zjzhtw2enc",
+        "art_01m5j6bd4fzt53wctsp545t52v",
+        "art_01m5j8x9kvdw5rej5pp7fq5qfq",
+        "art_01m5kstrw4knd28y8mr5dscs7m",
+        "art_01m5kyzvrc2tef7mefjw1tashs",
+        "art_01m5m5vhfaavrhsab8d2t22rn0",
+        "art_01m5m5vhcssjw5mechw5f0mejm",
+        "art_01m5mhw58px3pfmmymxnntre3h",
+        "art_01m5mq13eqshj6sdjdms0dmd68",
+        "art_01m5mrq4f6640j3nkv3yra03dz",
+        "art_01m5n7aq20v81rp253av25ta99",
+        "art_01m5nnxky691vf46982mfm4bce",
+        "art_01m5pz3khqtwwf0ta2y0ghhbqz",
+        "art_01m5qc08j7j9cxwknv2t2dme1s"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g62",
+      "title": "Marseille braces for more unrest after protests give way to 'apocalyptic' disorder",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cpbx4ahy12nkxd1h8kz4gg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g63",
+      "title": "Man arrested after historic town hall in France burned down during night of riots and looting",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pccy0t6rj9cq2fj33x4b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g64",
+      "title": "Suspect arrested in France after fire at historic city hall",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cssykm4m3hpc4m7yd33xg2",
+        "art_01m5d0pdxxphmdshdn38yzs21c",
+        "art_01m5d6qbqgvfkgkhf8qvfke7p9",
+        "art_01m5fd37r9afad30kdad28jzr4",
+        "art_01m5py83phpcwm18y0g7ref59a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g65",
+      "title": "France's sociopolitical & economic crises: 'Large portion of population sympathizes' with protestors",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5crz20p4xzvm58h5mjx6x5r",
+        "art_01m5q1q4p5cakpq64bhnkcb08k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g66",
+      "title": "\u2018Tinubu Must Go\u2019: Nigeria's northern protests test the limits of political dissent",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cvh1pnyh605900gg5gg06r",
+        "art_01m5d7jbdxw4b4fw8xj1cv637p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g67",
+      "title": "French Justice Minister promises 'extremely firm' punishment for rioters",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cwcs9fcm1fa0y25vwfxt2y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g68",
+      "title": "French PM vows 'massive' police deployment for new demonstrations",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cwcpkrw2ehxz6rsfrd8mfh",
+        "art_01m5hp1ctnb49dtx505k3090gk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g69",
+      "title": "Heavy rain causes widespread flooding in France\u2019s Marseille",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q5g52z3p793s2vwqk1dq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g70",
+      "title": "France protests latest: Suspect arrested over city hall fire as French PM says curfews are working",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pbzs5y5jhxy9ha5yrjtp",
+        "art_01m5ef1k0wetz0hwj1rh94sz4a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g71",
+      "title": "France could face even worse destruction with second weekend of planned riots, State Dept warns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cyzgyvqzamz3w8b7pzac1j",
+        "art_01m5mcqbh20mn11ptswjd4xwy8",
+        "art_01m5mcqmdh2317190zjzvv3n5v",
+        "art_01m5p2spff1cmywqe9yt3dgde6",
+        "art_01m5pr8jwd4nwk7gnpt98z9spm",
+        "art_01m5pvp8tzs6nq52r75bf3nqjk",
+        "art_01m5q1q4k45p0epjcmg6yrp7az",
+        "art_01m5s76wwabb7e1rcjp1p4zjrn",
+        "art_01m5shgwjv9mfkxenyfgmnvwfv",
+        "art_01m5spnmqnzb1beqtm62kvp68h",
+        "art_01m5st3nxb5fxqmfmag3f3986y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g72",
+      "title": "Protestaktion: Aktivisten blockieren R\u00fcstungsunternehmen in Kassel",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pg6fke6bkbzkpgaa96cb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g73",
+      "title": "How France\u2019s far right is using a weekend of riots and chaos to seize power",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5czt0er7s38h7wcj1gqn5mc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g74",
+      "title": "Home Office refuses to rule out letting more Channel migrants land in Gosport despite furious protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pe6w753n7zpqfthdrhy5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g75",
+      "title": "Flavio Bolsonaro\u2019s \u2018corrupto\u2019 stunt sparks viral meme before Brazil election runoff",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q517zm1c2wv5hze14gn9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g76",
+      "title": "Angst vor Frankreich-Unruhen - Der Anti-Krawall-Plan der Regierung",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pjp40vg6s2pp5xr57xaf",
+        "art_01m5hkegv6f2z8bkyb14s9tv4e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g77",
+      "title": "Proteste in Frankreich: Ausnahmezustand? Nicht mit uns!",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d1h38hh198yptjh7by07ec"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g78",
+      "title": "Kritik an Frankreichs Pr\u00e4sident w\u00e4chst - Paris brennt, Macron auf Krisen-Reise",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d2cmpv5g3ph851v27gmhna"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g79",
+      "title": "Albanian police clash with anti-government protesters for an 8th day",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d5t4zhp43atzf3rs6dphz4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g80",
+      "title": "Randale: Unruhen in Frankreich: Handelskette Carrefour kappt Prognose",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d43ngwn4t5jfxtvesqrytb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g81",
+      "title": "Why are French police so violent? Their job is to protect the state, not the people",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d4zq6zs9sb699k7w75k19c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g82",
+      "title": "How French police are harnessing social media to identify looters",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d444sb5nf69p1gnbdjnnf9",
+        "art_01m5m6qc6hjc6yrt8hkhh1jnjz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g83",
+      "title": "French presidential race largely unaffected by unrest, first post-riot poll shows",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d4ymwverefg99t9kfpdscf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g84",
+      "title": "Jugendgewalt: Gewaltattacke: Hunderte gehen nach AfD-Aufruf auf Stra\u00dfe",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d6qc2yg1fj306edcek5k7a",
+        "art_01m5enw8jykvpsb6pt03aj31rm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g85",
+      "title": "Wie die Krise Frankreich politisch spaltet",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d8dc4njvqe9pwk11z82bx6",
+        "art_01m5fr7ag9211q80xfh0tqja94"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g86",
+      "title": "Proteste in Deutschland angek\u00fcndigt \u2013 Hessens Innenminister warnt vor \u201eGewaltpotenzial\u201c",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d8da3cfjxgn6jstsm1tcm6",
+        "art_01m5ekb4ffbfe07xk83324rm1z",
+        "art_01m5eyfa219k5r9jy8yryrpjke",
+        "art_01m5fnm8759a7d0zjjh5py1kx5",
+        "art_01m5gbz3zhmwb6qbdd89gtyp4x",
+        "art_01m5hyka01jbaecnbsknqrep97",
+        "art_01m5kpd18c2a0wymc49n72rc9x",
+        "art_01m5kvhxhs2h0dnm7gm0fcd2ww"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g87",
+      "title": "Could France's riots happen here? Experts see parallels in socialism, immigration \u2014 and key differences",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5db0p9bganq3hh3jp1a3qyq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g88",
+      "title": "France backs UNESCO drive to involve more young people in political decisions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5db0c0d68cmje0btxq95p5n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g89",
+      "title": "Italy unleashes military response to violent riots as France faces a reckoning of its own",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dcqb1a8gkr1avfynby68qp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g90",
+      "title": "PSG fans divided over protests in France as Barcelona game goes ahead",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dfa8x122d0qfn76p88agyd",
+        "art_01m5djq8k9zkm9097zvn65b6v7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g91",
+      "title": "France riots leave thousands of businesses damaged",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dhvkby9wgnhh0g1s7cbcbs",
+        "art_01m5drq7tkqttn6ythnfyv4ap2",
+        "art_01m5esb7mz1mfsnfkjdwcj1cx2",
+        "art_01m5eyfe5jjx4js27rn4j13m19",
+        "art_01m5fhc1sa6eqy5ee3zmqy2950",
+        "art_01m5gehkc7vanwxtza8es9t9ne",
+        "art_01m5hjkmy64hqn7dv8298tn5vy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g92",
+      "title": "[Lionel Laurent] Why France is burning",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dg53a79ek708pkp22xwxxc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g93",
+      "title": "Art Basel Paris Preview Draws Interest Despite Protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5djp8vzwdgkzwwmzcvea7k5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g94",
+      "title": "Singapore haze: Is your old air purifier still effective, and how much does it cost to run one?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dp4wn5dfqh3xw5hwvdf75s"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g95",
+      "title": "Paris NFL game given green light to go ahead after violent protests in France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dpzpshdp3rej3wgdh40dtz",
+        "art_01m5fz47r57zvd3frfwpheehkd",
+        "art_01m5jjay54bht5dzc89pk070q3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g96",
+      "title": "Student protesters in France have a strange new slogan. What does it mean?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dw4ymj1ttk65p6bvbk38f7",
+        "art_01m5f12j800ypgmbqcaxxd2jn8",
+        "art_01m5fkxqtsqkjn03hz7n00kvad"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g97",
+      "title": "Ministry keeps France travel risk low, but advises against attending protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38ckrmbh5cn9wnqqbfxtg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g98",
+      "title": "Education protests are a warning",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38cyaytf53cnkws2vzsy8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g99",
+      "title": "Deportation too lenient for threats to president",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38czbag2ww8k9j3p5gb2h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g100",
+      "title": "Three issues defining the 2026 US midterm elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dx100a73t74xf8n3bpf4z4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g101",
+      "title": "Israelis abroad fly home to vote, posing threat to Netanyahu",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dxvr9bm86tsrs79n5tmrkh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g102",
+      "title": "Internet: Viele Jugendliche sehen Social-Media-Sucht im Umfeld",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5e9135s482xgetfmhvmpxs0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g103",
+      "title": "State Bank of India reports cyberattack involving nearly 3,900 customer records",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ear9z6hcsjg3crwyc91rrs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g104",
+      "title": "A student protest movement has gripped Serbia for two years. This weekend it will try to take power",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5earggtzjtq0gq8n7fh13ne",
+        "art_01m5k8nynbgs7za1fwy83qnrp9",
+        "art_01m5n7ac4pbnrn5ytgxhrw3s1s",
+        "art_01m5p4gkaxgp7vpbkqdht8ee0y",
+        "art_01m5s8x7wz44g1k7x3xfdh004k",
+        "art_01m5sntb3eqsamyyy0hmv7949t"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g105",
+      "title": "\ud83d\udd34 Russia releases US citizen accused of fighting for Ukraine",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5egrwvy3518fmdmtbm59mkb",
+        "art_01m5he9ka6fyr0h3cq4bjk0fwz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g106",
+      "title": "Europaweiter Protest: \u00abHands off Nature\u00bb: Millionen Unterschriften gegen EU-Reform",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ecf8447nezqh26w4az6ev3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g107",
+      "title": "France has a proud tradition of protesting, and sometimes people lose their heads",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5egrf5thdyyef74zjmeknt1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g108",
+      "title": "AmCham hosts US envoy, military chief for security, economic talks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ejfkxhdgwxahk6h0mxjfqy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g109",
+      "title": "Br\u00e4nde: Feuer in Hotel - Brandstiftung vermutet",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5en0sxqyvapkv4g1cck3013"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g110",
+      "title": "\u2018I am still traumatised\u2019: French police accused of brutalising minors",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5esb7nn8mj6c8ypjtzqbv50"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g111",
+      "title": "Thousands march in Greece over public education failures as Macron blasts \u2018stupid\u2019 commentary on French protests \u2013 as it happened",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5erfchd2ke8kxcxhwggqxxs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g112",
+      "title": "Hundreds rally at parliament against proposed university merger",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5erej9he999g8scfe3wr2hz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g113",
+      "title": "Let them eat cake! Emmanuel Macron's family macaron shop was guarded by police ring of steel during riots... while other shops were left to burn",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5evx0h7bbtn80qn5m7mssnd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g114",
+      "title": "The debt crisis leaves the French government with no room to respond to social demands",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f1xrsrv1vjwj8s7c4r0s5z",
+        "art_01m5fah1bc5hj8mw95h7wrt4zh",
+        "art_01m5g54ecey2mhyxvgd1yqtg60",
+        "art_01m5g8hc9yygn1xy4xrb8878mz",
+        "art_01m5hdfhkzyagsamkmsngen025"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g115",
+      "title": "Heilbronn: Eisenhammer durchschl\u00e4gt Autoscheibe auf Autobahn",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ewrfdgfh439fcpn346j150"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g116",
+      "title": "Daily News 21 / 10 / 2026",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ezbhgtfpkpdsqadbb3bggv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g117",
+      "title": "Toulouse v Troyes Ligue 1 game postponed amid unrest in France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5exm13bm130dmkjzjfce0kr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g118",
+      "title": "Yemen's Houthis deny launching drones towards Saudi Arabia's Medina",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5eyfgph8c7cf6k1d94wkaed"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g119",
+      "title": "\u201eStreiken wie die Jungend in Frankreich\u201c \u2013 Aufrufe zu Krawallen auch in Deutschland",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f067s6r8n5fjz1ew74b3jr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g120",
+      "title": "\u2018How can France stop Marine Le Pen\u2019? Our Europe columnists answered your questions on protests and politics in France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f128a36pvxh6t69adnp70r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g121",
+      "title": "Orange says network incident disrupts mobile services across France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2s0c0hycchxgphb22he7t"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g122",
+      "title": "Proteste in Europa: Warum die Deutschen nicht ausrasten",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2rh60c1rz557bk830arpd",
+        "art_01m5kfgp4h0ncp0m5s8j9b2v14"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g123",
+      "title": "Danke, Alice Schwarzer!",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2rke15my4qxaya45d3syw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g124",
+      "title": "Turkey, Qatar, Pakistan, Indonesia sign defence cooperation accord, Ankara says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f5bj01ndb2z1m8cxwqkjwf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g125",
+      "title": "Jailed Birmingham accountant ordered to repay more than \u00a3300,000 after targeting Covid support schemes",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f687rwnrwkyhy4a5yqehhy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g126",
+      "title": "Students and teachers march through Greek capital to protest cost of living",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f67ny00bcabwj21gadn49r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g127",
+      "title": "Former Moon aide claims S. Korea-US alliance is 'curse'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f67yfxvsxgr4yan6t0b84f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g128",
+      "title": "Politician who was intentionally hit by car loses both her legs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f67dfv6rjqxv49ate267zv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g129",
+      "title": "Macron says Trump spread rumours about protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f8t7097xxvfp8xjpvs3c4k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g130",
+      "title": "SC stays probe in financial irregularities case against ex-Kerala CM Pinarayi Vijayan",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fc7n88803qtsnn0nk7q0hp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g131",
+      "title": "Thousands of Greek students, teachers protest over education, pay",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f7y8p66j4f4b2m0a0ft1he",
+        "art_01m5fagbb2ea9560nbr15fagst",
+        "art_01m5fdytjkw14ehqn01yp7628h",
+        "art_01m5fpgxgcxxatwtqkyv8455y6",
+        "art_01m5fxddejcd64174akwbkhkjf",
+        "art_01m5g54g8swd8542p2fap8s50q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g132",
+      "title": "Macron findet deutliche Worte: \"Dumme \u00c4u\u00dferungen von ausl\u00e4ndischen Staatschefs\"",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fagba915tkea523ws9fzte"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g133",
+      "title": "Russland zu neuen Gespr\u00e4chen mit USA und Ukraine bereit \u2013 Witkoff nennt Putin \u201eMenschenfreund\u201c",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fc77w7ffpvq66cxxmxx1gf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g134",
+      "title": "Retailers in Italy warn of food shortages caused by truck driver protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fc7fpmg7cjrvtvb4vv91zp",
+        "art_01m5hgwemxkqnez3mab0y4m4dz",
+        "art_01m5hn69x4kebcq54znmmpm3r7",
+        "art_01m5j4md683fsgepj8da37epm8",
+        "art_01m5jqgd1vnnvp4q7fvwpr2rwp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g135",
+      "title": "France\u2019s \u2018casseurs\u2019: why the term fails to do justice to the extent of looting and spiralling unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5janammmdm26y27bkmagrv5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g136",
+      "title": "France's Macron lands in Riyadh on surprise 'solidarity' visit",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fdye2xx7rv1hpqq7dfszdn",
+        "art_01m5fr81xv4d38w67vnj9vzjtz",
+        "art_01m5fqc8hke42n092mwp5g32dv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g137",
+      "title": "French students are showing us what protest looks like in the age of viral spectacle",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5janambt12zp62kcjafed9j",
+        "art_01m5jtxm5yxkmttae2fkcz41as"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g138",
+      "title": "France\u2019s tourism sector worried about impact of riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fnmtvwzhxpcader1amt6pt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g139",
+      "title": "Long-standing fury of France\u2019s youth explodes across borders: Video report",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fnmpj8n1yqdz0sqwn373mz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g140",
+      "title": "Sharon Stone, 68, recreates her infamous Basic Instinct scene 34 years after the X-rated moment shot her to fame",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fwgzwghjeerjg7kpq1p9v6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g141",
+      "title": "PSG-Lyon match likely to be postponed amid unrest, say media reports",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fwh1rgw9fvf65219mwk0sf",
+        "art_01m5mg4rz0nqdemgyhxpad8azn",
+        "art_01m5mhwf0g31hv9kc80ggpttw5",
+        "art_01m5mkjvbfdgaqd68m1k5nrbnx"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g142",
+      "title": "Oppt\u00f8yene i Frankrike: Demonstrasjoner forbys i Paris torsdag",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fy80zbg5r8m3dfx1n8zc0c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g143",
+      "title": "Que a injusti\u00e7a n\u00e3o te entriste\u00e7a, que te radicalize",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g3cteg7tzybpqntcv20he2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g144",
+      "title": "S\u00fcdkoreas \"Timmy\" ist ein Hai",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g9c9k8c24sny1gpxz7x4sj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g145",
+      "title": "Democratic and GOP strategists on the deeply personal attack ad in Ohio",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gb3a5crcd5zxyc2hw50t89"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g146",
+      "title": "DOUGLAS MURRAY: If countries like France don't confront and remove those who hate them, there will be nothing left of them but a beautiful name",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gmhrpj6tjkvrbw2qyq7gy7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g147",
+      "title": "Chaos erupts at Trump's South Carolina rally as protesters posing as MAGA fans try to derail event before loyalists step in to the delight of president",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gh3vr22pbd57mt3tnndctq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g148",
+      "title": "Roger Marshall and Adam Hamilton face off in fiery Kansas Senate debate",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gncpq6a1psvqwk1pyyz3y4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g149",
+      "title": "Singapore to streamline community mental health services under new HealthierMind SG network",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gyvwq6q9m78sgkyk6rvvtz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g150",
+      "title": "Paris hopefuls jockey to succeed Macron",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gzq6w85j6vjgtdcr9c3qpt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g151",
+      "title": "Vorhersage: Erste Herbstst\u00fcrme stehen vor der T\u00fcr",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5h1dqg1wnw2p36k2tgt6y6g"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g152",
+      "title": "India asks citizens in France to exercise caution amid unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5h6k9bjs0ebwqbkj47n2p86"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g153",
+      "title": "Serbia: Student protesters flood Belgrade ahead of snap elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5h8aj9c1kbeb15pzj87fbe5",
+        "art_01m5j15r90w8ygznbdgawcxgcs",
+        "art_01m5kcy7az0z902pyt3tjfp8n6",
+        "art_01m5mte1y4ajxahfkkt6vwn2va"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g154",
+      "title": "Liberte, egalite, misere ? Why France is burning",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hdeqc739eevh48cj7vmv8r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g155",
+      "title": "Regnv\u00e6r utsetter asfaltarbeid \u2013 forventer mindre k\u00f8 ut av Oslo enn varslet",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hdemtjbz60prxtb86bzrc9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g156",
+      "title": "Refusing to cross, unable to escape: Seafarers recount Hormuz dangers to Euronews",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hg19eq7qnre81y2x0ks0r7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g157",
+      "title": "Can European leaders fix the cost-of-living crisis?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hhrdh7npkqehbje8ftgga8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g158",
+      "title": "What's behind the youth protests in France?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hkef4w55fvm9ma3k999nfp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g159",
+      "title": "Violent clashes erupt between Spanish police and anti-fascist protesters days after France riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hhqn2fd46weg9jgj402ykj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g160",
+      "title": "European Union awards top rights prize to International Criminal Court days after Trump sanctions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hjjw5kbk19pdw90nwn2p1a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g161",
+      "title": "Idaho mom who blamed vaccines for twins' deaths facing death penalty",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hjjsk2qp5yyt5te1yh761a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g162",
+      "title": "Ebola: Nigerians link outbreak to government\u2019s 2027 election plans",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hma80qcw8xfah9ydd6pd4v"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g163",
+      "title": "\u2018America, this is a warning\u2019: pro- Trump Maga media in a froth over Europe protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hp3g2penesxq1mjazaycrn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g164",
+      "title": "Foreign citizen killed during march in South Africa as anti-immigrant tensions flare",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hpw76pcy6yqmf0crzrppg5",
+        "art_01m5jd7pytngbgdkmtyvmanepk",
+        "art_01m5ky4gqqmxcq48jzt2rb050m"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g165",
+      "title": "Most French people AGREE with Trump that migration is to blame for far-left riots, poll finds after Macron slammed his 'stupid comments'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hsf2ehs0vbp7dzfmgn80m2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g166",
+      "title": "Far-Left activist arrested over arson attack that destroyed town hall during French riots is prosecuted for 'attempting to murder a policeman'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hyk6grdg5gesgny55ahjqp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g167",
+      "title": "Verletzungs-Schock - Bayern verk\u00fcndet D\u00edaz-Ausfall!",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hyka2429mxm2epxsn3cjp0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g168",
+      "title": "French PM Sebastien Lecornu meets with leaders of political parties amid unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j0btd9m2w6h4vw0qnp2kax"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g169",
+      "title": "France responds to ICE meme about riots with savage dig on gun control",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j21nb8nr4agrr7rnqjt2jm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g170",
+      "title": "France: Artists and collectors gather at Art Basel Paris despite unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j3rsqbk3b8xnedrhvypw2k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g171",
+      "title": "French students demonstrate again, despite school holidays",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j4md3nh08x6bnqprcm0hzr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g172",
+      "title": "Are the French police the most violent in the EU?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j6arxtnfar9zvk7epxvm4m"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g173",
+      "title": "Tusenvis samlet til ny protest i Paris",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j768c7s7b6b077e2af40jg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g174",
+      "title": "Palisades recovers damaged nuclear fuel assembly, but critics of restart escalate concerns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5je28z0wc8xb3cvz7ygk6gd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g175",
+      "title": "Wolfram Weimer: Schuss ins Knie",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jd6w756r1v4xzbbpsr5b5x"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g176",
+      "title": "\u2018London and I are a perfect match.\u2019 Journalist Vladimir Raevsky talks about his adopted city for Meduza\u2019s new series of questionnaires with Russian \u00e9migr\u00e9s.",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jey35f90gabgkfq0qb1qc9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g177",
+      "title": "Venezuela faces a deepening energy crisis as protests grow",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jm25y9j46n71gsnj8cm582"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g178",
+      "title": "NEC endorses 90-day plan to ease cost of living for Nigerians, but no specific details yet",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jrb2pcbsnkyjqmgfsfh0gf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g179",
+      "title": "Zelenskyy says fresh Russian strikes show 'no change' in Kremlin position",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jtxm7kr3g6xnebgd17bskp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g180",
+      "title": "Green youth group calls for 'students and young workers' to join Paris-style riots",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jwmxg5gdb0n7c8xdsyy8j4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g181",
+      "title": "'We don't really want to cancel': Singaporeans weigh France travel plans amid violent protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jtxm3chcrgjcypdg37bzxp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g182",
+      "title": "1 dead, nearly 1,000 flights cancelled as Taiwan shuts down ahead of Typhoon Champi",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ktp3c3thqekf8rbxsbq13r",
+        "art_01m5pgg7922x3vvsydycspkyc3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g183",
+      "title": "St Louis history",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j81wn103bx35mxfvhj1031"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g184",
+      "title": "Rare unrest flares in Tunisian capital as police clash with protesters",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k4ctwjqadwdvesr5hhvvxj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g185",
+      "title": "Korea's Q3 art auction sales fall 11% as top-end deals dry up",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k8n96ht1aynpbcfsbqvfjj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g186",
+      "title": "Middle schooler beaten by fellow students over deepfake images of classmates",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k8n94dmx3dbpz4xqdg5j7a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g187",
+      "title": "Albanian opposition and ruling party lawmakers scuffle in parliament over student protest tensions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kgcxwtrf852ascgxpz548z"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g188",
+      "title": "\ud83d\udd34 Live: French student groups call for protests to continue after meeting with Macron",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kktvbc8at7ff26y8z51y51",
+        "art_01m5kwdhreqkjn6snmxb4khb2r",
+        "art_01m5kzttm1s9nm1gmcj3ck8hda",
+        "art_01m5kzvrtbbe9b6ygh55sq6jw9",
+        "art_01m5m2det7yrsw2s75tqvn1fe4",
+        "art_01m5m99q0dfdj73ktw6s10x2ec",
+        "art_01m5mf9sn6cytbkv7gpg4bfnrr",
+        "art_01m5mjpzmjzgvgj19vmsy3tfd8",
+        "art_01m5mjqvjw1r8h1n7t5v742sz3",
+        "art_01m5nyg4y1cx3qdv565tebp8qd",
+        "art_01m5pr8jvwcbej4xgm6w1kdzpe"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g189",
+      "title": "'Generational rage': Young Europeans fight to be heard",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kmpafd0ecy5z6jwb6h472r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g190",
+      "title": "Steuern: Bayaz d\u00e4mpft Erwartungen trotz h\u00f6herer Steuereinnahmen",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5knh2ehfz7qwv2qc7eectf2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g191",
+      "title": "Protests, the cost of living and a widening wealth gap",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kq847k09f6qtahzjnwddxh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g192",
+      "title": "What to know about the weapons and tactics blamed for injuring French protesters",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5krywrhfwjn6xva5wn8hks3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g193",
+      "title": "Invite: Fasset AGM",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kstjaggthw5mcv08tvcv09"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g194",
+      "title": "Why is Gen Z revolting?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kwdxpcdzwjcsvb8fw0d85m",
+        "art_01m5m0pxzpq87vya14391608cv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g195",
+      "title": "Melania Trump has helped broker ceasefire in Russian-occupied Ukrainian town, says White House \u2013 as it happened",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kx94spfvkjg901jypwg3k7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g196",
+      "title": "France mounts major security operation for fresh wave of protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kx8fdztend54d34qnnvvv2",
+        "art_01m5mg4wf254akre736g0k3m3d",
+        "art_01m5mg52ekewe36qp44n69qaxp",
+        "art_01m5mv9qhv0wewvx7b0f6rwbjp",
+        "art_01m5mxw54dgrt69tddmkmbx9c9",
+        "art_01m5n867se1hr12gagcmpqn0w6",
+        "art_01m5ndad80q89bmhp9zdvxkhec",
+        "art_01m5njfh3kmmqa0fmm6byy5a1a",
+        "art_01m5p3n1akc5hpgavecfx54c4n",
+        "art_01m5p3nty7dx6dnde3pnbzpce0",
+        "art_01m5p685ms9b8snpk8sxf9qs0d",
+        "art_01m5p685m0cweejxgaafgj9tvq",
+        "art_01m5p67v7ekeg1r85m9dwzrda2",
+        "art_01m5pag0zj65dagnzkj35889jd",
+        "art_01m5qejgtpy2wdeq4zczhxckkw",
+        "art_01m5qfdr1ftm1dzv17c5n9pmns",
+        "art_01m5pdxxmgzn6wmcqfj0taz70g",
+        "art_01m5pdxzm78x7pkzwwca27q93q",
+        "art_01m5pfn37rsydfrz446h3yvckz",
+        "art_01m5pggp53gv6p20xjdwdpkb9r",
+        "art_01m5pj7mq06x00y3px3h9fhypa",
+        "art_01m5pj7fsm795kq2axcz7bd9zv",
+        "art_01m5pmstr2279y9sstejvxvtyj",
+        "art_01m5pnndtrr3v7fjzrgc2n1r2f",
+        "art_01m5pqd23k21p18nqvwb0nb52s",
+        "art_01m5pqcgj60c63pg5jrm4vsx4a",
+        "art_01m5pvp140z5fv3vr8ztk5pa32",
+        "art_01m5pwhbx92cgabp6j4svxjh4z",
+        "art_01m5pzz7kwyj3d89qtmmkq16m2",
+        "art_01m5qb4hm042p4hmpqp37yr873",
+        "art_01m5ps34868yr4d6s71szv8xcd",
+        "art_01m5ps3j442sabyd2z17bc48mp",
+        "art_01m5psynqppnk2r5x8f9z1aem5",
+        "art_01m5pvpcv395e1t970fr5h9ysa",
+        "art_01m5pvp807hdq3fmefbvy57h57",
+        "art_01m5pwhns8rvm91v6cdd2c6jjt",
+        "art_01m5pzzgkv6vcgs6wwvw6kktxy",
+        "art_01m5q1q4dwq1yda0cft3ysw96s",
+        "art_01m5q7pc3sfyfhgg1601rv0fxh",
+        "art_01m5qh4p5mxp0gac4j1m28carj",
+        "art_01m5q9drsetpe8sxyfcnnrpdfz",
+        "art_01m5qg9n8s80pv8aj5ezgazg6e",
+        "art_01m5qdpptjb5ytr8j81ftcnb2f",
+        "art_01m5qejf1qcvvyens2eya2m10x",
+        "art_01m5qejzgz0tmjwragp8h3fr28",
+        "art_01m5qejzfwaeyatwbzk63jxhdm",
+        "art_01m5qh58q6ke6841sx6vn57zc8",
+        "art_01m5qj0qw5kcfy0n9pze81vn62",
+        "art_01m5qj0n74aehxgvs4t8qatc6f",
+        "art_01m5ra0wn78eahqk7nnfvavasq",
+        "art_01m5qjvmbhxa6dg6dh983bjw2h",
+        "art_01m5qkq8ajx7xyakt3eett3sf3",
+        "art_01m5qq55zg37gec4hkb610jjav",
+        "art_01m5qrvctagggk2m39ey1xe64s",
+        "art_01m5qw9pv39qrkgecpzfqha741",
+        "art_01m5qx4k8zd7ybhqnkbzkxcjzd",
+        "art_01m5qx4hnvk11tx3tqagxb7k72",
+        "art_01m5r6k5vk7a4n8p0nkrsy5yn4",
+        "art_01m5r95trzf5wmy38agt7xwv5f",
+        "art_01m5r4w2ygxge8reg7f4pftk7t",
+        "art_01m5rv6pzedgcpxz2rrv96zb96",
+        "art_01m5s16ttxs91nq9pdfdcc24s6",
+        "art_01m5s2wvb0mzhqrgyrkhkyce06",
+        "art_01m5s6bh4prqcrzx4r72fpb9dd",
+        "art_01m5s76wv846bndbfq0ghtkjpp",
+        "art_01m5s76wtaz2hax0sh5cg61bdz",
+        "art_01m5s9rw4s7k8e5hxsw09qg57r",
+        "art_01m5scb48ym1y96rapbvxph0dy",
+        "art_01m5scbq0m6j6m9dkrd1qzx7qb",
+        "art_01m5sfsb3dtytfxf7gcm7dcwtm",
+        "art_01m5st3nz6b31kr5av12pq1nbz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g197",
+      "title": "Terror investigation underway after drive-by killing near Paris",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m39ayb8wb0sv5kd0zge65c",
+        "art_01m5m5vdc6n4avc85g3k7f8gx9",
+        "art_01m5m7jbveewdywwa8b1gmynqn",
+        "art_01m5m7j62737sak21txb01et2q",
+        "art_01m5m8dn5cky92emzkza7wnehg",
+        "art_01m5ma4ns0cqacr6bpdrhszj02",
+        "art_01m5ma4y161aebvw1bf8hw1gwt",
+        "art_01m5mp5qwhhc3m9dqyrj926vh5",
+        "art_01m5mw4x6rezp3shvregy5zes0",
+        "art_01m5n91bps0qbs5g2qfy6b2jqc",
+        "art_01m5pszm8a9v8apfwnsznxsprq",
+        "art_01m5q1q4g8wj9r5pb318nvbr32"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g198",
+      "title": "Fu\u00dfball-Bundesliga: Kr\u00f6sche-Abgang: Was Eintracht-Trainer Adi H\u00fctter dazu sagt",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m5vcfn07c4g2df4zzsam9z"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g199",
+      "title": "\u201eSchwerdtner zeichnet ein Freund-Feind-Feld mit Polizei und Medien \u2013 das verwundert\u201c",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m6q6kfpmnqnnt5rfbrnh5q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g200",
+      "title": "Leaked trove reveals extent of far-right AfD\u2019s efforts to court Trump and Maga allies",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m8e60tpt4vh3zqd443mqd8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g201",
+      "title": "\ud83d\udd34 Live: France\u2019s Macron arrives in Trappes after \u2018racist terrorist attack\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m7jq6885pxbnczd7at6y6w"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g202",
+      "title": "\u2018An orchestra being gassed should be an alarm signal\u2019: the musical activists targeted in Paris",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mb0re1s9794yyqe1fm6bg3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g203",
+      "title": "Proteste gegen hohe Lebenshaltungskosten: Italiens Sicherheitsbeh\u00f6rden verst\u00e4rken Vorkehrungen vor Protesten",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mb04e1p1v163h4p80rajna",
+        "art_01m5pd305apmsghj66dme9wdte",
+        "art_01m5pr82ctfxwafqdrkyn569ee",
+        "art_01m5pttacvyy5d3yxdw8pptc3e",
+        "art_01m5pxd4twfr4ksttwv1mn7623",
+        "art_01m5py8byn13qkt04hhxr7ts9p",
+        "art_01m5q8jtq6a7esmqmwn8z5jy7s",
+        "art_01m5qejze9ygetdmte7t14ysjz",
+        "art_01m5qvect8awxb1amzjg9xh2cs",
+        "art_01m5qvdne2m3n8q59wnk99z1kk",
+        "art_01m5rkfm8n3g3tmrr9368p4mnn",
+        "art_01m5rmapr68mh2ektcgmjsab97",
+        "art_01m5rzfzkq2qnpha7z2f39shp8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g204",
+      "title": "Stockende Tarifrunde: Verdi ruft bundesweit zu Warnstreiks bei privaten Banken auf",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mdjgm3zwdzdfzrns69nm9k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g205",
+      "title": "King Abdullah condemns 'terrorist attack' at Jordan church that killed eight",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mme6bc9ps2wy4a16zmbzhd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g206",
+      "title": "\u00abTerroristische Tat\u00bb: Sch\u00fcsse in Frankreich \u2013 was wir wissen und was nicht",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mn9v7h1ayxh2chkj7p51kh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g207",
+      "title": "US State Department issues warning to NFL fans in Paris ahead of game",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mna2yk6b9rtk5r854sxr2a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g208",
+      "title": "\u2018Foreign policy is the economy\u2019: How Iran war is shaping US midterm vote",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mrqsjqdd34efpe828aqzpp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g209",
+      "title": "State Department says Trump is 'spot on' with France protests after Macron decries 'stupid' comments",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mw5jb3jdp0906495vfse76"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g210",
+      "title": "Israel: Could Arab parties play kingmaker in the next Knesset ?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mw5gh2tskzjhzm2367mvwk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g211",
+      "title": "S\u00f6der wirbt f\u00fcr Aigner und Kampf gegen extreme Kr\u00e4fte",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mxw286a4b6j8fa14t2nm5t"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g212",
+      "title": "EXCLUSIVE: French President Macron cancels scheduled visit to Nigeria",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n19wgtv7rfenkcxbwmxmh5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g213",
+      "title": "Trump questions NFL\u2019s decision to go ahead with Paris game",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n25j6w9xa14qgc9rvjagrt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g214",
+      "title": "PF acha nota de Willer Tomaz citando indiciado no caso Abin Paralela e \u201c180 mil d\u00f3lares\u201d",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n9wyfjmx6p4nn1xs0a3mzs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g215",
+      "title": "Bild: Hitlers \u00ab\u00d8rnerede\u00bb st\u00e5r i flammer",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nbkk0avzak9w8z8242wbv1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g216",
+      "title": "In Florida, Trump vows to deal with Cuba after Iran gets settled",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nn1wm8b437wny7dvd63v85"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g217",
+      "title": "September industrial production rises 19 percent",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mte1q99pnjfw8n00e0m8bs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g218",
+      "title": "Rubio tells Cubans \u2018now is the time\u2019 to act to see political change",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nnxwjsbg9r15y0jxwcjyqt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g219",
+      "title": "We the peoples",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5p1ykscdrhveb320x2b7ykr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g220",
+      "title": "France\u2019s luxury stores board up windows ahead of fresh protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pag2bqcyvh4cm9dkbsydxn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g221",
+      "title": "How luxury brands can rise from the ruins of the riots in Paris and why you should consider buying shares when others are fearful",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pbbs876k2nefhj59ns6sp8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g222",
+      "title": "Kim Jong Un tells North Korean army units to prepare for 'new-era military build-up'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pd28qq7e9x0nnadb4t31bq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g223",
+      "title": "How a Small Student Protest Spread Across France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pnne9vhn63v5q1tfdjcrp5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g224",
+      "title": "\u201eUnsere Arbeiter gucken wie die in Deutschland zur AfD nach rechts\u201c",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pr81e301p4pkz88nbekvjz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g225",
+      "title": "Wrestling-Legende im Krankenhaus - Gro\u00dfe Sorge um Ric Flair",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pr873am6ynbvtrg9tb0gxg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g226",
+      "title": "France: Young demonstrators demand concrete action from Macron",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pvpcte899kbbbbcbbfhprk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g227",
+      "title": "10/24: CBS Saturday Morning",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qfdxn2e32ayvqag7tw8yg2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g228",
+      "title": "Angriff auf israelische Firma: Mehrere Hundert Menschen bei \u00abFree the Ulm 5\u00bb- Demo",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q7pcake4skkge9495ntw73"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g229",
+      "title": "Abschiebungen: Mehr als 700 Menschen protestieren gegen Abschiebeterminal",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q7pbqq1g4k1mthva90jykm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g230",
+      "title": "Protesters, police clash at anti-government demonstrations in Brussels",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qa8zja6kb93yhhq98ch77b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g231",
+      "title": "Lieber Beats als Buckingham Palace - Das wollte Prinz William als Kind werden",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qb4qg152evygnabvf1bw9n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g232",
+      "title": "Polizei pr\u00fcgelt auf Frau ein - Dieses Video heizt jetzt die Stimmung an",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qh52fa91ans6vny8rhnd9k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g233",
+      "title": "Thousands gather at new Albanian antigovernment rally",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qkr1bgvqdgr8catax91j3z",
+        "art_01m5qvefq766s9a04h0c73p6n0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g234",
+      "title": "Thousands of Israelis rally against Netanyahu gov\u2019t days before election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qq55yvvw9j6e5f1tmaqyd3",
+        "art_01m5r5rpvrrded5p9dszzc8kcd",
+        "art_01m5shgwk35e7z1tgdc6v8qq9n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g235",
+      "title": "Ukraine hat Musk zufolge Starlink f\u00fcr Offensivangriffe genutzt",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qx4r4ccaxey1ftz3fxs4a0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g236",
+      "title": "Expert discusses deterring transnational repression",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qcvesfd21n76j6dqhjqs9f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g237",
+      "title": "Violence breaks out across Europe after another day of protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5r968r7mqneg3bm0kdw9cxq",
+        "art_01m5ra0wc5dtery802ck2a23ph"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g238",
+      "title": "S. Korea's Q2 current account surplus ranks 2nd on robust chip exports",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rckb0kpvs7cpkbg2dyecew"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g239",
+      "title": "Will France\u2019s mass protests and riots spread across the globe?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rn6htepw6zm1bbadx7twnm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g240",
+      "title": "Car crushed by tree limb, lightning and 98 km winds in SA",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rgxp3qgqh2mdw6qty347et"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g241",
+      "title": "Albanien: Gewalt und Chaos bei Protesten in Tirana",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rgx4ecz0z3rpjaqr6b348a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g242",
+      "title": "Portuguese police clear Lisbon housing protest camp, make arrests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rjknwqxwzrak85262jhh8a"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g243",
+      "title": "Thousands rally in Turkiye over journalist arrests, media shutdowns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rmbkhwwrph636m4yn05hrh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g244",
+      "title": "\u2018They should leave us alone and go away\u2019: Indigenous leaders protest against nature conservation projects that are forcing them off their land",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rpxv2yypcbxz8qg0p5060e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g245",
+      "title": "A dramatic bear hunt in a midsize Japanese city could be a harbinger of what is to come",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rn6hq2n0xgyp1x7cyyvxp3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g246",
+      "title": "Security Sunday: Bringen Frankreichs Proteste Marine Le Pen an die Macht? \u2013 mit Martina Meister",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rtbskpsjjvkgazjgyh0td6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g247",
+      "title": "Cocaine-linked crimes on the rise in Britain as consumption surges",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ryn6kw5q4tdnh6kj20k26x"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g248",
+      "title": "Indian protesters clash with police over dam project bordering China",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s220zbppyk3k1zh87h44tg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g249",
+      "title": "Heute Cl\u00e1sico - Problem der Real-Kabine! Ich denke anders \u00fcber Yamal!",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s826hz43dn4bbrcep9bx4n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g250",
+      "title": "Schwindel und Unwohlsein: Fr\u00fcherer Bundesligacoach Seoane vor\u00fcbergehend im Krankenhaus",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s9rw6nksyk5z4nhy38a207"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g251",
+      "title": "More than 1,300 arrested and 50 police hurt in violent French protests - as National Rally's Marine Le Pen to kick off presidential campaign with rally speech",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sey6qcz4barb2698c8y01n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g252",
+      "title": "French protest groups demand more rallies as Macron faces tough choices",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sgmp25pvaj4y6smtfst3d2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g253",
+      "title": "The week in pictures: Protests across France, wildfires in Indonesia and Brazilian elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sjc7era4t7710aecgyk11h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g254",
+      "title": "Herbststurm: Zwei Sturmtiefs halten Feuerwehren in Atem",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sjbqtcyqyh5a3ps8bj9g4e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g255",
+      "title": "Portuguese police clear Lisbon housing protest camp, arrest 25",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5smyvhba0jzy7acvxkcr28k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g256",
+      "title": "How is the US-Israeli war on Iran causing havoc in Europe?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5st3r43jm98xzc5je031vdd"
+      ],
+      "confidence": "model"
+    }
+  ],
+  "provenance": "model-authored from the settled production Story graph; not human reviewed"
+}

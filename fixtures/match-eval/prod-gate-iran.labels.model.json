@@ -1,0 +1,3026 @@
+{
+  "set": "prod-gate-iran",
+  "guide": "docs/story-granularity.md",
+  "groups": [
+    {
+      "id": "g1",
+      "title": "Civilians trapped in Russian-occupied Oleshky have no safe way out. Ukraine says it\u2019s negotiating with Moscow to bring them directly to Ukrainian-controlled territory.",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5addvjamqsnp2c5fn2rz8h0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g2",
+      "title": "WATCH LIVE: Trump heads to rally in Kansas as Republican voters' frustrations deepen",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ae9b3svgf6ann242wv26sw",
+        "art_01m5ahq1942ma7zc3ynbbqrtah",
+        "art_01m5bgkpfvgba9w1j4p45pjprf",
+        "art_01m5c8nsr42dz1gs17ys38dms3",
+        "art_01m5ddjpctfrg5nm7jjw329ezn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g3",
+      "title": "Israel to resume commercial shipments to Gaza after Hamas fee dispute",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ae9ncp932d9v9rv7dgmcex",
+        "art_01m5aht9m7j3w2071ddks5ccnz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g4",
+      "title": "Trump endorses Netanyhu ahead of elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ag18f016wbqj4skhmds287",
+        "art_01m5an5ppt64mp9vvey4gs9fgp",
+        "art_01m5ata1bhv53mgf1kygz3dypa",
+        "art_01m5brb63g4605d4eec0wgkcw5",
+        "art_01m5d0pkrjv9ny8ekqyahmp7zn",
+        "art_01m5deesc68vy30wyfcsstfq55",
+        "art_01m5djpvv64r5wc27ft5mpv00t",
+        "art_01m5fxct39d2ay9wg764bexqd0",
+        "art_01m5j2xjfnrd5vn9x248gxkd4q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g5",
+      "title": "War on Iran backlash threatens Republican control of Congress",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ahtt3xx7edmaz79hx47745"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g6",
+      "title": "What will Russia and the world look like in 2038? For Meduza\u2019s 12th anniversary, we asked 12 people to share their hopes and predictions.",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5an4n9m352mfx36vm0t52cx"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g7",
+      "title": "Benny Gantz drops out of Israel\u2019s election race",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5apwtqjmass8w3n1rqwe7sc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g8",
+      "title": "Netanyahu\u2019s new security doctrine: Regional strategy or election ploy?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aqr7gpp8sttsy8x7vj67ma"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g9",
+      "title": "Lebanon to reject direct military co-ordination with Israel at Florida talks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aseqqvd9np15z12b3egn3z"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g10",
+      "title": "\u00abAcaben con ellas con gas\u00bb: Abuso y represalias dentro de una prisi\u00f3n de mujeres en California",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ase225nyq9kd5a9r232960"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g11",
+      "title": "How Iran war votes in Congress became a focal point for campaign ad attacks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5av5ew1cegq7xggzp4104f9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g12",
+      "title": "AP source: Eagles QB Jalen Hurts expected to miss rest of season after blood clots found in lungs and leg",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aw0w6bc0ja041v77k9fb2r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g13",
+      "title": "Pakistan army chief Asim Munir to visit Tehran on Tuesday",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aw15ddpb9za4q4wgg04qxr",
+        "art_01m5cyzmpdhsfgrd3axhzjn8qq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g14",
+      "title": "Wyoming Environmental Groups Debate Best Way to Manage Data Center Growth in the State",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5aym02qzyqz5kcn8v1sr5cf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g15",
+      "title": "Trump faces bipartisan backlash over waiving Russia sanctions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b09z25m8zzyy2z1n7va8ps"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g16",
+      "title": "Zelensky lobbies senators to press White House on alleged intel and weapons curbs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q0q6s3z8shdsrdqw9agq",
+        "art_01m5cwckjpdy0nnb495wkgnka6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g17",
+      "title": "US allowing 'dark fleet' oil tankers to ship crude, Energy Secretary says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b2x2by16pvvax4q4t9s72y",
+        "art_01m5ddjr0j3zbj1n4zhtd7w23e",
+        "art_01m5kc2y3e9xkvgvsz6ez8hkfn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g18",
+      "title": "Beleaguered Macron cites US-Iran war as factor in protests amid Trump, Vance criticism",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b3rq3826c295mrh3a6z6t2",
+        "art_01m5fd2jx3k1b335kb09es7dye"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g19",
+      "title": "DOJ charges 28 in California with voting crimes as election tensions escalate",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bk5w676m0f2h1t3gsc15mc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g20",
+      "title": "Hegseth meets Netanyahu in unannounced visit to Israel: Axios",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5b6azccy7p83107p8s1m50k",
+        "art_01m5bhg012cczxx0arwpt236hk",
+        "art_01m5c2n3h2713njpnt6y11edx1",
+        "art_01m5b9qy5rvjqh9ztft779x7pf",
+        "art_01m5bm1x45gwrp9esh8f2fzn19",
+        "art_01m5c1smkn1tyrg93xen5p2z0w",
+        "art_01m5c8ndaqzbb0vev7tzwa1550",
+        "art_01m5bbfem21ar16pm4revr4ddr",
+        "art_01m5d0q0nkv283c9kp529g3pgv",
+        "art_01m5bxg349emn3xf8fveybkz11",
+        "art_01m5c8nsnj5w18rgxrczs60w7g",
+        "art_01m5e7ad7edxeatm3gdcsjd2fe",
+        "art_01m5fky359hrk07gdhej17vnqe"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g21",
+      "title": "The affordability question Republicans can't escape",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q0p4hd834jw976tzpxxf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g22",
+      "title": "Iran war live: Qatar says Iran-US talks ongoing",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bbfemw5nyxrq20033wdjrf",
+        "art_01m5gvdeg5vft6t6eex8my64r5",
+        "art_01m5fzys06jb8zh5f0ddqf542h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g23",
+      "title": "A runner, nanna and trailblazing MP, Helen Haines's life changed in an instant",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5be10dxxcbr53g3mv8vv8zm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g24",
+      "title": "Houthis inflict major losses on Yemeni forces",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bk69d8d87kprkgyc6mzcd5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g25",
+      "title": "US midterms: Iran war and cost of living put Trump\u2019s foreign policy under pressure",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bmxdn55ae8y47jx6qjk175",
+        "art_01m5mrqsjqdd34efpe828aqzpp",
+        "art_01m5p67s2e15ew313dhyxv2jpp",
+        "art_01m5qkqy93rv8mwmpr37m6r1q6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g26",
+      "title": "Vance declines to endorse Netanyahu after Trump offers full support for re-election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bnrg4v3cx1g8df9fdfcs2w",
+        "art_01m5cst37csz2sgbqs6ybt4tvj",
+        "art_01m5ctnb9e0tj83gwnz390qdfw",
+        "art_01m5d0qcwcaqt6j3gepp20m08g",
+        "art_01m5drq04cw82vdqj0vd2fyy7q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g27",
+      "title": "The Human Fingerprint on Earth\u2019s Water Cycle",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5btxd36786vtkjd7h5q6csm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g28",
+      "title": "Iran war latest: Hegseth makes surprise visit to Israel as Netanyahu tells Trump 'we have job to finish'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5brb43ew237en98ex4jfdvs",
+        "art_01m5btx572fm8jrvd0bvsvyvxt",
+        "art_01m5ch76dd7qh5e092b7tr083y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g29",
+      "title": "Middle East latest: Iran says supertanker 'exploded' near Strait of Hormuz",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cgcvamcnamez5qm1sgjq7h",
+        "art_01m5cksmk9mbymxde0wjx0y5cw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g30",
+      "title": "Trump & Pakistan",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5brb4v7qwxaepbjbt9w4fhj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g31",
+      "title": "Macron talks energy crisis during UAE visit, WFP to cut Gaza food aid and Dubai tests autonomous wheelchairs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5bz75cp9fx8zq61tragsxy7",
+        "art_01m5cstevyg0dra7tfmn178rdx",
+        "art_01m5fdydna6tj243z5pdbr8xfw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g32",
+      "title": "US-Ukraine relations sour as Trump, Zelenskyy clash over talks, arms",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c0ypwax1tv084gencgwfrn",
+        "art_01m5drppm7rrj7vj5p3e8avnj3",
+        "art_01m5s8xaxn9wymsy2hfw2smdj2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g33",
+      "title": "On Israeli election eve, settler violence becomes Netanyahu liability",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c6ydwfyb8t39amx70068sy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g34",
+      "title": "UK national security adviser\u2019s wife Sarah Helm calls for Palestine Action ban to be lifted",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5c8nh93w34498j247phx5ah"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g35",
+      "title": "PM Shehbaz ready to build consensus on counterterrorism if opposition willing to: Sanaullah",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cacb4k4a5bxqrvfkh9y9n9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g36",
+      "title": "Rubio lands in India for 'trade diplomacy'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cc3845egrfme172rkk89nq",
+        "art_01m5cj2sxggtfzwj2ptcfyt8dp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g37",
+      "title": "Extraordinary footage shows Ukraine carry out first ever drone airlift of wounded soldier from frontline",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pcgxpxxa1wm7gcnyrmnk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g38",
+      "title": "Iran and Gaza: Why Trump's backing of Netanyahu may come with strings attached",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cvh5k71ap7a84rkx3vav88"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g39",
+      "title": "Iran prolongs talks in stalemate to influence US midterms, officials say",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cenyjcw7vazack8v38sabw",
+        "art_01m5cgcxh1nnrw879n2dt80a8a",
+        "art_01m5cfh7ewd0jvadwxy5zdxgxv",
+        "art_01m5cgc9tyx8vggh223bwhhaxj",
+        "art_01m5hqr8nsxcgz844qc05jpvw3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g40",
+      "title": "New ECOWAS Court judges pledge judicial excellence, integrity, effective justice",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5centqbbv6t1jh6hq28egrd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g41",
+      "title": "Masoud Pezeshkian: Peace, Not Surrender",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ch7s4gh783g9gzbh9883w7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g42",
+      "title": "Teenager among four killed in Israel strikes and gunfire in Gaza during 'ceasefire'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pcdzh7pzytk636wh9tfq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g43",
+      "title": "Iran regime under pressure as rebel groups escalate attacks in volatile southeast",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cjyj85n7pkbbbax52dbvjt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g44",
+      "title": "US peace talks off without sanctions removal, Iran tells Pakistan",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ckssfvr8vgkd3d39kajykf",
+        "art_01m5d441cg5ja1emn5wfq5t7dz",
+        "art_01m5d6r3gy2he7kmnzyq93nzph",
+        "art_01m5d6rhx1jadhz05k8m0ewv1m",
+        "art_01m5db0998j6w3adx90897evbc",
+        "art_01m5e4qywnkmv2zcgk87mbh9hb",
+        "art_01m5fd2x413qgs958e5n1h652a",
+        "art_01m5fz47rtjjkgvktvvd31e898"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g45",
+      "title": "Iran says Iraq has agreed to expel opposition groups from Kurdistan region",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cksse2440sf4jnrrwb1ez1",
+        "art_01m5d0ptekgx0n9r9d6s38d5fc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g46",
+      "title": "Trump isn't out to hurt Ukraine, Rubio tells Zelensky",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q0df3etzq5b72w68wsvh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g47",
+      "title": "Man arrested after historic town hall in France burned down during night of riots and looting",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pccy0t6rj9cq2fj33x4b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g48",
+      "title": "Iran denies collapse is close as US claims IRGC running out of money",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cnh5gjkk22zfjct9vbj12c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g49",
+      "title": "\u2018I don't recognise the country I grew up in anymore\u2019: Some Israelis tempted by exile",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cq85jxky97rss2f7bmykmk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g50",
+      "title": "No cancellation of planned FDI in UAE this year despite Iran war, Ministry of Investment says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cr369hhnjma1091pcr1rrw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g51",
+      "title": "Opinion polls suggest stalemate one week before Israeli election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cr363ydc7vp40j2hnfh9rq",
+        "art_01m5hyk1wyg2kndagdx7k3daew",
+        "art_01m5nyg5z9y7z3e8h9vb4bzxes",
+        "art_01m5p2srsed3960hng92anf42n",
+        "art_01m5rrm3jerx519x64m4recd7k",
+        "art_01m5s5fg3fcs71wk83te979bhs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g52",
+      "title": "US envoy Barrack defends decision to join Israel in war on Iran",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5crzb27nxdhk6kw6vw54e63"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g53",
+      "title": "Halloween costumes 2026: From Pitbull to Bad Bunny's bushes, seven pop culture-inspired looks to try",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cst72vwvvvr67qxrt42sxa"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g54",
+      "title": "US officials are actively prepping states for Trump interference in the midterm elections: report",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0pc48xm5tq1yg5ekmz7j9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g55",
+      "title": "Nuclear watchdog praises UAE response to drone strike on Barakah plant",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cx89f2eg37sp05z9286jg0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g56",
+      "title": "IRGC claims it downed US drone, set two tankers ablaze near Hormuz",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d43s58w1rbwwbsf7pknm4y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g57",
+      "title": "US midterm elections: Trump approval rating falls to new low",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cztqz32qn0n013vbvxzmsr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g58",
+      "title": "UN demands aid access to besieged Yemen city Taiz",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5cztmy8yt8fy9g5vtb4mzfq",
+        "art_01m5n19nkdjpn4ccxmcjrbs07y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g59",
+      "title": "Germany news: Hackers release AfD party emails",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d0q0wfbfvt97b8eed5ddcd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g60",
+      "title": "Lavrov backs Tehran, but does Russia also gain from the US-Iran crisis?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d2dfwga63jphtf4t51zs40",
+        "art_01m5dbvkrn8btvq7n7e3t2tdba"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g61",
+      "title": "Sheikh Abdullah joins US and India counterparts for talks in Mumbai",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38790wrbwq60196j1ksqj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g62",
+      "title": "IRGC mines set tankers ablaze as Tehran threatens expanded attacks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38p6wtwev9nv3pbv37qkj",
+        "art_01m5j5f4nz7khwryacrs01xz3g",
+        "art_01m5myqg92x7kgm8b2feqet2gq",
+        "art_01m5nprk29dwbxvt9yhh3hcvg7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g63",
+      "title": "Egypt weighs sending troops to Saudi Arabia in war with Iran-backed rebels",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d439fz3fvnvqxrftfvkztt",
+        "art_01m5f2sdhqwe8cpynyrpm1e0rr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g64",
+      "title": "Jerusalem Daily: half a million Palestinians lose food aid",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d4zwh7v2fh8jxhn6t8ehz9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g65",
+      "title": "Two men re-arrested for suspected spying for Iran in airbase scare: UK police",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d4zctxjwcxdbxarb8xcfhg",
+        "art_01m5d5t4ysq8ykxmv2gzk1q73h",
+        "art_01m5dbvv8eqkpmsfsnvgn8ka1b",
+        "art_01m5df997wfhmtj9b3v4h59g7j",
+        "art_01m5dg4ptdvfeg66ewc6m9ajyc",
+        "art_01m5mw4sbwnhvjegzy3axy0xqh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g66",
+      "title": "Middle East latest: Pezeshkian says US must recognise Iran's rights before talks can resume",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ekb8q1az99bv1scz9a6v06"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g67",
+      "title": "Iran\u2019s security chief rejects moving enriched uranium out of country",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d99bx0wbnfcfwaekhrn47e",
+        "art_01m5f8t70t5b9625pkmx2tkce6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g68",
+      "title": "Sea mine crisis re-emerges in Strait of Hormuz as Tehran urges Washington to accept deal",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5da51atbk7mrg6v2jxtzcgm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g69",
+      "title": "Iran not an 'evil regime', US ambassador Tom Barrack says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dbvv9kdqhkgm6pdxn31zmk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g70",
+      "title": "XENOBAROMETER: Locked out of state clinics, Durban\u2019s sick migrants turn to a last-resort lifeline",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d5v1gn9cdpcz0nrqvypb1q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g71",
+      "title": "Italy unleashes military response to violent riots as France faces a reckoning of its own",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dcqb1a8gkr1avfynby68qp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g72",
+      "title": "U.S. ramps up warnings to Americans in Middle East after Houthi strikes",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ddj2gwjp8gwxwncvsg30ye",
+        "art_01m5g0tmhqnjf0znptm3vr56qb",
+        "art_01m5g48qdpj3nb6jft4t13gtsh",
+        "art_01m5g54nwq1tve1v49tbd0111v",
+        "art_01m5g5zpbrjwbwe332bsz4s699",
+        "art_01m5g6tgbe5mw324cyaymjfhx0",
+        "art_01m5gdpmgpz0gdkdmphk2qa0j6",
+        "art_01m5ghzk4ns8x2bh47y046y6xd",
+        "art_01m5h959v9cg63pdx9shpggvt7",
+        "art_01m5pc6tw0x4ns0gtwy2enpqnh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g73",
+      "title": "MAGA foreign policy is a mess. Democrats disagree on what comes next",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fesby8j0hrtqgvrw4st9e7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g74",
+      "title": "Why the war on Iran could backfire on US regime-change goals",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dhvkbeemfrvhdd7sbe303p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g75",
+      "title": "Iran says Saudi Arabia, Houthis have not answered mediation offer",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dmdphhvcvc8db0kd27ygsj",
+        "art_01m5dn9eqtz296ke0rrdzr1536"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g76",
+      "title": "Bill Clinton campaigns in Florida for Democratic gubernatorial candidate David Jolly",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dqva64vkyf368qz21b4yvs"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g77",
+      "title": "Witkoff to present Putin with peace proposal after talks with Zelensky",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dsjsqk2204wr6v88062fd5",
+        "art_01m5et5zbmgc7fg1vz87awsssa",
+        "art_01m5fzzge911rxzpy1ekg2st57"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g78",
+      "title": "Brazil again accuses Milei of election interference after Lula remark",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dv9phqbt1csn0w2zz7dx4d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g79",
+      "title": "Deportation too lenient for threats to president",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5d38czbag2ww8k9j3p5gb2h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g80",
+      "title": "Iran war live: US warns peace deal with Tehran is extremely difficult",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dx12gxre450jnjgkrnrpw3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g81",
+      "title": "Israelis abroad fly home to vote, posing threat to Netanyahu",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5dxvr9bm86tsrs79n5tmrkh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g82",
+      "title": "Trump pleads with voters to 'please' pretend he's on ballot as GOP struggles to gain momentum in North Carolina",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5e25b1kg2d0nphbd8ga3fvb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g83",
+      "title": "Uganda reacts angrily as Nigeria confirms its first Ebola case",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5e3wssx0hzkha8wdxvy5hpa"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g84",
+      "title": "Oil rises on Middle East supply fears, US inventory drawdowns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ebkrkwpagyfwjxd6k3x565"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g85",
+      "title": "Dollar treads water as Middle East tensions simmer; Aussie buoyed by hawkish RBA",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5egrkx3mmxrwg37qhvgxh8b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g86",
+      "title": "US envoy to meet Putin after 'positive' talks with Zelensky",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5e4r1408e5x0qdf6jp0wxcf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g87",
+      "title": "Implementing the Lindsey O. Graham Sanctioning Russia and Iran Act of 2026",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ef25tfc51pgqy5tqv2z8t2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g88",
+      "title": "Signal No. 2 up in Batanes due to Super Typhoon Rosal",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ebma4fewrm05yea1m2tdf8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g89",
+      "title": "The Election Israel Has Waited Three Years For",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ee6gkn9jd8sqdd9t1hxgsd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g90",
+      "title": "Anthropic posts $80bn loss in first half of 2026: WSJ",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5efxvft9vew04vntrrnm79t"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g91",
+      "title": "Starbucks Hong Kong staff labels South Korean customer \u2018Kim\u2019 as \u2018Kimchi\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ehm5vywq9prcbebq83n4p4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g92",
+      "title": "Transboundary haze law possible but enforcement a challenge, Malaysia Parliament told",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ekb9h1cqfkp01wpdjwhph1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g93",
+      "title": "North Korea tells border troops to take 'resolute action' if South threatens their safety",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5em5wmc2nyqttj1mk68kna1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g94",
+      "title": "Iran clings to demands even as threat of renewed US-Israel attacks grows",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5en18p2hhpahwpqqf1g8x9e",
+        "art_01m5fc6w4he8taer3sameytdcn",
+        "art_01m5h34z7j4r67e12zrt3535zn",
+        "art_01m5j21cdrqgrqp0qyx8p1yj2n",
+        "art_01m5jxg5nm4q39sm5w3247me25"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g95",
+      "title": "Ukrainer k\u00f6nnen Drohnen kaum einsetzen - Musk soll \u201eStarshield\u201c-Drosselung angeordnet haben",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5eqke3sz79m19tqwf3pq8tc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g96",
+      "title": "Iraq closes major border crossing with Iran over 'security arrangements', says official",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5esahsb0pvpdt1h8zcb7m21"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g97",
+      "title": "US sanctions target Iran's rail sector as Tehran shifts cargo from sea routes to overland corridors",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5et63w02k6sje6bbza6rz4q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g98",
+      "title": "Neues Eckpunktepapier: Besserer Versicherungsschutz gegen Naturkatastrophen geplant",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5et5f6vg8egytdfv8c1ya89"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g99",
+      "title": "Palestinians Hope Israeli Election Will Oust Netanyahu",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ev14w7k618ztp3hnn19yjz",
+        "art_01m5rv72gcggn3a26v6kecre82"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g100",
+      "title": "Sultan's state visit: King Charles praises Oman's 'noble efforts' to keep Strait of Hormuz open",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ewrp4rmm5w19t8bjf3tbrh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g101",
+      "title": "Putin agrees to resume three-way peace talks with Ukraine and US in November",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ewrscg71hj6br60yzz8383"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g102",
+      "title": "The GOP has a midterm messaging problem. Ramaswamy isn\u2019t helping",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5eyg4sg2jp5eq9ew5ycbtfw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g103",
+      "title": "Schon heute auf RTL+ - So geht es n\u00e4chste Woche bei \u201eUnter uns\u201c weiter",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5exksp2sqbbaqr2q3sq2py5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g104",
+      "title": "Non-Iran Middle East oil exports recover to prewar levels with Hormuz alternatives",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5eyfetkh34wjanzyngcpbsm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g105",
+      "title": "Yemen's Houthis deny launching drones towards Saudi Medina on Wednesday",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f1xhdm60d8m9cx62x7fghn",
+        "art_01m5gqzvkbjqg0eawtembeg3x9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g106",
+      "title": "What You Can Learn From My Skin Cancer Diagnosis",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2rndp486dtass3t4rgya2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g107",
+      "title": "How Saudi Arabia's defense vulnerabilities could become Trump's problem amid Houthi onslaught",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2s6tc6cwn0v28p01njp7g"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g108",
+      "title": "Putin tells Witkoff he is ready to resume direct peace talks, Russia releases U.S. detainee",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f2s2fhes6dcqwz48da707d",
+        "art_01m5f2rtf419a68k8s62jmjp1z",
+        "art_01m5f5bmbfptjx9c0efy4fzvmn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g109",
+      "title": "Trump administration softens its stance on TPS amid election campaign",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f4ftqng1z4zvv7f3b5pj9r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g110",
+      "title": "US Democratic congressional nominee Lander detained by Israeli authorities in West Bank",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f5bhxev8v6kcm6m7tbaka7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g111",
+      "title": "Macron takes aim at Trump for using France riots for election gain",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f5bjqb967nb1hzt8tt82yp",
+        "art_01m5fzzgce6mztkamgcge4daxc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g112",
+      "title": "Trump\u2019s crackdown on immigrant voting in California is a ploy to influence election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f5aww2ft0d5pq5x1bcdjyz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g113",
+      "title": "Israel\u2019s election may change its leader, but not Iran war policy",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5f8stqev0p550nj84qp4b3q",
+        "art_01m5fc7kn7fg4pe36gpjcrwbz3",
+        "art_01m5gzq6tp7jmf916mk68ke0mq",
+        "art_01m5h5q1b2d8eqk17qm2rvrfj0",
+        "art_01m5hhqsrd8s8hdwx72dfabjmr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g114",
+      "title": "Trump defends Iran war, downplays high prices at North Carolina rally",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fd2k3bgbwhmgcgzw15z7se",
+        "art_01m5fvp3419zb3zppwe3479f0d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g115",
+      "title": "Hundreds of trucks stranded as Pakistan-Iran border trade suspended",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fdyarxfsrjxxsg0r1px9bn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g116",
+      "title": "Top Arab-Israeli election candidate tells AFP Netanyahu win would be 'catastrophe'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fhcgr08znmy0dh1bgrvbe7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g117",
+      "title": "Egypt's Sisi says Saudi defence role would not include attack on Yemen",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fk3gq5h4j21hk2492hrsqn",
+        "art_01m5fsyjxztszgqvzqh56983sf",
+        "art_01m5fpgkhxkjk1sysd6ckmzpzv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g118",
+      "title": "Kremlin says 'ready' to resume 3-way talks with US and Ukraine mid-November",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fky7ckgx3n7d7p1z2h6xr5",
+        "art_01m5fnmyswcf2mctxepfghz2t6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g119",
+      "title": "\u2018Bismillah, c\u2019est les t\u00e9n\u00e8bres\u2019: What does the French protests slogan mean?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fkxqtsqkjn03hz7n00kvad"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g120",
+      "title": "\u2018All he\u2019s doing is hurting Republicans\u2019: Some strategists beg Trump to stay in White House and not campaign",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fkxqsfv703v6dsacryh8bq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g121",
+      "title": "Fu\u00dfball-Bundesliga: Eintracht Frankfurt erlebt die Grenzen des Sprungbrettkonzepts",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fmrv764s4dg88kqr0zpw3m"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g122",
+      "title": "Manchin calls Schumer 'crazy' for trying to oust GOP senator in crucial Senate showdown",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fqceb40jvv68e2h16pf02k",
+        "art_01m5j9s1533cq489ppbpzmeqjr"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g123",
+      "title": "Macron visits Riyadh to show solidarity amid Houthi attacks, ease tensions at home via fuel deal",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fqc8hke42n092mwp5g32dv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g124",
+      "title": "Sheikh Abdullah discusses Middle East security with Italian Foreign Minister",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fs2w6rs7xh35g99wnbp910"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g125",
+      "title": "Israeli military conducts massive \"power projection\" operation near Iran's border",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fs304xddpks016pmwkk20h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g126",
+      "title": "Samsung\u2019s latest 55-inch Frame TV is down to its lowest price yet",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fs3he7psr80cj507mgtrb2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g127",
+      "title": "Iran is trying to \u2018create a rot from within\u2019 through \u2018information warfare,\u2019 analyst warns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fs3cd0svrh6rwj22es2c1k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g128",
+      "title": "Why can't Saudi Arabia stop the Houthis' deadly attacks?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fsy35vtbxp0pq39xaaqse5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g129",
+      "title": "US imposes sanctions on Greek, Panama law firm for helping Iran shipping",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fsyjttxqtzabsr8ht7yjsb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g130",
+      "title": "Govt reduces petrol price by Rs2.71 per litre, ups high-speed diesel rate by Re0.31",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fvnqt5bz6954dkkrsc5zpy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g131",
+      "title": "Jerusalem Daily: Israeli minister calls for settling the entire West Bank",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fxddkmcv1zrmeg4b8b4wye"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g132",
+      "title": "Bibas family relative takes fight to ICC after mother, two young boys murdered by Hamas",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fxd8z5dr37cayw8js6adjj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g133",
+      "title": "Russia puts Dmitry Bastrakov, founder of nationalist publishing house \u2018Black Hundred,\u2019 on wanted list amid reports of an AWOL investigation",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fxc4p5ax4mxf3bty23mhsd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g134",
+      "title": "Nach Lungen-OP: \u00c4rzte: Krebs bei Papst hat nicht gestreut",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5fz3gtepxck0dkccb7y6j89"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g135",
+      "title": "Cuba accuses US of threatening countries ahead of UN embargo vote",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g0v5xfda30zff091q6dvk7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g136",
+      "title": "Will Russia\u2019s diesel shipment to the US lower prices before midterms?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g54ve3jzdzng9q9n793gaj",
+        "art_01m5kac97ekmpndpsb4wzmqrsr",
+        "art_01m5kj3w6q477khmxbyry3sgs1",
+        "art_01m5ma4qrpr3v02n68sweaebpe",
+        "art_01m5mb0gcej196a3nxj62fybj6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g137",
+      "title": "Tehran displays mock installation of Trump behind bars",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g8hsyp3707cpx8zy0tvbc8",
+        "art_01m5hta7zg51mdm6wcvegbgnxy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g138",
+      "title": "Trump team asks Supreme Court to lift pause on Big Bend border wall construction",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5g7p8e73p6qvbf1v9twdeg5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g139",
+      "title": "Royal Navy lacks resources to counter Russian threat in high north, MPs warn",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gbzj016t4zv6g3v1p7yaw7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g140",
+      "title": "What happened during Witkoff and Kushner\u2019s latest meeting with Putin",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gfdh5q42rerp1cs275gdds"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g141",
+      "title": "Iran war live: Trump denies Iran talks, says situation will resolve soon",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gfdh30d6an8bn36ker1vf4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g142",
+      "title": "Israel cannot secure lasting peace while Gaza remains in crisis",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gfcwpykns4tk62d26q7vmk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g143",
+      "title": "US and Israel draw up plans for renewed strikes on Iran after American elections: Sources",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ghzme103e92tbfwtgntct7",
+        "art_01m5h4vkhf58vdqerfaee6284h",
+        "art_01m5hf5e03ke8925ndwzgbj0ay",
+        "art_01m5hpx2e24m4kjz1hpxajj5ng",
+        "art_01m5hwx8h6dep1m9jnw310x30y",
+        "art_01m5j0ah1x26km1d73dr300agc",
+        "art_01m5j4md4kk3nh7atkntry9g7z",
+        "art_01m5j82fbqjb972vv5pnq6nq7z",
+        "art_01m5jcc1fbsag9pzgm3areq99p",
+        "art_01m5k2mspjgy3eg00ymay016c3",
+        "art_01m5kzvk1wehq0p08svmndannh",
+        "art_01m5mqvx10ze6bxc3sx3wd1mdp",
+        "art_01m5n19nj9gntdk44knckwbgs8",
+        "art_01m5seykfnyqbqx2bh6z7x34cy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g144",
+      "title": "Sam Wood makes bid for bail to supreme court over domestic violence charges",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gkprzg0b3dzf5j044d903f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g145",
+      "title": "Rassismus in Chatgruppen: Rassistische Chats - Gericht verhandelt \u00fcber Justizbeamte",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gmhf737y267amtajmhtj3v"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g146",
+      "title": "Russia and Ukraine trade strikes overnight as Moscow signals readiness for peace talks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gndsm1z85wvrqth73fh004",
+        "art_01m5hn637wa66j9cx6cp0zhbw1"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g147",
+      "title": "Vom 19.10. bis 25.10.2026 - Das Wochenhoroskop f\u00fcr Fische",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5grtt8a8y6x471pjpdvyp53"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g148",
+      "title": "Makkah pact clarity",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5gw9eed0mze5qvg0mna4amn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g149",
+      "title": "Iran's IRGC Navy says seven vessels hit, warns US of wider response",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5h35aas1sardcswbk3f2mw1",
+        "art_01m5hv5k5pvzfnb23ymjqvcy2n",
+        "art_01m5jd7pwqyzx3qtwm47h9mr9r",
+        "art_01m5jxg3kc22esj0q90y2kmvm2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g150",
+      "title": "In Israel election, Palestinian citizens weigh fear against disillusionment",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5h8arfmfxvyqmgcxgx07zbd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g151",
+      "title": "Cybersicherheitswarnung: Erste Beh\u00f6rden-Webseiten nach Sicherheitsl\u00fccke wieder online",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hbqr8kb6ynz3ej22kdvkaw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g152",
+      "title": "Soaring oil prices underscore the need to help poor countries adopt renewables",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hbrbkqn43dssn7k69np2qg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g153",
+      "title": "IMF sees 1.3pc contraction in Pakistan this year due to Iran war",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hckdwkf9sm441yedph3nns",
+        "art_01m5hw1yk2fmxmrk44v11856p3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g154",
+      "title": "Israeli elections: Is it just right wing versus right?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hf66saq2g21q0ehe1nv2tg",
+        "art_01m5hmag5v58mhf0vv0v82qfc3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g155",
+      "title": "Morning news brief",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5he9t0k4k1de3t5k49pxx9h",
+        "art_01m5hp11bmkdsrqsr8qx98261p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g156",
+      "title": "Cyberkriminologe warnt - \u201eKI kann der neue T\u00e4ter im Netz werden\u201c",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hdexnxpq9644cnafs2ydwj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g157",
+      "title": "Englands TV-Experten kontern die harsche Trainerkritik des United-Kapit\u00e4ns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5he9hrpq44rvy4b4m7j7npn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g158",
+      "title": "TSMC seeks factory-equipment alternatives to thwart China\u2019s rare earths grip, sources say",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hp1b3ebccmwm04tmvvv4m7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g159",
+      "title": "A new approach to RAM updates",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hhr41kswz9302cvyfwypw5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g160",
+      "title": "Trump heads to Iowa as Republicans fight for seats in longtime stronghold",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hhqsqehxf8mk8qsgm4vr4e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g161",
+      "title": "IRGC threatens invasion of neighbours that attack Iran",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hkf4cyqn2pjsdbk6yczgdv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g162",
+      "title": "Trump says Google refused his request to rename Atlantic the \u2018American Ocean\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hkemqhb9xshpndas3rx54p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g163",
+      "title": "Netanyahu\u2019s far-right coalition on course to lose majority in Israeli elections, new poll suggests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hkemfnn2w7est83kc1ph2n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g164",
+      "title": "\u2018America, this is a warning\u2019: pro- Trump Maga media in a froth over Europe protests",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hp3g2penesxq1mjazaycrn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g165",
+      "title": "Oil prices jump to five-month high as attacks threaten global supply",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hpx1434h7najqf8g1dyys5",
+        "art_01m5ma55sbnxmhkq8xqvzpefy6",
+        "art_01m5mcqmkha2cvpgsfmx5th0nb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g166",
+      "title": "Pakistan, EU agree to strengthen counterterrorism cooperation at multilateral forums",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hq029bgbx0a2kv353tmb43"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g167",
+      "title": "Iran's Balochistan border region sees growing unrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hqr76yds6ndd5y4y8xh4mj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g168",
+      "title": "L\u00e4nderfinanzausgleich: Baden-W\u00fcrttemberg offen f\u00fcr Pr\u00fcfung von \u00abExtremismusklausel\u00bb",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hqr39p60mwq7fjyq4j0794"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g169",
+      "title": "Iran reveals \u2018offensive\u2019 doctrine, US issues alert: Is war imminent?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hsfppmsbdz4xzr8k3qbepd",
+        "art_01m5hv6dc831v0exkw8g1h8nng"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g170",
+      "title": "Saudi Aramco tells staff to evacuate Dhahran as clashes with Yemen's Houthis continue",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hv60vqknbwxv8dn1jn6d69"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g171",
+      "title": "Latin America is embracing Israel",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hyk1sswmz9cg5zthe0srmd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g172",
+      "title": "Britain\u2019s least-loved hotel chain is finally splashing the cash",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hyk269cnbaq2yj8hsvpgpk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g173",
+      "title": "Saudi Arabia and the UAE are sowing chaos",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hyk2cwmcqat9c82svmjejq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g174",
+      "title": "Israel frees from custody almost all suspects in two settler attacks, puts them under house arrest",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hw22bnex2akwydxh6t18ca",
+        "art_01m5hykpnfj7rfxrd6wa4qm2z7",
+        "art_01m5jeyjy7h8nyj1jp1sevpsp9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g175",
+      "title": "Outposts, violence, impunity: The anatomy of Israeli settler land grabs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hxsdha29m31qt84a32ypdm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g176",
+      "title": "How Sudan\u2019s shift to drone warfare is fuelling a civilian crisis",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5hzfjeemp5ayfg8s4ga00df"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g177",
+      "title": "Syria sends troops to Sweida front line as Israel moves hardware into area",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j0a669jha3f93zqrhmx601"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g178",
+      "title": "BILD-Sparfochs erkl\u00e4rt die Aktionen - Hier gibt\u2019s 10 Marken-Artikel gratis",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j21pdkz68jchb9q2sfnf0d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g179",
+      "title": "Markets tumble as concerns about Iran war and high AI spending collide",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j2x93hxf9zw4bx2hjqzyh2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g180",
+      "title": "Saudi-led coalition denies Houthi claims Riyadh threatened to attack tribal and civilian gatherings",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j9rx92s98pd0kv4cz6d71n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g181",
+      "title": "Damaged nuclear fuel assembly retrieved but criticism of Palisades restart plan escalates",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j9rx7dwakfz6a1sv0274d5",
+        "art_01m5je28z0wc8xb3cvz7ygk6gd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g182",
+      "title": "Can Netanyahu bomb Iran as a caretaker PM? How US and Israeli elections could affect war",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jd6qzrhbb49zahm7qcem7z",
+        "art_01m5jnrq0yj0y97hngkvgdg415"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g183",
+      "title": "Egypt calls for Yemen talks as parliament weighs military support to Saudi Arabia",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jfr6s50jme9ntm4qee1qpk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g184",
+      "title": "Pakistan, Egypt, Saudi Arabia, Turkiye to meet European trio in Istanbul",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jfrwq1wfr1fpw8n3tdhf3t",
+        "art_01m5jybxyq8rbgsnemgafkkq4c",
+        "art_01m5kktzh7393aksknbspdt9xy",
+        "art_01m5ky4ehvhj4gv7745f96v38k",
+        "art_01m5m8eb3v08k6tefr51w6hk9y",
+        "art_01m5mg588k3xx5cfg0jy1jthr0",
+        "art_01m5mhw8ramnj62bwve3qzh006",
+        "art_01m5mp630gagn7n8vq935emxcs",
+        "art_01m5pk3ahd3ndkpp3x07c4nwvg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g185",
+      "title": "Aipac ends US candidate endorsements as backlash over Israel grows",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jk66yhmgjg383sa5zbf00f"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g186",
+      "title": "Aipac halts candidate endorsements amid US backlash against Israel",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jm2m52nqp18s4e79nb6301",
+        "art_01m5p1yqcacjzr91w6nf627b2p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g187",
+      "title": "\u2018The best on Earth\u2019: Can weak economic growth undermine Europe\u2019s \u2018very sophisticated social system\u2019?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jm2c2qy9g2mxc856708ppc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g188",
+      "title": "Trump\u2019s attorney general won\u2019t rule out DOJ action to stop states from certifying midterms results",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jns5esqc7yec2kdws29xgv"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g189",
+      "title": "Trump rally exposes surprising cracks in MAGA base as Republicans face midterm test",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jrbtgj0ds8nz555bfzkr5h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g190",
+      "title": "US Democratic senator probes Ukraine's loss of Starshield service",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jqfkh81rtnx8gk1s72h3a7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g191",
+      "title": "Michele Tafoya says Iran war has gone on \"longer than I think people were ready for\"",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5js6f86t2egv09gnsby0srz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g192",
+      "title": "\u2018No other country is more closely aligned\u2019 \u2013 Trump envoy hails US-Argentina ties",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5jwn72v5kgy5mwmkkvcmmxk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g193",
+      "title": "After three disastrous years, Israel needs to rethink itself",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5j81wgj6sppssft2v4qc8yb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g194",
+      "title": "Iran war live: European, Middle East FMs in Istanbul for security talks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k1ta07drtwd32zp5g6h1f7",
+        "art_01m5mcps3x1zcxmcrmnfawqhav",
+        "art_01m5mw5mdnrpnesq3h3wsvrbeg",
+        "art_01m5mx0sn9p01kw4bap64wrb5e",
+        "art_01m5n19qjgggjmzs60jfp5dk41",
+        "art_01m5p7ygv0zzvrqnfephbv5r0c",
+        "art_01m5rmba9rsr15czv9dw1ftz8e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g195",
+      "title": "I'm horrified by the helicopter parenting at my son's university",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k6yjpraba4q7qhmzhrya4x"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g196",
+      "title": "Pollsters point to technical tie in Brazil election run-off",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k589nv2f6s767sr36zhgbf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g197",
+      "title": "Oil little changed as supply concern lingers amid Houthi attacks on Saudi Arabia",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k57mb1a9atg8r09z1w9j0m",
+        "art_01m5kmnt18ebvzvg1vajpfefjn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g198",
+      "title": "Houthi attacks on Saudi sites claim four more lives",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5k9hnmkj9m9cm609mdmntfq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g199",
+      "title": "Israel's far-right Ben Gvir seeks new ground in election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kac966fr7k1xd24g6jf5nd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g200",
+      "title": "Israelis are heading to the polls in their most seismic election in decades",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kb8trkkc6p2865wz8ehg58"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g201",
+      "title": "Middle East latest: Trump warns of 'another little Epic Fury' amid fears of renewed conflict",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kfgr6jpj4zxwgxr1s7jfyz",
+        "art_01m5p4gpbqzfx7k428yfphjg1w"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g202",
+      "title": "UAE tackles oil spill, Yemen warns of Houthi child recruitment and Oman strengthens UK investment ties",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5knh82bp1mhgjajdjx7cjzw",
+        "art_01m5mq126z5rtjcyw84wqkvjs0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g203",
+      "title": "EU entering winter with lowest gas reserves on record, IEA boss warns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kq8xna982kvnt0vw6x6eb2"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g204",
+      "title": "Eisenkot offers hawkish alternative to Netanyahu for Israeli PM",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kstjna115bdeffz1q22ssx",
+        "art_01m5kwd5sb2evhtmdxkccxm0zf",
+        "art_01m5p079mqr0a83h5e8svmgee4",
+        "art_01m5s8y0jx1t4k10304a7gkc1q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g205",
+      "title": "Are global oil reserves sufficient to withstand renewed US-Iran war?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kwdxqmgd9bxkzy44zr03xz"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g206",
+      "title": "British mother drowns in Bahamas while trying to save her two children who were swept away while snorkelling",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kvj07tzc59w4yk9659z68c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g207",
+      "title": "'We had a plan B, C and D': UAE retailers pledge to keep food prices stable amid Iran war disruption",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kwd79c7rys0ebsbn2xzcet"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g208",
+      "title": "Trump's MAGA faithful send warning to Republicans ahead of high-stakes midterm elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kx96jn5pwse2cvd53x6eb6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g209",
+      "title": "Iran war could worsen after US midterms",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kx8ff27e2f1gem83p91kd5"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g210",
+      "title": "Israel orders army to prepare to fully close West Bank after two soldiers killed in shooting",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kx9na88fnfhnme11bx70cx",
+        "art_01m5ky440dpxva2g4q7m7q2vqd",
+        "art_01m5ky3w4m3b4kh9fhpy26jkxm",
+        "art_01m5mme5yp8p3et3k0b0v5edxs",
+        "art_01m5kyzbrd5jxw6h799rxeaq61",
+        "art_01m5mg4n7wxsqjsjqcbbbc42w8",
+        "art_01m5kyzsq0bxs11r9n3nj69zed",
+        "art_01m5kyzxqjj6537ge38nzmbsfx",
+        "art_01m5kzv1e41n4j9qqd8eyhktf3",
+        "art_01m5m1jpnabq8r9d0gav5me6xn",
+        "art_01m5m1hxxd2nnyt3cnpbafvk35",
+        "art_01m5m5w1cj345bvqx12r6t88z4",
+        "art_01m5m7jhen9n2tskwtqh4aycx7",
+        "art_01m5mbvmgc0xzbd7nbhrckgc0j",
+        "art_01m5mbvhy8rtf9p83tct81zfj7",
+        "art_01m5meefh7yxxqd0x5veyf0rxv",
+        "art_01m5mg56weq92fa80qt06jpdts",
+        "art_01m5mg4s1qkq83cnt2bmp1gr9s",
+        "art_01m5mh0a0geh992r2v17cvq2dg",
+        "art_01m5mjqafqr1884jx8ry5wdz2z",
+        "art_01m5mme6a8r1zztkj3n00xd6em",
+        "art_01m5mqw81rdfbmbmt61mp11b7k",
+        "art_01m5mxvvr7cy7xqk2snscmvser",
+        "art_01m5ncf1qm6y33xye3wf3nsge1",
+        "art_01m5nn2mds760z4gpff2qe2csh",
+        "art_01m5p72w2mpsnhfw45be2d4z3y",
+        "art_01m5p73hfrdd89b4f42zb1b88h",
+        "art_01m5pkz646ec60sn1jtcq03k74",
+        "art_01m5pzzyfjynft8mqbyb46e1vv",
+        "art_01m5pzyvdkzexcwg8zpyhcpb10",
+        "art_01m5q6001wdt6msmp0hhb7d3eh",
+        "art_01m5q5zye7fgn9rxjzzwkrvd0p",
+        "art_01m5q6vptwenaeqjxdzg80waqf",
+        "art_01m5qrvf68w1gvvh66p46dtp9h",
+        "art_01m5qcvejxnm0100djwma818vn",
+        "art_01m5shgwmb0g0aqeqw9d32vqfb",
+        "art_01m5shge9gmkhjtjc980jz6r1c"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g211",
+      "title": "West Bank attack wounds 5 Israelis as Netanyahu cancels events",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ky4epb39skf9ms166gcsbq",
+        "art_01m5m1j4rcer0pmzc9j48gyfj5",
+        "art_01m5m4542ngr4343jdfxfp67dw",
+        "art_01m5mxwjsepqwpqdqtmhnr97ym",
+        "art_01m5q543v9astnzqqv8gx7gbcq",
+        "art_01m5pr8jtv638dhs8dqrd9jpgj",
+        "art_01m5qvefr3m0z9j7c6vb2rdcsm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g212",
+      "title": "Morning news brief",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5kztskxnx1eqk1gc1vd5z26"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g213",
+      "title": "New charges for Royal Navy sailor accused of plotting to leak secrets to Russia",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mh1b3j2vxny93jdf946m73"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g214",
+      "title": "Trump says he's weighing deal with Iran against action to \"finish them off\"",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m2ddwevjw137gbg6p1asxv",
+        "art_01m5nhktmqdy3pkqddqqhswq1g"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g215",
+      "title": "New electronics reach Iran, but prices soar as gov\u2019t fees, US sanctions hit",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m50p137vyqvjw4fm269s3m"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g216",
+      "title": "Steuern: Herbst-Steuersch\u00e4tzung: Auch MV darf mit mehr Geld rechnen",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m44e25tbw0yhq1b7x9w08h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g217",
+      "title": "Foreign diplomats in Brazil discuss quick recognition of runoff winner",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m44e7bw6qpzz9dhdwv76hx"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g218",
+      "title": "How Netanyahu could attack Iran to force Israel into unity government",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mhvreh41tpw08fpvra9twv",
+        "art_01m5mjq5ef6xhytb9a009c5zsq"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g219",
+      "title": "Exclusive-Saudi missile plant expansion may produce more powerful missiles, study says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m6pv5b56c9yybq6g94d3yc"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g220",
+      "title": "Analysis-Trump's diesel price relief efforts grow costlier as election nears",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m6pv6pr7hs8gjj177vrthf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g221",
+      "title": "Netanyahu stakes his re-election on the promise of another war with Iran and opposition to Arab parties",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m7k0ntyr2z6jqy7d63db1z"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g222",
+      "title": "Military reinforcements move to Mideast. And, millions of Americans vote early",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m8dvwccqnrasbeg93jv7qt",
+        "art_01m5nv22thq569c0v6n2a9172y"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g223",
+      "title": "Iran 'deliberately undermining Iraq\u2019s security', says Al Zaidi adviser",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5m99adqj3qbkhkmtqjc7xga"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g224",
+      "title": "US-Iran war, then and now: How the landscape has changed since February",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mb0srbm09hmbky65pwa2xa"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g225",
+      "title": "World News in Brief: Iran nuclear inspections, deadly church attack in Jordan, El Fasher \u2013 one year on",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ne6dm89wyy0vaeah9e5dae"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g226",
+      "title": "Why investors are betting on sulfur to power the next generation of defence kit",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mee3kyzdjdtnsbs3femdkb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g227",
+      "title": "Benjamin Netanyahu: Israel's longest-serving PM fighting for survival",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mcps3605e6zdbc5k0h4ps0",
+        "art_01m5p1y7vbkms9xppn5kksaetr",
+        "art_01m5p5cprt91kyt9s9n9gmccw4",
+        "art_01m5pfmr61qpfbey9jhrjptew1",
+        "art_01m5s6b3hrzg749argjerrb7hd",
+        "art_01m5sjbswtcjfdtgzsaxb9c4fb",
+        "art_01m5sm2jb86k0qxgtqfhhn4kax",
+        "art_01m5sm2j95b4fna1pg0jy5ajnk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g228",
+      "title": "At least 6 killed in Jordan church shooting: What to know",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mjq5cckbkjfexx8dpm65sb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g229",
+      "title": "Man who teased governor on Facebook gets bail after one month in detention",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mf9cefsasp1m293merev44"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g230",
+      "title": "'Will petrol be available in December?': Senate echoes with shortage concerns even as minister says no supply issues",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mp632fzq1mcbjnyvnh7c1y",
+        "art_01m5n4rbngqjnvgzb8szkv2896"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g231",
+      "title": "How will the Israeli election work and when will the result be announced?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mp5qy9nj95dynya2jjmh3p"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g232",
+      "title": "Tense Shabbat in Israel as pivotal elections approach",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mq1436wfp0zk0qtqeg13x9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g233",
+      "title": "Trump weighs quick end to Iran war against letting conflict \u2018wither\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mqvm47vtqfhd8x8v568cs8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g234",
+      "title": "Turkey says renewed attack on Iran would expand conflict, diplomacy only way",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mrpxgx903rxatpn0kxan6y",
+        "art_01m5mte0bymgxhydjfp65sjhx4",
+        "art_01m5mv9b9tt6eh6knaq43rhmva"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g235",
+      "title": "Trump's House nightmare deepens as famed election guru pushes 19 more races towards Democrats",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mte7dxvhjy1ydm6egn6kta"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g236",
+      "title": "WATCH: Knicks coaches waiting on rings, staffers hit by phishing email: Report",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mw5jpr11g7x754xjjj7460"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g237",
+      "title": "Israel: Could Arab parties play kingmaker in the next Knesset ?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mw5gh2tskzjhzm2367mvwk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g238",
+      "title": "Under U.S. Watch, Venezuela Grapples With Tensions Over Democracy",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mx0a6aksanjrn22kgg7nv7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g239",
+      "title": "Russian anti-war rock musician Andrey Makarevich endorses Israeli Prime Minister Benjamin Netanyahu ahead of election, drawing backlash",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mxw0zkx7yjvp543537xp7m"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g240",
+      "title": "Pl\u00f6tzlich taucht Altkanzler Schr\u00f6der bei einem Forum in China auf",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mxw55a5vgp0r1e0g55q9pj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g241",
+      "title": "Melania Trump announces truce in Ukrainian city 'on brink of disaster'",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5myq8qecptnx3t2sqhtc4k6"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g242",
+      "title": "The US will remain central to Gulf and Arab security, but the terms must change",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5mzjwzt7ng940se7rvk0rpf"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g243",
+      "title": "From Hormuz to data centers: How Iran\u2019s threats are raising stakes of renewed war",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pgg9rwbs9j0gz1zc0fvfgn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g244",
+      "title": "Netanyahu weighs West Bank operation ahead of elections: \u2018Politically, it will not help anybody\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n0ezcmqr76ezsq0t6vmwd0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g245",
+      "title": "Trump to swap some tariffs on Canadian goods amid midterm pressure",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n25e6fcq1w6wkh2n20pdkm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g246",
+      "title": "German president meets Zardari, praises Pakistan's 'rising diplomatic profile' in dispute resolution",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n25ry3hs9stshg533p25ba"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g247",
+      "title": "Loblaw CEO apologizes to 2 million shoppers for personal data hack, offers free credit monitoring",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n30ymppz2v706exhv4r18r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g248",
+      "title": "Indycar returns to Europe after 20 year absence with home race for Palou",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n3w4t0xt5hb4k1csmw3krn"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g249",
+      "title": "Trump says US may do another military operation against Iran",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5n6ewv3ba8z0ah3mxs19w3f",
+        "art_01m5n91a37n8qzw5ekjkqctw10",
+        "art_01m5nbmbzr3bj1hcdgvx88fha2",
+        "art_01m5p8st0xb3z1d2t6696jekap",
+        "art_01m5pfn0txt8x7zhxwcn2dy5wc",
+        "art_01m5r0jzwn7qcx7p9yy1g6xfs0",
+        "art_01m5r4w2htzbkt6p3ktekjj3d1",
+        "art_01m5r8a15b0mfjn14z5aqpeezm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g250",
+      "title": "WATCH: Trump at GOP rally in Florida revives idea of military intervention in Cuba after Iran",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nbkmtns9x09b2xx298a33j",
+        "art_01m5ncexneq5kbbx9jze2ffhzf",
+        "art_01m5nprm32e4gz2hgn3hsaxwwf",
+        "art_01m5nf1te1zfz058xahqy950wf",
+        "art_01m5nkaxe2exmsm5ech80f6b4w"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g251",
+      "title": "Medicare Advantage cuts leave millions scrambling to find coverage",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nhm0p0ymx56r5xs26zxtnt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g252",
+      "title": "News Wrap: White House says Melania Trump brokered localized ceasefire deal in Oleshky",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nfx0p2dhpx8bnnezmcr0j4",
+        "art_01m5qcvek5d1vs8ks1x36yd26d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g253",
+      "title": "Scoop: U.S. intel memo warns of \"advanced\" Iranian plots to kill officials abroad",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nn2dwxrqnh0ffx64tcaaaw",
+        "art_01m5nzbn58v0v3dz290s1xxvhp",
+        "art_01m5phcmb8778hzxja79djdp9p",
+        "art_01m5pwha6q5abmhhzkf4d1jha3",
+        "art_01m5q1q8jf97j2nsjgqsdpb5v5",
+        "art_01m5q7pc55n3arkyn827xczbv4",
+        "art_01m5qdpt1417933857p0b109wb",
+        "art_01m5r6k5vvwjd9k23wgb9gaebf",
+        "art_01m5r5rfrg0pmm70sj6rkdaj5x",
+        "art_01m5qcvfbnfzjk2j813crvkjxk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g254",
+      "title": "Rubio tells Cubans \u2018now is the time\u2019 to act to see political change",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nnxwjsbg9r15y0jxwcjyqt",
+        "art_01m5nvxmpt70b2255g3q6jr713",
+        "art_01m5pbbeeqa15stbe7fpwasm0h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g255",
+      "title": "US could strike Iran this weekend, envoy says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nnxaxg9pc88gr06qc5bpvf",
+        "art_01m5nt6wabtadsbtvr4ydmhmsn",
+        "art_01m5s81v35enaby60zscd0vb5e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g256",
+      "title": "Hochschulen: Kinder-Unis stehen in Th\u00fcringen hoch im Kurs",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5nv23xadb2x59xg3kegt7hg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g257",
+      "title": "Iran in \u2018Advanced Stages\u2019 of Planning Attacks Against Americans, Officials Say",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5p12n0k9p2fpmk6y1zxbc91",
+        "art_01m5p731x0yvv99k26qgv9zyef",
+        "art_01m5qb49avykp2e52j30hrzt9w",
+        "art_01m5qy0bpc52pkdmzx12j6vhgj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g258",
+      "title": "Who are the key figures in Israel's election and what are their stances on Palestinian statehood?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5p5c4d2qfbydmedjqeqg4rb"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g259",
+      "title": "\u201eBares f\u00fcr Rares\u201c am 23. Oktober 2026 - Aquamarin-Schmuck massiv im Wert untersch\u00e4tzt",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5p5cae64me4fac4c3m7c6ye"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g260",
+      "title": "How Benjamin Netanyahu reshaped Israel\u2019s institutions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5p7z8m2jh4drks8nanz5y3g"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g261",
+      "title": "Iran says US military not allowed to enter Gulf \u2018under any circumstances\u2019",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pag2arxsmksjhn5ft2hyz4"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g262",
+      "title": "Iranian president to meet Putin in Moscow: Iran media",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pd2gh3dn1wzm233j6gvw83"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g263",
+      "title": "Turkey rules out combat with Houthis under defence pact as foreign ministers meet in Istanbul",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pggd2nv8bn3sa4cgwrf187"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g264",
+      "title": "To bring down Netanyahu, Arab-Israeli parties ready for opposition alliance",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5phbs6vp89w563vq0d311fa"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g265",
+      "title": "U.S. Pressures Mexico to Deliver a Security Win Ahead of Midterm Elections",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pk2saavdr2ndsqw63fzvam"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g266",
+      "title": "HURIWA urges NASS to withdraw nutritionists\u2019 council bill",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pnn8pca5tqr8gv53fyxmcy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g267",
+      "title": "Five takeaways from Trump's midterm campaign rallies",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ppgj12c8a4264wbvcbkxb6",
+        "art_01m5q8j1ttrgc3sk461f94ecdt"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g268",
+      "title": "As Israeli election looms, Trump advisers see opportunity beyond Netanyahu",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5pzzzwv6px3jjxsk7ep2r61"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g269",
+      "title": "Iran says won\u2019t allow US warships to get close as Trump ponders new attacks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q1q8fbcppbejsmmxjfq3ep"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g270",
+      "title": "Netanyahu floats Crypto to bypass sanctions",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q2jdkpm2v074yfcctg8bzt",
+        "art_01m5sexnhaaq4tnmcn7w02fap2",
+        "art_01m5sexp7ctk7jkbm5wqnvfef2",
+        "art_01m5st3r4ycemp0dref0gk1nae"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g271",
+      "title": "Iran's Pezeshkian blames US for interim deal failure, urges new try",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q3d2d8w6b0xjcpphzf48cd",
+        "art_01m5qejddragegr01zjearc5q9",
+        "art_01m5rf6gec4117y9j5xy2ms1xw"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g272",
+      "title": "Israel to close all West Bank land crossings on election day",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s16k41tp2edn9h6taa1sjq",
+        "art_01m5rjkm33wv486hhgsw37kv9x",
+        "art_01m5rw1zjeggtvh1mcp2c70xbz",
+        "art_01m5s16tvz2edxkwsy7vrjck67",
+        "art_01m5sk6yz1yw24qt1kvhk554rk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g273",
+      "title": "Verkehr: Autos sto\u00dfen frontal zusammen - f\u00fcnf Schwerverletzte",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5q8j016xr3npc9ts72zkyz0"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g274",
+      "title": "Thousands take to Tel Aviv's streets for protests against Netanyahu",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qjw8mfj8fh7q4qtj1jcvf9",
+        "art_01m5qq55yvvw9j6e5f1tmaqyd3",
+        "art_01m5qyvptnvdxm5qw4djyeb7wm",
+        "art_01m5r5rpvrrded5p9dszzc8kcd",
+        "art_01m5r6k1fmcgcdfwqepfxd2ccc",
+        "art_01m5reb5w0w2a5m0b3q2d6gwrg",
+        "art_01m5shgwk35e7z1tgdc6v8qq9n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g275",
+      "title": "Thousands rally in Tel Aviv against Netanyahu ahead of vote",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qjvrdmxh1p7fcjhqxzq6jj"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g276",
+      "title": "Houthis claim 'phases' of attacks on Saudi airports, oil pipelines",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ra14fjjqb479m523nq6cxy",
+        "art_01m5r6k1h2nrdadnh5nmtqaj8h"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g277",
+      "title": "Putin puts Trump ahead of Iran in bid to mediate war",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5r0jqad16n0sfva2kyt72vk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g278",
+      "title": "Trade tariffs cause whiplash at Port Milwaukee",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5r1e1px60hm4zm4cx627qgy"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g279",
+      "title": "Iran blames US for deal failure, urges new try amid fear of new attacks",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qy1028fpd8v6n67qyqgv6r"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g280",
+      "title": "The bitter row over military service that could shape Israel's future",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rw2056njk0htmvpx7tz94n"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g281",
+      "title": "As Israeli election nears, campaign turns ugly",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5qcvfa10xmgkj3ca7ch2g5d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g282",
+      "title": "Obama slams Trump\u2019s \u2018cruelty and corruption\u2019 as he rallies Democrats",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5r968pym69krk8v9gs4z2r2",
+        "art_01m5rw2vcy9dqx0tgmayf15ptf",
+        "art_01m5s5g9c2dd1tfhq7c35abax1",
+        "art_01m5s4mjmrf2wjsjsz8prwxvj9"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g283",
+      "title": "Dar orders urgent action to rein in rising wheat prices",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5reatct8x8bnpdq8ztbqk0b"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g284",
+      "title": "Governing means confronting politically difficult issues, not just balancing interests: PM Wong",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rjkswdd5dsyb9edr1sfa8j"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g285",
+      "title": "Thousands rally in Turkiye over journalist arrests, media shutdowns",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rmbkhwwrph636m4yn05hrh"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g286",
+      "title": "Bots, deepfakes and surveillance: Israel\u2019s election goes to war online",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rtbwmtarbxrq2p2g0tdp6z"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g287",
+      "title": "'This is an extremist government': The Israeli Palestinians with the votes that could force Netanyahu out",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rxt6pbbp3q7q4yp8aahg8d"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g288",
+      "title": "Israeli elections: What are the possible outcomes?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5rzgts7nc1k5ctfe1mr4rxm"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g289",
+      "title": "Disenchanted Netanyahu supporters are prize of Israel election campaign",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s160fmb15j9fsn4nj3ktsg"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g290",
+      "title": "Netanyahu 'fighting for his political life' in 1st Israeli vote since Oct. 7. He might still survive",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s21rwcmw6vb5f887jsm010"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g291",
+      "title": "Iran\u2019s oil lifeline is drying up. The biggest pain may fall on ordinary citizens",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s2247mx7jd7yvgwz9b80z8"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g292",
+      "title": "Is Israel strong enough to go it alone?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ss7nens59ja37ywr1grsds"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g293",
+      "title": "Trump: Danmark ga oss Gr\u00f8nland",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s5f936sz2rh28thda1fc02"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g294",
+      "title": "Saudi Arabia looks to US for an AI edge as Yemen's Houthis up pressure",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s6b135mvh4638vgaryahvd"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g295",
+      "title": "More than 400.000 protest across France",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s76wv846bndbfq0ghtkjpp"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g296",
+      "title": "Resumption of war with with Israel, US will not change Iran's positions: Araghchi",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s771dyhznfee060j01fhdj",
+        "art_01m5samens4a71ts83tm1f5w6k",
+        "art_01m5snt20ggvterefs1whtkbfa"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g297",
+      "title": "Trump mocks reporter asking about Iran strikes, as Tehran says US derailed",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5san2y5z0d20jwnmvcq431q"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g298",
+      "title": "Saudi Arabia intercepts barrage of Houthi missiles and drones",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5s9rw23d830n8m7dmq64705"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g299",
+      "title": "Maximalist US and Iran positions fuelling conflict, former Pakistani PM says",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sam4gckemh99vcbeh1asv9",
+        "art_01m5sd6pe0mj56esvdkkyjv3wk"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g300",
+      "title": "Angela Rayner signals Shabana Mahmood will weaken Labour's immigration crackdown after she led revolt against 'un-British' reforms",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sey6rqfkg4pkwm5m5ecns3"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g301",
+      "title": "\u00c4rger \u00fcber schlechte Bezahlung - Cheerleader-Aufstand in der NFL",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5shgdgckaa731srz246pt8e"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g302",
+      "title": "Yemeni forces intercept Houthi weapons being smuggled from coast",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5sm2e313dhk8hvx5v8fygb7"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g303",
+      "title": "Ghost signs: Fading reminders of the past",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5smxvmhve86b20mh8rkrd9k"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g304",
+      "title": "Pak-US reset?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5smypp5s2gab7ytez5g032j"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g305",
+      "title": "Scoop: Netanyahu presses Trump for more support ahead of tight Tuesday election",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5ss7z4mytmz3xsswpjg0s46"
+      ],
+      "confidence": "model"
+    },
+    {
+      "id": "g306",
+      "title": "How is the US-Israeli war on Iran causing havoc in Europe?",
+      "reason": "Model-authored seed from the settled production Story graph; not human reviewed.",
+      "articleIds": [
+        "art_01m5st3r43jm98xzc5je031vdd"
+      ],
+      "confidence": "model"
+    }
+  ],
+  "provenance": "model-authored from the settled production Story graph; not human reviewed"
+}
