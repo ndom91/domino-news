@@ -41,6 +41,7 @@ export function readConfig(env = process.env) {
     // A Story is summarised (and so published) only once this many distinct newsroom
     // publishers cover it. Official sources attach but don't count.
     minPublishOutlets: num('MIN_PUBLISH_OUTLETS', 2),
+    eagerOptionalEnrichmentOutlets: num('EAGER_OPTIONAL_ENRICHMENT_OUTLETS', 3),
     // Feed items published longer ago than this are not ingested at all.
     maxArticleAgeDays: num('MAX_ARTICLE_AGE_DAYS', 3),
     enableSummaryEditing: env.ENABLE_SUMMARY_EDITING === 'true',

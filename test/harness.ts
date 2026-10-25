@@ -106,7 +106,7 @@ export async function createTestContext() {
   const ctx: WorkerContext & { ts: ReturnType<typeof createFakeTypesense> } = {
     ...base,
     // Fixture stories are mostly single-outlet; tests opt in to the publish threshold.
-    config: { ...base.config, minPublishOutlets: 1 },
+    config: { ...base.config, minPublishOutlets: 1, eagerOptionalEnrichmentOutlets: 1 },
     ts,
     // Never call logo.dev from tests, even if the shell has a key.
     logos: createLogoSource({ apiKey: undefined }),

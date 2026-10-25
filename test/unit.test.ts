@@ -903,6 +903,14 @@ describe('match admission', () => {
   })
 })
 
+describe('optional enrichment admission', () => {
+  it('keeps low-visibility Stories lazy', async () => {
+    const { optionalEnrichmentQueues, QUEUES } = await import('@dn/server')
+    expect(optionalEnrichmentQueues(2, 3)).toEqual([])
+    expect(optionalEnrichmentQueues(3, 3)).toEqual([QUEUES.generateContext, QUEUES.extractClaims])
+  })
+})
+
 describe('Expo push delivery', () => {
   afterEach(() => vi.unstubAllGlobals())
 

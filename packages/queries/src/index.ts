@@ -86,6 +86,10 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.story(id),
         queryFn: ({ signal }) => api.getStory(id, signal),
         staleTime: 30_000,
+        refetchInterval: (query) => {
+          const enrichment = query.state.data?.enrichment
+          return enrichment && Object.values(enrichment).includes('pending') ? 2_000 : false
+        },
       }),
     storyUpdates: (id: string) =>
       queryOptions({

@@ -271,6 +271,12 @@ export const storyDetailSchema = z.object({
   primarySources: z.array(primarySourceSchema),
   context: z.array(storyContextItemSchema),
   claims: z.array(storyClaimSchema),
+  enrichment: z.optional(
+    z.object({
+      context: z.enum(['pending', 'ready', 'failed']),
+      claims: z.enum(['pending', 'ready', 'failed']),
+    }),
+  ),
   // Newsroom publishers only, most rated first. Publishers without a country are left out.
   leanMix: z.array(storyLeanSchema),
 })

@@ -190,23 +190,37 @@ describe('summary versioning', () => {
   it('edits create a new version, keep history and reject stale bases', async () => {
     const { db } = h.ctx
     const [story] = await db
-      .select()
+      .select({ story: schema.story })
       .from(schema.story)
+      .innerJoin(schema.storyContext, eq(schema.storyContext.storyId, schema.story.id))
       .where(isNotNull(schema.story.publishedAt))
       .limit(1)
-    if (!story?.currentSummaryId) throw new Error('no published story')
-    const previous = story.currentSummaryId
+    if (!story?.story.currentSummaryId) throw new Error('no published story with context')
+    const currentStory = story.story
+    const previous = currentStory.currentSummaryId
     const versionId = await db.transaction((tx) =>
       editSummary(tx, {
-        storyId: story.id,
+        storyId: currentStory.id,
         basedOnVersionId: previous,
         headline: 'Edited headline',
         body: 'Edited body.',
         userId: 'user_test',
       }),
     )
-    const [after] = await db.select().from(schema.story).where(eq(schema.story.id, story.id))
+    const [after] = await db.select().from(schema.story).where(eq(schema.story.id, currentStory.id))
     expect(after?.currentSummaryId).toBe(versionId)
+    expect(
+      await db
+        .select()
+        .from(schema.storyContext)
+        .where(eq(schema.storyContext.storyId, currentStory.id)),
+    ).toHaveLength(0)
+    expect(
+      await db
+        .select()
+        .from(schema.claim)
+        .where(and(eq(schema.claim.storyId, currentStory.id), isNull(schema.claim.supersededAt))),
+    ).toHaveLength(0)
     const [old] = await db
       .select()
       .from(schema.storySummaryVersion)
@@ -215,7 +229,7 @@ describe('summary versioning', () => {
     await expect(
       db.transaction((tx) =>
         editSummary(tx, {
-          storyId: story.id,
+          storyId: currentStory.id,
           basedOnVersionId: previous,
           headline: 'x',
           body: 'y',
@@ -1031,6 +1045,87 @@ describe('summary debounce', () => {
   })
 })
 
+describe('lazy optional enrichment', () => {
+  it('admits missing current work once and stops on success or failure', async () => {
+    const { newId, ID_PREFIX } = await import('@dn/domain')
+    const { PROMPT_VERSIONS } = await import('@dn/inference')
+    const { ensureOptionalEnrichment, QUEUES } = await import('@dn/server')
+    const [story] = await h.ctx.db
+      .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story?.summaryId) throw new Error('no published story')
+    const modelId = 'lazy-enrichment-test-model'
+    const ctx = {
+      ...h.ctx,
+      inference: {
+        ...h.ctx.inference,
+        generation: { ...h.ctx.inference.generation, modelId },
+      },
+    }
+    expect(await ensureOptionalEnrichment(ctx, story.id, story.summaryId)).toEqual({
+      context: 'pending',
+      claims: 'pending',
+    })
+    await ensureOptionalEnrichment(ctx, story.id, story.summaryId)
+    const { rows: queued } = await h.ctx.pool.query<{ name: string; n: number }>(
+      `select name, count(*)::int as n from pgboss.job
+       where name in ($1, $2) and data->>'targetId' = $3 and state in ('created', 'retry', 'active')
+       group by name order by name`,
+      [QUEUES.generateContext, QUEUES.extractClaims, story.id],
+    )
+    expect(queued).toEqual([
+      { name: QUEUES.extractClaims, n: 1 },
+      { name: QUEUES.generateContext, n: 1 },
+    ])
+
+    const contextRunId = newId(ID_PREFIX.analysisRun)
+    const claimsRunId = newId(ID_PREFIX.analysisRun)
+    const now = new Date()
+    await h.ctx.db.insert(schema.analysisRun).values([
+      {
+        id: contextRunId,
+        operation: 'story_context',
+        modelId,
+        promptVersion: PROMPT_VERSIONS.explainContext,
+        pipelineVersion: 'p2',
+        inputFingerprint: story.summaryId,
+        targetType: 'story',
+        targetId: story.id,
+        startedAt: now,
+        completedAt: now,
+        status: 'succeeded',
+      },
+      {
+        id: claimsRunId,
+        operation: 'story_claims',
+        modelId,
+        promptVersion: PROMPT_VERSIONS.extractClaims,
+        pipelineVersion: 'p2',
+        inputFingerprint: story.summaryId,
+        targetType: 'story',
+        targetId: story.id,
+        startedAt: now,
+        completedAt: now,
+        status: 'failed',
+        error: 'test failure',
+      },
+    ])
+    expect(await ensureOptionalEnrichment(ctx, story.id, story.summaryId)).toEqual({
+      context: 'ready',
+      claims: 'failed',
+    })
+    await h.ctx.pool.query(
+      `delete from pgboss.job where name in ($1, $2) and data->>'targetId' = $3 and state in ('created', 'retry', 'active')`,
+      [QUEUES.generateContext, QUEUES.extractClaims, story.id],
+    )
+    await h.ctx.db
+      .delete(schema.analysisRun)
+      .where(inArray(schema.analysisRun.id, [contextRunId, claimsRunId]))
+  })
+})
+
 describe('incremental relationships', () => {
   it('reuses exact Story embeddings and relationship decisions', async () => {
     const { relateStory } = await import('@dn/jobs')
@@ -1044,7 +1139,8 @@ describe('incremental relationships', () => {
         join analysis_run a on a.id = r.analysis_run_id
         join story newer on newer.id = r.from_story_id
         join story older on older.id = r.to_story_id
-        where a.input_fingerprint = newer.id || ':' || newer.current_summary_id || '|' ||
+        where r.relation in ('related_to', 'provides_context_for')
+          and a.input_fingerprint = newer.id || ':' || newer.current_summary_id || '|' ||
           older.id || ':' || older.current_summary_id
         limit 1`)
     const edge = edges[0]

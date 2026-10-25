@@ -28,6 +28,7 @@ import { getInsights } from '../insights.ts'
 import { getMatchHealth } from '../match-health.ts'
 import { listMutedPublishers, setMutedPublisher } from '../muted-publishers.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
+import { ensureOptionalEnrichment } from '../optional-enrichment.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
@@ -254,7 +255,10 @@ const routes: Route[] = [
   route('GET', '/api/v1/stories/:id', async ({ ctx, params }) => {
     const story = await getStory(ctx.db, params.id ?? '')
     if (!story) throw new HttpError('not_found', 'story not found')
-    return json(story)
+    const enrichment = story.summary
+      ? await ensureOptionalEnrichment(ctx, story.id, story.summary.versionId)
+      : undefined
+    return json({ ...story, enrichment })
   }),
   route('GET', '/api/v1/stories/:id/updates', async ({ ctx, params }) => {
     const updates = await listStoryUpdates(ctx.db, params.id ?? '')

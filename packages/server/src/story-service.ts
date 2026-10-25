@@ -277,6 +277,7 @@ export async function recordGeneratedSummary(
       citation: citation.get(articleId) ?? null,
     })),
   )
+  if (supersedesVersionId) await clearOptionalEnrichment(db, story.id)
   await db
     .update(schema.story)
     .set({
@@ -361,6 +362,7 @@ export async function editSummary(
       })),
     )
   }
+  await clearOptionalEnrichment(db, story.id)
   await db
     .update(schema.story)
     .set({ currentSummaryId: versionId, title: input.headline })
@@ -375,4 +377,13 @@ export async function editSummary(
     articleIds: sources.map((source) => source.articleId),
   })
   return versionId
+}
+
+/** A new summary must never expose context anchors or claims derived from its predecessor. */
+async function clearOptionalEnrichment(db: Db, storyId: string) {
+  await db.delete(schema.storyContext).where(eq(schema.storyContext.storyId, storyId))
+  await db
+    .update(schema.claim)
+    .set({ supersededAt: new Date() })
+    .where(and(eq(schema.claim.storyId, storyId), isNull(schema.claim.supersededAt)))
 }

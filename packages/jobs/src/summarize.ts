@@ -6,9 +6,9 @@ import {
   type AnalysisJob,
   analysisJob,
   DomainError,
-  ENRICHMENT_QUEUES,
   getInferenceSettings,
   newsroomOutletCount,
+  optionalEnrichmentQueues,
   QUEUES,
   recordGeneratedSummary,
   recordStoryUpdate,
@@ -39,7 +39,8 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
 
   // Only Stories covered by enough newsrooms are worth summarising and publishing. When
   // another outlet joins, the fingerprint changes and a new job comes through here.
-  if ((await newsroomOutletCount(ctx.db, story.id)) < ctx.config.minPublishOutlets) {
+  const outletCount = await newsroomOutletCount(ctx.db, story.id)
+  if (outletCount < ctx.config.minPublishOutlets) {
     return { status: 'below_outlet_threshold' }
   }
   if (story.currentSummaryId && !job.force) {
@@ -120,9 +121,10 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     // Revisions update a Story, not its connections to other Stories. Context and claims follow
     // the new summary, while relationship inference remains initial-summary work.
     const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
-    const queues = assessment
-      ? ENRICHMENT_QUEUES.filter((queue) => queue !== QUEUES.relateStory)
-      : ENRICHMENT_QUEUES
+    const queues = [
+      ...(assessment ? [] : [QUEUES.relateStory]),
+      ...optionalEnrichmentQueues(outletCount, ctx.config.eagerOptionalEnrichmentOutlets),
+    ]
     for (const queue of queues) await sendInTx(ctx, tx, queue, next.data, next.options)
     return recorded
   })
