@@ -14,6 +14,7 @@ import {
   runMatchEval,
   sampleMatchSet,
   seedPublishers,
+  writeCandidateDataset,
   writeJson,
 } from '@dn/jobs'
 import {
@@ -48,6 +49,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   match:review --name n             Write a review page for its labels (reviewed labels, else the draft)
   match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k] [--tail-gap x] [--story-articles newest|anchored] [--ranking best|top2] [--judging sequential|choose] [--fresh]
                                     Replay matching over a labelled set and score it (B-cubed)
+  match:gate:dataset --name n      Write reviewed candidate examples for offline gate training
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
@@ -199,6 +201,17 @@ try {
             .slice(0, 5)
             .map((o) => `    ${o.size} articles mixing: ${o.labelled.join(' | ')}`)
             .join('\n')}`,
+      )
+      break
+    }
+    case 'match:gate:dataset': {
+      if (!values.name) throw new Error('--name required')
+      console.log(
+        await writeCandidateDataset(ctx.db, ctx.config.fixtureDir, values.name, {
+          minSimilarity: matchPolicy(ctx.inference.mode).llmMin,
+          maxCandidates: matchPolicy(ctx.inference.mode).maxCandidates,
+          windowSeconds: CANDIDATE_WINDOW_SECONDS,
+        }),
       )
       break
     }

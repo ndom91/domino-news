@@ -1010,6 +1010,47 @@ describe('match evaluation', () => {
     expect(split).toMatchObject({ predictedSingletons: 4, labelledSingletons: 0 })
   })
 
+  it('skips only when every candidate is below the gate threshold', async () => {
+    const { evaluateCandidateGate } = await import('@dn/jobs')
+    const example = (id: string, articleId: string, sameDevelopment: boolean, score: number) => ({
+      id,
+      articleId,
+      candidateStoryId: `sty_${id}`,
+      candidateRank: 1,
+      sameDevelopment,
+      score,
+      features: {
+        candidateCount: 1,
+        topSimilarity: 0,
+        nextSimilarity: 0,
+        similarityGap: 0,
+        centroidSimilarity: 0,
+        firstSimilarity: 0,
+        newestSimilarity: 0,
+        cohesion: 1,
+        nearestHours: 0,
+        oldestHours: 0,
+        candidateArticles: 1,
+        samePublisher: false,
+        titleTokenOverlap: 0,
+        sharedNumbers: 0,
+      },
+    })
+    const examples = [
+      example('1', 'a', false, 0.01),
+      example('2', 'b', true, 0.01),
+      example('3', 'c', false, 0.2),
+    ]
+    const result = evaluateCandidateGate(examples, (candidate) => candidate.score, 0.05)
+    expect(result).toEqual({
+      articlesWithCandidates: 3,
+      skippedArticles: 2,
+      falseSkips: 1,
+      skipRate: 2 / 3,
+      falseSkipRate: 0.5,
+    })
+  })
+
   it('replays matching in publish order with the production decision rules', async () => {
     const { replayMatching } = await import('@dn/jobs')
     const at = (h: number) => new Date(Date.UTC(2026, 9, 12, h)).toISOString()
