@@ -1,3 +1,4 @@
+import { schema } from '@dn/db'
 import { countryFromHeader, formatDate, plural } from '@dn/domain'
 import {
   type ApiErrorBody,
@@ -11,11 +12,13 @@ import {
   pushSubscriptionRequestSchema,
   readRequestSchema,
   regionSchema,
+  type StoryDetail,
   searchQuerySchema,
   signalsRequestSchema,
   summaryEditRequestSchema,
   userPreferencesUpdateSchema,
 } from '@dn/schemas'
+import { eq } from 'drizzle-orm'
 import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
 import { getBriefing } from '../briefing.ts'
@@ -253,11 +256,31 @@ const routes: Route[] = [
     json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
   route('GET', '/api/v1/stories/:id', async ({ ctx, params }) => {
-    const story = await getStory(ctx.db, params.id ?? '')
+    const storyId = await resolveStoryId(ctx.db, params.id ?? '')
+    const [target] = storyId
+      ? await ctx.db
+          .select({
+            summaryId: schema.story.currentSummaryId,
+            publishedAt: schema.story.publishedAt,
+          })
+          .from(schema.story)
+          .where(eq(schema.story.id, storyId))
+      : []
+    if (!storyId || !target?.publishedAt) throw new HttpError('not_found', 'story not found')
+    let enrichment: NonNullable<StoryDetail['enrichment']> | undefined
+    if (target.summaryId) {
+      try {
+        enrichment = await ensureOptionalEnrichment(ctx, storyId, target.summaryId)
+      } catch (error) {
+        console.error(`[story_enrichment] ${storyId} admission failed: ${(error as Error).message}`)
+        enrichment = { context: 'failed', claims: 'failed' }
+      }
+    }
+    const story = await getStory(ctx.db, storyId)
     if (!story) throw new HttpError('not_found', 'story not found')
-    const enrichment = story.summary
-      ? await ensureOptionalEnrichment(ctx, story.id, story.summary.versionId)
-      : undefined
+    if (story.summary?.versionId !== target.summaryId) {
+      enrichment = { context: 'pending', claims: 'pending' }
+    }
     return json({ ...story, enrichment })
   }),
   route('GET', '/api/v1/stories/:id/updates', async ({ ctx, params }) => {

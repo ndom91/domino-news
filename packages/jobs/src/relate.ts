@@ -24,6 +24,7 @@ import { runStoryGeneration, withAnalysisRun } from './provenance.ts'
 
 const MAX_CANDIDATES = 4
 const MAX_NARRATIVE_COMPONENT = 40
+class RelationshipInputsChangedError extends Error {}
 
 /**
  * After a Story has a summary: embed it, look for related published Stories, ask the
@@ -31,7 +32,11 @@ const MAX_NARRATIVE_COMPONENT = 40
  */
 export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
   const [story] = await ctx.db.select().from(schema.story).where(eq(schema.story.id, job.targetId))
-  if (!story?.publishedAt || story.currentSummaryId !== job.inputFingerprint)
+  if (
+    !story?.publishedAt ||
+    story.currentSummaryId !== job.inputFingerprint ||
+    !story.inputFingerprint
+  )
     return { status: 'stale' }
   const input = await loadStoryInput(ctx.db, story.id)
   if (!input) return { status: 'stale' }
@@ -47,17 +52,26 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
     )
     if (!generated) throw new Error('empty story embedding')
     vector = generated
-    await withTransaction(ctx.pool, async (tx) => {
-      await tx.db
+    const current = await withTransaction(ctx.pool, async (tx) => {
+      const updated = await tx.db
         .update(schema.story)
         .set({
           embedding: vector,
           embeddingModelId: ctx.inference.embeddings.modelId,
           embeddingSummaryId: story.currentSummaryId,
         })
-        .where(eq(schema.story.id, story.id))
+        .where(
+          and(
+            eq(schema.story.id, story.id),
+            eq(schema.story.currentSummaryId, job.inputFingerprint),
+          ),
+        )
+        .returning({ id: schema.story.id })
+      if (updated.length === 0) return false
       await touchStory(tx.db, story.id, 'story.embedded', null)
+      return true
     })
+    if (!current) return { status: 'stale' }
   }
 
   const { relateMin } = THRESHOLDS[ctx.inference.mode]
@@ -75,6 +89,7 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
         job,
         input,
         story.firstObservedAt,
+        story.inputFingerprint,
         candidate.id,
         candidate.similarity,
       )
@@ -82,7 +97,7 @@ export async function relateStory(ctx: WorkerContext, job: AnalysisJob) {
       added++
     }
   }
-  await assignNarrative(ctx, job, story.id)
+  await assignNarrative(ctx, job, story.id, story.inputFingerprint)
   return { status: 'ok', candidates: candidates.length, added }
 }
 
@@ -91,6 +106,7 @@ async function createEdgeIfRelated(
   job: AnalysisJob,
   self: StoryInput,
   selfFirstObservedAt: Date,
+  selfInputFingerprint: string,
   otherId: string,
   similarity: number,
 ) {
@@ -113,7 +129,10 @@ async function createEdgeIfRelated(
   const older = selfIsNewer ? otherInput : self
   const newerSummaryId = selfIsNewer ? job.inputFingerprint : other.currentSummaryId
   const olderSummaryId = selfIsNewer ? other.currentSummaryId : job.inputFingerprint
-  if (!newerSummaryId || !olderSummaryId) return false
+  const newerInputFingerprint = selfIsNewer ? selfInputFingerprint : other.inputFingerprint
+  const olderInputFingerprint = selfIsNewer ? other.inputFingerprint : selfInputFingerprint
+  if (!newerSummaryId || !olderSummaryId || !newerInputFingerprint || !olderInputFingerprint)
+    return false
   const assessment = await assessStoryRelationship(
     ctx,
     job,
@@ -121,6 +140,8 @@ async function createEdgeIfRelated(
     older,
     newerSummaryId,
     olderSummaryId,
+    newerInputFingerprint,
+    olderInputFingerprint,
     similarity,
   )
   if (assessment.output.decision !== 'related') return false
@@ -140,7 +161,26 @@ async function createEdgeIfRelated(
     console.warn(`[relate] rejected edge ${edge.fromStoryId}->${edge.toStoryId}: ${verdict.reason}`)
     return false
   }
-  await withTransaction(ctx.pool, async (tx) => {
+  return withTransaction(ctx.pool, async (tx) => {
+    const current = await tx.db
+      .select({
+        id: schema.story.id,
+        summaryId: schema.story.currentSummaryId,
+        inputFingerprint: schema.story.inputFingerprint,
+      })
+      .from(schema.story)
+      .where(inArray(schema.story.id, [newer.storyId, older.storyId]))
+      .for('update')
+    const currentById = new Map(current.map((row) => [row.id, row]))
+    const currentNewer = currentById.get(newer.storyId)
+    const currentOlder = currentById.get(older.storyId)
+    if (
+      currentNewer?.summaryId !== newerSummaryId ||
+      currentNewer?.inputFingerprint !== newerInputFingerprint ||
+      currentOlder?.summaryId !== olderSummaryId ||
+      currentOlder?.inputFingerprint !== olderInputFingerprint
+    )
+      throw new RelationshipInputsChangedError('Story inputs changed during relationship inference')
     const added = await tx.db
       .insert(schema.storyRelationship)
       .values({
@@ -151,7 +191,8 @@ async function createEdgeIfRelated(
       })
       .onConflictDoNothing()
       .returning({ id: schema.storyRelationship.id })
-    if (added.length && relation === 'corrects') {
+    if (added.length === 0) return false
+    if (relation === 'corrects') {
       await recordStoryUpdate(tx.db, {
         storyId: edge.fromStoryId,
         kind: 'correction_or_clarification',
@@ -163,8 +204,8 @@ async function createEdgeIfRelated(
     }
     await touchStory(tx.db, edge.fromStoryId, 'story.related', null)
     await touchStory(tx.db, edge.toStoryId, 'story.related', null)
+    return true
   })
-  return true
 }
 
 /** Reuse only an exact pair/model/prompt decision; validation still happens at edge insertion. */
@@ -175,9 +216,14 @@ async function assessStoryRelationship(
   older: StoryInput,
   newerSummaryId: string,
   olderSummaryId: string,
+  newerInputFingerprint: string,
+  olderInputFingerprint: string,
   similarity: number,
 ) {
-  const inputFingerprint = `${newer.storyId}:${newerSummaryId}|${older.storyId}:${olderSummaryId}`
+  const inputFingerprint = [
+    `${newer.storyId}:${newerSummaryId}:${newerInputFingerprint}`,
+    `${older.storyId}:${olderSummaryId}:${olderInputFingerprint}`,
+  ].join('|')
   const [cached] = await ctx.db
     .select({ runId: schema.analysisRun.id, output: schema.interpretation.output })
     .from(schema.analysisRun)
@@ -290,7 +336,12 @@ export async function narrativeComponent(db: Db, storyId: string) {
  * Connected Stories share a Narrative. Joins the oldest existing Narrative in the
  * component, or creates one. Narratives are never merged automatically.
  */
-async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: string) {
+async function assignNarrative(
+  ctx: WorkerContext,
+  job: AnalysisJob,
+  storyId: string,
+  inputFingerprint: string,
+) {
   const members = await narrativeComponent(ctx.db, storyId)
   if (members.length < 2) return
 
@@ -326,6 +377,20 @@ async function assignNarrative(ctx: WorkerContext, job: AnalysisJob, storyId: st
   )
 
   await withTransaction(ctx.pool, async (tx) => {
+    const [current] = await tx.db
+      .select({
+        summaryId: schema.story.currentSummaryId,
+        inputFingerprint: schema.story.inputFingerprint,
+      })
+      .from(schema.story)
+      .where(eq(schema.story.id, storyId))
+      .for('update')
+    if (
+      current?.summaryId !== job.inputFingerprint ||
+      current?.inputFingerprint !== inputFingerprint
+    ) {
+      throw new RelationshipInputsChangedError('Story inputs changed during narrative inference')
+    }
     const now = new Date()
     const interpretationId = newId(ID_PREFIX.interpretation)
     const narrativeId = target?.id ?? newId(ID_PREFIX.narrative)

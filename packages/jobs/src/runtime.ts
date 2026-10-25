@@ -16,12 +16,16 @@ import { embedArticles } from './embed.ts'
 import { explainStoryContext } from './explain-context.ts'
 import { pollFeed } from './ingest.ts'
 import { matchArticle } from './match.ts'
-import { MatchLeaderPendingError, resumeMatchFollower } from './match-admission.ts'
+import {
+  MatchLeaderPendingError,
+  reconcileMatchAdmissions,
+  resumeMatchFollower,
+} from './match-admission.ts'
 import { deliverForYouPushes } from './push-delivery.ts'
 import { relateStory } from './relate.ts'
 import { feedIds } from './seed.ts'
 import { summarizeStory } from './summarize.ts'
-import { releaseSummaryDebounce } from './summary-debounce.ts'
+import { reconcileSummaryDebounces, releaseSummaryDebounce } from './summary-debounce.ts'
 
 // `exclusive`: at most one created/retry/active job per singletonKey (task+target+fingerprint+version).
 // 5 retries with exponential backoff (about 1, 2, 4, 8, 16 minutes) cover a short inference
@@ -143,6 +147,15 @@ export async function startWorkers(ctx: WorkerContext) {
       console.log(`[deliver_expo_push] ${JSON.stringify(result)}`)
     }
   })
+  await boss.work(QUEUES.reconcileDeferredWork, async () => {
+    const [matches, summaries] = await Promise.all([
+      reconcileMatchAdmissions(ctx),
+      reconcileSummaryDebounces(ctx),
+    ])
+    if (matches || summaries) {
+      console.log(`[reconcile_deferred_work] ${JSON.stringify({ matches, summaries })}`)
+    }
+  })
 
   const genSlots = Math.max(1, ctx.config.generationConcurrency)
   await workWithReservedSlots(
@@ -212,6 +225,7 @@ export async function startWorkers(ctx: WorkerContext) {
 
   await boss.schedule(QUEUES.pollAllFeeds, ctx.config.feedPollCron, null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.admitBackfill, '* * * * *', null, { singletonKey: 'cron' })
+  await boss.schedule(QUEUES.reconcileDeferredWork, '* * * * *', null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.pruneEvents, '17 3 * * *', null, { singletonKey: 'cron' })
   await boss.schedule(QUEUES.deliverPush, ctx.config.expoPushDeliveryCron, null, {
     singletonKey: 'cron',

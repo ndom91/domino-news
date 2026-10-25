@@ -199,17 +199,28 @@ export const articleEmbedding = pgTable('article_embedding', {
   createdAt: createdAt(),
 })
 
-/** Short-lived leader lease used to coalesce concurrent Story-match inference. */
-export const matchAdmission = pgTable('match_admission', {
-  articleId: text('article_id')
-    .primaryKey()
-    .references(() => article.id),
-  leaderArticleId: text('leader_article_id')
-    .notNull()
-    .references(() => article.id),
-  expiresAt: ts('expires_at').notNull(),
-  createdAt: createdAt(),
-})
+/** Short-lived follower lease used to coalesce concurrent Story-match inference. */
+export const matchAdmission = pgTable(
+  'match_admission',
+  {
+    articleId: text('article_id')
+      .primaryKey()
+      .references(() => article.id),
+    leaderArticleId: text('leader_article_id')
+      .notNull()
+      .references(() => article.id),
+    inputFingerprint: text('input_fingerprint').notNull(),
+    priorityClass: text('priority_class').notNull(),
+    expiresAt: ts('expires_at').notNull(),
+    createdAt: createdAt(),
+  },
+  (t) => [
+    check(
+      'match_admission_priority_class',
+      sql`${t.priorityClass} in ('interactive', 'fresh', 'backfill')`,
+    ),
+  ],
+)
 
 // Observations (immutable, enforced by trigger in migration)
 
@@ -422,15 +433,24 @@ export const story = pgTable(
 )
 
 /** Latest desired summary input while a Story waits for a quiet reporting period. */
-export const summaryDebounce = pgTable('summary_debounce', {
-  storyId: text('story_id')
-    .primaryKey()
-    .references(() => story.id),
-  inputFingerprint: text('input_fingerprint').notNull(),
-  priorityClass: text('priority_class').notNull(),
-  dueAt: ts('due_at').notNull(),
-  updatedAt: ts('updated_at').notNull().defaultNow(),
-})
+export const summaryDebounce = pgTable(
+  'summary_debounce',
+  {
+    storyId: text('story_id')
+      .primaryKey()
+      .references(() => story.id),
+    inputFingerprint: text('input_fingerprint').notNull(),
+    priorityClass: text('priority_class').notNull(),
+    dueAt: ts('due_at').notNull(),
+    updatedAt: ts('updated_at').notNull().defaultNow(),
+  },
+  (t) => [
+    check(
+      'summary_debounce_priority_class',
+      sql`${t.priorityClass} in ('interactive', 'fresh', 'backfill')`,
+    ),
+  ],
+)
 
 export const storyArticle = pgTable(
   'story_article',
@@ -568,6 +588,29 @@ export const storySummarySource = pgTable(
     citation: integer('citation'),
   },
   (t) => [primaryKey({ columns: [t.summaryVersionId, t.articleId] })],
+)
+
+/** Exact optional enrichment versions committed with their derived reader data. */
+export const optionalEnrichmentCompletion = pgTable(
+  'optional_enrichment_completion',
+  {
+    storyId: text('story_id')
+      .notNull()
+      .references(() => story.id),
+    summaryVersionId: text('summary_version_id')
+      .notNull()
+      .references(() => storySummaryVersion.id),
+    kind: text('kind').$type<'context' | 'claims'>().notNull(),
+    modelId: text('model_id').notNull(),
+    promptVersion: text('prompt_version').notNull(),
+    completedAt: ts('completed_at').notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      columns: [t.storyId, t.summaryVersionId, t.kind, t.modelId, t.promptVersion],
+    }),
+    check('optional_enrichment_completion_kind', sql`${t.kind} in ('context', 'claims')`),
+  ],
 )
 
 // One durable verdict for a published Story's prior-summary/current-input pair.

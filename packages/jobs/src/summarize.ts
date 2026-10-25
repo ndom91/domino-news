@@ -8,6 +8,7 @@ import {
   DomainError,
   getInferenceSettings,
   newsroomOutletCount,
+  OPTIONAL_ENRICHMENT_SPECS,
   optionalEnrichmentQueues,
   QUEUES,
   recordGeneratedSummary,
@@ -62,10 +63,20 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
           (await getInferenceSettings(ctx)).summaryUpdateAssessmentMaxArticles,
         )
       : null
-  if (assessment && assessment.output.outcome !== 'material')
+  if (assessment && assessment.output.outcome !== 'material') {
+    if (story.currentSummaryId) {
+      await enqueueMissingOptionalEnrichment(
+        ctx,
+        story.id,
+        story.currentSummaryId,
+        outletCount,
+        job.priorityClass,
+      )
+    }
     return {
       status: assessment.prefiltered ? 'corroboration_prefilter' : assessment.output.outcome,
     }
+  }
 
   const input = await loadStoryInput(ctx.db, story.id)
   if (!input || input.articles.length === 0) return { status: 'no_articles' }
@@ -129,6 +140,41 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
     return recorded
   })
   return outcome
+}
+
+async function enqueueMissingOptionalEnrichment(
+  ctx: WorkerContext,
+  storyId: string,
+  summaryVersionId: string,
+  outletCount: number,
+  priorityClass: AnalysisJob['priorityClass'],
+) {
+  const queues = optionalEnrichmentQueues(outletCount, ctx.config.eagerOptionalEnrichmentOutlets)
+  if (queues.length === 0) return
+  const completed = await ctx.db
+    .select({
+      kind: schema.optionalEnrichmentCompletion.kind,
+      promptVersion: schema.optionalEnrichmentCompletion.promptVersion,
+      modelId: schema.optionalEnrichmentCompletion.modelId,
+    })
+    .from(schema.optionalEnrichmentCompletion)
+    .where(
+      and(
+        eq(schema.optionalEnrichmentCompletion.storyId, storyId),
+        eq(schema.optionalEnrichmentCompletion.summaryVersionId, summaryVersionId),
+      ),
+    )
+  const job = analysisJob(storyId, summaryVersionId, priorityClass)
+  for (const queue of queues) {
+    const spec = OPTIONAL_ENRICHMENT_SPECS[queue]
+    const ready = completed.some(
+      (row) =>
+        row.kind === spec.kind &&
+        row.modelId === ctx.inference.generation.modelId &&
+        row.promptVersion === spec.promptVersion,
+    )
+    if (!ready) await ctx.workerBoss.send(queue, job.data, job.options)
+  }
 }
 
 // assessSummaryUpdate records one material verdict for a prior-summary/current-input pair.

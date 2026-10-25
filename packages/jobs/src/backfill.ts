@@ -16,6 +16,7 @@ export async function admitBackfill(ctx: WorkerContext) {
   const queues = await ctx.workerBoss.getQueues([
     QUEUES.embedArticle,
     QUEUES.matchArticle,
+    QUEUES.resumeMatchArticle,
     QUEUES.releaseSummaryDebounce,
     QUEUES.summarizeStory,
     QUEUES.generateContext,

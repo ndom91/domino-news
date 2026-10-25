@@ -6,6 +6,7 @@ export const QUEUES = {
   matchArticle: 'match_article',
   resumeMatchArticle: 'resume_match_article',
   releaseSummaryDebounce: 'release_summary_debounce',
+  reconcileDeferredWork: 'reconcile_deferred_work',
   summarizeStory: 'build_story_summary',
   relateStory: 'relate_story',
   generateContext: 'generate_context',
@@ -55,5 +56,8 @@ export interface AnalysisJob {
   priorityClass: JobClass
   /** Summaries only: replace a generated summary even if inputs are unchanged. */
   force?: boolean
+  /** Optional enrichment identity, used by the detail endpoint to track this exact request. */
+  modelId?: string
+  promptVersion?: string
   // Never put article bodies or secrets in durable job payloads.
 }

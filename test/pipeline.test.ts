@@ -821,7 +821,7 @@ describe('event retention', () => {
 describe('concurrent matching', () => {
   it('puts two near-identical articles matched at the same time into one story', async () => {
     const { db, ts } = h.ctx
-    const { matchArticle, resumeMatchFollower, CandidatesChangedError } = await import('@dn/jobs')
+    const { matchArticle, resumeMatchFollower } = await import('@dn/jobs')
     const { ID_PREFIX, newId } = await import('@dn/domain')
     const [publisher] = await db.select().from(schema.publisher).limit(1)
     if (!publisher) throw new Error('no publisher')
@@ -944,28 +944,41 @@ describe('concurrent matching', () => {
         }
       }),
     )
-    const chooseStory = vi.spyOn(h.ctx.inference.generation, 'chooseStory')
-    const results = await Promise.allSettled(jobs.map((job) => matchArticle(h.ctx, job)))
-    const deferred = results.flatMap((result, index) =>
-      result.status === 'fulfilled' && result.value.status === 'deferred' && jobs[index]
-        ? [jobs[index]]
-        : [],
+    const realChooseStory = h.ctx.inference.generation.chooseStory
+    let entered: (() => void) | undefined
+    let release: (() => void) | undefined
+    const choosing = new Promise<void>((resolve) => {
+      entered = resolve
+    })
+    const blocked = new Promise<void>((resolve) => {
+      release = resolve
+    })
+    const chooseStory = vi
+      .spyOn(h.ctx.inference.generation, 'chooseStory')
+      .mockImplementation(async (input) => {
+        entered?.()
+        await blocked
+        return realChooseStory(input)
+      })
+    const [leader, follower] = jobs.sort((a, b) => a.targetId.localeCompare(b.targetId))
+    if (!leader || !follower) throw new Error('concurrent jobs missing')
+    const leaderResult = matchArticle(h.ctx, leader)
+    await choosing
+    expect(await matchArticle(h.ctx, follower)).toMatchObject({ status: 'deferred' })
+    release?.()
+    expect(await leaderResult).toMatchObject({ status: 'new_story' })
+    expect(
+      await resumeMatchFollower(h.ctx, { ...follower, inputFingerprint: 'stale-wake' }),
+    ).toMatchObject({ status: 'leader_matched' })
+    const { rows: resumed } = await h.ctx.pool.query<{ fingerprint: string }>(
+      `select data->>'inputFingerprint' as fingerprint from pgboss.job
+       where name = 'match_article' and data->>'targetId' = $1 order by created_on desc limit 1`,
+      [follower.targetId],
     )
-    expect(deferred).toHaveLength(1)
-    const follower = deferred[0]
-    if (!follower) throw new Error('no deferred follower')
-    expect(await resumeMatchFollower(h.ctx, follower)).toMatchObject({ status: 'leader_matched' })
+    expect(resumed[0]?.fingerprint).toBe(follower.inputFingerprint)
     expect(await matchArticle(h.ctx, follower)).toMatchObject({ status: 'attached' })
     expect(chooseStory).toHaveBeenCalledTimes(1)
     chooseStory.mockRestore()
-    // A job that lost the race must retry (as pg-boss would), not create a second story.
-    for (const [i, r] of results.entries()) {
-      if (r.status === 'rejected') {
-        expect(r.reason).toBeInstanceOf(CandidatesChangedError)
-        const job = jobs[i]
-        if (job) await matchArticle(h.ctx, job)
-      }
-    }
     const memberships = await db
       .select({ storyId: schema.storyArticle.storyId })
       .from(schema.storyArticle)
@@ -982,7 +995,8 @@ describe('summary debounce', () => {
   it('keeps one pending wake-up and releases only the latest Story fingerprint', async () => {
     const { withTransaction } = await import('@dn/db')
     const { newId, ID_PREFIX } = await import('@dn/domain')
-    const { debounceStorySummary, releaseSummaryDebounce } = await import('@dn/jobs')
+    const { debounceStorySummary, reconcileSummaryDebounces, releaseSummaryDebounce } =
+      await import('@dn/jobs')
     const storyId = newId(ID_PREFIX.story)
     await h.ctx.db.insert(schema.story).values({
       id: storyId,
@@ -995,6 +1009,29 @@ describe('summary debounce', () => {
     const schedule = (priorityClass: 'backfill' | 'fresh' | 'interactive') =>
       withTransaction(h.ctx.pool, (tx) => debounceStorySummary(h.ctx, tx, storyId, priorityClass))
     expect(await schedule('backfill')).toMatchObject({ status: 'scheduled' })
+    await expect(
+      releaseSummaryDebounce(h.ctx, {
+        targetId: storyId,
+        inputFingerprint: 'fingerprint-1',
+        pipelineVersion: 'p2',
+        priorityClass: 'backfill',
+      }),
+    ).rejects.toThrow(/wake already active/)
+    expect(
+      await h.ctx.db
+        .select()
+        .from(schema.summaryDebounce)
+        .where(eq(schema.summaryDebounce.storyId, storyId)),
+    ).toHaveLength(1)
+    await h.ctx.pool.query(
+      `delete from pgboss.job where name = 'release_summary_debounce' and data->>'targetId' = $1`,
+      [storyId],
+    )
+    await h.ctx.db
+      .update(schema.summaryDebounce)
+      .set({ dueAt: new Date(Date.now() - 1000) })
+      .where(eq(schema.summaryDebounce.storyId, storyId))
+    expect(await reconcileSummaryDebounces(h.ctx)).toBe(1)
     await h.ctx.db
       .update(schema.story)
       .set({ inputFingerprint: 'fingerprint-2' })
@@ -1047,7 +1084,6 @@ describe('summary debounce', () => {
 
 describe('lazy optional enrichment', () => {
   it('admits missing current work once and stops on success or failure', async () => {
-    const { newId, ID_PREFIX } = await import('@dn/domain')
     const { PROMPT_VERSIONS } = await import('@dn/inference')
     const { ensureOptionalEnrichment, QUEUES } = await import('@dn/server')
     const [story] = await h.ctx.db
@@ -1080,49 +1116,29 @@ describe('lazy optional enrichment', () => {
       { name: QUEUES.generateContext, n: 1 },
     ])
 
-    const contextRunId = newId(ID_PREFIX.analysisRun)
-    const claimsRunId = newId(ID_PREFIX.analysisRun)
-    const now = new Date()
-    await h.ctx.db.insert(schema.analysisRun).values([
-      {
-        id: contextRunId,
-        operation: 'story_context',
-        modelId,
-        promptVersion: PROMPT_VERSIONS.explainContext,
-        pipelineVersion: 'p2',
-        inputFingerprint: story.summaryId,
-        targetType: 'story',
-        targetId: story.id,
-        startedAt: now,
-        completedAt: now,
-        status: 'succeeded',
-      },
-      {
-        id: claimsRunId,
-        operation: 'story_claims',
-        modelId,
-        promptVersion: PROMPT_VERSIONS.extractClaims,
-        pipelineVersion: 'p2',
-        inputFingerprint: story.summaryId,
-        targetType: 'story',
-        targetId: story.id,
-        startedAt: now,
-        completedAt: now,
-        status: 'failed',
-        error: 'test failure',
-      },
-    ])
+    await h.ctx.db.insert(schema.optionalEnrichmentCompletion).values({
+      storyId: story.id,
+      summaryVersionId: story.summaryId,
+      kind: 'context',
+      modelId,
+      promptVersion: PROMPT_VERSIONS.explainContext,
+    })
+    await h.ctx.pool.query(
+      `update pgboss.job set state = 'failed', completed_on = now()
+       where name = $1 and data->>'targetId' = $2 and data->>'modelId' = $3`,
+      [QUEUES.extractClaims, story.id, modelId],
+    )
     expect(await ensureOptionalEnrichment(ctx, story.id, story.summaryId)).toEqual({
       context: 'ready',
       claims: 'failed',
     })
     await h.ctx.pool.query(
-      `delete from pgboss.job where name in ($1, $2) and data->>'targetId' = $3 and state in ('created', 'retry', 'active')`,
-      [QUEUES.generateContext, QUEUES.extractClaims, story.id],
+      `delete from pgboss.job where name in ($1, $2) and data->>'targetId' = $3 and data->>'modelId' = $4`,
+      [QUEUES.generateContext, QUEUES.extractClaims, story.id, modelId],
     )
     await h.ctx.db
-      .delete(schema.analysisRun)
-      .where(inArray(schema.analysisRun.id, [contextRunId, claimsRunId]))
+      .delete(schema.optionalEnrichmentCompletion)
+      .where(eq(schema.optionalEnrichmentCompletion.storyId, story.id))
   })
 })
 
@@ -1140,8 +1156,9 @@ describe('incremental relationships', () => {
         join story newer on newer.id = r.from_story_id
         join story older on older.id = r.to_story_id
         where r.relation in ('related_to', 'provides_context_for')
-          and a.input_fingerprint = newer.id || ':' || newer.current_summary_id || '|' ||
-          older.id || ':' || older.current_summary_id
+          and a.input_fingerprint = newer.id || ':' || newer.current_summary_id || ':' ||
+          newer.input_fingerprint || '|' || older.id || ':' || older.current_summary_id || ':' ||
+          older.input_fingerprint
         limit 1`)
     const edge = edges[0]
     if (!edge) throw new Error('no current generated relationship')
@@ -1207,6 +1224,48 @@ describe('incremental relationships', () => {
     expect(embed).toHaveBeenCalledTimes(1)
     classify.mockRestore()
     embed.mockRestore()
+
+    const realEmbed = h.ctx.inference.embeddings.embedDocuments
+    let embeddingStarted: (() => void) | undefined
+    let finishEmbedding: (() => void) | undefined
+    const started = new Promise<void>((resolve) => {
+      embeddingStarted = resolve
+    })
+    const finish = new Promise<void>((resolve) => {
+      finishEmbedding = resolve
+    })
+    const staleEmbed = vi
+      .spyOn(h.ctx.inference.embeddings, 'embedDocuments')
+      .mockImplementation(async (documents) => {
+        embeddingStarted?.()
+        await finish
+        return realEmbed(documents)
+      })
+    await h.ctx.db
+      .update(schema.story)
+      .set({ embeddingModelId: 'old-model' })
+      .where(eq(schema.story.id, edge.from_story_id))
+    const staleRun = relateStory({ ...h.ctx, ts: isolated }, job)
+    await started
+    await h.ctx.db
+      .update(schema.story)
+      .set({ currentSummaryId: 'sum_changed_during_embedding' })
+      .where(eq(schema.story.id, edge.from_story_id))
+    finishEmbedding?.()
+    expect(await staleRun).toEqual({ status: 'stale' })
+    const [afterStale] = await h.ctx.db
+      .select({ modelId: schema.story.embeddingModelId })
+      .from(schema.story)
+      .where(eq(schema.story.id, edge.from_story_id))
+    expect(afterStale?.modelId).toBe('old-model')
+    staleEmbed.mockRestore()
+    await h.ctx.db
+      .update(schema.story)
+      .set({
+        currentSummaryId: newer.summaryId,
+        embeddingModelId: h.ctx.inference.embeddings.modelId,
+      })
+      .where(eq(schema.story.id, edge.from_story_id))
   })
 })
 

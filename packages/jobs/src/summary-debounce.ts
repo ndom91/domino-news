@@ -1,6 +1,6 @@
 import { schema, type TxContext, withTransaction } from '@dn/db'
 import { type AnalysisJob, analysisJob, getInferenceSettings, QUEUES } from '@dn/server'
-import { eq } from 'drizzle-orm'
+import { asc, eq, lte } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 
 const INITIAL_SUMMARY_DEBOUNCE_SECONDS = 5
@@ -114,9 +114,34 @@ async function sendDebounceWake(
   job: ReturnType<typeof analysisJob>,
   dueAt: Date,
 ) {
-  await sendInTx(ctx, tx, QUEUES.releaseSummaryDebounce, job.data, {
+  const id = await sendInTx(ctx, tx, QUEUES.releaseSummaryDebounce, job.data, {
     ...job.options,
     singletonKey: `${job.data.targetId}:${dueAt.getTime()}`,
     startAfter: Math.max(1, Math.ceil((dueAt.getTime() - Date.now()) / 1000)),
   })
+  if (!id) throw new Error(`summary debounce wake already active for ${job.data.targetId}`)
+}
+
+/** Recover due debounce rows whose wake-up job was lost or exhausted. */
+export async function reconcileSummaryDebounces(ctx: WorkerContext, limit = 100) {
+  const due = await ctx.db
+    .select()
+    .from(schema.summaryDebounce)
+    .where(lte(schema.summaryDebounce.dueAt, new Date()))
+    .orderBy(asc(schema.summaryDebounce.dueAt))
+    .limit(limit)
+  let admitted = 0
+  for (const row of due) {
+    const job = analysisJob(
+      row.storyId,
+      row.inputFingerprint,
+      row.priorityClass as AnalysisJob['priorityClass'],
+    )
+    const id = await ctx.workerBoss.send(QUEUES.releaseSummaryDebounce, job.data, {
+      ...job.options,
+      singletonKey: `${row.storyId}:${row.dueAt.getTime()}`,
+    })
+    if (id) admitted++
+  }
+  return admitted
 }

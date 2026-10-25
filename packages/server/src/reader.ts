@@ -31,7 +31,12 @@ import { leanMixByStory } from './lean.ts'
 const iso = (d: Date) => d.toISOString()
 
 // Reads never need the embedding (768 floats, ~9.5 KB per row as text).
-const { embedding: _embedding, ...storyColumns } = getTableColumns(schema.story)
+const {
+  embedding: _embedding,
+  embeddingModelId: _embeddingModelId,
+  embeddingSummaryId: _embeddingSummaryId,
+  ...storyColumns
+} = getTableColumns(schema.story)
 
 /** Accepts a Story id, current slug, or a historical alias (merged/renamed stories). */
 export async function resolveStoryId(db: Db, idOrSlug: string): Promise<string | null> {

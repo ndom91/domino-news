@@ -122,6 +122,25 @@ export async function extractStoryClaims(ctx: WorkerContext, job: AnalysisJob) {
         )
       }
     }
+    await tx.db
+      .delete(schema.optionalEnrichmentCompletion)
+      .where(
+        and(
+          eq(schema.optionalEnrichmentCompletion.storyId, story.id),
+          eq(schema.optionalEnrichmentCompletion.summaryVersionId, job.inputFingerprint),
+          eq(schema.optionalEnrichmentCompletion.kind, 'claims'),
+        ),
+      )
+    await tx.db
+      .insert(schema.optionalEnrichmentCompletion)
+      .values({
+        storyId: story.id,
+        summaryVersionId: job.inputFingerprint,
+        kind: 'claims',
+        modelId: result.modelId,
+        promptVersion: result.promptVersion,
+      })
+      .onConflictDoNothing()
     return {
       status: 'ok',
       claims: claims.length,

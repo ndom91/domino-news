@@ -2,7 +2,7 @@ import { type Db, schema, withTransaction } from '@dn/db'
 import { ID_PREFIX, newId, slugify } from '@dn/domain'
 import type { StoryContextOutput } from '@dn/schemas'
 import type { AnalysisJob } from '@dn/server'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadStoryInput } from './inputs.ts'
 import { lockCurrentSummary, runStoryGeneration } from './provenance.ts'
@@ -95,6 +95,25 @@ export async function explainStoryContext(ctx: WorkerContext, job: AnalysisJob) 
         addedAt: new Date(),
       })
     }
+    await tx.db
+      .delete(schema.optionalEnrichmentCompletion)
+      .where(
+        and(
+          eq(schema.optionalEnrichmentCompletion.storyId, row.story.id),
+          eq(schema.optionalEnrichmentCompletion.summaryVersionId, job.inputFingerprint),
+          eq(schema.optionalEnrichmentCompletion.kind, 'context'),
+        ),
+      )
+    await tx.db
+      .insert(schema.optionalEnrichmentCompletion)
+      .values({
+        storyId: row.story.id,
+        summaryVersionId: job.inputFingerprint,
+        kind: 'context',
+        modelId: result.modelId,
+        promptVersion: result.promptVersion,
+      })
+      .onConflictDoNothing()
     return {
       status: 'ok',
       entries: entries.length,
