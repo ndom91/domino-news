@@ -38,9 +38,14 @@
 ```text
 poll_feed ──► article + revision + observation ──(same tx)──► embed_article
 embed_article ──► article_embedding + outbox(article) ──► match_article (+2s)
-match_article ──► attach to Story | new Story ──► release_summary_debounce ──► build_story_summary
-build_story_summary ──► summary version + publish + outbox(story) ──► relate_story
+match_article ──► attach to Story | new Story ──► summary_debounce ──► release_summary_debounce
+close concurrent follower ──► match_admission ──► resume_match_article ──► match_article
+release_summary_debounce ──► build_story_summary ──► summary version + publish + outbox(story)
+initial / forced summary ──► relate_story
+summary at ≥ eager threshold ──► generate_context + extract_claims
+authenticated Story detail below threshold ──► missing context / claims at interactive priority
 relate_story ──► story embedding, typed edges, narrative membership
+reconcile_deferred_work (each minute) ──► expired match leases + due summary rows
 indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
 ```
 
@@ -52,7 +57,7 @@ indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
 - **Backfill:** articles older than `FRESH_WINDOW_HOURS` are marked `pending_backfill`. A once-a-minute producer admits `BACKFILL_ADMIT_PER_MINUTE` of them (newest first) while total queued embeddings stay under 50. Pausing stops admission (ops page or `pnpm cli backfill:pause`).
 - **Matching** runs in parallel (reserved fresh slots like embed/summarise). Only the final write is serialised: it takes a Postgres advisory lock, re-checks the candidate Stories, and retries the job if a neighbour joined a Story it never evaluated, so two near-identical articles cannot both create a Story. Very-close articles first seen within two minutes use a durable 45-second admission lease: the oldest runs the normal matcher, followers wait without inference, then run the same matcher once the leader has a Story. Expiry, a separate resume queue and a once-a-minute reconciler recover from failed or lost work; followers are never attached automatically.
 - **Summary debounce:** each Story has at most one durable pending summary fingerprint. Another attachment replaces it and restarts the quiet period (5 seconds before first publication, `PUBLISHED_SUMMARY_DEBOUNCE_SECONDS` after publication). The wake-up releases only the latest fingerprint; early wake-ups retry or reschedule, and a once-a-minute reconciler recovers due rows with no live wake. Interactive work bypasses and clears the debounce.
-- **Optional enrichment:** summary generation stays eager; relationship inference remains initial-summary work. Context and claims are eager only once a Story has `EAGER_OPTIONAL_ENRICHMENT_OUTLETS` newsroom publishers (default 3); below that, opening the authenticated Story detail enqueues missing exact-version work at interactive priority. A completion marker commits in the same transaction as reader data, so the detail query refetches only until output (including a valid empty result) is durable or the exact job fails. A new summary immediately removes prior context links and supersedes prior claims, so lazy regeneration never exposes stale derived text.
+- **Optional enrichment:** summary generation stays eager; automatic relationship inference remains initial-summary work (forced refreshes can rerun it). Context and claims are eager only once a Story has `EAGER_OPTIONAL_ENRICHMENT_OUTLETS` newsroom publishers (default 3); below that, opening the authenticated Story detail enqueues missing exact-version work at interactive priority. A completion marker commits in the same transaction as reader data, so the detail query refetches only until output (including a valid empty result) is durable or the exact job fails. A new summary immediately removes prior context links and supersedes prior claims, so lazy regeneration never exposes stale derived text.
 - **Relating** runs with concurrency 1, so graph edits do not race. Story embeddings are reused only when both their embedding model and summary version still match. Pair decisions reuse successful relationship interpretations only for the exact two summary versions and source fingerprints, generation model and prompt version; graph rebuilds can therefore replay current decisions without inference, while any changed input or model policy forces a fresh call. Cached positive decisions still pass current-input, temporal and cycle validation before an edge is restored.
 - **Retries:** 20 attempts, 10s initial, exponential, capped at 10 minutes: this rides out an inference outage of several hours. The local adapter also retries 502/503/429 twice in-call. Failed jobs stay in pg-boss and appear on the Pipeline page.
 - **Transient bodies:** fetched only for publishers with `transient_body_allowed`, held in memory for one inference call, never logged or queued. Outbound links matching primary-document patterns become `source_reference` rows. Of 65 seeded publishers, **10 are `transient_body_allowed`** (Global Voices, Mongabay, Agência Pública and seven official sources under CC BY, OGL or public domain). The rest are `metadata_only` because their licences are non-commercial, unverified or block AI agents. Pages whose author metadata names AP, Reuters or AFP never yield a body. Federal Register and EU Commission pages can't be fetched as plain HTML yet, so they fall back to metadata. Reviews were best-effort, not legal advice (see `policyNote` and `license` in `fixtures/publishers.json`).
@@ -74,7 +79,7 @@ Chosen bands (`THRESHOLDS` in `packages/jobs/src/match.ts`):
 
 The model makes nearly all matching decisions; embeddings only shortlist. Fixture mode uses separate, coarser thresholds over hashed bag-of-words vectors.
 
-Prompt lessons from the real-model runs (current versions: `match-story@3`, `classify-relationship@3`):
+Prompt lessons from the real-model runs (current versions: `match-story@6`, `classify-relationship@6`):
 
 - **Reactions are separate developments, in both directions.** Backfill admits newest first, so a reaction ("Trump attacks Norway over the Nobel snub") can create a Story before the event it reacts to arrives. The match prompt must say that event-vs-reaction is `related_development` regardless of order; otherwise the original event gets absorbed into the reaction Story.
 - **Shared actors are not a link.** A loose relationship prompt connected anything involving Donald Trump. The prompt now requires a specific event, decision or dispute that a reader could name.
@@ -123,17 +128,17 @@ Prompt lessons from the real-model runs (current versions: `match-story@3`, `cla
 
 - **Passkeys:** `@better-auth/passkey`, table `auth_passkey`. `rpID` is the hostname of `BETTER_AUTH_URL` and `origin` is the URL itself, so passkeys created on one host don't work on another. Users add passkeys after a password sign-in on `/account`; login offers a button and WebAuthn autofill. Tested end-to-end with Chromium's virtual authenticator (`e2e/passkey.spec.ts`).
 - **Publisher coverage** is computed at read time from `story_article` (published Stories, active links). "First to report" uses `coalesce(published_at, first_seen_at)`, so a feed with missing dates can look slower than it was. No pipeline or schema changes.
-- **Enrichment after each summary version:** `build_story_summary` enqueues `relate_story`, `generate_context` and `extract_claims`, all keyed on the new summary version id, so a newer summary makes older enrichment jobs stale. `pnpm cli enrich:all` re-queues all three for existing data.
+- **Enrichment after a summary version:** initial and forced summaries enqueue `relate_story`; ordinary assessed revisions retain their existing graph. Context and claims enqueue only when newsroom coverage meets `EAGER_OPTIONAL_ENRICHMENT_OUTLETS` (default 3), otherwise an authenticated Story-detail read admits whichever exact-version jobs are missing. `pnpm cli enrich:all` explicitly re-queues all three for existing data regardless of that automatic threshold.
 - **Context entries** (`context_entry`, `context_entry_version` (append-only), `story_context`):
   - Validation drops entries whose `anchorText` isn't verbatim in the summary or which cite observations outside the Story.
   - One interpretation per entry, so each explanation's evidence is exactly its own sources.
   - Entries are reused by `normalized_key` (slug of the title) without regeneration.
-  - The reader hides anchors missing from the current text; editing a summary queues regeneration.
-  - Prompt `explain-context@2` skips countries, major parties, household-name institutions, generic words and news outlets; `@1` explained "Politico" and "European Union".
+  - A new summary deletes old Story-context links before publication; editing a summary queues context regeneration.
+  - Prompt `explain-context@2` introduced skipping countries, major parties, household-name institutions, generic words and news outlets; the current prompt is `explain-context@5`.
 - **Claims** (`claim`, `claim_mention`, `claim_evidence`):
   - Validation keeps only mentions of the Story's active articles and evidence pointing at the Story's own primary sources; claims with no mention are dropped.
-  - Re-extraction sets `superseded_at` on earlier claims; nothing is edited.
-  - Prompt `extract-claims@1` produced specific, attributable claims with sensible stances on the real model (e.g. Trump's "never heard of her" remark is *quoted*, the prize itself *asserted*), with zero claims dropped by validation on the fixture set.
+  - A new summary and re-extraction set `superseded_at` on earlier claims; nothing is edited in place.
+  - Prompt `extract-claims@1` produced specific, attributable claims with sensible stances on the real model (e.g. Trump's "never heard of her" remark is *quoted*, the prize itself *asserted*); the current prompt is `extract-claims@3`.
 
 ## Feature round 3 (deployment, roles, sign-in)
 

@@ -116,7 +116,8 @@ flowchart TD
     EMBQ --> SIM[Typesense similarity lookup]
     SIM --> CLUSTER[Create / link discrete stories]
     CLUSTER --> SUM[Prioritize recent story summaries]
-    SUM --> ENRICH[Deferred claims, source links, context, provenance]
+    SUM --> ENRICH[Optional claims, source links, context, provenance]
+    DETAIL[Authenticated Story detail] --> ENRICH
     FRESH[Fresh article arrivals] --> STORE
     SCHED[Priority / capacity-aware dispatcher] --> EMBQ
     SCHED --> SUM
@@ -128,6 +129,7 @@ Agreed principles:
 - Three job classes: **interactive**, **fresh**, **backfill**.
 - **Backfill is pausable, rate-limited, and progressively admitted**; do not enqueue a massive set of expensive generation requests all at once.
 - Process cheap ingestion/metadata first, then batched embeddings/clustering, then prioritized summaries, then optional enrichments.
+- In the current implementation, context and claims become eager when three newsroom publishers cover a Story; lower-coverage Stories admit missing exact-version work when an authenticated reader opens the detail page.
 - Limit inference concurrency separately for embeddings and generation; calibrate against actual hardware throughput and memory.
 - Retries use capped exponential backoff and jitter; jobs are idempotent and analysis-version-aware.
 - Outdated fresh-news jobs can expire or be reprioritized; stale results must not overwrite current analyses.

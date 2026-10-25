@@ -43,7 +43,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli match:sample --name n --seed <regex>` / `match:review --name n` | Draw a match evaluation set of real articles into `fixtures/match-eval/`; write a local review page for its story labels (rules: `docs/story-granularity.md`) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives, context and claims for published stories |
-| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one GPU call each, plus context, claims and relate for the new version; edited summaries are kept) |
+| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one summary call each; relationship inference runs for the new version, while context/claims follow the eager threshold below; edited summaries are kept) |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
 | `pnpm cli status` | Pipeline and queue status as JSON |
 | `pnpm cli dev:reset` | Delete all ingested and derived data (keeps users and publishers) |
@@ -55,6 +55,8 @@ e2e/, test/       Playwright and Vitest suites
 The default `.env.example` runs fixture ingest and fixture inference. Older fixture items count as backfill and are admitted at `BACKFILL_ADMIT_PER_MINUTE` (20/min), so the full set settles in 2–3 minutes. Watch progress on **Pipeline** (`/pipeline`).
 
 A Story is published only once `MIN_PUBLISH_OUTLETS` (default 2) newsroom publishers cover it, so single-outlet fixture Stories stay hidden. CI sets it to 1 so e2e data settles quickly.
+
+Context and claims are optional enrichment. They run eagerly at `EAGER_OPTIONAL_ENRICHMENT_OUTLETS` newsroom publishers (default 3); below that threshold, an authenticated Story-detail request admits the missing work at interactive priority and briefly polls until it is durably complete or terminally failed. Set the test harness threshold to 1 when a test expects eager enrichment.
 
 ### Local inference (EmbeddingGemma 2 + Gemma 4)
 
@@ -193,6 +195,13 @@ Nightly cron (adjust the path):
 
 - In a correlated `sql` subquery, write outer columns literally (`narrative.id`), not as `${schema.narrative.id}`. Drizzle drops the table name from select-list columns when the query has no joins, and a bare `"id"` then binds to the subquery's own tables.
 
+### Inference workflow invariants
+
+- Match admission only delays duplicate inference. A follower must always rerun `matchArticle`; never attach it directly to the elected leader's Story. Persist and resume the lease's latest fingerprint and priority, not values from a possibly stale wake job.
+- `match_admission` and `summary_debounce` are durable intent. The `reconcile_deferred_work` minute job is the recovery path when a pg-boss wake is lost or exhausted; do not delete expired/due rows before reconciliation claims them.
+- Optional context/claims are ready only when `optional_enrichment_completion` is committed in the same transaction as their reader data. A successful `analysis_run` alone is not readiness: persistence can still fail, and valid output can be empty.
+- Relationship inference reuse requires the exact pair of summary versions, Story input fingerprints, generation model and prompt. Cached decisions still pass current-input, temporal and cycle checks, and embedding/edge/narrative writes must revalidate freshness under lock.
+
 ## Performance guidelines
 
 Learned from the October 2026 performance pass. Queries are fast (0.1–6 ms); what costs time is round trips, serial awaits and bytes. Check these before adding a read or a page.
@@ -213,6 +222,7 @@ Learned from the October 2026 performance pass. Queries are fast (0.1–6 ms); w
 - A route loader prefetches every query its component needs, so the SSR HTML is complete and nothing pops in after hydration. Avoid `useQuery` without a matching loader prefetch, except for admin-only or below-the-fold extras.
 - Don't fetch a big endpoint for a few fields. The header strip uses `/api/v1/edition`, not `/api/v1/front`.
 - Queries never retry 4xx responses (`apps/web/src/router.tsx`), so a 404 shows at once.
+- Story detail is the deliberate polling exception: while exact-version context or claims are pending, its shared query refetches every two seconds and stops on durable completion or terminal job failure.
 
 **Client bundle and runtime**
 - `@dn/ui` is `"sideEffects": false`. Keep its modules free of side effects (no CSS imports, no top-level registration), or route chunks will merge back into the shared chunk.
@@ -273,7 +283,7 @@ All routes except the logo route require a session: the cookie from the web app,
 GET  /api/v1/front?region=                # lead (prefers the reader's regions), stats, developing narratives
 GET  /api/v1/edition                     # header strip: editionAt + last-24h story/publisher counts
 GET  /api/v1/stories?cursor=&limit=&region=
-GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related
+GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related, enrichment status
 POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE_SUMMARY_EDITING)
 GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
@@ -304,10 +314,12 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - RSS/Atom/RDF ingestion with URL normalisation, dedupe, revision tracking, immutable observations and per-feed failure isolation.
 - A durable pg-boss pipeline with priorities, reserved fresh capacity, rate-limited and pausable backfill, retries, stale-job rejection, and per-model GPU concurrency caps.
 - Conservative Story matching (EmbeddingGemma shortlist, Gemma 4 decision, `uncertain` supported) and typed Story relationships with temporal and cycle validation.
+- Concurrent matching coalesces very-close unmatched articles behind a durable follower lease; followers later rerun the normal conservative matcher and are never attached by the admission step.
+- Published summary updates use a durable quiet-period row so bursts collapse to the latest Story fingerprint. A once-a-minute reconciler recovers expired match leases and due summary rows whose wake job was lost.
 - Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones. The same call writes 2-3 more paragraphs (background, each side, what's next) that only the Story page shows, below the one-paragraph summary.
 - Narratives from Stories joined by timeline links (follows, responds to, corrects, branches from), with model-written titles. Loose links (related to, background for) show on Story pages but don't join Narratives. After upgrading, `pnpm cli enrich:all --reset-graph` rebuilds existing Narratives under this rule.
-- **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits trigger regeneration.
-- **Claims (lite):** up to five checkable statements per Story, with each outlet's stance (reports, attributes, mentions, disputes) and links to primary documents when known. Not a verification of truth.
+- **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits clear stale context and queue context regeneration.
+- **Claims (lite):** up to five checkable statements per Story, with each publisher's stance (reports, attributes, mentions, disputes) and links to primary documents when known. A new summary supersedes stale claims; low-coverage Stories regenerate them on detail demand. Not a verification of truth.
 - **Regions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region, and the lead prefers a Story in one of the reader's regions.
 - **For You (`/for-you`):** readers pick regions, desks and topics (on `/onboarding` at first sign-in, `/account` or the page itself) and follow narratives or publishers. Each generated summary tags 0-3 of 25 fixed topics (`TOPICS` in `packages/schemas`). Stories from the last 72 hours are ranked, not filtered: followed narrative +3, topic +2, followed outlet, region and desk +1 each, plus wider coverage, minus age. Every card says why it's there. Paging is an offset into the ranked window. The front page shows the top 4 as a "For you" rail once a reader has picks, follows or learned signals. Thumbs up / down on For You cards nudge learned weights for the Story's topics, desk, regions and narratives (never its publishers): ±1 per tap (regions ±0.5), clamped to ±3 and halved every 30 days. "Less" also hides the Story; undo reverses the tap (approximately, since weights are clamped). Readers see and reset what was learned on `/account`.
 - **Blindspot (`/blindspot`):** opt-in reading history (off by default, kept 30 days, deleted when turned off). Insights are computed on request: newer Stories in narratives you read, and regions or desks with many Stories this week that you rarely read. Nothing about the reader's politics is inferred or stored. A "Covered mostly by one side" section shows even with history off: this week's Stories where at least 3 of the covering publishers in the reader's country are rated and 75% or more lean the same way.
