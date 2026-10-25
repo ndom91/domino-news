@@ -8,10 +8,18 @@ export const ONE_SIDED_SHARE = 0.75
 // Below this many rated publishers a country's mix is too thin to show.
 export const LEAN_MIX_MIN_RATED = 2
 
+export type LeanBand = LeanSide | 'center'
+
 export function leanSide(lean: PublisherLean | null): LeanSide | null {
   if (lean === 'left' || lean === 'centre_left') return 'left'
   if (lean === 'right' || lean === 'centre_right') return 'right'
   return null
+}
+
+/** Collapse the five-point publisher scale into the three bands used for coverage comparison. */
+export function leanBand(lean: PublisherLean | null): LeanBand | null {
+  if (lean === 'centre') return 'center'
+  return leanSide(lean)
 }
 
 /** The side that dominates a country's rated coverage, or null. Centre counts as rated. */

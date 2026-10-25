@@ -1,4 +1,4 @@
-import { formatDate, hostnameOf, plural, stripCitations } from '@dn/domain'
+import { formatDate, hostnameOf, leanBand, plural, stripCitations } from '@dn/domain'
 import {
   type NarrativeDetail,
   REGION_LABELS,
@@ -19,12 +19,14 @@ import {
   Skeleton,
   SourceList,
   SummaryText,
+  Tabs,
   Timestamp,
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
+import { z } from 'zod/mini'
 import { RouterLink } from '../../components/link.tsx'
 import { PreviewTeaser } from '../../components/preview-teaser.tsx'
 import { StoryLean } from '../../components/story-lean.tsx'
@@ -32,7 +34,20 @@ import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
 import { seo } from '../../lib/seo.ts'
 
+const COVERAGE_TABS = ['all', 'left', 'center', 'right'] as const
+type CoverageTab = (typeof COVERAGE_TABS)[number]
+
+const COVERAGE_LABELS: Record<CoverageTab, string> = {
+  all: 'All',
+  left: 'Left',
+  center: 'Center',
+  right: 'Right',
+}
+
 export const Route = createFileRoute('/stories/$slug')({
+  validateSearch: z.object({
+    coverage: z.catch(z.optional(z.enum(COVERAGE_TABS)), undefined),
+  }),
   loader: async ({ context, params }) => {
     // Signed out (e.g. from a shared link): only the public teaser, never the full story.
     if (context.preview) {
@@ -107,6 +122,89 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
 }
 
 const STORY_UPDATES_SHOWN = 5
+
+function reportingByCoverage(story: StoryDetail): Record<CoverageTab, StoryDetail['sources']> {
+  const coverageByPublisher = new Map(
+    story.leanMix.flatMap((mix) =>
+      mix.publishers.flatMap(({ publisher, lean }) => {
+        const band = leanBand(lean)
+        return band ? [[publisher.id, band] as const] : []
+      }),
+    ),
+  )
+  const grouped: Record<CoverageTab, StoryDetail['sources']> = {
+    all: story.sources,
+    left: [],
+    center: [],
+    right: [],
+  }
+  for (const source of story.sources) {
+    const coverage = coverageByPublisher.get(source.publisher.id)
+    if (coverage) grouped[coverage].push(source)
+  }
+  return grouped
+}
+
+function OriginalReporting({
+  active,
+  onActiveChange,
+  story,
+}: {
+  active: CoverageTab
+  onActiveChange: (next: CoverageTab) => void
+  story: StoryDetail
+}) {
+  const grouped = useMemo(() => reportingByCoverage(story), [story])
+  const publisherCount = new Set(story.sources.map((source) => source.publisher.id)).size
+
+  useEffect(() => {
+    if (active === 'all') return
+    function revealCitedReport() {
+      const id = decodeURIComponent(window.location.hash.slice(1))
+      const source = story.sources.find((item) => `report-${item.articleId}` === id)
+      if (source && !grouped[active].some((item) => item.articleId === source.articleId)) {
+        onActiveChange('all')
+      }
+    }
+    revealCitedReport()
+    window.addEventListener('hashchange', revealCitedReport)
+    return () => window.removeEventListener('hashchange', revealCitedReport)
+  }, [active, grouped, onActiveChange, story.sources])
+
+  return (
+    <section aria-labelledby="sources-heading">
+      <SectionHeader
+        id="sources-heading"
+        rule
+        title="Original reporting"
+        meta={`${plural(story.sources.length, 'report')} from ${plural(publisherCount, 'publisher')}`}
+      />
+      <p className="mb-4 max-w-reading text-sm text-text-secondary">
+        Compare newsroom coverage by published political lean. Labels are relative to each
+        publisher’s country; official and unrated reports appear under All. Open a headline to read
+        the full article on the publisher’s site.
+      </p>
+      <Tabs
+        aria-label="Filter original reporting by political lean"
+        value={active}
+        onValueChange={onActiveChange}
+        tabs={COVERAGE_TABS.map((value) => ({
+          value,
+          label: COVERAGE_LABELS[value],
+          content:
+            grouped[value].length > 0 ? (
+              <SourceList sources={grouped[value]} Link={RouterLink} />
+            ) : (
+              <p className="type-meta py-2">
+                No reports from publishers assessed as {COVERAGE_LABELS[value].toLowerCase()} for
+                this story.
+              </p>
+            ),
+        }))}
+      />
+    </section>
+  )
+}
 
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (update.summaryDiff) {
@@ -344,6 +442,17 @@ function TimelineDisclosure({
 
 function StoryPage() {
   const { slug } = Route.useParams()
+  const { coverage = 'all' } = Route.useSearch()
+  const navigate = Route.useNavigate()
+  const changeCoverage = useCallback(
+    (next: CoverageTab) =>
+      navigate({
+        search: { coverage: next === 'all' ? undefined : next },
+        replace: true,
+        resetScroll: false,
+      }),
+    [navigate],
+  )
   const { now } = Route.useLoaderData()
   const { session } = Route.useRouteContext()
   // Summary versions are an editorial detail; readers only see the current summary.
@@ -359,7 +468,6 @@ function StoryPage() {
   const [editing, setEditing] = useState(false)
   const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
   const editButtonRef = useRef<HTMLButtonElement>(null)
-  const publisherCount = new Set(story.sources.map((s) => s.publisher.id)).size
   const showAllUpdates = expandedUpdatesFor === story.id
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
@@ -458,19 +566,7 @@ function StoryPage() {
             </section>
           ) : null}
 
-          <section aria-labelledby="sources-heading">
-            <SectionHeader
-              id="sources-heading"
-              rule
-              title="Original reporting"
-              meta={`${plural(story.sources.length, 'report')} from ${plural(publisherCount, 'publisher')}`}
-            />
-            <p className="mb-4 max-w-reading text-sm text-text-secondary">
-              Headlines and descriptions as each publisher published them in its feed. Open a link
-              to read the full article on the publisher's site.
-            </p>
-            <SourceList sources={story.sources} Link={RouterLink} />
-          </section>
+          <OriginalReporting active={coverage} onActiveChange={changeCoverage} story={story} />
 
           {narrative.data ? (
             <section aria-labelledby="development-heading">
