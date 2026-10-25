@@ -16,6 +16,7 @@ import { embedArticles } from './embed.ts'
 import { explainStoryContext } from './explain-context.ts'
 import { pollFeed } from './ingest.ts'
 import { matchArticle } from './match.ts'
+import { MatchLeaderPendingError, resumeMatchFollower } from './match-admission.ts'
 import { deliverForYouPushes } from './push-delivery.ts'
 import { relateStory } from './relate.ts'
 import { feedIds } from './seed.ts'
@@ -38,9 +39,11 @@ const QUEUE_OPTIONS: Omit<Queue, 'name'> = {
 
 function queueOptions(name: string): Omit<Queue, 'name'> {
   // A rebuild re-creates collections; retrying a still-running one would orphan them.
-  return name === QUEUES.rebuildSearch
-    ? { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
-    : QUEUE_OPTIONS
+  if (name === QUEUES.rebuildSearch)
+    return { ...QUEUE_OPTIONS, retryLimit: 0, expireInSeconds: 6 * 3600 }
+  if (name === QUEUES.resumeMatchArticle)
+    return { ...QUEUE_OPTIONS, retryLimit: 5, retryDelay: 3, retryBackoff: true, retryDelayMax: 24 }
+  return QUEUE_OPTIONS
 }
 
 /** Create missing queues, and bring existing ones up to the current options. */
@@ -157,6 +160,24 @@ export async function startWorkers(ctx: WorkerContext) {
     QUEUES.matchArticle,
     genSlots,
     each((job) => matchArticle(ctx, job)),
+  )
+  await boss.work<AnalysisJob>(
+    QUEUES.resumeMatchArticle,
+    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: 1 },
+    async (jobs) => {
+      for (const job of jobs) {
+        try {
+          const result = await resumeMatchFollower(ctx, job.data)
+          console.log(`[${job.name}] ${job.data.targetId} ${JSON.stringify(result)}`)
+        } catch (error) {
+          // Waiting is the expected retry path, not an operational failure worth logging.
+          if (!(error instanceof MatchLeaderPendingError)) {
+            console.error(`[${job.name}] ${job.data.targetId} failed: ${(error as Error).message}`)
+          }
+          throw error
+        }
+      }
+    },
   )
   await workWithReservedSlots(
     boss,

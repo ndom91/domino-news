@@ -14,6 +14,7 @@ import {
 import { and, eq, inArray, isNull } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { loadArticles, loadStoryInput } from './inputs.ts'
+import { admitMatchFollower } from './match-admission.ts'
 import { decideMatch, type MatchPolicy, rankStories } from './match-core.ts'
 import { withAnalysisRun } from './provenance.ts'
 
@@ -142,12 +143,21 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
   const policy = matchPolicy(ctx.inference.mode)
   const at = row.article.publishedAt ?? row.article.firstSeenAt
   const neighbours = await similarArticles(ctx, job.targetId, row.embedding.embedding, at)
-
   const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin, policy.ranking)
 
   const [top] = ranked
   // The model needs the article only when the embedding alone doesn't decide.
   const needsModel = !top || top[1] < policy.autoSame
+  if (needsModel) {
+    const admission = await admitMatchFollower(ctx, job, neighbours, thresholds.autoSame)
+    if (admission) {
+      return {
+        status: 'deferred',
+        leaderArticleId: admission.leaderArticleId,
+        until: admission.expiresAt.toISOString(),
+      }
+    }
+  }
   const articleInput = needsModel ? (await loadArticles(ctx.db, [job.targetId]))[0] : null
   if (needsModel && !articleInput) return { status: 'stale' }
   const decision = await decideMatch(

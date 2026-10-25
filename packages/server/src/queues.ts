@@ -4,6 +4,7 @@ export const QUEUES = {
   pollFeed: 'poll_feed',
   embedArticle: 'embed_article',
   matchArticle: 'match_article',
+  resumeMatchArticle: 'resume_match_article',
   summarizeStory: 'build_story_summary',
   relateStory: 'relate_story',
   generateContext: 'generate_context',

@@ -199,6 +199,18 @@ export const articleEmbedding = pgTable('article_embedding', {
   createdAt: createdAt(),
 })
 
+/** Short-lived leader lease used to coalesce concurrent Story-match inference. */
+export const matchAdmission = pgTable('match_admission', {
+  articleId: text('article_id')
+    .primaryKey()
+    .references(() => article.id),
+  leaderArticleId: text('leader_article_id')
+    .notNull()
+    .references(() => article.id),
+  expiresAt: ts('expires_at').notNull(),
+  createdAt: createdAt(),
+})
+
 // Observations (immutable, enforced by trigger in migration)
 
 export const observation = pgTable(

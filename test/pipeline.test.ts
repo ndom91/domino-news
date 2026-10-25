@@ -11,7 +11,7 @@ import {
   touchStory,
 } from '@dn/server'
 import { and, count, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { drainPipeline } from './drain.ts'
 import { createTestContext, truncateAll } from './harness.ts'
 
@@ -807,12 +807,67 @@ describe('event retention', () => {
 describe('concurrent matching', () => {
   it('puts two near-identical articles matched at the same time into one story', async () => {
     const { db, ts } = h.ctx
-    const { matchArticle, CandidatesChangedError } = await import('@dn/jobs')
+    const { matchArticle, resumeMatchFollower, CandidatesChangedError } = await import('@dn/jobs')
     const { ID_PREFIX, newId } = await import('@dn/domain')
     const [publisher] = await db.select().from(schema.publisher).limit(1)
     if (!publisher) throw new Error('no publisher')
     const title = 'Glaciologists confirm record-breaking Antarctic ice shelf collapse near Thwaites'
     const now = new Date()
+    const pairVector = [1, ...Array.from({ length: 767 }, () => 0)]
+    const candidateVector = [0.5, Math.sqrt(0.75), ...Array.from({ length: 766 }, () => 0)]
+    const candidateId = newId(ID_PREFIX.article)
+    const candidateRevisionId = newId(ID_PREFIX.articleRevision)
+    await db.insert(schema.article).values({
+      id: candidateId,
+      publisherId: publisher.id,
+      canonicalUrl: `https://example.com/older-ice-${candidateId}`,
+      firstSeenAt: new Date(now.getTime() - 3_600_000),
+      publishedAt: new Date(now.getTime() - 3_600_000),
+      pipelineState: 'matched',
+    })
+    await db.insert(schema.articleRevision).values({
+      id: candidateRevisionId,
+      articleId: candidateId,
+      observedAt: now,
+      title: 'Scientists monitor a separate Antarctic ice shelf fracture',
+      description: 'A nearby shelf remains under observation.',
+      contentHash: `h-${candidateId}`,
+    })
+    await db
+      .update(schema.article)
+      .set({ latestRevisionId: candidateRevisionId })
+      .where(eq(schema.article.id, candidateId))
+    await db.insert(schema.observation).values({
+      id: newId(ID_PREFIX.observation),
+      type: 'article_discovered',
+      observedAt: now,
+      sourceUrl: `https://example.com/older-ice-${candidateId}`,
+      collectionMethod: 'rss',
+      subjectType: 'article',
+      subjectId: candidateId,
+      payload: { revisionId: candidateRevisionId },
+      schemaVersion: 1,
+    })
+    await db.insert(schema.articleEmbedding).values({
+      articleId: candidateId,
+      revisionId: candidateRevisionId,
+      modelId: 'test',
+      inputFingerprint: candidateRevisionId,
+      embedding: candidateVector,
+    })
+    const { createStoryWithArticle } = await import('@dn/server')
+    await createStoryWithArticle(db, {
+      articleId: candidateId,
+      title: 'Scientists monitor a separate Antarctic ice shelf fracture',
+      observedAt: now,
+      matchMethod: 'new_story',
+    })
+    await db.insert(schema.outboxEvent).values({
+      aggregateType: 'article',
+      aggregateId: candidateId,
+      eventType: 'article.embedded',
+      aggregateVersion: 1,
+    })
     const ids: string[] = []
     for (const suffix of ['a', 'b']) {
       const articleId = newId(ID_PREFIX.article)
@@ -848,13 +903,12 @@ describe('concurrent matching', () => {
         payload: { revisionId },
         schemaVersion: 1,
       })
-      const [vector] = await h.ctx.inference.embeddings.embedDocuments([{ title, text: '' }])
       await db.insert(schema.articleEmbedding).values({
         articleId,
         revisionId,
         modelId: 'test',
         inputFingerprint: revisionId,
-        embedding: vector ?? [],
+        embedding: pairVector,
       })
       await db.insert(schema.outboxEvent).values({
         aggregateType: 'article',
@@ -876,7 +930,20 @@ describe('concurrent matching', () => {
         }
       }),
     )
+    const chooseStory = vi.spyOn(h.ctx.inference.generation, 'chooseStory')
     const results = await Promise.allSettled(jobs.map((job) => matchArticle(h.ctx, job)))
+    const deferred = results.flatMap((result, index) =>
+      result.status === 'fulfilled' && result.value.status === 'deferred' && jobs[index]
+        ? [jobs[index]]
+        : [],
+    )
+    expect(deferred).toHaveLength(1)
+    const follower = deferred[0]
+    if (!follower) throw new Error('no deferred follower')
+    expect(await resumeMatchFollower(h.ctx, follower)).toMatchObject({ status: 'leader_matched' })
+    expect(await matchArticle(h.ctx, follower)).toMatchObject({ status: 'attached' })
+    expect(chooseStory).toHaveBeenCalledTimes(1)
+    chooseStory.mockRestore()
     // A job that lost the race must retry (as pg-boss would), not create a second story.
     for (const [i, r] of results.entries()) {
       if (r.status === 'rejected') {

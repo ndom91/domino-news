@@ -877,6 +877,32 @@ describe('Story decision acceptance', () => {
   })
 })
 
+describe('match admission', () => {
+  it('elects the oldest concurrent unmatched article and ignores stale or matched neighbours', async () => {
+    const { electMatchLeader } = await import('@dn/jobs')
+    const now = new Date('2026-10-25T12:00:00Z')
+    const candidate = (
+      id: string,
+      publishedMinutes: number,
+      firstSeenMinutes: number,
+      storyId: string | null = null,
+    ) => ({
+      id,
+      at: new Date(now.getTime() + publishedMinutes * 60_000),
+      firstSeenAt: new Date(now.getTime() + firstSeenMinutes * 60_000),
+      storyId,
+    })
+    expect(
+      electMatchLeader('current', [
+        candidate('current', 2, 2),
+        candidate('leader', 0, 1),
+        candidate('stale', -60, -60),
+        candidate('matched', -1, 1, 'sty_1'),
+      ])?.id,
+    ).toBe('leader')
+  })
+})
+
 describe('Expo push delivery', () => {
   afterEach(() => vi.unstubAllGlobals())
 
