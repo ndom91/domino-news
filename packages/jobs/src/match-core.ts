@@ -24,6 +24,12 @@ export interface MatchPolicy {
    * candidates side by side in one call, picking one or none.
    */
   judging: 'sequential' | 'choose'
+  /**
+   * Evaluation-only tail pruning: when the final candidate trails the one before it by more
+   * than this embedding-score gap, omit it from the model prompt. Undefined keeps all
+   * candidates. A positive match is never inferred from this rule.
+   */
+  tailCandidateMaxGap?: number
 }
 
 export const STORY_ARTICLES_SHOWN = 12
@@ -73,6 +79,20 @@ export interface MatchDecision {
   runId?: string
 }
 
+/** Candidate list sent to the model after an optional, conservative weak-tail omission. */
+export function modelCandidates(
+  ranked: [storyId: string, similarity: number][],
+  policy: MatchPolicy,
+) {
+  const candidates = ranked.slice(0, policy.maxCandidates)
+  const gap = policy.tailCandidateMaxGap
+  if (gap === undefined || candidates.length < 2) return candidates
+  const previous = candidates.at(-2)
+  const tail = candidates.at(-1)
+  if (previous && tail && previous[1] - tail[1] > gap) return candidates.slice(0, -1)
+  return candidates
+}
+
 /**
  * Attach to the top story if it's close enough; otherwise ask the model about each candidate
  * in turn and attach to the first it calls the same development. Null = start a new story.
@@ -87,7 +107,7 @@ export async function decideMatch(
   if (top && top[1] >= policy.autoSame) {
     return { storyId: top[0], similarity: top[1], method: 'embedding' }
   }
-  const candidates = ranked.slice(0, policy.maxCandidates)
+  const candidates = modelCandidates(ranked, policy)
   if (policy.judging === 'choose') {
     if (candidates.length === 0) return null
     const { storyId, runId } = await choose(candidates.map(([id]) => id))

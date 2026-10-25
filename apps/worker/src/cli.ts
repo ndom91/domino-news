@@ -46,7 +46,7 @@ const USAGE = `Usage: pnpm cli <command> [options]
   match:sample --name n --seed <title regex> [--seed …] [--days 6] [--random 100] [--neighbour-min 0.8]
                                     Draw a match evaluation set into fixtures/match-eval/<name>.json
   match:review --name n             Write a review page for its labels (reviewed labels, else the draft)
-  match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k] [--story-articles newest|anchored] [--ranking best|top2] [--judging sequential|choose] [--fresh]
+  match:eval --name n [--label l] [--auto-same x] [--llm-min y] [--candidates k] [--tail-gap x] [--story-articles newest|anchored] [--ranking best|top2] [--judging sequential|choose] [--fresh]
                                     Replay matching over a labelled set and score it (B-cubed)
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
@@ -74,6 +74,7 @@ const { positionals, values } = parseArgs({
     'auto-same': { type: 'string' },
     'llm-min': { type: 'string' },
     candidates: { type: 'string' },
+    'tail-gap': { type: 'string' },
     'story-articles': { type: 'string' },
     ranking: { type: 'string' },
     judging: { type: 'string' },
@@ -167,6 +168,7 @@ try {
         autoSame: values['auto-same'] ? Number(values['auto-same']) : base.autoSame,
         llmMin: values['llm-min'] ? Number(values['llm-min']) : base.llmMin,
         maxCandidates: values.candidates ? Number(values.candidates) : base.maxCandidates,
+        ...(values['tail-gap'] ? { tailCandidateMaxGap: Number(values['tail-gap']) } : {}),
         storyArticles: (values['story-articles'] ?? base.storyArticles) as 'newest' | 'anchored',
         ranking: (values.ranking ?? base.ranking) as 'best' | 'top2',
         judging: (values.judging ?? base.judging) as 'sequential' | 'choose',

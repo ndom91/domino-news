@@ -1081,4 +1081,41 @@ describe('match evaluation', () => {
     // A pick outside the candidates shown is ignored.
     expect(await decideMatch(ranked, policy, never, pick('s3'))).toBeNull()
   })
+
+  it('omits only a clearly weak final candidate when configured', async () => {
+    const { modelCandidates } = await import('@dn/jobs')
+    const policy = {
+      autoSame: 0.95,
+      llmMin: 0.7,
+      maxCandidates: 5,
+      storyArticles: 'anchored' as const,
+      ranking: 'best' as const,
+      judging: 'choose' as const,
+      tailCandidateMaxGap: 0.03,
+    }
+    expect(
+      modelCandidates(
+        [
+          ['s1', 0.9],
+          ['s2', 0.86],
+          ['s3', 0.82],
+          ['s4', 0.78],
+          ['s5', 0.74],
+        ],
+        policy,
+      ),
+    ).toHaveLength(4)
+    expect(
+      modelCandidates(
+        [
+          ['s1', 0.9],
+          ['s2', 0.86],
+          ['s3', 0.82],
+          ['s4', 0.78],
+          ['s5', 0.76],
+        ],
+        policy,
+      ),
+    ).toHaveLength(5)
+  })
 })
