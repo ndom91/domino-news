@@ -1,5 +1,6 @@
 import { formatDate, plural } from '@dn/domain'
 import {
+  Button,
   cx,
   deskKey,
   NarrativeActivity,
@@ -10,6 +11,7 @@ import {
 } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
+import { useState } from 'react'
 import { FollowButton } from '../../components/follow-button.tsx'
 import { RouterLink } from '../../components/link.tsx'
 import { Page } from '../../components/page.tsx'
@@ -50,6 +52,8 @@ export const Route = createFileRoute('/narratives/$slug')({
   component: NarrativeRoute,
 })
 
+const NARRATIVE_UPDATES_SHOWN = 5
+
 function NarrativeRoute() {
   const { preview } = Route.useLoaderData()
   return preview ? <PreviewTeaser preview={preview} /> : <NarrativePage />
@@ -59,6 +63,8 @@ function NarrativePage() {
   const { slug } = Route.useParams()
   const { data: narrative } = useSuspenseQuery(queries.narrative(slug))
   const { data: updates } = useSuspenseQuery(queries.narrativeUpdates(slug))
+  const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
+  const showAllUpdates = expandedUpdatesFor === narrative.id
   const first = narrative.stories[0]
   const last = narrative.stories[narrative.stories.length - 1]
   return (
@@ -104,8 +110,14 @@ function NarrativePage() {
                 title="Recent updates"
                 meta={plural(updates.items.length, 'update')}
               />
-              <ol className="flex max-w-reading flex-col divide-y divide-border border-t border-border">
-                {updates.items.map((update) => {
+              <ol
+                id="narrative-updates-list"
+                className="flex max-w-reading flex-col divide-y divide-border border-t border-border"
+              >
+                {(showAllUpdates
+                  ? updates.items
+                  : updates.items.slice(0, NARRATIVE_UPDATES_SHOWN)
+                ).map((update) => {
                   const story = narrative.stories.find((item) => item.id === update.storyId)
                   return (
                     <li key={update.id} className="py-4 first:pt-3">
@@ -130,6 +142,22 @@ function NarrativePage() {
                   )
                 })}
               </ol>
+              {updates.items.length > NARRATIVE_UPDATES_SHOWN ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="mt-4"
+                  aria-expanded={showAllUpdates}
+                  aria-controls="narrative-updates-list"
+                  onClick={() =>
+                    setExpandedUpdatesFor((current) =>
+                      current === narrative.id ? null : narrative.id,
+                    )
+                  }
+                >
+                  {showAllUpdates ? 'Show fewer updates' : 'View all updates'}
+                </Button>
+              ) : null}
             </section>
           ) : null}
           <p className="mt-8 max-w-reading text-xs text-text-muted">

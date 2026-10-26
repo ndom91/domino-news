@@ -28,6 +28,7 @@ import { authClient } from '../lib/auth-client.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 
 const TABS = ['preferences', 'following', 'security'] as const
+const ACCOUNT_LIST_ITEMS_SHOWN = 5
 
 export const Route = createFileRoute('/account')({
   // An unknown tab falls back to Preferences instead of erroring.
@@ -560,41 +561,60 @@ function FeedSection() {
 
 function FollowingSection() {
   const queryClient = useQueryClient()
+  const [showAll, setShowAll] = useState(false)
   const follows = useQuery(queries.follows())
   const unfollow = useMutation(setFollowMutation(api, queryClient))
+  const items = [...(follows.data?.items ?? [])].sort((a, b) => a.title.localeCompare(b.title))
   return (
     <SettingsRow
       id="following"
       title="Following"
       description="Stories from narratives and publishers you follow rank higher in Briefing."
     >
-      {follows.data?.items.length ? (
-        <ul className="flex flex-col divide-y divide-border border-y border-border">
-          {follows.data.items.map((f) => (
-            <li
-              key={`${f.targetType}-${f.id}`}
-              className="flex items-center justify-between gap-3 py-2.5"
-            >
-              <span>
-                {f.title}{' '}
-                <span className="type-meta">
-                  {f.targetType === 'narrative' ? 'Narrative' : 'Publisher'}
-                </span>
-              </span>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={`Unfollow ${f.title}`}
-                loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
-                onClick={() =>
-                  unfollow.mutate({ targetType: f.targetType, targetId: f.id, follow: false })
-                }
+      {items.length ? (
+        <>
+          <ul
+            id="following-list"
+            className="flex flex-col divide-y divide-border border-y border-border"
+          >
+            {(showAll ? items : items.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)).map((f) => (
+              <li
+                key={`${f.targetType}-${f.id}`}
+                className="flex items-center justify-between gap-3 py-2.5"
               >
-                Unfollow
-              </Button>
-            </li>
-          ))}
-        </ul>
+                <span>
+                  {f.title}{' '}
+                  <span className="type-meta">
+                    {f.targetType === 'narrative' ? 'Narrative' : 'Publisher'}
+                  </span>
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  aria-label={`Unfollow ${f.title}`}
+                  loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
+                  onClick={() =>
+                    unfollow.mutate({ targetType: f.targetType, targetId: f.id, follow: false })
+                  }
+                >
+                  Unfollow
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {items.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mt-4"
+              aria-expanded={showAll}
+              aria-controls="following-list"
+              onClick={() => setShowAll((value) => !value)}
+            >
+              {showAll ? 'Show fewer followed items' : 'View all followed items'}
+            </Button>
+          ) : null}
+        </>
       ) : (
         <p className="text-sm text-text-muted">
           Nothing yet. Use Follow on a narrative or publisher page.
@@ -606,31 +626,50 @@ function FollowingSection() {
 
 function MutedPublishersSection() {
   const queryClient = useQueryClient()
+  const [showAll, setShowAll] = useState(false)
   const muted = useQuery(queries.mutedPublishers())
   const change = useMutation(setMutedPublisherMutation(api, queryClient))
+  const items = muted.data?.items ?? []
   return (
     <SettingsRow
       id="muted-publishers"
       title="Muted publishers"
       description="Muted publishers do not shape your Briefing. A story still appears when other publishers report it."
     >
-      {muted.data?.items.length ? (
-        <ul className="flex flex-col divide-y divide-border border-y border-border">
-          {muted.data.items.map((publisher) => (
-            <li key={publisher.id} className="flex items-center justify-between gap-3 py-2.5">
-              <span>{publisher.name}</span>
-              <Button
-                size="sm"
-                variant="ghost"
-                aria-label={`Unmute ${publisher.name}`}
-                loading={change.isPending && change.variables?.publisherId === publisher.id}
-                onClick={() => change.mutate({ publisherId: publisher.id, muted: false })}
-              >
-                Unmute
-              </Button>
-            </li>
-          ))}
-        </ul>
+      {items.length ? (
+        <>
+          <ul
+            id="muted-publishers-list"
+            className="flex flex-col divide-y divide-border border-y border-border"
+          >
+            {(showAll ? items : items.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)).map((publisher) => (
+              <li key={publisher.id} className="flex items-center justify-between gap-3 py-2.5">
+                <span>{publisher.name}</span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  aria-label={`Unmute ${publisher.name}`}
+                  loading={change.isPending && change.variables?.publisherId === publisher.id}
+                  onClick={() => change.mutate({ publisherId: publisher.id, muted: false })}
+                >
+                  Unmute
+                </Button>
+              </li>
+            ))}
+          </ul>
+          {items.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mt-4"
+              aria-expanded={showAll}
+              aria-controls="muted-publishers-list"
+              onClick={() => setShowAll((value) => !value)}
+            >
+              {showAll ? 'Show fewer muted publishers' : 'View all muted publishers'}
+            </Button>
+          ) : null}
+        </>
       ) : (
         <p className="text-sm text-text-muted">No muted publishers.</p>
       )}
@@ -641,6 +680,7 @@ function MutedPublishersSection() {
 /** What For You learned from thumbs up / down. Every item can be removed, or all reset. */
 function LearnedSignals() {
   const queryClient = useQueryClient()
+  const [showAll, setShowAll] = useState(false)
   const signals = useQuery(queries.signals())
   const update = useMutation(updateSignalsMutation(api, queryClient))
   const items = signals.data?.items ?? []
@@ -658,33 +698,47 @@ function LearnedSignals() {
         </p>
       ) : (
         <>
-          {[
-            { title: 'More', list: more },
-            { title: 'Less', list: less },
-          ].map(({ title, list }) =>
-            list.length > 0 ? (
-              <div key={title} className="mb-3 flex flex-wrap items-center gap-2 text-sm">
-                <span className="w-12 font-semibold">{title}</span>
-                {list.map((s) => (
-                  <span
-                    key={`${s.kind}-${s.key}`}
-                    className="inline-flex items-center gap-1 border border-border-strong py-0.5 pl-2"
-                  >
-                    {s.label}
-                    <button
-                      type="button"
-                      aria-label={`Forget ${s.label}`}
-                      disabled={update.isPending}
-                      onClick={() => update.mutate({ remove: { kind: s.kind, key: s.key } })}
-                      className="relative min-h-6 px-1.5 text-text-muted after:absolute after:-inset-2.5 after:content-[''] hover:text-text"
+          <div id="learned-signals-list">
+            {[
+              { title: 'More', list: more },
+              { title: 'Less', list: less },
+            ].map(({ title, list }) =>
+              list.length > 0 ? (
+                <div key={title} className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+                  <span className="w-12 font-semibold">{title}</span>
+                  {(showAll ? list : list.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)).map((s) => (
+                    <span
+                      key={`${s.kind}-${s.key}`}
+                      className="inline-flex items-center gap-1 border border-border-strong py-0.5 pl-2"
                     >
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            ) : null,
-          )}
+                      {s.label}
+                      <button
+                        type="button"
+                        aria-label={`Forget ${s.label}`}
+                        disabled={update.isPending}
+                        onClick={() => update.mutate({ remove: { kind: s.kind, key: s.key } })}
+                        className="relative min-h-6 px-1.5 text-text-muted after:absolute after:-inset-2.5 after:content-[''] hover:text-text"
+                      >
+                        ×
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : null,
+            )}
+          </div>
+          {more.length > ACCOUNT_LIST_ITEMS_SHOWN || less.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
+            <Button
+              size="sm"
+              variant="secondary"
+              className="mb-3"
+              aria-expanded={showAll}
+              aria-controls="learned-signals-list"
+              onClick={() => setShowAll((value) => !value)}
+            >
+              {showAll ? 'Show fewer learned signals' : 'View all learned signals'}
+            </Button>
+          ) : null}
           <ConfirmDialog
             trigger={
               <Button size="sm" variant="danger" disabled={update.isPending}>
