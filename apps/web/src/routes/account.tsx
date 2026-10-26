@@ -58,7 +58,7 @@ function AccountPage() {
     preferences: (
       <>
         <FeedSection />
-        <LocalitySection />
+        <LocalitySection fallbackCountry={session.country} />
         <CountrySection />
       </>
     ),
@@ -379,28 +379,26 @@ function ReadingHistorySection() {
 }
 
 // Country choices, sorted by name. Built once: Intl names don't change at runtime.
+const SORTED_COUNTRY_OPTIONS = KNOWN_COUNTRIES.map((code) => ({
+  value: code,
+  label: countryName(code),
+})).sort((a, b) => a.label.localeCompare(b.label))
+
 const COUNTRY_OPTIONS = [
   { value: null, label: 'Automatic (where you are)' },
-  ...KNOWN_COUNTRIES.map((code) => ({ value: code, label: countryName(code) })).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  ),
+  ...SORTED_COUNTRY_OPTIONS,
 ]
 
 const LOCALITY_COUNTRY_OPTIONS = [
   { value: null, label: 'Choose a country' },
-  ...KNOWN_COUNTRIES.map((code) => ({ value: code, label: countryName(code) })).sort((a, b) =>
-    a.label.localeCompare(b.label),
-  ),
+  ...SORTED_COUNTRY_OPTIONS,
 ]
 
-function LocalitySection() {
+function LocalitySection({ fallbackCountry }: { fallbackCountry: string | null }) {
   const preferences = useQuery(queries.preferences())
   const saved = preferences.data?.locality ?? null
-  const canonical =
-    saved ??
-    (preferences.data?.country
-      ? { city: null, county: null, country: preferences.data.country }
-      : null)
+  const country = preferences.data?.country ?? fallbackCountry
+  const canonical = saved ?? (country ? { city: null, county: null, country } : null)
   return (
     <SettingsRow
       id="local-stories"
