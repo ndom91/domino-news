@@ -170,6 +170,13 @@ globalThis.fetch = async (input, init) => {
   })
 }
 
+class BasetenHttpError extends Error {
+  constructor(status, detail) {
+    super(`Baseten HTTP ${status}: ${detail}`)
+    this.status = status
+  }
+}
+
 async function decide(state, instructions, criteria) {
   const body = {
     model,
@@ -195,10 +202,17 @@ async function decide(state, instructions, criteria) {
       body: JSON.stringify(body),
       signal: AbortSignal.timeout(120000),
     })
-    if (!response.ok)
-      throw new Error(
-        `Baseten HTTP ${response.status}; stopping rather than interpreting a failure as a decision`,
-      )
+    if (!response.ok) {
+      const detail = (await response.text()).replaceAll(apiKey, '[REDACTED]').slice(0, 1000)
+      currentCalls.push({
+        provider: 'baseten',
+        requestHash,
+        status: response.status,
+        wallMs: performance.now() - start,
+        error: detail,
+      })
+      throw new BasetenHttpError(response.status, detail)
+    }
     const data = await response.json()
     const answer = data.answers?.decision
     const keys = Object.keys(criteria)
@@ -227,28 +241,46 @@ async function decide(state, instructions, criteria) {
 }
 
 function summarize(cases) {
-  const withGold = cases.filter((c) => c.expected)
+  const evaluated = cases.filter((c) => c.mammoth)
+  const withGold = evaluated.filter((c) => c.expected)
   const withGemma = cases.filter((c) => c.gemma !== undefined)
+  const both = evaluated.filter((c) => c.gemma !== undefined)
   const goldWithGemma = withGold.filter((c) => c.gemma !== undefined)
   const accepted = (c, threshold) =>
-    c.mammoth.choice !== 'uncertain' && c.mammoth.probabilities[c.mammoth.choice] >= threshold
+    c.mammoth &&
+    c.mammoth.choice !== 'uncertain' &&
+    c.mammoth.probabilities[c.mammoth.choice] >= threshold
   return {
     cases: cases.length,
+    mammothEvaluatedCases: evaluated.length,
+    mammothFailures: cases.length - evaluated.length,
     labelledCases: withGold.length,
-    mammothCorrect: withGold.filter((c) => c.expected.includes(c.mammoth.choice)).length,
+    mammothCorrect: withGold.length
+      ? withGold.filter((c) => c.expected.includes(c.mammoth.choice)).length
+      : null,
     gemmaComparedCases: withGemma.length,
     gemmaCorrect: goldWithGemma.length
       ? goldWithGemma.filter((c) => c.expected.includes(c.gemma)).length
       : null,
-    mammothGemmaAgreement: withGemma.length
-      ? withGemma.filter((c) => c.mammoth.choice === c.gemma).length
+    mammothGemmaComparedCases: both.length,
+    mammothGemmaAgreement: both.length
+      ? both.filter((c) => c.mammoth.choice === c.gemma).length
       : null,
     probabilityThresholds: [0.9, 0.95, 0.99].map((threshold) => {
-      const rows = withGold.filter((c) => accepted(c, threshold))
+      const rows = cases.filter((c) => accepted(c, threshold))
+      const labelled = rows.filter((c) => c.expected)
+      const compared = rows.filter((c) => c.gemma !== undefined)
       return {
         threshold,
         accepted: rows.length,
-        correct: rows.filter((c) => c.expected.includes(c.mammoth.choice)).length,
+        labelledAccepted: labelled.length,
+        correct: labelled.length
+          ? labelled.filter((c) => c.expected.includes(c.mammoth.choice)).length
+          : null,
+        gemmaCompared: compared.length,
+        gemmaAgreement: compared.length
+          ? compared.filter((c) => c.mammoth.choice === c.gemma).length
+          : null,
       }
     }),
     errors: withGold
@@ -312,7 +344,8 @@ try {
   const stages = process.argv.slice(2)
   const enabled = (name) => stages.length === 0 || stages.includes(name)
 
-  if (enabled('relationships')) {
+  if (enabled('relationships') || enabled('relationships-compact')) {
+    const compact = stages.includes('relationships-compact')
     currentCalls = []
     const cases = []
     console.log('[start] 1. Relationship controls')
@@ -359,15 +392,34 @@ try {
     )
     for (const row of selected) {
       const [a, b] = await Promise.all([
-        loadStoryInput(db, row.newer_id, { matching: 'anchored' }),
-        loadStoryInput(db, row.older_id, { matching: 'anchored' }),
+        loadStoryInput(db, row.newer_id),
+        loadStoryInput(db, row.older_id),
       ])
       if (!a || !b) throw new Error('Selected Story disappeared')
       const input =
         Date.parse(a.firstObservedAt) >= Date.parse(b.firstObservedAt)
           ? { newer: a, older: b }
           : { newer: b, older: a }
-      const mammoth = await relationshipDecision(input)
+      if (compact) {
+        input.newer = { ...input.newer, articles: [] }
+        input.older = { ...input.older, articles: [] }
+      }
+      let mammoth = null
+      let mammothError = null
+      try {
+        mammoth = await relationshipDecision(input)
+      } catch (error) {
+        if (
+          !(error instanceof BasetenHttpError) ||
+          error.status !== 422 ||
+          !/token|length|sequence|context|too large|too long/i.test(error.message)
+        )
+          throw error
+        mammothError = { status: error.status, reason: error.message }
+        console.log(
+          `[relationships] Hosted length refusal for ${row.newer_id}:${row.older_id}; recorded as unavailable, never as unrelated`,
+        )
+      }
       const baseline = await gemma.classifyRelationship(input)
       realCases.push({
         id: `${row.newer_id}:${row.older_id}`,
@@ -375,18 +427,23 @@ try {
         historicalPromptVersion: row.historical_prompt_version,
         input: { newer: cleanStory(input.newer), older: cleanStory(input.older) },
         mammoth,
+        ...(mammothError ? { mammothError } : {}),
         gemma: normalizeRelationship(baseline.output),
         gemmaOutput: baseline.output,
       })
       if (realCases.length % 16 === 0)
         console.log(`[relationships] ${realCases.length}/${selected.length}`)
     }
-    const realResult = report('relationship-real', realCases, [
+    const realName = compact ? 'relationship-real-summary-only' : 'relationship-real-production'
+    const realResult = report(realName, realCases, [
       'Historical classify-relationship@4 outputs were used for stratified sampling only, not as ground truth.',
-      'Fresh Gemma classify-relationship@6 and Mammoth see the same summaries and at most 12 anchored reports per Story.',
+      compact
+        ? 'Explicit compact follow-up: BOTH models receive current titles and summaries, with article evidence omitted; this is not the production input profile.'
+        : 'Fresh Gemma classify-relationship@6 and Mammoth use the production relationship loader: current titles and summaries, with at most 12 newest reports per Story.',
       'The balanced sample does not estimate production prevalence or independent accuracy.',
+      'Hosted length-limit refusals are unavailable cases and require fallback; they are never counted as unrelated or correct answers.',
     ])
-    await writeResult('relationship-real', realResult)
+    await writeResult(realName, realResult)
     console.log(`[result] Real relationship comparison ${JSON.stringify(realResult.summary)}`)
   }
 
@@ -425,6 +482,36 @@ try {
     ])
     await writeResult('materiality-controls', result)
     console.log(`[result] Materiality controls ${JSON.stringify(result.summary)}`)
+  }
+
+  if (enabled('matching-baseline')) {
+    currentCalls = []
+    const label = `${runId}-gemma-baseline`
+    console.log('[start] 3a. Fresh Gemma-only matching baseline')
+    const result = await runMatchEval(
+      { db, inference: { generation: gemma }, config: { fixtureDir: join(root, 'fixtures') } },
+      {
+        name: 'set-1',
+        label,
+        policy: matchPolicy('local'),
+        neighbours: NEIGHBOURS,
+        windowSeconds: CANDIDATE_WINDOW_SECONDS,
+        fresh: true,
+        log: (message) => console.log(`[matching baseline] ${message}`),
+      },
+    )
+    await writeResult('matching-gemma-baseline', {
+      ...result,
+      runId,
+      requests: currentCalls,
+      notes: [
+        'Same greedy, zero-thinking request settings and content-addressed raw-response cache as the hosted matching comparison.',
+        'Recorded during the same evaluation session to supplement the older baseline; reused request timings remain estimates rather than a controlled hardware benchmark.',
+      ],
+    })
+    console.log(
+      `[result] Matching Gemma baseline ${JSON.stringify({ score: result.score, failedCalls: result.failedCalls })}`,
+    )
   }
 
   if (enabled('matching')) {

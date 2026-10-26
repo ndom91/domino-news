@@ -25,10 +25,12 @@ Native API probability calibration is a claim to evaluate on our tasks, not perm
 This is the strongest direct-replacement opportunity: an existing generation call chooses a relation from a small finite vocabulary, while the production graph does not need a generated explanation to insert an edge. Temporal, freshness, cycle and narrative validation must remain deterministic.
 
 1. Run 28 constructed controls covering every relation, unrelated shared actors/themes, insufficient evidence, a publisher-text prompt injection, and a few non-English examples.
-2. Run 64 real Story pairs against both Mammoth and a fresh Gemma 4 26B-A4B baseline, with the same summaries and up to 12 anchored reports per Story.
+2. Run 64 real Story pairs against both Mammoth and a fresh Gemma 4 26B-A4B baseline, with the production relationship inputs: current titles and summaries and up to 12 newest reports per Story.
 3. Measure relation agreement, uncertainty, false-link behavior on labelled controls and fixed probability thresholds. Do not call agreement with Gemma independent accuracy.
 
 The local snapshot contains 1,747 historical relationship interpretations, all using `classify-relationship@4`. Their labels select a varied sample only: 32 unrelated, 16 follows, eight responds-to and eight related-to cases (including old related decisions with a null type). Fresh Gemma uses `classify-relationship@6`. Historical labels are not the answer key, and the balanced sample does not estimate production prevalence.
+
+**Input-profile correction:** the first real-pair run used `loadStoryInput(..., { matching: 'anchored' })`, which intentionally substitutes the first headline and omits the summary. Both models saw the same evidence, but it was not the production relationship profile. That run is retained as `relationship-real.json`, a metadata-only diagnostic. The corrected comparison uses the default relationship loader and writes `relationship-real-production.json`. Length-limit refusals in this real-pair comparison are recorded as unavailable cases requiring fallback, never as unrelated decisions. A separately named optional `relationships-compact` stage supplies titles and summaries without articles to **both** models; it must not be described as the production input profile.
 
 ### 2. Summary-update materiality
 
@@ -40,6 +42,7 @@ The local snapshot has no historical summary-update assessments, so this is a po
 
 Use the existing 334-article / 145-Story `set-1` replay with its current matching core, candidate limits and anchored evidence:
 
+- **Gemma baseline:** an additional same-session Gemma-only replay supplements the older baseline from 011, using the same greedy request settings and content-addressed raw-response cache as this experiment.
 - **Replacement:** Mammoth selects a candidate or none. An explicit uncertain answer makes no attachment.
 - **Probability-0.95 fallback:** accept a non-uncertain Mammoth choice only at raw probability at least 0.95; otherwise ask Gemma. This threshold is fixed before observing these matching results, not selected for a favorable score.
 
@@ -71,6 +74,8 @@ The runner is `scripts/eval-mammoth.mjs`. Provide the Baseten key securely in th
 node --env-file=.env --import ./apps/worker/node_modules/tsx/dist/loader.mjs scripts/eval-mammoth.mjs
 ```
 
-Optional positional stages are `relationships`, `materiality`, `matching` and `checks`. By default they run in that order. Native results and comparisons go to `fixtures/decision-eval/results/`; the matching core also writes its usual report under `fixtures/match-eval/results/`. Intermediate caches live under the already ignored `fixtures/match-eval/cache/mammoth-hosted-20261026/`.
+Optional positional stages are `relationships`, `materiality`, `matching-baseline`, `matching` and `checks`. By default they run in that order. `relationships-compact` is a separate explicit follow-up input profile, not part of the default sequence. Native results and comparisons go to `fixtures/decision-eval/results/`; the matching core also writes its usual report under `fixtures/match-eval/results/`. Intermediate caches live under the already ignored `fixtures/match-eval/cache/mammoth-hosted-20261026/`.
+
+`scripts/audit-mammoth-matching.mjs` reconstructs the two saved Mammoth matching trajectories without inference. It checks article order, candidate evidence and final B-cubed scores, then attributes placement errors to accepted decisions or fallbacks using the existing `diagnose` rule. Its output is `matching-audit.json` alongside the other decision-evaluation reports.
 
 No automatic production rollout follows any score. A recommendation requires error inspection, representative reviewed examples and a justified cost comparison, not just a leaderboard score or a high model probability.
