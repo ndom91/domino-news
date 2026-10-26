@@ -79,6 +79,52 @@ test('story changes show a timeline with expandable updates and versions', async
   await expectNoHorizontalOverflow(page)
 })
 
+test('original reporting groups reports and reveals cited reports', async ({ page }) => {
+  await signIn(page)
+  await page.route('**/api/v1/stories/*', async (route) => {
+    if (new URL(route.request().url()).pathname.split('/').length !== 5) return route.continue()
+    const response = await route.fetch()
+    const story = await response.json()
+    const source = story.sources[0]
+    if (!source) return route.fulfill({ response })
+    story.sources = Array.from({ length: 6 }, (_, index) => ({
+      ...source,
+      articleId: `report-test-${index}`,
+      title: `Test report ${index + 1}`,
+      citedInSummary: index === 5,
+      citation: index === 5 ? 1 : null,
+      official: false,
+    }))
+    story.leanMix = [
+      {
+        country: 'US',
+        publishers: [{ publisher: source.publisher, lean: 'centre_left', estimated: false }],
+        oneSided: null,
+      },
+    ]
+    await route.fulfill({ response, json: story })
+  })
+  await page.locator('main article h3 a').first().click()
+  const reporting = page.locator('section[aria-labelledby="sources-heading"]')
+  const group = reporting.locator('section[aria-labelledby="report-group-centre_left"]')
+  await expect(group.getByText('Test report 1')).toBeVisible()
+  await expect(group.getByText('Test report 3')).toHaveCount(0)
+  await group.getByRole('button', { name: 'Show 4 more reports' }).click()
+  await expect(group.getByText('Test report 6')).toBeVisible()
+  await group.getByRole('button', { name: 'Show fewer reports' }).click()
+  await page.evaluate(() => {
+    window.location.hash = 'report-report-test-5'
+  })
+  await expect(reporting.getByText('Test report 6')).toBeVisible()
+  await reporting.getByRole('button', { name: 'By time' }).click()
+  await expect(reporting.getByRole('button', { name: 'By time' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+  await expect(reporting.getByText('Test report 6')).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+})
+
 test('feed → story → narrative → search', async ({ page }) => {
   await signIn(page)
 
