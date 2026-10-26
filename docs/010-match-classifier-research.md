@@ -9,6 +9,8 @@ Investigate whether a small, specialized text-pair classifier can safely replace
 
 The definition of a Story remains [story-granularity.md](story-granularity.md). A false merge can contaminate a summary, so a classifier must be able to abstain and leave difficult decisions to the existing matcher.
 
+**Subsequent no-fine-tuning experiment:** [011](011-small-model-match-benchmark.md) records four instruction-model replacement runs and six fallback cascades. None of those tested cascades delivered both acceptable matching quality and a lower processing-time estimate. That does not evaluate or clear the proposed trained classifier below.
+
 ## What previous experiments showed
 
 The committed reports in `fixtures/match-eval/results/` and the evaluation section of [006](006-implementation-notes.md) provide the baseline:

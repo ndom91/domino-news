@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-26
 
-**Status:** Offline evaluation. No production model changes and no fine-tuning.
+**Status:** Complete: four replacement runs and six cascade runs. Keep the current production matcher; none of the tested cascades demonstrated both safe matching quality and lower inference cost. No production model changes and no fine-tuning.
 
 This follows the alternatives discussed in [010](010-match-classifier-research.md): use an existing small instruction model before Gemma, without training on publisher material. The question is whether large-model requests can be avoided **without increasing false merges or total inference cost**.
 
@@ -36,9 +36,9 @@ The smaller models' main problem was **over-merging**. Qwen was the strongest re
 
 Faster standalone replacement is not enough to justify a prefilter. Adding the small model to every undecided article costs extra work, so its bypass rate must offset that work as well as preserve matching quality.
 
-## Cascade follow-up
+## Cascade results
 
-End-to-end cascade replays are the next part of this benchmark:
+All six end-to-end cascade replays completed:
 
 - **Positive-only:** accept a valid small-model attachment; otherwise ask the larger Gemma.
 - **Negative-only:** accept a valid small-model "none" choice; otherwise ask the larger Gemma.
@@ -48,9 +48,43 @@ Decisions already measured in the replacement runs can be reused only for the ex
 
 Original caches do not distinguish invalid answers from valid "none" choices. For any candidate replacement run with invalid outputs, cached "none" answers must therefore be re-requested before they can be accepted by a cascade.
 
-Cascade timing totals should sum measured per-question costs for both stages, including reused decisions. Such totals are **estimates**, not physical end-to-end runs with cache lookup latency, and are not directly comparable to whole-run durations that include retry backoff. Server processing time is prompt time plus decode time, not a measurement of GPU utilization or energy.
+Cascade timing totals sum measured per-question costs for both stages, including reused decisions. Such totals are **estimates**, not physical end-to-end runs with cache lookup latency, and are not directly comparable to whole-run durations that include retry backoff. Server processing time is prompt time plus decode time, not a measurement of GPU utilization or energy. The baseline's successful requests sum to **757.7 seconds** of server-reported processing time; the relative processing estimates below use that denominator.
 
-Results and the final recommendation will be added after the cascade runs complete. None of the replacement results supports an unconditional production switch.
+Reports: `fixtures/match-eval/results/set-1.cascade-*-greedy-budget0-20261026.json`.
+
+| Small model | Accept small-model decisions only when | Precision | Recall | F1 | Large Gemma calls avoided | Logical small + large decisions | Estimated server processing vs baseline |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Ministral 3 3B | Positive match | 52.8% | 88.5% | 66.2% | 84.1% | 226 + 36 | 1.00× |
+| Qwen3.5 4B | Positive match | 58.6% | 93.8% | 72.2% | 82.3% | 226 + 40 | 1.13× |
+| Gemma 4 E4B | Positive match | 55.4% | 91.4% | 69.0% | 87.2% | 226 + 29 | 0.93× |
+| Ministral 3 3B | No match | 86.2% | 78.1% | 82.0% | 11.9% | 226 + 199 | 1.87× |
+| Qwen3.5 4B | No match | 85.5% | 83.1% | **84.3%** | **17.7%** | 226 + 186 | **1.98×** |
+| Gemma 4 E4B | No match | 82.5% | 83.9% | 83.2% | 8.0% | 226 + 208 | 1.99× |
+
+These replay policies have no learned confidence threshold. "Calls avoided" counts only the larger Gemma calls: total model decisions increased in every cascade. The inherited report `modelCalls` field counts top-level choose operations, not both stages; `smallDecisions`, `fallbackDecisions` and `logicalCalls` record the actual logical work.
+
+**Positive-only gates are unsafe under the tested protocol.** They remove many larger-model calls by trusting exactly the attachments that cause the small models' over-merging. Falling back when the small model says "none" cannot repair an incorrect accepted attachment.
+
+**Negative-only gates offer a quality/cost trade-off, not a compute saving.** Qwen is the most promising by quality: 84.3% F1 versus the fresh baseline's 83.2%, precision 85.5% versus 82.5%, and recall 83.1% versus 83.9%. Its cascade had 14 wrong joins of articles that should start a new Story, versus 22 for the baseline. That is a useful signal, but the roughly one-point F1 improvement is comparable in size to historical baseline variation and is not held-out proof of an improvement.
+
+Qwen avoided only 40 of the 226 larger-model decisions. Its small stage added about **870.3 seconds** of server processing, while the remaining Gemma decisions cost **631.5 seconds**: approximately **1,501.9 seconds** in total, versus 757.7 for Gemma alone. It would need a substantially cheaper or more selective first stage to justify this policy on compute grounds.
+
+Standalone replacement timings also understate some cascade workloads. For example, Qwen's negative-only small stage processed 966,085 prompt tokens, versus 779,178 in its replacement run. A less over-merged Story graph can expose more candidate evidence, so a faster replacement replay does not establish the cost of putting that model before Gemma.
+
+### Timing caveat: client pauses and retries
+
+The raw `estimatedSerialWallMs` for Ministral's negative-only cascade is about six hours. Several measured client-side calls took tens of minutes while their server-reported processing was only a few seconds. This is consistent with client suspension/pause or other external waiting, but the cause was not established. **Do not interpret that total as six hours of inference or a 20× slowdown.** The processing-time comparison above excludes that client-side wait; it still shows approximately 1.87× the baseline's server processing.
+
+Transient HTTP retries occurred during the experiments and are recorded separately from logical decisions. Timing estimates assembled from successful response metrics do not include every failed attempt's processing or retry backoff. Shared production load and prompt-cache state remain uncontrolled, so the table supports a directional cost conclusion, not exact isolated-hardware speedups.
+
+## Recommendation
+
+**Keep Gemma 4 26B-A4B as the matcher. Do not add any of these three models as an always-run first stage using the tested prompt and gates.** No tested combination delivered both acceptable false-merge behavior and a lower processing-time estimate.
+
+- Reject all three unconditional replacements and positive-only cascades on matching quality.
+- Do not deploy the negative-only cascades as inference-cost optimizations: they reduce large-model calls but add substantially more total processing.
+- Retain Qwen's negative-only result as a possible quality-oriented research lead, not a production recommendation. Investigate further only with a clear quality objective or a way to make the first stage much cheaper/more selective, followed by reviewed held-out event-family evaluation.
+- These results do not rule out different prompts, calibrated abstention, narrower routing, or other small models. They do rule out assuming that a smaller model plus fallback is automatically cheaper or safe.
 
 ## Limitations and resumption
 

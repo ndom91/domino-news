@@ -12,7 +12,7 @@ Read in numbered order. 001–005 are the architecture agreed before building (2
 - `008-third-party-data-licensing.md`: sources used or considered for publisher assessments, and commercial-use review requirements
 - `009-reader-product-roadmap.md`: agreed direction for Briefing, coverage comparison, source controls, and future reader features
 - `010-match-classifier-research.md`: deferred matching-classifier proposal, production arrival-timing findings, evaluation plan and unresolved training-rights gate
-- `011-small-model-match-benchmark.md`: no-fine-tuning small-model matching evaluation, timing protocol and cascade follow-up
+- `011-small-model-match-benchmark.md`: completed small-model replacement and fallback benchmarks; quality, timing caveats and recommendation
 - `domino-design-handoff.zip`: the visual design handoff ("Signal × Index")
 
 Current status, commands and configuration live in [`AGENTS.md`](../AGENTS.md).
