@@ -1,0 +1,2097 @@
+{
+  "runId": "mammoth-hosted-20261026",
+  "task": "materiality-controls",
+  "ranAt": "2026-10-26T11:43:18.782Z",
+  "model": "decision-models/baseten-mammoth-27b-latest",
+  "baselineModel": "gemma-4-26B-A4B",
+  "labelProvenance": "Assistant-authored controlled examples based on repository rules; not independently human-reviewed or a held-out real-news benchmark. Expected labels are not sent to either model.",
+  "summary": {
+    "cases": 30,
+    "mammothEvaluatedCases": 30,
+    "mammothFailures": 0,
+    "labelledCases": 30,
+    "mammothCorrect": 30,
+    "gemmaComparedCases": 30,
+    "gemmaCorrect": 30,
+    "mammothGemmaComparedCases": 30,
+    "mammothGemmaAgreement": 30,
+    "probabilityThresholds": [
+      {
+        "threshold": 0.9,
+        "accepted": 24,
+        "labelledAccepted": 24,
+        "correct": 24,
+        "gemmaCompared": 24,
+        "gemmaAgreement": 24
+      },
+      {
+        "threshold": 0.95,
+        "accepted": 23,
+        "labelledAccepted": 23,
+        "correct": 23,
+        "gemmaCompared": 23,
+        "gemmaAgreement": 23
+      },
+      {
+        "threshold": 0.99,
+        "accepted": 8,
+        "labelledAccepted": 8,
+        "correct": 8,
+        "gemmaCompared": 8,
+        "gemmaAgreement": 8
+      }
+    ],
+    "errors": []
+  },
+  "cases": [
+    {
+      "id": "u01",
+      "summary": "A train crash killed five passengers.",
+      "report": "Officials raised the confirmed death toll from the same train crash to eight.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.989284910990496,
+        "probabilities": {
+          "material": 0.9928566073269973,
+          "corroboration_only": 0.001816161320150425,
+          "uncertain": 0.005327231352852224
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "new_fact",
+        "outcome": "material",
+        "note": "Added that the confirmed death toll has risen to eight passengers.",
+        "sourceArticleIds": [
+          "u01"
+        ],
+        "observationIds": [
+          "observation-u01"
+        ]
+      }
+    },
+    {
+      "id": "u02",
+      "summary": "Riyadh airport is closed after a missile attack.",
+      "report": "The airport authority announced that Riyadh airport has reopened and flights have resumed.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.967137646187528,
+        "probabilities": {
+          "material": 0.9780917641250186,
+          "corroboration_only": 0.004938476741799044,
+          "uncertain": 0.016969759133182376
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Updated to reflect that Riyadh airport has reopened and flight operations have resumed.",
+        "sourceArticleIds": [
+          "u02"
+        ],
+        "observationIds": [
+          "observation-u02"
+        ]
+      }
+    },
+    {
+      "id": "u03",
+      "summary": "A court is considering the mayor's corruption case.",
+      "report": "The court convicted the mayor of corruption and sentenced her to three years in prison.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9641006434476351,
+        "probabilities": {
+          "material": 0.9760670956317568,
+          "corroboration_only": 0.009117549041952076,
+          "uncertain": 0.014815355326291007
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Added that the mayor was convicted and sentenced to three years in prison.",
+        "sourceArticleIds": [
+          "u03"
+        ],
+        "observationIds": [
+          "observation-u03"
+        ]
+      }
+    },
+    {
+      "id": "u04",
+      "summary": "A publisher reported that the museum burned down.",
+      "report": "The publisher corrected its earlier report: the fire was at a warehouse and the museum was intact.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9940152636939871,
+        "probabilities": {
+          "material": 0.9960101757959914,
+          "corroboration_only": 0.0011698377008379991,
+          "uncertain": 0.0028199865031705634
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "correction",
+        "outcome": "material",
+        "note": "Updated to clarify that the fire occurred at a warehouse and the museum remained intact.",
+        "sourceArticleIds": [
+          "u04"
+        ],
+        "observationIds": [
+          "observation-u04"
+        ]
+      }
+    },
+    {
+      "id": "u05",
+      "summary": "Opposition lawmakers accused the minister of taking illegal payments.",
+      "report": "The minister issued an official denial of the illegal-payment allegation and released a statement disputing the lawmakers' account.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9937744922873842,
+        "probabilities": {
+          "material": 0.9958496615249228,
+          "corroboration_only": 0.0030174424369541182,
+          "uncertain": 0.0011328960381228874
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "official_response",
+        "outcome": "material",
+        "note": "Added that the minister issued an official denial and released a statement disputing the allegations.",
+        "sourceArticleIds": [
+          "u05"
+        ],
+        "observationIds": [
+          "observation-u05"
+        ]
+      }
+    },
+    {
+      "id": "u06",
+      "summary": "The union voted to strike over wages.",
+      "report": "The union and employer signed a wage agreement and cancelled the planned strike.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.970081421645311,
+        "probabilities": {
+          "material": 0.980054281096874,
+          "corroboration_only": 0.0067118254765620305,
+          "uncertain": 0.013233893426564045
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Updated that the union and employer signed a wage agreement and cancelled the planned strike.",
+        "sourceArticleIds": [
+          "u06"
+        ],
+        "observationIds": [
+          "observation-u06"
+        ]
+      }
+    },
+    {
+      "id": "u07",
+      "summary": "Flooding affected 1,000 homes in the northern district.",
+      "report": "Police confirmed that flooding affected one thousand homes in the northern district.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.8407614383869818,
+        "probabilities": {
+          "material": 0.09035854021204001,
+          "corroboration_only": 0.8938409589246545,
+          "uncertain": 0.015800500863305502
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u08",
+      "summary": "The central bank raised its policy rate to 4 percent on Monday.",
+      "report": "Another publisher reports that the central bank increased its policy rate to 4% on Monday.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.98866960229217,
+        "probabilities": {
+          "material": 0.00042488217549513905,
+          "corroboration_only": 0.9924464015281134,
+          "uncertain": 0.0071287162963915756
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u09",
+      "summary": "Officials said five passengers died in the train crash.",
+      "report": "A second newsroom reports the same official death toll of five passengers in that train crash.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9814829689609127,
+        "probabilities": {
+          "material": 0.0006357947850221559,
+          "corroboration_only": 0.9876553126406086,
+          "uncertain": 0.011708892574369207
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u10",
+      "summary": "The government announced that the airport will remain closed until Friday.",
+      "report": "The airport authority reiterated the already-announced closure until Friday, without announcing another change.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9853728085435208,
+        "probabilities": {
+          "material": 0.007761460775575642,
+          "corroboration_only": 0.990248539029014,
+          "uncertain": 0.00199000019541042
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u11",
+      "summary": "The court rejected the appeal and upheld the conviction.",
+      "report": "Judges dismissed the appeal, leaving the existing conviction in place.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9948205375480681,
+        "probabilities": {
+          "material": 0.0006024942120906631,
+          "corroboration_only": 0.9965470250320454,
+          "uncertain": 0.0028504807558637525
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u12",
+      "summary": "The hospital remains open despite earlier plans to close it.",
+      "report": "Hospital managers confirm the hospital has not closed and remains open.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.7406858096886786,
+        "probabilities": {
+          "material": 0.16422698555103424,
+          "corroboration_only": 0.8271238731257857,
+          "uncertain": 0.008649141323180048
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u13",
+      "summary": "The former minister was released from prison.",
+      "report": "The prison service corrected that claim: the former minister has not been released and remains in custody.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9823987272617185,
+        "probabilities": {
+          "material": 0.9882658181744791,
+          "corroboration_only": 0.00248252682540785,
+          "uncertain": 0.009251655000112883
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "correction",
+        "outcome": "material",
+        "note": "Updated to reflect that the former minister remains in custody according to the prison service.",
+        "sourceArticleIds": [
+          "u13"
+        ],
+        "observationIds": [
+          "observation-u13"
+        ]
+      }
+    },
+    {
+      "id": "u14",
+      "summary": "The airport is closed after an attack.",
+      "report": "Airport story: the latest developments.",
+      "expected": [
+        "uncertain"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "uncertain",
+        "confidence": 0.9924394080989456,
+        "probabilities": {
+          "material": 0.00023085544202613756,
+          "corroboration_only": 0.004809539158676575,
+          "uncertain": 0.9949596053992972
+        }
+      },
+      "gemma": "uncertain",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "uncertain",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u15",
+      "summary": "The court is hearing a procurement case against the minister.",
+      "report": "Court live updates.",
+      "expected": [
+        "uncertain"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "uncertain",
+        "confidence": 0.9706899583441604,
+        "probabilities": {
+          "material": 0.0003243041446583547,
+          "corroboration_only": 0.019215723625901442,
+          "uncertain": 0.9804599722294403
+        }
+      },
+      "gemma": "uncertain",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "uncertain",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u16",
+      "summary": "Five people died in the storm.",
+      "report": "Officials announce a significant update, but the headline and description do not state what changed.",
+      "expected": [
+        "uncertain"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "uncertain",
+        "confidence": 0.9968378825313675,
+        "probabilities": {
+          "material": 0.0005587241736294118,
+          "corroboration_only": 0.0015493541387922897,
+          "uncertain": 0.9978919216875783
+        }
+      },
+      "gemma": "uncertain",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "uncertain",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u17",
+      "summary": "Flooding has forced evacuations in the northern district.",
+      "report": "Officials ordered additional evacuations in the southern district because the same flooding has spread there.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9820033924588628,
+        "probabilities": {
+          "material": 0.988002261639242,
+          "corroboration_only": 0.003745197735960368,
+          "uncertain": 0.00825254062479769
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "new_fact",
+        "outcome": "material",
+        "note": "Added that flooding has spread to the southern district, prompting additional evacuation orders.",
+        "sourceArticleIds": [
+          "u17"
+        ],
+        "observationIds": [
+          "observation-u17"
+        ]
+      }
+    },
+    {
+      "id": "u18",
+      "summary": "The government imposed a ban on the messaging service.",
+      "report": "The service's operator filed a lawsuit to overturn the ban.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9727616719754099,
+        "probabilities": {
+          "material": 0.9818411146502733,
+          "corroboration_only": 0.009188512725535124,
+          "uncertain": 0.008970372624191439
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "new_fact",
+        "outcome": "material",
+        "note": "Added that the service's operator has filed a lawsuit to overturn the ban.",
+        "sourceArticleIds": [
+          "u18"
+        ],
+        "observationIds": [
+          "observation-u18"
+        ]
+      }
+    },
+    {
+      "id": "u19",
+      "summary": "A missile attack damaged the airport runway.",
+      "report": "The airport authority suspended all flights because of the damage to the runway.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9511700226074817,
+        "probabilities": {
+          "material": 0.9674466817383212,
+          "corroboration_only": 0.0221438276741155,
+          "uncertain": 0.010409490587563264
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "consequence",
+        "outcome": "material",
+        "note": "Added that the airport authority suspended all flights due to the runway damage.",
+        "sourceArticleIds": [
+          "u19"
+        ],
+        "observationIds": [
+          "observation-u19"
+        ]
+      }
+    },
+    {
+      "id": "u20",
+      "summary": "Rescuers estimate that ten people may be missing after the collapse.",
+      "report": "Rescuers confirmed that all ten previously missing people were found alive.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9711636311872861,
+        "probabilities": {
+          "material": 0.9807757541248575,
+          "corroboration_only": 0.010480315486480752,
+          "uncertain": 0.008743930388661855
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Updated to reflect that all ten previously missing people have been found alive.",
+        "sourceArticleIds": [
+          "u20"
+        ],
+        "observationIds": [
+          "observation-u20"
+        ]
+      }
+    },
+    {
+      "id": "u21",
+      "summary": "The company reported a 12 percent fall in quarterly revenue.",
+      "report": "Quarterly revenue at the company declined by twelve percent, according to the same earnings release.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9942114324006461,
+        "probabilities": {
+          "material": 0.0003731826915146135,
+          "corroboration_only": 0.9961409549337642,
+          "uncertain": 0.003485862374720984
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u22",
+      "summary": "The bridge will close on Tuesday for repairs.",
+      "report": "Officials repeated that the bridge will close on Tuesday for repairs. The only change to the article is its publication timestamp.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.959640453461612,
+        "probabilities": {
+          "material": 0.006937362219212389,
+          "corroboration_only": 0.9730936356410748,
+          "uncertain": 0.019969002139712772
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u23",
+      "summary": "The French parliament approved the clean-water bill.",
+      "report": "Le parlement français a adopté le projet de loi sur l'eau propre.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.961657881226899,
+        "probabilities": {
+          "material": 0.0011504593817751967,
+          "corroboration_only": 0.9744385874845993,
+          "uncertain": 0.024410953133625447
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u24",
+      "summary": "A court convicted the mayor of corruption.",
+      "report": "El tribunal declaró culpable de corrupción a la alcaldesa; el informe no añade ninguna otra novedad.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9652094023556739,
+        "probabilities": {
+          "material": 0.010771533859668244,
+          "corroboration_only": 0.976806268237116,
+          "uncertain": 0.012422197903215698
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u25",
+      "summary": "The central bank's policy rate is 4 percent.",
+      "report": "Die Zentralbank senkte den Leitzins von vier auf drei Prozent.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9210510868845028,
+        "probabilities": {
+          "material": 0.9473673912563352,
+          "corroboration_only": 0.020014247330683306,
+          "uncertain": 0.03261836141298139
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Updated the central bank's policy rate from 4 percent to 3 percent.",
+        "sourceArticleIds": [
+          "u25"
+        ],
+        "observationIds": [
+          "observation-u25"
+        ]
+      }
+    },
+    {
+      "id": "u26",
+      "summary": "The president announced a tariff on imports from Country B.",
+      "report": "Country B's government announced retaliatory tariffs in response to that measure.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.969744739895185,
+        "probabilities": {
+          "material": 0.97982982659679,
+          "corroboration_only": 0.006875487298284177,
+          "uncertain": 0.01329468610492596
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "consequence",
+        "outcome": "material",
+        "note": "Added that Country B's government has announced retaliatory tariffs in response to the president's measure.",
+        "sourceArticleIds": [
+          "u26"
+        ],
+        "observationIds": [
+          "observation-u26"
+        ]
+      }
+    },
+    {
+      "id": "u27",
+      "summary": "A court has scheduled a hearing for Monday.",
+      "report": "The court moved the hearing from Monday to Wednesday.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.94414464214722,
+        "probabilities": {
+          "material": 0.9627630947648135,
+          "corroboration_only": 0.007328940456037329,
+          "uncertain": 0.029907964779149303
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "status_change",
+        "outcome": "material",
+        "note": "Updated the hearing date from Monday to Wednesday.",
+        "sourceArticleIds": [
+          "u27"
+        ],
+        "observationIds": [
+          "observation-u27"
+        ]
+      }
+    },
+    {
+      "id": "u28",
+      "summary": "The government's tax bill passed parliament by 210 votes to 190.",
+      "report": "The tax bill cleared parliament, with 210 lawmakers in favour and 190 opposed.",
+      "expected": [
+        "corroboration_only"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "corroboration_only",
+        "confidence": 0.9899895234628466,
+        "probabilities": {
+          "material": 0.0014261590751366614,
+          "corroboration_only": 0.9933263489752312,
+          "uncertain": 0.005247491949632174
+        }
+      },
+      "gemma": "corroboration_only",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "corroboration_only",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    },
+    {
+      "id": "u29",
+      "summary": "The government said the bridge was safe to use.",
+      "report": "Independent engineers disputed that safety assessment and reported newly identified cracks in the bridge.",
+      "expected": [
+        "material"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "material",
+        "confidence": 0.9758665383186765,
+        "probabilities": {
+          "material": 0.9839110255457844,
+          "corroboration_only": 0.0026732224720832126,
+          "uncertain": 0.013415751982132412
+        }
+      },
+      "gemma": "material",
+      "gemmaOutput": {
+        "changeKind": "new_perspective",
+        "outcome": "material",
+        "note": "Added that independent engineers disputed the government's safety assessment and identified new cracks in the bridge.",
+        "sourceArticleIds": [
+          "u29"
+        ],
+        "observationIds": [
+          "observation-u29"
+        ]
+      }
+    },
+    {
+      "id": "u30",
+      "summary": "A court rejected the permit application.",
+      "report": "Permit application decision: read more on the publisher's site; the headline and description give no result or new facts.",
+      "expected": [
+        "uncertain"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "uncertain",
+        "confidence": 0.9227453964342406,
+        "probabilities": {
+          "material": 0.000904917875384891,
+          "corroboration_only": 0.05059815116845453,
+          "uncertain": 0.9484969309561605
+        }
+      },
+      "gemma": "uncertain",
+      "gemmaOutput": {
+        "changeKind": null,
+        "outcome": "uncertain",
+        "note": "",
+        "sourceArticleIds": [],
+        "observationIds": []
+      }
+    }
+  ],
+  "requests": [
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "5343ff1bdac005b1479c8cc198a6d6dfe319a79ae42fe66d18695bd5dbaef43d",
+      "wallMs": 260.68579199997475,
+      "usage": {
+        "input_tokens": 484,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "419f1ff36dc3e2717c9bb9e04719570c461b2a20bc5c497879b59f8fc0827f76",
+      "status": 200,
+      "wallMs": 1126.7279589999816,
+      "usage": {
+        "completion_tokens": 54,
+        "prompt_tokens": 530,
+        "total_tokens": 584,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 389,
+        "prompt_ms": 353.397,
+        "prompt_per_token_ms": 0.9084755784061697,
+        "prompt_per_second": 1100.7450544288718,
+        "predicted_n": 54,
+        "predicted_ms": 507.56,
+        "predicted_per_token_ms": 9.576603773584905,
+        "predicted_per_second": 104.42115217905273,
+        "draft_n": 40,
+        "draft_n_accepted": 33
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "4a4543d86d640eb881c3a7e3b7ec5e0285392ed7a50778995da9f02266f10a54",
+      "wallMs": 211.74462499999208,
+      "usage": {
+        "input_tokens": 488,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "9db8293cc92f164d01988830b52948f5c0c6bffb2bf6d43a27d0977a4c6a7bbc",
+      "status": 200,
+      "wallMs": 887.2272090000333,
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 534,
+        "total_tokens": 590,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 393,
+        "prompt_ms": 345.364,
+        "prompt_per_token_ms": 0.8787888040712467,
+        "prompt_per_second": 1137.9298363465793,
+        "predicted_n": 56,
+        "predicted_ms": 527.766,
+        "predicted_per_token_ms": 9.595745454545455,
+        "predicted_per_second": 104.2128519078531,
+        "draft_n": 44,
+        "draft_n_accepted": 33
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "7ceb76fbb0f134860ec0767f73fd68b47d78716fe8e09e99d99a069845495ac5",
+      "wallMs": 470.4970420000027,
+      "usage": {
+        "input_tokens": 489,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "bbebdc3b8a5d4d59151f956d665140be9998ce1f76c8b1d5eeed65c27aea7351",
+      "status": 200,
+      "wallMs": 843.7350839999854,
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 536,
+        "total_tokens": 592,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 395,
+        "prompt_ms": 346.3,
+        "prompt_per_token_ms": 0.8767088607594937,
+        "prompt_per_second": 1140.629511983829,
+        "predicted_n": 56,
+        "predicted_ms": 483.698,
+        "predicted_per_token_ms": 8.79450909090909,
+        "predicted_per_second": 113.70731324090652,
+        "draft_n": 40,
+        "draft_n_accepted": 35
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "25a5c225e6f97b62c27fa496c9893e9f411a4314a60db0435753c8cc31daa815",
+      "wallMs": 213.7309580000001,
+      "usage": {
+        "input_tokens": 491,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "f6bcfbcb000059097e996ffb438747c9ad722acdb4e2916d777d6b5b57bbb92d",
+      "status": 200,
+      "wallMs": 871.6009169999743,
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 537,
+        "total_tokens": 593,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 396,
+        "prompt_ms": 348.507,
+        "prompt_per_token_ms": 0.8800681818181818,
+        "prompt_per_second": 1136.2755984815226,
+        "predicted_n": 56,
+        "predicted_ms": 509.312,
+        "predicted_per_token_ms": 9.260218181818182,
+        "predicted_per_second": 107.98881628549887,
+        "draft_n": 42,
+        "draft_n_accepted": 34
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "459c18019aef5fe60f10d74be1a0759980ad171c6d1d83f8f77b510f2fc9f346",
+      "wallMs": 208.4455410000519,
+      "usage": {
+        "input_tokens": 496,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "0d664bc022b4359914dd428373f585bded9a3d5a9fca1dbd9777c2a127796adb",
+      "status": 200,
+      "wallMs": 869.7753329999978,
+      "usage": {
+        "completion_tokens": 59,
+        "prompt_tokens": 542,
+        "total_tokens": 601,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 401,
+        "prompt_ms": 348.802,
+        "prompt_per_token_ms": 0.8698304239401496,
+        "prompt_per_second": 1149.6493712765407,
+        "predicted_n": 59,
+        "predicted_ms": 506.816,
+        "predicted_per_token_ms": 8.738206896551723,
+        "predicted_per_second": 114.43995453971462,
+        "draft_n": 42,
+        "draft_n_accepted": 38
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "a94ee34e9f396bf219590426877f15809f47df0a3eb5fee7f2105556ab3346fb",
+      "wallMs": 229.63400000002002,
+      "usage": {
+        "input_tokens": 485,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "3aad175aaa9e753910e053596e2d0b68108869843af40e18806f8617c0b8f64f",
+      "status": 200,
+      "wallMs": 892.2944160000188,
+      "usage": {
+        "completion_tokens": 62,
+        "prompt_tokens": 531,
+        "total_tokens": 593,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 390,
+        "prompt_ms": 345.986,
+        "prompt_per_token_ms": 0.8871435897435898,
+        "prompt_per_second": 1127.2132398420745,
+        "predicted_n": 62,
+        "predicted_ms": 534.16,
+        "predicted_per_token_ms": 8.75672131147541,
+        "predicted_per_second": 114.19799311067845,
+        "draft_n": 44,
+        "draft_n_accepted": 39
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "0985bd4371747892e7db27499b61422913eec71e0eed221c6583d06e309069d2",
+      "wallMs": 206.76812499994412,
+      "usage": {
+        "input_tokens": 491,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "2cb566c79f1ff369274f939f9e97298d716a446d4acf09a010ab13a5bca1cc1c",
+      "status": 200,
+      "wallMs": 728.4765419999603,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 537,
+        "total_tokens": 579,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 396,
+        "prompt_ms": 348.432,
+        "prompt_per_token_ms": 0.8798787878787879,
+        "prompt_per_second": 1136.520181843229,
+        "predicted_n": 42,
+        "predicted_ms": 366.014,
+        "predicted_per_token_ms": 8.927170731707317,
+        "predicted_per_second": 112.01757309829678,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "f2005563957ee56905f024b543d814e08b56adc906af826f08672b4e16efa29e",
+      "wallMs": 210.30791700002737,
+      "usage": {
+        "input_tokens": 495,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "dea8eaa81766ee9eac277113c17c7c85f47933813c2effeb70ec882b92a4472a",
+      "status": 200,
+      "wallMs": 723.48199999996,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 541,
+        "total_tokens": 583,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 400,
+        "prompt_ms": 348.176,
+        "prompt_per_token_ms": 0.87044,
+        "prompt_per_second": 1148.8442626717524,
+        "predicted_n": 42,
+        "predicted_ms": 363.319,
+        "predicted_per_token_ms": 8.861439024390243,
+        "predicted_per_second": 112.84848851835439,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "64a579a1991ee6f7d80665d295e5b7cf62488240342700ece982432321fd0188",
+      "wallMs": 412.3031669999473,
+      "usage": {
+        "input_tokens": 491,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "3da55ef0bb1d7f3c4021faa8699ebaaf7cdb3d4204b9375abb4d3587bd1a2ef7",
+      "status": 200,
+      "wallMs": 740.4054170000018,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 537,
+        "total_tokens": 579,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 396,
+        "prompt_ms": 347.79,
+        "prompt_per_token_ms": 0.8782575757575758,
+        "prompt_per_second": 1138.6181316311568,
+        "predicted_n": 42,
+        "predicted_ms": 379.226,
+        "predicted_per_token_ms": 9.24941463414634,
+        "predicted_per_second": 108.11494992431953,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "443170db54c51ab6508aef6b065c9b15d2b8805bdc1085e2ef6be8ccf7d1c763",
+      "wallMs": 210.94275000004563,
+      "usage": {
+        "input_tokens": 493,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "03e5d9ad85205f3fbdaa6412d7ecec89e50691c8fe4722518aaa6776409b2aae",
+      "status": 200,
+      "wallMs": 727.7903749999823,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 538,
+        "total_tokens": 580,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 397,
+        "prompt_ms": 350.507,
+        "prompt_per_token_ms": 0.8828891687657431,
+        "prompt_per_second": 1132.6449971041948,
+        "predicted_n": 42,
+        "predicted_ms": 364.681,
+        "predicted_per_token_ms": 8.894658536585366,
+        "predicted_per_second": 112.42702526317521,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "01a135e41af0d3526472f90c59f4f49511aad074d26597eda4146e576365dd24",
+      "wallMs": 206.94049999996787,
+      "usage": {
+        "input_tokens": 486,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "b7bb6da4b646a7f2cefb92c29ca372d928a9073ededd3ddba3dc31a487de9c1d",
+      "status": 200,
+      "wallMs": 727.431958000001,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 532,
+        "total_tokens": 574,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 391,
+        "prompt_ms": 349.274,
+        "prompt_per_token_ms": 0.8932838874680307,
+        "prompt_per_second": 1119.4649472906658,
+        "predicted_n": 42,
+        "predicted_ms": 364.682,
+        "predicted_per_token_ms": 8.894682926829269,
+        "predicted_per_second": 112.42671697533741,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "eeb864f95c96a0672ef4c5c09360dbb545eb1627a1cd20c059cae381093b10e4",
+      "wallMs": 207.0113330000313,
+      "usage": {
+        "input_tokens": 486,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "cb792962b39bde20ac16b73ac95365a8bcfa563d6492145fc8bd8b5d0ef080d6",
+      "status": 200,
+      "wallMs": 726.8316249999916,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 532,
+        "total_tokens": 574,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 391,
+        "prompt_ms": 351.155,
+        "prompt_per_token_ms": 0.8980946291560101,
+        "prompt_per_second": 1113.4684113852857,
+        "predicted_n": 42,
+        "predicted_ms": 363.79,
+        "predicted_per_token_ms": 8.872926829268293,
+        "predicted_per_second": 112.7023832430798,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "71aec0e72e97e22c5f64d94dc5aa71d5fb0efd63d1a73b17bf648269f048ef81",
+      "wallMs": 207.0498329999973,
+      "usage": {
+        "input_tokens": 490,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "cd7300f7795d32a9f941558cf33182f17654e9acaf88604a714afd21daed87ee",
+      "status": 200,
+      "wallMs": 863.8176250000251,
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 536,
+        "total_tokens": 592,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 395,
+        "prompt_ms": 348.599,
+        "prompt_per_token_ms": 0.8825291139240506,
+        "prompt_per_second": 1133.1070943978611,
+        "predicted_n": 56,
+        "predicted_ms": 501.882,
+        "predicted_per_token_ms": 9.125127272727273,
+        "predicted_per_second": 109.58751260256395,
+        "draft_n": 42,
+        "draft_n_accepted": 34
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "c04590761d7fca9f9e107e7505b370ffe05000085f3b032cfcfd1790f70bf68b",
+      "wallMs": 213.13066600001184,
+      "usage": {
+        "input_tokens": 478,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "1cd3e2c695661ff9ce4ac26bfc93f93013f269f4489c979304bcde6781afd1e4",
+      "status": 200,
+      "wallMs": 669.9003750000265,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 524,
+        "total_tokens": 561,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 383,
+        "prompt_ms": 338.241,
+        "prompt_per_token_ms": 0.8831357702349869,
+        "prompt_per_second": 1132.3287241936962,
+        "predicted_n": 37,
+        "predicted_ms": 318.144,
+        "predicted_per_token_ms": 8.837333333333333,
+        "predicted_per_second": 113.15630657815329,
+        "draft_n": 26,
+        "draft_n_accepted": 24
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "d493786709606ff17b955f8f4b4ae51f60963d5049804455d647c1e63603d253",
+      "wallMs": 2460.8697909999755,
+      "usage": {
+        "input_tokens": 478,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "23e978861e1056237a09e54a68358a6382a17780fa1fa40cd42e02a7db29d719",
+      "status": 200,
+      "wallMs": 672.5547079999815,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 524,
+        "total_tokens": 561,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 383,
+        "prompt_ms": 339.818,
+        "prompt_per_token_ms": 0.8872532637075717,
+        "prompt_per_second": 1127.0739042664015,
+        "predicted_n": 37,
+        "predicted_ms": 318.604,
+        "predicted_per_token_ms": 8.850111111111111,
+        "predicted_per_second": 112.99293166438589,
+        "draft_n": 26,
+        "draft_n_accepted": 24
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "070770ab79612b14b58b67218094c3648eb3236973026db20c304ae4c5575690",
+      "wallMs": 1221.4664169999887,
+      "usage": {
+        "input_tokens": 487,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "7a2a0e0d7da7d2bc051684aff9d7a4df1152d3eca611b517a66aad8bf0f99a44",
+      "status": 200,
+      "wallMs": 679.6784169999883,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 533,
+        "total_tokens": 570,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 392,
+        "prompt_ms": 347.931,
+        "prompt_per_token_ms": 0.887579081632653,
+        "prompt_per_second": 1126.660171125884,
+        "predicted_n": 37,
+        "predicted_ms": 316.972,
+        "predicted_per_token_ms": 8.804777777777778,
+        "predicted_per_second": 113.5747006044698,
+        "draft_n": 26,
+        "draft_n_accepted": 24
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "48f1b3c5e76c83d35db622336e03da64b8889a9e45df1bfaf20d4207c2b73ae2",
+      "wallMs": 319.3119580000057,
+      "usage": {
+        "input_tokens": 491,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "645adcbcc57e1278eef14f14d38c5d7c118e019d0dd983b800161ed8330d4151",
+      "status": 200,
+      "wallMs": 847.6994580000173,
+      "usage": {
+        "completion_tokens": 57,
+        "prompt_tokens": 537,
+        "total_tokens": 594,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 396,
+        "prompt_ms": 347.44,
+        "prompt_per_token_ms": 0.8773737373737374,
+        "prompt_per_second": 1139.765139304628,
+        "predicted_n": 57,
+        "predicted_ms": 487.457,
+        "predicted_per_token_ms": 8.704589285714286,
+        "predicted_per_second": 114.88192804698672,
+        "draft_n": 40,
+        "draft_n_accepted": 36
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "5e79569631e14ab1751b7db9d0c64d82628328a1d989b483a1fc151417938d7c",
+      "wallMs": 542.2644999999902,
+      "usage": {
+        "input_tokens": 485,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "4d0aa887aadb2142c3c3cb22373c13402be5dab3325c1ea1d2dac8017c781bc0",
+      "status": 200,
+      "wallMs": 844.2503329999745,
+      "usage": {
+        "completion_tokens": 58,
+        "prompt_tokens": 532,
+        "total_tokens": 590,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 391,
+        "prompt_ms": 347.711,
+        "prompt_per_token_ms": 0.8892864450127878,
+        "prompt_per_second": 1124.4970679673638,
+        "predicted_n": 58,
+        "predicted_ms": 483.329,
+        "predicted_per_token_ms": 8.479456140350877,
+        "predicted_per_second": 117.93209180496102,
+        "draft_n": 40,
+        "draft_n_accepted": 37
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "16eaf03ec4c25442362efc8acf8a3ca9cc0121b183226fb1f2ce90c245f7840a",
+      "wallMs": 207.3159169999999,
+      "usage": {
+        "input_tokens": 485,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "e081fa745ccdf44acd29c3d79e307de0da85eca2ec9981040dbc8b99dd995b4c",
+      "status": 200,
+      "wallMs": 860.5337080000318,
+      "usage": {
+        "completion_tokens": 55,
+        "prompt_tokens": 531,
+        "total_tokens": 586,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 390,
+        "prompt_ms": 351.295,
+        "prompt_per_token_ms": 0.9007564102564103,
+        "prompt_per_second": 1110.1780554804368,
+        "predicted_n": 55,
+        "predicted_ms": 496.563,
+        "predicted_per_token_ms": 9.195611111111111,
+        "predicted_per_second": 108.74753052482767,
+        "draft_n": 40,
+        "draft_n_accepted": 34
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "d9247f2dcc0977de314dd8bfdc9bd775040ac998d6d475f0386a1cc7ab68a703",
+      "wallMs": 776.3308749999851,
+      "usage": {
+        "input_tokens": 491,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "887d4483f404d00b8ccf254aa6bffd3543a117dd91cf00118f80c97ef6f79d55",
+      "status": 200,
+      "wallMs": 864.5988749999669,
+      "usage": {
+        "completion_tokens": 56,
+        "prompt_tokens": 537,
+        "total_tokens": 593,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 396,
+        "prompt_ms": 348.746,
+        "prompt_per_token_ms": 0.8806717171717171,
+        "prompt_per_second": 1135.4968945880385,
+        "predicted_n": 56,
+        "predicted_ms": 503.458,
+        "predicted_per_token_ms": 9.153781818181818,
+        "predicted_per_second": 109.2444652781364,
+        "draft_n": 42,
+        "draft_n_accepted": 34
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "76d968223ffaf0bfd32d87cb8a963af19b65231454e5a586f16fe7619a6b2bdf",
+      "wallMs": 673.7837909999653,
+      "usage": {
+        "input_tokens": 494,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "169fb7bc92cfa403b41f29fcdcd56836e27f58fd33b4d7736fe28821621ebb50",
+      "status": 200,
+      "wallMs": 728.8089170000167,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 540,
+        "total_tokens": 582,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 399,
+        "prompt_ms": 353.094,
+        "prompt_per_token_ms": 0.8849473684210526,
+        "prompt_per_second": 1130.0107053645772,
+        "predicted_n": 42,
+        "predicted_ms": 362.756,
+        "predicted_per_token_ms": 8.84770731707317,
+        "predicted_per_second": 113.02363020873536,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "647db2a7cc15a621e3ac405bd758f86339893be55f2247b202061d3ce6601154",
+      "wallMs": 209.1362080000108,
+      "usage": {
+        "input_tokens": 495,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "700570db2a3a430749df1d81ca5ac1c55d17bf5ecf952fe9978328afcb08b0e1",
+      "status": 200,
+      "wallMs": 748.4937499999651,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 541,
+        "total_tokens": 583,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 400,
+        "prompt_ms": 355.572,
+        "prompt_per_token_ms": 0.88893,
+        "prompt_per_second": 1124.947971156334,
+        "predicted_n": 42,
+        "predicted_ms": 378.917,
+        "predicted_per_token_ms": 9.241878048780487,
+        "predicted_per_second": 108.20311572191272,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "49ed76011198f7c2ceab4d91e34547dcda24d2bc448319809bf1f813221c1484",
+      "wallMs": 229.3550839999807,
+      "usage": {
+        "input_tokens": 486,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "86af124cb8f565336e25193c61c858c1da0d8c8e4f7769a493c74fc398a04e0b",
+      "status": 200,
+      "wallMs": 728.2110840000096,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 534,
+        "total_tokens": 576,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 393,
+        "prompt_ms": 349.47,
+        "prompt_per_token_ms": 0.8892366412213741,
+        "prompt_per_second": 1124.5600480727958,
+        "predicted_n": 42,
+        "predicted_ms": 364.408,
+        "predicted_per_token_ms": 8.888,
+        "predicted_per_second": 112.51125112511251,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "4abfe52e7443738616a6f437c7b0fb68f86f9c2ff69ef74e76f7159997f7c7c6",
+      "wallMs": 1231.7885829999577,
+      "usage": {
+        "input_tokens": 492,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "76f5299653ff3578350c2716dab9adae389e1ca9d0b9b5d359b87edca7884ca2",
+      "status": 200,
+      "wallMs": 719.8242500000051,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 536,
+        "total_tokens": 578,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 395,
+        "prompt_ms": 344.038,
+        "prompt_per_token_ms": 0.8709822784810127,
+        "prompt_per_second": 1148.128985751574,
+        "predicted_n": 42,
+        "predicted_ms": 362.95,
+        "predicted_per_token_ms": 8.852439024390243,
+        "predicted_per_second": 112.9632180741149,
+        "draft_n": 30,
+        "draft_n_accepted": 27
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "5b50a112ababc0059e0f27f4f69b6ab0d42bb72558107f56deea4880a723a9cc",
+      "wallMs": 210.5375420000055,
+      "usage": {
+        "input_tokens": 489,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "8ed6f21c8225c5be3966656edd1ec0833e2212a1488050c99f062dcc224af3e9",
+      "status": 200,
+      "wallMs": 913.8045000000275,
+      "usage": {
+        "completion_tokens": 63,
+        "prompt_tokens": 536,
+        "total_tokens": 599,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 395,
+        "prompt_ms": 348.725,
+        "prompt_per_token_ms": 0.8828481012658228,
+        "prompt_per_second": 1132.6976844218223,
+        "predicted_n": 63,
+        "predicted_ms": 553.275,
+        "predicted_per_token_ms": 8.923790322580645,
+        "predicted_per_second": 112.0600063259681,
+        "draft_n": 46,
+        "draft_n_accepted": 40
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "5b746e91b5d20455d474f3ae69b21d9664d67a85c966a45ee1783f67a5d68c70",
+      "wallMs": 655.1696670000092,
+      "usage": {
+        "input_tokens": 488,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "f4aab1c789f24a92a4f957f867427eca44323d7ea944196687d9fa0fc4584dd6",
+      "status": 200,
+      "wallMs": 888.6250839999993,
+      "usage": {
+        "completion_tokens": 62,
+        "prompt_tokens": 535,
+        "total_tokens": 597,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 394,
+        "prompt_ms": 348.477,
+        "prompt_per_token_ms": 0.8844593908629441,
+        "prompt_per_second": 1130.6341594997662,
+        "predicted_n": 62,
+        "predicted_ms": 526.676,
+        "predicted_per_token_ms": 8.634032786885246,
+        "predicted_per_second": 115.82073229082016,
+        "draft_n": 44,
+        "draft_n_accepted": 39
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "d2e8a03cb85a014dbe4a653f797e839eda92a25bc2b0ab91f107690869de2666",
+      "wallMs": 370.82387500000186,
+      "usage": {
+        "input_tokens": 482,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "cdf5ab089b394ded339a134557c167e7407b10b45c0121a92241298155e2ba6a",
+      "status": 200,
+      "wallMs": 788.1814580000355,
+      "usage": {
+        "completion_tokens": 51,
+        "prompt_tokens": 528,
+        "total_tokens": 579,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 387,
+        "prompt_ms": 339.078,
+        "prompt_per_token_ms": 0.8761705426356589,
+        "prompt_per_second": 1141.3303133792226,
+        "predicted_n": 51,
+        "predicted_ms": 435.205,
+        "predicted_per_token_ms": 8.7041,
+        "predicted_per_second": 114.88838593306603,
+        "draft_n": 36,
+        "draft_n_accepted": 33
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "c974686a23c39ba96e91d781561329af91d4fda2078a8bbf174005026f293321",
+      "wallMs": 281.8537919999799,
+      "usage": {
+        "input_tokens": 503,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "123a2fcb776627a2389c91c890f87ae3989e6595c603e22e2f8c7005ccbb2bab",
+      "status": 200,
+      "wallMs": 752.5149589999928,
+      "usage": {
+        "completion_tokens": 42,
+        "prompt_tokens": 550,
+        "total_tokens": 592,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 409,
+        "prompt_ms": 353.243,
+        "prompt_per_token_ms": 0.8636748166259168,
+        "prompt_per_second": 1157.8431844367758,
+        "predicted_n": 42,
+        "predicted_ms": 386.303,
+        "predicted_per_token_ms": 9.422024390243902,
+        "predicted_per_second": 106.13430390134168,
+        "draft_n": 32,
+        "draft_n_accepted": 26
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "2ce302dad4a83c3570a9b5dc8de3aa17c58ac65e9a9671faf3507a829bb5f701",
+      "wallMs": 210.83162500004983,
+      "usage": {
+        "input_tokens": 488,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "1b3c4056cc55740b9f18364bd3f96218a1ad70db6592e890191922f81cebdc74",
+      "status": 200,
+      "wallMs": 895.7902079999913,
+      "usage": {
+        "completion_tokens": 61,
+        "prompt_tokens": 534,
+        "total_tokens": 595,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 393,
+        "prompt_ms": 352.943,
+        "prompt_per_token_ms": 0.8980737913486004,
+        "prompt_per_second": 1113.4942469463908,
+        "predicted_n": 61,
+        "predicted_ms": 529.607,
+        "predicted_per_token_ms": 8.826783333333333,
+        "predicted_per_second": 113.29155392583557,
+        "draft_n": 44,
+        "draft_n_accepted": 38
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "452caf852ea5320506e06c7d1ac292281c790977745835bb7c281b27390599a7",
+      "wallMs": 421.5690000000177,
+      "usage": {
+        "input_tokens": 494,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "local-gemma",
+      "model": "gemma-4-26B-A4B",
+      "requestHash": "48414c6bf42807b84b15c4ec9ef3067a11f9ff7d012fcbe7ae2658d519bd20aa",
+      "status": 200,
+      "wallMs": 704.0978330000071,
+      "usage": {
+        "completion_tokens": 37,
+        "prompt_tokens": 541,
+        "total_tokens": 578,
+        "prompt_tokens_details": {
+          "cached_tokens": 141
+        }
+      },
+      "timings": {
+        "cache_n": 141,
+        "prompt_n": 400,
+        "prompt_ms": 351.208,
+        "prompt_per_token_ms": 0.87802,
+        "prompt_per_second": 1138.926220359445,
+        "predicted_n": 37,
+        "predicted_ms": 340.479,
+        "predicted_per_token_ms": 9.457749999999999,
+        "predicted_per_second": 105.73339324892285,
+        "draft_n": 28,
+        "draft_n_accepted": 23
+      },
+      "reused": false
+    }
+  ],
+  "notes": [
+    "No historical summary-update assessments exist in the local snapshot; this phase uses constructed examples only.",
+    "A material verdict does not replace the grounded update note or citations currently generated by Gemma.",
+    "False corroboration verdicts can hide real updates and must be measured separately from aggregate accuracy.",
+    "Post-run summary audit: unlabelled cases have null correctness, and threshold coverage includes unlabelled cases without treating Gemma agreement as ground truth. Model answers and request measurements are unchanged."
+  ],
+  "summaryAuditedAt": "2026-10-26T12:49:04.464066+00:00"
+}

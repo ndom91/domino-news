@@ -1,0 +1,426 @@
+{
+  "runId": "mammoth-hosted-20261026",
+  "task": "grounding-controls",
+  "ranAt": "2026-10-26T12:00:09.037Z",
+  "model": "decision-models/baseten-mammoth-27b-latest",
+  "baselineModel": "gemma-4-26B-A4B",
+  "labelProvenance": "Assistant-authored controlled examples based on repository rules; not independently human-reviewed or a held-out real-news benchmark. Expected labels are not sent to either model.",
+  "summary": {
+    "cases": 12,
+    "mammothEvaluatedCases": 12,
+    "mammothFailures": 0,
+    "labelledCases": 12,
+    "mammothCorrect": 11,
+    "gemmaComparedCases": 0,
+    "gemmaCorrect": null,
+    "mammothGemmaComparedCases": 0,
+    "mammothGemmaAgreement": null,
+    "probabilityThresholds": [
+      {
+        "threshold": 0.9,
+        "accepted": 9,
+        "labelledAccepted": 9,
+        "correct": 9,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      },
+      {
+        "threshold": 0.95,
+        "accepted": 9,
+        "labelledAccepted": 9,
+        "correct": 9,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      },
+      {
+        "threshold": 0.99,
+        "accepted": 9,
+        "labelledAccepted": 9,
+        "correct": 9,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      }
+    ],
+    "errors": [
+      {
+        "id": "g04",
+        "expected": [
+          "unsupported"
+        ],
+        "choice": "insufficient_evidence",
+        "probability": 0.4995362027314126
+      }
+    ]
+  },
+  "cases": [
+    {
+      "id": "g01",
+      "evidence": "Officials said five passengers died in the train crash.",
+      "claim": "Officials reported five deaths in the train crash.",
+      "expected": [
+        "supported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "supported",
+        "confidence": 0.9924829928508224,
+        "probabilities": {
+          "supported": 0.9943622446381168,
+          "contradicted": 0.00022812417653836597,
+          "unsupported": 0.004825455072653564,
+          "insufficient_evidence": 0.00058417611269108
+        }
+      }
+    },
+    {
+      "id": "g02",
+      "evidence": "Officials said five passengers died in the train crash.",
+      "claim": "Officials reported fifty deaths in the train crash.",
+      "expected": [
+        "contradicted"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "contradicted",
+        "confidence": 0.9907013054741528,
+        "probabilities": {
+          "supported": 0.00033386605784525896,
+          "contradicted": 0.9930259791056146,
+          "unsupported": 0.006413891200960764,
+          "insufficient_evidence": 0.00022626363557927217
+        }
+      }
+    },
+    {
+      "id": "g03",
+      "evidence": "The airport closed after a missile attack.",
+      "claim": "The airport reopened on Friday.",
+      "expected": [
+        "unsupported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "unsupported",
+        "confidence": 0.6108436560890182,
+        "probabilities": {
+          "supported": 0.0002666543092354488,
+          "contradicted": 0.000958012545539577,
+          "unsupported": 0.7081327420667637,
+          "insufficient_evidence": 0.2906425910784612
+        }
+      }
+    },
+    {
+      "id": "g04",
+      "evidence": "The mayor denied the allegation that she accepted illegal payments.",
+      "claim": "The mayor accepted illegal payments.",
+      "expected": [
+        "unsupported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "insufficient_evidence",
+        "confidence": 0.33271493697521676,
+        "probabilities": {
+          "supported": 0.001894528852798278,
+          "contradicted": 0.2626988944631261,
+          "unsupported": 0.2358703739526631,
+          "insufficient_evidence": 0.4995362027314126
+        }
+      }
+    },
+    {
+      "id": "g05",
+      "evidence": "The mayor denied the allegation that she accepted illegal payments.",
+      "claim": "The mayor denied accepting illegal payments.",
+      "expected": [
+        "supported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "supported",
+        "confidence": 0.9935424741428079,
+        "probabilities": {
+          "supported": 0.995156855607106,
+          "contradicted": 0.00045648973082876445,
+          "unsupported": 0.002911446155598399,
+          "insufficient_evidence": 0.0014752085064669994
+        }
+      }
+    },
+    {
+      "id": "g06",
+      "evidence": "The company reported a 12 percent decline in revenue.",
+      "claim": "The company's revenue increased by 12 percent.",
+      "expected": [
+        "contradicted"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "contradicted",
+        "confidence": 0.9897041434612848,
+        "probabilities": {
+          "supported": 0.0005403214363433206,
+          "contradicted": 0.9922781075959636,
+          "unsupported": 0.003977252990811744,
+          "insufficient_evidence": 0.0032043179768814246
+        }
+      }
+    },
+    {
+      "id": "g07",
+      "evidence": "A court postponed the hearing until Wednesday.",
+      "claim": "A court moved the hearing to Wednesday.",
+      "expected": [
+        "supported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "supported",
+        "confidence": 0.9941035672853454,
+        "probabilities": {
+          "supported": 0.9955776754640091,
+          "contradicted": 0.0010333326937463987,
+          "unsupported": 0.002789293340316323,
+          "insufficient_evidence": 0.0005996985019280407
+        }
+      }
+    },
+    {
+      "id": "g08",
+      "evidence": "The government said the bridge was safe. Engineers disputed that claim.",
+      "claim": "The government and engineers agree that the bridge is safe.",
+      "expected": [
+        "contradicted"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "contradicted",
+        "confidence": 0.9975411315049469,
+        "probabilities": {
+          "supported": 6.454920541019352e-05,
+          "contradicted": 0.9981558486287102,
+          "unsupported": 0.0016405041236291565,
+          "insufficient_evidence": 0.00013909804225034015
+        }
+      }
+    },
+    {
+      "id": "g09",
+      "evidence": "A report identifies an incident but gives no date or location.",
+      "claim": "The incident happened in Paris on Monday.",
+      "expected": [
+        "unsupported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "unsupported",
+        "confidence": 0.6297067409562692,
+        "probabilities": {
+          "supported": 0.0003856817155895753,
+          "contradicted": 0.0012527105012302773,
+          "unsupported": 0.7222800557172019,
+          "insufficient_evidence": 0.27608155206597823
+        }
+      }
+    },
+    {
+      "id": "g10",
+      "evidence": "No article metadata is available.",
+      "claim": "The policy takes effect on Friday.",
+      "expected": [
+        "insufficient_evidence"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "insufficient_evidence",
+        "confidence": 0.9985508503391388,
+        "probabilities": {
+          "supported": 2.081826066474543e-05,
+          "contradicted": 4.5845951024459297e-05,
+          "unsupported": 0.0010201980339566653,
+          "insufficient_evidence": 0.9989131377543541
+        }
+      }
+    },
+    {
+      "id": "g11",
+      "evidence": "El tribunal absolvió a la alcaldesa.",
+      "claim": "The court acquitted the mayor.",
+      "expected": [
+        "supported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "supported",
+        "confidence": 0.993465103983877,
+        "probabilities": {
+          "supported": 0.9950988279879077,
+          "contradicted": 0.0005180720664474621,
+          "unsupported": 0.0031121995759993545,
+          "insufficient_evidence": 0.0012709003696453603
+        }
+      }
+    },
+    {
+      "id": "g12",
+      "evidence": "Le ministère a annoncé que le pont resterait fermé jusqu'à vendredi.",
+      "claim": "The ministry announced that the bridge would remain closed until Friday.",
+      "expected": [
+        "supported"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "supported",
+        "confidence": 0.9979255651575955,
+        "probabilities": {
+          "supported": 0.9984441738681966,
+          "contradicted": 0.00013294628185840188,
+          "unsupported": 0.0005319692567130282,
+          "insufficient_evidence": 0.000890910593231846
+        }
+      }
+    }
+  ],
+  "requests": [
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "0f9945c3bcf664108ea0159b4c7e1a58cc6c77fdfa9dec9942a628ed51a14234",
+      "wallMs": 371.04866699990816,
+      "usage": {
+        "input_tokens": 220,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "5ea71fcecdae3d60e498e4befc3bc0472819a631da4c3ae8364c8355ca7f4244",
+      "wallMs": 185.43029199982993,
+      "usage": {
+        "input_tokens": 220,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "fae797129a74ed7228b34a13fc290e02c650a865108b9fffbb561cc13a792055",
+      "wallMs": 190.25775000010617,
+      "usage": {
+        "input_tokens": 215,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "4480e79c1c1e5f14ce2879a308991342764af855923d39f6281d28269f3da0c4",
+      "wallMs": 183.70920899999328,
+      "usage": {
+        "input_tokens": 218,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "8eed3bf53c58c30039b6fa87f67db5804943dadf8cfab9c43eb635e12dac6d24",
+      "wallMs": 183.82937499997206,
+      "usage": {
+        "input_tokens": 219,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "ddba38e21cdc846bd802e9dae255c89a7d647ba4255db721c207fb6cddbf363b",
+      "wallMs": 230.58391700009815,
+      "usage": {
+        "input_tokens": 224,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "2efeec0501a72cabb0c5b942c91531113f5c7ece1262e6a017a9ef6cd01cf96c",
+      "wallMs": 416.15920800017193,
+      "usage": {
+        "input_tokens": 217,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "33b88a4a0650001d01bed4fabf9ace8a5d3b40e17f07381ee9d3d11324d8cb83",
+      "wallMs": 189.2113749999553,
+      "usage": {
+        "input_tokens": 225,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "c093f1d4943f3fa4f0d41bfa252704f7d1bc9c9b3b7c29a37fd1228512293ded",
+      "wallMs": 416.1335829999298,
+      "usage": {
+        "input_tokens": 221,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "e14c1635a0a4a4466ee77f72dd89a0ac83451b048099202e55bd590cd03e0d19",
+      "wallMs": 192.8778329999186,
+      "usage": {
+        "input_tokens": 214,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "3537ffeeb058dc9d0277d278229b843319d3f7427957acd8abbaf84516720790",
+      "wallMs": 867.0022090000566,
+      "usage": {
+        "input_tokens": 216,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "486b37015a25038aa4ceef57ea18d7ed7948891f2685a79c4561af931e18909c",
+      "wallMs": 186.21983300009742,
+      "usage": {
+        "input_tokens": 227,
+        "output_tokens": 1
+      },
+      "reused": false
+    }
+  ],
+  "notes": [
+    "Diagnostic constructed examples only; no Gemma comparison in this phase.",
+    "This would add or reorganize pipeline work; it does not demonstrate an inference-cost reduction.",
+    "not_mentioned is a diagnostic sentinel, not a new persisted claim-stance enum.",
+    "Post-run summary audit: unlabelled cases have null correctness, and threshold coverage includes unlabelled cases without treating Gemma agreement as ground truth. Model answers and request measurements are unchanged."
+  ],
+  "summaryAuditedAt": "2026-10-26T12:49:04.464528+00:00"
+}

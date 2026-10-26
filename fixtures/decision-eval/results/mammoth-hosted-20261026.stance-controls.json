@@ -1,0 +1,429 @@
+{
+  "runId": "mammoth-hosted-20261026",
+  "task": "stance-controls",
+  "ranAt": "2026-10-26T12:00:12.353Z",
+  "model": "decision-models/baseten-mammoth-27b-latest",
+  "baselineModel": "gemma-4-26B-A4B",
+  "labelProvenance": "Assistant-authored controlled examples based on repository rules; not independently human-reviewed or a held-out real-news benchmark. Expected labels are not sent to either model.",
+  "summary": {
+    "cases": 12,
+    "mammothEvaluatedCases": 12,
+    "mammothFailures": 0,
+    "labelledCases": 12,
+    "mammothCorrect": 12,
+    "gemmaComparedCases": 0,
+    "gemmaCorrect": null,
+    "mammothGemmaComparedCases": 0,
+    "mammothGemmaAgreement": null,
+    "probabilityThresholds": [
+      {
+        "threshold": 0.9,
+        "accepted": 12,
+        "labelledAccepted": 12,
+        "correct": 12,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      },
+      {
+        "threshold": 0.95,
+        "accepted": 10,
+        "labelledAccepted": 10,
+        "correct": 10,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      },
+      {
+        "threshold": 0.99,
+        "accepted": 7,
+        "labelledAccepted": 7,
+        "correct": 7,
+        "gemmaCompared": 0,
+        "gemmaAgreement": null
+      }
+    ],
+    "errors": []
+  },
+  "cases": [
+    {
+      "id": "c01",
+      "claim": "The bridge is unsafe.",
+      "report": "Our investigation found the bridge is unsafe.",
+      "expected": [
+        "asserts"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "asserts",
+        "confidence": 0.990692974509752,
+        "probabilities": {
+          "asserts": 0.9925543796078017,
+          "denies": 0.0006449075354155743,
+          "quotes": 0.004669705959289964,
+          "discusses": 0.0018930661087026017,
+          "not_mentioned": 0.00023794078879006182
+        }
+      }
+    },
+    {
+      "id": "c02",
+      "claim": "The bridge is unsafe.",
+      "report": "The bridge is not unsafe; the evidence shows it is safe to use.",
+      "expected": [
+        "denies"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "denies",
+        "confidence": 0.9988742224366665,
+        "probabilities": {
+          "asserts": 0.0006437079339038208,
+          "denies": 0.9990993779493331,
+          "quotes": 7.352416297242806e-05,
+          "discusses": 0.00012077958218061459,
+          "not_mentioned": 6.26103716102477e-05
+        }
+      }
+    },
+    {
+      "id": "c03",
+      "claim": "The bridge is unsafe.",
+      "report": "The engineers' union said the bridge is unsafe. This report attributes that assessment to the union without independently endorsing it.",
+      "expected": [
+        "quotes"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "quotes",
+        "confidence": 0.9650502669322386,
+        "probabilities": {
+          "asserts": 0.0015764765878992703,
+          "denies": 0.0015298296305387594,
+          "quotes": 0.972040213545791,
+          "discusses": 0.024137626061679553,
+          "not_mentioned": 0.0007158541740916948
+        }
+      }
+    },
+    {
+      "id": "c04",
+      "claim": "The bridge is unsafe.",
+      "report": "The article discusses the debate over bridge safety without endorsing or rejecting the unsafe-bridge claim.",
+      "expected": [
+        "discusses"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "discusses",
+        "confidence": 0.9952399208315515,
+        "probabilities": {
+          "asserts": 0.00010457548405382829,
+          "denies": 0.0001810415894199131,
+          "quotes": 0.0019188691059113816,
+          "discusses": 0.9961919366652412,
+          "not_mentioned": 0.0016035771553736212
+        }
+      }
+    },
+    {
+      "id": "c05",
+      "claim": "The minister accepted illegal payments.",
+      "report": "Documents obtained by this newsroom show that the minister accepted illegal payments.",
+      "expected": [
+        "asserts"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "asserts",
+        "confidence": 0.9902203965091696,
+        "probabilities": {
+          "asserts": 0.9921763172073357,
+          "denies": 0.000380501089681416,
+          "quotes": 0.0038023647723264727,
+          "discusses": 0.0034808755359041817,
+          "not_mentioned": 0.0001599413947521748
+        }
+      }
+    },
+    {
+      "id": "c06",
+      "claim": "The minister accepted illegal payments.",
+      "report": "Our investigation found that the illegal-payment allegation is false and that the minister accepted no such payments.",
+      "expected": [
+        "denies"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "denies",
+        "confidence": 0.9950031218816071,
+        "probabilities": {
+          "asserts": 0.001801133877860443,
+          "denies": 0.9960024975052858,
+          "quotes": 0.0009075076994310928,
+          "discusses": 0.001044067871213325,
+          "not_mentioned": 0.0002447930462093591
+        }
+      }
+    },
+    {
+      "id": "c07",
+      "claim": "The minister accepted illegal payments.",
+      "report": "Opposition lawmakers alleged that the minister accepted illegal payments; this newsroom has not verified their allegation.",
+      "expected": [
+        "quotes"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "quotes",
+        "confidence": 0.9123600510575771,
+        "probabilities": {
+          "asserts": 0.00045115537859665946,
+          "denies": 0.0008457623010979957,
+          "quotes": 0.9298880408460618,
+          "discusses": 0.0686315536427323,
+          "not_mentioned": 0.00018348783151122386
+        }
+      }
+    },
+    {
+      "id": "c08",
+      "claim": "The minister accepted illegal payments.",
+      "report": "This explainer describes how the illegal-payment controversy became an election issue, without evaluating the allegation.",
+      "expected": [
+        "discusses"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "discusses",
+        "confidence": 0.9760986701509716,
+        "probabilities": {
+          "asserts": 0.00014401198837264242,
+          "denies": 0.00024386509064330646,
+          "quotes": 0.002101223316433294,
+          "discusses": 0.9808789361207774,
+          "not_mentioned": 0.016631963483773448
+        }
+      }
+    },
+    {
+      "id": "c09",
+      "claim": "The airport is closed.",
+      "report": "The airport is closed, our correspondent confirmed at the terminal.",
+      "expected": [
+        "asserts"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "asserts",
+        "confidence": 0.9301374136206466,
+        "probabilities": {
+          "asserts": 0.9441099308965173,
+          "denies": 0.0018808851194363158,
+          "quotes": 0.048558469464902214,
+          "discusses": 0.004859145109116033,
+          "not_mentioned": 0.0005915694100282263
+        }
+      }
+    },
+    {
+      "id": "c10",
+      "claim": "The airport is closed.",
+      "report": "Reports that the airport is closed are incorrect: flights continue and the airport remains open.",
+      "expected": [
+        "denies"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "denies",
+        "confidence": 0.9946403040974741,
+        "probabilities": {
+          "asserts": 0.001059206053041425,
+          "denies": 0.9957122432779792,
+          "quotes": 0.0028501471337880266,
+          "discusses": 0.00032252352035325887,
+          "not_mentioned": 5.588001483790273e-05
+        }
+      }
+    },
+    {
+      "id": "c11",
+      "claim": "The airport is closed.",
+      "report": "The airport authority announced that the airport is closed. The article attributes that status to the authority.",
+      "expected": [
+        "quotes"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "quotes",
+        "confidence": 0.9528224178458583,
+        "probabilities": {
+          "asserts": 0.026640925440291407,
+          "denies": 0.0008121347050876188,
+          "quotes": 0.9622579342766867,
+          "discusses": 0.009981795114997902,
+          "not_mentioned": 0.00030721046293617776
+        }
+      }
+    },
+    {
+      "id": "c12",
+      "claim": "The airport is closed.",
+      "report": "The article concerns a school opening and does not mention the airport.",
+      "expected": [
+        "not_mentioned"
+      ],
+      "mammoth": {
+        "type": "choice",
+        "choice": "not_mentioned",
+        "confidence": 0.9995587741545494,
+        "probabilities": {
+          "asserts": 1.7176811752260302e-05,
+          "denies": 3.348946953177583e-05,
+          "quotes": 1.3836049597798315e-05,
+          "discusses": 0.0002884783454784302,
+          "not_mentioned": 0.9996470193236396
+        }
+      }
+    }
+  ],
+  "requests": [
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "6676549d2e20abff2a8b15ffad063195abe84b06df7388635d4ea6b38efcf2bc",
+      "wallMs": 355.90445800009184,
+      "usage": {
+        "input_tokens": 224,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "761871e0b837309a4bb783141d45e8dcf2a68212a5fae2b0d2635c38ccf8a51c",
+      "wallMs": 188.89862500014715,
+      "usage": {
+        "input_tokens": 231,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "aa79fbeeb8fcc183eedae0fe770d93429ce79c78ff38d2fc6690311e7f312712",
+      "wallMs": 362.6642090000678,
+      "usage": {
+        "input_tokens": 239,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "ca441d23ff706d5590560d47f12628231827b56326c287ec8e646a1079ac0f24",
+      "wallMs": 260.8610000000335,
+      "usage": {
+        "input_tokens": 234,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "0e70b8bf0b4e890936c1889cb494d5a264ce69b08030c8ecf2e3c5087a7ebcf2",
+      "wallMs": 187.52383399987593,
+      "usage": {
+        "input_tokens": 231,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "ad6fb0a1c17ae7766eb6899b768b552232c5453ca1f8824ee5cf950bfc35a789",
+      "wallMs": 196.6872090001125,
+      "usage": {
+        "input_tokens": 236,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "f39dbc1c34c940251f4cc4709a9b49674d20b8182d2f56e6167f19a8f9cc1579",
+      "wallMs": 187.08504200004973,
+      "usage": {
+        "input_tokens": 237,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "1a0d8438bfaa14e8e7ab2215881c2f0b4c82ad4400a47a22ffd51ce955ed071d",
+      "wallMs": 185.2612079998944,
+      "usage": {
+        "input_tokens": 236,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "d1c48f3ca7b5855a1cb46f8ecd79a3d638639182365a7316bdbea2ed5b687cad",
+      "wallMs": 188.75366599997506,
+      "usage": {
+        "input_tokens": 228,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "0833c6ac6d8a2be0f7e7e118264f5a3c30ad83d0a0aca47e1b89a468016af56f",
+      "wallMs": 652.6225829999894,
+      "usage": {
+        "input_tokens": 233,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "d1922413cad2c27f7c551a941768f661fd1a0b038d4678c8a4579ff98bef3505",
+      "wallMs": 340.6931250002235,
+      "usage": {
+        "input_tokens": 235,
+        "output_tokens": 1
+      },
+      "reused": false
+    },
+    {
+      "provider": "baseten",
+      "model": "decision-models/baseten-mammoth-27b-latest",
+      "requestHash": "fe7624983ba6897656ca9acbf1c083f32d599b9d07a9040cbcd59b9949201898",
+      "wallMs": 193.51833299989812,
+      "usage": {
+        "input_tokens": 229,
+        "output_tokens": 1
+      },
+      "reused": false
+    }
+  ],
+  "notes": [
+    "Diagnostic constructed examples only; no Gemma comparison in this phase.",
+    "This would add or reorganize pipeline work; it does not demonstrate an inference-cost reduction.",
+    "not_mentioned is a diagnostic sentinel, not a new persisted claim-stance enum.",
+    "Post-run summary audit: unlabelled cases have null correctness, and threshold coverage includes unlabelled cases without treating Gemma agreement as ground truth. Model answers and request measurements are unchanged."
+  ],
+  "summaryAuditedAt": "2026-10-26T12:49:04.458140+00:00"
+}

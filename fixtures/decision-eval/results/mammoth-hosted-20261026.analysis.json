@@ -1,0 +1,414 @@
+{
+  "runId": "mammoth-hosted-20261026",
+  "controls": {
+    "relationship-controls": {
+      "cases": 28,
+      "mammothCorrect": 28,
+      "gemmaCompared": 28,
+      "gemmaCorrect": 21,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 28,
+          "freshAttempts": 0,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 10560.07849700008,
+          "medianSuccessfulRequestMs": 285.6154790000146,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 28,
+          "freshAttempts": 0,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 241782.04475,
+          "medianSuccessfulRequestMs": 9221.475874999996,
+          "localServerProcessingMs": 38232.088
+        }
+      }
+    },
+    "materiality-controls": {
+      "cases": 30,
+      "mammothCorrect": 30,
+      "gemmaCompared": 30,
+      "gemmaCorrect": 30,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 30,
+          "freshAttempts": 30,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 13491.600873999938,
+          "medianSuccessfulRequestMs": 229.49454200000037,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 30,
+          "freshAttempts": 30,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 24037.16437699995,
+          "medianSuccessfulRequestMs": 770.3482085000142,
+          "localServerProcessingMs": 23387.328
+        }
+      }
+    },
+    "grounding-controls": {
+      "cases": 12,
+      "mammothCorrect": 11,
+      "gemmaCompared": 0,
+      "gemmaCorrect": null,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 12,
+          "freshAttempts": 12,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 3612.4632510000374,
+          "medianSuccessfulRequestMs": 191.5677915000124,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 0,
+          "freshAttempts": 0,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 0,
+          "medianSuccessfulRequestMs": null,
+          "localServerProcessingMs": 0
+        }
+      }
+    },
+    "stance-controls": {
+      "cases": 12,
+      "mammothCorrect": 12,
+      "gemmaCompared": 0,
+      "gemmaCorrect": null,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 12,
+          "freshAttempts": 12,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 3300.473292000359,
+          "medianSuccessfulRequestMs": 195.1027710000053,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 0,
+          "freshAttempts": 0,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 0,
+          "medianSuccessfulRequestMs": null,
+          "localServerProcessingMs": 0
+        }
+      }
+    }
+  },
+  "relationships": {
+    "relationship-real": {
+      "cases": 64,
+      "unavailable": [],
+      "evaluated": 64,
+      "agreementWithGemma": 38,
+      "independentAccuracy": null,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 64,
+          "freshAttempts": 64,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 24098.84011899997,
+          "medianSuccessfulRequestMs": 324.1235000000015,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 64,
+          "freshAttempts": 64,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 175201.89642199985,
+          "medianSuccessfulRequestMs": 2575.6848544999957,
+          "localServerProcessingMs": 158173.96199999997
+        }
+      },
+      "policies": [
+        {
+          "threshold": 0.9,
+          "scope": "all-decisions",
+          "accepted": 34,
+          "coverage": 0.53125,
+          "agreementWithGemma": 30,
+          "estimatedPipelineWallMs": 108588.06407799982,
+          "estimatedWallRatio": 0.6197881775003696,
+          "remainingLocalServerProcessingMs": 76369.04899999998,
+          "localServerProcessingReduction": 0.5171831821472614
+        },
+        {
+          "threshold": 0.9,
+          "scope": "unrelated-only",
+          "accepted": 28,
+          "coverage": 0.4375,
+          "agreementWithGemma": 28,
+          "estimatedPipelineWallMs": 124915.7026209998,
+          "estimatedWallRatio": 0.712981452667166,
+          "remainingLocalServerProcessingMs": 91063.54299999999,
+          "localServerProcessingReduction": 0.4242823417421888
+        },
+        {
+          "threshold": 0.95,
+          "scope": "all-decisions",
+          "accepted": 28,
+          "coverage": 0.4375,
+          "agreementWithGemma": 26,
+          "estimatedPipelineWallMs": 124856.48528799982,
+          "estimatedWallRatio": 0.712643457849705,
+          "remainingLocalServerProcessingMs": 90979.03899999999,
+          "localServerProcessingReduction": 0.42481658896550867
+        },
+        {
+          "threshold": 0.95,
+          "scope": "unrelated-only",
+          "accepted": 25,
+          "coverage": 0.390625,
+          "agreementWithGemma": 25,
+          "estimatedPipelineWallMs": 133680.47807999983,
+          "estimatedWallRatio": 0.7630081683477358,
+          "remainingLocalServerProcessingMs": 99007.776,
+          "localServerProcessingReduction": 0.3740576846649386
+        },
+        {
+          "threshold": 0.99,
+          "scope": "all-decisions",
+          "accepted": 11,
+          "coverage": 0.171875,
+          "agreementWithGemma": 11,
+          "estimatedPipelineWallMs": 173532.53891299985,
+          "estimatedWallRatio": 0.9904718068520268,
+          "remainingLocalServerProcessingMs": 135107.19999999998,
+          "localServerProcessingReduction": 0.14583160027312203
+        },
+        {
+          "threshold": 0.99,
+          "scope": "unrelated-only",
+          "accepted": 11,
+          "coverage": 0.171875,
+          "agreementWithGemma": 11,
+          "estimatedPipelineWallMs": 173532.53891299985,
+          "estimatedWallRatio": 0.9904718068520268,
+          "remainingLocalServerProcessingMs": 135107.19999999998,
+          "localServerProcessingReduction": 0.14583160027312203
+        }
+      ]
+    },
+    "relationship-real-production": {
+      "cases": 64,
+      "unavailable": [
+        {
+          "id": "sty_01m4q1cerrbf5ycmf3zbfszg0d:sty_01m4n3326mcsnd8vxrhccgmbnm",
+          "error": {
+            "status": 422,
+            "reason": "Baseten HTTP 422: {\n\t\"error\": \"OneJev prompt has 17385 tokens, exceeding max_len 16384; prompts are never truncated\",\n\t\"error_type\": \"Validation\"\n}\n"
+          }
+        }
+      ],
+      "evaluated": 63,
+      "agreementWithGemma": 38,
+      "independentAccuracy": null,
+      "requests": {
+        "baseten": {
+          "logicalAttempts": 64,
+          "freshAttempts": 31,
+          "failedAttempts": 1,
+          "estimatedLogicalWallMs": 32272.923290999955,
+          "medianSuccessfulRequestMs": 350.7452499999781,
+          "localServerProcessingMs": null
+        },
+        "local-gemma": {
+          "logicalAttempts": 64,
+          "freshAttempts": 31,
+          "failedAttempts": 0,
+          "estimatedLogicalWallMs": 402446.1494160002,
+          "medianSuccessfulRequestMs": 4152.732833000016,
+          "localServerProcessingMs": 187810.37199999997
+        }
+      },
+      "policies": [
+        {
+          "threshold": 0.9,
+          "scope": "all-decisions",
+          "accepted": 35,
+          "coverage": 0.546875,
+          "agreementWithGemma": 33,
+          "estimatedPipelineWallMs": 194022.46308199997,
+          "estimatedWallRatio": 0.48210788788400855,
+          "remainingLocalServerProcessingMs": 95483.75600000001,
+          "localServerProcessingReduction": 0.49159487315216
+        },
+        {
+          "threshold": 0.9,
+          "scope": "unrelated-only",
+          "accepted": 29,
+          "coverage": 0.453125,
+          "agreementWithGemma": 29,
+          "estimatedPipelineWallMs": 231342.302457,
+          "estimatedWallRatio": 0.5748403924169897,
+          "remainingLocalServerProcessingMs": 112659.63100000004,
+          "localServerProcessingReduction": 0.40014159068914446
+        },
+        {
+          "threshold": 0.95,
+          "scope": "all-decisions",
+          "accepted": 28,
+          "coverage": 0.4375,
+          "agreementWithGemma": 28,
+          "estimatedPipelineWallMs": 257951.95529099996,
+          "estimatedWallRatio": 0.6409601773189297,
+          "remainingLocalServerProcessingMs": 115014.78500000002,
+          "localServerProcessingReduction": 0.38760152714036455
+        },
+        {
+          "threshold": 0.95,
+          "scope": "unrelated-only",
+          "accepted": 25,
+          "coverage": 0.390625,
+          "agreementWithGemma": 25,
+          "estimatedPipelineWallMs": 273149.85979,
+          "estimatedWallRatio": 0.678723998692433,
+          "remainingLocalServerProcessingMs": 123386.95200000002,
+          "localServerProcessingReduction": 0.34302376015739944
+        },
+        {
+          "threshold": 0.99,
+          "scope": "all-decisions",
+          "accepted": 14,
+          "coverage": 0.21875,
+          "agreementWithGemma": 14,
+          "estimatedPipelineWallMs": 343711.9464990001,
+          "estimatedWallRatio": 0.854056988736926,
+          "remainingLocalServerProcessingMs": 154972.79799999998,
+          "localServerProcessingReduction": 0.1748443051909827
+        },
+        {
+          "threshold": 0.99,
+          "scope": "unrelated-only",
+          "accepted": 14,
+          "coverage": 0.21875,
+          "agreementWithGemma": 14,
+          "estimatedPipelineWallMs": 343711.9464990001,
+          "estimatedWallRatio": 0.854056988736926,
+          "remainingLocalServerProcessingMs": 154972.79799999998,
+          "localServerProcessingReduction": 0.1748443051909827
+        }
+      ]
+    }
+  },
+  "matching": {
+    "baselineScore": {
+      "precision": 0.8303592138863821,
+      "recall": 0.8527344777155443,
+      "f1": 0.8413981159845773,
+      "predictedStories": 143,
+      "labelledStories": 145,
+      "predictedSingletons": 114,
+      "labelledSingletons": 116
+    },
+    "replacementScore": {
+      "precision": 0.6848214548015018,
+      "recall": 0.9144386234875841,
+      "f1": 0.7831461523549039,
+      "predictedStories": 117,
+      "labelledStories": 145,
+      "predictedSingletons": 92,
+      "labelledSingletons": 116
+    },
+    "cascadeScore": {
+      "precision": 0.8085999522629465,
+      "recall": 0.8615063046909642,
+      "f1": 0.8342151332549199,
+      "predictedStories": 137,
+      "labelledStories": 145,
+      "predictedSingletons": 108,
+      "labelledSingletons": 116
+    },
+    "acceptedByMammoth": 104,
+    "fallbackDecisions": 122,
+    "largeModelCallsAvoided": 0.46017699115044247,
+    "acceptedPlacementErrors": [
+      {
+        "articleId": "art_01m4ksk2rdhczef6zaap91wzmr",
+        "title": "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+        "labelledStory": "Zelensky and UK criticise the US-Russia diesel deal",
+        "source": "mammoth",
+        "verdict": "wrongJoinByModel",
+        "mammothChoice": "story_1",
+        "probability": 0.9991065730940192,
+        "selectedStoryArticleTitles": [
+          "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+          "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’"
+        ]
+      },
+      {
+        "articleId": "art_01m4n9ykz03m1wbv6wbav50e6c",
+        "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
+        "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+        "source": "mammoth",
+        "verdict": "joinedWrongStory",
+        "mammothChoice": "story_1",
+        "probability": 0.9630014223329492,
+        "selectedStoryArticleTitles": [
+          "12 killed and more than 300 wounded in attack on Riyadh airport",
+          "Twelve killed and hundreds injured in Houthi attack at Riyadh airport",
+          "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+          "At least twelve killed, multiple people wounded in attack on Riyadh airport"
+        ]
+      }
+    ],
+    "baselineErrorsOnSameArticleSubset": 6,
+    "f1Difference": -0.007182982729657339,
+    "precisionDifference": -0.021759261623435666,
+    "baselineRequests": {
+      "baseten": {
+        "logicalAttempts": 0,
+        "freshAttempts": 0,
+        "failedAttempts": 0,
+        "estimatedLogicalWallMs": 0,
+        "medianSuccessfulRequestMs": null,
+        "localServerProcessingMs": null
+      },
+      "local-gemma": {
+        "logicalAttempts": 226,
+        "freshAttempts": 151,
+        "failedAttempts": 0,
+        "estimatedLogicalWallMs": 1510769.8972059996,
+        "medianSuccessfulRequestMs": 5557.878187999944,
+        "localServerProcessingMs": 788508.8549999995
+      }
+    },
+    "cascadeRequests": {
+      "baseten": {
+        "logicalAttempts": 226,
+        "freshAttempts": 191,
+        "failedAttempts": 0,
+        "estimatedLogicalWallMs": 122640.63658400049,
+        "medianSuccessfulRequestMs": 484.4183745000046,
+        "localServerProcessingMs": null
+      },
+      "local-gemma": {
+        "logicalAttempts": 122,
+        "freshAttempts": 122,
+        "failedAttempts": 0,
+        "estimatedLogicalWallMs": 778338.8131669995,
+        "medianSuccessfulRequestMs": 5886.0797500000335,
+        "localServerProcessingMs": 445500.51900000003
+      }
+    },
+    "estimatedWallRatio": 0.5963710631362598,
+    "localServerProcessingReduction": 0.43500885731968053,
+    "notes": [
+      "The timing ratio combines measured per-question latencies from different deployments and includes reused answers; it is not same-hardware compute or dollar cost.",
+      "The article-subset comparison comes from different replay trajectories, not identical candidate contexts.",
+      "The predeclared gate shows a useful trade-off on an already-used development set; this is not held-out production validation."
+    ]
+  },
+  "distinctSuccessfulHostedRequestsCached": 626,
+  "distinctHostedInputTokensCached": 1978606,
+  "notes": [
+    "No model calls or database writes in this analysis.",
+    "Relationship policies are post-run cost simulations at predeclared probability thresholds, not live graph-update replays.",
+    "Independent real-pair correctness is unknown; agreement with Gemma is not accuracy.",
+    "The initial real relationship profile omitted summaries through the matching loader; the production-profile result supersedes it for recommendations.",
+    "Cached-success totals exclude connectivity probes, interrupted-run failures and final recorded length refusals; they are not a provider billing audit."
+  ]
+}

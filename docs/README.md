@@ -13,7 +13,7 @@ Read in numbered order. 001–005 are the architecture agreed before building (2
 - `009-reader-product-roadmap.md`: agreed direction for Briefing, coverage comparison, source controls, and future reader features
 - `010-match-classifier-research.md`: deferred matching-classifier proposal, production arrival-timing findings, evaluation plan and unresolved training-rights gate
 - `011-small-model-match-benchmark.md`: completed small-model replacement and fallback benchmarks; quality, timing caveats and recommendation
-- `012-mammoth-decision-evaluation.md`: hosted Mammoth evaluation order, controls, native probabilities and safety/cost limitations
+- `012-mammoth-decision-evaluation.md`: completed hosted Mammoth evaluation; relationship-gate pilot recommendation, matching trade-offs and safety/cost limitations
 - `domino-design-handoff.zip`: the visual design handoff ("Signal × Index")
 
 Current status, commands and configuration live in [`AGENTS.md`](../AGENTS.md).

@@ -1,0 +1,2004 @@
+{
+  "runId": "mammoth-hosted-20261026",
+  "audits": [
+    {
+      "mode": "replacement",
+      "score": {
+        "precision": 0.6848214548015018,
+        "recall": 0.9144386234875841,
+        "f1": 0.7831461523549039,
+        "predictedStories": 117,
+        "labelledStories": 145,
+        "predictedSingletons": 92,
+        "labelledSingletons": 116
+      },
+      "tallies": {
+        "mammoth": {
+          "correct": 175,
+          "wrongJoinByModel": 34,
+          "joinedWrongStory": 12,
+          "modelSaidNo": 4,
+          "notRetrieved": 1
+        },
+        "gemma": {},
+        "no_model": {
+          "correct": 102,
+          "notRetrieved": 1,
+          "joinedWrongStory": 5
+        }
+      },
+      "errors": [
+        {
+          "articleId": "art_01m4kskba8vkqn8vd4kd4tasw3",
+          "title": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "labelledStory": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6188463290772334,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2rdhczef6zaap91wzmr",
+          "title": "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+          "labelledStory": "Zelensky and UK criticise the US-Russia diesel deal",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9991065730940192,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk8tkyp4dv86g7ka1snqr",
+          "title": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "labelledStory": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8860575130964193,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2cjb0exc1qkb4fftx3k",
+          "title": "Trump, Zelensky clash over diesel deal as Russian strikes on Ukraine kill 21, including children",
+          "labelledStory": "Trump says Ukraine should get a new president",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.769737373289216,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2qszbggevxcx84xxp4d",
+          "title": "12 killed and more than 300 wounded in attack on Riyadh airport",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6994260313995374,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk7vaw34k0ejjn3xbmdj4",
+          "title": "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6639766208161249,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4kwe6hmk3g6tvz32ehxga3j",
+          "title": "Trump weighs joining the fight against Houthis after Riyadh airport attack",
+          "labelledStory": "US considers joining Saudi strikes on the Houthis",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8199645258119692,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4mdm21g9qhxgq35qt10rxk7",
+          "title": "World condemns deadly Houthi attack on Saudi Arabia’s Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8770843575078674,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0eh7bc83n9kza4586g9",
+          "title": "Saudi Arabia presses on with global energy summit after deadly Riyadh airport attack",
+          "labelledStory": "Top oil executives dropped from Riyadh WPC Energy Congress",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6073536440833774,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4n7c27910d1rhqr56yngxck",
+          "title": "Britain stands behind Zelenskyy, says Streeting after Trump’s call for new leader in Ukraine",
+          "labelledStory": "UK and Germany back Zelensky after Trump call",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.7014287623965216,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4n7cbrsb2q6f1wvyj129amx",
+          "title": "Trump, Zelensky clash over diesel deal as Russian strikes kill 21",
+          "labelledStory": "Trump says Ukraine should get a new president",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.6183206836917289,
+          "selectedStoryArticleTitles": [
+            "Russian attack on Ukrainian city kills 15, a day after Trump eases diesel sanctions on Moscow",
+            "Russian glide bomb attack on Zaporizhzhia kills at least 20 people"
+          ]
+        },
+        {
+          "articleId": "art_01m4n9ykz03m1wbv6wbav50e6c",
+          "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.9280471830928213,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4ne7qbhh9yk3px7djr9dt9d",
+          "title": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "labelledStory": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.3941752036302261,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4ne8cdn5r1fp0p19hgb0vse",
+          "title": "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions",
+          "labelledStory": "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.7523296751183934,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4nkbh7ym2z3wghqhtzbsz7m",
+          "title": "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+          "labelledStory": "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6037497316934478,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0cyy55ebvmaegjq8fv1",
+          "title": "Riyadh airport closure: UAE flight cancellations extend into Tuesday",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.5975406468436695,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4p1z0cmc6a6cfe4ptk6kfa9",
+          "title": "Middle East latest: Saudi Arabia extends suspension of operations at Riyadh airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.965203687404892,
+          "selectedStoryArticleTitles": [
+            "Riyadh airport closure: UAE flight cancellations extend into Tuesday"
+          ]
+        },
+        {
+          "articleId": "art_01m4npsrsfeebkgdm9f6t5gx5j",
+          "title": "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+          "labelledStory": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9076340306106739,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4npsrsdf7jrjrv8670vpff9",
+          "title": "Strike on Riyadh: What options for the Saudi-led coalition?",
+          "labelledStory": "Strike on Riyadh: What options for the Saudi-led coalition?",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8216108317407376,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4nt7yscn43yqkgeqav6gqhd",
+          "title": "Read-out by President von der Leyen following her call with President Zelenskyy",
+          "labelledStory": "EU says it will welcome energy truce \"when it holds\"",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.872570184195888,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4nvyagjafn5fvgcd7r89v0n",
+          "title": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "labelledStory": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.7191275626104227,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ypghn688gmmdhbpy7ber",
+          "title": "Saudi Arabia is increasingly under siege",
+          "labelledStory": "Saudi Arabia is increasingly under siege",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.817061575657483,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yvzara0fg01mmvznn2zv",
+          "title": "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power",
+          "labelledStory": "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8387376480686716,
+          "selectedStoryArticleTitles": [
+            "'No lesson learnt': KP emergency evokes grim October memories"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z45gagw8778d9egtz7sb",
+          "title": "Is the Yemen war entering a new phase?",
+          "labelledStory": "Is the Yemen war entering a new phase?",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8572216246097681,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain",
+            "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+            "12 killed and more than 300 wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p135982z4zd4709qqek1h1",
+          "title": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "labelledStory": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6262043986662188,
+          "selectedStoryArticleTitles": [
+            "What to expect from Apple’s ‘Welcome Home’ event"
+          ]
+        },
+        {
+          "articleId": "art_01m4p8v7c0syy2e81ywb3mdx7c",
+          "title": "Republican senator says Trump diesel agreement with Russia may be illegal",
+          "labelledStory": "Republican senator says Trump diesel agreement with Russia may be illegal",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8321530358574396,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4paj3sr0gry3mdxpcm5s7qr",
+          "title": "Saudi health minister visits survivors of deadly Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "mammoth",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.6350688632413629,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pgjjb6vg2da6j2djbkga4y",
+          "title": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "labelledStory": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9405788320428562,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4pgj0qf7vgvavyd1jtp4ph6",
+          "title": "Here’s the biggest news you missed this weekend",
+          "labelledStory": "Here’s the biggest news you missed this weekend",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_2",
+          "probability": 0.9770735207431094,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ywpq7ctq8hd4yfjjz4e2",
+          "title": "Kyiv pushes back on US call for new Ukrainian president",
+          "labelledStory": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.700360782373195,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4pr9t9pqv9346tq3xvssq96",
+          "title": "Iran war live: Tehran says Yemen escalation benefits ‘only’ Israel",
+          "labelledStory": "Iran urges Saudi diplomacy after Houthi escalation",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8364596033797179,
+          "selectedStoryArticleTitles": [
+            "Iran calls U.S. response \"insufficient\" amid stalled talks to end the war"
+          ]
+        },
+        {
+          "articleId": "art_01m4pt10jzabcn3sz3fn2085ap",
+          "title": "Houthis kill 14 at Saudi airport as expert warns of 'rapid targets' amid Middle East war",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_3",
+          "probability": 0.6753616937876686,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4pt0r22n0ne1wkmfkbxxx74",
+          "title": "Iran urges Saudi Arabia to pursue diplomacy after Houthis escalate attacks",
+          "labelledStory": "Iran urges Saudi diplomacy after Houthi escalation",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.9414813469968046,
+          "selectedStoryArticleTitles": [
+            "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says"
+          ]
+        },
+        {
+          "articleId": "art_01m4q00mta6qcbbmdb64mp0x23",
+          "title": "Zelenskyy risks rupture with Trump as midterms pressure mounts",
+          "labelledStory": "Zelenskyy risks rupture with Trump as midterms pressure mounts",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.589996827777766,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4q2k0m3g8a2p0qdv6trpavr",
+          "title": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "labelledStory": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9879319485176558,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4q3eafzwq3hben897zdh839",
+          "title": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "labelledStory": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9674436661568027,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4q7rfs3ad6x0jfpzbqs18dp",
+          "title": "Indian killed in Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.9274939541720696,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9ezh307b2nn1r1vkj8gas",
+          "title": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "labelledStory": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8933782055804154,
+          "selectedStoryArticleTitles": [
+            "Pope Leo announces medical update"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9ewrpakpmf61rcpvydd2v",
+          "title": "Turkey, Pakistan, Egypt, Saudi Arabia condemn Houthi attacks on Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "mammoth",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.5014117680767012,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4q9eh5x3hehq3tvytx5g5xm",
+          "title": "Timeline: Houthis escalate attacks on Saudi airports",
+          "labelledStory": "Timeline: Houthis escalate attacks on Saudi airports",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_3",
+          "probability": 0.7688207784887566,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qb696da81k79jmdghr73hx",
+          "title": "Nigeria condemns fatal Houthi attack on Saudi Arabia’s airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.950973486729603,
+          "selectedStoryArticleTitles": [
+            "Turkey, Pakistan, Egypt, Saudi Arabia condemn Houthi attacks on Riyadh airport",
+            "Turkey, Pakistan, Egypt, Saudi Arabia condemn Houthi attacks on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4qjwrescr9d7v7vd04jpgmw",
+          "title": "Saudi airport stays shut as Houthi attacks kill 20 people in a week",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_3",
+          "probability": 0.32777073098028425,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qjx9cma4jerhc383dntgdk",
+          "title": "‘Trump is really mad’: White House source says president expects Ukraine to stop striking Russian oil refineries",
+          "labelledStory": "‘Trump is really mad’: White House source says president expects Ukraine to stop striking Russian oil refineries",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_2",
+          "probability": 0.7649627803461245,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4qjwvqan1mb10f0fcyfhh10",
+          "title": "DPM Dar defends emergency and governor's rule in KP, says measures not politically motivated",
+          "labelledStory": "DPM Dar defends emergency and governor's rule in KP, says measures not politically motivated",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9521609767277809,
+          "selectedStoryArticleTitles": [
+            "'No lesson learnt': KP emergency evokes grim October memories",
+            "Pakistan Army deployed in Khyber Pakhtunkhwa in aid of civil power"
+          ]
+        },
+        {
+          "articleId": "art_01m4qkrjybahn8cxhwv003nnrv",
+          "title": "Top oil executives dropped from event schedule after Riyadh attacks",
+          "labelledStory": "Top oil executives dropped from Riyadh WPC Energy Congress",
+          "source": "mammoth",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.9238424387472556,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qkrjy7snhyqp4q64tb126c",
+          "title": "Skies over Saudi capital Riyadh largely empty after deadly Houthi strikes on airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.8838480459765595,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qmmd8qewa9zw1sq88za36p",
+          "title": "Live: Saudi Arabia extends suspension of operations at Riyadh airport after deadly Houthi attacks",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.7296092958394196,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qmm7v21nfkn69ycnqwr3pp",
+          "title": "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash",
+          "labelledStory": "Trump calls for Ukraine to choose a new president as relations with Zelensky hit their lowest point since Oval Office clash",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.4446648639486419,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr1rwc9krnpfxb62sa6zh9",
+          "title": "Russia striking fuel reserves despite 'energy ceasefire', Zelenskyy says",
+          "labelledStory": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.6618356284150448,
+          "selectedStoryArticleTitles": [
+            "Ukraine says ready to halt refinery strikes if Moscow stops energy attacks",
+            "Kyiv pushes back on Trump’s call for a new Ukrainian president as drones hit Russian data hub",
+            "Ukraine will only stop attacking Russian oil as part of an energy ceasefire, Zelensky says",
+            "Ukraine Shrugs Off Trump Call to Ditch Zelensky for Energy Strikes"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr1k9dvyxtpv6etdjjdvjd",
+          "title": "Saudi energy minister says attacks testing infrastructure, vows response",
+          "labelledStory": "Saudi energy minister says attacks testing infrastructure, vows response",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_3",
+          "probability": 0.38915602015918305,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr1ws8nhqryagw9a3veyak",
+          "title": "Malaysians advised to postpone umrah pilgrimage to Saudi Arabia amid security concerns",
+          "labelledStory": "Countries warn against travel to Saudi Arabia",
+          "source": "mammoth",
+          "verdict": "notRetrieved",
+          "mammothChoice": "none",
+          "probability": 0.6787626244367183,
+          "selectedStoryArticleTitles": []
+        }
+      ],
+      "notes": [
+        "No new inference calls. Mammoth saved article order and candidate evidence were verified; Gemma baseline choices were reconstructed from cached numeric outputs. All B-cubed scores were verified exactly.",
+        "Error attribution uses the existing diagnose rule: the right Story is the predicted group holding most already-seen labelled mates.",
+        "Labels are from the previously used model-drafted/manually-adjusted development set; these are not independently reviewed error rates."
+      ]
+    },
+    {
+      "mode": "probability95-fallback",
+      "score": {
+        "precision": 0.8085999522629465,
+        "recall": 0.8615063046909642,
+        "f1": 0.8342151332549199,
+        "predictedStories": 137,
+        "labelledStories": 145,
+        "predictedSingletons": 108,
+        "labelledSingletons": 116
+      },
+      "tallies": {
+        "mammoth": {
+          "correct": 102,
+          "wrongJoinByModel": 1,
+          "joinedWrongStory": 1
+        },
+        "gemma": {
+          "wrongJoinByModel": 22,
+          "correct": 73,
+          "notRetrieved": 4,
+          "joinedWrongStory": 13,
+          "modelSaidNo": 10
+        },
+        "no_model": {
+          "correct": 104,
+          "notRetrieved": 1,
+          "joinedWrongStory": 3
+        }
+      },
+      "errors": [
+        {
+          "articleId": "art_01m4kskba8vkqn8vd4kd4tasw3",
+          "title": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "labelledStory": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6188463290772334,
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2rdhczef6zaap91wzmr",
+          "title": "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+          "labelledStory": "Zelensky and UK criticise the US-Russia diesel deal",
+          "source": "mammoth",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9991065730940192,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk8tkyp4dv86g7ka1snqr",
+          "title": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "labelledStory": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8860575130964193,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2cjb0exc1qkb4fftx3k",
+          "title": "Trump, Zelensky clash over diesel deal as Russian strikes on Ukraine kill 21, including children",
+          "labelledStory": "Trump says Ukraine should get a new president",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.769737373289216,
+          "selectedStoryArticleTitles": [
+            "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2c764r8zktqxbbcdmav",
+          "title": "Russian attack on Ukrainian city kills 15, a day after Trump eases diesel sanctions on Moscow",
+          "labelledStory": "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8852039493862874,
+          "selectedStoryArticleTitles": [
+            "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief",
+            "Trump, Zelensky clash over diesel deal as Russian strikes on Ukraine kill 21, including children"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk7vaw34k0ejjn3xbmdj4",
+          "title": "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8957211485222214,
+          "selectedStoryArticleTitles": [
+            "12 killed and more than 300 wounded in attack on Riyadh airport",
+            "Twelve killed and hundreds injured in Houthi attack at Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4kskb2kw073ymdeyg6qkhw4",
+          "title": "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+          "labelledStory": "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "none",
+          "probability": 0.5722718598919715,
+          "selectedStoryArticleTitles": [
+            "At least 10,000 detained across India ahead of October 10 Delhi protest against Gyanesh Kumar: CJP",
+            "Dhruv Rathee detained ahead of CJP protest against CEC"
+          ]
+        },
+        {
+          "articleId": "art_01m4mdm21g9qhxgq35qt10rxk7",
+          "title": "World condemns deadly Houthi attack on Saudi Arabia’s Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6390610123120001,
+          "selectedStoryArticleTitles": [
+            "Trump weighs joining the fight against Houthis after Riyadh airport attack",
+            "Trump ‘may’ join Saudi strikes on Houthis after Riyadh airport attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4n9ykz03m1wbv6wbav50e6c",
+          "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "mammoth",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.9630014223329492,
+          "selectedStoryArticleTitles": [
+            "12 killed and more than 300 wounded in attack on Riyadh airport",
+            "Twelve killed and hundreds injured in Houthi attack at Riyadh airport",
+            "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+            "At least twelve killed, multiple people wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4ne7qbhh9yk3px7djr9dt9d",
+          "title": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "labelledStory": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.42828424344066535,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yykvab5z1sjct887hd84",
+          "title": "Germany backs Ukraine’s Zelensky after Trump’s call for his removal",
+          "labelledStory": "UK and Germany back Zelensky after Trump call",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "mammothChoice": "story_1",
+          "probability": 0.49535744312402497,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4njg1sdc92yz2nw8sft10gh",
+          "title": "India’s crackdown on youth protesters: What next?",
+          "labelledStory": "India’s crackdown on youth protesters: What next?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6153275337659555,
+          "selectedStoryArticleTitles": [
+            "At least 10,000 detained across India ahead of October 10 Delhi protest against Gyanesh Kumar: CJP",
+            "Dhruv Rathee detained ahead of CJP protest against CEC",
+            "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests"
+          ]
+        },
+        {
+          "articleId": "art_01m4nkbh7ym2z3wghqhtzbsz7m",
+          "title": "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+          "labelledStory": "Houthi attack on Riyadh airport forces swift rethink of Trump’s new strategy",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.7108913955563874,
+          "selectedStoryArticleTitles": [
+            "Trump weighs joining the fight against Houthis after Riyadh airport attack",
+            "Trump ‘may’ join Saudi strikes on Houthis after Riyadh airport attack",
+            "World condemns deadly Houthi attack on Saudi Arabia’s Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0cyy55ebvmaegjq8fv1",
+          "title": "Riyadh airport closure: UAE flight cancellations extend into Tuesday",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "none",
+          "probability": 0.5997244382212222,
+          "selectedStoryArticleTitles": [
+            "Yemen's Houthis warn passengers not to use Saudi airports",
+            "Yemen’s Houthis renew warning over Saudi airports after latest deadly Riyadh attack",
+            "Saudi Arabia extends airport closure as Houthis warn 'worse is yet to come'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0cmc6a6cfe4ptk6kfa9",
+          "title": "Middle East latest: Saudi Arabia extends suspension of operations at Riyadh airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.8777466857923694,
+          "selectedStoryArticleTitles": [
+            "Yemen's Houthis warn passengers not to use Saudi airports",
+            "Yemen’s Houthis renew warning over Saudi airports after latest deadly Riyadh attack",
+            "Saudi Arabia extends airport closure as Houthis warn 'worse is yet to come'",
+            "Riyadh airport closure: UAE flight cancellations extend into Tuesday"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yp6fadktx59zskehedpk",
+          "title": "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.8126788231851213,
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim"
+          ]
+        },
+        {
+          "articleId": "art_01m4nt7yscn43yqkgeqav6gqhd",
+          "title": "Read-out by President von der Leyen following her call with President Zelenskyy",
+          "labelledStory": "EU says it will welcome energy truce \"when it holds\"",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8552978887995266,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yvzqq9xk9ad81ap9zrem",
+          "title": "FO reiterates Pakistan's 'firm and unshakeable' commitment to Saudi Arabia's security after Riyadh attack",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "mammothChoice": "story_2",
+          "probability": 0.5975545046875294,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4nvyagjafn5fvgcd7r89v0n",
+          "title": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "labelledStory": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.7326112235870117,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ypghn688gmmdhbpy7ber",
+          "title": "Saudi Arabia is increasingly under siege",
+          "labelledStory": "Saudi Arabia is increasingly under siege",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_2",
+          "probability": 0.8237199879897636,
+          "selectedStoryArticleTitles": [
+            "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z45gagw8778d9egtz7sb",
+          "title": "Is the Yemen war entering a new phase?",
+          "labelledStory": "Is the Yemen war entering a new phase?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.834773028474572,
+          "selectedStoryArticleTitles": [
+            "12 killed and more than 300 wounded in attack on Riyadh airport",
+            "Twelve killed and hundreds injured in Houthi attack at Riyadh airport",
+            "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+            "At least twelve killed, multiple people wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p135982z4zd4709qqek1h1",
+          "title": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "labelledStory": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.6262043986662188,
+          "selectedStoryArticleTitles": [
+            "What to expect from Apple’s ‘Welcome Home’ event"
+          ]
+        },
+        {
+          "articleId": "art_01m4p4j5faeetbdm2awa61ffm5",
+          "title": "'To keep oil prices from rising' — Russian lawmaker questions Trump’s energy ceasefire claim",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_1",
+          "probability": 0.8955835999526319,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4p4j1mnw4dg4j09pjwxdeda",
+          "title": "Saudi and Yemeni Airports Hit in New Round of Strikes",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_4",
+          "probability": 0.7996612363562483,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4paj3sr0gry3mdxpcm5s7qr",
+          "title": "Saudi health minister visits survivors of deadly Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.649648803643027,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pdzfzkv67ptrffn9maedsh",
+          "title": "Trump claims Russia and Ukraine agree to 'energy ceasefire' despite continued attacks",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.5973740950649566,
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue"
+          ]
+        },
+        {
+          "articleId": "art_01m4pgjjb6vg2da6j2djbkga4y",
+          "title": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "labelledStory": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.9311255064864528,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4pgj0qf7vgvavyd1jtp4ph6",
+          "title": "Here’s the biggest news you missed this weekend",
+          "labelledStory": "Here’s the biggest news you missed this weekend",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_2",
+          "probability": 0.9311726165734512,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4pj90d8a0nzy2anhdkyg686",
+          "title": "Trump’s ‘energy ceasefire’ sparks confusion as Russia strikes Ukraine",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.8294072479584097,
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ywpq7ctq8hd4yfjjz4e2",
+          "title": "Kyiv pushes back on US call for new Ukrainian president",
+          "labelledStory": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.6639843083603544,
+          "selectedStoryArticleTitles": [
+            "Ukraine's Zelenskiy tells ABC he will organize elections if Russia agrees to 60-day ceasefire",
+            "Zelensky says if Trump, Putin want elections in Ukraine, a two-month ceasefire is needed",
+            "Ukraine's Zelenskyy says he will organise elections if Russia agrees to 60-day ceasefire",
+            "Ukraine's Zelenskyy tells ABC he will organise elections if Russia agrees to 60-day ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4pqe898g3qqepfqrvwp3gxb",
+          "title": "Saudi Arabia reports injuries in new attack at Riyadh airport, day after strike kills 13",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "none",
+          "probability": 0.5377162851425288,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pr8yy1ye2tatwwd4mbphc5",
+          "title": "Yemen's Houthis target King Khalid airport in Saudi Arabia again",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_4",
+          "probability": 0.8969197957491184,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pt10jzabcn3sz3fn2085ap",
+          "title": "Houthis kill 14 at Saudi airport as expert warns of 'rapid targets' amid Middle East war",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_2",
+          "probability": 0.4777016978995617,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pt0r22n0ne1wkmfkbxxx74",
+          "title": "Iran urges Saudi Arabia to pursue diplomacy after Houthis escalate attacks",
+          "labelledStory": "Iran urges Saudi diplomacy after Houthi escalation",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.7793080998302141,
+          "selectedStoryArticleTitles": [
+            "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says"
+          ]
+        },
+        {
+          "articleId": "art_01m4q2k0m3g8a2p0qdv6trpavr",
+          "title": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "labelledStory": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_3",
+          "probability": 0.48998463536722486,
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4q3eafzwq3hben897zdh839",
+          "title": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "labelledStory": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_4",
+          "probability": 0.7872663184265339,
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4q7rfs3ad6x0jfpzbqs18dp",
+          "title": "Indian killed in Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.7262173634246537,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9ezh307b2nn1r1vkj8gas",
+          "title": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "labelledStory": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_1",
+          "probability": 0.8933782055804154,
+          "selectedStoryArticleTitles": [
+            "Pope Leo announces medical update"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9ewrpakpmf61rcpvydd2v",
+          "title": "Turkey, Pakistan, Egypt, Saudi Arabia condemn Houthi attacks on Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.8651701779709546,
+          "selectedStoryArticleTitles": [
+            "FO reiterates Pakistan's 'firm and unshakeable' commitment to Saudi Arabia's security after Riyadh attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9eh5x3hehq3tvytx5g5xm",
+          "title": "Timeline: Houthis escalate attacks on Saudi airports",
+          "labelledStory": "Timeline: Houthis escalate attacks on Saudi airports",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "story_3",
+          "probability": 0.6940116373918965,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qaas8520ffeapqm51s4gfq",
+          "title": "Live: EU’s top diplomat says she will welcome Russia-Ukraine energy ceasefire ‘when it holds’",
+          "labelledStory": "EU says it will welcome energy truce \"when it holds\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_1",
+          "probability": 0.9162493160738984,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qc1d97jxkcpmqk7kgpqmtp",
+          "title": "Countries warn against travel to Saudi Arabia following Houthi attacks",
+          "labelledStory": "Countries warn against travel to Saudi Arabia",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "mammothChoice": "none",
+          "probability": 0.5139998396252478,
+          "selectedStoryArticleTitles": [
+            "Saudi Arabia reports injuries in new attack at Riyadh airport, day after strike kills 13"
+          ]
+        },
+        {
+          "articleId": "art_01m4qc1e68vw4rkwn5vrq3c6yv",
+          "title": "Europe Today: Trump claims Ukraine-Russia energy ceasefire as Baltics stay on alert",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.9477004691313153,
+          "selectedStoryArticleTitles": [
+            "Live: EU’s top diplomat says she will welcome Russia-Ukraine energy ceasefire ‘when it holds’"
+          ]
+        },
+        {
+          "articleId": "art_01m4qekd4ap2a7kyvnt4ptn98m",
+          "title": "Oil falls on hopes Russia-Ukraine energy ceasefire will boost supplies",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_1",
+          "probability": 0.8088624300028221,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qh6afphxg9xj759h1nqgr5",
+          "title": "Zelensky says Ukrainian military ‘received all relevant orders’ over energy truce announced by Trump",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_1",
+          "probability": 0.9487499161234809,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qjwrescr9d7v7vd04jpgmw",
+          "title": "Saudi airport stays shut as Houthi attacks kill 20 people in a week",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_1",
+          "probability": 0.552104678206416,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qkrjybahn8cxhwv003nnrv",
+          "title": "Top oil executives dropped from event schedule after Riyadh attacks",
+          "labelledStory": "Top oil executives dropped from Riyadh WPC Energy Congress",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "mammothChoice": "none",
+          "probability": 0.9324127575277805,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qkrjy7snhyqp4q64tb126c",
+          "title": "Skies over Saudi capital Riyadh largely empty after deadly Houthi strikes on airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.7468299352028901,
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr2j7vgvbcdqfffjsf8hf2",
+          "title": "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil",
+          "labelledStory": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "mammothChoice": "story_1",
+          "probability": 0.9450229881898508,
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qr1rwc9krnpfxb62sa6zh9",
+          "title": "Russia striking fuel reserves despite 'energy ceasefire', Zelenskyy says",
+          "labelledStory": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "mammothChoice": "story_2",
+          "probability": 0.9005650458336532,
+          "selectedStoryArticleTitles": [
+            "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr1ws8nhqryagw9a3veyak",
+          "title": "Malaysians advised to postpone umrah pilgrimage to Saudi Arabia amid security concerns",
+          "labelledStory": "Countries warn against travel to Saudi Arabia",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "mammothChoice": "none",
+          "probability": 0.7015099123777951,
+          "selectedStoryArticleTitles": []
+        }
+      ],
+      "notes": [
+        "No new inference calls. Mammoth saved article order and candidate evidence were verified; Gemma baseline choices were reconstructed from cached numeric outputs. All B-cubed scores were verified exactly.",
+        "Error attribution uses the existing diagnose rule: the right Story is the predicted group holding most already-seen labelled mates.",
+        "Labels are from the previously used model-drafted/manually-adjusted development set; these are not independently reviewed error rates."
+      ]
+    },
+    {
+      "mode": "gemma-baseline",
+      "score": {
+        "precision": 0.8303592138863821,
+        "recall": 0.8527344777155443,
+        "f1": 0.8413981159845773,
+        "predictedStories": 143,
+        "labelledStories": 145,
+        "predictedSingletons": 114,
+        "labelledSingletons": 116
+      },
+      "tallies": {
+        "mammoth": {},
+        "gemma": {
+          "correct": 175,
+          "wrongJoinByModel": 21,
+          "modelSaidNo": 13,
+          "notRetrieved": 5,
+          "joinedWrongStory": 12
+        },
+        "no_model": {
+          "correct": 104,
+          "notRetrieved": 1,
+          "joinedWrongStory": 3
+        }
+      },
+      "errors": [
+        {
+          "articleId": "art_01m4kskba8vkqn8vd4kd4tasw3",
+          "title": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "labelledStory": "Days of Deadly Houthi Attacks Show Saudi Arabia’s Vulnerabilities",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Three Saudis killed in Riyadh airport attack claimed by Houthis",
+            "Houthi missile strikes on Riyadh airport kill three, including airline captain"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2rdhczef6zaap91wzmr",
+          "title": "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+          "labelledStory": "Zelensky and UK criticise the US-Russia diesel deal",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk8tkyp4dv86g7ka1snqr",
+          "title": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "labelledStory": "US, Ukrainian, European officials discuss ending Russia's war at Miami meeting",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2cjb0exc1qkb4fftx3k",
+          "title": "Trump, Zelensky clash over diesel deal as Russian strikes on Ukraine kill 21, including children",
+          "labelledStory": "Trump says Ukraine should get a new president",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk2c764r8zktqxbbcdmav",
+          "title": "Russian attack on Ukrainian city kills 15, a day after Trump eases diesel sanctions on Moscow",
+          "labelledStory": "Russian glide bomb attack on Zaporizhzhia kills at least 15-20",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "'Every extra billion will be spent on this' — Zelensky warns as missiles hit Kyiv after Russia sanctions relief",
+            "Trump, Zelensky clash over diesel deal as Russian strikes on Ukraine kill 21, including children"
+          ]
+        },
+        {
+          "articleId": "art_01m4ksk7vaw34k0ejjn3xbmdj4",
+          "title": "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "12 killed and more than 300 wounded in attack on Riyadh airport",
+            "Twelve killed and hundreds injured in Houthi attack at Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4kskb2kw073ymdeyg6qkhw4",
+          "title": "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+          "labelledStory": "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "At least 10,000 detained across India ahead of October 10 Delhi protest against Gyanesh Kumar: CJP",
+            "Dhruv Rathee detained ahead of CJP protest against CEC"
+          ]
+        },
+        {
+          "articleId": "art_01m4mdm21g9qhxgq35qt10rxk7",
+          "title": "World condemns deadly Houthi attack on Saudi Arabia’s Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump weighs joining the fight against Houthis after Riyadh airport attack",
+            "Trump ‘may’ join Saudi strikes on Houthis after Riyadh airport attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ytj00pzcy5g3e2xddytk",
+          "title": "Angriff auf Flughafen in Riad - viele Tote und Verletzte",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4n9ykz03m1wbv6wbav50e6c",
+          "title": "Yemen fighting expands as Houthis attack Saudi airport: What to know",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4ne7qbhh9yk3px7djr9dt9d",
+          "title": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "labelledStory": "Riyadh airport attacks another dangerous moment in already tense conflict",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yykvab5z1sjct887hd84",
+          "title": "Germany backs Ukraine’s Zelensky after Trump’s call for his removal",
+          "labelledStory": "UK and Germany back Zelensky after Trump call",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4njg1sdc92yz2nw8sft10gh",
+          "title": "India’s crackdown on youth protesters: What next?",
+          "labelledStory": "India’s crackdown on youth protesters: What next?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "At least 10,000 detained across India ahead of October 10 Delhi protest against Gyanesh Kumar: CJP",
+            "Dhruv Rathee detained ahead of CJP protest against CEC",
+            "‘Citizens being silenced’: What ordinary Indians think of the crackdown on the Delhi protests"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0cyy55ebvmaegjq8fv1",
+          "title": "Riyadh airport closure: UAE flight cancellations extend into Tuesday",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Yemen's Houthis warn passengers not to use Saudi airports",
+            "Yemen’s Houthis renew warning over Saudi airports after latest deadly Riyadh attack",
+            "Saudi Arabia extends airport closure as Houthis warn 'worse is yet to come'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z0cmc6a6cfe4ptk6kfa9",
+          "title": "Middle East latest: Saudi Arabia extends suspension of operations at Riyadh airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Yemen's Houthis warn passengers not to use Saudi airports",
+            "Yemen’s Houthis renew warning over Saudi airports after latest deadly Riyadh attack",
+            "Saudi Arabia extends airport closure as Houthis warn 'worse is yet to come'",
+            "Riyadh airport closure: UAE flight cancellations extend into Tuesday"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yp6fadktx59zskehedpk",
+          "title": "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim"
+          ]
+        },
+        {
+          "articleId": "art_01m4nt7yscn43yqkgeqav6gqhd",
+          "title": "Read-out by President von der Leyen following her call with President Zelenskyy",
+          "labelledStory": "EU says it will welcome energy truce \"when it holds\"",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1yvzqq9xk9ad81ap9zrem",
+          "title": "FO reiterates Pakistan's 'firm and unshakeable' commitment to Saudi Arabia's security after Riyadh attack",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4nvyagjafn5fvgcd7r89v0n",
+          "title": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "labelledStory": "Trump’s deal with Putin will have little impact on US diesel prices, experts say",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ypghn688gmmdhbpy7ber",
+          "title": "Saudi Arabia is increasingly under siege",
+          "labelledStory": "Saudi Arabia is increasingly under siege",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Saudi Arabia Has Few Options as Houthis Aim at Heart of Its Ambitions"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1z45gagw8778d9egtz7sb",
+          "title": "Is the Yemen war entering a new phase?",
+          "labelledStory": "Is the Yemen war entering a new phase?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "12 killed and more than 300 wounded in attack on Riyadh airport",
+            "Twelve killed and hundreds injured in Houthi attack at Riyadh airport",
+            "Saudi Arabia suspends operations at Riyadh airport after an attack causes multiple injuries",
+            "At least twelve killed, multiple people wounded in attack on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4p135982z4zd4709qqek1h1",
+          "title": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "labelledStory": "The new Apple TV could have a built-in mic and a remote with a speaker",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "What to expect from Apple’s ‘Welcome Home’ event"
+          ]
+        },
+        {
+          "articleId": "art_01m4p4j5faeetbdm2awa61ffm5",
+          "title": "'To keep oil prices from rising' — Russian lawmaker questions Trump’s energy ceasefire claim",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4paj3sr0gry3mdxpcm5s7qr",
+          "title": "Saudi health minister visits survivors of deadly Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pdzfzkv67ptrffn9maedsh",
+          "title": "Trump claims Russia and Ukraine agree to 'energy ceasefire' despite continued attacks",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue"
+          ]
+        },
+        {
+          "articleId": "art_01m4pgjjb6vg2da6j2djbkga4y",
+          "title": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "labelledStory": "Trump Russia deal could fuel Putin's war, ex-NATO commander warns as Zelenskyy says 'nyet'",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4pgj0qf7vgvavyd1jtp4ph6",
+          "title": "Here’s the biggest news you missed this weekend",
+          "labelledStory": "Here’s the biggest news you missed this weekend",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4pj944jjg193fyt0gr0754r",
+          "title": "CCTV shows moment of deadly Houthi strike on Riyadh airport",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pj90d8a0nzy2anhdkyg686",
+          "title": "Trump’s ‘energy ceasefire’ sparks confusion as Russia strikes Ukraine",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "New Russian strikes follow Trump's announcement of Russia-Ukraine energy ceasefire",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Russia hits Ukraine power plants despite Trump energy ceasefire claim",
+            "Trump claims Russia and Ukraine agree to energy ceasefire, but Kyiv says strikes continue"
+          ]
+        },
+        {
+          "articleId": "art_01m4p1ywpq7ctq8hd4yfjjz4e2",
+          "title": "Kyiv pushes back on US call for new Ukrainian president",
+          "labelledStory": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Ukraine's Zelenskiy tells ABC he will organize elections if Russia agrees to 60-day ceasefire",
+            "Zelensky says if Trump, Putin want elections in Ukraine, a two-month ceasefire is needed",
+            "Ukraine's Zelenskyy says he will organise elections if Russia agrees to 60-day ceasefire",
+            "Ukraine's Zelenskyy tells ABC he will organise elections if Russia agrees to 60-day ceasefire"
+          ]
+        },
+        {
+          "articleId": "art_01m4pr8yy1ye2tatwwd4mbphc5",
+          "title": "Yemen's Houthis target King Khalid airport in Saudi Arabia again",
+          "labelledStory": "Second strike on Riyadh airport a day later kills one (Oct 11)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pt10jzabcn3sz3fn2085ap",
+          "title": "Houthis kill 14 at Saudi airport as expert warns of 'rapid targets' amid Middle East war",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4pt0r22n0ne1wkmfkbxxx74",
+          "title": "Iran urges Saudi Arabia to pursue diplomacy after Houthis escalate attacks",
+          "labelledStory": "Iran urges Saudi diplomacy after Houthi escalation",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Saudi, Iranian foreign ministers discuss regional tensions, state news agency says"
+          ]
+        },
+        {
+          "articleId": "art_01m4q2k0m3g8a2p0qdv6trpavr",
+          "title": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "labelledStory": "Trump's diesel deal dubbed a 'betrayal' of loyal Republican's legacy",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump, Putin agree on deal to release Russian diesel to US, world markets",
+            "Trump says he’s reached a deal with Putin to supply Russian diesel to U.S. and global markets. Zelensky calls it ‘an investment in a war that must be ended, not prolonged.’",
+            "Zelenskyy hits out at 'gifts to Putin' after Trump announces deal for Russian diesel",
+            "Trump announces diesel deal with Russia in bid to lower prices"
+          ]
+        },
+        {
+          "articleId": "art_01m4q3eafzwq3hben897zdh839",
+          "title": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "labelledStory": "Wie Trumps Ölkrise zur Ukraine-Frage wird",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Trump announces Ukraine energy ceasefire with Russia, surprising Zelenskiy",
+            "Trump announces Russia-Ukraine 'energy ceasefire,' which Zelenskyy says he hasn't seen but supports",
+            "Zelenskyy appears surprised as Trump announces 'energy ceasefire'",
+            "🔴 Trump says Russia and Ukraine agree to 'energy ceasefire'"
+          ]
+        },
+        {
+          "articleId": "art_01m4q7rfs3ad6x0jfpzbqs18dp",
+          "title": "Indian killed in Riyadh airport attack",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4q9ezh307b2nn1r1vkj8gas",
+          "title": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "labelledStory": "The pope has a lung nodule. What does this mean? And what’s the risk of cancer?",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Pope Leo announces medical update"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9ewrpakpmf61rcpvydd2v",
+          "title": "Turkey, Pakistan, Egypt, Saudi Arabia condemn Houthi attacks on Riyadh airport",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "FO reiterates Pakistan's 'firm and unshakeable' commitment to Saudi Arabia's security after Riyadh attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4q9eh5x3hehq3tvytx5g5xm",
+          "title": "Timeline: Houthis escalate attacks on Saudi airports",
+          "labelledStory": "Timeline: Houthis escalate attacks on Saudi airports",
+          "source": "gemma",
+          "verdict": "wrongJoinByModel",
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qaas8520ffeapqm51s4gfq",
+          "title": "Live: EU’s top diplomat says she will welcome Russia-Ukraine energy ceasefire ‘when it holds’",
+          "labelledStory": "EU says it will welcome energy truce \"when it holds\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qc1e68vw4rkwn5vrq3c6yv",
+          "title": "Europe Today: Trump claims Ukraine-Russia energy ceasefire as Baltics stay on alert",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Live: EU’s top diplomat says she will welcome Russia-Ukraine energy ceasefire ‘when it holds’"
+          ]
+        },
+        {
+          "articleId": "art_01m4qekd4ap2a7kyvnt4ptn98m",
+          "title": "Oil falls on hopes Russia-Ukraine energy ceasefire will boost supplies",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qh6afphxg9xj759h1nqgr5",
+          "title": "Zelensky says Ukrainian military ‘received all relevant orders’ over energy truce announced by Trump",
+          "labelledStory": "Trump announces Russia-Ukraine \"energy ceasefire\"",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qjwrescr9d7v7vd04jpgmw",
+          "title": "Saudi airport stays shut as Houthi attacks kill 20 people in a week",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qkrjybahn8cxhwv003nnrv",
+          "title": "Top oil executives dropped from event schedule after Riyadh attacks",
+          "labelledStory": "Top oil executives dropped from Riyadh WPC Energy Congress",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qks12hcpwfywq6438dw4dp",
+          "title": "CCTV shows moment of strike at King Khalid International Airport in Riyadh",
+          "labelledStory": "Houthi attack on Riyadh airport kills 12 (Oct 10)",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "CCTV shows moment of deadly Houthi strike on Riyadh airport"
+          ]
+        },
+        {
+          "articleId": "art_01m4qkrjy7snhyqp4q64tb126c",
+          "title": "Skies over Saudi capital Riyadh largely empty after deadly Houthi strikes on airport",
+          "labelledStory": "Riyadh airport closure and flight cancellations",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "Passenger terminal at Riyadh airport is struck again, a day after 12 were killed",
+            "🔴 Live: Houthi rebels claim latest attacks on Riyadh airport, following Saturday's deadly strike",
+            "Middle East crisis: Riyadh airport hit again as Houthis claim attacks, including strike that killed 12 – as it happened",
+            "Saudi airport struck again a day after deadly attack"
+          ]
+        },
+        {
+          "articleId": "art_01m4qpazdcykhsxx2em9hfa9ws",
+          "title": "China condemns Houthi attacks on Saudi Arabia, warns of escalation",
+          "labelledStory": "Countries condemn the Houthi attacks on Riyadh airport",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qr2j7vgvbcdqfffjsf8hf2",
+          "title": "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil",
+          "labelledStory": "Zelensky says Ukraine would stop refinery strikes if Russia stops energy attacks",
+          "source": "gemma",
+          "verdict": "modelSaidNo",
+          "selectedStoryArticleTitles": []
+        },
+        {
+          "articleId": "art_01m4qr1rwc9krnpfxb62sa6zh9",
+          "title": "Russia striking fuel reserves despite 'energy ceasefire', Zelenskyy says",
+          "labelledStory": "Russia hits Ukrainian power plants despite announced energy ceasefire",
+          "source": "gemma",
+          "verdict": "joinedWrongStory",
+          "selectedStoryArticleTitles": [
+            "'We have one refinery' — Zelensky says energy ceasefire must cover power grid, not just oil"
+          ]
+        },
+        {
+          "articleId": "art_01m4qr1ws8nhqryagw9a3veyak",
+          "title": "Malaysians advised to postpone umrah pilgrimage to Saudi Arabia amid security concerns",
+          "labelledStory": "Countries warn against travel to Saudi Arabia",
+          "source": "gemma",
+          "verdict": "notRetrieved",
+          "selectedStoryArticleTitles": []
+        }
+      ],
+      "notes": [
+        "No new inference calls. Mammoth saved article order and candidate evidence were verified; Gemma baseline choices were reconstructed from cached numeric outputs. All B-cubed scores were verified exactly.",
+        "Error attribution uses the existing diagnose rule: the right Story is the predicted group holding most already-seen labelled mates.",
+        "Labels are from the previously used model-drafted/manually-adjusted development set; these are not independently reviewed error rates."
+      ]
+    }
+  ]
+}

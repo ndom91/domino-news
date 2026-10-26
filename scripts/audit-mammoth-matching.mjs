@@ -43,8 +43,11 @@ try {
     embedding: embeddingOf.get(a.id),
   }))
   const audits = []
-  for (const mode of ['replacement', 'probability95-fallback']) {
+  for (const mode of ['replacement', 'probability95-fallback', 'gemma-baseline']) {
     const saved = JSON.parse(await readFile(join(dir, `${runId}.matching-${mode}.json`), 'utf8'))
+    const baseline = mode === 'gemma-baseline'
+    const requests = saved.requests.filter((r) => r.provider === 'local-gemma' && r.status === 200)
+    const replayChoices = []
     const trace = []
     const candidateGroups = new Map()
     let index = 0
@@ -56,8 +59,32 @@ try {
         throw new Error('Unexpected sequential judging')
       },
       async (articleId, stories) => {
-        const choice = saved.choices[index++]
-        assert.equal(choice.articleId, articleId)
+        let choice
+        if (baseline) {
+          const cached = JSON.parse(
+            await readFile(
+              join(
+                root,
+                'fixtures/match-eval/cache',
+                runId,
+                `gemma-${requests[index].requestHash}.json`,
+              ),
+              'utf8',
+            ),
+          )
+          const output = JSON.parse(cached.data.choices[0].message.content)
+          choice = {
+            articleId,
+            fallback: true,
+            finalStoryId: output.choice === 0 ? null : stories[output.choice - 1]?.id,
+          }
+          assert.notEqual(choice.finalStoryId, undefined)
+        } else {
+          choice = saved.choices[index]
+          assert.equal(choice.articleId, articleId)
+        }
+        index++
+        replayChoices.push(choice)
         const shown = stories.map((s) =>
           storyArticlesShown(
             s.articleIds
@@ -66,7 +93,7 @@ try {
             saved.policy.storyArticles,
           ).map((a) => a.articleId),
         )
-        assert.deepEqual(shown, choice.candidateArticleIds)
+        if (!baseline) assert.deepEqual(shown, choice.candidateArticleIds)
         candidateGroups.set(
           articleId,
           stories.map((s) => ({ storyId: s.id, articleIds: [...s.articleIds] })),
@@ -75,11 +102,11 @@ try {
       },
       trace,
     )
-    assert.equal(index, saved.choices.length)
+    assert.equal(index, baseline ? requests.length : saved.choices.length)
     const score = bcubed(predicted, gold)
     for (const key of ['precision', 'recall', 'f1'])
       assert(Math.abs(score[key] - saved.score[key]) < 1e-12)
-    const choices = new Map(saved.choices.map((c) => [c.articleId, c]))
+    const choices = new Map(replayChoices.map((c) => [c.articleId, c]))
     const placed = new Map()
     const tallies = { mammoth: {}, gemma: {}, no_model: {} }
     const errors = []
@@ -113,8 +140,12 @@ try {
           labelledStory: goldTitles.get(gold.get(step.articleId)),
           source,
           verdict,
-          mammothChoice: choice.mammoth.choice,
-          probability: choice.mammoth.probabilities[choice.mammoth.choice],
+          ...(choice.mammoth
+            ? {
+                mammothChoice: choice.mammoth.choice,
+                probability: choice.mammoth.probabilities[choice.mammoth.choice],
+              }
+            : {}),
           selectedStoryArticleTitles:
             selected?.articleIds.slice(0, 4).map((id) => byId.get(id).title) ?? [],
         })
@@ -127,7 +158,7 @@ try {
       tallies,
       errors,
       notes: [
-        'No new inference calls. Saved article order, candidate evidence and B-cubed scores were verified exactly.',
+        'No new inference calls. Mammoth saved article order and candidate evidence were verified; Gemma baseline choices were reconstructed from cached numeric outputs. All B-cubed scores were verified exactly.',
         'Error attribution uses the existing diagnose rule: the right Story is the predicted group holding most already-seen labelled mates.',
         'Labels are from the previously used model-drafted/manually-adjusted development set; these are not independently reviewed error rates.',
       ],

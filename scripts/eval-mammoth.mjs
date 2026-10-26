@@ -30,6 +30,8 @@ const apiKey =
 if (!apiKey) throw new Error('Set BASETEN_API_KEY or BASETEN_API_KEY_FILE outside the repository')
 const freePeriodEnds = Date.parse('2026-10-28T06:59:59Z')
 const maxBasetenRequests = Number(process.env.BASETEN_EVAL_MAX_REQUESTS ?? 800)
+if (!Number.isInteger(maxBasetenRequests) || maxBasetenRequests < 1)
+  throw new Error('BASETEN_EVAL_MAX_REQUESTS must be a positive integer')
 let basetenRequests = 0
 let currentCalls = []
 await mkdir(resultsDir, { recursive: true })
@@ -301,7 +303,9 @@ function report(name, cases, notes) {
     ranAt: new Date().toISOString(),
     model,
     baselineModel: gemma.modelId,
-    labelProvenance: controls.labelProvenance,
+    labelProvenance: name.startsWith('relationship-real')
+      ? 'No independently reviewed labels. Historical outputs select the sample; fresh Gemma comparisons measure agreement, not accuracy.'
+      : controls.labelProvenance,
     summary: summarize(cases),
     cases,
     requests: currentCalls,
@@ -487,7 +491,7 @@ try {
   if (enabled('matching-baseline')) {
     currentCalls = []
     const label = `${runId}-gemma-baseline`
-    console.log('[start] 3a. Fresh Gemma-only matching baseline')
+    console.log('[start] 3a. Same-session Gemma-only matching baseline')
     const result = await runMatchEval(
       { db, inference: { generation: gemma }, config: { fixtureDir: join(root, 'fixtures') } },
       {

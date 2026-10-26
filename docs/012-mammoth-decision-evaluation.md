@@ -2,7 +2,7 @@
 
 **Date:** 2026-10-26
 
-**Status:** In progress. Offline only; no production model or pipeline changes, and no fine-tuning.
+**Status:** Complete. Recommend a shadow-only high-confidence relationship-rejection pilot, not a production model switch. Offline only; no production model or pipeline changes, and no fine-tuning.
 
 This experiment follows [011](011-small-model-match-benchmark.md). Small instruction models did not provide a useful matching cost/quality trade-off. Mammoth is a different experiment: a model trained to produce probability distributions over finite choices through the native System One API, without generating a rationale.
 
@@ -66,6 +66,80 @@ The hosted Mammoth deployment and local Strix Halo Gemma deployment use differen
 
 Gemma requests explicitly use temperature zero, zero thinking budget and disabled thinking, as in 011. Separate content-addressed caches store hosted answers and raw Gemma numeric choices; cached synthetic Story IDs are not copied between replay graphs. Timing aggregates must distinguish measured fresh calls, reused answers and estimates.
 
+## Results
+
+Detailed reports and derived analysis are in `fixtures/decision-eval/results/mammoth-hosted-20261026.*.json`. The corrected production-profile relationship run and same-session Gemma baseline completed on October 26. There are 626 distinct successful hosted requests in the local experiment cache, plus length-refusal attempts and the earlier connectivity probe; this cache count is not a provider billing audit. The optional compact relationship profile was **not** run.
+
+### Constructed controls
+
+| Task | Mammoth | Gemma | Interpretation |
+| --- | --- | --- | --- |
+| Relationships | 28/28 | 21/28 | Promising instruction/policy checks, not natural-news accuracy |
+| Summary materiality | 30/30 | 30/30 | No observed difference in these simple controls |
+| Grounding | 11/12 | Not tested | One unsupported versus insufficient-evidence disagreement; neither label approves the claim |
+| Publisher stance | 12/12 | Not tested | Diagnostic only; no evidence yet of a pipeline cost saving |
+
+These examples often state the relevant distinction explicitly. They cannot establish that Mammoth is generally more accurate than Gemma. Several Gemma control rationales describe a valid connection while its emitted decision remains unrelated; the benchmark scores the emitted decision, as the pipeline would, not an inferred correction from its rationale.
+
+### Real relationships: high-confidence rejection is the best first pilot
+
+Of 64 production-profile pairs, Mammoth evaluated 63 and rejected one input with HTTP 422: the prompt contained **17,385 tokens**, exceeding its **16,384-token** limit. It was recorded as unavailable, not as unrelated; a deployed gate must fall back without silently truncating evidence.
+
+Across the 63 evaluable pairs, Mammoth and fresh Gemma agreed on 38 exact labels. **60.3% agreement is not a 60.3% accuracy score**: neither model is an independent answer key, and disagreements include relation subtypes. Unconditional relationship replacement is not justified.
+
+At the predeclared raw-probability thresholds:
+
+| Policy | Pairs accepted out of 64 | Agreement with Gemma on accepted pairs | Estimated sum of request latencies vs Gemma alone |
+| --- | --- | --- | --- |
+| Any non-uncertain label, p ≥ 0.95 | 28 | 28/28 | 0.64× |
+| **Unrelated only, p ≥ 0.95** | **25** | **25/25** | **0.68×** |
+| Unrelated only, p ≥ 0.99 | 14 | 14/14 | 0.85× |
+
+The recommended shadow policy avoids proposing new edges: let Mammoth confidently reject a pair; ask Gemma for all other decisions, including positive connections, uncertainty and provider failures. The 0.95 rejection policy bypasses **39.1%** of Gemma relationship calls in this balanced sample and reduces the sum of recorded local Gemma prompt/decode processing by **34.3%**. Its estimated combined request latency is 273.2 seconds versus 402.4 for Gemma alone.
+
+Those times are **post-run estimates**, assembled from per-question measurements, including reused answers. They are not a fresh live graph replay, an energy measurement, a same-hardware speedup or a production cost projection. The balanced sample's coverage cannot be extrapolated directly to production prevalence. Independent review must check for missed real links, not merely reproduce Gemma agreement.
+
+### Matching: a useful second research lead, not a drop-in replacement
+
+| Policy | Precision | Recall | F1 | Large Gemma decisions |
+| --- | --- | --- | --- | --- |
+| Same-session Gemma alone | 83.0% | 85.3% | **84.1%** | 226 |
+| Mammoth alone | 68.5% | 91.4% | 78.3% | 0 |
+| Mammoth p ≥ 0.95, otherwise Gemma | 80.9% | 86.2% | **83.4%** | **122** |
+
+The gated run accepts 104 of 226 decisions (96 attachments and eight none choices), avoiding **46.0%** of larger-model calls. Its F1 is 0.72 percentage points below the same-session baseline, while precision is 2.18 points lower. This is close to historical baseline variability, not proof of equivalent quality. Earlier interim comparisons used 011's older 83.2% baseline; the final comparison uses the same-session 84.1% result.
+
+The baseline is not 226 independently resampled answers: 151 local requests were new and 75 reused exact raw responses from this evaluation's content-addressed cache. The gated run made 122 local requests; its 226 hosted decisions include 35 reused exact answers. These reuse counts are separate from the matching harness's top-level `cachedCalls` counter.
+
+The audit reproduced both Mammoth trajectories and the Gemma baseline exactly. Under the existing placement-diagnosis rule, **102 of 104 accepted Mammoth decisions were correct**. The two errors were:
+
+- **99.91% probability:** a reaction criticizing the Trump–Putin diesel deal attached to the deal announcement instead of starting a separate reaction Story.
+- **96.30% probability:** a Riyadh-airport report attached to the wrong attack Story.
+
+Both articles also had placement errors in the Gemma-only trajectory. On the same 104-article subset, that trajectory had six placement errors, versus Mammoth's two. This is a cross-trajectory diagnostic, **not an identical-candidate paired accuracy test**. The high-confidence errors demonstrate that even p ≥ 0.99 is not a guarantee that our Story-granularity rules are satisfied.
+
+The sum of recorded request latencies is approximately 901 seconds for the cascade, versus 1,511 for the same-session baseline. Recorded local Gemma prompt/decode processing decreases from 788.5 to 445.5 seconds (**43.5%**), with the rest of the decision work moved to Baseten. Hosted GPU processing time is unavailable; do not describe this as a measured total-compute or dollar saving. Server load, prompt-cache state and different hosting hardware remain confounders.
+
+### Other use-cases
+
+- **Summary materiality:** promising classifier behavior, but only controlled examples are available. Nine of 30 cases received a corroboration-only verdict at p ≥ 0.95, all correct under their constructed labels. That does not establish a useful real-data skip rate or a net saving. Material outcomes still need the grounded note and citations currently generated by Gemma.
+- **Grounding:** useful as a possible review aid, not an independent fact-check or an automatic publication approval. No real-summary accuracy or net cost benefit was measured.
+- **Stance:** the diagnostic supports further investigation, but splitting labels out of the existing claims-generation call is not automatically cheaper. Official-source exceptions and realistic claim/report ambiguity need testing.
+
+## Recommendation
+
+**Mammoth is worth a targeted pilot. The first pilot should be a shadow-only relationship-rejection gate, not a full matching replacement.** Unlike the previous small instruction-model cascades, this native decision model shows a plausible useful role.
+
+Use the tested relationship inputs and question wording. Treat only a valid `unrelated` choice with raw `probabilities.unrelated ≥ 0.95` as a candidate bypass. Everything else goes to the existing Gemma path. Keep temporal/cycle validation, exact-version provenance and durable recovery unchanged. During shadow evaluation, do not suppress existing work or let Mammoth insert edges.
+
+Before any live bypass:
+
+1. Review representative real high-confidence rejections independently, including difficult positive connections and different event families/languages. Gemma agreement alone is not sufficient.
+2. Check the acceptable missed-link rate and measure latency/workload at natural production prevalence. The tested threshold is a research starting point, not a validated production cutoff.
+3. Confirm production hosting price, privacy/retention terms, availability, token-limit fallback and credential handling after the free period. There is no evidence yet that the same benefit carries over to self-hosting Mammoth on Strix Halo.
+
+Keep Gemma as the authoritative matcher for now. The probability-gated matching result is the next research lead if relationship shadow results justify more work, but requires fresh reviewed event families and attention to high-confidence event-versus-reaction errors. Defer materiality suppression, grounding approval and claims restructuring until representative evidence supports them.
+
 ## Reproduction
 
 The runner is `scripts/eval-mammoth.mjs`. Provide the Baseten key securely in the environment or in a private external file, and run from the repository root:
@@ -76,6 +150,8 @@ node --env-file=.env --import ./apps/worker/node_modules/tsx/dist/loader.mjs scr
 
 Optional positional stages are `relationships`, `materiality`, `matching-baseline`, `matching` and `checks`. By default they run in that order. `relationships-compact` is a separate explicit follow-up input profile, not part of the default sequence. Native results and comparisons go to `fixtures/decision-eval/results/`; the matching core also writes its usual report under `fixtures/match-eval/results/`. Intermediate caches live under the already ignored `fixtures/match-eval/cache/mammoth-hosted-20261026/`.
 
-`scripts/audit-mammoth-matching.mjs` reconstructs the two saved Mammoth matching trajectories without inference. It checks article order, candidate evidence and final B-cubed scores, then attributes placement errors to accepted decisions or fallbacks using the existing `diagnose` rule. Its output is `matching-audit.json` alongside the other decision-evaluation reports.
+`scripts/audit-mammoth-matching.mjs` reconstructs the two saved Mammoth matching trajectories and the same-session Gemma baseline without inference. It checks saved candidate evidence where available and final B-cubed scores, then attributes placement errors to accepted decisions or fallbacks using the existing `diagnose` rule. Its output is `matching-audit.json` alongside the other decision-evaluation reports.
+
+`node scripts/summarize-mammoth.mjs` derives `analysis.json` from the completed reports without inference or DB access. It includes relationship coverage/cost simulations, distinguishes agreement from independent accuracy, and summarizes matching costs and audited errors. Intermediate caches are needed for the matching trajectory audit and cached-request totals.
 
 No automatic production rollout follows any score. A recommendation requires error inspection, representative reviewed examples and a justified cost comparison, not just a leaderboard score or a high model probability.
