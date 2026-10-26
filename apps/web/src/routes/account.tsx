@@ -17,7 +17,7 @@ import {
   Timestamp,
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useBlocker } from '@tanstack/react-router'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { z } from 'zod/mini'
 import { FeedPicks } from '../components/feed-picks.tsx'
@@ -57,6 +57,7 @@ function AccountPage() {
     preferences: (
       <>
         <FeedSection />
+        <LocalitySection />
         <CountrySection />
       </>
     ),
@@ -383,6 +384,137 @@ const COUNTRY_OPTIONS = [
     a.label.localeCompare(b.label),
   ),
 ]
+
+const LOCALITY_COUNTRY_OPTIONS = [
+  { value: null, label: 'Choose a country' },
+  ...KNOWN_COUNTRIES.map((code) => ({ value: code, label: countryName(code) })).sort((a, b) =>
+    a.label.localeCompare(b.label),
+  ),
+]
+
+function LocalitySection() {
+  const preferences = useQuery(queries.preferences())
+  const saved = preferences.data?.locality ?? null
+  const canonical =
+    saved ??
+    (preferences.data?.country
+      ? { city: null, county: null, country: preferences.data.country }
+      : null)
+  return (
+    <SettingsRow
+      id="local-stories"
+      title="Local stories"
+      description="Save where you live to see city and county stories before wider news from your country. Without a saved location, Local may use your current country without storing it."
+    >
+      <LocalityForm
+        key={`${saved ? 'saved' : 'suggested'}:${JSON.stringify(canonical)}`}
+        canonical={canonical}
+        saved={Boolean(saved)}
+      />
+    </SettingsRow>
+  )
+}
+
+function LocalityForm({
+  canonical,
+  saved,
+}: {
+  canonical: { city: string | null; county: string | null; country: string } | null
+  saved: boolean
+}) {
+  const queryClient = useQueryClient()
+  const save = useMutation(savePreferencesMutation(api, queryClient))
+  const [city, setCity] = useState(canonical?.city ?? '')
+  const [county, setCounty] = useState(canonical?.county ?? '')
+  const [country, setCountry] = useState<string | null>(canonical?.country ?? null)
+  const normalized = {
+    city: city.trim() || null,
+    county: county.trim() || null,
+    country,
+  }
+  const dirty =
+    normalized.city !== (canonical?.city ?? null) ||
+    normalized.county !== (canonical?.county ?? null) ||
+    normalized.country !== (canonical?.country ?? null)
+  const blocker = useBlocker({
+    shouldBlockFn: () => dirty,
+    enableBeforeUnload: dirty,
+    withResolver: true,
+  })
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    if (!country) return
+    save.mutate({ locality: { city: normalized.city, county: normalized.county, country } })
+  }
+
+  return (
+    <form onSubmit={submit} aria-label="Local news location">
+      <fieldset disabled={save.isPending}>
+        <legend className="sr-only">Local news location</legend>
+        <div className="grid grid-cols-3 gap-4 max-lg:grid-cols-1">
+          <TextInput
+            label="City"
+            name="city"
+            autoComplete="address-level2"
+            value={city}
+            maxLength={100}
+            onChange={(event) => setCity(event.target.value)}
+          />
+          <TextInput
+            label="County or local area"
+            name="county"
+            autoComplete="address-level1"
+            value={county}
+            maxLength={100}
+            onChange={(event) => setCounty(event.target.value)}
+          />
+          <Select
+            label="Country"
+            name="country"
+            options={LOCALITY_COUNTRY_OPTIONS}
+            value={country}
+            onValueChange={setCountry}
+          />
+        </div>
+        <p className="mt-3 text-sm text-text-muted">
+          City and county are optional. We do not request or store your precise coordinates.
+        </p>
+        {save.isError ? (
+          <Notice tone="error" title="Location not saved" className="mt-4">
+            {save.error.message} Try again.
+          </Notice>
+        ) : null}
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Button type="submit" variant="primary" loading={save.isPending} disabled={!country}>
+            Save location
+          </Button>
+          {saved ? (
+            <Button
+              type="button"
+              variant="ghost"
+              loading={save.isPending}
+              onClick={() => save.mutate({ locality: null })}
+            >
+              Use automatic country
+            </Button>
+          ) : null}
+        </div>
+      </fieldset>
+      <ConfirmDialog
+        open={blocker.status === 'blocked'}
+        title="Discard your location changes?"
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        destructive
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+      >
+        Your city, county or country has not been saved.
+      </ConfirmDialog>
+    </form>
+  )
+}
 
 function CountrySection() {
   const queryClient = useQueryClient()

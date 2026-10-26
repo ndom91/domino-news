@@ -90,9 +90,11 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Covered mostly by one side/ })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
-  // Local: explicit city/county/country setup is available even without an IP-country header.
+  // Local links to its explicit city/county/country setup in Account preferences.
   await page.goto('/local')
   await expect(page.getByRole('heading', { level: 1, name: 'Local' })).toBeVisible()
+  await page.getByRole('link', { name: /setting your location here/ }).click()
+  await expect(page).toHaveURL(/\/account\?tab=preferences#local-stories$/)
   await expect(page.getByRole('form', { name: 'Local news location' })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
