@@ -1,4 +1,12 @@
-import { formatDate, hostnameOf, leanBand, plural, stripCitations } from '@dn/domain'
+import {
+  clockTime,
+  formatDate,
+  formatDateTime,
+  hostnameOf,
+  leanBand,
+  plural,
+  stripCitations,
+} from '@dn/domain'
 import {
   type NarrativeDetail,
   REGION_LABELS,
@@ -207,35 +215,30 @@ function OriginalReporting({
 }
 
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
-  if (update.summaryDiff) {
-    return (
-      <div className="mt-3 max-w-reading text-sm leading-normal">
-        <p>{update.description}</p>
-        <SummaryVersions summaryDiff={update.summaryDiff} />
-        <SupportingSources sources={update.sources} />
-      </div>
-    )
-  }
-  if (update.relatedStory) {
-    return (
-      <p className="mt-3 text-sm text-text-secondary">
-        <Link
-          to="/stories/$slug"
-          params={{ slug: update.relatedStory.slug }}
-          className="link-inline font-semibold"
-        >
-          {update.relatedStory.title}
-        </Link>
-      </p>
-    )
-  }
-  return <SupportingSources sources={update.sources} />
+  if (!update.sources.length && !update.relatedStory && !update.summaryDiff?.previous) return null
+  return (
+    <div className="mt-3 max-w-reading text-sm leading-normal">
+      <SupportingSources sources={update.sources} />
+      {update.relatedStory ? (
+        <p className="mt-2 text-text-secondary">
+          <Link
+            to="/stories/$slug"
+            params={{ slug: update.relatedStory.slug }}
+            className="link-inline font-semibold"
+          >
+            {update.relatedStory.title}
+          </Link>
+        </p>
+      ) : null}
+      {update.summaryDiff ? <SummaryVersions summaryDiff={update.summaryDiff} /> : null}
+    </div>
+  )
 }
 
 function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
   if (sources.length === 0) return null
   return (
-    <p className="mt-3 max-w-reading text-sm text-text-secondary">
+    <p className="text-text-secondary">
       <span className="font-semibold text-text">Supported by: </span>
       {sources.map((source) => (
         <span key={source.url}>
@@ -264,7 +267,7 @@ function SummaryVersions({
   if (!summaryDiff.previous) return null
   return (
     <details className="t-acc mt-3">
-      <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+      <summary className="inline-flex min-h-tap cursor-pointer items-center border border-border-strong px-3 font-semibold text-text hover:text-accent-text">
         Compare summary versions
       </summary>
       <div className="mt-3 flex flex-col gap-4">
@@ -290,17 +293,14 @@ function SummaryVersion({ label, text }: { label: string; text: string }) {
   )
 }
 
-function updateTitle(update: StoryUpdateEvent) {
-  switch (update.kind) {
-    case 'summary_revision':
-      return 'Summary updated'
-    case 'new_primary_source':
-      return 'Primary document added'
-    case 'correction_or_clarification':
-      return 'Correction or clarification'
-    default:
-      return update.description
-  }
+const UPDATE_LABELS: Record<StoryUpdateEvent['kind'], string> = {
+  summary_revision: 'Summary revised',
+  new_reporting: 'New reporting',
+  official_response: 'Official response',
+  consequence: 'Consequence',
+  new_primary_source: 'Primary document added',
+  correction_or_clarification: 'Correction or clarification',
+  analysis: 'Analysis',
 }
 
 const TIMELINE_BOOKEND_SIZE = 3
@@ -523,26 +523,55 @@ function StoryPage() {
                 id="updates-heading"
                 rule
                 title="What changed"
-                meta={plural(updates.items.length, 'update')}
+                meta={
+                  <span className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm normal-case tracking-normal text-text-secondary">
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden className="size-2.5 bg-accent" /> Summary revised
+                    </span>
+                    <span className="inline-flex items-center gap-1.5">
+                      <span aria-hidden className="size-2.5 border-2 border-text" /> Other updates
+                    </span>
+                    <span className="font-semibold text-text">
+                      {plural(updates.items.length, 'recent update')}
+                    </span>
+                  </span>
+                }
               />
               <ol
                 id="story-updates-list"
-                className="flex flex-col divide-y divide-border border-t border-border"
+                className="relative before:absolute before:top-0 before:bottom-0 before:left-[4.75rem] before:w-px before:bg-text max-sm:before:left-[3.75rem]"
               >
                 {(showAllUpdates ? updates.items : updates.items.slice(0, STORY_UPDATES_SHOWN)).map(
                   (update) => (
-                    <li key={update.id} className="py-4 first:pt-3">
-                      <div className="max-w-reading">
-                        {updateTitle(update) ? (
-                          <p className="text-md font-semibold leading-snug">
-                            {updateTitle(update)}
-                          </p>
-                        ) : null}
-                        <Timestamp
-                          at={update.createdAt}
-                          format="datetime"
-                          className="mt-1 block type-meta"
-                        />
+                    <li
+                      key={update.id}
+                      className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] max-sm:grid-cols-[3.75rem_minmax(0,1fr)]"
+                    >
+                      <time
+                        dateTime={update.createdAt}
+                        title={formatDateTime(update.createdAt)}
+                        className="pt-4 pr-3"
+                      >
+                        <span className="block type-numeral tabular-nums">
+                          {clockTime(update.createdAt)}
+                        </span>
+                        <span className="mt-1 block type-meta">
+                          {formatDate(update.createdAt)} · UTC
+                        </span>
+                      </time>
+                      <span
+                        aria-hidden
+                        className={
+                          update.kind === 'summary_revision'
+                            ? 'absolute top-5 left-[4.75rem] size-2.5 -translate-x-1/2 bg-accent max-sm:left-[3.75rem]'
+                            : 'absolute top-5 left-[4.75rem] size-2.5 -translate-x-1/2 border-2 border-text bg-surface max-sm:left-[3.75rem]'
+                        }
+                      />
+                      <div className="min-w-0 border-b border-border py-4 pl-6 max-sm:pl-4">
+                        <p className="type-label text-text-muted">{UPDATE_LABELS[update.kind]}</p>
+                        <p className="mt-2 max-w-reading text-md font-semibold leading-snug">
+                          {update.description}
+                        </p>
                         <UpdateDetail update={update} />
                       </div>
                     </li>
@@ -550,18 +579,26 @@ function StoryPage() {
                 )}
               </ol>
               {updates.items.length > STORY_UPDATES_SHOWN ? (
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  className="mt-4"
-                  aria-expanded={showAllUpdates}
-                  aria-controls="story-updates-list"
-                  onClick={() =>
-                    setExpandedUpdatesFor((current) => (current === story.id ? null : story.id))
-                  }
-                >
-                  {showAllUpdates ? 'Show fewer changes' : 'View all changes'}
-                </Button>
+                <div className="mt-5 flex flex-wrap items-center gap-3 pl-[6.25rem] max-sm:pl-[4.75rem]">
+                  <Button
+                    size="sm"
+                    variant="secondary"
+                    aria-expanded={showAllUpdates}
+                    aria-controls="story-updates-list"
+                    onClick={() =>
+                      setExpandedUpdatesFor((current) => (current === story.id ? null : story.id))
+                    }
+                  >
+                    {showAllUpdates
+                      ? 'Show fewer changes'
+                      : `View all ${updates.items.length} recent changes`}
+                  </Button>
+                  {!showAllUpdates ? (
+                    <span className="type-meta">
+                      {plural(updates.items.length - STORY_UPDATES_SHOWN, 'earlier update')}
+                    </span>
+                  ) : null}
+                </div>
               ) : null}
             </section>
           ) : null}

@@ -45,6 +45,40 @@ test('about and legal pages are public and linked from login and the footer', as
   await expect(page).toHaveURL(/\/imprint$/)
 })
 
+test('story changes show a timeline with expandable updates and versions', async ({ page }) => {
+  await page.route('**/api/v1/stories/*/updates', async (route) => {
+    await route.fulfill({
+      json: {
+        items: Array.from({ length: 6 }, (_, index) => ({
+          id: `update-${index}`,
+          storyId: 'story-test',
+          kind: index === 0 ? 'summary_revision' : 'new_reporting',
+          description: `Timeline update ${index + 1}`,
+          origin: 'system',
+          createdAt: '2026-10-26T18:35:00.000Z',
+          relatedStory: null,
+          summaryDiff:
+            index === 0 ? { previous: 'Earlier summary', current: 'Current summary' } : null,
+          sources: [],
+        })),
+      },
+    })
+  })
+  await signIn(page)
+  await page.locator('main article h3 a').first().click()
+  const changes = page.locator('section[aria-labelledby="updates-heading"]')
+  await expect(changes.getByRole('heading', { name: 'What changed' })).toBeVisible()
+  await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)
+  await expect(changes.getByText('18:35').first()).toBeVisible()
+  await changes.getByText('Compare summary versions').click()
+  await expect(changes.getByText('Earlier summary')).toBeVisible()
+  await changes.getByRole('button', { name: 'View all 6 recent changes' }).click()
+  await expect(changes.locator('#story-updates-list > li')).toHaveCount(6)
+  await changes.getByRole('button', { name: 'Show fewer changes' }).click()
+  await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)
+  await expectNoHorizontalOverflow(page)
+})
+
 test('feed → story → narrative → search', async ({ page }) => {
   await signIn(page)
 
