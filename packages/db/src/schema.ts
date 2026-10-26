@@ -3,6 +3,7 @@ import {
   EMBEDDING_DIMENSIONS,
   type FeedbackSignal,
   type FollowTargetType,
+  type Place,
   type Region,
   type SignalKind,
   type Topic,
@@ -415,6 +416,8 @@ export const story = pgTable(
     embeddingSummaryId: text('embedding_summary_id'),
     // Macro-regions the Story concerns (`REGIONS` in @dn/schemas), set by generated summaries.
     regions: text('regions').array().$type<Region[]>().notNull().default(sql`'{}'::text[]`),
+    // Event geography from the grounded summary; never derived from publisher headquarters.
+    locations: jsonb('locations').$type<Place[]>().notNull().default(sql`'[]'::jsonb`),
     // Desk (`DESKS` in @dn/schemas), set by generated summaries; null until then.
     desk: text('desk').$type<Desk>(),
     // Specific subjects (`TOPICS` in @dn/schemas), set by generated summaries; drives For You.
@@ -428,6 +431,7 @@ export const story = pgTable(
       .on(t.lastUpdatedAt.desc().nullsFirst(), t.id.desc().nullsFirst())
       .where(sql`${t.publishedAt} is not null and ${t.mergedIntoStoryId} is null`),
     index('story_regions_idx').using('gin', t.regions),
+    index('story_locations_idx').using('gin', t.locations),
     index('story_topics_idx').using('gin', t.topics),
   ],
 )
@@ -964,6 +968,8 @@ export const userPreference = pgTable('user_preference', {
   rememberReads: boolean('remember_reads').notNull().default(false),
   // ISO 3166-1 alpha-2 for the Story lean mix. Null = use the request's country.
   country: text('country'),
+  // Explicit city/county/country used only for the Local feed.
+  locality: jsonb('locality').$type<Place>(),
   // The only Briefing activity retained: its most recent open. This is not reading history.
   briefingLastOpenedAt: ts('briefing_last_opened_at'),
   updatedAt: ts('updated_at').notNull().defaultNow(),

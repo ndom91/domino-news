@@ -1,6 +1,7 @@
 import { z } from 'zod/mini'
 import { DESKS, deskSchema } from './desks.ts'
 import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
+import { localScopeSchema, placeSchema } from './places.ts'
 import { REGIONS, regionSchema } from './regions.ts'
 import { TOPICS, topicSchema } from './topics.ts'
 
@@ -168,6 +169,14 @@ export const storyListResponseSchema = z.object({
   pageInfo: pageInfoSchema,
 })
 export type StoryListResponse = z.infer<typeof storyListResponseSchema>
+
+export const localFeedResponseSchema = z.object({
+  locality: z.nullable(placeSchema),
+  source: z.nullable(z.enum(['saved', 'request'])),
+  items: z.array(z.object({ story: storyListItemSchema, scope: localScopeSchema })),
+  pageInfo: pageInfoSchema,
+})
+export type LocalFeedResponse = z.infer<typeof localFeedResponseSchema>
 
 export const relatedStorySchema = z.object({
   id: z.string(),
@@ -797,6 +806,8 @@ export const userPreferencesSchema = z.object({
   // ISO 3166-1 alpha-2. Picks which country's lean mix a Story shows first.
   // Null = use the country the request comes from.
   country: z.nullable(z.string().check(z.regex(/^[A-Z]{2}$/))),
+  // Explicit Local-page preference. Null means the request country may be used without storage.
+  locality: z.nullable(placeSchema),
   // True once the reader has finished or skipped onboarding. Only ever set to true.
   onboarded: z.boolean(),
 })

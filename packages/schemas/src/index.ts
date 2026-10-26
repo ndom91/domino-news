@@ -1,5 +1,6 @@
 export * from './api.ts'
 export * from './desks.ts'
 export * from './inference.ts'
+export * from './places.ts'
 export * from './regions.ts'
 export * from './topics.ts'

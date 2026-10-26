@@ -10,6 +10,7 @@ import {
   frontPageSchema,
   insightsSchema,
   learnedSignalsSchema,
+  localFeedResponseSchema,
   mutedPublisherListSchema,
   narrativeDetailSchema,
   narrativeListResponseSchema,
@@ -613,6 +614,32 @@ describe('preferences', () => {
     await save(token, { regions: [], desks: [] })
   })
 
+  it('saves an explicit locality and validates its fields', async () => {
+    const locality = { city: ' Bristol ', county: ' City of Bristol ', country: 'GB' }
+    const saved = userPreferencesSchema.parse(await (await save(token, { locality })).json())
+    expect(saved.locality).toEqual({ city: 'Bristol', county: 'City of Bristol', country: 'GB' })
+
+    await createUserAccount(h.ctx.auth, { username: 'localother', password: 'other-password' })
+    const signIn = await h.ctx.auth.handler(
+      new Request('http://localhost:3000/api/auth/sign-in/username', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', origin: 'http://localhost:3000' },
+        body: JSON.stringify({ username: 'localother', password: 'other-password' }),
+      }),
+    )
+    const other = await handleApiRequest(
+      h.ctx,
+      new Request('http://localhost:3000/api/v1/me/preferences', {
+        headers: { authorization: `Bearer ${signIn.headers.get('set-auth-token') ?? ''}` },
+      }),
+    )
+    expect(userPreferencesSchema.parse(await other.json()).locality).toBeNull()
+
+    expect((await save(token, { locality: { ...locality, country: 'gb' } })).status).toBe(400)
+    expect((await save(token, { locality: { ...locality, city: '   ' } })).status).toBe(400)
+    await save(token, { locality: null })
+  })
+
   it('marks onboarding done once, and never undoes it', async () => {
     const prefs = async () =>
       userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
@@ -631,6 +658,90 @@ describe('preferences', () => {
     )
     expect(again[0].onboarded_at).toEqual(first)
     await save(token, { regions: [] })
+  })
+})
+
+describe('local', () => {
+  const post = (path: string, body: unknown) =>
+    call(path, {
+      method: 'POST',
+      body: JSON.stringify(body),
+      headers: { 'content-type': 'application/json' },
+    })
+
+  it('orders city, county and country matches and paginates without crossing countries', async () => {
+    const all = storyListResponseSchema.parse(
+      await (await call('/api/v1/stories?limit=4')).json(),
+    ).items
+    const [city, county, country, foreign] = all
+    if (!city || !county || !country || !foreign) throw new Error('local test needs four stories')
+
+    await h.ctx.pool.query(`update story set locations = '[]'::jsonb`)
+    await Promise.all([
+      h.ctx.db
+        .update(schema.story)
+        .set({ locations: [{ city: 'Bristol', county: 'City of Bristol', country: 'GB' }] })
+        .where(eq(schema.story.id, city.id)),
+      h.ctx.db
+        .update(schema.story)
+        .set({ locations: [{ city: 'Bath', county: 'City of Bristol', country: 'GB' }] })
+        .where(eq(schema.story.id, county.id)),
+      h.ctx.db
+        .update(schema.story)
+        .set({ locations: [{ city: 'Manchester', county: 'Greater Manchester', country: 'GB' }] })
+        .where(eq(schema.story.id, country.id)),
+      h.ctx.db
+        .update(schema.story)
+        .set({ locations: [{ city: 'Paris', county: null, country: 'FR' }] })
+        .where(eq(schema.story.id, foreign.id)),
+    ])
+    await post('/api/v1/me/preferences', {
+      locality: { city: 'Bristol', county: 'City of Bristol', country: 'GB' },
+    })
+
+    const first = localFeedResponseSchema.parse(await (await call('/api/v1/local?limit=2')).json())
+    expect(first.source).toBe('saved')
+    expect(first.items.map((item) => [item.story.id, item.scope])).toEqual([
+      [city.id, 'city'],
+      [county.id, 'county'],
+    ])
+    expect(first.pageInfo.nextCursor).toBeTruthy()
+    const second = localFeedResponseSchema.parse(
+      await (
+        await call(
+          `/api/v1/local?limit=2&cursor=${encodeURIComponent(first.pageInfo.nextCursor ?? '')}`,
+        )
+      ).json(),
+    )
+    expect(second.items.map((item) => [item.story.id, item.scope])).toEqual([
+      [country.id, 'country'],
+    ])
+    expect([...first.items, ...second.items].some((item) => item.story.id === foreign.id)).toBe(
+      false,
+    )
+
+    await post('/api/v1/me/preferences', { locality: null })
+    const automatic = localFeedResponseSchema.parse(
+      await (await call('/api/v1/local', { headers: { 'cf-ipcountry': 'GB' } })).json(),
+    )
+    expect(automatic).toMatchObject({
+      locality: { city: null, county: null, country: 'GB' },
+      source: 'request',
+    })
+    expect(automatic.items.every((item) => item.scope === 'country')).toBe(true)
+    expect(
+      userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json()).locality,
+    ).toBeNull()
+  })
+
+  it('returns an unconfigured feed when neither a saved nor request country exists', async () => {
+    await post('/api/v1/me/preferences', { locality: null })
+    expect(localFeedResponseSchema.parse(await (await call('/api/v1/local')).json())).toEqual({
+      locality: null,
+      source: null,
+      items: [],
+      pageInfo: { nextCursor: null },
+    })
   })
 })
 

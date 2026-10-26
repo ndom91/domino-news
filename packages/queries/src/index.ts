@@ -27,6 +27,7 @@ export const queryKeys = {
   edition: () => ['edition'] as const,
   fronts: () => ['front'] as const,
   briefing: () => ['briefing'] as const,
+  local: () => ['local'] as const,
   front: (region: Region | null = null) => ['front', region ?? 'all'] as const,
   storyList: (region: Region | null = null) => ['stories', 'list', region ?? 'all'] as const,
   story: (id: string) => ['stories', 'detail', id] as const,
@@ -65,6 +66,14 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.briefing(),
         queryFn: ({ signal }) => api.getBriefing(signal),
         staleTime: 60_000,
+      }),
+    local: () =>
+      infiniteQueryOptions({
+        queryKey: queryKeys.local(),
+        queryFn: ({ pageParam, signal }) => api.getLocal({ cursor: pageParam, limit: 30 }, signal),
+        initialPageParam: null as string | null,
+        getNextPageParam: (last) => last.pageInfo.nextCursor,
+        staleTime: 30_000,
       }),
     edition: () =>
       queryOptions({
@@ -242,6 +251,7 @@ export function savePreferencesMutation(api: ApiClient, queryClient: QueryClient
         queryClient.invalidateQueries({ queryKey: queryKeys.insights() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.forYou() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.briefing() }),
+        queryClient.invalidateQueries({ queryKey: queryKeys.local() }),
         queryClient.invalidateQueries({ queryKey: queryKeys.fronts() }),
       ])
     },

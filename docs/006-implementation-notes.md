@@ -32,6 +32,7 @@
 - **Staleness:** `story.input_fingerprint` = hash of the active articles' latest revision IDs. A generated summary is recorded only if its fingerprint is still current and differs from the current version's (so retries and stale jobs never overwrite).
 - **Embeddings:** stored canonically in Postgres (`article_embedding`, `story.embedding`, pgvector 768-d) so Typesense can be rebuilt without re-embedding. Retrieval itself goes through Typesense.
 - **Merge/split:** `story_lineage_event`, `story_alias` and `story.merged_into_story_id` exist and old IDs/slugs resolve, but no merge/split operation or UI is implemented yet.
+- **Locality:** generated summaries attach up to five event places (city, county/local equivalent and ISO country) to a Story. They describe where the event happens or directly affects, never publisher headquarters. Readers may explicitly save one locality; absent that, the Local API can use the request country without persisting it. Local ranks exact city, then county/local area, then country matches.
 
 ## Pipeline
 

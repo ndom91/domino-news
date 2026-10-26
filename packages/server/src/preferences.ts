@@ -13,6 +13,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
       topics: schema.userPreference.topics,
       rememberReads: schema.userPreference.rememberReads,
       country: schema.userPreference.country,
+      locality: schema.userPreference.locality,
       briefingLastOpenedAt: schema.userPreference.briefingLastOpenedAt,
       onboardedAt: schema.userPreference.onboardedAt,
     })
@@ -24,6 +25,7 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
     topics: row?.topics ?? [],
     rememberReads: row?.rememberReads ?? false,
     country: row?.country ?? null,
+    locality: row?.locality ?? null,
     onboarded: Boolean(row?.onboardedAt),
   }
 }
@@ -59,7 +61,21 @@ export async function savePreferences(
   update: UserPreferencesUpdate,
 ): Promise<UserPreferences> {
   const current = await getPreferences(db, userId)
-  const next = { ...current, ...update, onboarded: current.onboarded || update.onboarded === true }
+  const normalized = update.locality
+    ? {
+        ...update,
+        locality: {
+          city: update.locality.city?.trim() || null,
+          county: update.locality.county?.trim() || null,
+          country: update.locality.country,
+        },
+      }
+    : update
+  const next = {
+    ...current,
+    ...normalized,
+    onboarded: current.onboarded || update.onboarded === true,
+  }
   const { onboarded, ...columns } = next
   // Onboarding is only ever marked done; finishing it again keeps the first timestamp.
   const onboardedAt = onboarded && !current.onboarded ? { onboardedAt: new Date() } : {}

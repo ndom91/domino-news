@@ -23,7 +23,9 @@ import {
   type Insights,
   insightsSchema,
   type LearnedSignals,
+  type LocalFeedResponse,
   learnedSignalsSchema,
+  localFeedResponseSchema,
   type MatchHealth,
   type MutedPublisherList,
   type MutedPublisherRequest,
@@ -151,6 +153,8 @@ export function createApiClient({
       opts: { cursor?: string | null; limit?: number; region?: Region | null } = {},
       signal?: AbortSignalLike,
     ) => request<StoryListResponse>(storyListResponseSchema, `/stories${qs(opts)}`, { signal }),
+    getLocal: (opts: { cursor?: string | null; limit?: number } = {}, signal?: AbortSignalLike) =>
+      request<LocalFeedResponse>(localFeedResponseSchema, `/local${qs(opts)}`, { signal }),
     getStory: (id: string, signal?: AbortSignalLike) =>
       request<StoryDetail>(storyDetailSchema, `/stories/${encodeURIComponent(id)}`, { signal }),
     getStoryUpdates: (id: string, signal?: AbortSignalLike) =>

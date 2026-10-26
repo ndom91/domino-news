@@ -20,7 +20,10 @@ export const Route = createFileRoute('/privacy')({
 const RETENTION = [
   ['Account details', 'Until you delete your account'],
   ['Sessions, with IP address and browser', '30 days after sign-in, then deleted'],
-  ['Your picks, follows and country', 'Until you change them or your account is deleted'],
+  [
+    'Your picks, follows, country and saved locality',
+    'Until you change them or your account is deleted',
+  ],
   ['For You thumbs up and down', '30 days; what they taught For You fades over 30 days'],
   ['Reading history (only if you turn it on)', '30 days; deleted at once when you turn it off'],
   [
@@ -64,9 +67,10 @@ function PrivacyPage() {
             of the service).
           </li>
           <li>
-            <strong>Your settings:</strong> the regions, desks, topics and country you pick, the
-            narratives and publishers you follow, and your thumbs up and down on For You. Needed to
-            provide those features (Art. 6(1)(b) GDPR).
+            <strong>Your settings:</strong> the regions, desks, topics and country you pick, any
+            city and county or local area you explicitly save for Local, the narratives and
+            publishers you follow, and your thumbs up and down on For You. Needed to provide those
+            features (Art. 6(1)(b) GDPR). Domino does not request or store your precise coordinates.
           </li>
           <li>
             <strong>Reading history, only if you turn it on:</strong> which stories you open, for
@@ -76,8 +80,8 @@ function PrivacyPage() {
           </li>
           <li>
             <strong>Your country:</strong> worked out from your connection on each visit to show
-            publishers from your country first. It isn’t stored unless you pick a country yourself
-            (Art. 6(1)(f) GDPR).
+            relevant coverage and a country-level Local feed. It isn’t stored unless you pick a
+            country yourself (Art. 6(1)(f) GDPR).
           </li>
           <li>
             <strong>Push alerts, only if you allow them:</strong> your device’s push token and a

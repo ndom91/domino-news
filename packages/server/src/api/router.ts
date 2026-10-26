@@ -28,6 +28,7 @@ import { listFollows, setFollow } from '../follows.ts'
 import { FOR_YOU_PAGE_SIZE, getForYou } from '../for-you.ts'
 import { getEdition, getFrontPage } from '../front.ts'
 import { getInsights } from '../insights.ts'
+import { getLocalFeed } from '../local.ts'
 import { getMatchHealth } from '../match-health.ts'
 import { listMutedPublishers, setMutedPublisher } from '../muted-publishers.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
@@ -60,6 +61,11 @@ const forYouQuery = z.object({
     z.coerce.number().check(z.int(), z.gte(1), z.lte(FOR_YOU_PAGE_SIZE)),
     FOR_YOU_PAGE_SIZE,
   ),
+})
+
+const localQuery = z.object({
+  cursor: z.optional(z.string().check(z.regex(/^[123]\|\d{4}-\d{2}-\d{2}T[^|]+\|.+$/))),
+  limit: z._default(z.coerce.number().check(z.int(), z.gte(1), z.lte(100)), 30),
 })
 
 export type Session = Awaited<ReturnType<ServerContext['auth']['api']['getSession']>>
@@ -380,6 +386,20 @@ const routes: Route[] = [
   route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
     json(await getForYou(ctx.db, userId, forYouQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
+  route('GET', '/api/v1/local', async ({ ctx, request, url, userId }) => {
+    const { locality: saved } = await getPreferences(ctx.db, userId)
+    const requestCountry = countryFromHeader(request.headers.get('cf-ipcountry'))
+    const locality =
+      saved ?? (requestCountry ? { city: null, county: null, country: requestCountry } : null)
+    return json(
+      await getLocalFeed(
+        ctx.db,
+        locality,
+        saved ? 'saved' : requestCountry ? 'request' : null,
+        localQuery.parse(Object.fromEntries(url.searchParams)),
+      ),
+    )
+  }),
   route('GET', '/api/v1/briefing', async ({ ctx, userId }) =>
     json(await getBriefing(ctx.db, userId)),
   ),

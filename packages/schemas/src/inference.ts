@@ -1,5 +1,6 @@
 import { z } from 'zod/mini'
 import { deskSchema } from './desks.ts'
+import { placeSchema } from './places.ts'
 import { regionSchema } from './regions.ts'
 import { topicSchema } from './topics.ts'
 
@@ -32,6 +33,8 @@ export const storySummarySchema = z.object({
   sourceArticleIds: z.array(z.string()).check(z.minLength(1)),
   observationIds: z.array(z.string()).check(z.minLength(1)),
   regions: z.array(regionSchema).check(z.minLength(1), z.maxLength(3)),
+  // Places where this event happens or directly affects. Empty for genuinely global stories.
+  locations: z.array(placeSchema).check(z.maxLength(5)),
   desk: deskSchema,
   topics: z.array(topicSchema).check(z.maxLength(3)),
 })

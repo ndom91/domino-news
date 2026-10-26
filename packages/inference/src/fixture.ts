@@ -1,5 +1,5 @@
 import { contentTokens, jaccard, regionForCountry, truncate } from '@dn/domain'
-import { type Desk, EMBEDDING_DIMENSIONS, type Region, type Topic } from '@dn/schemas'
+import { type Desk, EMBEDDING_DIMENSIONS, type Place, type Region, type Topic } from '@dn/schemas'
 import { PROMPT_VERSIONS } from './prompts.ts'
 import type { ArticleInput, EmbeddingProvider, GenerationProvider, StoryInput } from './types.ts'
 
@@ -38,6 +38,36 @@ function fixtureRegions(s: StoryInput): Region[] {
     if (region) regions.add(region)
   }
   return regions.size > 0 ? [...regions].slice(0, 3) : ['global']
+}
+
+// Deterministic place tags from the reporting text, never from a publisher's home country.
+const FIXTURE_PLACES: [Place, RegExp][] = [
+  [{ city: 'Washington', county: null, country: 'US' }, /\bWashington(?:,? D\.?C\.?)?\b/i],
+  [{ city: 'New York City', county: null, country: 'US' }, /\bNew York(?: City)?\b/i],
+  [{ city: 'London', county: null, country: 'GB' }, /\bLondon\b/i],
+  [{ city: 'Kyiv', county: null, country: 'UA' }, /\bKyiv\b/i],
+  [{ city: null, county: null, country: 'UA' }, /\bUkrain(?:e|ian)\b/i],
+  [{ city: null, county: null, country: 'US' }, /\b(?:United States|U\.S\.|US)\b/i],
+  [{ city: null, county: null, country: 'GB' }, /\b(?:United Kingdom|Britain|British|UK)\b/i],
+  [{ city: null, county: null, country: 'DE' }, /\bGerman(?:y)?\b/i],
+  [{ city: null, county: null, country: 'FR' }, /\bFr(?:ance|ench)\b/i],
+  [{ city: null, county: null, country: 'IN' }, /\bIndia(?:n)?\b/i],
+]
+
+function fixtureLocations(s: StoryInput): Place[] {
+  const text = s.articles.map((a) => `${a.title} ${a.description ?? ''}`).join(' ')
+  const found = FIXTURE_PLACES.filter(([, pattern]) => pattern.test(text)).map(([place]) => place)
+  return found
+    .filter(
+      (place, index) =>
+        found.findIndex(
+          (other) =>
+            other.city === place.city &&
+            other.county === place.county &&
+            other.country === place.country,
+        ) === index,
+    )
+    .slice(0, 5)
 }
 
 // Stand-in for model tagging: the first desk whose keywords appear in the lead headline.
@@ -157,6 +187,7 @@ export function createFixtureGeneration(): GenerationProvider {
           sourceArticleIds: story.articles.map((a) => a.articleId),
           observationIds: story.articles.map((a) => a.observationId),
           regions: fixtureRegions(story),
+          locations: fixtureLocations(story),
           desk: fixtureDesk(lead.title),
           topics: fixtureTopics(lead.title),
         },

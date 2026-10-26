@@ -811,12 +811,14 @@ describe('local generation adapter', () => {
       detail: 'd[1]',
       sources: [2],
       regions: ['europe'],
+      locations: [{ city: 'London', county: null, country: 'GB' }],
       desk: 'politics',
       topics: [],
     })
     const { output } = await (await generation()).summarizeStory({ story })
     expect(output.sourceArticleIds).toEqual(['art_b'])
     expect(output.observationIds).toEqual(['obs_b'])
+    expect(output.locations).toEqual([{ city: 'London', county: null, country: 'GB' }])
   })
 
   it('maps a System One Story choice and keeps article bodies out of its compact input', async () => {

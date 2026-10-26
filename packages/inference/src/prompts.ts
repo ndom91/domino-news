@@ -8,7 +8,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput, SummaryUpdateInput }
 // 30-character IDs back and dropped characters, which failed grounding checks.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@6',
-  summarizeStory: 'summarize-story@9',
+  summarizeStory: 'summarize-story@10',
   assessSummaryUpdate: 'assess-summary-update@1',
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
@@ -119,6 +119,11 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
   north-america (US, Canada), latin-america (Mexico, Central and South America, Caribbean), europe (incl. UK, Ukraine, Russia), middle-east (Gulf, Levant, Iran, Israel, Turkey, Egypt), africa (excl. Egypt), south-asia (India, Pakistan, Bangladesh, Sri Lanka, Nepal, Afghanistan), east-asia (China, Japan, Koreas, Taiwan, Mongolia), southeast-asia (Indonesia, Philippines, Vietnam, Thailand, Malaysia, Singapore, Myanmar), oceania (Australia, New Zealand, Pacific islands), central-asia (Kazakhstan, Uzbekistan and neighbours).
   Use "global" only when no single region fits: worldwide events, or more than three regions equally involved.
   An official body's home country is not a region unless the events happen there.
+- locations: 0-5 places where this specific event happens or that it directly affects, most specific first.
+  Each place has an ISO 3166-1 alpha-2 country code and optional city and county. Use the common English
+  place name from the reporting. "county" may be the equivalent local second-level area (district, borough,
+  parish or municipality), but never a state, province or broad region. Do not use a publisher's location.
+  Use [] when the sources do not establish a place, or for a genuinely worldwide event.
 - desk: the one desk that fits the main event best. Pick from:
 ${DESKS.map((d) => `  ${d} (${DESK_SCOPES[d]})`).join('\n')}
   Choose by what happened, not who was involved: a court ruling on a politician is justice, a war's economic cost is economy. Use politics only when the main actor is a government, party or election. Public-health agencies, outbreaks and medical findings are science; regulators' enforcement actions are justice or economy by subject.

@@ -284,6 +284,7 @@ export async function recordGeneratedSummary(
       currentSummaryId: versionId,
       title: input.output.headline,
       regions: [...new Set(input.output.regions)],
+      locations: input.output.locations,
       desk: input.output.desk,
       topics: [...new Set(input.output.topics)],
       publishedAt: story.publishedAt ?? new Date(),

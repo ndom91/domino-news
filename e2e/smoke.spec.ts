@@ -90,6 +90,12 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(page.getByRole('heading', { name: /Covered mostly by one side/ })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
+  // Local: explicit city/county/country setup is available even without an IP-country header.
+  await page.goto('/local')
+  await expect(page.getByRole('heading', { level: 1, name: 'Local' })).toBeVisible()
+  await expect(page.getByRole('form', { name: 'Local news location' })).toBeVisible()
+  await expectNoHorizontalOverflow(page)
+
   // Narrative graph with clickable story nodes
   await page.goto('/narratives')
   const narrative = page.locator('main li a').first()

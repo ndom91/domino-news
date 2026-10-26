@@ -16,6 +16,7 @@ import { Route as BlindspotRouteImport } from './routes/blindspot'
 import { Route as BriefingRouteImport } from './routes/briefing'
 import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as ImprintRouteImport } from './routes/imprint'
+import { Route as LocalRouteImport } from './routes/local'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PipelineRouteImport } from './routes/pipeline'
@@ -65,6 +66,11 @@ const ForYouRoute = ForYouRouteImport.update({
 const ImprintRoute = ImprintRouteImport.update({
   id: '/imprint',
   path: '/imprint',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LocalRoute = LocalRouteImport.update({
+  id: '/local',
+  path: '/local',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
+  '/local': typeof LocalRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
@@ -175,6 +182,7 @@ export interface FileRoutesByTo {
   '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
+  '/local': typeof LocalRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
@@ -200,6 +208,7 @@ export interface FileRoutesById {
   '/briefing': typeof BriefingRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
+  '/local': typeof LocalRoute
   '/login': typeof LoginRoute
   '/onboarding': typeof OnboardingRoute
   '/pipeline': typeof PipelineRoute
@@ -226,6 +235,7 @@ export interface FileRouteTypes {
     | '/briefing'
     | '/for-you'
     | '/imprint'
+    | '/local'
     | '/login'
     | '/onboarding'
     | '/pipeline'
@@ -250,6 +260,7 @@ export interface FileRouteTypes {
     | '/briefing'
     | '/for-you'
     | '/imprint'
+    | '/local'
     | '/login'
     | '/onboarding'
     | '/pipeline'
@@ -274,6 +285,7 @@ export interface FileRouteTypes {
     | '/briefing'
     | '/for-you'
     | '/imprint'
+    | '/local'
     | '/login'
     | '/onboarding'
     | '/pipeline'
@@ -299,6 +311,7 @@ export interface RootRouteChildren {
   BriefingRoute: typeof BriefingRoute
   ForYouRoute: typeof ForYouRoute
   ImprintRoute: typeof ImprintRoute
+  LocalRoute: typeof LocalRoute
   LoginRoute: typeof LoginRoute
   OnboardingRoute: typeof OnboardingRoute
   PipelineRoute: typeof PipelineRoute
@@ -365,6 +378,13 @@ declare module '@tanstack/react-router' {
       path: '/imprint'
       fullPath: '/imprint'
       preLoaderRoute: typeof ImprintRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/local': {
+      id: '/local'
+      path: '/local'
+      fullPath: '/local'
+      preLoaderRoute: typeof LocalRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -483,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   BriefingRoute: BriefingRoute,
   ForYouRoute: ForYouRoute,
   ImprintRoute: ImprintRoute,
+  LocalRoute: LocalRoute,
   LoginRoute: LoginRoute,
   OnboardingRoute: OnboardingRoute,
   PipelineRoute: PipelineRoute,
