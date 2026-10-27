@@ -48,6 +48,10 @@ export async function getBriefing(db: Db, userId: string): Promise<BriefingRespo
     since,
     openedAt: checkpoint.openedAt.toISOString(),
     personalised: feed.personalised,
+    audioStories: feed.items
+      .slice(0, 5)
+      .filter(({ story }) => story.summary?.trim())
+      .map(({ story }) => ({ title: story.title, slug: story.slug })),
     sections: [
       section(
         'essential',

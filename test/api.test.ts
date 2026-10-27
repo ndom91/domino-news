@@ -957,6 +957,15 @@ describe('Briefing', () => {
       `update story set last_updated_at = now() where published_at is not null`,
     )
     const first = briefingResponseSchema.parse(await (await call('/api/v1/briefing')).json())
+    const feed = await (await call('/api/v1/for-you?limit=5')).json()
+    expect(first.audioStories).toEqual(
+      feed.items
+        .filter((item: { story: { summary: string | null } }) => item.story.summary?.trim())
+        .map((item: { story: { title: string; slug: string } }) => ({
+          title: item.story.title,
+          slug: item.story.slug,
+        })),
+    )
     expect(first.since).toBeNull()
     expect(first.openedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/)
     const second = briefingResponseSchema.parse(await (await call('/api/v1/briefing')).json())

@@ -1,10 +1,11 @@
+import { plural } from '@dn/domain'
 import { feedbackMutation } from '@dn/queries'
 import type { BriefingResponse, ForYouReason } from '@dn/schemas'
 import { Button, IconButton, Notice, StoryItem, StoryItemSkeleton } from '@dn/ui'
 import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { RouterLink } from '../components/link.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
@@ -35,7 +36,7 @@ function BriefingPage() {
             : 'Your first briefing: a considered view of the news now.'}
         </p>
       </header>
-      <AudioBriefingPrototype />
+      <AudioBriefingPrototype preview={briefing.audioStories} />
       {!briefing.personalised ? (
         <Notice tone="neutral" title="Make this briefing yours" className="mt-8 max-w-reading">
           Pick the regions, desks and topics you care about, or follow a narrative or publisher.
@@ -63,7 +64,7 @@ function BriefingPage() {
 }
 
 // On-demand prototype: audio exists only in this page's memory.
-function AudioBriefingPrototype() {
+function AudioBriefingPrototype({ preview }: { preview: BriefingResponse['audioStories'] }) {
   const [briefing, setBriefing] = useState<{
     audio: string
     transcript: string
@@ -71,6 +72,9 @@ function AudioBriefingPrototype() {
   } | null>(null)
   const [pending, setPending] = useState(false)
   const [error, setError] = useState('')
+  const controller = useRef<AbortController | null>(null)
+
+  useEffect(() => () => controller.current?.abort(), [])
 
   useEffect(
     () => () => {
@@ -80,6 +84,8 @@ function AudioBriefingPrototype() {
   )
 
   async function generate() {
+    const abort = new AbortController()
+    controller.current = abort
     setPending(true)
     setError('')
     try {
@@ -87,6 +93,7 @@ function AudioBriefingPrototype() {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+        signal: abort.signal,
       })
       if (!response.ok) {
         const body = await response.json()
@@ -104,61 +111,158 @@ function AudioBriefingPrototype() {
         audio: URL.createObjectURL(new Blob([bytes], { type: data.contentType })),
       })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Could not prepare your audio briefing.')
+      if (!abort.signal.aborted)
+        setError(err instanceof Error ? err.message : 'Could not prepare your audio briefing.')
     } finally {
+      controller.current = null
       setPending(false)
     }
   }
 
   return (
-    <section className="border-b-2 border-rule py-6" aria-labelledby="audio-briefing-title">
-      <h2 id="audio-briefing-title" className="type-section">
-        Listen to your briefing
-      </h2>
-      <p className="mt-2 max-w-reading text-text-secondary">
-        An experimental, AI-written audio briefing of up to five stories from your personalised
-        feed. Your name is sent to the services that write and read it. Preparing it may take a few
-        minutes.
-      </p>
-      <div className="mt-4">
-        <Button onClick={generate} loading={pending} disabled={pending}>
-          {briefing ? 'Prepare a new briefing' : 'Prepare audio briefing'}
-        </Button>
+    <section className="border-b-2 border-rule py-8" aria-labelledby="audio-briefing-title">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+        <p className="type-label text-text-muted">
+          Listen · {pending ? 'Preparing' : briefing ? 'Ready to play' : 'Ready to prepare'}
+        </p>
+        <Link
+          to="/account"
+          search={{ tab: 'preferences' }}
+          hash="audio-style"
+          className="link-inline min-h-tap content-center text-sm font-semibold"
+        >
+          Audio settings
+        </Link>
       </div>
-      <p className="mt-2 text-text-secondary" aria-live="polite">
-        {pending ? 'Preparing your audio briefing…' : ''}
-      </p>
-      {error ? (
-        <Notice tone="error" title="Audio briefing unavailable">
-          {error}
-        </Notice>
-      ) : null}
-      {briefing ? (
-        <div className="mt-4 max-w-reading">
-          {/* biome-ignore lint/a11y/useMediaCaption: The complete generated transcript is available immediately below; this prototype has no timed captions. */}
-          <audio
-            controls
-            preload="none"
-            src={briefing.audio}
-            aria-label="Your audio briefing"
-            className="w-full"
-          />
-          <details className="mt-4">
-            <summary>Transcript and stories</summary>
-            <p className="mt-3 whitespace-pre-line text-text-secondary">{briefing.transcript}</p>
-            <ul className="mt-4 flex flex-col gap-2">
-              {briefing.stories.map((story) => (
-                <li key={story.slug}>
-                  <Link to="/stories/$slug" params={{ slug: story.slug }} className="link-inline">
-                    {story.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </details>
+      {briefing && !pending ? (
+        <>
+          <div className="flex flex-wrap items-center gap-4 border-t-2 border-rule pt-5 pb-5">
+            <h2 id="audio-briefing-title" className="type-section">
+              Your briefing
+            </h2>
+            <span className="border border-border-strong px-2 py-1 type-label">Experimental</span>
+          </div>
+          <div className="bg-band p-5 text-band-text">
+            <p className="mb-3 type-label text-band-muted">Your audio briefing</p>
+            {/* biome-ignore lint/a11y/useMediaCaption: A full transcript is provided below. */}
+            <audio
+              controls
+              preload="metadata"
+              src={briefing.audio}
+              aria-label="Your audio briefing"
+              aria-describedby="audio-transcript"
+              className="w-full"
+            />
+          </div>
+          <div className="grid gap-8 py-6 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:gap-column">
+            <div id="audio-transcript">
+              <h3 className="border-b-2 border-rule pb-2 type-label">Transcript</h3>
+              <p className="mt-4 max-w-reading whitespace-pre-line text-base leading-normal">
+                {briefing.transcript}
+              </p>
+            </div>
+            <AudioStoryList stories={briefing.stories} />
+          </div>
+          <div className="flex flex-wrap items-center justify-between gap-4 border-t border-border pt-4">
+            <p className="max-w-reading text-sm text-text-secondary">
+              AI-written and AI-read. Check what you hear against the linked stories.
+            </p>
+            <Button onClick={generate}>Prepare a new briefing</Button>
+          </div>
+          {error ? (
+            <Notice tone="error" title="Audio briefing unavailable" className="mt-4">
+              {error}
+            </Notice>
+          ) : null}
+        </>
+      ) : (
+        <div className="grid gap-8 border-t-2 border-rule pt-5 pb-2 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] md:gap-column">
+          <div>
+            <div className="flex flex-wrap items-start justify-between gap-4">
+              <h2 id="audio-briefing-title" className="type-section">
+                Listen to your briefing
+              </h2>
+              <span className="border border-border-strong px-2 py-1 type-label">Experimental</span>
+            </div>
+            <p className="mt-4 max-w-reading text-base leading-snug text-text-secondary">
+              The top stories from your feed, written up and read aloud. Explore the linked stories
+              for their sources.
+            </p>
+            <p className="mt-4 text-sm font-semibold" aria-live="polite">
+              {pending ? 'Preparing your briefing… Keep reading; this may take a few minutes.' : ''}
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-4">
+              {pending ? (
+                <Button onClick={() => controller.current?.abort()}>Cancel preparation</Button>
+              ) : (
+                <Button variant="primary" onClick={generate} disabled={!preview.length}>
+                  Prepare audio briefing
+                </Button>
+              )}
+              {!pending ? (
+                <span className="text-sm text-text-muted">Takes a few minutes</span>
+              ) : null}
+            </div>
+            <p className="mt-5 max-w-reading text-sm text-text-muted">
+              AI-written and AI-read. Your name is sent to the writing and voice services so the
+              briefing can greet you.
+            </p>
+            {error ? (
+              <Notice tone="error" title="Audio briefing unavailable" className="mt-4">
+                {error}
+              </Notice>
+            ) : null}
+          </div>
+          <AudioStoryList stories={preview} preview />
         </div>
-      ) : null}
+      )}
     </section>
+  )
+}
+
+function AudioStoryList({
+  stories,
+  preview = false,
+}: {
+  stories: { title: string; slug: string }[]
+  preview?: boolean
+}) {
+  return (
+    <div>
+      <div className="flex items-baseline justify-between gap-3 border-b-2 border-rule pb-2">
+        <h3 className="type-label">{preview ? 'In this briefing' : 'Stories'}</h3>
+        <span className="text-sm text-text-muted">
+          {plural(stories.length, 'story', 'stories')} · from For You
+        </span>
+      </div>
+      {stories.length ? (
+        <ol className="divide-y divide-border">
+          {stories.map((story, index) => (
+            <li key={story.slug} className="flex gap-4 py-3">
+              <span className="type-meta font-bold tabular-nums">
+                {String(index + 1).padStart(2, '0')}
+              </span>
+              <Link
+                to="/stories/$slug"
+                params={{ slug: story.slug }}
+                className="link-inline min-h-tap font-semibold"
+              >
+                {story.title}
+              </Link>
+            </li>
+          ))}
+        </ol>
+      ) : (
+        <p className="mt-4 text-text-secondary">
+          No recent stories with summaries are available yet.
+        </p>
+      )}
+      {preview && stories.length ? (
+        <p className="mt-3 text-sm text-text-muted">
+          Selection may change when you prepare your briefing.
+        </p>
+      ) : null}
+    </div>
   )
 }
 

@@ -908,6 +908,7 @@ export const briefingResponseSchema = z.object({
   since: z.nullable(z.string()),
   openedAt: z.string(),
   personalised: z.boolean(),
+  audioStories: z.array(z.object({ title: z.string(), slug: z.string() })),
   sections: z.array(briefingSectionSchema),
 })
 export type BriefingResponse = z.infer<typeof briefingResponseSchema>

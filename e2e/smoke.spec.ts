@@ -14,6 +14,37 @@ test('unauthenticated visitors are sent to sign in', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
+test('audio briefing shows preparation and the returned transcript', async ({ page }) => {
+  await signIn(page)
+  await page.goto('/briefing')
+  const panel = page.locator('section[aria-labelledby="audio-briefing-title"]')
+  const prepare = panel.getByRole('button', { name: 'Prepare audio briefing' })
+  await expect(prepare).toBeEnabled()
+  let respond: (() => void) | undefined
+  const wait = new Promise<void>((resolve) => {
+    respond = resolve
+  })
+  await page.route('**/api/v1/briefing/audio-prototype', async (route) => {
+    await wait
+    await route.fulfill({
+      json: {
+        audio: 'UklGRgQAAABXQVZF',
+        contentType: 'audio/wav',
+        transcript: 'Hello from your briefing.',
+        stories: [{ title: 'A test story', slug: 'test-story' }],
+      },
+    })
+  })
+  await prepare.click()
+  await expect(panel.getByText('Preparing your briefing…', { exact: false })).toBeVisible()
+  await expect(panel.getByRole('button', { name: 'Cancel preparation' })).toBeVisible()
+  respond?.()
+  await expect(panel.getByText('Hello from your briefing.')).toBeVisible()
+  await expect(panel.getByRole('link', { name: 'A test story' })).toBeVisible()
+  await expect(panel.locator('audio')).toHaveAttribute('controls')
+  await expectNoHorizontalOverflow(page)
+})
+
 test('about and legal pages are public and linked from login and the footer', async ({ page }) => {
   for (const [path, title] of [
     ['/about', 'About Domino'],
