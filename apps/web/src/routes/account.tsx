@@ -84,13 +84,7 @@ function AccountPage() {
   return (
     <Page>
       <PageTitle>Account</PageTitle>
-      <div className="mb-10 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-text-secondary">
-          Signed in as{' '}
-          <span className="font-semibold text-text">
-            {session.user?.username ?? session.user?.name}
-          </span>
-        </p>
+      <div className="mb-10 flex justify-end">
         <SignOutButton />
       </div>
 
@@ -187,7 +181,7 @@ function AudioStyleSection() {
         </Notice>
       ) : null}
       <p className="text-sm text-text-secondary" aria-live="polite">
-        {save.isPending ? 'Saving audio style…' : save.isSuccess ? 'Audio style saved.' : ''}
+        {save.isPending ? 'Saving audio style…' : ''}
       </p>
     </SettingsRow>
   )

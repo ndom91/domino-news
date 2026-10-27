@@ -131,12 +131,13 @@ function SectionMenu({ items }: { items: ReturnType<typeof navFor> }) {
 /** Avatar button that opens Settings and Sign out. */
 function UserMenu({ user }: { user: { name: string; email: string; username: string | null } }) {
   const { signOut } = useSignOut()
+  const displayName = user.name || user.username || user.email
   return (
     <Menu
       trigger={
         <button
           type="button"
-          aria-label={`Account menu for ${user.username ?? user.name}`}
+          aria-label={`Account menu for ${displayName}`}
           // Pulls the 44px tap target in so the visible gap matches the nav links.
           className="inline-flex size-tap flex-none items-center justify-end lg:-ml-5.5"
         >
@@ -145,7 +146,7 @@ function UserMenu({ user }: { user: { name: string; email: string; username: str
       }
     >
       <p className="border-b border-border px-4 pt-2.5 pb-2.5 type-meta">
-        Signed in as <b className="font-semibold text-text">{user.username ?? user.name}</b>
+        Signed in as <b className="font-semibold text-text">{displayName}</b>
       </p>
       <MenuLinkItem render={<Link to="/account" />}>Settings</MenuLinkItem>
       <ThemeItem />
