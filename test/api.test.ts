@@ -25,7 +25,7 @@ import {
 import { clearCache, createUserAccount, recordStoryUpdate, setFeedback } from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
 import { eq } from 'drizzle-orm'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { seedAndRunFixtures } from './drain.ts'
 import { createTestContext, truncateAll } from './harness.ts'
 
@@ -942,6 +942,69 @@ describe('Briefing', () => {
       body: JSON.stringify(body),
       headers: { 'content-type': 'application/json' },
     })
+
+  it('streams actual audio generation stages and the final result', async () => {
+    await h.ctx.pool.query(
+      `update story set last_updated_at = now() where published_at is not null`,
+    )
+    clearCache()
+    vi.stubEnv('AUDIO_PROTOTYPE_TTS_URL', 'http://speech.test')
+    let finishWriting: (script: string) => void = () => {}
+    const writing = new Promise<string>((resolve) => {
+      finishWriting = resolve
+    })
+    const writer = vi
+      .spyOn(h.ctx.inference.generation, 'writeAudioBriefing')
+      .mockReturnValue(writing)
+    const wav = Buffer.alloc(46)
+    wav.write('RIFF', 0)
+    wav.writeUInt32LE(38, 4)
+    wav.write('WAVEfmt ', 8)
+    wav.writeUInt32LE(16, 16)
+    wav.write('data', 36)
+    wav.writeUInt32LE(2, 40)
+    const fetcher = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(wav))
+    try {
+      const response = await call('/api/v1/briefing/audio-prototype', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', accept: 'application/x-ndjson' },
+        body: JSON.stringify({ timeZone: 'UTC' }),
+      })
+      expect(response.headers.get('content-type')).toContain('application/x-ndjson')
+      const reader = response.body?.getReader()
+      expect(reader).toBeDefined()
+      const decoder = new TextDecoder()
+      let text = ''
+      while (!text.includes('"stage":"writing"')) {
+        const part = await reader?.read()
+        if (!part || part.done) throw new Error('Stream ended before writing began')
+        text += decoder.decode(part.value, { stream: true })
+      }
+      expect(fetcher).not.toHaveBeenCalled()
+      finishWriting('A spoken script.')
+      while (true) {
+        const part = await reader?.read()
+        if (!part || part.done) break
+        text += decoder.decode(part.value, { stream: true })
+      }
+      const events = text
+        .trim()
+        .split('\n')
+        .map((line) => JSON.parse(line))
+      expect(events.map((event) => event.type)).toEqual(['selected', 'stage', 'stage', 'result'])
+      expect(events.slice(1, 3).map((event) => event.stage)).toEqual(['writing', 'recording'])
+      expect(events[3]).toMatchObject({
+        transcript: 'A spoken script.',
+        contentType: 'audio/wav',
+        stories: events[0].stories,
+      })
+    } finally {
+      finishWriting('A spoken script.')
+      writer.mockRestore()
+      fetcher.mockRestore()
+      vi.unstubAllEnvs()
+    }
+  })
 
   it('defaults to professional audio and saves only valid styles', async () => {
     const initial = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())

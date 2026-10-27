@@ -16,7 +16,7 @@ test('unauthenticated visitors are sent to sign in', async ({ page }) => {
 
 test('audio briefing shows preparation and the returned transcript', async ({ page }) => {
   await signIn(page)
-  await page.goto('/briefing')
+  await page.goto('/briefing', { waitUntil: 'networkidle' })
   const panel = page.locator('section[aria-labelledby="audio-briefing-title"]')
   const prepare = panel.getByRole('button', { name: 'Prepare audio briefing' })
   await expect(prepare).toBeEnabled()
@@ -24,24 +24,53 @@ test('audio briefing shows preparation and the returned transcript', async ({ pa
   const wait = new Promise<void>((resolve) => {
     respond = resolve
   })
+  const wav = Buffer.alloc(44 + 48000)
+  wav.write('RIFF', 0)
+  wav.writeUInt32LE(wav.length - 8, 4)
+  wav.write('WAVEfmt ', 8)
+  wav.writeUInt32LE(16, 16)
+  wav.writeUInt16LE(1, 20)
+  wav.writeUInt16LE(1, 22)
+  wav.writeUInt32LE(24000, 24)
+  wav.writeUInt32LE(48000, 28)
+  wav.writeUInt16LE(2, 32)
+  wav.writeUInt16LE(16, 34)
+  wav.write('data', 36)
+  wav.writeUInt32LE(48000, 40)
   await page.route('**/api/v1/briefing/audio-prototype', async (route) => {
     await wait
     await route.fulfill({
-      json: {
-        audio: 'UklGRgQAAABXQVZF',
-        contentType: 'audio/wav',
-        transcript: 'Hello from your briefing.',
-        stories: [{ title: 'A test story', slug: 'test-story' }],
-      },
+      contentType: 'application/x-ndjson',
+      body:
+        [
+          { type: 'selected', stories: [{ title: 'A test story', slug: 'test-story' }] },
+          { type: 'stage', stage: 'writing' },
+          { type: 'stage', stage: 'recording' },
+          {
+            type: 'result',
+            audio: wav.toString('base64'),
+            contentType: 'audio/wav',
+            transcript: 'Hello from your briefing.',
+            stories: [{ title: 'A test story', slug: 'test-story' }],
+          },
+        ]
+          .map((event) => JSON.stringify(event))
+          .join('\n') + '\n',
     })
   })
   await prepare.click()
-  await expect(panel.getByText('Preparing your briefing…', { exact: false })).toBeVisible()
+  await expect(panel.getByText('Choosing stories…', { exact: false })).toBeVisible()
   await expect(panel.getByRole('button', { name: 'Cancel preparation' })).toBeVisible()
   respond?.()
   await expect(panel.getByText('Hello from your briefing.')).toBeVisible()
   await expect(panel.getByRole('link', { name: 'A test story' })).toBeVisible()
-  await expect(panel.locator('audio')).toHaveAttribute('controls')
+  await expect(panel.getByRole('button', { name: 'Play briefing' })).toBeVisible()
+  await expect(panel.getByRole('slider', { name: 'Seek audio briefing' })).toBeVisible()
+  await expect(panel.getByRole('slider', { name: 'Seek audio briefing' })).toBeEnabled()
+  await panel.getByRole('button', { name: 'Play briefing' }).click()
+  await expect(panel.getByRole('button', { name: 'Pause briefing' })).toBeVisible()
+  await panel.getByRole('button', { name: /Playback speed/ }).click()
+  await expect(panel.getByRole('button', { name: /Playback speed 1.25/ })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 })
 

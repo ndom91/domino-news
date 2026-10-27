@@ -108,6 +108,8 @@ On the Briefing page, prepare an on-demand spoken reading of up to five ranked F
 
 Readers can choose Professional or Radio show in Account preferences. Radio show asks for humorous presenter banter and clearly fictional sponsors, while keeping the same factual and sensitive-subject safeguards. The speech adapter is behind `SpeechProvider` in `packages/server/src/speech-provider.ts`.
 
+The audio briefing POST supports `Accept: application/x-ndjson` for live selection, script-writing and voice-recording stages, then a result or error event. Without that Accept header it returns the original JSON response. These are whole-briefing stages, not per-story progress or chapter timestamps.
+
 ### Live RSS
 
 `INGEST_MODE=live` polls the real feeds in `fixtures/publishers.json` on `FEED_POLL_CRON` (default every 15 minutes), or once with `pnpm cli ingest`. Conditional requests (ETag / Last-Modified) avoid refetching unchanged feeds.

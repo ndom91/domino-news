@@ -393,6 +393,7 @@ const routes: Route[] = [
   route('POST', '/api/v1/briefing/audio-prototype', async ({ ctx, userId, request }) => {
     const speech = createSpeechProvider()
     if (!speech) throw new HttpError('unavailable', 'Audio briefing is not configured')
+    const synthesize = speech.synthesize
     const { timeZone } = await readJson(
       request,
       z.object({ timeZone: z.optional(z.string().check(z.maxLength(100))) }),
@@ -418,30 +419,79 @@ const routes: Route[] = [
     ])
     const stories = selectAudioStories(feed.items)
     if (!stories.length) throw new HttpError('not_found', 'No stories with summaries are available')
-    let transcript: string
-    try {
-      transcript = await ctx.inference.generation.writeAudioBriefing({
-        stories: stories.map(({ story }) => story),
-        greeting: { name: users[0]?.name ?? '', date },
-        style: preferences.audioBriefingStyle,
-        signal: request.signal,
-      })
-    } catch (error) {
-      console.error('[audio-prototype] script generation failed', error)
-      throw new HttpError('unavailable', 'Could not write your briefing. Please try again.')
+    const selected = stories.map(({ story }) => ({ title: story.title, slug: story.slug }))
+    async function generate(
+      signal: AbortSignal,
+      progress: (stage: 'writing' | 'recording') => void,
+    ) {
+      progress('writing')
+      let transcript: string
+      try {
+        transcript = await ctx.inference.generation.writeAudioBriefing({
+          stories: stories.map(({ story }) => story),
+          greeting: { name: users[0]?.name ?? '', date },
+          style: preferences.audioBriefingStyle,
+          signal,
+        })
+      } catch (error) {
+        console.error('[audio-prototype] script generation failed', error)
+        throw new HttpError('unavailable', 'Could not write your briefing. Please try again.')
+      }
+      progress('recording')
+      let audio: Awaited<ReturnType<typeof synthesize>>
+      try {
+        audio = await synthesize(transcript, signal)
+      } catch (error) {
+        console.error('[audio-prototype] speech generation failed', error)
+        throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
+      }
+      return {
+        transcript,
+        audio: audio.bytes.toString('base64'),
+        contentType: audio.contentType,
+        stories: selected,
+      }
     }
-    let audio: Awaited<ReturnType<typeof speech.synthesize>>
-    try {
-      audio = await speech.synthesize(transcript, request.signal)
-    } catch (error) {
-      console.error('[audio-prototype] speech generation failed', error)
-      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
+    if (!request.headers.get('accept')?.includes('application/x-ndjson')) {
+      return json(await generate(request.signal, () => {}))
     }
-    return json({
-      transcript,
-      audio: audio.bytes.toString('base64'),
-      contentType: audio.contentType,
-      stories: stories.map(({ story }) => ({ title: story.title, slug: story.slug })),
+    const abort = new AbortController()
+    const signal = AbortSignal.any([request.signal, abort.signal])
+    const encoder = new TextEncoder()
+    const stream = new ReadableStream<Uint8Array>({
+      start(controller) {
+        const send = (value: unknown) => {
+          if (!signal.aborted) controller.enqueue(encoder.encode(`${JSON.stringify(value)}\n`))
+        }
+        void (async () => {
+          try {
+            send({ type: 'selected', stories: selected })
+            const result = await generate(signal, (stage) => send({ type: 'stage', stage }))
+            send({ type: 'result', ...result })
+          } catch (error) {
+            if (!signal.aborted)
+              send({
+                type: 'error',
+                message:
+                  error instanceof HttpError
+                    ? error.message
+                    : 'Could not prepare your briefing. Please try again.',
+              })
+          } finally {
+            if (!signal.aborted) controller.close()
+          }
+        })()
+      },
+      cancel() {
+        abort.abort()
+      },
+    })
+    return new Response(stream, {
+      headers: {
+        'content-type': 'application/x-ndjson',
+        'cache-control': 'no-store',
+        'x-accel-buffering': 'no',
+      },
     })
   }),
   route('GET', '/api/v1/local', async ({ ctx, request, url, userId }) => {
