@@ -10,6 +10,7 @@ import {
   Button,
   ConfirmDialog,
   Notice,
+  RadioGroup,
   Reveal,
   SectionLabel,
   Select,
@@ -150,30 +151,25 @@ function AudioStyleSection() {
           Try refreshing the page.
         </Notice>
       ) : preferences.data ? (
-        <fieldset disabled={save.isPending} className="flex flex-col gap-3">
-          <legend className="sr-only">Audio briefing style</legend>
-          {(
-            [
-              ['professional', 'Professional', 'A clear, light-hearted news broadcast.'],
-              ['radio', 'Radio show', 'An exuberant host with jokes and fictional sponsors.'],
-            ] as const
-          ).map(([value, label, description]) => (
-            <label key={value} className="flex min-h-tap cursor-pointer items-start gap-3">
-              <input
-                type="radio"
-                name="audioBriefingStyle"
-                value={value}
-                checked={preferences.data.audioBriefingStyle === value}
-                onChange={() => save.mutate({ audioBriefingStyle: value })}
-                className="mt-1"
-              />
-              <span>
-                <span className="block font-semibold">{label}</span>
-                <span className="text-sm text-text-secondary">{description}</span>
-              </span>
-            </label>
-          ))}
-        </fieldset>
+        <RadioGroup
+          label="Audio briefing style"
+          name="audioBriefingStyle"
+          disabled={save.isPending}
+          value={preferences.data.audioBriefingStyle}
+          onValueChange={(value) => save.mutate({ audioBriefingStyle: value })}
+          options={[
+            {
+              value: 'professional',
+              label: 'Professional',
+              description: 'A clear, light-hearted news broadcast.',
+            },
+            {
+              value: 'radio',
+              label: 'Radio show',
+              description: 'An exuberant host with jokes and fictional sponsors.',
+            },
+          ]}
+        />
       ) : null}
       {save.isError ? (
         <Notice tone="error" title="Audio style not saved">
