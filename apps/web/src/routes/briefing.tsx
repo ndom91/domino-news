@@ -32,10 +32,10 @@ function BriefingPage() {
     ]),
   )
   return (
-    <Page>
+    <Page className="pt-6 md:pt-6">
       <header className="grid pb-2 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
         <div>
-          <p className="mb-3 type-label text-accent-text">Your news desk</p>
+          <p className="mb-2 type-label text-accent-text">Your news desk</p>
           <h1 className="type-display-md text-[clamp(2.5rem,4vw,4rem)]">Briefing</h1>
         </div>
         <p className="mt-6 text-base leading-snug text-text-secondary md:mt-0">
@@ -59,7 +59,7 @@ function BriefingPage() {
         </Notice>
       ) : null}
       {briefing.sections.length ? (
-        <div className="flex flex-col gap-16 pt-4 pb-16 md:gap-20">
+        <div className="flex flex-col gap-16 pb-16 md:gap-20">
           {briefing.sections.map((section, index) => (
             <BriefingSection
               key={section.kind}

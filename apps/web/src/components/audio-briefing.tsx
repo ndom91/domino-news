@@ -23,7 +23,7 @@ export function AudioBriefingPrototype({
   const stageIndex = stage === 'selecting' ? 0 : stage === 'writing' ? 1 : 2
 
   return (
-    <section className="pt-5 pb-8" aria-labelledby="audio-briefing-title">
+    <section className="pt-3 pb-2" aria-labelledby="audio-briefing-title">
       {briefing && !pending ? (
         <>
           <AudioPlayer
@@ -137,15 +137,7 @@ export function AudioBriefingPrototype({
             </div>
             {pending ? (
               <div className="mt-4 max-w-reading">
-                <div className="flex gap-1" aria-hidden="true">
-                  {[0, 1, 2].map((step) => (
-                    <span
-                      key={step}
-                      className={`h-1.5 flex-1 border border-band-line ${step < stageIndex ? 'bg-band-text' : step === stageIndex ? 'bg-accent' : 'bg-transparent'}`}
-                    />
-                  ))}
-                </div>
-                <ol className="mt-3 flex flex-wrap gap-x-5 gap-y-1 text-sm text-band-muted">
+                <ol className="grid grid-cols-3 gap-1 text-sm text-band-muted">
                   {[
                     selected
                       ? `Picked ${plural(selected.length, 'story', 'stories')}`
@@ -155,14 +147,20 @@ export function AudioBriefingPrototype({
                   ].map((label, index) => (
                     <li
                       key={label}
-                      className={index === stageIndex ? 'font-bold text-band-text' : ''}
+                      className={`min-w-0 ${index === stageIndex ? 'font-bold text-band-text' : ''}`}
                     >
-                      {label}
-                      {index === stageIndex
-                        ? ' (in progress)'
-                        : index < stageIndex
-                          ? ' (done)'
-                          : ''}
+                      <span
+                        aria-hidden="true"
+                        className={`mb-3 block h-1.5 border border-band-line ${index < stageIndex ? 'bg-band-text' : index === stageIndex ? 'bg-accent' : 'bg-transparent'}`}
+                      />
+                      <span className="block pr-2">
+                        {label}
+                        {index === stageIndex
+                          ? ' (in progress)'
+                          : index < stageIndex
+                            ? ' (done)'
+                            : ''}
+                      </span>
                     </li>
                   ))}
                 </ol>

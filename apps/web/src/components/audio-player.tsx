@@ -1,5 +1,5 @@
 import { plural } from '@dn/domain'
-import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
+import { CaretDownIcon, CaretUpIcon, PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 
 function clock(seconds: number) {
@@ -142,9 +142,14 @@ export function AudioPlayer({
             aria-expanded={transcriptOpen}
             aria-controls="audio-transcript-panel"
             onClick={onToggleTranscript}
-            className="min-h-tap border-2 border-band-text bg-band-text px-3 text-sm font-semibold text-band"
+            className="inline-flex min-h-tap items-center gap-1.5 border-2 border-band-text bg-band-text px-3 text-sm font-semibold text-band"
           >
-            Transcript <span aria-hidden="true">{transcriptOpen ? '⌃' : '⌄'}</span>
+            Transcript
+            {transcriptOpen ? (
+              <CaretUpIcon size={14} weight="bold" aria-hidden />
+            ) : (
+              <CaretDownIcon size={14} weight="bold" aria-hidden />
+            )}
           </button>
         </div>
       </div>
