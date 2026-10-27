@@ -393,13 +393,35 @@ const routes: Route[] = [
     const endpoint = process.env.AUDIO_PROTOTYPE_TTS_URL
     const key = process.env.AUDIO_PROTOTYPE_TTS_API_KEY
     if (!endpoint || !key) throw new HttpError('unavailable', 'Audio briefing is not configured')
-    const feed = await getForYou(ctx.db, userId, { limit: 5 })
+    const { timeZone } = await readJson(
+      request,
+      z.object({ timeZone: z.optional(z.string().check(z.maxLength(100))) }),
+    )
+    let date: string
+    try {
+      date = new Intl.DateTimeFormat('en', {
+        timeZone: timeZone || 'UTC',
+        month: 'long',
+        day: 'numeric',
+      }).format(new Date())
+    } catch {
+      throw new HttpError('bad_request', 'Invalid time zone')
+    }
+    const [feed, users] = await Promise.all([
+      getForYou(ctx.db, userId, { limit: 5 }),
+      ctx.db
+        .select({ name: schema.authUser.name })
+        .from(schema.authUser)
+        .where(eq(schema.authUser.id, userId))
+        .limit(1),
+    ])
     const stories = feed.items.filter(({ story }) => story.summary?.trim())
     if (!stories.length) throw new HttpError('not_found', 'No stories with summaries are available')
     let transcript: string
     try {
       transcript = await writeAudioBriefing(
         stories.map(({ story }) => story),
+        { name: users[0]?.name ?? '', date },
         request.signal,
       )
     } catch (error) {

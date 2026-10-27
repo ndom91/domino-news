@@ -83,7 +83,11 @@ function AudioBriefingPrototype() {
     setPending(true)
     setError('')
     try {
-      const response = await fetch('/api/v1/briefing/audio-prototype', { method: 'POST' })
+      const response = await fetch('/api/v1/briefing/audio-prototype', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
+      })
       if (!response.ok) {
         const body = await response.json()
         throw new Error(body.error?.message || 'Could not prepare your audio briefing.')
@@ -109,7 +113,8 @@ function AudioBriefingPrototype() {
       </h2>
       <p className="mt-2 max-w-reading text-text-secondary">
         An experimental, AI-written audio briefing of up to five stories from your personalised
-        feed. Preparing it may take a few minutes.
+        feed. Your name is sent to the services that write and read it. Preparing it may take a few
+        minutes.
       </p>
       <div className="mt-4">
         <Button onClick={generate} loading={pending} disabled={pending}>

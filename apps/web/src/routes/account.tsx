@@ -1,5 +1,6 @@
 import { countryName, KNOWN_COUNTRIES } from '@dn/domain'
 import {
+  queryKeys,
   savePreferencesMutation,
   setFollowMutation,
   setMutedPublisherMutation,
@@ -17,7 +18,7 @@ import {
   Timestamp,
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, useBlocker } from '@tanstack/react-router'
+import { createFileRoute, useBlocker, useRouter } from '@tanstack/react-router'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { z } from 'zod/mini'
 import { FeedPicks } from '../components/feed-picks.tsx'
@@ -57,6 +58,7 @@ function AccountPage() {
   const content = {
     preferences: (
       <>
+        <NameSection name={session.user?.name ?? ''} />
         <FeedSection />
         <LocalitySection fallbackCountry={session.country} />
         <CountrySection />
@@ -135,6 +137,87 @@ function SettingsRow({
       </div>
       <div className="col-span-2 max-md:col-span-1">{children}</div>
     </section>
+  )
+}
+
+function NameSection({ name }: { name: string }) {
+  const queryClient = useQueryClient()
+  const router = useRouter()
+  const [saved, setSaved] = useState(name)
+  const [value, setValue] = useState(name)
+  const dirty = value.trim() !== saved
+  const blocker = useBlocker({
+    shouldBlockFn: () => dirty,
+    enableBeforeUnload: dirty,
+    withResolver: true,
+  })
+  const save = useMutation({
+    mutationFn: async (next: string) => {
+      const { error } = await authClient.updateUser({ name: next })
+      if (error) throw new Error(error.message ?? 'Could not save your name')
+    },
+    onSuccess: async (_result, next) => {
+      setSaved(next)
+      setValue(next)
+      await queryClient.invalidateQueries({ queryKey: queryKeys.session() })
+      await router.invalidate()
+    },
+  })
+
+  function submit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const next = value.trim()
+    if (next) save.mutate(next)
+  }
+
+  return (
+    <SettingsRow
+      id="name"
+      title="Name"
+      description="The name used to greet you in your audio briefing."
+    >
+      <form onSubmit={submit}>
+        <TextInput
+          label="Name"
+          name="name"
+          autoComplete="name"
+          value={value}
+          maxLength={100}
+          required
+          disabled={save.isPending}
+          onChange={(event) => setValue(event.target.value)}
+        />
+        {save.isError ? (
+          <Notice tone="error" title="Name not saved">
+            {save.error.message} Try again.
+          </Notice>
+        ) : null}
+        <div className="mt-4">
+          <Button
+            type="submit"
+            variant="primary"
+            loading={save.isPending}
+            disabled={save.isPending || !value.trim() || !dirty}
+          >
+            Save name
+          </Button>
+        </div>
+        <p className="mt-2 text-sm text-text-secondary" aria-live="polite">
+          {save.isSuccess && !dirty ? 'Name saved.' : ''}
+        </p>
+      </form>
+      <ConfirmDialog
+        open={blocker.status === 'blocked'}
+        title="Discard your name changes?"
+        confirmLabel="Discard changes"
+        cancelLabel="Keep editing"
+        destructive
+        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => blocker.reset?.()}
+      >
+        Your name has not been saved.
+      </ConfirmDialog>
+    </SettingsRow>
   )
 }
 
