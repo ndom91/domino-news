@@ -102,6 +102,10 @@ LOGO_DEV_API_KEY=sk_...   # logo.dev secret key
 
 The web server fetches each publisher's logo once through the logo.dev API, keeps it in memory, and serves it at `/api/v1/logos/<slug>.webp` without a session. It's cached for a year in browsers and at Cloudflare. logo.dev's fair use forbids proxying its CDN (`img.logo.dev`), so only the API is used. Without the key, publishers show no logo.
 
+### Audio briefing prototype
+
+On the Briefing page, prepare an on-demand spoken reading of up to five ranked For You summaries. Set `INFERENCE_MODE=local` and configure local generation as above, plus `AUDIO_PROTOTYPE_TTS_URL` (the full URL, e.g. `http://llama-dash.puff.lan/v1/audio/llama-tts`), `AUDIO_PROTOTYPE_TTS_API_KEY`, and optionally `AUDIO_PROTOTYPE_TTS_MODEL` (defaults to `lfm3-audio-2b`). Restart the web server after changing `.env`. The generation model writes a presenter script from the summaries, then the speech service receives that script and returns WAV audio. The prototype waits for the complete response, stores nothing on the server, and keeps the audio only in the browser page. It does not run on a schedule. Compare the transcript, factual accuracy, and pronunciation with the linked stories before deciding whether to develop it further.
+
 ### Live RSS
 
 `INGEST_MODE=live` polls the real feeds in `fixtures/publishers.json` on `FEED_POLL_CRON` (default every 15 minutes), or once with `pnpm cli ingest`. Conditional requests (ETag / Last-Modified) avoid refetching unchanged feeds.

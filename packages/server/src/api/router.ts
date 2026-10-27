@@ -21,6 +21,7 @@ import {
 import { eq } from 'drizzle-orm'
 import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
+import { writeAudioBriefing } from '../audio-briefing-prototype.ts'
 import { getBriefing } from '../briefing.ts'
 import type { ServerContext } from '../context.ts'
 import { listHiddenStories, listSignals, setFeedback, updateSignals } from '../feedback.ts'
@@ -386,6 +387,60 @@ const routes: Route[] = [
   route('GET', '/api/v1/for-you', async ({ ctx, url, userId }) =>
     json(await getForYou(ctx.db, userId, forYouQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
+  // Throwaway audio prototype: build the script from the authenticated reader's feed,
+  // never from client-provided text. No audio or reading history is persisted.
+  route('POST', '/api/v1/briefing/audio-prototype', async ({ ctx, userId, request }) => {
+    const endpoint = process.env.AUDIO_PROTOTYPE_TTS_URL
+    const key = process.env.AUDIO_PROTOTYPE_TTS_API_KEY
+    if (!endpoint || !key) throw new HttpError('unavailable', 'Audio briefing is not configured')
+    const feed = await getForYou(ctx.db, userId, { limit: 5 })
+    const stories = feed.items.filter(({ story }) => story.summary?.trim())
+    if (!stories.length) throw new HttpError('not_found', 'No stories with summaries are available')
+    let transcript: string
+    try {
+      transcript = await writeAudioBriefing(
+        stories.map(({ story }) => story),
+        request.signal,
+      )
+    } catch (error) {
+      console.error('[audio-prototype] script generation failed', error)
+      throw new HttpError('unavailable', 'Could not write your briefing. Please try again.')
+    }
+    let response: Response
+    try {
+      response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
+        body: JSON.stringify({
+          model: process.env.AUDIO_PROTOTYPE_TTS_MODEL || 'lfm3-audio-2b',
+          input: transcript,
+        }),
+        signal: AbortSignal.any([request.signal, AbortSignal.timeout(180_000)]),
+      })
+    } catch (error) {
+      console.error('[audio-prototype] speech service request failed', error)
+      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
+    }
+    if (!response.ok) {
+      console.error('[audio-prototype] speech service returned', response.status)
+      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
+    }
+    const wav = Buffer.from(await response.arrayBuffer())
+    if (
+      wav.length < 12 ||
+      wav.toString('ascii', 0, 4) !== 'RIFF' ||
+      wav.toString('ascii', 8, 12) !== 'WAVE'
+    ) {
+      console.error('[audio-prototype] speech service returned invalid WAV audio')
+      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
+    }
+    const audio = wav.toString('base64')
+    return json({
+      transcript,
+      audio,
+      stories: stories.map(({ story }) => ({ title: story.title, slug: story.slug })),
+    })
+  }),
   route('GET', '/api/v1/local', async ({ ctx, request, url, userId }) => {
     const { locality: saved } = await getPreferences(ctx.db, userId)
     const requestCountry = countryFromHeader(request.headers.get('cf-ipcountry'))

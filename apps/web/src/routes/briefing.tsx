@@ -4,7 +4,7 @@ import { Button, IconButton, Notice, StoryItem, StoryItemSkeleton } from '@dn/ui
 import { ThumbsDownIcon, ThumbsUpIcon } from '@phosphor-icons/react'
 import { useMutation, useQueryClient, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { RouterLink } from '../components/link.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
@@ -35,6 +35,7 @@ function BriefingPage() {
             : 'Your first briefing: a considered view of the news now.'}
         </p>
       </header>
+      <AudioBriefingPrototype />
       {!briefing.personalised ? (
         <Notice tone="neutral" title="Make this briefing yours" className="mt-8 max-w-reading">
           Pick the regions, desks and topics you care about, or follow a narrative or publisher.
@@ -58,6 +59,97 @@ function BriefingPage() {
         <p className="text-text-secondary">No stories in the last three days yet.</p>
       )}
     </Page>
+  )
+}
+
+// On-demand prototype: audio exists only in this page's memory.
+function AudioBriefingPrototype() {
+  const [briefing, setBriefing] = useState<{
+    audio: string
+    transcript: string
+    stories: { title: string; slug: string }[]
+  } | null>(null)
+  const [pending, setPending] = useState(false)
+  const [error, setError] = useState('')
+
+  useEffect(
+    () => () => {
+      if (briefing) URL.revokeObjectURL(briefing.audio)
+    },
+    [briefing],
+  )
+
+  async function generate() {
+    setPending(true)
+    setError('')
+    try {
+      const response = await fetch('/api/v1/briefing/audio-prototype', { method: 'POST' })
+      if (!response.ok) {
+        const body = await response.json()
+        throw new Error(body.error?.message || 'Could not prepare your audio briefing.')
+      }
+      const data = (await response.json()) as {
+        audio: string
+        transcript: string
+        stories: { title: string; slug: string }[]
+      }
+      const bytes = Uint8Array.from(atob(data.audio), (char) => char.charCodeAt(0))
+      setBriefing({ ...data, audio: URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' })) })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Could not prepare your audio briefing.')
+    } finally {
+      setPending(false)
+    }
+  }
+
+  return (
+    <section className="border-b-2 border-rule py-6" aria-labelledby="audio-briefing-title">
+      <h2 id="audio-briefing-title" className="type-section">
+        Listen to your briefing
+      </h2>
+      <p className="mt-2 max-w-reading text-text-secondary">
+        An experimental, AI-written audio briefing of up to five stories from your personalised
+        feed. Preparing it may take a few minutes.
+      </p>
+      <div className="mt-4">
+        <Button onClick={generate} loading={pending} disabled={pending}>
+          {briefing ? 'Prepare a new briefing' : 'Prepare audio briefing'}
+        </Button>
+      </div>
+      <p className="mt-2 text-text-secondary" aria-live="polite">
+        {pending ? 'Preparing your audio briefing…' : ''}
+      </p>
+      {error ? (
+        <Notice tone="error" title="Audio briefing unavailable">
+          {error}
+        </Notice>
+      ) : null}
+      {briefing ? (
+        <div className="mt-4 max-w-reading">
+          {/* biome-ignore lint/a11y/useMediaCaption: The complete generated transcript is available immediately below; this prototype has no timed captions. */}
+          <audio
+            controls
+            preload="none"
+            src={briefing.audio}
+            aria-label="Your audio briefing"
+            className="w-full"
+          />
+          <details className="mt-4">
+            <summary>Transcript and stories</summary>
+            <p className="mt-3 whitespace-pre-line text-text-secondary">{briefing.transcript}</p>
+            <ul className="mt-4 flex flex-col gap-2">
+              {briefing.stories.map((story) => (
+                <li key={story.slug}>
+                  <Link to="/stories/$slug" params={{ slug: story.slug }} className="link-inline">
+                    {story.title}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      ) : null}
+    </section>
   )
 }
 
