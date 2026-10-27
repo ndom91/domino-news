@@ -32,7 +32,7 @@ const config: ExpoConfig = {
     package: 'dev.ndo.dominonews',
     googleServicesFile: './google-services.json',
     adaptiveIcon: {
-      foregroundImage: '../web/public/icon-maskable-512.png',
+      foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#f3f1ec',
     },
   },

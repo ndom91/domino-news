@@ -1,6 +1,6 @@
-// Renders the web app manifest icons from apps/web/public/favicon.svg.
+// Renders the web manifest and Android adaptive icons from apps/web/public/favicon.svg.
 // Run after changing the favicon: node scripts/app-icons.mjs
-import { readFileSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 
 // resvg is a dependency of @dn/web (pnpm doesn't hoist it to the root).
@@ -10,9 +10,9 @@ const { Resvg } = require('@resvg/resvg-js')
 const pub = new URL('../apps/web/public/', import.meta.url)
 const svg = readFileSync(new URL('favicon.svg', pub), 'utf8')
 
-const render = (source, size, name) => {
+const render = (source, size, name, directory = pub) => {
   const png = new Resvg(source, { fitTo: { mode: 'width', value: size } }).render().asPng()
-  writeFileSync(new URL(name, pub), png)
+  writeFileSync(new URL(name, directory), png)
   console.log(`${name} ${size}×${size}`)
 }
 
@@ -28,3 +28,16 @@ const maskable = svg
   )
   .replace('</g></svg>', '</g></g></svg>')
 render(maskable, 512, 'icon-maskable-512.png')
+
+// Android's adaptive foreground has a smaller safe circle (66 of 108 dp).
+// Keep the whole mark inside it and let the configured background fill the mask.
+const android = svg
+  .replace('<rect width="760" height="760" fill="#f3f1ec"/>', '')
+  .replace(
+    /<g transform="([^"]*)">/,
+    '<g transform="translate(212.8 212.8) scale(0.44)"><g transform="$1">',
+  )
+  .replace('</g></svg>', '</g></g></svg>')
+const mobileAssets = new URL('../apps/mobile/assets/', import.meta.url)
+mkdirSync(mobileAssets, { recursive: true })
+render(android, 512, 'adaptive-icon.png', mobileAssets)
