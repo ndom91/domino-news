@@ -21,7 +21,7 @@ import {
 import { eq } from 'drizzle-orm'
 import { z } from 'zod/mini'
 import { createAssessment, listEvidence, publisherIdBySlug } from '../assessments.ts'
-import { writeAudioBriefing } from '../audio-briefing-prototype.ts'
+import { AUDIO_BRIEFING_STORY_LIMIT, selectAudioStories } from '../audio-briefing-selection.ts'
 import { getBriefing } from '../briefing.ts'
 import type { ServerContext } from '../context.ts'
 import { listHiddenStories, listSignals, setFeedback, updateSignals } from '../feedback.ts'
@@ -408,7 +408,7 @@ const routes: Route[] = [
       throw new HttpError('bad_request', 'Invalid time zone')
     }
     const [feed, users, preferences] = await Promise.all([
-      getForYou(ctx.db, userId, { limit: 5 }),
+      getForYou(ctx.db, userId, { limit: AUDIO_BRIEFING_STORY_LIMIT }),
       ctx.db
         .select({ name: schema.authUser.name })
         .from(schema.authUser)
@@ -416,16 +416,16 @@ const routes: Route[] = [
         .limit(1),
       getPreferences(ctx.db, userId),
     ])
-    const stories = feed.items.filter(({ story }) => story.summary?.trim())
+    const stories = selectAudioStories(feed.items)
     if (!stories.length) throw new HttpError('not_found', 'No stories with summaries are available')
     let transcript: string
     try {
-      transcript = await writeAudioBriefing(
-        stories.map(({ story }) => story),
-        { name: users[0]?.name ?? '', date },
-        preferences.audioBriefingStyle,
-        request.signal,
-      )
+      transcript = await ctx.inference.generation.writeAudioBriefing({
+        stories: stories.map(({ story }) => story),
+        greeting: { name: users[0]?.name ?? '', date },
+        style: preferences.audioBriefingStyle,
+        signal: request.signal,
+      })
     } catch (error) {
       console.error('[audio-prototype] script generation failed', error)
       throw new HttpError('unavailable', 'Could not write your briefing. Please try again.')

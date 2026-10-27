@@ -644,6 +644,17 @@ describe('preferences', () => {
     await save(token, { locality: null })
   })
 
+  it('preserves independent preferences saved concurrently', async () => {
+    const [style, country] = await Promise.all([
+      save(token, { audioBriefingStyle: 'radio' }),
+      save(token, { country: 'GB' }),
+    ])
+    expect(style.status).toBe(200)
+    expect(country.status).toBe(200)
+    const prefs = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect(prefs).toMatchObject({ audioBriefingStyle: 'radio', country: 'GB' })
+  })
+
   it('marks onboarding done once, and never undoes it', async () => {
     const prefs = async () =>
       userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())

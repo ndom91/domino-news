@@ -62,7 +62,6 @@ export async function savePreferences(
   userId: string,
   update: UserPreferencesUpdate,
 ): Promise<UserPreferences> {
-  const current = await getPreferences(db, userId)
   const normalized = update.locality
     ? {
         ...update,
@@ -73,25 +72,38 @@ export async function savePreferences(
         },
       }
     : update
-  const next = {
-    ...current,
-    ...normalized,
-    onboarded: current.onboarded || update.onboarded === true,
-  }
-  const { onboarded, ...columns } = next
-  // Onboarding is only ever marked done; finishing it again keeps the first timestamp.
-  const onboardedAt = onboarded && !current.onboarded ? { onboardedAt: new Date() } : {}
-  await db
-    .insert(schema.userPreference)
-    .values({ userId, ...columns, ...onboardedAt })
-    .onConflictDoUpdate({
-      target: schema.userPreference.userId,
-      set: { ...columns, ...onboardedAt, updatedAt: new Date() },
-    })
-  if (update.rememberReads === false) {
-    await db.delete(schema.readingEvent).where(eq(schema.readingEvent.userId, userId))
-  }
-  return next
+  const { onboarded, ...columns } = normalized
+  const onboardedAt = onboarded === true ? new Date() : undefined
+  return db.transaction(async (tx) => {
+    const [row] = await tx
+      .insert(schema.userPreference)
+      .values({ userId, ...columns, onboardedAt })
+      .onConflictDoUpdate({
+        target: schema.userPreference.userId,
+        set: {
+          ...columns,
+          ...(onboardedAt
+            ? { onboardedAt: sql`coalesce(${schema.userPreference.onboardedAt}, ${onboardedAt})` }
+            : {}),
+          updatedAt: new Date(),
+        },
+      })
+      .returning()
+    if (!row) throw new Error('Failed to save preferences')
+    if (update.rememberReads === false) {
+      await tx.delete(schema.readingEvent).where(eq(schema.readingEvent.userId, userId))
+    }
+    return {
+      regions: row.regions,
+      desks: row.desks,
+      topics: row.topics,
+      rememberReads: row.rememberReads,
+      audioBriefingStyle: row.audioBriefingStyle,
+      country: row.country,
+      locality: row.locality,
+      onboarded: Boolean(row.onboardedAt),
+    }
+  })
 }
 
 /** Record that a user opened a Story, only if they opted in. Returns whether it was kept. */

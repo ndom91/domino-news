@@ -1,5 +1,6 @@
 import type { Db } from '@dn/db'
 import type { BriefingResponse, ForYouResponse, StoryUpdateKind } from '@dn/schemas'
+import { selectAudioStories } from './audio-briefing-selection.ts'
 import { getForYou } from './for-you.ts'
 import { openBriefing } from './preferences.ts'
 import { latestStoryUpdatesSince } from './story-updates.ts'
@@ -48,10 +49,10 @@ export async function getBriefing(db: Db, userId: string): Promise<BriefingRespo
     since,
     openedAt: checkpoint.openedAt.toISOString(),
     personalised: feed.personalised,
-    audioStories: feed.items
-      .slice(0, 5)
-      .filter(({ story }) => story.summary?.trim())
-      .map(({ story }) => ({ title: story.title, slug: story.slug })),
+    audioStories: selectAudioStories(feed.items).map(({ story }) => ({
+      title: story.title,
+      slug: story.slug,
+    })),
     sections: [
       section(
         'essential',

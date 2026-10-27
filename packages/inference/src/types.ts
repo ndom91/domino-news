@@ -1,4 +1,5 @@
 import type {
+  AudioBriefingStyle,
   ClaimsOutput,
   NarrativeTitle,
   RelationshipCandidate,
@@ -59,6 +60,12 @@ export interface EmbeddingProvider {
 
 export interface GenerationProvider {
   readonly modelId: string
+  writeAudioBriefing(input: {
+    stories: { title: string; summary: string | null }[]
+    greeting: { name: string; date: string }
+    style: AudioBriefingStyle
+    signal: AbortSignal
+  }): Promise<string>
   matchStory(input: { article: ArticleInput; story: StoryInput }): Promise<Generated<StoryMatch>>
   /** One call with several candidates side by side: which one, if any, is the same development. */
   chooseStory(input: {

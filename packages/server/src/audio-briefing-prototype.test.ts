@@ -1,5 +1,5 @@
+import { createLocalGeneration } from '@dn/inference'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { writeAudioBriefing } from './audio-briefing-prototype.ts'
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -10,17 +10,20 @@ describe('audio briefing styles', () => {
   it.each(['professional', 'radio'] as const)(
     'uses the %s instructions with factual safeguards',
     async (style) => {
-      vi.stubEnv('INFERENCE_MODE', 'local')
-      vi.stubEnv('INFERENCE_BASE_URL', 'http://inference/v1')
       const fetcher = vi
         .spyOn(globalThis, 'fetch')
         .mockResolvedValue(Response.json({ choices: [{ message: { content: 'A script.' } }] }))
-      const result = await writeAudioBriefing(
-        [{ title: 'News', summary: 'Report [1]' }],
-        { name: 'Nico', date: 'October 27' },
+      const generation = createLocalGeneration({
+        baseUrl: 'http://inference/v1',
+        generationModel: 'gemma',
+        embeddingModel: 'embedding',
+      })
+      const result = await generation.writeAudioBriefing({
+        stories: [{ title: 'News', summary: 'Report [1]' }],
+        greeting: { name: 'Nico', date: 'October 27' },
         style,
-        new AbortController().signal,
-      )
+        signal: new AbortController().signal,
+      })
       expect(result).toBe('A script.')
       const body = JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))
       expect(body.messages[0].content).toContain('preserve attribution and uncertainty')
@@ -30,4 +33,23 @@ describe('audio briefing styles', () => {
       expect(body.messages[1].content).not.toContain('[1]')
     },
   )
+
+  it('rejects a truncated script rather than sending it to speech', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      Response.json({ choices: [{ finish_reason: 'length', message: { content: 'Incomplete' } }] }),
+    )
+    const generation = createLocalGeneration({
+      baseUrl: 'http://inference/v1',
+      generationModel: 'gemma',
+      embeddingModel: 'embedding',
+    })
+    await expect(
+      generation.writeAudioBriefing({
+        stories: [],
+        greeting: { name: '', date: 'October 27' },
+        style: 'professional',
+        signal: new AbortController().signal,
+      }),
+    ).rejects.toThrow('truncated')
+  })
 })

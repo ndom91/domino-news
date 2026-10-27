@@ -10,6 +10,7 @@ export function createCloudGeneration(): GenerationProvider {
   }
   return {
     modelId: 'cloud-disabled',
+    writeAudioBriefing: disabled,
     matchStory: disabled,
     chooseStory: disabled,
     summarizeStory: disabled,

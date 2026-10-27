@@ -126,6 +126,9 @@ export function createFixtureGeneration(): GenerationProvider {
   const modelId = FIXTURE_GENERATION_MODEL
   return {
     modelId,
+    async writeAudioBriefing() {
+      throw new Error('Audio briefing requires local generation inference to be configured')
+    },
     async matchStory({ article, story }) {
       const score = jaccard(articleTokens(article), storyTokens(story))
       const decision =
