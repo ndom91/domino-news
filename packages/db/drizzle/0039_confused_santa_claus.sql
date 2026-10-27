@@ -1,0 +1,1 @@
+ALTER TABLE "user_preference" ADD COLUMN "audio_briefing_style" text DEFAULT 'professional' NOT NULL;

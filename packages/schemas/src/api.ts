@@ -797,12 +797,16 @@ export const publisherDetailSchema = z.extend(publisherStatsSchema, {
 })
 export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 
+export const audioBriefingStyleSchema = z.enum(['professional', 'radio'])
+export type AudioBriefingStyle = z.infer<typeof audioBriefingStyleSchema>
+
 export const userPreferencesSchema = z.object({
   // For You picks. Empty = no preference. They rank Stories up, never hide others.
   regions: z.array(regionSchema).check(z.maxLength(REGIONS.length)),
   desks: z.array(deskSchema).check(z.maxLength(DESKS.length)),
   topics: z.array(topicSchema).check(z.maxLength(TOPICS.length)),
   rememberReads: z.boolean(),
+  audioBriefingStyle: audioBriefingStyleSchema,
   // ISO 3166-1 alpha-2. Picks which country's lean mix a Story shows first.
   // Null = use the country the request comes from.
   country: z.nullable(z.string().check(z.regex(/^[A-Z]{2}$/))),

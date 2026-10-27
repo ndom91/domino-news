@@ -59,6 +59,7 @@ function AccountPage() {
     preferences: (
       <>
         <NameSection name={session.user?.name ?? ''} />
+        <AudioStyleSection />
         <FeedSection />
         <LocalitySection fallbackCountry={session.country} />
         <CountrySection />
@@ -137,6 +138,58 @@ function SettingsRow({
       </div>
       <div className="col-span-2 max-md:col-span-1">{children}</div>
     </section>
+  )
+}
+
+function AudioStyleSection() {
+  const queryClient = useQueryClient()
+  const preferences = useQuery(queries.preferences())
+  const save = useMutation(savePreferencesMutation(api, queryClient))
+  return (
+    <SettingsRow
+      id="audio-style"
+      title="Audio briefing style"
+      description="Choose how your audio briefing is written. Radio may include clearly fictional sponsor jokes."
+    >
+      {preferences.isError ? (
+        <Notice tone="error" title="Audio style could not be loaded">
+          Try refreshing the page.
+        </Notice>
+      ) : preferences.data ? (
+        <fieldset disabled={save.isPending} className="flex flex-col gap-3">
+          <legend className="sr-only">Audio briefing style</legend>
+          {(
+            [
+              ['professional', 'Professional', 'A clear, light-hearted news broadcast.'],
+              ['radio', 'Radio show', 'An exuberant host with jokes and fictional sponsors.'],
+            ] as const
+          ).map(([value, label, description]) => (
+            <label key={value} className="flex min-h-tap cursor-pointer items-start gap-3">
+              <input
+                type="radio"
+                name="audioBriefingStyle"
+                value={value}
+                checked={preferences.data.audioBriefingStyle === value}
+                onChange={() => save.mutate({ audioBriefingStyle: value })}
+                className="mt-1"
+              />
+              <span>
+                <span className="block font-semibold">{label}</span>
+                <span className="text-sm text-text-secondary">{description}</span>
+              </span>
+            </label>
+          ))}
+        </fieldset>
+      ) : null}
+      {save.isError ? (
+        <Notice tone="error" title="Audio style not saved">
+          {save.error.message} Try again.
+        </Notice>
+      ) : null}
+      <p className="text-sm text-text-secondary" aria-live="polite">
+        {save.isPending ? 'Saving audio style…' : save.isSuccess ? 'Audio style saved.' : ''}
+      </p>
+    </SettingsRow>
   )
 }
 

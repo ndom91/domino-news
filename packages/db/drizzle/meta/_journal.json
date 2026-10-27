@@ -274,6 +274,13 @@
       "when": 1792973694292,
       "tag": "0038_aberrant_mentor",
       "breakpoints": true
+    },
+    {
+      "idx": 39,
+      "version": "7",
+      "when": 1793135944847,
+      "tag": "0039_confused_santa_claus",
+      "breakpoints": true
     }
   ]
 }

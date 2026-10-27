@@ -94,11 +94,15 @@ function AudioBriefingPrototype() {
       }
       const data = (await response.json()) as {
         audio: string
+        contentType: string
         transcript: string
         stories: { title: string; slug: string }[]
       }
       const bytes = Uint8Array.from(atob(data.audio), (char) => char.charCodeAt(0))
-      setBriefing({ ...data, audio: URL.createObjectURL(new Blob([bytes], { type: 'audio/wav' })) })
+      setBriefing({
+        ...data,
+        audio: URL.createObjectURL(new Blob([bytes], { type: data.contentType })),
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not prepare your audio briefing.')
     } finally {

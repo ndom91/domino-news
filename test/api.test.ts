@@ -78,8 +78,12 @@ describe('/api/v1 contracts', () => {
     })
     expect(saved.status).toBe(200)
 
-    const registered = await call(`/api/v1/me/push-subscriptions?token=${encodeURIComponent(token)}`)
-    expect(pushSubscriptionStatusSchema.parse(await registered.json())).toEqual({ registered: true })
+    const registered = await call(
+      `/api/v1/me/push-subscriptions?token=${encodeURIComponent(token)}`,
+    )
+    expect(pushSubscriptionStatusSchema.parse(await registered.json())).toEqual({
+      registered: true,
+    })
 
     const removed = await call('/api/v1/me/push-subscriptions/remove', {
       method: 'POST',
@@ -927,6 +931,26 @@ describe('Briefing', () => {
       body: JSON.stringify(body),
       headers: { 'content-type': 'application/json' },
     })
+
+  it('defaults to professional audio and saves only valid styles', async () => {
+    const initial = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+    expect(initial.audioBriefingStyle).toBe('professional')
+    const changed = userPreferencesSchema.parse(
+      await (await post('/api/v1/me/preferences', { audioBriefingStyle: 'radio' })).json(),
+    )
+    expect(changed.audioBriefingStyle).toBe('radio')
+    const other = userPreferencesSchema.parse(
+      await (await post('/api/v1/me/preferences', { rememberReads: true })).json(),
+    )
+    expect(other.audioBriefingStyle).toBe('radio')
+    expect((await post('/api/v1/me/preferences', { audioBriefingStyle: 'invalid' })).status).toBe(
+      400,
+    )
+    expect(
+      userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
+        .audioBriefingStyle,
+    ).toBe('radio')
+  })
 
   it('keeps one comparison checkpoint and lets readers mute publishers', async () => {
     await h.ctx.pool.query(

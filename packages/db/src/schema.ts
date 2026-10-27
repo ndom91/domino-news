@@ -1,4 +1,5 @@
 import {
+  type AudioBriefingStyle,
   type Desk,
   EMBEDDING_DIMENSIONS,
   type FeedbackSignal,
@@ -966,6 +967,10 @@ export const userPreference = pgTable('user_preference', {
   onboardedAt: ts('onboarded_at'),
   // Opt-in: record Story reads for the Blindspot page. Off = nothing is recorded.
   rememberReads: boolean('remember_reads').notNull().default(false),
+  audioBriefingStyle: text('audio_briefing_style')
+    .$type<AudioBriefingStyle>()
+    .notNull()
+    .default('professional'),
   // ISO 3166-1 alpha-2 for the Story lean mix. Null = use the request's country.
   country: text('country'),
   // Explicit city/county/country used only for the Local feed.

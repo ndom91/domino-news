@@ -45,6 +45,7 @@ import {
 import { analysisJob, QUEUES } from '../queues.ts'
 import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
 import { searchAll } from '../search/search.ts'
+import { createSpeechProvider } from '../speech-provider.ts'
 import { DomainError, editSummary } from '../story-service.ts'
 import { listNarrativeUpdates, listStoryUpdates } from '../story-updates.ts'
 
@@ -390,9 +391,8 @@ const routes: Route[] = [
   // Throwaway audio prototype: build the script from the authenticated reader's feed,
   // never from client-provided text. No audio or reading history is persisted.
   route('POST', '/api/v1/briefing/audio-prototype', async ({ ctx, userId, request }) => {
-    const endpoint = process.env.AUDIO_PROTOTYPE_TTS_URL
-    const key = process.env.AUDIO_PROTOTYPE_TTS_API_KEY
-    if (!endpoint || !key) throw new HttpError('unavailable', 'Audio briefing is not configured')
+    const speech = createSpeechProvider()
+    if (!speech) throw new HttpError('unavailable', 'Audio briefing is not configured')
     const { timeZone } = await readJson(
       request,
       z.object({ timeZone: z.optional(z.string().check(z.maxLength(100))) }),
@@ -407,13 +407,14 @@ const routes: Route[] = [
     } catch {
       throw new HttpError('bad_request', 'Invalid time zone')
     }
-    const [feed, users] = await Promise.all([
+    const [feed, users, preferences] = await Promise.all([
       getForYou(ctx.db, userId, { limit: 5 }),
       ctx.db
         .select({ name: schema.authUser.name })
         .from(schema.authUser)
         .where(eq(schema.authUser.id, userId))
         .limit(1),
+      getPreferences(ctx.db, userId),
     ])
     const stories = feed.items.filter(({ story }) => story.summary?.trim())
     if (!stories.length) throw new HttpError('not_found', 'No stories with summaries are available')
@@ -422,44 +423,24 @@ const routes: Route[] = [
       transcript = await writeAudioBriefing(
         stories.map(({ story }) => story),
         { name: users[0]?.name ?? '', date },
+        preferences.audioBriefingStyle,
         request.signal,
       )
     } catch (error) {
       console.error('[audio-prototype] script generation failed', error)
       throw new HttpError('unavailable', 'Could not write your briefing. Please try again.')
     }
-    let response: Response
+    let audio: Awaited<ReturnType<typeof speech.synthesize>>
     try {
-      response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json' },
-        body: JSON.stringify({
-          model: process.env.AUDIO_PROTOTYPE_TTS_MODEL || 'lfm3-audio-2b',
-          input: transcript,
-        }),
-        signal: AbortSignal.any([request.signal, AbortSignal.timeout(180_000)]),
-      })
+      audio = await speech.synthesize(transcript, request.signal)
     } catch (error) {
-      console.error('[audio-prototype] speech service request failed', error)
+      console.error('[audio-prototype] speech generation failed', error)
       throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
     }
-    if (!response.ok) {
-      console.error('[audio-prototype] speech service returned', response.status)
-      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
-    }
-    const wav = Buffer.from(await response.arrayBuffer())
-    if (
-      wav.length < 12 ||
-      wav.toString('ascii', 0, 4) !== 'RIFF' ||
-      wav.toString('ascii', 8, 12) !== 'WAVE'
-    ) {
-      console.error('[audio-prototype] speech service returned invalid WAV audio')
-      throw new HttpError('unavailable', 'Audio generation failed. Please try again.')
-    }
-    const audio = wav.toString('base64')
     return json({
       transcript,
-      audio,
+      audio: audio.bytes.toString('base64'),
+      contentType: audio.contentType,
       stories: stories.map(({ story }) => ({ title: story.title, slug: story.slug })),
     })
   }),
