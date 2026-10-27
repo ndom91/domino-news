@@ -9,6 +9,7 @@ import { AudioBriefingPrototype } from '../components/audio-briefing.tsx'
 import { RouterLink } from '../components/link.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
+import { useAudioBriefing } from '../lib/use-audio-briefing.ts'
 
 export const Route = createFileRoute('/briefing')({
   loader: async ({ context }) => {
@@ -23,9 +24,16 @@ export const Route = createFileRoute('/briefing')({
 function BriefingPage() {
   const { now } = Route.useLoaderData()
   const { data: briefing } = useSuspenseQuery(queries.briefing())
+  const audio = useAudioBriefing()
+  const audioPositions = new Map(
+    (audio.pending ? [] : (audio.briefing?.stories ?? [])).map((story, index) => [
+      story.slug,
+      index + 1,
+    ]),
+  )
   return (
     <Page>
-      <header className="grid border-b-2 border-rule pb-5 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
+      <header className="grid pb-2 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
         <div>
           <p className="mb-3 type-label text-accent-text">Your news desk</p>
           <h1 className="type-display-md text-[clamp(2.5rem,4vw,4rem)]">Briefing</h1>
@@ -36,7 +44,7 @@ function BriefingPage() {
             : 'Your first briefing: a considered view of the news now.'}
         </p>
       </header>
-      <AudioBriefingPrototype preview={briefing.audioStories} />
+      <AudioBriefingPrototype preview={briefing.audioStories} audio={audio} />
       {!briefing.personalised ? (
         <Notice tone="neutral" title="Make this briefing yours" className="mt-8 max-w-reading">
           Pick the regions, desks and topics you care about, or follow a narrative or publisher.
@@ -53,7 +61,13 @@ function BriefingPage() {
       {briefing.sections.length ? (
         <div className="flex flex-col gap-16 pt-4 pb-16 md:gap-20">
           {briefing.sections.map((section, index) => (
-            <BriefingSection key={section.kind} section={section} now={now} first={index === 0} />
+            <BriefingSection
+              key={section.kind}
+              section={section}
+              now={now}
+              first={index === 0}
+              audioPositions={audioPositions}
+            />
           ))}
         </div>
       ) : (
@@ -67,10 +81,12 @@ function BriefingSection({
   section,
   now,
   first,
+  audioPositions,
 }: {
   section: BriefingResponse['sections'][number]
   now: string
   first: boolean
+  audioPositions: ReadonlyMap<string, number>
 }) {
   return (
     <section aria-labelledby={`briefing-${section.kind}`}>
@@ -84,7 +100,12 @@ function BriefingSection({
       </div>
       <div className="mt-8 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {section.items.map((item) => (
-          <BriefingCard key={item.story.id} item={item} now={now} />
+          <BriefingCard
+            key={item.story.id}
+            item={item}
+            now={now}
+            audioPosition={audioPositions.get(item.story.slug)}
+          />
         ))}
       </div>
     </section>
@@ -94,9 +115,11 @@ function BriefingSection({
 function BriefingCard({
   item,
   now,
+  audioPosition,
 }: {
   item: BriefingResponse['sections'][number]['items'][number]
   now: string
+  audioPosition?: number
 }) {
   const queryClient = useQueryClient()
   const save = useMutation(feedbackMutation(api, queryClient))
@@ -146,6 +169,13 @@ function BriefingCard({
   return (
     <article className="flex flex-col">
       <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />
+      {audioPosition ? (
+        <p className="mt-2">
+          <span className="border border-border-strong px-2 py-1 type-label">
+            Selected for audio · {String(audioPosition).padStart(2, '0')}
+          </span>
+        </p>
+      ) : null}
       {item.update ? (
         <p className="mt-3 text-sm font-semibold leading-snug text-text-secondary">
           {item.update.description}

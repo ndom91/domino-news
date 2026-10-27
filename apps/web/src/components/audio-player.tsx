@@ -1,3 +1,4 @@
+import { plural } from '@dn/domain'
 import { PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { useRef, useState } from 'react'
 
@@ -6,7 +7,17 @@ function clock(seconds: number) {
   return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
 }
 
-export function AudioPlayer({ src }: { src: string }) {
+export function AudioPlayer({
+  src,
+  storyCount,
+  transcriptOpen,
+  onToggleTranscript,
+}: {
+  src: string
+  storyCount: number
+  transcriptOpen: boolean
+  onToggleTranscript: () => void
+}) {
   const audio = useRef<HTMLAudioElement>(null)
   const [playing, setPlaying] = useState(false)
   const [position, setPosition] = useState(0)
@@ -40,7 +51,7 @@ export function AudioPlayer({ src }: { src: string }) {
   }
 
   return (
-    <div className="bg-band px-5 py-6 text-band-text md:px-7">
+    <div className="bg-band px-4 py-3 text-band-text md:px-5">
       {/* biome-ignore lint/a11y/useMediaCaption: The full transcript is provided alongside the player. */}
       <audio
         ref={audio}
@@ -58,12 +69,12 @@ export function AudioPlayer({ src }: { src: string }) {
         }
         onError={() => setError('Audio could not be loaded. Try preparing your briefing again.')}
       />
-      <div className="flex flex-wrap items-center gap-5">
+      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
         <button
           type="button"
           onClick={toggle}
           aria-label={playing ? 'Pause briefing' : 'Play briefing'}
-          className="grid size-16 shrink-0 place-items-center bg-accent text-accent-contrast"
+          className="grid size-tap shrink-0 place-items-center bg-accent text-accent-contrast"
         >
           {playing ? (
             <PauseIcon size={25} weight="fill" aria-hidden />
@@ -72,8 +83,17 @@ export function AudioPlayer({ src }: { src: string }) {
           )}
         </button>
         <div className="min-w-48 flex-1">
-          <p className="type-label text-band-muted">{playing ? 'Now playing' : 'Audio briefing'}</p>
-          <p className="type-headline text-band-text">Your news briefing</p>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <h2 id="audio-briefing-title" className="type-headline text-band-text">
+              Listen to your briefing
+            </h2>
+            <span className="border border-band-line px-2 py-0.5 type-label text-band-text">
+              Experimental
+            </span>
+            <span className="text-sm text-band-muted">
+              {plural(storyCount, 'story', 'stories')} from your feed
+            </span>
+          </div>
           <input
             type="range"
             min={0}
@@ -116,6 +136,15 @@ export function AudioPlayer({ src }: { src: string }) {
             className="min-h-tap min-w-tap border border-band-line px-2 text-sm font-bold"
           >
             +15s
+          </button>
+          <button
+            type="button"
+            aria-expanded={transcriptOpen}
+            aria-controls="audio-transcript-panel"
+            onClick={onToggleTranscript}
+            className="min-h-tap border-2 border-band-text bg-band-text px-3 text-sm font-semibold text-band"
+          >
+            Transcript <span aria-hidden="true">{transcriptOpen ? '⌃' : '⌄'}</span>
           </button>
         </div>
       </div>

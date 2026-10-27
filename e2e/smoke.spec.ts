@@ -62,6 +62,12 @@ test('audio briefing shows preparation and the returned transcript', async ({ pa
   await expect(panel.getByText('Choosing stories…', { exact: false })).toBeVisible()
   await expect(panel.getByRole('button', { name: 'Cancel preparation' })).toBeVisible()
   respond?.()
+  await expect(panel.getByRole('button', { name: 'Transcript' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+  await expect(panel.getByText('Hello from your briefing.')).toBeHidden()
+  await panel.getByRole('button', { name: 'Transcript' }).click()
   await expect(panel.getByText('Hello from your briefing.')).toBeVisible()
   await expect(panel.getByRole('link', { name: 'A test story' })).toBeVisible()
   await expect(panel.getByRole('button', { name: 'Play briefing' })).toBeVisible()
@@ -70,6 +76,9 @@ test('audio briefing shows preparation and the returned transcript', async ({ pa
   await panel.getByRole('button', { name: 'Play briefing' }).click()
   await expect(panel.getByRole('button', { name: 'Pause briefing' })).toBeVisible()
   await panel.getByRole('button', { name: /Playback speed/ }).click()
+  await expect(panel.getByRole('button', { name: /Playback speed 1.25/ })).toBeVisible()
+  await panel.getByRole('button', { name: 'Transcript' }).click()
+  await expect(panel.getByText('Hello from your briefing.')).toBeHidden()
   await expect(panel.getByRole('button', { name: /Playback speed 1.25/ })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 })
