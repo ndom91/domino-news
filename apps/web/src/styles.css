@@ -74,12 +74,21 @@
 @media (min-width: 48rem) {
   .audio-player-grid {
     grid-template-columns: auto minmax(0, 1fr) auto auto auto auto auto;
-    grid-template-areas: "play heading time back speed forward transcript" "play seek time back speed forward transcript";
+    grid-template-areas: "play heading . . . . ." "play seek time back speed forward transcript";
     column-gap: 0.5rem;
     row-gap: 0;
   }
   .audio-player-play {
     margin-right: 0.5rem;
+  }
+  .audio-player-seek,
+  .audio-player-time,
+  .audio-player-back,
+  .audio-player-speed,
+  .audio-player-forward,
+  .audio-player-transcript {
+    /* Align controls with the track while retaining its 44px seek target. */
+    margin-top: -0.75rem;
   }
   .audio-player-transcript {
     margin-inline: 0;
