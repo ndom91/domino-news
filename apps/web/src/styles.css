@@ -4,6 +4,27 @@
 
 @source "../../../packages/ui/src";
 
+/* Fade the disclosure in and out; unsupported browsers switch instantly. */
+.audio-transcript-panel {
+  display: none;
+  opacity: 0;
+  transform: translateY(-4px);
+  transition:
+    opacity var(--dn-duration-exit) var(--dn-ease-smooth),
+    transform var(--dn-duration-exit) var(--dn-ease-smooth),
+    display var(--dn-duration-exit) allow-discrete;
+}
+.audio-transcript-panel[data-open="true"] {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+  transition-duration: var(--dn-duration-enter);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
 .audio-player-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

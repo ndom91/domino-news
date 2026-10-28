@@ -1,11 +1,5 @@
 import { plural } from '@dn/domain'
-import {
-  CaretDownIcon,
-  CaretUpIcon,
-  DownloadSimpleIcon,
-  PauseIcon,
-  PlayIcon,
-} from '@phosphor-icons/react'
+import { CaretDownIcon, DownloadSimpleIcon, PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { type CSSProperties, useRef, useState } from 'react'
 
 function clock(seconds: number) {
@@ -167,11 +161,12 @@ export function AudioPlayer({
             <span className="md:hidden">Transcript and stories</span>
             <span className="hidden md:inline">Transcript</span>
           </span>
-          {transcriptOpen ? (
-            <CaretUpIcon size={14} weight="bold" aria-hidden />
-          ) : (
-            <CaretDownIcon size={14} weight="bold" aria-hidden />
-          )}
+          <CaretDownIcon
+            size={14}
+            weight="bold"
+            aria-hidden
+            className={`transition-transform duration-(--dn-duration-enter) ${transcriptOpen ? 'rotate-180' : ''}`}
+          />
         </button>
         <a
           href={src}

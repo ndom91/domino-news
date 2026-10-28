@@ -35,8 +35,9 @@ export function AudioBriefingPrototype({
           />
           <div
             id="audio-transcript-panel"
-            hidden={!transcriptOpen}
-            className="border border-border-strong bg-sunken p-5 md:p-6"
+            data-open={transcriptOpen}
+            inert={!transcriptOpen}
+            className="audio-transcript-panel border border-border-strong bg-sunken p-5 md:p-6"
           >
             <div className="grid gap-8 md:grid-cols-[minmax(0,1.8fr)_minmax(0,0.7fr)] md:gap-column">
               <div id="audio-transcript">
@@ -61,7 +62,7 @@ export function AudioBriefingPrototype({
           </div>
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-2 md:justify-end">
             <p className="text-sm text-text-secondary md:hidden">
-              AI-generated audio digest. Check what you hear against the linked stories.
+              AI-generated audio. May contain errors.
             </p>
             <div className="flex flex-wrap items-center gap-x-4">
               <a
