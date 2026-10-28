@@ -58,10 +58,7 @@ export function AudioBriefingPrototype({
               <AudioStoryList stories={briefing.stories} />
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-2">
-            <p className="text-sm text-text-secondary">
-              AI-generated audio digest. Check what you hear against the linked stories.
-            </p>
+          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 pt-2">
             <div className="flex flex-wrap items-center gap-x-4">
               <a
                 href={briefing.audio}
@@ -88,10 +85,10 @@ export function AudioBriefingPrototype({
       ) : (
         <>
           <div className="bg-band px-4 py-4 text-band-text md:px-5">
-            <div className="flex flex-wrap items-center gap-4">
+            <div className="flex flex-wrap items-stretch gap-4">
               <span
                 aria-hidden="true"
-                className="grid size-tap shrink-0 place-items-center border border-band-line text-band-muted"
+                className="grid min-h-14 w-14 shrink-0 place-items-center border border-band-line text-band-muted"
               >
                 <PlayIcon size={18} weight="fill" />
               </span>
@@ -115,12 +112,13 @@ export function AudioBriefingPrototype({
                       ? 'The top stories from your feed, written up and read aloud. Takes a few minutes.'
                       : 'No recent stories with summaries are available yet.'}
                 </p>
+                <p className="text-sm text-band-muted">AI-generated audio digest.</p>
               </div>
               {pending ? (
                 <button
                   type="button"
                   onClick={cancel}
-                  className="min-h-tap border border-band-line px-4 font-semibold"
+                  className="min-h-tap self-center border border-band-line px-4 font-semibold"
                 >
                   Cancel preparation
                 </button>
@@ -129,7 +127,7 @@ export function AudioBriefingPrototype({
                   type="button"
                   onClick={generate}
                   disabled={!preview.length}
-                  className="inline-flex min-h-tap items-center justify-center gap-2 bg-accent px-4 font-semibold text-accent-contrast disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex min-h-tap items-center justify-center gap-2 self-center bg-accent px-4 font-semibold text-accent-contrast disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   <PlayIcon size={16} weight="fill" aria-hidden /> Prepare audio briefing
                 </button>
@@ -167,8 +165,7 @@ export function AudioBriefingPrototype({
               </div>
             ) : null}
           </div>
-          <div className="flex flex-wrap items-center justify-between gap-x-4 pt-2">
-            <p className="text-sm text-text-secondary">AI-generated audio digest.</p>
+          <div className="flex justify-end pt-2">
             <AudioSettings />
           </div>
         </>

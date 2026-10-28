@@ -153,6 +153,9 @@ export function AudioPlayer({
           </button>
         </div>
       </div>
+      <p className="mt-1 text-sm text-band-muted">
+        AI-generated audio digest. Check what you hear against the linked stories.
+      </p>
       {error ? (
         <p role="alert" className="mt-3 text-sm text-band-text">
           {error}

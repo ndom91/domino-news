@@ -33,12 +33,12 @@ function BriefingPage() {
   )
   return (
     <Page className="pt-6 md:pt-6">
-      <header className="grid pb-2 md:grid-cols-[minmax(0,1fr)_minmax(12rem,0.32fr)] md:items-end md:gap-x-column">
+      <header className="pb-2">
         <div>
           <p className="mb-2 type-label text-accent-text">Your news desk</p>
           <h1 className="type-display-md text-[clamp(2.5rem,4vw,4rem)]">Briefing</h1>
         </div>
-        <p className="mt-6 text-base leading-snug text-text-secondary md:mt-0">
+        <p className="mt-2 text-base leading-snug text-text-secondary">
           {briefing.since
             ? 'What changed since your last briefing.'
             : 'Your first briefing: a considered view of the news now.'}
