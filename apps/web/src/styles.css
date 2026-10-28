@@ -4,6 +4,109 @@
 
 @source "../../../packages/ui/src";
 
+.audio-player-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  grid-template-areas: "heading heading heading heading heading" "seek seek seek seek seek" "speed back play forward download" "transcript transcript transcript transcript transcript";
+  align-items: center;
+  justify-items: center;
+  row-gap: 0.5rem;
+}
+
+.audio-player-heading {
+  grid-area: heading;
+  justify-self: stretch;
+}
+.audio-player-seek {
+  grid-area: seek;
+  justify-self: stretch;
+}
+.audio-player-play {
+  grid-area: play;
+}
+.audio-player-speed {
+  grid-area: speed;
+}
+.audio-player-back {
+  grid-area: back;
+}
+.audio-player-forward {
+  grid-area: forward;
+}
+.audio-player-download {
+  grid-area: download;
+}
+.audio-player-time {
+  grid-area: time;
+}
+.audio-player-transcript {
+  grid-area: transcript;
+  justify-self: stretch;
+  margin-inline: -1rem;
+}
+
+@media (min-width: 48rem) {
+  .audio-player-grid {
+    grid-template-columns: auto minmax(0, 1fr) auto auto auto auto auto;
+    grid-template-areas: "play heading time back speed forward transcript" "play seek time back speed forward transcript";
+    column-gap: 0.5rem;
+    row-gap: 0;
+  }
+  .audio-player-play {
+    margin-right: 0.5rem;
+  }
+  .audio-player-transcript {
+    margin-inline: 0;
+  }
+}
+
+.audio-seek {
+  appearance: none;
+  display: block;
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.audio-seek:disabled {
+  cursor: not-allowed;
+}
+.audio-seek::-webkit-slider-runnable-track {
+  height: 4px;
+  background: linear-gradient(
+    to right,
+    var(--color-accent) var(--seek-progress),
+    var(--color-band-line) var(--seek-progress)
+  );
+}
+.audio-seek::-webkit-slider-thumb {
+  appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -4.5px;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-accent);
+}
+.audio-seek::-moz-range-track {
+  height: 4px;
+  background: var(--color-band-line);
+}
+.audio-seek::-moz-range-progress {
+  height: 4px;
+  background: var(--color-accent);
+}
+.audio-seek::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border: 0;
+  border-radius: 0;
+  background: var(--color-accent);
+}
+
 /*
  * Theme switch (see switchTheme): the new theme grows as a circle from the control that was
  * used, while the old view dims slightly underneath. switchTheme skips it under reduced motion.

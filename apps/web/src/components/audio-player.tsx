@@ -1,6 +1,12 @@
 import { plural } from '@dn/domain'
-import { CaretDownIcon, CaretUpIcon, PauseIcon, PlayIcon } from '@phosphor-icons/react'
-import { useRef, useState } from 'react'
+import {
+  CaretDownIcon,
+  CaretUpIcon,
+  DownloadSimpleIcon,
+  PauseIcon,
+  PlayIcon,
+} from '@phosphor-icons/react'
+import { type CSSProperties, useRef, useState } from 'react'
 
 function clock(seconds: number) {
   const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
@@ -51,7 +57,7 @@ export function AudioPlayer({
   }
 
   return (
-    <div className="bg-band px-4 py-3 text-band-text md:px-5">
+    <div className="bg-band text-band-text">
       {/* biome-ignore lint/a11y/useMediaCaption: The full transcript is provided alongside the player. */}
       <audio
         ref={audio}
@@ -69,12 +75,12 @@ export function AudioPlayer({
         }
         onError={() => setError('Audio could not be loaded. Try preparing your briefing again.')}
       />
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+      <div className="audio-player-grid px-4 pt-4 md:px-5 md:pt-3">
         <button
           type="button"
           onClick={toggle}
           aria-label={playing ? 'Pause briefing' : 'Play briefing'}
-          className="grid size-tap shrink-0 place-items-center bg-accent text-accent-contrast"
+          className="audio-player-play grid size-16 place-items-center bg-accent text-accent-contrast md:size-tap"
         >
           {playing ? (
             <PauseIcon size={25} weight="fill" aria-hidden />
@@ -82,7 +88,7 @@ export function AudioPlayer({
             <PlayIcon size={25} weight="fill" aria-hidden />
           )}
         </button>
-        <div className="min-w-48 flex-1">
+        <div className="audio-player-heading min-w-0">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
             <h2 id="audio-briefing-title" className="type-headline text-band-text">
               Listen to your briefing
@@ -90,10 +96,12 @@ export function AudioPlayer({
             <span className="border border-band-line px-2 py-0.5 type-label text-band-text">
               Experimental
             </span>
-            <span className="text-sm text-band-muted">
+            <span className="w-full text-sm text-band-muted md:w-auto">
               {plural(storyCount, 'story', 'stories')} from your feed
             </span>
           </div>
+        </div>
+        <div className="audio-player-seek min-w-0">
           <input
             type="range"
             min={0}
@@ -104,60 +112,81 @@ export function AudioPlayer({
             aria-label="Seek audio briefing"
             aria-valuetext={`${clock(position)} of ${clock(duration)}`}
             onChange={(event) => seek(Number(event.target.value))}
-            className="min-h-tap w-full cursor-pointer accent-accent"
+            className="audio-seek"
+            style={
+              {
+                '--seek-progress': `${duration ? Math.min(100, (position / duration) * 100) : 0}%`,
+              } as CSSProperties
+            }
           />
+          <div
+            className="-mt-2 flex justify-between text-sm font-bold text-band-muted tabular-nums md:hidden"
+            aria-hidden="true"
+          >
+            <span>{clock(position)}</span>
+            <span>{clock(duration)}</span>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="min-w-24 text-right text-sm font-bold tabular-nums">
-            {clock(position)} / {clock(duration)}
+        <span className="audio-player-time hidden text-right text-sm font-bold tabular-nums md:block">
+          {clock(position)} / {clock(duration)}
+        </span>
+        <button
+          type="button"
+          aria-label="Go back 15 seconds"
+          onClick={() => seek(position - 15)}
+          disabled={!duration}
+          className="audio-player-back min-h-tap min-w-tap px-2 text-sm font-bold md:border md:border-band-line"
+        >
+          −15s
+        </button>
+        <button
+          type="button"
+          aria-label={`Playback speed ${rate} times. Change speed`}
+          onClick={changeRate}
+          className="audio-player-speed min-h-tap min-w-tap px-2 text-sm font-bold md:border md:border-band-line"
+        >
+          {rate}×
+        </button>
+        <button
+          type="button"
+          aria-label="Go forward 15 seconds"
+          onClick={() => seek(position + 15)}
+          disabled={!duration}
+          className="audio-player-forward min-h-tap min-w-tap px-2 text-sm font-bold md:border md:border-band-line"
+        >
+          +15s
+        </button>
+        <button
+          type="button"
+          aria-expanded={transcriptOpen}
+          aria-controls="audio-transcript-panel"
+          onClick={onToggleTranscript}
+          className="audio-player-transcript inline-flex min-h-tap items-center justify-between gap-1.5 border-t border-band-line px-4 text-sm font-semibold md:border-2 md:border-band-text md:bg-band-text md:px-3 md:text-band"
+        >
+          <span>
+            <span className="md:hidden">Transcript and stories</span>
+            <span className="hidden md:inline">Transcript</span>
           </span>
-          <button
-            type="button"
-            aria-label="Go back 15 seconds"
-            onClick={() => seek(position - 15)}
-            disabled={!duration}
-            className="min-h-tap min-w-tap border border-band-line px-2 text-sm font-bold"
-          >
-            −15s
-          </button>
-          <button
-            type="button"
-            aria-label={`Playback speed ${rate} times. Change speed`}
-            onClick={changeRate}
-            className="min-h-tap min-w-tap border border-band-line px-2 text-sm font-bold"
-          >
-            {rate}×
-          </button>
-          <button
-            type="button"
-            aria-label="Go forward 15 seconds"
-            onClick={() => seek(position + 15)}
-            disabled={!duration}
-            className="min-h-tap min-w-tap border border-band-line px-2 text-sm font-bold"
-          >
-            +15s
-          </button>
-          <button
-            type="button"
-            aria-expanded={transcriptOpen}
-            aria-controls="audio-transcript-panel"
-            onClick={onToggleTranscript}
-            className="inline-flex min-h-tap items-center gap-1.5 border-2 border-band-text bg-band-text px-3 text-sm font-semibold text-band"
-          >
-            Transcript
-            {transcriptOpen ? (
-              <CaretUpIcon size={14} weight="bold" aria-hidden />
-            ) : (
-              <CaretDownIcon size={14} weight="bold" aria-hidden />
-            )}
-          </button>
-        </div>
+          {transcriptOpen ? (
+            <CaretUpIcon size={14} weight="bold" aria-hidden />
+          ) : (
+            <CaretDownIcon size={14} weight="bold" aria-hidden />
+          )}
+        </button>
+        <a
+          href={src}
+          download="domino-briefing.wav"
+          aria-label="Download audio"
+          className="audio-player-download grid min-h-tap min-w-tap place-items-center md:hidden"
+        >
+          <DownloadSimpleIcon size={20} aria-hidden />
+        </a>
       </div>
-      <p className="mt-1 text-sm text-band-muted">
+      <p className="hidden px-5 pb-3 text-sm text-band-muted md:block">
         AI-generated audio digest. Check what you hear against the linked stories.
       </p>
       {error ? (
-        <p role="alert" className="mt-3 text-sm text-band-text">
+        <p role="alert" className="px-4 pb-3 text-sm text-band-text">
           {error}
         </p>
       ) : null}

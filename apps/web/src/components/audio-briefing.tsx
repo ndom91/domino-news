@@ -47,6 +47,7 @@ export function AudioBriefingPrototype({
                 {paragraphs.length > 3 ? (
                   <div className="mt-4">
                     <Button
+                      className="w-full md:w-auto"
                       onClick={() => setFullTranscript((full) => !full)}
                       aria-expanded={fullTranscript}
                     >
@@ -58,12 +59,15 @@ export function AudioBriefingPrototype({
               <AudioStoryList stories={briefing.stories} />
             </div>
           </div>
-          <div className="flex flex-wrap items-center justify-end gap-x-4 gap-y-1 pt-2">
+          <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-2 md:justify-end">
+            <p className="text-sm text-text-secondary md:hidden">
+              AI-generated audio digest. Check what you hear against the linked stories.
+            </p>
             <div className="flex flex-wrap items-center gap-x-4">
               <a
                 href={briefing.audio}
                 download="domino-briefing.wav"
-                className="link-inline min-h-tap content-center text-sm font-semibold"
+                className="link-inline hidden min-h-tap content-center text-sm font-semibold md:block"
               >
                 Download audio
               </a>
