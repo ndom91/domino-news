@@ -4,25 +4,30 @@
 
 @source "../../../packages/ui/src";
 
-/* Fade the disclosure in and out; unsupported browsers switch instantly. */
+/* Keep the panel mounted so it can fold without measuring its content. */
 .audio-transcript-panel {
-  display: none;
-  opacity: 0;
-  transform: translateY(-4px);
-  transition:
-    opacity var(--dn-duration-exit) var(--dn-ease-smooth),
-    transform var(--dn-duration-exit) var(--dn-ease-smooth),
-    display var(--dn-duration-exit) allow-discrete;
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows var(--dn-duration-enter) var(--dn-ease-smooth);
 }
 .audio-transcript-panel[data-open="true"] {
-  display: block;
+  grid-template-rows: 1fr;
+}
+.audio-transcript-inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--dn-duration-enter) var(--dn-ease-smooth),
+    visibility 0s var(--dn-duration-enter);
+}
+.audio-transcript-panel[data-open="true"] .audio-transcript-inner {
   opacity: 1;
-  transform: translateY(0);
-  transition-duration: var(--dn-duration-enter);
-  @starting-style {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
+  visibility: visible;
+  transition:
+    opacity var(--dn-duration-enter) var(--dn-ease-smooth),
+    visibility 0s;
 }
 
 .audio-player-grid {

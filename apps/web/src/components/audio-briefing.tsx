@@ -37,27 +37,29 @@ export function AudioBriefingPrototype({
             id="audio-transcript-panel"
             data-open={transcriptOpen}
             inert={!transcriptOpen}
-            className="audio-transcript-panel border border-border-strong bg-sunken p-5 md:p-6"
+            className="audio-transcript-panel"
           >
-            <div className="grid gap-8 md:grid-cols-[minmax(0,1.8fr)_minmax(0,0.7fr)] md:gap-column">
-              <div id="audio-transcript">
-                <h3 className="type-label">Transcript</h3>
-                <p className="mt-4 max-w-reading whitespace-pre-line text-base leading-normal">
-                  {(fullTranscript ? paragraphs : paragraphs.slice(0, 3)).join('\n\n')}
-                </p>
-                {paragraphs.length > 3 ? (
-                  <div className="mt-4">
-                    <Button
-                      className="w-full md:w-auto"
-                      onClick={() => setFullTranscript((full) => !full)}
-                      aria-expanded={fullTranscript}
-                    >
-                      {fullTranscript ? 'Show less transcript' : 'Show full transcript'}
-                    </Button>
-                  </div>
-                ) : null}
+            <div className="audio-transcript-inner">
+              <div className="grid gap-8 border border-border-strong bg-sunken p-5 md:grid-cols-[minmax(0,1.8fr)_minmax(0,0.7fr)] md:gap-column md:p-6">
+                <div id="audio-transcript">
+                  <h3 className="type-label">Transcript</h3>
+                  <p className="mt-4 max-w-reading whitespace-pre-line text-base leading-normal">
+                    {(fullTranscript ? paragraphs : paragraphs.slice(0, 3)).join('\n\n')}
+                  </p>
+                  {paragraphs.length > 3 ? (
+                    <div className="mt-4">
+                      <Button
+                        className="w-full md:w-auto"
+                        onClick={() => setFullTranscript((full) => !full)}
+                        aria-expanded={fullTranscript}
+                      >
+                        {fullTranscript ? 'Show less transcript' : 'Show full transcript'}
+                      </Button>
+                    </div>
+                  ) : null}
+                </div>
+                <AudioStoryList stories={briefing.stories} />
               </div>
-              <AudioStoryList stories={briefing.stories} />
             </div>
           </div>
           <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 pt-2 md:justify-end">

@@ -686,7 +686,22 @@ function FollowingSection() {
   const toast = useToast()
   const [showAll, setShowAll] = useState(false)
   const follows = useQuery(queries.follows())
-  const unfollow = useMutation(setFollowMutation(api, queryClient))
+  const followMutation = setFollowMutation(api, queryClient)
+  const unfollow = useMutation({
+    ...followMutation,
+    mutationFn: ({
+      title: _title,
+      ...request
+    }: Parameters<typeof followMutation.mutationFn>[0] & { title: string }) =>
+      followMutation.mutationFn(request),
+    onError: (_error, variables) =>
+      toast.add({
+        title: `Couldn’t unfollow ${variables.title}.`,
+        description: 'Try again.',
+        type: 'error',
+        priority: 'high',
+      }),
+  })
   const items = [...(follows.data?.items ?? [])].sort((a, b) => a.title.localeCompare(b.title))
   return (
     <SettingsRow
@@ -717,18 +732,12 @@ function FollowingSection() {
                   aria-label={`Unfollow ${f.title}`}
                   loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
                   onClick={() =>
-                    unfollow.mutate(
-                      { targetType: f.targetType, targetId: f.id, follow: false },
-                      {
-                        onError: () =>
-                          toast.add({
-                            title: `Couldn’t unfollow ${f.title}.`,
-                            description: 'Try again.',
-                            type: 'error',
-                            priority: 'high',
-                          }),
-                      },
-                    )
+                    unfollow.mutate({
+                      targetType: f.targetType,
+                      targetId: f.id,
+                      follow: false,
+                      title: f.title,
+                    })
                   }
                 >
                   Unfollow
@@ -763,7 +772,22 @@ function MutedPublishersSection() {
   const toast = useToast()
   const [showAll, setShowAll] = useState(false)
   const muted = useQuery(queries.mutedPublishers())
-  const change = useMutation(setMutedPublisherMutation(api, queryClient))
+  const muteMutation = setMutedPublisherMutation(api, queryClient)
+  const change = useMutation({
+    ...muteMutation,
+    mutationFn: ({
+      name: _name,
+      ...request
+    }: Parameters<typeof muteMutation.mutationFn>[0] & { name: string }) =>
+      muteMutation.mutationFn(request),
+    onError: (_error, variables) =>
+      toast.add({
+        title: `Couldn’t unmute ${variables.name}.`,
+        description: 'Try again.',
+        type: 'error',
+        priority: 'high',
+      }),
+  })
   const items = muted.data?.items ?? []
   return (
     <SettingsRow
@@ -786,18 +810,7 @@ function MutedPublishersSection() {
                   aria-label={`Unmute ${publisher.name}`}
                   loading={change.isPending && change.variables?.publisherId === publisher.id}
                   onClick={() =>
-                    change.mutate(
-                      { publisherId: publisher.id, muted: false },
-                      {
-                        onError: () =>
-                          toast.add({
-                            title: `Couldn’t unmute ${publisher.name}.`,
-                            description: 'Try again.',
-                            type: 'error',
-                            priority: 'high',
-                          }),
-                      },
-                    )
+                    change.mutate({ publisherId: publisher.id, muted: false, name: publisher.name })
                   }
                 >
                   Unmute

@@ -50,6 +50,38 @@ test('account following actions report failed changes', async ({ page }) => {
   await expect(page.getByText('Couldn’t update your feedback.')).toBeVisible()
 })
 
+test('concurrent unfollow failures each show a notification', async ({ page }) => {
+  await signIn(page)
+  let releaseFirst: (() => void) | undefined
+  const firstResponse = new Promise<void>((resolve) => {
+    releaseFirst = resolve
+  })
+  await page.route('**/api/v1/me/follows', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        json: {
+          items: [
+            { targetType: 'publisher', id: 'p1', slug: 'first', title: 'First publisher' },
+            { targetType: 'publisher', id: 'p2', slug: 'second', title: 'Second publisher' },
+          ],
+        },
+      })
+      return
+    }
+    if (route.request().postDataJSON().targetId === 'p1') await firstResponse
+    await route.fulfill({ status: 500, json: { error: 'Failed' } })
+  })
+  await page.getByRole('button', { name: /Account menu for/ }).click()
+  await page.getByRole('menuitem', { name: 'Settings' }).click()
+  await page.getByRole('tab', { name: 'Following' }).click()
+  await page.getByRole('button', { name: 'Unfollow First publisher' }).click()
+  await page.getByRole('button', { name: 'Unfollow Second publisher' }).click()
+  await expect(page.getByText('Couldn’t unfollow Second publisher.')).toBeVisible()
+  releaseFirst?.()
+  await expect(page.getByText('Couldn’t unfollow First publisher.')).toBeVisible()
+  await expect(page.locator('.dn-toast')).toHaveCount(2)
+})
+
 test('audio briefing shows preparation and the returned transcript', async ({ page }) => {
   await signIn(page)
   await page.goto('/briefing', { waitUntil: 'networkidle' })
