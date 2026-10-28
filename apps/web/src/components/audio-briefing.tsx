@@ -88,11 +88,11 @@ export function AudioBriefingPrototype({
           </div>
         </>
       ) : (
-        <div className="bg-band px-4 py-4 text-band-text md:px-5">
+        <div className="bg-band px-4 py-4 text-band-text md:px-5 md:py-3">
           <div className="flex flex-wrap items-stretch gap-4">
             <span
               aria-hidden="true"
-              className="grid size-18 shrink-0 self-start place-items-center border border-band-line text-band-muted md:self-center"
+              className="grid size-18 shrink-0 self-start place-items-center border border-band-line text-band-muted md:size-tap md:self-center"
             >
               <PlayIcon size={18} weight="fill" />
             </span>
