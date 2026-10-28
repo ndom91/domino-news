@@ -102,7 +102,7 @@ export function AudioBriefingPrototype({
                     Listen to your briefing
                   </h2>
                   <span className="border border-band-line px-2 py-0.5 type-label">
-                    Experimental
+                    Beta
                   </span>
                 </div>
                 <p className="mt-1 text-sm text-band-muted">

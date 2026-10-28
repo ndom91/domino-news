@@ -94,7 +94,7 @@ export function AudioPlayer({
               Listen to your briefing
             </h2>
             <span className="border border-band-line px-2 py-0.5 type-label text-band-text">
-              Experimental
+              Beta
             </span>
             <span className="w-full text-sm text-band-muted md:w-auto">
               {plural(storyCount, 'story', 'stories')} from your feed
