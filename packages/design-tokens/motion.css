@@ -89,6 +89,85 @@
   rotate: 90deg;
 }
 
+/* Base UI toast stack: the measured offsets expand on hover or keyboard focus. */
+.dn-toast-viewport {
+  position: fixed;
+  right: max(1rem, var(--dn-safe-right, 0px));
+  bottom: max(1rem, var(--dn-safe-bottom, 0px));
+  width: min(22.5rem, calc(100vw - 2rem));
+  z-index: 100;
+}
+.dn-toast {
+  --toast-gap: 0.75rem;
+  --toast-scale: calc(1 - var(--toast-index) * 0.05);
+  --toast-stack-height: var(--toast-frontmost-height, var(--toast-height));
+  --toast-expanded-y: calc(
+    -1 *
+    var(--toast-offset-y) -
+    var(--toast-index) *
+    var(--toast-gap) +
+    var(--toast-swipe-movement-y)
+  );
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: var(--toast-stack-height);
+  z-index: calc(100 - var(--toast-index));
+  transform-origin: bottom center;
+  transform: translateX(var(--toast-swipe-movement-x))
+    translateY(
+      calc(
+        var(--toast-swipe-movement-y) -
+        var(--toast-index) *
+        0.6rem -
+        (1 - var(--toast-scale)) *
+        var(--toast-stack-height)
+      )
+    )
+    scale(var(--toast-scale));
+  transition:
+    transform var(--dn-duration-enter) var(--dn-ease-smooth),
+    opacity var(--dn-duration-exit) var(--dn-ease-smooth);
+}
+.dn-toast::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  height: calc(var(--toast-gap) + 1px);
+}
+.dn-toast[data-expanded] {
+  height: var(--toast-height);
+  transform: translateX(var(--toast-swipe-movement-x)) translateY(var(--toast-expanded-y));
+}
+.dn-toast[data-starting-style],
+.dn-toast[data-ending-style] {
+  opacity: 0;
+  transform: translateY(100%);
+}
+.dn-toast[data-limited] {
+  opacity: 0;
+}
+.dn-toast[data-ending-style][data-swipe-direction="right"] {
+  transform: translateX(calc(var(--toast-swipe-movement-x) + 150%))
+    translateY(var(--toast-expanded-y));
+}
+.dn-toast[data-ending-style][data-swipe-direction="down"] {
+  transform: translateY(calc(var(--toast-swipe-movement-y) + 150%));
+}
+.dn-toast-content {
+  overflow: hidden;
+  transition: opacity var(--dn-duration-enter) var(--dn-ease-smooth);
+}
+.dn-toast-content[data-behind] {
+  opacity: 0;
+}
+.dn-toast-content[data-expanded] {
+  opacity: 1;
+}
+
 /* Skeleton placeholder: a slow breathing pulse while data loads. */
 .t-skel {
   animation: t-skel-pulse 1.6s ease-in-out infinite;

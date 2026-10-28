@@ -2,7 +2,7 @@
 
 import { archivoLatinUrl } from '@dn/design-tokens/fonts'
 import { queryKeys } from '@dn/queries'
-import { TooltipProvider } from '@dn/ui'
+import { ToastProvider, TooltipProvider } from '@dn/ui'
 import type { QueryClient } from '@tanstack/react-query'
 import {
   createRootRouteWithContext,
@@ -92,24 +92,26 @@ function RootLayout() {
   const { pathname } = useLocation()
   const user = pathname !== '/onboarding' ? session.user : null
   return (
-    <TooltipProvider>
-      {/* Block wrapper: as flex items, the header's mx-auto rows would shrink to fit. */}
-      <div>
-        {user ? (
-          <SiteHeader user={user} />
-        ) : !session.user && pathname !== '/login' ? (
-          <PublicHeader />
+    <ToastProvider>
+      <TooltipProvider>
+        {/* Block wrapper: as flex items, the header's mx-auto rows would shrink to fit. */}
+        <div>
+          {user ? (
+            <SiteHeader user={user} />
+          ) : !session.user && pathname !== '/login' ? (
+            <PublicHeader />
+          ) : null}
+        </div>
+        {/* flex-1 pins the footer to the bottom when the page is short. */}
+        <main id="main" className="flex-1">
+          <Outlet />
+        </main>
+        {/* The login page has its own layout and links to the legal pages itself. */}
+        {pathname !== '/login' && pathname !== '/onboarding' ? (
+          <SiteFooter user={session.user} />
         ) : null}
-      </div>
-      {/* flex-1 pins the footer to the bottom when the page is short. */}
-      <main id="main" className="flex-1">
-        <Outlet />
-      </main>
-      {/* The login page has its own layout and links to the legal pages itself. */}
-      {pathname !== '/login' && pathname !== '/onboarding' ? (
-        <SiteFooter user={session.user} />
-      ) : null}
-    </TooltipProvider>
+      </TooltipProvider>
+    </ToastProvider>
   )
 }
 

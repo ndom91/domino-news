@@ -1,6 +1,11 @@
 // Typed, deterministic snippets: variants, states and editorial compositions.
 export default [
   {
+    group: 'Toast',
+    name: 'Stacked notifications',
+    code: '<ToastDemo />',
+  },
+  {
     group: 'Button',
     name: 'Variants',
     code: '<div className="flex flex-wrap gap-3"><Button variant="primary">Save summary</Button><Button>Cancel</Button><Button variant="ghost">Show history</Button><Button variant="danger">Pause backfill</Button></div>',
