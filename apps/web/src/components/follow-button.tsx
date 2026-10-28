@@ -1,6 +1,6 @@
 import { setFollowMutation } from '@dn/queries'
 import type { FollowTargetType } from '@dn/schemas'
-import { Button } from '@dn/ui'
+import { Button, useToast } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api, queries } from '../lib/api.ts'
 
@@ -15,6 +15,7 @@ export function FollowButton({
   name: string
 }) {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const follows = useQuery(queries.follows())
   const save = useMutation(setFollowMutation(api, queryClient))
   const following =
@@ -27,7 +28,20 @@ export function FollowButton({
       aria-label={following ? `Unfollow ${name}` : `Follow ${name}`}
       disabled={follows.isPending}
       loading={save.isPending}
-      onClick={() => save.mutate({ targetType, targetId, follow: !following })}
+      onClick={() =>
+        save.mutate(
+          { targetType, targetId, follow: !following },
+          {
+            onError: () =>
+              toast.add({
+                title: `Couldn’t ${following ? 'unfollow' : 'follow'} ${name}.`,
+                description: 'Try again.',
+                type: 'error',
+                priority: 'high',
+              }),
+          },
+        )
+      }
     >
       {following ? 'Following' : 'Follow'}
     </Button>

@@ -17,6 +17,7 @@ import {
   Tabs,
   TextInput,
   Timestamp,
+  useToast,
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useBlocker, useRouter } from '@tanstack/react-router'
@@ -682,6 +683,7 @@ function FeedSection() {
 
 function FollowingSection() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [showAll, setShowAll] = useState(false)
   const follows = useQuery(queries.follows())
   const unfollow = useMutation(setFollowMutation(api, queryClient))
@@ -715,7 +717,18 @@ function FollowingSection() {
                   aria-label={`Unfollow ${f.title}`}
                   loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
                   onClick={() =>
-                    unfollow.mutate({ targetType: f.targetType, targetId: f.id, follow: false })
+                    unfollow.mutate(
+                      { targetType: f.targetType, targetId: f.id, follow: false },
+                      {
+                        onError: () =>
+                          toast.add({
+                            title: `Couldn’t unfollow ${f.title}.`,
+                            description: 'Try again.',
+                            type: 'error',
+                            priority: 'high',
+                          }),
+                      },
+                    )
                   }
                 >
                   Unfollow
@@ -747,6 +760,7 @@ function FollowingSection() {
 
 function MutedPublishersSection() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [showAll, setShowAll] = useState(false)
   const muted = useQuery(queries.mutedPublishers())
   const change = useMutation(setMutedPublisherMutation(api, queryClient))
@@ -771,7 +785,20 @@ function MutedPublishersSection() {
                   variant="ghost"
                   aria-label={`Unmute ${publisher.name}`}
                   loading={change.isPending && change.variables?.publisherId === publisher.id}
-                  onClick={() => change.mutate({ publisherId: publisher.id, muted: false })}
+                  onClick={() =>
+                    change.mutate(
+                      { publisherId: publisher.id, muted: false },
+                      {
+                        onError: () =>
+                          toast.add({
+                            title: `Couldn’t unmute ${publisher.name}.`,
+                            description: 'Try again.',
+                            type: 'error',
+                            priority: 'high',
+                          }),
+                      },
+                    )
+                  }
                 >
                   Unmute
                 </Button>
@@ -801,9 +828,19 @@ function MutedPublishersSection() {
 /** What For You learned from thumbs up / down. Every item can be removed, or all reset. */
 function LearnedSignals() {
   const queryClient = useQueryClient()
+  const toast = useToast()
   const [showAll, setShowAll] = useState(false)
   const signals = useQuery(queries.signals())
-  const update = useMutation(updateSignalsMutation(api, queryClient))
+  const update = useMutation({
+    ...updateSignalsMutation(api, queryClient),
+    onError: () =>
+      toast.add({
+        title: 'Couldn’t update your feedback.',
+        description: 'Try again.',
+        type: 'error',
+        priority: 'high',
+      }),
+  })
   const items = signals.data?.items ?? []
   const more = items.filter((s) => s.weight > 0)
   const less = items.filter((s) => s.weight < 0)

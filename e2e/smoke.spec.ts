@@ -14,6 +14,42 @@ test('unauthenticated visitors are sent to sign in', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
+test('failed sign out leaves the reader signed in and allows retry', async ({ page }) => {
+  await signIn(page)
+  await page.route('**/api/auth/sign-out', (route) =>
+    route.fulfill({ status: 500, json: { message: 'Sign out failed' } }),
+  )
+  await page.getByRole('button', { name: /Account menu for/ }).click()
+  await page.getByRole('menuitem', { name: 'Sign out' }).click()
+  await expect(page.getByText('Couldn’t sign out.')).toBeVisible()
+  await page.getByRole('button', { name: /Account menu for/ }).click()
+  await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeEnabled()
+})
+
+test('account following actions report failed changes', async ({ page }) => {
+  await signIn(page)
+  for (const [endpoint, item] of [
+    ['follows', { targetType: 'publisher', id: 'p1', slug: 'example', title: 'Example publisher' }],
+    ['muted-publishers', { id: 'p2', slug: 'muted', name: 'Muted publisher' }],
+    ['signals', { kind: 'topic', key: 'climate', label: 'Climate', weight: 1 }],
+  ] as const) {
+    await page.route(`**/api/v1/me/${endpoint}`, (route) =>
+      route.request().method() === 'GET'
+        ? route.fulfill({ json: { items: [item] } })
+        : route.fulfill({ status: 500, json: { error: 'Failed' } }),
+    )
+  }
+  await page.getByRole('button', { name: /Account menu for/ }).click()
+  await page.getByRole('menuitem', { name: 'Settings' }).click()
+  await page.getByRole('tab', { name: 'Following' }).click()
+  await page.getByRole('button', { name: 'Unfollow Example publisher' }).click()
+  await expect(page.getByText('Couldn’t unfollow Example publisher.')).toBeVisible()
+  await page.getByRole('button', { name: 'Unmute Muted publisher' }).click()
+  await expect(page.getByText('Couldn’t unmute Muted publisher.')).toBeVisible()
+  await page.getByRole('button', { name: 'Forget Climate' }).click()
+  await expect(page.getByText('Couldn’t update your feedback.')).toBeVisible()
+})
+
 test('audio briefing shows preparation and the returned transcript', async ({ page }) => {
   await signIn(page)
   await page.goto('/briefing', { waitUntil: 'networkidle' })
