@@ -176,9 +176,6 @@ function AudioStyleSection() {
           {save.error.message} Try again.
         </Notice>
       ) : null}
-      <p className="text-sm text-text-secondary" aria-live="polite">
-        {save.isPending ? 'Saving audio style…' : ''}
-      </p>
     </SettingsRow>
   )
 }
