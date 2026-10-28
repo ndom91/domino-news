@@ -92,7 +92,7 @@ export function AudioBriefingPrototype({
             <div className="flex flex-wrap items-stretch gap-4">
               <span
                 aria-hidden="true"
-                className="grid min-h-14 w-14 shrink-0 place-items-center border border-band-line text-band-muted"
+                className="grid size-18 shrink-0 self-center place-items-center border border-band-line text-band-muted"
               >
                 <PlayIcon size={18} weight="fill" />
               </span>
@@ -105,18 +105,20 @@ export function AudioBriefingPrototype({
                     Experimental
                   </span>
                 </div>
-                <p className="mt-1 text-sm text-band-muted" aria-live="polite">
-                  {pending
-                    ? stage === 'selecting'
-                      ? 'Choosing stories…'
-                      : stage === 'writing'
-                        ? 'Writing the script…'
-                        : 'Recording the voice…'
-                    : preview.length
-                      ? 'The top stories from your feed, written up and read aloud. Takes a few minutes.'
-                      : 'No recent stories with summaries are available yet.'}
+                <p className="mt-1 text-sm text-band-muted">
+                  <span aria-live="polite">
+                    {pending
+                      ? stage === 'selecting'
+                        ? 'Choosing stories…'
+                        : stage === 'writing'
+                          ? 'Writing the script…'
+                          : 'Recording the voice…'
+                      : preview.length
+                        ? 'The top stories from your feed, written up and read aloud. Takes a few minutes.'
+                        : 'No recent stories with summaries are available yet.'}
+                  </span>{' '}
+                  AI-generated audio digest.
                 </p>
-                <p className="text-sm text-band-muted">AI-generated audio digest.</p>
               </div>
               {pending ? (
                 <button
