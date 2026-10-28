@@ -1,7 +1,7 @@
 import { plural } from '@dn/domain'
 import type { BriefingResponse } from '@dn/schemas'
 import { Button, Notice } from '@dn/ui'
-import { PlayIcon } from '@phosphor-icons/react'
+import { GearIcon, PlayIcon } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { useAudioBriefing } from '../lib/use-audio-briefing.ts'
@@ -87,39 +87,37 @@ export function AudioBriefingPrototype({
           </div>
         </>
       ) : (
-        <>
-          <div className="bg-band px-4 py-4 text-band-text md:px-5">
-            <div className="flex flex-wrap items-stretch gap-4">
-              <span
-                aria-hidden="true"
-                className="grid size-18 shrink-0 self-center place-items-center border border-band-line text-band-muted"
-              >
-                <PlayIcon size={18} weight="fill" />
-              </span>
-              <div className="min-w-48 flex-1">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <h2 id="audio-briefing-title" className="type-headline">
-                    Listen to your briefing
-                  </h2>
-                  <span className="border border-band-line px-2 py-0.5 type-label">
-                    Beta
-                  </span>
-                </div>
-                <p className="mt-1 text-sm text-band-muted">
-                  <span aria-live="polite">
-                    {pending
-                      ? stage === 'selecting'
-                        ? 'Choosing stories…'
-                        : stage === 'writing'
-                          ? 'Writing the script…'
-                          : 'Recording the voice…'
-                      : preview.length
-                        ? 'The top stories from your feed, written up and read aloud. Takes a few minutes.'
-                        : 'No recent stories with summaries are available yet.'}
-                  </span>{' '}
-                  AI-generated audio digest.
-                </p>
+        <div className="bg-band px-4 py-4 text-band-text md:px-5">
+          <div className="flex flex-wrap items-stretch gap-4">
+            <span
+              aria-hidden="true"
+              className="grid size-18 shrink-0 self-start place-items-center border border-band-line text-band-muted md:self-center"
+            >
+              <PlayIcon size={18} weight="fill" />
+            </span>
+            <div className="min-w-48 flex-1">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                <h2 id="audio-briefing-title" className="type-headline">
+                  Listen to your briefing
+                </h2>
+                <span className="border border-band-line px-2 py-0.5 type-label">Beta</span>
               </div>
+              <p className="mt-1 text-sm text-band-muted">
+                <span aria-live="polite">
+                  {pending
+                    ? stage === 'selecting'
+                      ? 'Choosing stories…'
+                      : stage === 'writing'
+                        ? 'Writing the script…'
+                        : 'Recording the voice…'
+                    : preview.length
+                      ? 'The top stories from your feed, written up and read aloud. Takes a few minutes.'
+                      : 'No recent stories with summaries are available yet.'}
+                </span>{' '}
+                AI-generated audio digest.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 self-center">
               {pending ? (
                 <button
                   type="button"
@@ -138,43 +136,50 @@ export function AudioBriefingPrototype({
                   <PlayIcon size={16} weight="fill" aria-hidden /> Prepare audio briefing
                 </button>
               )}
+              <Link
+                to="/account"
+                search={{ tab: 'preferences' }}
+                hash="audio-style"
+                aria-label="Audio settings"
+                title="Audio settings"
+                className="grid size-tap place-items-center border border-band-line text-band-text md:order-first"
+              >
+                <GearIcon size={20} aria-hidden />
+              </Link>
             </div>
-            {pending ? (
-              <div className="mt-4 max-w-reading">
-                <ol className="grid grid-cols-3 gap-1 text-sm text-band-muted">
-                  {[
-                    selected
-                      ? `Picked ${plural(selected.length, 'story', 'stories')}`
-                      : 'Choose stories',
-                    'Write the script',
-                    'Record the voice',
-                  ].map((label, index) => (
-                    <li
-                      key={label}
-                      className={`min-w-0 ${index === stageIndex ? 'font-bold text-band-text' : ''}`}
-                    >
-                      <span
-                        aria-hidden="true"
-                        className={`mb-3 block h-1.5 border border-band-line ${index < stageIndex ? 'bg-band-text' : index === stageIndex ? 'bg-accent' : 'bg-transparent'}`}
-                      />
-                      <span className="block pr-2">
-                        {label}
-                        {index === stageIndex
-                          ? ' (in progress)'
-                          : index < stageIndex
-                            ? ' (done)'
-                            : ''}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </div>
-            ) : null}
           </div>
-          <div className="flex justify-end pt-2">
-            <AudioSettings />
-          </div>
-        </>
+          {pending ? (
+            <div className="mt-4 max-w-reading">
+              <ol className="grid grid-cols-3 gap-1 text-sm text-band-muted">
+                {[
+                  selected
+                    ? `Picked ${plural(selected.length, 'story', 'stories')}`
+                    : 'Choose stories',
+                  'Write the script',
+                  'Record the voice',
+                ].map((label, index) => (
+                  <li
+                    key={label}
+                    className={`min-w-0 ${index === stageIndex ? 'font-bold text-band-text' : ''}`}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={`mb-3 block h-1.5 border border-band-line ${index < stageIndex ? 'bg-band-text' : index === stageIndex ? 'bg-accent' : 'bg-transparent'}`}
+                    />
+                    <span className="block pr-2">
+                      {label}
+                      {index === stageIndex
+                        ? ' (in progress)'
+                        : index < stageIndex
+                          ? ' (done)'
+                          : ''}
+                    </span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
+        </div>
       )}
       {error ? (
         <Notice tone="error" title="Audio briefing unavailable" className="mt-4">
