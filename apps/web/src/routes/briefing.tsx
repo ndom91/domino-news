@@ -25,12 +25,6 @@ function BriefingPage() {
   const { now } = Route.useLoaderData()
   const { data: briefing } = useSuspenseQuery(queries.briefing())
   const audio = useAudioBriefing()
-  const audioPositions = new Map(
-    (audio.pending ? [] : (audio.briefing?.stories ?? [])).map((story, index) => [
-      story.slug,
-      index + 1,
-    ]),
-  )
   return (
     <Page className="pt-6 md:pt-6">
       <header className="pb-2">
@@ -61,13 +55,7 @@ function BriefingPage() {
       {briefing.sections.length ? (
         <div className="flex flex-col gap-16 pb-16 md:gap-20">
           {briefing.sections.map((section, index) => (
-            <BriefingSection
-              key={section.kind}
-              section={section}
-              now={now}
-              first={index === 0}
-              audioPositions={audioPositions}
-            />
+            <BriefingSection key={section.kind} section={section} now={now} first={index === 0} />
           ))}
         </div>
       ) : (
@@ -81,12 +69,10 @@ function BriefingSection({
   section,
   now,
   first,
-  audioPositions,
 }: {
   section: BriefingResponse['sections'][number]
   now: string
   first: boolean
-  audioPositions: ReadonlyMap<string, number>
 }) {
   return (
     <section aria-labelledby={`briefing-${section.kind}`}>
@@ -100,12 +86,7 @@ function BriefingSection({
       </div>
       <div className="mt-8 grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
         {section.items.map((item) => (
-          <BriefingCard
-            key={item.story.id}
-            item={item}
-            now={now}
-            audioPosition={audioPositions.get(item.story.slug)}
-          />
+          <BriefingCard key={item.story.id} item={item} now={now} />
         ))}
       </div>
     </section>
@@ -115,11 +96,9 @@ function BriefingSection({
 function BriefingCard({
   item,
   now,
-  audioPosition,
 }: {
   item: BriefingResponse['sections'][number]['items'][number]
   now: string
-  audioPosition?: number
 }) {
   const queryClient = useQueryClient()
   const save = useMutation(feedbackMutation(api, queryClient))
@@ -169,13 +148,6 @@ function BriefingCard({
   return (
     <article className="flex flex-col">
       <StoryItem story={item.story} now={now} Link={RouterLink} showFirstReport={false} />
-      {audioPosition ? (
-        <p className="mt-2">
-          <span className="border border-border-strong px-2 py-1 type-label">
-            Selected for audio · {String(audioPosition).padStart(2, '0')}
-          </span>
-        </p>
-      ) : null}
       {item.update ? (
         <p className="mt-3 text-sm font-semibold leading-snug text-text-secondary">
           {item.update.description}
