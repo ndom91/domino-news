@@ -9,6 +9,46 @@
   ],
   "entries": [
     {
+      "publisher": "center-square",
+      "source": "allsides",
+      "rating": "Lean Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/center-square-media-bias",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "publisher": "washington-examiner",
+      "source": "allsides",
+      "rating": "Lean Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/washington-examiner-media-bias",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "publisher": "daily-wire",
+      "source": "allsides",
+      "rating": "Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/daily-wire-media-bias",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "publisher": "breitbart",
+      "source": "allsides",
+      "rating": "Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/breitbart-news-media-bias",
+      "checkedAt": "2026-10-29"
+    },
+    {
+      "publisher": "the-federalist",
+      "source": "allsides",
+      "rating": "Right",
+      "countryContext": "US",
+      "url": "https://www.allsides.com/news-source/federalist-media-bias",
+      "checkedAt": "2026-10-29"
+    },
+    {
       "publisher": "nytimes",
       "source": "allsides",
       "rating": "Lean Left",

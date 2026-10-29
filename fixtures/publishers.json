@@ -1,5 +1,81 @@
 [
   {
+    "slug": "center-square",
+    "name": "The Center Square",
+    "domain": "thecentersquare.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Republishing guidelines allow attributed reuse, but permission for automated AI summarisation is unconfirmed; robots.txt blocks several AI crawlers. Metadata only.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [
+      {
+        "url": "https://www.thecentersquare.com/search/?f=atom&altf=mrss&t=article&l=20&s=start_time&fulltext=showtext&sd=desc&ips=1200",
+        "title": "The Center Square"
+      }
+    ]
+  },
+  {
+    "slug": "washington-examiner",
+    "name": "Washington Examiner",
+    "domain": "washingtonexaminer.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Permission for article body processing has not been established. Conservative default.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [{ "url": "https://www.washingtonexaminer.com/feed/", "title": "Washington Examiner" }]
+  },
+  {
+    "slug": "daily-wire",
+    "name": "The Daily Wire",
+    "domain": "dailywire.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Permission for article body processing has not been established. Conservative default.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [{ "url": "https://www.dailywire.com/feeds/rss.xml", "title": "The Daily Wire" }]
+  },
+  {
+    "slug": "breitbart",
+    "name": "Breitbart News",
+    "domain": "breitbart.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Permission for article body processing has not been established; robots.txt could not be retrieved. Conservative default.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [{ "url": "https://feeds.feedburner.com/breitbart", "title": "Breitbart News" }]
+  },
+  {
+    "slug": "the-federalist",
+    "name": "The Federalist",
+    "domain": "thefederalist.com",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "Permission for article body processing has not been established. Conservative default.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [{ "url": "https://thefederalist.com/feed/", "title": "The Federalist" }]
+  },
+  {
+    "slug": "electrek",
+    "name": "Electrek",
+    "domain": "electrek.co",
+    "countryCode": "US",
+    "languages": ["en"],
+    "articleBodyProcessingPolicy": "metadata_only",
+    "policyNote": "robots.txt disallows GPTBot, ClaudeBot and other AI dataset crawlers from /. Metadata only.",
+    "policyReviewedAt": "2026-10-29",
+    "feeds": [
+      {
+        "url": "https://electrek.co/feed/",
+        "title": "Electrek"
+      }
+    ]
+  },
+  {
     "slug": "nytimes",
     "name": "The New York Times",
     "domain": "nytimes.com",
