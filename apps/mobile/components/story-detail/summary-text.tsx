@@ -1,7 +1,8 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { stripCitations } from '@dn/domain'
-import type { StoryContextItem } from '@dn/schemas'
+import { splitCitations } from '@dn/domain'
+import type { StoryContextItem, StorySource } from '@dn/schemas'
 import { StyleSheet, Text } from 'react-native'
+import { openExternalLink } from './open-external-link'
 
 type SummaryPart = { text: string } | { text: string; item: StoryContextItem }
 
@@ -10,36 +11,53 @@ export function SummaryText({
   context,
   onContextPress,
   text,
+  sources,
 }: {
   context: StoryContextItem[]
   onContextPress: (item: StoryContextItem) => void
   text: string
+  sources: StorySource[]
 }) {
   return (
     <>
-      {annotateText(cleanText(text), context).map((part, index) =>
-        'item' in part ? (
-          <Text
-            accessibilityHint="Opens a definition"
-            accessibilityLabel={`${part.text}: ${part.item.title}`}
-            accessibilityRole="button"
-            key={part.item.id}
-            onPress={() => onContextPress(part.item)}
-            style={styles.contextTerm}
-          >
-            {part.text}
-          </Text>
-        ) : (
-          // biome-ignore lint/suspicious/noArrayIndexKey: text runs are positional and never reorder
-          <Text key={index}>{part.text}</Text>
-        ),
-      )}
+      {splitCitations(text).flatMap((part, index) => {
+        if ('citation' in part) {
+          const source = sources.find((item) => item.citation === part.citation)
+          return source
+            ? [
+                <Text
+                  // biome-ignore lint/suspicious/noArrayIndexKey: citations are positional text runs
+                  key={`citation-${index}`}
+                  accessibilityRole="link"
+                  accessibilityLabel={`Read source ${part.citation}: ${source.publisher.name}`}
+                  onPress={() => void openExternalLink(source.url)}
+                  style={styles.contextTerm}
+                >
+                  [{part.citation}]
+                </Text>,
+              ]
+            : []
+        }
+        return annotateText(part.text, context).map((part, partIndex) =>
+          'item' in part ? (
+            <Text
+              accessibilityHint="Opens a definition"
+              accessibilityLabel={`${part.text}: ${part.item.title}`}
+              accessibilityRole="button"
+              key={part.item.id}
+              onPress={() => onContextPress(part.item)}
+              style={styles.contextTerm}
+            >
+              {part.text}
+            </Text>
+          ) : (
+            // biome-ignore lint/suspicious/noArrayIndexKey: text runs are positional and never reorder
+            <Text key={`${index}-${partIndex}`}>{part.text}</Text>
+          ),
+        )
+      })}
     </>
   )
-}
-
-function cleanText(text: string) {
-  return stripCitations(text).replace(/\s+([.,;:])/g, '$1')
 }
 
 function annotateText(text: string, items: StoryContextItem[]): SummaryPart[] {

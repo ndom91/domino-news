@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { countryName, LEAN_MIX_MIN_RATED, plural } from '@dn/domain'
+import { oneSidedCoverage, plural } from '@dn/domain'
 import { LEAN_LABELS, type PublisherLean, type StoryLean } from '@dn/schemas'
 import { StyleSheet, Text, View } from 'react-native'
 
@@ -13,40 +13,30 @@ const colors: Record<PublisherLean, string> = {
   right: t.color.lean.right,
 }
 
-export function StoryLeanMeter({ mix, country }: { mix: StoryLean[]; country: string | null }) {
+export function StoryLeanMeter({ mix }: { mix: StoryLean[] }) {
   if (mix.length === 0) return null
-
-  const shown = mix.filter((entry) => ratedCount(entry) >= LEAN_MIX_MIN_RATED)
-  const thin = mix.filter((entry) => ratedCount(entry) < LEAN_MIX_MIN_RATED)
-  const main = shown.find((entry) => entry.country === country) ?? shown[0]
-  const others = shown.filter((entry) => entry !== main)
-  const publisherCount = mix.reduce((total, entry) => total + entry.publishers.length, 0)
+  const publishers = mix.flatMap((entry) => entry.publishers)
+  const main: StoryLean = {
+    country: 'global',
+    publishers,
+    oneSided: oneSidedCoverage(
+      publishers.filter((publisher) => !publisher.estimated).map((publisher) => publisher.lean),
+    ),
+  }
 
   return (
     <View style={styles.section}>
       <Text style={styles.label}>Political lean</Text>
-      {main ? (
-        <LeanSpread lean={main} />
-      ) : (
-        <Text style={styles.empty}>
-          Not enough of the {plural(publisherCount, 'publisher')} here have a reviewed lean yet.
-        </Text>
-      )}
-      {others.map((entry) => (
-        <LeanSpread compact key={entry.country} lean={entry} />
-      ))}
+      <LeanSpread lean={main} />
       <Text style={styles.note}>
-        Each publisher’s lean is relative to its own country’s media and comes from reviewed
-        assessments.
-        {main && thin.length
-          ? ` Too few rated publishers to show: ${thin.map((entry) => countryName(entry.country)).join(', ')}.`
-          : ''}
+        This is a shared scale. Each assessment retains its country context and evidence. Estimates
+        are marked and never determine one-sided coverage.
       </Text>
     </View>
   )
 }
 
-function LeanSpread({ lean, compact = false }: { lean: StoryLean; compact?: boolean }) {
+function LeanSpread({ lean }: { lean: StoryLean }) {
   const rated = ratedCount(lean)
   const estimated = lean.publishers.filter(
     (publisher) => publisher.lean && publisher.estimated,
@@ -58,9 +48,9 @@ function LeanSpread({ lean, compact = false }: { lean: StoryLean; compact?: bool
   const unrated = lean.publishers.filter((publisher) => publisher.lean === null)
 
   return (
-    <View style={[styles.spread, compact ? styles.compactSpread : null]}>
+    <View style={styles.spread}>
       <View style={styles.spreadHeading}>
-        <Text style={styles.country}>Publishers in {countryName(lean.country)}</Text>
+        <Text style={styles.country}>Covering publishers</Text>
         <Text style={styles.count}>
           {rated} of {plural(lean.publishers.length, 'publisher')} rated
           {estimated ? `, ${estimated} estimated` : ''}
@@ -82,33 +72,29 @@ function LeanSpread({ lean, compact = false }: { lean: StoryLean; compact?: bool
           <View style={[styles.segment, styles.unrated, { flex: unrated.length }]} />
         ) : null}
       </View>
-      {!compact ? (
-        <>
-          <View
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-            style={styles.axis}
-          >
-            <Text style={styles.axisText}>Left</Text>
-            <Text style={styles.axisText}>Right</Text>
-          </View>
-          <View style={styles.rows}>
-            {groups.map((group) => (
-              <LeanRow
-                key={group.key}
-                label={LEAN_LABELS[group.key]}
-                publishers={group.publishers}
-                color={colors[group.key]}
-              />
-            ))}
-            {unrated.length ? <LeanRow label="Not rated" publishers={unrated} unrated /> : null}
-          </View>
-          {lean.oneSided ? (
-            <Text style={styles.oneSided}>
-              Mostly covered by {lean.oneSided}-leaning publishers in {countryName(lean.country)}
-            </Text>
-          ) : null}
-        </>
+      <View
+        accessibilityElementsHidden
+        importantForAccessibility="no-hide-descendants"
+        style={styles.axis}
+      >
+        <Text style={styles.axisText}>Left</Text>
+        <Text style={styles.axisText}>Right</Text>
+      </View>
+      <View style={styles.rows}>
+        {groups.map((group) => (
+          <LeanRow
+            key={group.key}
+            label={LEAN_LABELS[group.key]}
+            publishers={group.publishers}
+            color={colors[group.key]}
+          />
+        ))}
+        {unrated.length ? <LeanRow label="Not rated" publishers={unrated} unrated /> : null}
+      </View>
+      {lean.oneSided ? (
+        <Text style={styles.oneSided}>
+          Most publishers with sourced ratings lean {lean.oneSided}.
+        </Text>
       ) : null}
     </View>
   )
@@ -165,18 +151,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
     textTransform: 'uppercase',
   },
-  empty: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 22,
-  },
   spread: { gap: t.space[2] },
-  compactSpread: {
-    borderTopColor: t.color.border,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: t.space[4],
-  },
   spreadHeading: {
     flexDirection: 'row',
     flexWrap: 'wrap',

@@ -83,6 +83,7 @@ export default function ForYouScreen() {
               <Text style={styles.intro}>
                 Ranked around the regions, desks and topics you pick. Wider news still appears.
               </Text>
+              <Button onPress={() => router.push('/briefing')}>Open your briefing</Button>
             </View>
             {!first?.personalised ? (
               <View style={styles.setup}>

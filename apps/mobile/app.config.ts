@@ -41,6 +41,10 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
+    [
+      'expo-audio',
+      { microphonePermission: false, recordAudioAndroid: false, enableBackgroundPlayback: false },
+    ],
     ['expo-navigation-bar', { enforceContrast: false, style: 'dark' }],
     [
       'expo-splash-screen',

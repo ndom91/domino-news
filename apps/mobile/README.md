@@ -16,6 +16,18 @@ claims yet. Opening its detail screen admits that optional enrichment at interac
 shared Story query polls briefly and updates the screen when the exact summary version is ready.
 Previously generated Stories can still be read with the worker stopped.
 
+The Local tab uses the location saved in Account, or the API's connection-country fallback when
+available. Narratives remain accessible from Latest. Briefing is available from For You; opening it
+updates the same last-opened checkpoint used by web.
+
+Audio briefing is an on-demand prototype. Configure the server's local inference and speech service
+as described in the root `AGENTS.md`. Android requests the complete audio response, so it shows a
+single preparation state rather than the web's streamed stages. Playback uses a temporary cache file,
+removed when the Briefing screen closes; it is not designed for background playback. The new
+`expo-audio` and `expo-file-system` native modules require rebuilding existing development/preview
+clients before testing. Expo Go can also be used where its bundled SDK supports them.
+Run the mobile unit tests with `pnpm --filter @dn/mobile test`.
+
 Expo Go supports username/password sign-in. Google sign-in needs a custom development build because it
 uses native Google Play services. A development build sets `APP_VARIANT=development` to allow a LAN
 `http://` API; production builds require HTTPS and intentionally do not enable cleartext transport.

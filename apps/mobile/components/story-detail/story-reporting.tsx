@@ -1,8 +1,9 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, hostnameOf, plural } from '@dn/domain'
-import type { StorySource } from '@dn/schemas'
+import { LEAN_LABELS, type StoryLean, type StorySource } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { groupReporting } from '../../lib/reporting-groups'
 import { PublisherLogo } from '../publisher-logo'
 import { Button, uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
@@ -13,18 +14,28 @@ const EXCERPT_MAX_LENGTH = 360
 export function StoryReporting({
   onPublisherPress,
   sources,
+  leanMix,
 }: {
   onPublisherPress: (slug: string) => void
   sources: StorySource[]
+  leanMix: StoryLean[]
 }) {
   const [expanded, setExpanded] = useState(false)
+  const [view, setView] = useState<'lean' | 'time'>('lean')
   const publisherCount = new Set(sources.map((source) => source.publisher.id)).size
-  const orderedSources = [...sources].sort((a, b) => {
-    const aAt = a.publishedAt ?? a.observedAt
-    const bAt = b.publishedAt ?? b.observedAt
-    return aAt.localeCompare(bAt)
-  })
-  const shownSources = expanded ? orderedSources : orderedSources.slice(0, 5)
+  const { ordered: orderedSources, ratings, groups: grouped } = groupReporting(sources, leanMix)
+  const shownSources =
+    view === 'time'
+      ? (expanded ? orderedSources : orderedSources.slice(0, 5)).map((source) => ({
+          source,
+          heading: null,
+        }))
+      : grouped.flatMap(({ group, items }) =>
+          (expanded ? items : items.slice(0, 2)).map((source, index) => ({
+            source,
+            heading: index === 0 ? (group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]) : null,
+          })),
+        )
 
   return (
     <View style={styles.section}>
@@ -33,11 +44,31 @@ export function StoryReporting({
         {plural(sources.length, 'report')} from {plural(publisherCount, 'publisher')}
       </Text>
       <Text style={styles.intro}>
-        Headlines and descriptions are as each publisher published them. Open an article to read it
-        on the publisher’s site.
+        Lean describes the publisher, not an individual report. Estimates are marked.
       </Text>
-      {shownSources.map((source) => (
+      <View style={{ flexDirection: 'row', gap: t.space[2] }}>
+        <Button
+          tone={view === 'lean' ? 'dark' : 'light'}
+          onPress={() => {
+            setView('lean')
+            setExpanded(false)
+          }}
+        >
+          By lean
+        </Button>
+        <Button
+          tone={view === 'time' ? 'dark' : 'light'}
+          onPress={() => {
+            setView('time')
+            setExpanded(false)
+          }}
+        >
+          By time
+        </Button>
+      </View>
+      {shownSources.map(({ source, heading }) => (
         <View key={source.articleId} style={styles.source}>
+          {heading ? <Text style={uiStyles.label}>{heading}</Text> : null}
           <Pressable
             accessibilityHint="Opens the publisher"
             accessibilityLabel={`View ${source.publisher.name}`}
@@ -61,6 +92,7 @@ export function StoryReporting({
             ) : null}
             <Text style={styles.metadata}>
               {source.official ? 'Official source · ' : ''}
+              {ratings.get(source.publisher.id)?.estimated ? 'Estimated lean · ' : ''}
               {source.citation
                 ? `Citation ${source.citation} · `
                 : source.citedInSummary
@@ -72,7 +104,11 @@ export function StoryReporting({
           </Pressable>
         </View>
       ))}
-      {orderedSources.length > 5 ? (
+      {(
+        view === 'time'
+          ? orderedSources.length > 5
+          : grouped.some((group) => group.items.length > 2)
+      ) ? (
         <Button onPress={() => setExpanded((current) => !current)} tone="light">
           {expanded ? 'Show fewer reports' : `View all ${plural(orderedSources.length, 'report')}`}
         </Button>

@@ -9,6 +9,7 @@ import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../com
 import { isUnauthorized, queries } from '../../../lib/api'
 
 export default function LatestScreen() {
+  const router = useRouter()
   const front = useQuery(queries.front())
   const stories = useInfiniteQuery(queries.storyList())
 
@@ -93,6 +94,9 @@ export default function LatestScreen() {
                 {plural(latest.length, 'story', 'stories')}
               </Text>
             </View>
+            <Button tone="light" onPress={() => router.push('/narratives')}>
+              Browse narratives
+            </Button>
           </>
         }
         ListHeaderComponentStyle={latest.length ? styles.listHeader : undefined}

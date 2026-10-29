@@ -51,14 +51,14 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="narratives"
+        name="local"
         options={{
-          title: 'Narratives',
-          tabBarAccessibilityLabel: 'Connected story narratives',
+          title: 'Local',
+          tabBarAccessibilityLabel: 'Local stories',
           tabBarIcon: ({ color, size }) => (
             <Feather
               color={typeof color === 'string' ? color : t.color.textMuted}
-              name="git-branch"
+              name="map-pin"
               size={size}
             />
           ),

@@ -80,6 +80,7 @@ export default function SignedInLayout() {
     >
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+      <Stack.Screen name="briefing" options={{ headerTitle: 'Briefing' }} />
       <Stack.Screen
         name="stories/[slug]"
         options={{ headerBackTitle: 'Back', headerTitle: 'Story' }}
@@ -87,6 +88,10 @@ export default function SignedInLayout() {
       <Stack.Screen
         name="blindspot"
         options={{ headerBackTitle: 'Account', headerTitle: 'Blindspot' }}
+      />
+      <Stack.Screen
+        name="narratives/index"
+        options={{ headerBackTitle: 'Back', headerTitle: 'Narratives' }}
       />
       <Stack.Screen
         name="narratives/[slug]"

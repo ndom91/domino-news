@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { MutePublisher } from '../../../components/account/muted-publishers'
 import { FollowToggle } from '../../../components/follow-toggle'
 import { PublisherLogo } from '../../../components/publisher-logo'
 import { StoryCard } from '../../../components/story-card'
@@ -75,6 +76,7 @@ export default function PublisherScreen() {
             .filter(Boolean)
             .join(' · ')}
         </Text>
+        <MutePublisher id={data.id} name={data.name} />
 
         <View style={styles.counts}>
           <Count label="Stories" value={data.storiesCovered} />

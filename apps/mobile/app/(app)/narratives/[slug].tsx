@@ -6,7 +6,8 @@ import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
-import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
+import { StoryUpdates } from '../../../components/story-detail/story-updates'
+import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
 
 const RELATION_LABELS: Record<StoryRelation, string> = {
@@ -21,6 +22,7 @@ const RELATION_LABELS: Record<StoryRelation, string> = {
 export default function NarrativeScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const narrative = useQuery(queries.narrative(slug))
+  const updates = useQuery(queries.narrativeUpdates(slug))
 
   if (narrative.isPending) {
     return (
@@ -42,10 +44,24 @@ export default function NarrativeScreen() {
     )
   }
 
-  return <NarrativeContent narrative={narrative.data} />
+  return (
+    <NarrativeContent
+      narrative={narrative.data}
+      updates={updates.data?.items ?? []}
+      retryUpdates={updates.isError ? () => void updates.refetch() : undefined}
+    />
+  )
 }
 
-function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
+function NarrativeContent({
+  narrative,
+  updates,
+  retryUpdates,
+}: {
+  narrative: NarrativeDetail
+  updates: Parameters<typeof StoryUpdates>[0]['items']
+  retryUpdates?: () => void
+}) {
   const router = useRouter()
   const [lastMarkerCenter, setLastMarkerCenter] = useState<number | null>(null)
   const stories = [...narrative.stories].sort((a, b) =>
@@ -71,6 +87,12 @@ function NarrativeContent({ narrative }: { narrative: NarrativeDetail }) {
           <Text style={styles.title}>{narrative.title}</Text>
           <FollowToggle name={narrative.title} targetId={narrative.id} targetType="narrative" />
         </View>
+        <StoryUpdates title="Recent updates" items={updates} />
+        {retryUpdates ? (
+          <Button tone="light" onPress={retryUpdates}>
+            Retry recent updates
+          </Button>
+        ) : null}
         {narrative.description ? (
           <Text style={styles.description}>{narrative.description}</Text>
         ) : null}

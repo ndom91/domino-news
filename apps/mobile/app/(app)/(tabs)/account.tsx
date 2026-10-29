@@ -14,7 +14,10 @@ import { useState } from 'react'
 import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AlertSettings } from '../../../components/account/alert-settings'
+import { AudioSettings } from '../../../components/account/audio-settings'
 import { ConfirmationDialog } from '../../../components/account/confirmation-dialog'
+import { LocalitySettings } from '../../../components/account/locality-settings'
+import { MutedPublishers } from '../../../components/account/muted-publishers'
 import { FeedPicks } from '../../../components/feed-picks'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
@@ -147,7 +150,7 @@ export default function AccountScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Country preference</Text>
           <Text style={styles.description}>
-            Choose which country’s publisher lean context appears first on stories.
+            Choose the country used for country-specific coverage insights.
           </Text>
           <Pressable
             accessibilityHint="Opens country choices"
@@ -171,6 +174,9 @@ export default function AccountScreen() {
           </Pressable>
         </View>
 
+        <LocalitySettings locality={settings.locality} />
+        <AudioSettings style={settings.audioBriefingStyle} name={user?.name ?? ''} />
+        <MutedPublishers />
         <AlertSettings />
 
         <View style={styles.section}>

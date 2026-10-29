@@ -20,7 +20,14 @@ export function StoryHeader({ story }: { story: StoryDetail }) {
   const summaryText = (text: string) => {
     const context = story.context.filter((item) => !shown.includes(item.anchorText))
     shown += `\n${text}`
-    return <SummaryText context={context} onContextPress={setSelectedContext} text={text} />
+    return (
+      <SummaryText
+        context={context}
+        sources={story.sources}
+        onContextPress={setSelectedContext}
+        text={text}
+      />
+    )
   }
 
   return (
