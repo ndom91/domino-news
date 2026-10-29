@@ -28,6 +28,7 @@ import {
   SummaryText,
   Timestamp,
 } from '@dn/ui'
+import { CaretDownIcon } from '@phosphor-icons/react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -132,21 +133,35 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
       <div className="flex flex-wrap items-center gap-x-4">
         <SupportingSources sources={update.sources} />
         {update.summaryDiff?.previous ? (
-          <button
+          <Button
             type="button"
+            variant="ghost"
+            size="sm"
             aria-expanded={comparing}
             aria-controls={comparisonId}
             onClick={() => setComparing((open) => !open)}
-            className="inline-flex min-h-tap items-center gap-1 font-semibold text-accent-text hover:underline"
+            className="min-h-tap"
           >
             {comparing ? 'Hide comparison' : 'Compare versions'}
-            <span aria-hidden>{comparing ? '⌃' : '⌄'}</span>
-          </button>
+            <CaretDownIcon
+              size={14}
+              weight="bold"
+              aria-hidden
+              className={`transition-transform duration-(--dn-duration-enter) ${comparing ? 'rotate-180' : ''}`}
+            />
+          </Button>
         ) : null}
       </div>
       {update.summaryDiff?.previous ? (
-        <div id={comparisonId} hidden={!comparing}>
-          <SummaryVersions summaryDiff={update.summaryDiff} />
+        <div
+          id={comparisonId}
+          data-open={comparing}
+          inert={!comparing}
+          className="disclosure-panel"
+        >
+          <div className="disclosure-inner">
+            <SummaryVersions summaryDiff={update.summaryDiff} />
+          </div>
         </div>
       ) : null}
       {update.relatedStory ? (
@@ -176,11 +191,10 @@ function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }
             target="_blank"
             rel="noopener noreferrer"
             title={source.title}
-            className="link-inline"
+            className="hover:text-accent-text"
           >
             {source.publisher?.name ?? source.title}
           </a>
-          {source === sources.at(-1) ? null : ', '}
         </span>
       ))}
     </span>

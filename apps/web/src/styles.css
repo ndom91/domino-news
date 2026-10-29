@@ -5,15 +5,18 @@
 @source "../../../packages/ui/src";
 
 /* Keep the panel mounted so it can fold without measuring its content. */
-.audio-transcript-panel {
+.audio-transcript-panel,
+.disclosure-panel {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows var(--dn-duration-enter) var(--dn-ease-smooth);
 }
-.audio-transcript-panel[data-open="true"] {
+.audio-transcript-panel[data-open="true"],
+.disclosure-panel[data-open="true"] {
   grid-template-rows: 1fr;
 }
-.audio-transcript-inner {
+.audio-transcript-inner,
+.disclosure-inner {
   min-height: 0;
   overflow: hidden;
   opacity: 0;
@@ -22,7 +25,8 @@
     opacity var(--dn-duration-enter) var(--dn-ease-smooth),
     visibility 0s var(--dn-duration-enter);
 }
-.audio-transcript-panel[data-open="true"] .audio-transcript-inner {
+.audio-transcript-panel[data-open="true"] .audio-transcript-inner,
+.disclosure-panel[data-open="true"] .disclosure-inner {
   opacity: 1;
   visibility: visible;
   transition:

@@ -216,6 +216,22 @@ test('story changes show a timeline with expandable updates and versions', async
                       domain: 'example.com',
                     },
                   },
+                  ...(index === 1
+                    ? [
+                        {
+                          type: 'article',
+                          title: 'Another report',
+                          description: null,
+                          url: 'https://example.com/other',
+                          publisher: {
+                            id: 'publisher-other',
+                            slug: 'other',
+                            name: 'Other Publisher',
+                            domain: 'example.com',
+                          },
+                        },
+                      ]
+                    : []),
                 ]
               : [],
         })),
@@ -230,7 +246,17 @@ test('story changes show a timeline with expandable updates and versions', async
   await expect(changes.getByText('18:35').first()).toBeVisible()
   await expect(changes.getByText('26 Oct · UTC')).toHaveCount(1)
   await expect(changes.getByText('25 Oct · UTC')).toHaveCount(1)
-  await expect(changes.getByText('+1 source')).toBeVisible()
+  await expect(changes.getByText('+2 sources')).toBeVisible()
+  const reporting = changes.locator('#story-updates-list > li').nth(1)
+  await expect(reporting.getByRole('link', { name: 'Other Publisher' })).toHaveAttribute(
+    'href',
+    'https://example.com/other',
+  )
+  await expect(reporting).not.toContainText(',')
+  await expect(reporting.getByRole('link', { name: 'Test Publisher' })).toHaveCSS(
+    'text-decoration-line',
+    'none',
+  )
   await expect(changes.getByRole('link', { name: 'Test Publisher' }).first()).toHaveAttribute(
     'href',
     'https://example.com/report',
