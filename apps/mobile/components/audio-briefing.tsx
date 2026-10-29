@@ -1,101 +1,337 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import { plural } from '@dn/domain'
+import Feather from '@expo/vector-icons/Feather'
 import { useAudioPlayerStatus } from 'expo-audio'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { StyleSheet, Text, View } from 'react-native'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useAudioBriefing } from './audio-briefing-provider'
-import { Button, uiStyles } from './ui'
+
+function clock(seconds: number) {
+  const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
+  return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
+}
 
 export function AudioBriefing({ available }: { available: boolean }) {
   const router = useRouter()
   const { player, result, pending, error, generate, cancel, play } = useAudioBriefing()
   const status = useAudioPlayerStatus(player)
-  const [transcript, setTranscript] = useState(false)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [rate, setRate] = useState(1)
+  const duration = Number.isFinite(status.duration) ? Math.max(0, status.duration) : 0
+  const position = Number.isFinite(status.currentTime)
+    ? Math.max(0, Math.min(status.currentTime, duration))
+    : 0
+  const progress = duration ? position / duration : 0
+  function changeRate() {
+    const speeds = [1, 1.25, 1.5, 2, 0.75]
+    const next = speeds[(speeds.indexOf(rate) + 1) % speeds.length] ?? 1
+    player.setPlaybackRate(next)
+    setRate(next)
+  }
   return (
-    <View style={styles.section}>
-      <Text style={uiStyles.label}>Listen to your briefing · Beta</Text>
-      <Text style={styles.text}>
-        AI-generated audio may contain errors. Preparing it can take a few minutes.
-      </Text>
-      {pending ? (
-        <>
-          <Text accessibilityLiveRegion="polite" style={styles.text}>
-            Preparing your briefing…
+    <View style={styles.panel}>
+      <View style={styles.topRow}>
+        {result ? (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={status.playing ? 'Pause briefing' : 'Play briefing'}
+            onPress={() => (status.playing ? player.pause() : void play())}
+            style={({ pressed }) => [styles.play, pressed && styles.pressed]}
+          >
+            <Feather
+              name={status.playing ? 'pause' : 'play'}
+              size={24}
+              color={t.color.accentContrast}
+            />
+          </Pressable>
+        ) : (
+          <View aria-hidden style={styles.placeholder}>
+            <Feather name="headphones" size={22} color={t.color.bandText} />
+          </View>
+        )}
+        <View style={styles.heading}>
+          <View style={styles.headingRow}>
+            <Text style={styles.title}>Listen to your briefing</Text>
+            <Text style={styles.beta}>Beta</Text>
+          </View>
+          <Text style={styles.subhead}>
+            {result
+              ? `${plural(result.stories.length, 'story', 'stories')} from your feed`
+              : available
+                ? 'Your top stories, read aloud.'
+                : 'No recent stories with summaries yet.'}
           </Text>
-          <Button tone="light" onPress={cancel}>
-            Cancel preparation
-          </Button>
-        </>
-      ) : (
-        <Button disabled={!available} onPress={() => void generate()}>
-          {result ? 'Prepare a new briefing' : 'Prepare audio briefing'}
-        </Button>
-      )}
-      {error ? (
-        <Text accessibilityRole="alert" style={styles.error}>
-          {error}
-        </Text>
-      ) : null}
+        </View>
+        <Pressable
+          accessibilityRole="link"
+          accessibilityLabel="Audio settings"
+          onPress={() => router.push('/account')}
+          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+        >
+          <Feather name="settings" size={19} color={t.color.bandText} />
+        </Pressable>
+      </View>
+
       {result ? (
         <>
-          <Button tone="light" onPress={() => (status.playing ? player.pause() : void play())}>
-            {status.playing ? 'Pause' : 'Play'}
-          </Button>
-          {status.error ? (
-            <Text accessibilityRole="alert" style={styles.error}>
-              Playback failed. Try preparing the briefing again.
-            </Text>
-          ) : null}
-          <Text style={styles.text}>
-            {Math.floor(status.currentTime)} / {Math.floor(status.duration)} seconds
-          </Text>
-          <View style={styles.controls}>
-            <Button
-              tone="light"
-              onPress={() => void player.seekTo(Math.max(0, status.currentTime - 15))}
-            >
-              Back 15 seconds
-            </Button>
-            <Button
-              tone="light"
-              onPress={() => void player.seekTo(Math.min(status.duration, status.currentTime + 15))}
-            >
-              Forward 15 seconds
-            </Button>
+          <View
+            accessible
+            accessibilityLabel={`Playback position ${clock(position)} of ${clock(duration)}`}
+            accessibilityRole="progressbar"
+            accessibilityValue={{ min: 0, max: duration || 1, now: position }}
+            style={styles.progressTrack}
+          >
+            <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
           </View>
-          <Button tone="light" onPress={() => setTranscript(!transcript)}>
-            {transcript ? 'Hide transcript' : 'Show transcript'}
-          </Button>
-          {transcript ? (
-            <Text selectable style={styles.text}>
-              {result.transcript}
-            </Text>
-          ) : null}
-          {result.stories.map((story) => (
-            <Button
-              key={story.slug}
-              tone="light"
-              onPress={() => router.push(`/stories/${story.slug}`)}
+          <View style={styles.times}>
+            <Text style={styles.time}>{clock(position)}</Text>
+            <Text style={styles.time}>{clock(duration)}</Text>
+          </View>
+          <View style={styles.controls}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go back 15 seconds"
+              disabled={!duration}
+              onPress={() => void player.seekTo(Math.max(0, position - 15))}
+              style={({ pressed }) => [styles.smallControl, pressed && styles.pressed]}
             >
-              {story.title}
-            </Button>
-          ))}
+              <Text style={styles.controlText}>−15s</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={`Playback speed ${rate} times. Change speed`}
+              onPress={changeRate}
+              style={({ pressed }) => [styles.smallControl, pressed && styles.pressed]}
+            >
+              <Text style={styles.controlText}>{rate}×</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Go forward 15 seconds"
+              disabled={!duration}
+              onPress={() => void player.seekTo(Math.min(duration, position + 15))}
+              style={({ pressed }) => [styles.smallControl, pressed && styles.pressed]}
+            >
+              <Text style={styles.controlText}>+15s</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityState={{ expanded: detailsOpen }}
+              onPress={() => setDetailsOpen(!detailsOpen)}
+              style={({ pressed }) => [styles.detailsButton, pressed && styles.pressed]}
+            >
+              <Text style={styles.controlText}>Transcript & stories</Text>
+              <Feather
+                name={detailsOpen ? 'chevron-up' : 'chevron-down'}
+                size={16}
+                color={t.color.bandText}
+              />
+            </Pressable>
+          </View>
         </>
       ) : null}
-      <Button tone="light" onPress={() => router.push('/account')}>
-        Audio settings
-      </Button>
+
+      {pending ? (
+        <View style={styles.preparation}>
+          <Text accessibilityLiveRegion="polite" style={styles.subhead}>
+            Preparing your briefing…
+          </Text>
+          <Pressable accessibilityRole="button" onPress={cancel} style={styles.inlineAction}>
+            <Text style={styles.actionText}>Cancel</Text>
+          </Pressable>
+        </View>
+      ) : (
+        <Pressable
+          accessibilityRole="button"
+          disabled={!available}
+          onPress={() => void generate()}
+          style={({ pressed }) => [
+            result ? styles.inlineAction : styles.prepareButton,
+            pressed && styles.pressed,
+            !available && styles.disabled,
+          ]}
+        >
+          <Text style={result ? styles.actionText : styles.prepareText}>
+            {result ? 'Prepare a new briefing' : 'Prepare audio briefing'}
+          </Text>
+        </Pressable>
+      )}
+      {error || status.error ? (
+        <Text accessibilityRole="alert" style={styles.error}>
+          {error || 'Playback failed. Try preparing the briefing again.'}
+        </Text>
+      ) : null}
+      <Text style={styles.disclaimer}>AI-generated audio. May contain errors.</Text>
+
+      {result && detailsOpen ? (
+        <View style={styles.details}>
+          <Text accessibilityRole="header" style={styles.detailsHeading}>
+            Transcript
+          </Text>
+          <Text selectable style={styles.transcript}>
+            {result.transcript}
+          </Text>
+          <Text accessibilityRole="header" style={styles.detailsHeading}>
+            Stories in this briefing
+          </Text>
+          {result.stories.map((story, index) => (
+            <Pressable
+              key={story.slug}
+              accessibilityRole="link"
+              accessibilityLabel={`Open ${story.title}`}
+              onPress={() => router.push(`/stories/${story.slug}`)}
+              style={({ pressed }) => [styles.story, pressed && styles.pressed]}
+            >
+              <Text style={styles.storyNumber}>{String(index + 1).padStart(2, '0')}</Text>
+              <Text style={styles.storyTitle}>{story.title}</Text>
+              <Feather name="arrow-up-right" size={17} color={t.color.bandMuted} />
+            </Pressable>
+          ))}
+        </View>
+      ) : null}
     </View>
   )
 }
+
 const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginVertical: t.space[5] },
-  controls: { flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
-  text: {
-    color: t.color.textSecondary,
+  panel: {
+    borderTopColor: t.color.bandMuted,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: t.space[2],
+    marginTop: t.space[5],
+    paddingTop: t.space[4],
+  },
+  topRow: { alignItems: 'center', flexDirection: 'row', gap: t.space[3] },
+  play: {
+    alignItems: 'center',
+    backgroundColor: t.color.accent,
+    height: 56,
+    justifyContent: 'center',
+    width: 56,
+  },
+  placeholder: {
+    alignItems: 'center',
+    borderColor: t.color.bandMuted,
+    borderWidth: 1,
+    height: 56,
+    justifyContent: 'center',
+    width: 56,
+  },
+  heading: { flex: 1, gap: t.space[1] },
+  headingRow: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
+  title: {
+    color: t.color.bandText,
+    fontFamily: t.font.bold,
+    fontSize: t.type.bodyLarge,
+    flexShrink: 1,
+  },
+  beta: {
+    borderColor: t.color.bandMuted,
+    borderWidth: 1,
+    color: t.color.bandText,
+    fontFamily: t.font.bold,
+    fontSize: t.type.meta,
+    paddingHorizontal: t.space[1],
+  },
+  subhead: {
+    color: t.color.bandMuted,
     fontFamily: t.font.regular,
+    fontSize: t.type.meta,
+    lineHeight: 19,
+  },
+  iconButton: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+    minWidth: t.size.tap,
+  },
+  progressTrack: { backgroundColor: t.color.bandMuted, height: 4, marginTop: t.space[3] },
+  progressFill: { backgroundColor: t.color.accent, height: '100%' },
+  times: { flexDirection: 'row', justifyContent: 'space-between' },
+  time: {
+    color: t.color.bandMuted,
+    fontFamily: t.font.medium,
+    fontSize: t.type.meta,
+    fontVariant: ['tabular-nums'],
+  },
+  controls: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[1] },
+  smallControl: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+    minWidth: t.size.tap,
+  },
+  controlText: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.meta },
+  detailsButton: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    gap: t.space[1],
+    justifyContent: 'flex-end',
+    minHeight: t.size.tap,
+    flexGrow: 1,
+  },
+  preparation: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  prepareButton: {
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: t.color.accent,
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+    paddingHorizontal: t.space[4],
+    marginTop: t.space[2],
+  },
+  prepareText: { color: t.color.accentContrast, fontFamily: t.font.bold, fontSize: t.type.body },
+  inlineAction: { alignSelf: 'flex-start', justifyContent: 'center', minHeight: t.size.tap },
+  actionText: {
+    color: t.color.bandText,
+    fontFamily: t.font.semibold,
+    fontSize: t.type.meta,
+    textDecorationLine: 'underline',
+  },
+  disclaimer: { color: t.color.bandMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
+  details: {
+    borderTopColor: t.color.bandMuted,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    gap: t.space[3],
+    marginTop: t.space[2],
+    paddingTop: t.space[4],
+  },
+  detailsHeading: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.body },
+  transcript: {
+    color: t.color.bandText,
+    fontFamily: t.font.regular,
+    fontSize: t.type.body,
+    lineHeight: 24,
+  },
+  story: {
+    alignItems: 'center',
+    borderTopColor: t.color.bandMuted,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    flexDirection: 'row',
+    gap: t.space[3],
+    minHeight: t.size.tap,
+    paddingVertical: t.space[2],
+  },
+  storyNumber: {
+    color: t.color.bandMuted,
+    fontFamily: t.font.bold,
+    fontSize: t.type.meta,
+    fontVariant: ['tabular-nums'],
+  },
+  storyTitle: {
+    color: t.color.bandText,
+    flex: 1,
+    fontFamily: t.font.semibold,
     fontSize: t.type.body,
     lineHeight: 22,
   },
-  error: { color: t.color.error, fontFamily: t.font.medium },
+  error: { color: t.color.bandText, fontFamily: t.font.medium, fontSize: t.type.meta },
+  pressed: { opacity: 0.7 },
+  disabled: { opacity: 0.45 },
 })

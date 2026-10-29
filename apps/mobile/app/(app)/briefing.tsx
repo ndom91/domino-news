@@ -5,7 +5,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect } from 'expo-router'
 import { useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { AudioBriefing } from '../../components/audio-briefing'
 import { StoryCard } from '../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../components/ui'
 import { api, isUnauthorized, queries } from '../../lib/api'
@@ -45,7 +44,6 @@ export default function BriefingScreen() {
             ? 'What changed since your last briefing.'
             : 'Your first briefing: a considered view of the news now.'}
         </Text>
-        <AudioBriefing available={data.audioStories.length > 0} />
         {!data.personalised ? (
           <Text style={styles.text}>
             Choose regions, desks and topics in Account to make this briefing yours.

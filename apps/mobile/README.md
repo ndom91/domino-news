@@ -17,8 +17,9 @@ shared Story query polls briefly and updates the screen when the exact summary v
 Previously generated Stories can still be read with the worker stopped.
 
 The Local tab uses the location saved in Account, or the API's connection-country fallback when
-available. Narratives remain accessible from Latest. Briefing is available from For You; opening it
-updates the same last-opened checkpoint used by web.
+available. Narratives remain accessible from Latest. The audio player and a link to the written
+Briefing are on For You; opening the written Briefing updates the same last-opened checkpoint used
+by web.
 
 Audio briefing is an on-demand prototype. Configure the server's local inference and speech service
 as described in the root `AGENTS.md`. Android requests the complete audio response, so it shows a

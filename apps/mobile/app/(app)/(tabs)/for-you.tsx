@@ -6,6 +6,7 @@ import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-q
 import { Redirect, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { AudioBriefing } from '../../../components/audio-briefing'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { api, isUnauthorized, queries } from '../../../lib/api'
@@ -83,21 +84,19 @@ export default function ForYouScreen() {
               <Text style={styles.intro}>
                 Ranked around the regions, desks and topics you pick. Wider news still appears.
               </Text>
+              <AudioBriefing
+                available={
+                  first?.items.slice(0, 5).some(({ story }) => Boolean(story.summary?.trim())) ??
+                  false
+                }
+              />
               <Pressable
                 accessibilityRole="link"
-                accessibilityLabel="Listen to your top stories"
-                accessibilityHint="Opens your briefing where you can prepare audio"
                 onPress={() => router.push('/briefing')}
                 style={({ pressed }) => [styles.briefingLink, pressed && styles.pressed]}
               >
-                <View style={styles.briefingIcon}>
-                  <Feather name="headphones" size={20} color={t.color.accentContrast} />
-                </View>
-                <View style={styles.briefingCopy}>
-                  <Text style={styles.briefingTitle}>Listen to your top stories</Text>
-                  <Text style={styles.briefingDetail}>Open your audio briefing</Text>
-                </View>
-                <Feather name="arrow-right" size={19} color={t.color.bandText} />
+                <Text style={styles.briefingLinkText}>Read your briefing</Text>
+                <Feather name="arrow-right" size={16} color={t.color.bandText} />
               </Pressable>
             </View>
             {!first?.personalised ? (
@@ -258,24 +257,17 @@ const styles = StyleSheet.create({
   },
   briefingLink: {
     alignItems: 'center',
-    borderColor: t.color.bandMuted,
-    borderWidth: 1,
+    alignSelf: 'flex-start',
     flexDirection: 'row',
-    gap: t.space[3],
-    marginTop: t.space[4],
+    gap: t.space[2],
     minHeight: t.size.tap,
-    padding: t.space[3],
   },
-  briefingIcon: {
-    alignItems: 'center',
-    backgroundColor: t.color.accent,
-    height: t.size.tap,
-    justifyContent: 'center',
-    width: t.size.tap,
+  briefingLinkText: {
+    color: t.color.bandText,
+    fontFamily: t.font.semibold,
+    fontSize: t.type.meta,
+    textDecorationLine: 'underline',
   },
-  briefingCopy: { flex: 1, gap: t.space[1] },
-  briefingTitle: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.body },
-  briefingDetail: { color: t.color.bandMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
   setup: {
     backgroundColor: t.color.warningSubtle,
     gap: t.space[3],
