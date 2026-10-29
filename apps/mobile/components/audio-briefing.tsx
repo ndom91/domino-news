@@ -1,88 +1,16 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio'
-import * as FileSystem from 'expo-file-system/legacy'
-import { useFocusEffect, useRouter } from 'expo-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
-import { AppState, StyleSheet, Text, View } from 'react-native'
-import { authClient } from '../lib/auth-client'
-import { apiUrl } from '../lib/config'
+import { useAudioPlayerStatus } from 'expo-audio'
+import { useRouter } from 'expo-router'
+import { useState } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { useAudioBriefing } from './audio-briefing-provider'
 import { Button, uiStyles } from './ui'
-
-type Result = { transcript: string; stories: { title: string; slug: string }[] }
 
 export function AudioBriefing({ available }: { available: boolean }) {
   const router = useRouter()
-  const player = useAudioPlayer(null)
+  const { player, result, pending, error, generate, cancel, play } = useAudioBriefing()
   const status = useAudioPlayerStatus(player)
-  const [result, setResult] = useState<Result | null>(null)
-  const [pending, setPending] = useState(false)
-  const [error, setError] = useState('')
   const [transcript, setTranscript] = useState(false)
-  const controller = useRef<AbortController | null>(null)
-  const file = useRef<string | null>(null)
-  useFocusEffect(
-    useCallback(
-      () => () => {
-        player.pause()
-      },
-      [player],
-    ),
-  )
-  useEffect(() => {
-    const listener = AppState.addEventListener('change', (state) => {
-      if (state !== 'active') player.pause()
-    })
-    return () => listener.remove()
-  }, [player])
-  useEffect(
-    () => () => {
-      controller.current?.abort()
-      if (file.current)
-        void FileSystem.deleteAsync(file.current, { idempotent: true }).catch(console.warn)
-    },
-    [],
-  )
-  async function generate() {
-    const abort = new AbortController()
-    controller.current = abort
-    setPending(true)
-    setError('')
-    let path: string | null = null
-    try {
-      const cookie = await authClient.getCookie()
-      const response = await fetch(`${apiUrl}/api/v1/briefing/audio-prototype`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json', cookie },
-        body: JSON.stringify({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-        signal: abort.signal,
-      })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.error?.message ?? 'Could not prepare your briefing.')
-      if (!FileSystem.cacheDirectory) throw new Error('Audio storage is unavailable.')
-      path = `${FileSystem.cacheDirectory}briefing-${Date.now()}.wav`
-      await FileSystem.writeAsStringAsync(path, body.audio, {
-        encoding: FileSystem.EncodingType.Base64,
-      })
-      if (abort.signal.aborted) {
-        await FileSystem.deleteAsync(path, { idempotent: true })
-        return
-      }
-      player.pause()
-      player.replace(path)
-      const previous = file.current
-      file.current = path
-      path = null
-      if (previous) void FileSystem.deleteAsync(previous, { idempotent: true }).catch(console.warn)
-      setResult({ transcript: body.transcript, stories: body.stories })
-    } catch (err) {
-      if (!abort.signal.aborted)
-        setError(err instanceof Error ? err.message : 'Could not prepare your briefing.')
-    } finally {
-      if (path) void FileSystem.deleteAsync(path, { idempotent: true }).catch(console.warn)
-      controller.current = null
-      setPending(false)
-    }
-  }
   return (
     <View style={styles.section}>
       <Text style={uiStyles.label}>Listen to your briefing · Beta</Text>
@@ -94,7 +22,7 @@ export function AudioBriefing({ available }: { available: boolean }) {
           <Text accessibilityLiveRegion="polite" style={styles.text}>
             Preparing your briefing…
           </Text>
-          <Button tone="light" onPress={() => controller.current?.abort()}>
+          <Button tone="light" onPress={cancel}>
             Cancel preparation
           </Button>
         </>
@@ -110,9 +38,14 @@ export function AudioBriefing({ available }: { available: boolean }) {
       ) : null}
       {result ? (
         <>
-          <Button tone="light" onPress={() => (status.playing ? player.pause() : player.play())}>
+          <Button tone="light" onPress={() => (status.playing ? player.pause() : void play())}>
             {status.playing ? 'Pause' : 'Play'}
           </Button>
+          {status.error ? (
+            <Text accessibilityRole="alert" style={styles.error}>
+              Playback failed. Try preparing the briefing again.
+            </Text>
+          ) : null}
           <Text style={styles.text}>
             {Math.floor(status.currentTime)} / {Math.floor(status.duration)} seconds
           </Text>

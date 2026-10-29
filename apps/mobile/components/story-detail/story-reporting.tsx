@@ -1,14 +1,23 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, hostnameOf, plural } from '@dn/domain'
-import { LEAN_LABELS, type StoryLean, type StorySource } from '@dn/schemas'
+import { LEAN_LABELS, type PublisherLean, type StoryLean, type StorySource } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { groupReporting } from '../../lib/reporting-groups'
 import { PublisherLogo } from '../publisher-logo'
-import { Button, uiStyles } from '../ui'
+import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
+import { SectionHeading } from './section-heading'
 
 const EXCERPT_MAX_LENGTH = 360
+const GROUP_COLORS: Record<PublisherLean | 'unrated', string> = {
+  left: t.color.lean.left,
+  centre_left: t.color.lean.centreLeft,
+  centre: t.color.lean.centre,
+  centre_right: t.color.lean.centreRight,
+  right: t.color.lean.right,
+  unrated: t.color.lean.unrated,
+}
 
 // StoryReporting renders the publisher articles covering a story.
 export function StoryReporting({
@@ -29,17 +38,19 @@ export function StoryReporting({
       ? (expanded ? orderedSources : orderedSources.slice(0, 5)).map((source) => ({
           source,
           heading: null,
+          group: null,
         }))
       : grouped.flatMap(({ group, items }) =>
           (expanded ? items : items.slice(0, 2)).map((source, index) => ({
             source,
+            group,
             heading: index === 0 ? (group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]) : null,
           })),
         )
 
   return (
     <View style={styles.section}>
-      <Text style={uiStyles.label}>Original reporting</Text>
+      <SectionHeading>Original reporting</SectionHeading>
       <Text style={styles.caption}>
         {plural(sources.length, 'report')} from {plural(publisherCount, 'publisher')}
       </Text>
@@ -66,9 +77,37 @@ export function StoryReporting({
           By time
         </Button>
       </View>
-      {shownSources.map(({ source, heading }) => (
-        <View key={source.articleId} style={styles.source}>
-          {heading ? <Text style={uiStyles.label}>{heading}</Text> : null}
+      {shownSources.map(({ source, heading, group }) => (
+        <View
+          key={source.articleId}
+          style={[
+            styles.source,
+            group
+              ? {
+                  borderLeftColor: GROUP_COLORS[group],
+                  borderLeftWidth: 4,
+                  paddingLeft: t.space[3],
+                }
+              : null,
+          ]}
+        >
+          {heading ? (
+            <View style={styles.groupHeading}>
+              <Text accessibilityRole="header" style={styles.groupTitle}>
+                {heading}
+              </Text>
+              <Text style={styles.groupCount}>
+                {plural(
+                  new Set(
+                    grouped
+                      .find((item) => item.group === group)
+                      ?.items.map((item) => item.publisher.id),
+                  ).size,
+                  'publisher',
+                )}
+              </Text>
+            </View>
+          ) : null}
           <Pressable
             accessibilityHint="Opens the publisher"
             accessibilityLabel={`View ${source.publisher.name}`}
@@ -144,6 +183,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     paddingBottom: t.space[3],
   },
+  groupHeading: {
+    borderTopColor: t.color.rule,
+    borderTopWidth: 2,
+    gap: t.space[1],
+    paddingTop: t.space[3],
+  },
+  groupTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.bodyLarge },
+  groupCount: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
   publisher: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], minHeight: t.size.tap },
   publisherText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
   article: { gap: t.space[1], minHeight: t.size.tap, paddingBottom: t.space[1] },

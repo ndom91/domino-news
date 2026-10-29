@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { Redirect, Stack, usePathname, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
+import { AudioBriefingProvider } from '../../components/audio-briefing-provider'
 import { LoadingView, Screen } from '../../components/ui'
 import { queries } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
@@ -66,46 +67,48 @@ export default function SignedInLayout() {
   }
 
   return (
-    <Stack
-      screenOptions={{
-        contentStyle: styles.screen,
-        headerBackButtonDisplayMode: 'minimal',
-        headerShadowVisible: false,
-        headerStyle: styles.header,
-        headerTintColor: t.color.bandText,
-        headerTitleStyle: styles.headerTitle,
-        statusBarBackgroundColor: t.color.band,
-        statusBarStyle: 'light',
-      }}
-    >
-      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      <Stack.Screen name="briefing" options={{ headerTitle: 'Briefing' }} />
-      <Stack.Screen
-        name="stories/[slug]"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Story' }}
-      />
-      <Stack.Screen
-        name="blindspot"
-        options={{ headerBackTitle: 'Account', headerTitle: 'Blindspot' }}
-      />
-      <Stack.Screen
-        name="narratives/index"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Narratives' }}
-      />
-      <Stack.Screen
-        name="narratives/[slug]"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Narrative' }}
-      />
-      <Stack.Screen
-        name="publishers/index"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Publishers' }}
-      />
-      <Stack.Screen
-        name="publishers/[slug]"
-        options={{ headerBackTitle: 'Back', headerTitle: 'Publisher' }}
-      />
-    </Stack>
+    <AudioBriefingProvider key={userId}>
+      <Stack
+        screenOptions={{
+          contentStyle: styles.screen,
+          headerBackButtonDisplayMode: 'minimal',
+          headerShadowVisible: false,
+          headerStyle: styles.header,
+          headerTintColor: t.color.bandText,
+          headerTitleStyle: styles.headerTitle,
+          statusBarBackgroundColor: t.color.band,
+          statusBarStyle: 'light',
+        }}
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        <Stack.Screen name="briefing" options={{ headerTitle: 'Briefing' }} />
+        <Stack.Screen
+          name="stories/[slug]"
+          options={{ headerBackTitle: 'Back', headerTitle: 'Story' }}
+        />
+        <Stack.Screen
+          name="blindspot"
+          options={{ headerBackTitle: 'Account', headerTitle: 'Blindspot' }}
+        />
+        <Stack.Screen
+          name="narratives/index"
+          options={{ headerBackTitle: 'Back', headerTitle: 'Narratives' }}
+        />
+        <Stack.Screen
+          name="narratives/[slug]"
+          options={{ headerBackTitle: 'Back', headerTitle: 'Narrative' }}
+        />
+        <Stack.Screen
+          name="publishers/index"
+          options={{ headerBackTitle: 'Back', headerTitle: 'Publishers' }}
+        />
+        <Stack.Screen
+          name="publishers/[slug]"
+          options={{ headerBackTitle: 'Back', headerTitle: 'Publisher' }}
+        />
+      </Stack>
+    </AudioBriefingProvider>
   )
 }
 

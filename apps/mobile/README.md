@@ -22,10 +22,11 @@ updates the same last-opened checkpoint used by web.
 
 Audio briefing is an on-demand prototype. Configure the server's local inference and speech service
 as described in the root `AGENTS.md`. Android requests the complete audio response, so it shows a
-single preparation state rather than the web's streamed stages. Playback uses a temporary cache file,
-removed when the Briefing screen closes; it is not designed for background playback. The new
-`expo-audio` and `expo-file-system` native modules require rebuilding existing development/preview
-clients before testing. Expo Go can also be used where its bundled SDK supports them.
+single preparation state rather than the web's streamed stages. Playback continues while navigating,
+when the app is backgrounded, and with the screen locked; Android exposes media notification controls.
+The temporary audio file is removed when the signed-in session ends or a new briefing replaces it.
+Background playback requires a new development or preview build with the audio config plugin enabled;
+Expo Go does not provide the app-specific foreground-service configuration.
 Run the mobile unit tests with `pnpm --filter @dn/mobile test`.
 
 Expo Go supports username/password sign-in. Google sign-in needs a custom development build because it

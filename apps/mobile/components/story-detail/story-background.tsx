@@ -12,8 +12,8 @@ import {
   View,
 } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
-import { uiStyles } from '../ui'
 import { openExternalLink } from './open-external-link'
+import { SectionHeading } from './section-heading'
 
 // StoryBackground presents expandable background notes and their grounding links.
 export function StoryBackground({ entries }: { entries: StoryContextItem[] }) {
@@ -26,7 +26,7 @@ export function StoryBackground({ entries }: { entries: StoryContextItem[] }) {
   return (
     <>
       <View style={styles.section}>
-        <Text style={uiStyles.label}>Background</Text>
+        <SectionHeading>Background</SectionHeading>
         {entries.map((entry) => (
           <Pressable
             accessibilityHint="Opens background information"

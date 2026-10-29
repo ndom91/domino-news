@@ -3,8 +3,9 @@ import { formatDate, hostnameOf, plural } from '@dn/domain'
 import type { NarrativeRef, StoryDetail, StoryRelation } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { Button, uiStyles } from '../ui'
+import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
+import { SectionHeading } from './section-heading'
 
 const RELATION_LABELS: Record<StoryRelation, string> = {
   follows: 'Follows',
@@ -49,7 +50,7 @@ export function StoryConnections({
     <>
       {narrative ? (
         <View style={styles.section}>
-          <Text style={uiStyles.label}>Part of a narrative</Text>
+          <SectionHeading>Part of a narrative</SectionHeading>
           <Pressable
             accessibilityHint="Opens this narrative"
             accessibilityLabel={narrative.title}
@@ -63,7 +64,7 @@ export function StoryConnections({
         </View>
       ) : null}
       <View style={styles.section}>
-        <Text style={uiStyles.label}>Connected stories</Text>
+        <SectionHeading>Connected stories</SectionHeading>
         {related.length === 0 ? (
           <Text style={styles.empty}>No connected stories found yet.</Text>
         ) : (
@@ -92,7 +93,7 @@ export function StoryConnections({
         ) : null}
       </View>
       <View style={styles.section}>
-        <Text style={uiStyles.label}>Primary sources</Text>
+        <SectionHeading>Primary sources</SectionHeading>
         {primarySources.length === 0 ? (
           <Text style={styles.empty}>
             No primary documents found. We only look for them in articles from publishers that let

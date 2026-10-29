@@ -83,7 +83,22 @@ export default function ForYouScreen() {
               <Text style={styles.intro}>
                 Ranked around the regions, desks and topics you pick. Wider news still appears.
               </Text>
-              <Button onPress={() => router.push('/briefing')}>Open your briefing</Button>
+              <Pressable
+                accessibilityRole="link"
+                accessibilityLabel="Listen to your top stories"
+                accessibilityHint="Opens your briefing where you can prepare audio"
+                onPress={() => router.push('/briefing')}
+                style={({ pressed }) => [styles.briefingLink, pressed && styles.pressed]}
+              >
+                <View style={styles.briefingIcon}>
+                  <Feather name="headphones" size={20} color={t.color.accentContrast} />
+                </View>
+                <View style={styles.briefingCopy}>
+                  <Text style={styles.briefingTitle}>Listen to your top stories</Text>
+                  <Text style={styles.briefingDetail}>Open your audio briefing</Text>
+                </View>
+                <Feather name="arrow-right" size={19} color={t.color.bandText} />
+              </Pressable>
             </View>
             {!first?.personalised ? (
               <View style={styles.setup}>
@@ -241,6 +256,26 @@ const styles = StyleSheet.create({
     lineHeight: 23,
     maxWidth: 320,
   },
+  briefingLink: {
+    alignItems: 'center',
+    borderColor: t.color.bandMuted,
+    borderWidth: 1,
+    flexDirection: 'row',
+    gap: t.space[3],
+    marginTop: t.space[4],
+    minHeight: t.size.tap,
+    padding: t.space[3],
+  },
+  briefingIcon: {
+    alignItems: 'center',
+    backgroundColor: t.color.accent,
+    height: t.size.tap,
+    justifyContent: 'center',
+    width: t.size.tap,
+  },
+  briefingCopy: { flex: 1, gap: t.space[1] },
+  briefingTitle: { color: t.color.bandText, fontFamily: t.font.bold, fontSize: t.type.body },
+  briefingDetail: { color: t.color.bandMuted, fontFamily: t.font.regular, fontSize: t.type.meta },
   setup: {
     backgroundColor: t.color.warningSubtle,
     gap: t.space[3],

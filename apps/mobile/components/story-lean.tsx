@@ -2,6 +2,7 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import { oneSidedCoverage, plural } from '@dn/domain'
 import { LEAN_LABELS, type PublisherLean, type StoryLean } from '@dn/schemas'
 import { StyleSheet, Text, View } from 'react-native'
+import { SectionHeading } from './story-detail/section-heading'
 
 const leans: PublisherLean[] = ['left', 'centre_left', 'centre', 'centre_right', 'right']
 
@@ -26,7 +27,7 @@ export function StoryLeanMeter({ mix }: { mix: StoryLean[] }) {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.label}>Political lean</Text>
+      <SectionHeading>Political lean</SectionHeading>
       <LeanSpread lean={main} />
       <Text style={styles.note}>
         This is a shared scale. Each assessment retains its country context and evidence. Estimates
@@ -144,13 +145,6 @@ function barLabel(
 
 const styles = StyleSheet.create({
   section: { gap: t.space[3], marginTop: t.space[10] },
-  label: {
-    color: t.color.text,
-    fontFamily: t.font.black,
-    fontSize: t.type.body,
-    letterSpacing: 0.8,
-    textTransform: 'uppercase',
-  },
   spread: { gap: t.space[2] },
   spreadHeading: {
     flexDirection: 'row',

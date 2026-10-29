@@ -43,7 +43,7 @@ const config: ExpoConfig = {
     'expo-secure-store',
     [
       'expo-audio',
-      { microphonePermission: false, recordAudioAndroid: false, enableBackgroundPlayback: false },
+      { microphonePermission: false, recordAudioAndroid: false, enableBackgroundPlayback: true },
     ],
     ['expo-navigation-bar', { enforceContrast: false, style: 'dark' }],
     [

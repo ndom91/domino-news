@@ -1,9 +1,10 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { countryName } from '@dn/domain'
 import type { LocalScope, Place } from '@dn/schemas'
+import Feather from '@expo/vector-icons/Feather'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
-import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
@@ -46,7 +47,20 @@ export default function LocalScreen() {
         ListHeaderComponent={
           <View style={styles.header}>
             <Text style={uiStyles.eyebrow}>News near you</Text>
-            <Text style={styles.heading}>Local</Text>
+            <View style={styles.titleRow}>
+              <Text style={styles.heading}>Local</Text>
+              {first?.source === 'saved' ? (
+                <Pressable
+                  accessibilityLabel="Edit your location"
+                  accessibilityHint="Opens Account settings"
+                  accessibilityRole="button"
+                  onPress={() => router.push('/account')}
+                  style={({ pressed }) => [styles.settings, pressed && styles.pressed]}
+                >
+                  <Feather name="settings" size={20} color={t.color.textSecondary} />
+                </Pressable>
+              ) : null}
+            </View>
             <Text style={styles.text}>Stories from your city, local area and country.</Text>
             {first?.source === 'request' && first.locality ? (
               <Text style={styles.text}>
@@ -54,9 +68,11 @@ export default function LocalScreen() {
                 location is not saved.
               </Text>
             ) : null}
-            <Button tone="light" onPress={() => router.push('/account')}>
-              Set your location
-            </Button>
+            {first?.source !== 'saved' ? (
+              <Button tone="light" onPress={() => router.push('/account')}>
+                Set your location
+              </Button>
+            ) : null}
             {feed.isRefetchError ? (
               <Text style={styles.text}>Couldn’t refresh. Showing saved results.</Text>
             ) : null}
@@ -103,6 +119,14 @@ export default function LocalScreen() {
 
 const styles = StyleSheet.create({
   header: { gap: t.space[3], marginBottom: t.space[5] },
+  titleRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
+  settings: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: t.size.tap,
+    minWidth: t.size.tap,
+  },
+  pressed: { opacity: 0.7 },
   heading: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.display },
   text: {
     color: t.color.textSecondary,
