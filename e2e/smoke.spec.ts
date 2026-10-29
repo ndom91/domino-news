@@ -202,7 +202,7 @@ test('story changes show a timeline with expandable updates and versions', async
           summaryDiff:
             index === 0 ? { previous: 'Earlier summary', current: 'Current summary' } : null,
           sources:
-            index === 1
+            index <= 1
               ? [
                   {
                     type: 'article',
@@ -231,15 +231,40 @@ test('story changes show a timeline with expandable updates and versions', async
   await expect(changes.getByText('26 Oct · UTC')).toHaveCount(1)
   await expect(changes.getByText('25 Oct · UTC')).toHaveCount(1)
   await expect(changes.getByText('+1 source')).toBeVisible()
-  await expect(changes.getByRole('link', { name: 'Test Publisher' })).toHaveAttribute(
+  await expect(changes.getByRole('link', { name: 'Test Publisher' }).first()).toHaveAttribute(
     'href',
     'https://example.com/report',
   )
   await expect(changes.getByText('Timeline update 2')).toHaveCount(0)
   await expect(changes.getByText('Official response')).toBeVisible()
   await expect(changes.getByText('Timeline update 3')).toBeVisible()
-  await changes.getByText('Compare versions').click()
+  const revision = changes.locator('#story-updates-list > li').first()
+  const toggle = revision.getByRole('button', { name: 'Compare versions' })
+  const publisher = revision.getByRole('link', { name: 'Test Publisher' })
+  const positionBefore = await toggle.boundingBox()
+  const publisherBefore = await publisher.boundingBox()
+  await toggle.focus()
+  await page.keyboard.press('Enter')
   await expect(changes.getByText('Earlier summary')).toBeVisible()
+  const positionAfter = await revision
+    .getByRole('button', { name: 'Hide comparison' })
+    .boundingBox()
+  const publisherAfter = await publisher.boundingBox()
+  expect(positionAfter?.x).toBeCloseTo(positionBefore?.x ?? 0, 0)
+  expect((positionAfter?.y ?? 0) - (publisherAfter?.y ?? 0)).toBeCloseTo(
+    (positionBefore?.y ?? 0) - (publisherBefore?.y ?? 0),
+    0,
+  )
+  await expect(revision.getByRole('button', { name: 'Hide comparison' })).toHaveAttribute(
+    'aria-expanded',
+    'true',
+  )
+  await page.keyboard.press('Enter')
+  await expect(revision.getByRole('button', { name: 'Compare versions' })).toHaveAttribute(
+    'aria-expanded',
+    'false',
+  )
+  await expect(changes.getByText('Earlier summary')).toBeHidden()
   await changes.getByRole('button', { name: 'View all 6 changes' }).click()
   await expect(changes.locator('#story-updates-list > li')).toHaveCount(6)
   await changes.getByRole('button', { name: 'Show fewer changes' }).click()

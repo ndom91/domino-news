@@ -30,7 +30,7 @@ import {
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { z } from 'zod/mini'
 import { RouterLink } from '../../components/link.tsx'
@@ -124,13 +124,31 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
 const STORY_UPDATES_SHOWN = 5
 
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
+  const [comparing, setComparing] = useState(false)
+  const comparisonId = useId()
   if (!update.sources.length && !update.relatedStory && !update.summaryDiff?.previous) return null
   return (
     <div className="mt-2 max-w-reading text-sm leading-normal">
       <div className="flex flex-wrap items-center gap-x-4">
         <SupportingSources sources={update.sources} />
-        {update.summaryDiff ? <SummaryVersions summaryDiff={update.summaryDiff} /> : null}
+        {update.summaryDiff?.previous ? (
+          <button
+            type="button"
+            aria-expanded={comparing}
+            aria-controls={comparisonId}
+            onClick={() => setComparing((open) => !open)}
+            className="inline-flex min-h-tap items-center gap-1 font-semibold text-accent-text hover:underline"
+          >
+            {comparing ? 'Hide comparison' : 'Compare versions'}
+            <span aria-hidden>{comparing ? '⌃' : '⌄'}</span>
+          </button>
+        ) : null}
       </div>
+      {update.summaryDiff?.previous ? (
+        <div id={comparisonId} hidden={!comparing}>
+          <SummaryVersions summaryDiff={update.summaryDiff} />
+        </div>
+      ) : null}
       {update.relatedStory ? (
         <p className="mt-2 text-text-secondary">
           <Link
@@ -177,15 +195,10 @@ function SummaryVersions({
 }) {
   if (!summaryDiff.previous) return null
   return (
-    <details className="t-acc">
-      <summary className="inline-flex min-h-tap cursor-pointer items-center font-semibold text-accent-text hover:underline">
-        Compare versions ›
-      </summary>
-      <div className="mt-3 flex flex-col gap-4">
-        <SummaryVersion label="Before" text={summaryDiff.previous} />
-        <SummaryVersion label="After" text={summaryDiff.current} />
-      </div>
-    </details>
+    <div className="mt-2 flex flex-col gap-4 border-l-2 border-border-strong pl-4">
+      <SummaryVersion label="Before" text={summaryDiff.previous} />
+      <SummaryVersion label="After" text={summaryDiff.current} />
+    </div>
   )
 }
 
