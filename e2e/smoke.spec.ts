@@ -193,14 +193,31 @@ test('story changes show a timeline with expandable updates and versions', async
         items: Array.from({ length: 6 }, (_, index) => ({
           id: `update-${index}`,
           storyId: 'story-test',
-          kind: index === 0 ? 'summary_revision' : 'new_reporting',
+          kind:
+            index === 0 ? 'summary_revision' : index === 2 ? 'official_response' : 'new_reporting',
           description: `Timeline update ${index + 1}`,
           origin: 'system',
-          createdAt: '2026-10-26T18:35:00.000Z',
+          createdAt: index < 3 ? '2026-10-26T18:35:00.000Z' : '2026-10-25T18:35:00.000Z',
           relatedStory: null,
           summaryDiff:
             index === 0 ? { previous: 'Earlier summary', current: 'Current summary' } : null,
-          sources: [],
+          sources:
+            index === 1
+              ? [
+                  {
+                    type: 'article',
+                    title: 'A report',
+                    description: null,
+                    url: 'https://example.com/report',
+                    publisher: {
+                      id: 'publisher-test',
+                      slug: 'test',
+                      name: 'Test Publisher',
+                      domain: 'example.com',
+                    },
+                  },
+                ]
+              : [],
         })),
       },
     })
@@ -211,9 +228,19 @@ test('story changes show a timeline with expandable updates and versions', async
   await expect(changes.getByRole('heading', { name: 'What changed' })).toBeVisible()
   await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)
   await expect(changes.getByText('18:35').first()).toBeVisible()
-  await changes.getByText('Compare summary versions').click()
+  await expect(changes.getByText('26 Oct · UTC')).toHaveCount(1)
+  await expect(changes.getByText('25 Oct · UTC')).toHaveCount(1)
+  await expect(changes.getByText('+1 source')).toBeVisible()
+  await expect(changes.getByRole('link', { name: 'Test Publisher' })).toHaveAttribute(
+    'href',
+    'https://example.com/report',
+  )
+  await expect(changes.getByText('Timeline update 2')).toHaveCount(0)
+  await expect(changes.getByText('Official response')).toBeVisible()
+  await expect(changes.getByText('Timeline update 3')).toBeVisible()
+  await changes.getByText('Compare versions').click()
   await expect(changes.getByText('Earlier summary')).toBeVisible()
-  await changes.getByRole('button', { name: 'View all 6 recent changes' }).click()
+  await changes.getByRole('button', { name: 'View all 6 changes' }).click()
   await expect(changes.locator('#story-updates-list > li')).toHaveCount(6)
   await changes.getByRole('button', { name: 'Show fewer changes' }).click()
   await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)

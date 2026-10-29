@@ -19,6 +19,7 @@ import {
   HeroStory,
   leadCitations,
   NarrativeGraph,
+  PublisherLogo,
   Reveal,
   relationLabel,
   SectionHeader,
@@ -125,8 +126,11 @@ const STORY_UPDATES_SHOWN = 5
 function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
   if (!update.sources.length && !update.relatedStory && !update.summaryDiff?.previous) return null
   return (
-    <div className="mt-3 max-w-reading text-sm leading-normal">
-      <SupportingSources sources={update.sources} />
+    <div className="mt-2 max-w-reading text-sm leading-normal">
+      <div className="flex flex-wrap items-center gap-x-4">
+        <SupportingSources sources={update.sources} />
+        {update.summaryDiff ? <SummaryVersions summaryDiff={update.summaryDiff} /> : null}
+      </div>
       {update.relatedStory ? (
         <p className="mt-2 text-text-secondary">
           <Link
@@ -138,7 +142,6 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
           </Link>
         </p>
       ) : null}
-      {update.summaryDiff ? <SummaryVersions summaryDiff={update.summaryDiff} /> : null}
     </div>
   )
 }
@@ -146,10 +149,10 @@ function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
 function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
   if (sources.length === 0) return null
   return (
-    <p className="text-text-secondary">
-      <span className="font-semibold text-text">Supported by: </span>
+    <span className="inline-flex flex-wrap items-center gap-x-2 text-text-secondary">
       {sources.map((source) => (
-        <span key={source.url}>
+        <span key={source.url} className="inline-flex items-center gap-1">
+          {source.publisher ? <PublisherLogo slug={source.publisher.slug} size={22} /> : null}
           <a
             href={source.url}
             target="_blank"
@@ -162,7 +165,7 @@ function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }
           {source === sources.at(-1) ? null : ', '}
         </span>
       ))}
-    </p>
+    </span>
   )
 }
 
@@ -174,9 +177,9 @@ function SummaryVersions({
 }) {
   if (!summaryDiff.previous) return null
   return (
-    <details className="t-acc mt-3">
-      <summary className="inline-flex min-h-tap cursor-pointer items-center border border-border-strong px-3 font-semibold text-text hover:text-accent-text">
-        Compare summary versions
+    <details className="t-acc">
+      <summary className="inline-flex min-h-tap cursor-pointer items-center font-semibold text-accent-text hover:underline">
+        Compare versions ›
       </summary>
       <div className="mt-3 flex flex-col gap-4">
         <SummaryVersion label="Before" text={summaryDiff.previous} />
@@ -377,6 +380,11 @@ function StoryPage() {
   const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
   const editButtonRef = useRef<HTMLButtonElement>(null)
   const showAllUpdates = expandedUpdatesFor === story.id
+  const visibleUpdates = showAllUpdates
+    ? updates.items
+    : updates.items.slice(0, STORY_UPDATES_SHOWN)
+  const multipleUpdateYears =
+    new Set(visibleUpdates.map((update) => new Date(update.createdAt).getUTCFullYear())).size > 1
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
     ...queries.narrative(narrativeRef?.slug ?? ''),
@@ -440,7 +448,7 @@ function StoryPage() {
                       <span aria-hidden className="size-2.5 border-2 border-text" /> Other updates
                     </span>
                     <span className="font-semibold text-text">
-                      {plural(updates.items.length, 'recent update')}
+                      {plural(updates.items.length, 'update')}
                     </span>
                   </span>
                 }
@@ -449,22 +457,34 @@ function StoryPage() {
                 id="story-updates-list"
                 className="relative before:absolute before:top-0 before:bottom-0 before:left-[4.75rem] before:w-px before:bg-text max-sm:before:left-[3.75rem]"
               >
-                {(showAllUpdates ? updates.items : updates.items.slice(0, STORY_UPDATES_SHOWN)).map(
-                  (update) => (
-                    <li
-                      key={update.id}
-                      className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] max-sm:grid-cols-[3.75rem_minmax(0,1fr)]"
-                    >
+                {visibleUpdates.map((update, index, visible) => (
+                  <li key={update.id}>
+                    {index === 0 ||
+                    new Date(visible[index - 1]?.createdAt ?? update.createdAt)
+                      .toISOString()
+                      .slice(0, 10) !== new Date(update.createdAt).toISOString().slice(0, 10) ? (
+                      <p className="relative bg-canvas py-2 pl-[6.25rem] type-label text-text-muted max-sm:pl-[4.75rem]">
+                        {formatDate(update.createdAt)}
+                        {multipleUpdateYears
+                          ? ` ${new Date(update.createdAt).getUTCFullYear()}`
+                          : ''}{' '}
+                        · UTC
+                      </p>
+                    ) : null}
+                    <div className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] max-sm:grid-cols-[3.75rem_minmax(0,1fr)]">
                       <time
                         dateTime={update.createdAt}
                         title={formatDateTime(update.createdAt)}
                         className="pt-4 pr-3"
                       >
-                        <span className="block type-numeral tabular-nums">
+                        <span
+                          className={
+                            update.kind === 'summary_revision'
+                              ? 'block type-numeral tabular-nums'
+                              : 'block type-meta font-bold tabular-nums'
+                          }
+                        >
                           {clockTime(update.createdAt)}
-                        </span>
-                        <span className="mt-1 block type-meta">
-                          {formatDate(update.createdAt)} · UTC
                         </span>
                       </time>
                       <span
@@ -476,15 +496,31 @@ function StoryPage() {
                         }
                       />
                       <div className="min-w-0 border-b border-border py-4 pl-6 max-sm:pl-4">
-                        <p className="type-label text-text-muted">{UPDATE_LABELS[update.kind]}</p>
-                        <p className="mt-2 max-w-reading text-md font-semibold leading-snug">
-                          {update.description}
-                        </p>
-                        <UpdateDetail update={update} />
+                        {update.kind === 'new_reporting' &&
+                        update.sources.length &&
+                        !update.relatedStory &&
+                        !update.summaryDiff ? (
+                          <div className="flex flex-wrap items-center gap-x-4">
+                            <span className="type-label text-text-muted">
+                              +{plural(update.sources.length, 'source')}
+                            </span>
+                            <SupportingSources sources={update.sources} />
+                          </div>
+                        ) : (
+                          <>
+                            <p className="type-label text-text-muted">
+                              {UPDATE_LABELS[update.kind]}
+                            </p>
+                            <p className="mt-2 max-w-reading text-md font-semibold leading-snug">
+                              {update.description}
+                            </p>
+                            <UpdateDetail update={update} />
+                          </>
+                        )}
                       </div>
-                    </li>
-                  ),
-                )}
+                    </div>
+                  </li>
+                ))}
               </ol>
               {updates.items.length > STORY_UPDATES_SHOWN ? (
                 <div className="mt-5 flex flex-wrap items-center gap-3 pl-[6.25rem] max-sm:pl-[4.75rem]">
@@ -499,7 +535,7 @@ function StoryPage() {
                   >
                     {showAllUpdates
                       ? 'Show fewer changes'
-                      : `View all ${updates.items.length} recent changes`}
+                      : `View all ${updates.items.length} changes`}
                   </Button>
                   {!showAllUpdates ? (
                     <span className="type-meta">
