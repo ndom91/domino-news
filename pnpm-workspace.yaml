@@ -11,3 +11,8 @@ saveExact: true
 
 # Only install versions published at least 7 days ago (minutes); limits exposure to compromised releases.
 minimumReleaseAge: 10080
+minimumReleaseAgeIgnoreMissingTime: false
+trustPolicy: no-downgrade
+trustPolicyExclude:
+  - semver@6.3.1
+  - webpack-dev-middleware@7.4.6
