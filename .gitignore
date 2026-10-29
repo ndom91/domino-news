@@ -16,6 +16,9 @@ playwright-report
 test-results
 playroom/dist
 
+# Internal LLM notes / investigations
+docs/investigations
+
 # Design handoff archives from Claude Design (large binaries, kept locally)
 docs/*-handoff.zip
 
@@ -25,3 +28,4 @@ fixtures/match-eval/*.review.html
 fixtures/match-eval/cache/
 
 dash.db*
+
