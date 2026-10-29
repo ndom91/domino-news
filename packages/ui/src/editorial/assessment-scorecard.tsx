@@ -27,7 +27,7 @@ const RELIABILITY_STEPS = [
   { key: 'reliable', label: RELIABILITY_LABELS.reliable, tone: 'success' },
   { key: 'no_consensus', label: RELIABILITY_LABELS.no_consensus, tone: 'warning' },
   { key: 'unreliable', label: RELIABILITY_LABELS.unreliable, tone: 'error' },
-  { key: 'deprecated', label: RELIABILITY_LABELS.deprecated, tone: 'error' },
+  { key: 'deprecated', label: 'Strongly discouraged as a source', tone: 'error' },
 ] as const satisfies readonly { key: ReliabilityLevel; label: string; tone: string }[]
 
 const LEANS = publisherLeanSchema.options

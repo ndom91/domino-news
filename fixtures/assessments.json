@@ -379,6 +379,25 @@
       "notes": "Stephen Smith stake (about 26.9%) comes from Axios, March 2026. Wikipedia still lists the Rothschilds at 21%. Exact current percentages need a check against the latest Economist Group annual report."
     },
     {
+      "slug": "electrek",
+      "request": {
+        "fundingModel": "commercial",
+        "ownership": "Part of the 9to5 network, owned by Seth Weintraub through 925, LLC. Funded by advertising, affiliate partnerships and optional subscriptions.",
+        "reliabilityLevel": null,
+        "reliability": "Not on Wikipedia's perennial sources list.",
+        "countryContext": "US",
+        "lean": null,
+        "leanEvidenceUrl": null,
+        "leanNote": null
+      },
+      "sources": [
+        "https://electrek.co/about/",
+        "https://9to5mac.com/about/",
+        "https://en.wikipedia.org/wiki/Electrek"
+      ],
+      "notes": "No AllSides or Reuters Institute audience lean evidence found. Media Bias/Fact Check rates Electrek Left-Center, but is not an approved evidence source for this project; its licence terms are unclear. Leave lean unassessed. Ownership confirmed by the 9to5 network's about page."
+    },
+    {
       "slug": "elpais-en",
       "request": {
         "fundingModel": "commercial",
