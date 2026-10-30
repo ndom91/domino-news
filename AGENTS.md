@@ -230,7 +230,7 @@ Learned from the October 2026 performance pass. Queries are fast (0.1–6 ms); w
 - A route loader prefetches every query its component needs, so the SSR HTML is complete and nothing pops in after hydration. Avoid `useQuery` without a matching loader prefetch, except for admin-only or below-the-fold extras.
 - Don't fetch a big endpoint for a few fields. The header strip uses `/api/v1/edition`, not `/api/v1/front`.
 - Queries never retry 4xx responses (`apps/web/src/router.tsx`), so a 404 shows at once.
-- Story detail is the deliberate polling exception: while exact-version context or claims are pending, its shared query refetches every two seconds and stops on durable completion or terminal job failure.
+- Story detail is the deliberate polling exception: while exact-version context or claims are pending, its shared query refetches every 15 seconds and stops on durable completion or terminal job failure.
 
 **Client bundle and runtime**
 - `@dn/ui` is `"sideEffects": false`. Keep its modules free of side effects (no CSS imports, no top-level registration), or route chunks will merge back into the shared chunk.

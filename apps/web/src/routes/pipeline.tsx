@@ -55,7 +55,7 @@ function useOpsAction() {
 const actionKey = (a: OpsAction) =>
   'queue' in a ? `${a.action}:${a.queue}:${a.ids?.join(',') ?? 'all'}` : a.action
 
-// Internal diagnostics. Polls every 5s; not a production admin console.
+// Internal diagnostics. Polls every 30s; not a production admin console.
 function OpsPage() {
   const status = useQuery(queries.ops())
   const { failed, section } = Route.useSearch()

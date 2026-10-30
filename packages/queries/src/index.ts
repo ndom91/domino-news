@@ -97,7 +97,7 @@ export function createQueries(api: ApiClient) {
         staleTime: 30_000,
         refetchInterval: (query) => {
           const enrichment = query.state.data?.enrichment
-          return enrichment && Object.values(enrichment).includes('pending') ? 2_000 : false
+          return enrichment && Object.values(enrichment).includes('pending') ? 15_000 : false
         },
       }),
     storyUpdates: (id: string) =>
@@ -207,7 +207,7 @@ export function createQueries(api: ApiClient) {
       queryOptions({
         queryKey: queryKeys.ops(),
         queryFn: ({ signal }) => api.getOpsStatus(signal),
-        refetchInterval: 5_000,
+        refetchInterval: 30_000,
       }),
     // Computed on the server and cached there for 5 minutes; no need to poll faster.
     matchHealth: () =>

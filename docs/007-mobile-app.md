@@ -113,7 +113,7 @@ export const queries = createQueries(api)
 
 - **Errors:** `ApiError` from `@dn/api-client` has `status` and `code`. `code` is `unauthorized` (session expired: send the user to sign-in), `forbidden`, `not_found`, `bad_request`, `conflict`, `unavailable`, `internal`, or `network` (no connection).
 - **Bearer tokens** also work as an alternative: sign in, read the `set-auth-token` response header, then send `Authorization: Bearer <token>`. Prefer the cookie flow above, which `@better-auth/expo` manages for you.
-- **Optional Story enrichment:** `queries.story(id)` is shared with the web app. When the API reports exact-version context or claims as `pending`, TanStack Query refetches every two seconds and stops after durable completion or terminal failure. The native Story screen therefore receives newly generated context without app-specific polling code.
+- **Optional Story enrichment:** `queries.story(id)` is shared with the web app. When the API reports exact-version context or claims as `pending`, TanStack Query refetches every 15 seconds and stops after durable completion or terminal failure. The native Story screen therefore receives newly generated context without app-specific polling code.
 - Contract tests for the native flow live in `test/api.test.ts` ("Expo app sign-in") and `test/unit.test.ts` ("API client on native").
 
 ## 6. Running against a dev server

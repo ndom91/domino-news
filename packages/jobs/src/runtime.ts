@@ -65,6 +65,7 @@ export async function createQueues(boss: PgBoss) {
 }
 
 type Handler = (jobs: Job<AnalysisJob>[]) => Promise<unknown>
+const WORKER_POLL_SECONDS = 5
 
 /**
  * Two workers per analysis queue: `freshSlots` that only take fresh/interactive jobs, plus
@@ -84,13 +85,13 @@ async function workWithReservedSlots(
       localConcurrency: freshSlots,
       minPriority: PRIORITY.fresh,
       batchSize,
-      pollingIntervalSeconds: 1,
+      pollingIntervalSeconds: WORKER_POLL_SECONDS,
     },
     handler,
   )
   await boss.work<AnalysisJob>(
     name,
-    { localConcurrency: 1, batchSize, pollingIntervalSeconds: 2 },
+    { localConcurrency: 1, batchSize, pollingIntervalSeconds: WORKER_POLL_SECONDS },
     handler,
   )
 }
@@ -114,48 +115,68 @@ export async function startWorkers(ctx: WorkerContext) {
   const boss = ctx.workerBoss
   await createQueues(boss)
 
-  await boss.work<{ feedId: string }>(QUEUES.pollFeed, { localConcurrency: 4 }, async ([job]) => {
-    if (!job) return
-    const result = await pollFeed(ctx, job.data.feedId)
-    console.log(`[poll_feed] ${job.data.feedId} ${JSON.stringify(result)}`)
-  })
-  await boss.work(QUEUES.pollAllFeeds, async () => {
-    for (const feedId of await feedIds(ctx.db)) {
-      await boss.send(
-        QUEUES.pollFeed,
-        { feedId },
-        { singletonKey: feedId, priority: PRIORITY.fresh },
-      )
-    }
-  })
-  await boss.work(QUEUES.admitBackfill, async () => {
-    const result = await admitBackfill(ctx)
-    if (result.admitted > 0) console.log(`[admit_backfill] ${JSON.stringify(result)}`)
-  })
-  await boss.work(QUEUES.pruneEvents, async () => {
+  await boss.work<{ feedId: string }>(
+    QUEUES.pollFeed,
+    { localConcurrency: 4, pollingIntervalSeconds: WORKER_POLL_SECONDS },
+    async ([job]) => {
+      if (!job) return
+      const result = await pollFeed(ctx, job.data.feedId)
+      console.log(`[poll_feed] ${job.data.feedId} ${JSON.stringify(result)}`)
+    },
+  )
+  await boss.work(
+    QUEUES.pollAllFeeds,
+    { pollingIntervalSeconds: WORKER_POLL_SECONDS },
+    async () => {
+      for (const feedId of await feedIds(ctx.db)) {
+        await boss.send(
+          QUEUES.pollFeed,
+          { feedId },
+          { singletonKey: feedId, priority: PRIORITY.fresh },
+        )
+      }
+    },
+  )
+  await boss.work(
+    QUEUES.admitBackfill,
+    { pollingIntervalSeconds: WORKER_POLL_SECONDS },
+    async () => {
+      const result = await admitBackfill(ctx)
+      if (result.admitted > 0) console.log(`[admit_backfill] ${JSON.stringify(result)}`)
+    },
+  )
+  await boss.work(QUEUES.pruneEvents, { pollingIntervalSeconds: WORKER_POLL_SECONDS }, async () => {
     const result = await pruneDeliveredEvents(ctx.db, ctx.config.eventRetentionDays)
     const reads = await pruneReaderHistory(ctx.db)
     await prunePushDeliveries(ctx.db)
     console.log(`[prune_delivered_events] ${JSON.stringify({ ...result, ...reads })}`)
   })
-  await boss.work(QUEUES.rebuildSearch, async () => {
-    await rebuildSearchIndex(ctx.db, ctx.ts)
-  })
-  await boss.work(QUEUES.deliverPush, async () => {
+  await boss.work(
+    QUEUES.rebuildSearch,
+    { pollingIntervalSeconds: WORKER_POLL_SECONDS },
+    async () => {
+      await rebuildSearchIndex(ctx.db, ctx.ts)
+    },
+  )
+  await boss.work(QUEUES.deliverPush, { pollingIntervalSeconds: WORKER_POLL_SECONDS }, async () => {
     const result = await deliverForYouPushes(ctx)
     if (result.alerted || result.invalidTokens || result.receiptsChecked || result.failed) {
       console.log(`[deliver_expo_push] ${JSON.stringify(result)}`)
     }
   })
-  await boss.work(QUEUES.reconcileDeferredWork, async () => {
-    const [matches, summaries] = await Promise.all([
-      reconcileMatchAdmissions(ctx),
-      reconcileSummaryDebounces(ctx),
-    ])
-    if (matches || summaries) {
-      console.log(`[reconcile_deferred_work] ${JSON.stringify({ matches, summaries })}`)
-    }
-  })
+  await boss.work(
+    QUEUES.reconcileDeferredWork,
+    { pollingIntervalSeconds: WORKER_POLL_SECONDS },
+    async () => {
+      const [matches, summaries] = await Promise.all([
+        reconcileMatchAdmissions(ctx),
+        reconcileSummaryDebounces(ctx),
+      ])
+      if (matches || summaries) {
+        console.log(`[reconcile_deferred_work] ${JSON.stringify({ matches, summaries })}`)
+      }
+    },
+  )
 
   const genSlots = Math.max(1, ctx.config.generationConcurrency)
   await workWithReservedSlots(
@@ -177,7 +198,7 @@ export async function startWorkers(ctx: WorkerContext) {
   )
   await boss.work<AnalysisJob>(
     QUEUES.resumeMatchArticle,
-    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: 1 },
+    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: WORKER_POLL_SECONDS },
     async (jobs) => {
       for (const job of jobs) {
         try {
@@ -201,7 +222,7 @@ export async function startWorkers(ctx: WorkerContext) {
   )
   await boss.work<AnalysisJob>(
     QUEUES.releaseSummaryDebounce,
-    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: 1 },
+    { localConcurrency: Math.max(1, genSlots), pollingIntervalSeconds: WORKER_POLL_SECONDS },
     each((job) => releaseSummaryDebounce(ctx, job)),
   )
   await workWithReservedSlots(
@@ -219,7 +240,7 @@ export async function startWorkers(ctx: WorkerContext) {
   // Relating is serialised: it reads and extends the shared story graph.
   await boss.work<AnalysisJob>(
     QUEUES.relateStory,
-    { localConcurrency: 1, pollingIntervalSeconds: 1 },
+    { localConcurrency: 1, pollingIntervalSeconds: WORKER_POLL_SECONDS },
     each((job) => relateStory(ctx, job)),
   )
 
