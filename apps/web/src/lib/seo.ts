@@ -14,12 +14,12 @@ interface ShareImage {
   alt: string
 }
 
-/** The site-wide share card, from the same template as story cards. Bump v after changing it. */
+/** The site-wide share card. Change the URL when replacing the image to refresh shared previews. */
 export const DEFAULT_IMAGE: ShareImage = {
-  url: '/api/v1/og/site/default.png?v=2',
-  width: 1200,
-  height: 630,
-  alt: 'Domino Wire: follow the news as it falls',
+  url: '/og-domino-wire.png',
+  width: 1024,
+  height: 500,
+  alt: 'Domino Wire: the story, and the story behind it',
 }
 
 export interface SeoInput {
