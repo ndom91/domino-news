@@ -12,7 +12,6 @@ export function getRouter() {
         // Retry once, but not a 4xx: a missing slug should 404 at once, not after a retry.
         retry: (count, error) =>
           count < 1 && !(error instanceof ApiError && error.status >= 400 && error.status < 500),
-        refetchOnWindowFocus: false,
       },
     },
   })

@@ -18,13 +18,15 @@ const discard = {
 /** Dev-only editor. Saving creates a new summary version; the previous one stays in history. */
 export function SummaryEditor({
   storyId,
-  summary,
+  summary: initialSummary,
   onDone,
 }: {
   storyId: string
   summary: Summary
   onDone: () => void
 }) {
+  // Keep the edit based on the version that populated the form, even if the story refetches.
+  const [summary] = useState(initialSummary)
   const queryClient = useQueryClient()
   const mutation = useMutation(editSummaryMutation(api, queryClient, storyId))
   const [dirty, setDirty] = useState(false)
