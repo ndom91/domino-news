@@ -14,7 +14,7 @@ export const PROMPT_VERSIONS = {
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@5',
   extractClaims: 'extract-claims@3',
-  chooseStory: 'choose-story@1',
+  chooseStory: 'choose-story@2',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -247,6 +247,10 @@ export function chooseStoryPrompt(input: { article: ArticleInput; stories: Story
   return `Decide which EXISTING STORY, if any, reports the same news development as the NEW ARTICLE.
 ${DEVELOPMENT_RULES}
 Judge each story by what it is about, set by its first reports, not only its latest ones.
+An article must be mainly about that same development. A passing mention in a live blog or
+roundup does not make its other subjects the story's development. Do not match an article
+merely because it resembles a later, potentially misplaced report in the story. If the first
+reports cover several unrelated events and the main development is unclear, answer 0.
 These differences do NOT make it a different development: another language, a different headline or angle,
 more or less detail, or an official statement versus news coverage of the same announcement, ruling or release.
 - choice: the "story" number of the one story that is the SAME development, or 0 if none is.

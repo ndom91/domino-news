@@ -1169,6 +1169,15 @@ describe('match evaluation', () => {
     expect(await decideMatch(ranked, policy, never, pick('s3'))).toBeNull()
   })
 
+  it('requires a model decision even for a very close local neighbour', async () => {
+    const { decideMatch, matchPolicy } = await import('@dn/jobs')
+    const policy = matchPolicy('local')
+    const ranked: [string, number][] = [['mixed-story', 0.99]]
+    const choose = vi.fn(async () => ({ storyId: null }))
+    expect(await decideMatch(ranked, policy, async () => null, choose)).toBeNull()
+    expect(choose).toHaveBeenCalledWith(['mixed-story'])
+  })
+
   it('omits only a clearly weak final candidate when configured', async () => {
     const { modelCandidates } = await import('@dn/jobs')
     const policy = {

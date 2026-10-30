@@ -16,9 +16,9 @@ import { decideMatch, type MatchPolicy, rankStories } from './match-core.ts'
 import { withAnalysisRun } from './provenance.ts'
 import { debounceStorySummary } from './summary-debounce.ts'
 
-// Cosine-similarity bands. Above `autoSame` we attach without asking the model; between
-// `llmMin` and `autoSame` the model decides; below `llmMin` the article starts a new Story.
-// Fixture vectors are bag-of-words hashes, so their scale differs from EmbeddingGemma's.
+// Cosine-similarity bands. `autoSame` also controls follower admission; fixture matching
+// uses it for automatic attachment, while local matching always asks the model. Below
+// `llmMin` the article starts a new Story. Fixture vectors have a different scale.
 export const THRESHOLDS = {
   fixture: { autoSame: 0.75, llmMin: 0.2, relateMin: 0.12 },
   local: { autoSame: 0.93, llmMin: 0.72, relateMin: 0.6 },
@@ -36,7 +36,9 @@ const MAX_LLM_CANDIDATES = 5
 export function matchPolicy(mode: keyof typeof THRESHOLDS): MatchPolicy {
   const t = THRESHOLDS[mode]
   return {
-    autoSame: t.autoSame,
+    // A close neighbour can itself be an unrelated article in a mixed Story. Do not
+    // let its similarity propagate the mistake without checking the Story's anchors.
+    autoSame: mode === 'local' ? Number.POSITIVE_INFINITY : t.autoSame,
     llmMin: t.llmMin,
     maxCandidates: MAX_LLM_CANDIDATES,
     storyArticles: 'anchored',
