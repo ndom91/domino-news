@@ -123,6 +123,12 @@ function RootDocument({ children }: { children: ReactNode }) {
         {/* biome-ignore lint/security/noDangerouslySetInnerHtml: static script, no user input */}
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <HeadContent />
+        <script
+          src="https://stats.ndo.dev/api/script.js"
+          data-site-id="f51919953027"
+          defer
+          fetchPriority="low"
+        />
       </head>
       <body className="flex min-h-dvh flex-col bg-canvas text-text antialiased">
         <a

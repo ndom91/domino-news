@@ -67,7 +67,7 @@ function AboutPage() {
 
       <Section id="principles" title="What we don’t do">
         <ul>
-          <li>No ads, no tracking and no analytics.</li>
+          <li>No ads.</li>
           <li>We don’t sell or share your data.</li>
           <li>
             We don’t guess your politics. Blindspot and For You work from what you choose and, only

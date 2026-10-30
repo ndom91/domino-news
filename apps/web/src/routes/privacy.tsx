@@ -40,7 +40,7 @@ function PrivacyPage() {
       lead={
         <p>
           Domino collects as little as it can: what it needs to run your account and the features
-          you choose. There are no ads, no analytics and no tracking.
+          you choose. We also use Rybbit analytics. There are no ads.
         </p>
       }
     >
@@ -99,8 +99,8 @@ function PrivacyPage() {
         <p>
           Domino sets one cookie: the session cookie that keeps you signed in. It’s strictly
           necessary, so it needs no consent (§25(2) TDDDG). Your light or dark theme choice is kept
-          in your browser’s local storage and never sent to us. There are no other cookies, no
-          analytics and no tracking pixels.
+          in your browser’s local storage and never sent to us. The site also loads Rybbit analytics
+          from stats.ndo.dev.
         </p>
       </Section>
 
