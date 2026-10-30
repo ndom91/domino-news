@@ -175,6 +175,10 @@ function PrivacyPage() {
           database backups are deleted within 14 days, when old backups are pruned.
         </p>
         <p>
+          For other ways to request deletion, see{' '}
+          <Link to="/delete-account">delete your account</Link>.
+        </p>
+        <p>
           For anything else, email <Email address={OPERATOR.email} />. We reply within one month.
         </p>
         <p>

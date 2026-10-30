@@ -22,7 +22,14 @@ import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
 
 // Readable without an account: the imprint and privacy policy must be reachable by anyone.
-const PUBLIC_PATHS = new Set(['/login', '/about', '/privacy', '/terms', '/imprint'])
+const PUBLIC_PATHS = new Set([
+  '/login',
+  '/about',
+  '/privacy',
+  '/terms',
+  '/imprint',
+  '/delete-account',
+])
 // Signed out, these show a teaser (title, one sentence, sign-in button) instead of redirecting,
 // so shared links preview properly. The routes load public preview data when `preview` is set.
 const PREVIEW_PATH = /^\/(stories|narratives|publishers)\/[^/]+\/?$/
@@ -42,7 +49,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       throw redirect({ to: '/login', search: { next: location.href } })
     }
     // First visit: onboarding once, then back to where they were going.
-    if (session.user && !session.user.onboarded && location.pathname !== '/onboarding') {
+    if (
+      session.user &&
+      !session.user.onboarded &&
+      location.pathname !== '/onboarding' &&
+      location.pathname !== '/delete-account'
+    ) {
       throw redirect({ to: '/onboarding', search: { next: location.href } })
     }
     return { session, preview }

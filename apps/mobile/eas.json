@@ -19,6 +19,13 @@
       "android": {
         "gradleCommand": ":app:assembleRelease -x lint -x lintVitalRelease"
       }
+    },
+    "production": {
+      "environment": "preview",
+      "autoIncrement": true,
+      "android": {
+        "buildType": "app-bundle"
+      }
     }
   }
 }

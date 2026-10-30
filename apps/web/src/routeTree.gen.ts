@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AccountRouteImport } from './routes/account'
 import { Route as BlindspotRouteImport } from './routes/blindspot'
 import { Route as BriefingRouteImport } from './routes/briefing'
+import { Route as DeleteAccountRouteImport } from './routes/delete-account'
 import { Route as ForYouRouteImport } from './routes/for-you'
 import { Route as ImprintRouteImport } from './routes/imprint'
 import { Route as LocalRouteImport } from './routes/local'
@@ -56,6 +57,11 @@ const BlindspotRoute = BlindspotRouteImport.update({
 const BriefingRoute = BriefingRouteImport.update({
   id: '/briefing',
   path: '/briefing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DeleteAccountRoute = DeleteAccountRouteImport.update({
+  id: '/delete-account',
+  path: '/delete-account',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForYouRoute = ForYouRouteImport.update({
@@ -155,6 +161,7 @@ export interface FileRoutesByFullPath {
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/briefing': typeof BriefingRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/local': typeof LocalRoute
@@ -180,6 +187,7 @@ export interface FileRoutesByTo {
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/briefing': typeof BriefingRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/local': typeof LocalRoute
@@ -206,6 +214,7 @@ export interface FileRoutesById {
   '/account': typeof AccountRoute
   '/blindspot': typeof BlindspotRoute
   '/briefing': typeof BriefingRoute
+  '/delete-account': typeof DeleteAccountRoute
   '/for-you': typeof ForYouRoute
   '/imprint': typeof ImprintRoute
   '/local': typeof LocalRoute
@@ -233,6 +242,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/blindspot'
     | '/briefing'
+    | '/delete-account'
     | '/for-you'
     | '/imprint'
     | '/local'
@@ -258,6 +268,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/blindspot'
     | '/briefing'
+    | '/delete-account'
     | '/for-you'
     | '/imprint'
     | '/local'
@@ -283,6 +294,7 @@ export interface FileRouteTypes {
     | '/account'
     | '/blindspot'
     | '/briefing'
+    | '/delete-account'
     | '/for-you'
     | '/imprint'
     | '/local'
@@ -309,6 +321,7 @@ export interface RootRouteChildren {
   AccountRoute: typeof AccountRoute
   BlindspotRoute: typeof BlindspotRoute
   BriefingRoute: typeof BriefingRoute
+  DeleteAccountRoute: typeof DeleteAccountRoute
   ForYouRoute: typeof ForYouRoute
   ImprintRoute: typeof ImprintRoute
   LocalRoute: typeof LocalRoute
@@ -364,6 +377,13 @@ declare module '@tanstack/react-router' {
       path: '/briefing'
       fullPath: '/briefing'
       preLoaderRoute: typeof BriefingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/delete-account': {
+      id: '/delete-account'
+      path: '/delete-account'
+      fullPath: '/delete-account'
+      preLoaderRoute: typeof DeleteAccountRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/for-you': {
@@ -501,6 +521,7 @@ const rootRouteChildren: RootRouteChildren = {
   AccountRoute: AccountRoute,
   BlindspotRoute: BlindspotRoute,
   BriefingRoute: BriefingRoute,
+  DeleteAccountRoute: DeleteAccountRoute,
   ForYouRoute: ForYouRoute,
   ImprintRoute: ImprintRoute,
   LocalRoute: LocalRoute,
