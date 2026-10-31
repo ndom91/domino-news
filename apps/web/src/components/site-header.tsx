@@ -212,6 +212,7 @@ export function PublicHeader() {
 
 const LEGAL = [
   { to: '/about', label: 'About' },
+  { to: '/contact-us', label: 'Contact us' },
   { to: '/privacy', label: 'Privacy' },
   { to: '/terms', label: 'Terms' },
   { to: '/imprint', label: 'Imprint' },

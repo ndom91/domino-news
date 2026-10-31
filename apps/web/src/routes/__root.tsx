@@ -29,6 +29,7 @@ const PUBLIC_PATHS = new Set([
   '/terms',
   '/imprint',
   '/delete-account',
+  '/contact-us',
 ])
 // Signed out, these show a teaser (title, one sentence, sign-in button) instead of redirecting,
 // so shared links preview properly. The routes load public preview data when `preview` is set.
@@ -53,7 +54,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       session.user &&
       !session.user.onboarded &&
       location.pathname !== '/onboarding' &&
-      location.pathname !== '/delete-account'
+      location.pathname !== '/delete-account' &&
+      location.pathname !== '/contact-us'
     ) {
       throw redirect({ to: '/onboarding', search: { next: location.href } })
     }

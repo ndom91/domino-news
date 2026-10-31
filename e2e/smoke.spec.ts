@@ -14,6 +14,18 @@ test('unauthenticated visitors are sent to sign in', async ({ page }) => {
   await expect(page.getByRole('button', { name: 'Sign in', exact: true })).toBeVisible()
 })
 
+test('contact information is public and linked in the footer', async ({ page }) => {
+  await page.goto('/contact-us')
+  await expect(page.getByRole('heading', { name: 'Contact us', level: 1 })).toBeVisible()
+  await expect(page.getByRole('link', { name: 'domino-wire@ndo.dev' })).toHaveAttribute(
+    'href',
+    'mailto:domino-wire@ndo.dev',
+  )
+  await expect(
+    page.getByRole('contentinfo').getByRole('link', { name: 'Contact us' }),
+  ).toHaveAttribute('href', '/contact-us')
+})
+
 test('failed sign out leaves the reader signed in and allows retry', async ({ page }) => {
   await signIn(page)
   await page.route('**/api/auth/sign-out', (route) =>

@@ -11,7 +11,7 @@ import type { UserPreferences, UserPreferencesUpdate } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { useState } from 'react'
-import { Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
+import { Linking, Modal, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { AlertSettings } from '../../../components/account/alert-settings'
 import { AudioSettings } from '../../../components/account/audio-settings'
@@ -54,6 +54,7 @@ export default function AccountScreen() {
   })
   const [signingOut, setSigningOut] = useState(false)
   const [signOutError, setSignOutError] = useState<string | null>(null)
+  const [contactError, setContactError] = useState<string | null>(null)
   const [countryPickerOpen, setCountryPickerOpen] = useState(false)
   const [countryError, setCountryError] = useState<string | null>(null)
   const [confirmReadingHistoryOff, setConfirmReadingHistoryOff] = useState(false)
@@ -62,6 +63,15 @@ export default function AccountScreen() {
   const signalSave = useMutation(updateSignalsMutation(api, queryClient))
   const feedbackSave = useMutation(feedbackMutation(api, queryClient))
   const user = session.data?.user
+
+  async function openContact(url: string) {
+    setContactError(null)
+    try {
+      await Linking.openURL(url)
+    } catch {
+      setContactError('Could not open the link. Please email domino-wire@ndo.dev instead.')
+    }
+  }
 
   async function signOut() {
     setSigningOut(true)
@@ -367,6 +377,39 @@ export default function AccountScreen() {
         <Button disabled={signingOut} onPress={signOut}>
           {signingOut ? 'Signing out…' : 'Sign out'}
         </Button>
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Contact us</Text>
+          <Text style={styles.description}>
+            Questions or feedback about Domino Wire? Email domino-wire@ndo.dev.
+          </Text>
+          <Pressable
+            accessibilityLabel="Email Domino Wire at domino-wire@ndo.dev"
+            accessibilityRole="link"
+            onPress={() => void openContact('mailto:domino-wire@ndo.dev')}
+            style={({ pressed }) => [styles.navigationRow, pressed ? styles.pressed : null]}
+          >
+            <Text style={styles.navigationTitle}>Email us</Text>
+            <Text aria-hidden style={styles.navigationArrow}>
+              ›
+            </Text>
+          </Pressable>
+          <Pressable
+            accessibilityLabel="Open the Domino Wire contact page"
+            accessibilityRole="link"
+            onPress={() => void openContact('https://domino-wire.ndo.dev/contact-us')}
+            style={({ pressed }) => [styles.navigationRow, pressed ? styles.pressed : null]}
+          >
+            <Text style={styles.navigationTitle}>Contact page</Text>
+            <Text aria-hidden style={styles.navigationArrow}>
+              ›
+            </Text>
+          </Pressable>
+          {contactError ? (
+            <Text accessibilityLiveRegion="polite" style={styles.error}>
+              {contactError}
+            </Text>
+          ) : null}
+        </View>
       </ScrollView>
       <Modal
         animationType="slide"
