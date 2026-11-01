@@ -1,0 +1,58 @@
+{
+  "configVersion": 0,
+  "apple": {
+    "copyright": "2026 Nico Domino",
+    "categories": ["NEWS", "MAGAZINES_AND_NEWSPAPERS"],
+    "info": {
+      "en-US": {
+        "title": "Domino Wire",
+        "subtitle": "Every side of the story",
+        "description": "Domino Wire follows the news across more than 60 publishers and turns their reporting into stories: one page per development, with every source linked. See who reported what, when, and how it connects to what came before.\n\nSTORIES, NOT HEADLINES\n• Articles about the same event are grouped into one story with a short summary\n• Every sentence in a summary links to the article it comes from\n• Narratives connect stories that follow from each other into a timeline\n\nKNOW YOUR SOURCES\n• See which publishers covered a story and which didn't\n• Each publisher's ownership, reliability and political lean, each from a named source\n• Lean is shown per country, because \"centre-right\" in the UK isn't the same as in the US\n\nMADE FOR YOU, ON YOUR TERMS\n• For You ranks stories by the regions, desks and topics you pick, and the narratives and publishers you follow\n• Every story says why it's in your feed\n• Optional alerts for the stories that matter to you\n• Blindspot shows what you might be missing, only if you turn on reading history\n\nHONEST ABOUT HOW IT WORKS\nSummaries are written by a language model running on our own servers, using only the articles in each story. A summary says what publishers report, not what Domino Wire has verified. Read the originals for the full picture.\n\nPRIVATE BY DEFAULT\n• No ads, and we don't sell or share your data\n• Sign up with just a username and password. Email is optional\n• We never guess your politics\n• Delete your account at any time from the app",
+        "keywords": [
+          "news",
+          "headlines",
+          "media bias",
+          "politics",
+          "sources",
+          "briefing",
+          "world",
+          "balanced",
+          "coverage",
+          "lean",
+          "publishers",
+          "summary"
+        ],
+        "promoText": "Every story, every source. See how publishers across the spectrum cover the same news, with summaries that cite every claim.",
+        "privacyPolicyUrl": "https://domino-wire.ndo.dev/privacy",
+        "supportUrl": "https://domino-wire.ndo.dev/about"
+      }
+    },
+    "advisory": {
+      "alcoholTobaccoOrDrugUseOrReferences": "INFREQUENT_OR_MILD",
+      "contests": "NONE",
+      "gambling": false,
+      "gamblingSimulated": "NONE",
+      "horrorOrFearThemes": "NONE",
+      "matureOrSuggestiveThemes": "INFREQUENT_OR_MILD",
+      "medicalOrTreatmentInformation": "INFREQUENT_OR_MILD",
+      "profanityOrCrudeHumor": "NONE",
+      "sexualContentGraphicAndNudity": "NONE",
+      "sexualContentOrNudity": "NONE",
+      "unrestrictedWebAccess": false,
+      "violenceCartoonOrFantasy": "NONE",
+      "violenceRealistic": "INFREQUENT_OR_MILD",
+      "violenceRealisticProlongedGraphicOrSadistic": "NONE",
+      "seventeenPlus": false
+    },
+    "release": {
+      "automaticRelease": false,
+      "phasedRelease": false
+    },
+    "review": {
+      "firstName": "Nico",
+      "lastName": "Domino",
+      "email": "domino-wire@ndo.dev",
+      "notes": "Sign in with the demo username (not an email address) and password provided in App Store Connect. Content is public news coverage grouped from publishers' RSS feeds, so the app needs an internet connection. Story summaries are AI-written from the grouped articles and cite each source; links open the original article in Safari.\n\nAccount deletion: Account tab > Delete account (asks for the password).\nPush alerts: Account tab > Notifications."
+    }
+  }
+}
