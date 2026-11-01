@@ -50,7 +50,7 @@ export default function ReadingHistoryScreen() {
               <SettingsRow
                 detail="See gaps and new developments in your reading."
                 icon="eye"
-                onPress={() => router.push('/blindspot')}
+                onPress={() => router.push('/account/blindspot')}
                 title="View Blindspot"
               />
             </SettingsGroup>

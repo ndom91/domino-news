@@ -5,9 +5,9 @@ import { DESK_LABELS, type Desk, type Insights, REGION_LABELS, type Region } fro
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
-import { StoryCard } from '../../components/story-card'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../components/ui'
-import { api, isUnauthorized, queries } from '../../lib/api'
+import { StoryCard } from '../../../../components/story-card'
+import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../../components/ui'
+import { api, isUnauthorized, queries } from '../../../../lib/api'
 
 export default function BlindspotScreen() {
   const router = useRouter()
@@ -79,7 +79,10 @@ export default function BlindspotScreen() {
             ) : null}
           </View>
         ) : (
-          <ReadingInsights data={data} onManageHistory={() => router.push('/account')} />
+          <ReadingInsights
+            data={data}
+            onManageHistory={() => router.navigate('/account/history')}
+          />
         )}
 
         <OneSidedCoverage data={data.oneSided} />

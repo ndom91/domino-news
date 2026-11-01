@@ -24,6 +24,7 @@ export default function AccountLayout() {
       <Stack.Screen name="alerts" options={{ title: 'Notifications' }} />
       <Stack.Screen name="audio" options={{ title: 'Audio briefing' }} />
       <Stack.Screen name="history" options={{ title: 'Reading history' }} />
+      <Stack.Screen name="blindspot" options={{ title: 'Blindspot' }} />
     </Stack>
   )
 }
