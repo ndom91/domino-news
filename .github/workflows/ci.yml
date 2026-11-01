@@ -30,9 +30,11 @@ jobs:
       # Node 25+ no longer bundles corepack.
       - run: npm install -g corepack@0.36.0 && corepack enable
       - run: pnpm install --frozen-lockfile
+      - run: node scripts/check-docker-workspaces.mjs
       - run: pnpm check
       - run: pnpm typecheck
       - run: pnpm test
+      - run: bash test/deploy-script.test.sh
 
   e2e:
     runs-on: ubuntu-latest

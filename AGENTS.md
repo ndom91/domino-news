@@ -122,6 +122,7 @@ cp .env.example .env    # set BETTER_AUTH_SECRET, BETTER_AUTH_URL (public origin
 scripts/deploy.sh up            # compose up --build (migrate runs first), then cli seed
 scripts/deploy.sh user you      # cli user:create, prompts for the password
 scripts/deploy.sh update        # git pull --ff-only, then the same as up
+scripts/deploy.sh update-image  # git pull, then pull and deploy the commit-tagged GHCR image
 ```
 
 Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) is not included yet. Backups: `scripts/deploy.sh backup` (pg_dump into `backups/` on the host; offsite copies are left to the operator; see README).
@@ -163,6 +164,7 @@ scripts/deploy.sh cli ingest          # poll every feed now
 ```bash
 scripts/deploy.sh backup     # before any update that has migrations
 scripts/deploy.sh update     # git pull, rebuild, migrate, restart, re-seed publishers
+                             # or update-image to pull the published image (see README)
 ```
 
 - **Migrations only go forward.** There are no down migrations, so rolling back code does not undo the schema; restore a backup instead.

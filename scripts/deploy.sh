@@ -14,6 +14,8 @@ Usage: scripts/deploy.sh <command>
 
   up                 Build images, start everything (migrations run first), seed publishers
   update             git pull, then the same as `up`
+  image-up           Pull the image for the current commit, start and seed
+  update-image       git pull, then the same as `image-up`
   user <username>    Create an admin login (prompts for the password)
   status             Container state and pipeline status
   logs [service]     Follow logs (all services, or one: web, worker, indexer, ...)
@@ -76,12 +78,43 @@ up() {
   compose ps
 }
 
+image_up() {
+  [[ -f .env ]] || { echo "Missing .env: copy .env.example and fill it in first." >&2; exit 1; }
+  local image previous_image status
+  image="${DOMINO_IMAGE_REPOSITORY:-ghcr.io/ndom91/domino-news}:$(git rev-parse HEAD)"
+  echo "Pulling $image"
+  # Pull before changing the local tag or starting anything: a missing image leaves the
+  # currently running containers untouched. Tagging also keeps cli/backup/restore on this image.
+  docker pull "$image"
+  previous_image=$(docker image inspect --format '{{.Id}}' domino-news-app:local 2>/dev/null) || previous_image=''
+  docker tag "$image" domino-news-app:local
+  if compose up -d --no-build --pull missing --remove-orphans; then
+    :
+  else
+    status=$?
+    echo "Deployment failed; containers or migrations may have changed. Inspect the stack before retrying." >&2
+    if [[ -n "$previous_image" ]]; then
+      docker tag "$previous_image" domino-news-app:local || echo "Could not restore the previous local image tag." >&2
+    else
+      docker image rm domino-news-app:local || echo "Could not remove the new local image tag." >&2
+    fi
+    return "$status"
+  fi
+  cli seed
+  compose ps
+}
+
 case "${1:-}" in
   up) up ;;
   update)
     git pull --ff-only
     # Re-run the freshly pulled script; this process still holds the old functions.
     exec "$0" up
+    ;;
+  image-up) image_up ;;
+  update-image)
+    git pull --ff-only
+    exec "$0" image-up
     ;;
   user)
     [[ -n "${2:-}" ]] || { usage; exit 1; }
