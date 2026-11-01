@@ -1,0 +1,39 @@
+# Release the app: push a tag like `mobile-v0.8.2` (bump `version` in app.config.ts first).
+# Each run uses one iOS and one Android build from the EAS plan; build numbers auto-increment.
+name: Release
+
+on:
+  push:
+    tags:
+      - mobile-v*
+
+jobs:
+  build_ios:
+    name: Build iOS
+    type: build
+    params:
+      platform: ios
+      profile: production
+
+  build_android:
+    name: Build Android
+    type: build
+    params:
+      platform: android
+      profile: production
+
+  submit_ios:
+    name: Submit to TestFlight
+    type: submit
+    needs: [build_ios]
+    params:
+      build_id: ${{ needs.build_ios.outputs.build_id }}
+      profile: production
+
+  submit_android:
+    name: Submit to Play (internal track)
+    type: submit
+    needs: [build_android]
+    params:
+      build_id: ${{ needs.build_android.outputs.build_id }}
+      profile: production
