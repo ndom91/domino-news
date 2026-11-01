@@ -26,6 +26,54 @@ test('contact information is public and linked in the footer', async ({ page }) 
   ).toHaveAttribute('href', '/contact-us')
 })
 
+test('Local setup saves a city and shows only filled location badges', async ({ page }) => {
+  await signIn(page)
+  const preferences = await (await page.request.get('/api/v1/me/preferences')).json()
+  let locality = { city: null as string | null, county: null as string | null, country: 'DE' }
+  let saved = false
+  await page.route('**/api/v1/local*', (route) =>
+    route.fulfill({
+      json: {
+        locality,
+        source: saved ? 'saved' : 'request',
+        items: [],
+        pageInfo: { nextCursor: null },
+      },
+    }),
+  )
+  await page.route('**/api/v1/me/preferences', (route) => {
+    if (route.request().method() !== 'POST') return route.continue()
+    locality = route.request().postDataJSON().locality
+    saved = true
+    return route.fulfill({ json: { ...preferences, locality } })
+  })
+  const sections = page.getByRole('button', { name: /^Sections/ })
+  if (await sections.isVisible()) {
+    await sections.click()
+    await page.getByRole('menuitem', { name: 'Local' }).click()
+  } else {
+    await page
+      .getByRole('navigation', { name: 'Primary' })
+      .getByRole('link', { name: 'Local' })
+      .click()
+  }
+  await expect(page.getByText('Based on your connection:')).toBeVisible()
+  await page.getByLabel('City or town').fill('Berlin')
+  await page.getByRole('link', { name: 'Choose country or local area' }).click()
+  await expect(
+    page.getByRole('alertdialog', { name: 'Discard your location changes?' }),
+  ).toBeVisible()
+  await page.getByRole('button', { name: 'Keep editing' }).click()
+  await page.getByRole('button', { name: 'Save location' }).click()
+  const badges = page.getByRole('list', { name: 'Your location' })
+  await expect(badges.getByRole('listitem')).toHaveText(['Berlin', '›Germany'])
+  await expect(page.getByRole('link', { name: 'Change location' })).toBeVisible()
+  await expect(page.getByText('Set your location to see stories from where you live.')).toHaveCount(
+    0,
+  )
+  await expectNoHorizontalOverflow(page)
+})
+
 test('failed sign out leaves the reader signed in and allows retry', async ({ page }) => {
   await signIn(page)
   await page.route('**/api/auth/sign-out', (route) =>
@@ -404,7 +452,7 @@ test('feed → story → narrative → search', async ({ page }) => {
   // Local links to its explicit city/county/country setup in Account preferences.
   await page.goto('/local')
   await expect(page.getByRole('heading', { level: 1, name: 'Local' })).toBeVisible()
-  await page.getByRole('link', { name: /setting your location here/ }).click()
+  await page.getByRole('link', { name: /Change location|Choose country or local area/ }).click()
   await expect(page).toHaveURL(/\/account\?tab=preferences#local-stories$/)
   await expect(page.getByRole('form', { name: 'Local news location' })).toBeVisible()
   await expectNoHorizontalOverflow(page)
