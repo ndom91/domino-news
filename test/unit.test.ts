@@ -804,6 +804,34 @@ describe('local generation adapter', () => {
     expect(prompt).not.toContain('obs_a')
   })
 
+  it('constrains story choices and sends articles without numbers', async () => {
+    reply({ choice: 2, rationale: 'Same event.' })
+    const stories = [story, { ...story, storyId: 'sty_2' }]
+    const { output } = await (await generation()).chooseStory({ article: article('new'), stories })
+    expect(output.storyId).toBe('sty_2')
+    const fetchMock = vi.mocked(fetch)
+    const body = JSON.parse(String(fetchMock.mock.calls[0]?.[1]?.body))
+    const prompt = body.messages[1].content as string
+    expect(prompt).toContain('Valid choices are integers from 0 to 2')
+    expect(prompt).toContain('"story": 2')
+    expect(prompt).not.toContain('"n":')
+    expect(body.response_format.json_schema.schema.properties.choice).toMatchObject({
+      minimum: 0,
+      maximum: 2,
+    })
+  })
+
+  it('accepts no match and rejects out-of-range story choices', async () => {
+    reply({ choice: 0, rationale: 'Different events.' })
+    const adapter = await generation()
+    const input = { article: article('new'), stories: [story] }
+    expect((await adapter.chooseStory(input)).output.storyId).toBeNull()
+    for (const choice of [-1, 2, 12]) {
+      reply({ choice, rationale: 'Invalid choice.' })
+      await expect(adapter.chooseStory(input)).rejects.toThrow(/story_choice.*choice/s)
+    }
+  })
+
   it('maps the numbers the model cites back to article and observation IDs', async () => {
     reply({
       headline: 'h',

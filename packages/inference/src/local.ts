@@ -145,7 +145,8 @@ const systemOneResponse = z.object({
 // What the model answers: sources by their number in the prompt ("n", "p"), never by ID.
 // `fromNumbers` below maps them back, so callers only ever see real IDs.
 const sourceNumbers = z.array(z.int()).check(z.minLength(1))
-const choiceByNumber = z.object({ choice: z.int(), rationale: z.string() })
+const choiceByNumber = (count: number) =>
+  z.object({ choice: z.int().check(z.minimum(0), z.maximum(count)), rationale: z.string() })
 const matchByNumber = z.object({
   decision: storyMatchSchema.shape.decision,
   evidenceArticles: z.array(z.int()),
@@ -300,12 +301,15 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
     chooseStory: async (input) => {
       const g = await generate(
         'story_choice',
-        choiceByNumber,
+        choiceByNumber(input.stories.length),
         chooseStoryPrompt(input),
         PROMPT_VERSIONS.chooseStory,
       )
       const { choice, rationale } = g.output
-      const storyId = choice === 0 ? null : numbered('story_choice', input.stories, choice).storyId
+      const storyId = choice === 0 ? null : input.stories[choice - 1]?.storyId
+      if (storyId === undefined) {
+        throw new InvalidModelOutputError(`story_choice: invalid story choice ${choice}`)
+      }
       return { ...g, output: { storyId, rationale } }
     },
     summarizeStory: async (input) => {

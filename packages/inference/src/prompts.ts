@@ -14,7 +14,7 @@ export const PROMPT_VERSIONS = {
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@5',
   extractClaims: 'extract-claims@3',
-  chooseStory: 'choose-story@2',
+  chooseStory: 'choose-story@3',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -254,6 +254,7 @@ reports cover several unrelated events and the main development is unclear, answ
 These differences do NOT make it a different development: another language, a different headline or angle,
 more or less detail, or an official statement versus news coverage of the same announcement, ruling or release.
 - choice: the "story" number of the one story that is the SAME development, or 0 if none is.
+  Valid choices are integers from 0 to ${input.stories.length}; article details are not choices.
   Several stories can be on the same topic; pick the one that is the same development, not the closest topic.
   If none is clearly the same development, answer 0.
 - rationale: one sentence.
@@ -262,5 +263,5 @@ NEW ARTICLE:
 ${data(articleData(input.article))}
 
 EXISTING STORIES:
-${data(input.stories.map((s, i) => ({ story: i + 1, ...storyData(s) })))}`
+${data(input.stories.map((s, i) => ({ story: i + 1, ...storyData(s), articles: s.articles.map((a) => articleData(a)) })))}`
 }
