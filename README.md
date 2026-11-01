@@ -55,7 +55,10 @@ scripts/deploy.sh update        # git pull, cached local build, migrate, restart
 ```
 
 The Docker build caches dependency installation separately from source changes. It requires
-BuildKit (enabled by default in current Docker/Compose). Web, worker, indexer and migrations
+BuildKit (enabled by default in current Docker/Compose). It installs the web and worker
+workspaces and their dependencies, not the mobile or Playroom workspaces. Some Expo packages
+are still installed as optional peers of the server's `@better-auth/expo` integration. Web,
+worker, indexer and migrations
 share one image, so they can all be recreated when that image changes; Postgres and Typesense
 are separate images.
 

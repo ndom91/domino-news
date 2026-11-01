@@ -11,6 +11,10 @@ docs
 **/.expo
 **/.DS_Store
 **/*.tsbuildinfo
+apps/mobile/**
+!apps/mobile/package.json
+playroom/**
+!playroom/package.json
 fixtures/match-eval/cache
 fixtures/match-eval/*.review.html
 fixtures/decision-eval/results

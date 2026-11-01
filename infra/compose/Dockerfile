@@ -31,8 +31,10 @@ COPY packages/schemas/package.json packages/schemas/package.json
 COPY packages/server/package.json packages/server/package.json
 COPY packages/ui/package.json packages/ui/package.json
 COPY playroom/package.json playroom/package.json
+# Install the web and worker workspaces and their dependencies, not the mobile app.
 RUN --mount=type=cache,id=domino-pnpm-store,target=/pnpm/store \
-  pnpm install --frozen-lockfile --store-dir=/pnpm/store
+  pnpm install --frozen-lockfile --store-dir=/pnpm/store \
+    --filter '@dn/web...' --filter '@dn/worker...'
 COPY --from=source /app/ /app/
 RUN pnpm --filter @dn/web build
 
