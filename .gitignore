@@ -29,3 +29,4 @@ fixtures/match-eval/cache/
 
 dash.db*
 
+.agents/skills/eas-workflows

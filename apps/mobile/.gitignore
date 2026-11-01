@@ -7,3 +7,6 @@ expo-env.d.ts
 # Native projects are generated from app.config.ts by `expo prebuild` / `expo run:*`.
 /ios
 /android
+
+# Google Service Account
+loombeat-89ae2f51119b.json
