@@ -81,46 +81,56 @@ export function SettingsGroup({ title, children }: { title: string; children: Re
 type FeatherName = ComponentProps<typeof Feather>['name']
 
 /**
- * A row that opens a sub-page or link. iOS shows a chevron for navigation; Android settings
- * rows don't, so the chevron is iOS-only.
+ * A settings row. Navigation rows get a chevron on iOS only (Android settings rows don't use
+ * one); `external` rows open a link; `action` rows act in place, so they get no trailing icon.
  */
 export function SettingsRow({
   icon,
   title,
   detail,
-  external = false,
+  kind = 'navigate',
+  destructive = false,
+  disabled = false,
   onPress,
 }: {
   icon: FeatherName
   title: string
   detail?: string
-  external?: boolean
+  kind?: 'navigate' | 'external' | 'action'
+  destructive?: boolean
+  disabled?: boolean
   onPress: () => void
 }) {
+  const tint = destructive ? t.color.error : t.color.textSecondary
   return (
     <Pressable
-      accessibilityHint={external ? 'Opens outside the app' : undefined}
+      accessibilityHint={kind === 'external' ? 'Opens outside the app' : undefined}
       accessibilityLabel={detail ? `${title}, ${detail}` : title}
-      accessibilityRole={external ? 'link' : 'button'}
+      accessibilityRole={kind === 'external' ? 'link' : 'button'}
+      accessibilityState={{ disabled }}
       android_ripple={{ color: t.color.border }}
+      disabled={disabled}
       onPress={onPress}
       style={({ pressed }) => [
         styles.row,
+        disabled ? settingsStyles.disabled : null,
         pressed && Platform.OS === 'ios' ? styles.rowPressed : null,
       ]}
     >
-      <Feather aria-hidden color={t.color.textSecondary} name={icon} size={20} />
+      <Feather aria-hidden color={tint} name={icon} size={20} />
       <View style={styles.rowText}>
-        <Text style={styles.rowTitle}>{title}</Text>
+        <Text style={[styles.rowTitle, destructive ? styles.rowTitleDestructive : null]}>
+          {title}
+        </Text>
         {detail ? (
           <Text numberOfLines={1} style={styles.rowDetail}>
             {detail}
           </Text>
         ) : null}
       </View>
-      {external ? (
+      {kind === 'external' ? (
         <Feather aria-hidden color={t.color.textMuted} name="external-link" size={16} />
-      ) : Platform.OS === 'ios' ? (
+      ) : kind === 'navigate' && Platform.OS === 'ios' ? (
         <Feather aria-hidden color={t.color.textMuted} name="chevron-right" size={20} />
       ) : null}
     </Pressable>
@@ -168,5 +178,6 @@ const styles = StyleSheet.create({
   rowPressed: { backgroundColor: t.color.border },
   rowText: { flex: 1, gap: 2 },
   rowTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  rowTitleDestructive: { color: t.color.error },
   rowDetail: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.meta },
 })

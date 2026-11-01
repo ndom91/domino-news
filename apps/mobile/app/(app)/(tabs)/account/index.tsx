@@ -13,7 +13,7 @@ import {
   SettingsRow,
   settingsStyles as s,
 } from '../../../../components/account/settings'
-import { Button, uiStyles } from '../../../../components/ui'
+import { uiStyles } from '../../../../components/ui'
 import { authClient } from '../../../../lib/auth-client'
 import { disableForYouAlerts } from '../../../../lib/for-you-alerts'
 
@@ -125,13 +125,13 @@ export default function AccountScreen() {
           <SettingsGroup title="Help">
             <SettingsRow
               detail="domino-wire@ndo.dev"
-              external
+              kind="external"
               icon="mail"
               onPress={() => void openContact('mailto:domino-wire@ndo.dev')}
               title="Email us"
             />
             <SettingsRow
-              external
+              kind="external"
               icon="message-circle"
               onPress={() => void openContact('https://domino-wire.ndo.dev/contact-us')}
               title="Contact page"
@@ -143,17 +143,21 @@ export default function AccountScreen() {
             </Text>
           ) : null}
 
-          <View style={s.section}>
-            {signOutError ? (
-              <Text accessibilityLiveRegion="polite" style={s.error}>
-                {signOutError}
-              </Text>
-            ) : null}
-            <Button disabled={signingOut} onPress={signOut}>
-              {signingOut ? 'Signing out…' : 'Sign out'}
-            </Button>
+          <SettingsGroup title="Account">
+            <SettingsRow
+              disabled={signingOut}
+              icon="log-out"
+              kind="action"
+              onPress={() => void signOut()}
+              title={signingOut ? 'Signing out…' : 'Sign out'}
+            />
             <DeleteAccount />
-          </View>
+          </SettingsGroup>
+          {signOutError ? (
+            <Text accessibilityLiveRegion="polite" style={s.error}>
+              {signOutError}
+            </Text>
+          ) : null}
         </SettingsPage>
       )}
     </PreferencesPage>

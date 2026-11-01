@@ -5,8 +5,8 @@ import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { authClient } from '../../lib/auth-client'
 import { forgetForYouAlerts } from '../../lib/for-you-alerts'
-import { Button } from '../ui'
 import { ConfirmationDialog } from './confirmation-dialog'
+import { SettingsRow } from './settings'
 
 /**
  * Self-serve account deletion, as on the web Account page. better-auth wants the password, or
@@ -50,37 +50,34 @@ export function DeleteAccount() {
     setPassword('')
   }
 
+  const error = accounts.isError
+    ? accounts.error.message
+    : remove.isError && !confirming
+      ? remove.error.message
+      : null
+
   return (
-    <View style={styles.section}>
-      <Text style={styles.title}>Delete account</Text>
-      <Text style={styles.description}>
-        Deleting your account removes your preferences, follows, reading history and feedback. It
-        can’t be undone.
-      </Text>
-      {accounts.isError ? (
-        <Text accessibilityLiveRegion="polite" style={styles.error}>
-          {accounts.error.message}
-        </Text>
-      ) : null}
-      {remove.isError && !confirming ? (
-        <Text accessibilityLiveRegion="polite" style={styles.error}>
-          {remove.error.message}
-        </Text>
-      ) : null}
-      <Button
+    <>
+      <SettingsRow
+        destructive
         disabled={accounts.isPending || accounts.isError || remove.isPending}
+        icon="trash-2"
+        kind="action"
         onPress={() => {
           remove.reset()
           setConfirming(true)
         }}
-        tone="light"
-      >
-        {remove.isPending ? 'Deleting account…' : 'Delete account'}
-      </Button>
+        title={remove.isPending ? 'Deleting account…' : 'Delete account'}
+      />
+      {error ? (
+        <Text accessibilityLiveRegion="polite" style={[styles.error, styles.rowError]}>
+          {error}
+        </Text>
+      ) : null}
       <ConfirmationDialog
         cancelLabel="Keep account"
         confirmLabel={remove.isPending ? 'Deleting…' : 'Delete account'}
-        detail="Everything tied to your account is deleted straight away. This can’t be undone."
+        detail="Your preferences, follows, reading history and feedback are deleted straight away. This can’t be undone."
         onCancel={cancel}
         onConfirm={() => remove.mutate()}
         pending={remove.isPending || (hasPassword && password.length === 0)}
@@ -109,19 +106,11 @@ export function DeleteAccount() {
           </Text>
         ) : null}
       </ConfirmationDialog>
-    </View>
+    </>
   )
 }
 
 const styles = StyleSheet.create({
-  section: { gap: t.space[4], marginTop: t.space[8] },
-  title: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
-  description: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 23,
-  },
   field: { gap: t.space[2] },
   label: { color: t.color.textSecondary, fontFamily: t.font.bold, fontSize: t.type.label },
   input: {
@@ -135,4 +124,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: t.space[3],
   },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.body, lineHeight: 22 },
+  rowError: { paddingHorizontal: t.space[4], paddingVertical: t.space[3] },
 })
