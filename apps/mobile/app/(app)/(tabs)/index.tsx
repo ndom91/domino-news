@@ -1,6 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { plural, stripCitations } from '@dn/domain'
-import type { StoryLead } from '@dn/schemas'
+import { DESK_LABELS, DESK_SLOT, type StoryLead } from '@dn/schemas'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
@@ -94,9 +94,12 @@ export default function LatestScreen() {
                 {plural(latest.length, 'story', 'stories')}
               </Text>
             </View>
-            <Button tone="light" onPress={() => router.push('/narratives')}>
-              Browse narratives
-            </Button>
+            {/* Spaced off the header's rule so the two borders don't read as one thick line. */}
+            <View style={styles.browse}>
+              <Button tone="light" onPress={() => router.push('/narratives')}>
+                Browse narratives
+              </Button>
+            </View>
           </>
         }
         ListHeaderComponentStyle={latest.length ? styles.listHeader : undefined}
@@ -115,21 +118,38 @@ export default function LatestScreen() {
 
 function LeadStory({ story }: { story: StoryLead }) {
   const router = useRouter()
+  // The same desk fill as the web hero and the story cards' bars.
+  const slot = story.desk ? DESK_SLOT[story.desk] : 0
+  const fill = t.color.narrative[slot] ?? t.color.narrative[0]
+  const ink = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
+  const narrative = story.narratives[0]
   return (
     <Pressable
       accessibilityHint="Opens this story"
       accessibilityLabel={story.title}
       accessibilityRole="link"
       onPress={() => router.push(`/stories/${story.slug}`)}
-      style={({ pressed }) => [styles.leadStory, pressed ? styles.pressed : null]}
+      style={({ pressed }) => [
+        styles.leadStory,
+        { backgroundColor: fill },
+        pressed ? styles.pressed : null,
+      ]}
     >
-      <Text style={styles.leadTitle}>{story.title}</Text>
+      <View style={[styles.leadKicker, { borderBottomColor: ink }]}>
+        <Text numberOfLines={1} style={[styles.leadLabel, { color: ink }]}>
+          {narrative?.title ?? (story.desk ? DESK_LABELS[story.desk] : 'Story')}
+        </Text>
+        <Text style={[styles.leadMeta, { color: ink }]}>Most reported today</Text>
+      </View>
+      <Text style={[styles.leadTitle, { color: ink }]}>{story.title}</Text>
       {story.summary ? (
-        <Text numberOfLines={5} style={styles.leadSummary}>
+        <Text numberOfLines={5} style={[styles.leadSummary, { color: ink }]}>
           {stripCitations(story.summary.body).replace(/\s+([.,;:])/g, '$1')}
         </Text>
       ) : null}
-      <Text style={styles.leadMeta}>{plural(story.sources.length, 'report')}</Text>
+      <Text style={[styles.leadMeta, { color: ink }]}>
+        {plural(story.sources.length, 'report')}
+      </Text>
     </Pressable>
   )
 }
@@ -144,27 +164,27 @@ const styles = StyleSheet.create({
   editionLabel: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
   editionText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
   lead: { gap: t.space[3], marginTop: t.space[6] },
-  leadStory: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.rule,
-    borderWidth: 2,
-    gap: t.space[3],
-    padding: t.space[4],
+  leadStory: { gap: t.space[3], padding: t.space[4] },
+  leadKicker: { borderBottomWidth: 2, gap: t.space[1], paddingBottom: t.space[2] },
+  leadLabel: {
+    fontFamily: t.font.bold,
+    fontSize: t.type.meta,
+    letterSpacing: 0.8,
+    textTransform: 'uppercase',
   },
   leadTitle: {
-    color: t.color.text,
     fontFamily: t.font.black,
     fontSize: 30,
     letterSpacing: -0.6,
     lineHeight: 31,
   },
   leadSummary: {
-    color: t.color.textSecondary,
     fontFamily: t.font.regular,
     fontSize: t.type.bodyLarge,
     lineHeight: 25,
   },
-  leadMeta: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
+  leadMeta: { fontFamily: t.font.bold, fontSize: t.type.meta },
+  browse: { marginTop: t.space[3] },
   pressed: { opacity: 0.7 },
   latestHeader: {
     alignItems: 'baseline',
