@@ -95,7 +95,9 @@ if docker compose --env-file "$tmp/.env" -f "$root/infra/compose/compose.yaml" \
   exit 1
 fi
 migration=$(compose ps -aq migrate)
-[[ $(docker inspect --format '{{.State.ExitCode}}' "$migration") == 37 ]]
+[[ -n "$migration" ]] || { echo 'Migration container was not created' >&2; exit 1; }
+migration_exit=$(docker inspect --format '{{.State.ExitCode}}' "$migration")
+[[ "$migration_exit" == 37 ]] || { echo "Unexpected migration exit: $migration_exit" >&2; exit 1; }
 for service in web worker indexer; do
   container=$(compose ps -aq "$service")
   if [[ -n "$container" && $(docker inspect --format '{{.State.Running}}' "$container") == true ]]; then
@@ -113,5 +115,7 @@ if docker compose --env-file "$tmp/.env" -f "$root/infra/compose/compose.yaml" \
   exit 1
 fi
 web=$(compose ps -aq web)
-[[ $(docker inspect --format '{{.State.ExitCode}}' "$web") == 42 ]]
+[[ -n "$web" ]] || { echo 'Web container was not created' >&2; exit 1; }
+web_exit=$(docker inspect --format '{{.State.ExitCode}}' "$web")
+[[ "$web_exit" == 42 ]] || { echo "Unexpected web exit: $web_exit" >&2; exit 1; }
 echo 'An immediate web startup failure was reported'

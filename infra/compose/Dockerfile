@@ -1,3 +1,4 @@
+# syntax=docker/dockerfile:1.14
 # One image for web, worker, indexer and migrations; Compose picks the command.
 FROM node:26-slim AS base
 # COREPACK_HOME outside /root so the non-root runtime user can use the pre-fetched pnpm.
@@ -7,12 +8,6 @@ ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH CI=true COREPACK_HOME=/corepack
 RUN npm install -g corepack@0.36.0 && corepack enable && corepack prepare pnpm@12.11.2 --activate \
   && pnpm -v && chown -R node:node "$COREPACK_HOME"
 WORKDIR /app
-
-# Host file modes are copied as-is. Fix source permissions before dependencies exist,
-# so the recursive chmod never walks or copies the large node_modules tree.
-FROM base AS source
-COPY . .
-RUN chmod -R a+rX /app
 
 FROM base AS build
 # Copy all workspace manifests before the source so code-only changes reuse the install layer.
@@ -35,7 +30,8 @@ COPY playroom/package.json playroom/package.json
 RUN --mount=type=cache,id=domino-pnpm-store,target=/pnpm/store \
   pnpm install --frozen-lockfile --store-dir=/pnpm/store \
     --filter '@dn/web...' --filter '@dn/worker...'
-COPY --from=source /app/ /app/
+# Ensure the runtime user can read source while preserving existing executable bits.
+COPY --chmod=u=rwX,go=rX . .
 RUN pnpm --filter @dn/web build
 
 FROM base AS runtime

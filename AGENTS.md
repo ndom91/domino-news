@@ -34,6 +34,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm test` | Vitest: unit + integration (needs Compose Postgres; uses database `dn_test`) |
 | `pnpm test:e2e` | Playwright smoke tests against a running app (`E2E_BASE_URL`, `DEV_USERNAME`, `DEV_PASSWORD`) |
 | `bash test/compose-deploy.test.sh <local-app-image>` | Verify migration ordering and failure isolation in disposable local Compose services (requires Docker) |
+| `bash test/docker-permissions.test.sh` | Check image source permissions and dependency caching with a local Docker build |
 | `pnpm db:generate` / `pnpm db:migrate` | Drizzle migrations |
 | `pnpm cli seed` | Upsert publishers and feeds |
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
