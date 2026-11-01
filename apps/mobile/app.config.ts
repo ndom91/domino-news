@@ -29,8 +29,9 @@ const config: ExpoConfig = {
   primaryColor: '#121212',
   icon: '../web/public/icon-512.png',
   ios: {
-    // iOS masks icons to a squircle, so it needs the padded variant to avoid clipping the logo.
-    icon: '../web/public/icon-maskable-512.png',
+    // iOS masks icons to a squircle and the App Store needs 1024px with no transparency. Rendered
+    // from apps/web/public/favicon.svg with padding so the corners don't clip the logo.
+    icon: './assets/icon-ios.png',
     // Permanent once released on the App Store; matches the Android package.
     bundleIdentifier: 'dev.ndo.dominonews',
     supportsTablet: false,
