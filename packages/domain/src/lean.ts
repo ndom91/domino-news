@@ -44,7 +44,77 @@ export function countryFromHeader(value: string | null | undefined): string | nu
 // import time would break every importer of @dn/domain there.
 let countryNames: Intl.DisplayNames | null | undefined
 
-/** "United Kingdom" for "GB"; the code itself if Intl doesn't know it. */
+// Hermes has no Intl.DisplayNames, so the apps would show bare codes. English names for every
+// country in COUNTRY_REGION, matching what Intl returns on the web.
+export const FALLBACK_COUNTRY_NAMES: Record<string, string> = {
+  AE: 'United Arab Emirates',
+  AR: 'Argentina',
+  AT: 'Austria',
+  AU: 'Australia',
+  BA: 'Bosnia & Herzegovina',
+  BD: 'Bangladesh',
+  BE: 'Belgium',
+  BR: 'Brazil',
+  CA: 'Canada',
+  CH: 'Switzerland',
+  CL: 'Chile',
+  CN: 'China',
+  CO: 'Colombia',
+  CZ: 'Czechia',
+  DE: 'Germany',
+  DK: 'Denmark',
+  EE: 'Estonia',
+  EG: 'Egypt',
+  ES: 'Spain',
+  FI: 'Finland',
+  FR: 'France',
+  GB: 'United Kingdom',
+  GH: 'Ghana',
+  GR: 'Greece',
+  HK: 'Hong Kong SAR China',
+  HU: 'Hungary',
+  ID: 'Indonesia',
+  IE: 'Ireland',
+  IL: 'Israel',
+  IN: 'India',
+  IT: 'Italy',
+  JP: 'Japan',
+  KE: 'Kenya',
+  KR: 'South Korea',
+  KZ: 'Kazakhstan',
+  LB: 'Lebanon',
+  LK: 'Sri Lanka',
+  LT: 'Lithuania',
+  LV: 'Latvia',
+  MX: 'Mexico',
+  MY: 'Malaysia',
+  NG: 'Nigeria',
+  NL: 'Netherlands',
+  NO: 'Norway',
+  NP: 'Nepal',
+  NZ: 'New Zealand',
+  PE: 'Peru',
+  PH: 'Philippines',
+  PK: 'Pakistan',
+  PL: 'Poland',
+  PT: 'Portugal',
+  QA: 'Qatar',
+  RO: 'Romania',
+  RS: 'Serbia',
+  SA: 'Saudi Arabia',
+  SE: 'Sweden',
+  SG: 'Singapore',
+  TH: 'Thailand',
+  TR: 'Türkiye',
+  TW: 'Taiwan',
+  UA: 'Ukraine',
+  US: 'United States',
+  UZ: 'Uzbekistan',
+  VN: 'Vietnam',
+  ZA: 'South Africa',
+}
+
+/** "United Kingdom" for "GB"; the code itself if neither Intl nor the fallback list knows it. */
 export function countryName(code: string): string {
   if (countryNames === undefined) {
     countryNames =
@@ -53,9 +123,9 @@ export function countryName(code: string): string {
         : null
   }
   try {
-    return countryNames?.of(code) ?? code
+    return countryNames?.of(code) ?? FALLBACK_COUNTRY_NAMES[code] ?? code
   } catch {
-    return code
+    return FALLBACK_COUNTRY_NAMES[code] ?? code
   }
 }
 

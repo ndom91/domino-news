@@ -102,7 +102,9 @@ export function ContextSheet({
           {entry ? (
             <ScrollView contentContainerStyle={styles.sheetContent}>
               <View style={styles.sheetHeader}>
-                <Text style={styles.sheetTitle}>{entry.title}</Text>
+                <Text accessibilityRole="header" style={styles.sheetTitle}>
+                  {entry.title}
+                </Text>
                 <Pressable
                   accessibilityLabel={`Close ${entry.title}`}
                   accessibilityRole="button"
@@ -115,7 +117,9 @@ export function ContextSheet({
               <Text style={styles.sheetBody}>{entry.explanation}</Text>
               {entry.sources.length > 0 ? (
                 <View style={styles.grounding}>
-                  <Text style={styles.groundingLabel}>Grounding sources</Text>
+                  <Text accessibilityRole="header" style={styles.groundingLabel}>
+                    Grounding sources
+                  </Text>
                   {entry.sources.map((source) => (
                     <Pressable
                       accessibilityHint="Opens the publisher’s article"

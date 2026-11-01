@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { LocalitySettings } from '../../../../components/account/locality-settings'
 import {
   PreferencesPage,
+  SectionHeading,
   SettingsPage,
   settingsStyles as s,
   useSavePreferences,
@@ -39,7 +40,7 @@ export default function LocationSettingsScreen() {
           <>
             <SettingsPage>
               <View style={s.section}>
-                <Text style={s.sectionTitle}>Country preference</Text>
+                <SectionHeading>Country preference</SectionHeading>
                 <Text style={s.description}>
                   Choose the country used for country-specific coverage insights.
                 </Text>
@@ -70,14 +71,12 @@ export default function LocationSettingsScreen() {
               transparent
               visible={pickerOpen}
             >
-              <View
-                accessibilityLabel="Country preference"
-                accessibilityViewIsModal
-                style={styles.sheetScrim}
-              >
+              <View accessibilityViewIsModal style={styles.sheetScrim}>
                 <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.sheet}>
                   <View style={styles.sheetHeader}>
-                    <Text style={s.sectionTitle}>Country preference</Text>
+                    <Text accessibilityRole="header" style={s.sectionTitle}>
+                      Country preference
+                    </Text>
                     <Pressable
                       accessibilityLabel="Close country choices"
                       accessibilityRole="button"

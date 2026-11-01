@@ -28,13 +28,11 @@ export function ConfirmationDialog({
 }) {
   return (
     <Modal animationType="fade" onRequestClose={onCancel} transparent visible={visible}>
-      <View
-        accessibilityLabel={`${title} confirmation`}
-        accessibilityViewIsModal
-        style={styles.scrim}
-      >
+      <View accessibilityViewIsModal style={styles.scrim}>
         <View style={styles.dialog}>
-          <Text style={styles.title}>{title}</Text>
+          <Text accessibilityRole="header" style={styles.title}>
+            {title}
+          </Text>
           <Text style={styles.detail}>{detail}</Text>
           {children}
           <View style={styles.actions}>

@@ -4,7 +4,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { ConfirmationDialog } from '../../../../components/account/confirmation-dialog'
-import { SettingsPage, settingsStyles as s } from '../../../../components/account/settings'
+import {
+  SectionHeading,
+  SettingsPage,
+  settingsStyles as s,
+} from '../../../../components/account/settings'
 import { StoryCard } from '../../../../components/story-card'
 import { Button } from '../../../../components/ui'
 import { api, queries } from '../../../../lib/api'
@@ -20,6 +24,7 @@ export default function LearnedSignalsScreen() {
     <>
       <SettingsPage>
         <View style={s.section}>
+          <SectionHeading>Signals</SectionHeading>
           <Text style={s.description}>
             “More” and “Less” adjust these signals. You can remove a signal or start over.
           </Text>
@@ -72,7 +77,7 @@ export default function LearnedSignalsScreen() {
         </View>
 
         <View style={s.section}>
-          <Text style={s.sectionTitle}>Hidden from For You</Text>
+          <SectionHeading>Hidden from For You</SectionHeading>
           {hiddenStories.isPending ? <Text style={s.note}>Loading hidden stories…</Text> : null}
           {hiddenStories.isError ? (
             <Text style={s.error}>Hidden stories could not be loaded.</Text>

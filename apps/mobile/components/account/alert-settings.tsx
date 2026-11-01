@@ -9,6 +9,7 @@ import {
   syncForYouAlerts,
 } from '../../lib/for-you-alerts'
 import { Button } from '../ui'
+import { SectionHeading } from './settings'
 
 type AlertStatus = { enabled: boolean; registered: boolean }
 
@@ -55,7 +56,7 @@ export function AlertSettings() {
 
   return (
     <View style={styles.section}>
-      <Text style={styles.title}>Background alerts</Text>
+      <SectionHeading>Background alerts</SectionHeading>
       <Text style={styles.description}>
         Domino Wire sends a notification when a new story surfaces in your For You feed.
       </Text>
@@ -111,5 +112,4 @@ const styles = StyleSheet.create({
   },
   section: { gap: t.space[4] },
   switchRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
-  title: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
 })

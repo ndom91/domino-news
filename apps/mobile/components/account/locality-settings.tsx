@@ -5,7 +5,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { api } from '../../lib/api'
-import { Button, uiStyles } from '../ui'
+import { Button } from '../ui'
+import { SectionHeading } from './settings'
 
 export function LocalitySettings({ locality }: { locality: Place | null }) {
   const queryClient = useQueryClient()
@@ -27,7 +28,7 @@ export function LocalitySettings({ locality }: { locality: Place | null }) {
   }
   return (
     <View style={styles.section}>
-      <Text style={uiStyles.label}>Local stories</Text>
+      <SectionHeading>Local stories</SectionHeading>
       <Text style={styles.text}>
         Choose a country and optionally a city or local area. Your location is saved to your
         account.
@@ -89,7 +90,7 @@ export function LocalitySettings({ locality }: { locality: Place | null }) {
   )
 }
 const styles = StyleSheet.create({
-  section: { gap: t.space[2] },
+  section: { gap: t.space[3] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
   label: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
   input: {

@@ -3,9 +3,11 @@ import {
   clockTime,
   countryFromHeader,
   dayLabel,
+  FALLBACK_COUNTRY_NAMES,
   formatDate,
   formatDateTime,
   hostnameOf,
+  KNOWN_COUNTRIES,
   leanBand,
   leanSide,
   normalizeArticleUrl,
@@ -257,6 +259,11 @@ describe('regions', () => {
     expect(regionForCountry('qa')).toBe('middle-east')
     expect(regionForCountry('ZZ')).toBeNull()
     expect(regionForCountry(null)).toBeNull()
+  })
+
+  it('has an English name for every known country, matching Intl, for Hermes', () => {
+    const names = new Intl.DisplayNames(['en'], { type: 'region' })
+    for (const code of KNOWN_COUNTRIES) expect(FALLBACK_COUNTRY_NAMES[code]).toBe(names.of(code))
   })
 
   it("prefers recent stories in the reader's regions for the lead, else the most-sourced", () => {

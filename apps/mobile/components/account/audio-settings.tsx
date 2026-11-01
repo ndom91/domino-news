@@ -6,7 +6,8 @@ import { useState } from 'react'
 import { StyleSheet, Text, TextInput, View } from 'react-native'
 import { api } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
-import { Button, uiStyles } from '../ui'
+import { Button } from '../ui'
+import { SectionHeading } from './settings'
 
 export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name: string }) {
   const queryClient = useQueryClient()
@@ -32,7 +33,7 @@ export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name
   }
   return (
     <View style={styles.section}>
-      <Text style={uiStyles.label}>Presentation style</Text>
+      <SectionHeading>Presentation style</SectionHeading>
       <Text style={styles.text}>
         Choose a presentation style. Radio may include fictional sponsor jokes.
       </Text>

@@ -69,10 +69,19 @@ export function PreferencesPage({
   return <>{children(preferences.data)}</>
 }
 
+/** Labels a section of a settings page. The native header already names the page itself. */
+export function SectionHeading({ children }: { children: string }) {
+  return (
+    <Text accessibilityRole="header" style={uiStyles.eyebrow}>
+      {children}
+    </Text>
+  )
+}
+
 export function SettingsGroup({ title, children }: { title: string; children: ReactNode }) {
   return (
     <View style={styles.group}>
-      <Text style={uiStyles.eyebrow}>{title}</Text>
+      <SectionHeading>{title}</SectionHeading>
       <View style={styles.groupRows}>{children}</View>
     </View>
   )
