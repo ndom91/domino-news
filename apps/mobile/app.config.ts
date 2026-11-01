@@ -37,6 +37,8 @@ const config: ExpoConfig = {
     infoPlist: {
       // The app only uses standard HTTPS, which is exempt from export compliance.
       ITSAppUsesNonExemptEncryption: false,
+      // The root Stack sets statusBarStyle per screen; react-native-screens requires this on iOS.
+      UIViewControllerBasedStatusBarAppearance: true,
       ...(developmentBuild ? { NSAppTransportSecurity: { NSAllowsArbitraryLoads: true } } : {}),
     },
   },

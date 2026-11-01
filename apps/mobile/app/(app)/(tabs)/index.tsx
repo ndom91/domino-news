@@ -79,7 +79,7 @@ export default function LatestScreen() {
             <View style={styles.edition}>
               <Text style={styles.editionLabel}>The latest reporting</Text>
               <Text style={styles.editionText}>
-                {plural(front.data.stats.stories, 'story')} in the last 24 hours
+                {plural(front.data.stats.stories, 'story', 'stories')} in the last 24 hours
               </Text>
             </View>
             {front.data.lead ? (

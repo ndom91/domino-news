@@ -135,7 +135,7 @@ function ReadingInsights({
               <View key={`${gap.kind}-${gap.key}`} style={styles.gap}>
                 <Text style={styles.gapTitle}>{gapLabel(gap)}</Text>
                 <Text style={styles.caption}>
-                  {plural(gap.storiesThisWeek, 'story')} this week ·{' '}
+                  {plural(gap.storiesThisWeek, 'story', 'stories')} this week ·{' '}
                   {gap.yourReads === 0 ? 'none read by you' : `${gap.yourReads} read by you`}
                 </Text>
               </View>
