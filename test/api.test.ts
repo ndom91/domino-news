@@ -653,6 +653,7 @@ describe('preferences', () => {
     expect(country.status).toBe(200)
     const prefs = userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
     expect(prefs).toMatchObject({ audioBriefingStyle: 'radio', country: 'GB' })
+    await save(token, { audioBriefingStyle: 'professional' })
   })
 
   it('marks onboarding done once, and never undoes it', async () => {
@@ -1024,6 +1025,10 @@ describe('Briefing', () => {
       userPreferencesSchema.parse(await (await call('/api/v1/me/preferences')).json())
         .audioBriefingStyle,
     ).toBe('radio')
+    await post('/api/v1/me/preferences', {
+      audioBriefingStyle: 'professional',
+      rememberReads: false,
+    })
   })
 
   it('keeps one comparison checkpoint and lets readers mute publishers', async () => {
@@ -1286,7 +1291,7 @@ describe('publisher coverage', () => {
     expect(res.status).toBe(200)
     const { publisherListResponseSchema } = await import('@dn/schemas')
     const body = publisherListResponseSchema.parse(await res.json())
-    expect(body.items.length).toBe(77)
+    expect(body.items.length).toBe(83)
     for (const p of body.items) {
       const { rows } = await h.ctx.pool.query(
         `select count(distinct sa.story_id)::int as n from story_article sa
