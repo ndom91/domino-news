@@ -89,7 +89,7 @@ export function LocalitySettings({ locality }: { locality: Place | null }) {
   )
 }
 const styles = StyleSheet.create({
-  section: { gap: t.space[2], marginTop: t.space[10] },
+  section: { gap: t.space[2] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
   label: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
   input: {

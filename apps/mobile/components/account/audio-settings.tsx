@@ -32,7 +32,7 @@ export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name
   }
   return (
     <View style={styles.section}>
-      <Text style={uiStyles.label}>Audio briefing</Text>
+      <Text style={uiStyles.label}>Presentation style</Text>
       <Text style={styles.text}>
         Choose a presentation style. Radio may include fictional sponsor jokes.
       </Text>
@@ -75,7 +75,7 @@ export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name
   )
 }
 const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginTop: t.space[10] },
+  section: { gap: t.space[3] },
   row: { flexDirection: 'row', gap: t.space[2] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
   input: {

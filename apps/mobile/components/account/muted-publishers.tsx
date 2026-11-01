@@ -37,7 +37,7 @@ export function MutedPublishers() {
   const list = useQuery(queries.mutedPublishers())
   const save = useMutation(setMutedPublisherMutation(api, useQueryClient()))
   return (
-    <View style={styles.section}>
+    <View style={styles.list}>
       <Text style={uiStyles.label}>Muted publishers</Text>
       {list.isPending ? <Text style={styles.text}>Loading…</Text> : null}
       {list.isError || save.isError ? (
@@ -62,6 +62,7 @@ export function MutedPublishers() {
 }
 const styles = StyleSheet.create({
   section: { gap: t.space[3], marginTop: t.space[5] },
+  list: { gap: t.space[3] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
   error: { color: t.color.error },
 })

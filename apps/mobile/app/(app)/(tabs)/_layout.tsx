@@ -80,6 +80,8 @@ export default function TabLayout() {
       <Tabs.Screen
         name="account"
         options={{
+          // The account stack draws its own headers.
+          headerShown: false,
           title: 'Account',
           tabBarIcon: ({ color, size }) => (
             <Feather

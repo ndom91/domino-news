@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     fontSize: t.type.meta,
     lineHeight: 18,
   },
-  section: { gap: t.space[4], marginTop: t.space[8] },
+  section: { gap: t.space[4] },
   switchRow: { alignItems: 'center', flexDirection: 'row', justifyContent: 'space-between' },
   title: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.headline },
 })
