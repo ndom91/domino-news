@@ -27,7 +27,10 @@ export async function savePushSubscription(db: Db, userId: string, token: string
 export async function pushSubscriptionRegistered(db: Db, userId: string, token: string) {
   const subscription = await db.query.pushSubscription.findFirst({
     columns: { token: true },
-    where: and(eq(schema.pushSubscription.token, token), eq(schema.pushSubscription.userId, userId)),
+    where: and(
+      eq(schema.pushSubscription.token, token),
+      eq(schema.pushSubscription.userId, userId),
+    ),
   })
 
   return Boolean(subscription)

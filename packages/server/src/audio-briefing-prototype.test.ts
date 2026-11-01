@@ -28,7 +28,9 @@ describe('audio briefing styles', () => {
       const body = JSON.parse(String(fetcher.mock.calls[0]?.[1]?.body))
       expect(body.messages[0].content).toContain('preserve attribution and uncertainty')
       expect(body.messages[0].content).toContain(
-        style === 'radio' ? 'satirical commercial in the spirit of GTA radio' : 'professional, light-hearted',
+        style === 'radio'
+          ? 'satirical commercial in the spirit of GTA radio'
+          : 'professional, light-hearted',
       )
       if (style === 'radio') {
         expect(body.messages[0].content).toContain('Invent a different absurd business')

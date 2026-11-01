@@ -10,8 +10,10 @@
       "**",
       "!**/routeTree.gen.ts",
       "!**/drizzle/meta",
+      "!.agents/skills",
       "!fixtures/**/*.xml",
-      "!fixtures/match-eval"
+      "!fixtures/match-eval",
+      "!fixtures/decision-eval/results"
     ]
   },
   "formatter": {
