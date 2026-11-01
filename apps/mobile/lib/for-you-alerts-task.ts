@@ -69,6 +69,11 @@ export async function disableForYouAlerts(): Promise<void> {
   await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY)
 }
 
+/** Drop the local opt-in without calling the API, e.g. after the account was deleted. */
+export async function forgetForYouAlerts(): Promise<void> {
+  await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY)
+}
+
 export async function refreshForYouPushToken(token: string) {
   await saveToken(token)
 }

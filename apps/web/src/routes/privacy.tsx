@@ -55,10 +55,10 @@ function PrivacyPage() {
       <Section id="data" title="What we process, and why">
         <ul>
           <li>
-            <strong>Your account:</strong> username, name, email address, a hashed password (we
-            never store the password itself) and any passkeys you add. With Google sign-in, also the
-            name, email address and profile picture Google shares. Needed to provide the service
-            (Art. 6(1)(b) GDPR).
+            <strong>Your account:</strong> username, name, email address (optional), a hashed
+            password (we never store the password itself) and any passkeys you add. With Google
+            sign-in, also the name, email address and profile picture Google shares. Needed to
+            provide the service (Art. 6(1)(b) GDPR).
           </li>
           <li>
             <strong>Sessions:</strong> when you sign in, we store a session with your IP address and

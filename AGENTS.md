@@ -36,7 +36,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm db:generate` / `pnpm db:migrate` | Drizzle migrations |
 | `pnpm cli seed` | Upsert publishers and feeds |
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
-| `pnpm cli user:create --username u --password p [--role user]` | Create an account (public sign-up is disabled). CLI accounts are admins unless `--role user` |
+| `pnpm cli user:create --username u --password p [--role user]` | Create an account without the public sign-up form. CLI accounts are admins unless `--role user` |
 | `pnpm cli user:role --username u --role admin\|user` | Promote or demote an account |
 | `pnpm cli assessments:import` | Refresh publisher evidence from Wikidata (ownership), Wikipedia's perennial sources (reliability) and `fixtures/lean-evidence.json` (lean) |
 | `pnpm cli assessments:publish --username u [--dry-run]` | Publish the reviewed assessments in `fixtures/assessments.json` as admin `u`. Skips publishers whose latest assessment already matches. Run `assessments:import` first |
@@ -341,7 +341,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Publisher coverage:** publisher stats (stories, first to report) and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, For You, Story, Narrative (timeline), Blindspot, publishers, search, pipeline, account and onboarding pages, and a 404 page. Desktop-first and checked at 375px; below 1024px the header nav becomes a section menu.
-- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; sign-up closed except through Google. An `admin` role gates the Pipeline page and assessment review.
+- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; public sign-up with a username, password and optional email (web and mobile), plus self-serve account deletion on both. An `admin` role gates the Pipeline page and assessment review.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited

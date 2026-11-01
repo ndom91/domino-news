@@ -38,6 +38,11 @@ export async function disableForYouAlerts(): Promise<void> {
   await (await taskModule()).disableForYouAlerts()
 }
 
+export async function forgetForYouAlerts(): Promise<void> {
+  if (isExpoGo) return
+  await (await taskModule()).forgetForYouAlerts()
+}
+
 export async function listenForStoryNotifications(listener: StoryListener): Promise<Subscription> {
   if (isExpoGo) return { remove: () => {} }
 

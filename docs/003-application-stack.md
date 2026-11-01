@@ -211,7 +211,7 @@ Constraints:
 Added 2026-10-10 by founder decision: **the entire application sits behind a login**, including Story and Narrative pages and every `/api/v1` route.
 
 - **Library:** [better-auth](https://www.better-auth.com) with the Drizzle adapter. Auth tables (`auth_user`, `auth_session`, `auth_account`, `auth_verification`, `auth_passkey`) live in PostgreSQL next to domain data.
-- **Methods:** username + password (`username` plugin), passkeys, and optional Google sign-in. Public sign-up is **disabled**; accounts are created with `pnpm cli user:create`, but any Google account can sign up.
+- **Methods:** username + password (`username` plugin), passkeys, and optional Google sign-in. Public sign-up takes a username and password, with an optional email (blank emails get a `<username>@users.local` placeholder, as CLI accounts do). `pnpm cli user:create` still creates accounts directly, and any Google account can sign up.
 - **Roles:** `auth_user.role` is `admin` or `user`. CLI accounts are admins unless `--role user`; Google accounts are users. API routes marked `adminOnly` return `403` to users.
 - **API clients:** the `bearer` plugin issues a token on sign-in (`set-auth-token` header) that clients send as `Authorization: Bearer <token>`. The web app uses the same session via cookies. This keeps the API usable by the future Expo app without browser cookies.
 - **Passkeys (implemented):** `@better-auth/passkey`. Signed-in users add passkeys on `/account`; the login page offers "Sign in with a passkey" and browser autofill. `rpID`/`origin` come from `BETTER_AUTH_URL`, so it must be the real public origin (HTTPS in production; `localhost` works for development).

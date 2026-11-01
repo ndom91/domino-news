@@ -9,7 +9,11 @@ import { seo } from '../lib/seo.ts'
 import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/login')({
-  validateSearch: z.object({ next: z.optional(z.string()), error: z.optional(z.string()) }),
+  validateSearch: z.object({
+    next: z.optional(z.string()),
+    error: z.optional(z.string()),
+    mode: z.optional(z.literal('sign-up')),
+  }),
   beforeLoad: ({ context }) => {
     if (context.session.user) throw redirect({ to: '/' })
   },
@@ -22,16 +26,20 @@ export const Route = createFileRoute('/login')({
 // Fixed seed: the same illustration for everyone, every visit.
 const MARBLE_SEED = 'Ledger'
 
+// Matches minPasswordLength in packages/server/src/auth.ts.
+const MIN_PASSWORD_LENGTH = 10
+
 function LoginPage() {
   const queryClient = useQueryClient()
   const router = useRouter()
-  const { next, error: oauthError } = Route.useSearch()
+  const { next, error: oauthError, mode } = Route.useSearch()
+  const signingUp = mode === 'sign-up'
   const { session } = Route.useRouteContext()
   const [error, setError] = useState<string | null>(
     oauthError ? "This Google account isn't allowed to sign in." : null,
   )
   // Which sign-in method is in flight, so only its button spins.
-  const [pending, setPending] = useState<null | 'password' | 'passkey' | 'google'>(null)
+  const [pending, setPending] = useState<null | 'password' | 'sign-up' | 'passkey' | 'google'>(null)
   // Wrong credentials shake the fields. Remove, reflow, re-add so repeat failures replay it.
   const fieldsRef = useRef<HTMLDivElement>(null)
   function shakeFields() {
@@ -110,6 +118,34 @@ function LoginPage() {
     await finishSignIn()
   }
 
+  async function onSignUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const form = new FormData(event.currentTarget)
+    const username = String(form.get('username') ?? '').trim()
+    const password = String(form.get('password') ?? '')
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Choose a password with at least ${MIN_PASSWORD_LENGTH} characters.`)
+      shakeFields()
+      return
+    }
+    setPending('sign-up')
+    setError(null)
+    // The server stores a placeholder when email is blank and uses the username as the name.
+    const { error } = await authClient.signUp.email({
+      username,
+      password,
+      email: String(form.get('email') ?? '').trim(),
+      name: username,
+    })
+    if (error) {
+      setPending(null)
+      setError(error.message ?? 'Could not create the account. Try again.')
+      shakeFields()
+      return
+    }
+    await finishSignIn()
+  }
+
   return (
     <div className="grid min-h-dvh lg:grid-cols-2">
       <aside className="flex flex-col gap-2 bg-band px-gutter pt-4 pb-8 text-band-text lg:pt-6 lg:pb-10">
@@ -128,52 +164,114 @@ function LoginPage() {
       </aside>
       <main className="flex items-center justify-center px-gutter py-12">
         <div className="w-full max-w-100">
-          <h1 className="mb-8 border-b-6 border-rule pb-3.5 type-section">Sign in</h1>
-          <form method="post" onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-            <div ref={fieldsRef} className="flex flex-col gap-4">
-              <TextInput
-                label="Username"
-                name="username"
-                autoComplete="username webauthn"
-                autoCapitalize="none"
-                spellCheck={false}
-                required
-                autoFocus
-              />
-              <TextInput
-                label="Password"
-                name="password"
-                type="password"
-                autoComplete="current-password"
-                required
-              />
-            </div>
-            {error ? <Notice tone="error" title={error} /> : null}
-            <Button
-              type="submit"
-              variant="primary"
-              loading={pending === 'password'}
-              disabled={pending !== null}
+          <h1 className="mb-8 border-b-6 border-rule pb-3.5 type-section">
+            {signingUp ? 'Create an account' : 'Sign in'}
+          </h1>
+          {signingUp ? (
+            <form
+              key="sign-up"
+              method="post"
+              onSubmit={onSignUp}
+              className="flex flex-col gap-4"
+              noValidate
             >
-              Sign in
-            </Button>
-          </form>
+              <div ref={fieldsRef} className="flex flex-col gap-4">
+                <TextInput
+                  label="Username"
+                  name="username"
+                  description="3–30 letters, numbers, dots or underscores. You sign in with it."
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  minLength={3}
+                  maxLength={30}
+                  required
+                  autoFocus
+                />
+                <TextInput
+                  label="Email (optional)"
+                  name="email"
+                  type="email"
+                  description="Only used to contact you about your account."
+                  autoComplete="email"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                />
+                <TextInput
+                  label="Password"
+                  name="password"
+                  type="password"
+                  description={`At least ${MIN_PASSWORD_LENGTH} characters. There’s no password reset yet, so keep it safe.`}
+                  autoComplete="new-password"
+                  minLength={MIN_PASSWORD_LENGTH}
+                  required
+                />
+              </div>
+              {error ? <Notice tone="error" title={error} /> : null}
+              <Button
+                type="submit"
+                variant="primary"
+                loading={pending === 'sign-up'}
+                disabled={pending !== null}
+              >
+                Create account
+              </Button>
+            </form>
+          ) : (
+            <form
+              key="sign-in"
+              method="post"
+              onSubmit={onSubmit}
+              className="flex flex-col gap-4"
+              noValidate
+            >
+              <div ref={fieldsRef} className="flex flex-col gap-4">
+                <TextInput
+                  label="Username"
+                  name="username"
+                  autoComplete="username webauthn"
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  required
+                  autoFocus
+                />
+                <TextInput
+                  label="Password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                />
+              </div>
+              {error ? <Notice tone="error" title={error} /> : null}
+              <Button
+                type="submit"
+                variant="primary"
+                loading={pending === 'password'}
+                disabled={pending !== null}
+              >
+                Sign in
+              </Button>
+            </form>
+          )}
           <div className="mt-4 flex items-center gap-3 text-xs text-text-muted">
             <span className="h-px flex-1 bg-border" />
             or
             <span className="h-px flex-1 bg-border" />
           </div>
-          <Button
-            className="mt-4 w-full"
-            onClick={signInWithPasskey}
-            loading={pending === 'passkey'}
-            disabled={pending !== null}
-          >
-            Sign in with a passkey
-          </Button>
+          {signingUp ? null : (
+            <Button
+              className="mt-4 w-full"
+              onClick={signInWithPasskey}
+              loading={pending === 'passkey'}
+              disabled={pending !== null}
+            >
+              Sign in with a passkey
+            </Button>
+          )}
           {session.features.googleSignIn ? (
             <Button
-              className="mt-3 w-full"
+              className={signingUp ? 'mt-4 w-full' : 'mt-3 w-full'}
               onClick={signInWithGoogle}
               loading={pending === 'google'}
               disabled={pending !== null}
@@ -182,11 +280,15 @@ function LoginPage() {
             </Button>
           ) : null}
           <p className="mt-8 text-sm text-text-muted">
-            There is no sign-up. Ask an administrator for an account
-            {session.features.googleSignIn
-              ? ', or continue with Google if your email is allowed'
-              : ''}
-            .
+            {signingUp ? 'Already have an account? ' : 'New to Domino Wire? '}
+            <Link
+              to="/login"
+              search={{ next, mode: signingUp ? undefined : 'sign-up' }}
+              onClick={() => setError(null)}
+              className="inline-flex min-h-tap items-center font-semibold text-text underline underline-offset-4"
+            >
+              {signingUp ? 'Sign in' : 'Create an account'}
+            </Link>
           </p>
           <nav aria-label="Legal" className="mt-8 border-t border-border pt-2 text-sm">
             <ul className="flex flex-wrap gap-x-5">

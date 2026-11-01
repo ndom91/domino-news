@@ -3,7 +3,7 @@ import { passkey } from '@better-auth/passkey'
 import { type Db, schema } from '@dn/db'
 import { betterAuth } from 'better-auth'
 import { drizzleAdapter } from 'better-auth/adapters/drizzle'
-import { APIError } from 'better-auth/api'
+import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { eq } from 'drizzle-orm'
@@ -12,10 +12,10 @@ import { eq } from 'drizzle-orm'
  * Whole app sits behind login: username + password or passkeys (added after a password
  * sign-in, from the account page). Bearer tokens let API clients (and later the Expo app)
  * authenticate without cookies.
- * Public sign-up is disabled: create accounts with `pnpm cli user:create`.
- * Google sign-in is optional (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET). disableSignUp doesn't
- * cover OAuth, so any Google account can sign up.
- * Roles: CLI-created accounts are admins by default; Google sign-ups are plain users.
+ * Public sign-up (POST /api/auth/sign-up/email) takes a username and password; email is optional.
+ * `pnpm cli user:create` still creates accounts directly. Google sign-in is optional
+ * (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET), and any Google account can sign up.
+ * Roles: CLI-created accounts are admins by default; public and Google sign-ups are plain users.
  * Mobile: the Expo app signs in through the expo() plugin. Native requests have no Origin, so
  * the app sends its scheme in `expo-origin`, which must be listed in trustedOrigins.
  */
@@ -49,7 +49,8 @@ export function createAuth(db: Db, env = process.env) {
         passkey: schema.authPasskey,
       },
     }),
-    emailAndPassword: { enabled: true, disableSignUp: true, minPasswordLength: 10 },
+    emailAndPassword: { enabled: true, minPasswordLength: 10 },
+    hooks: { before: optionalSignUpEmail },
     socialProviders:
       googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
@@ -94,6 +95,28 @@ export function createAuth(db: Db, env = process.env) {
 
 export type Auth = ReturnType<typeof createAuth>
 
+// better-auth requires a unique email on every user. Sign-ups that leave it blank get the same
+// placeholder the CLI uses, so readers sign in by username only. A placeholder can't be claimed
+// as a real address, or someone could take it before the matching username signs up.
+const PLACEHOLDER_EMAIL_DOMAIN = '@users.local'
+
+const placeholderEmail = (username: string) =>
+  `${username.trim().toLowerCase()}${PLACEHOLDER_EMAIL_DOMAIN}`
+
+const optionalSignUpEmail = createAuthMiddleware(async (ctx) => {
+  if (ctx.path !== '/sign-up/email') return
+  const body = ctx.body as Record<string, unknown> | undefined
+  if (!body || typeof body.username !== 'string') {
+    throw new APIError('BAD_REQUEST', { message: 'Choose a username.' })
+  }
+  const email = typeof body.email === 'string' ? body.email.trim() : ''
+  if (email.toLowerCase().endsWith(PLACEHOLDER_EMAIL_DOMAIN)) {
+    throw new APIError('BAD_REQUEST', { message: 'Use a different email address.' })
+  }
+  body.email = email || placeholderEmail(body.username)
+  if (typeof body.name !== 'string' || !body.name.trim()) body.name = body.username.trim()
+})
+
 export type UserRole = 'admin' | 'user'
 
 /** Server-side account creation, bypassing the disabled public sign-up endpoint. */
@@ -106,7 +129,7 @@ export async function createUserAccount(
   const user = await ctx.internalAdapter.createUser(
     {
       name: input.name ?? input.username,
-      email: `${normalized}@users.local`,
+      email: placeholderEmail(normalized),
       emailVerified: false,
       username: normalized,
       displayUsername: input.username,

@@ -11,4 +11,4 @@ export const OPERATOR = {
 }
 
 // When the legal pages last changed. Bump with any edit to their content.
-export const LEGAL_UPDATED_AT = '2026-10-30'
+export const LEGAL_UPDATED_AT = '2026-11-01'

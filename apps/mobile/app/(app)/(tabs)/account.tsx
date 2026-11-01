@@ -16,6 +16,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { AlertSettings } from '../../../components/account/alert-settings'
 import { AudioSettings } from '../../../components/account/audio-settings'
 import { ConfirmationDialog } from '../../../components/account/confirmation-dialog'
+import { DeleteAccount } from '../../../components/account/delete-account'
 import { LocalitySettings } from '../../../components/account/locality-settings'
 import { MutedPublishers } from '../../../components/account/muted-publishers'
 import { FeedPicks } from '../../../components/feed-picks'
@@ -377,6 +378,7 @@ export default function AccountScreen() {
         <Button disabled={signingOut} onPress={signOut}>
           {signingOut ? 'Signing out…' : 'Sign out'}
         </Button>
+        <DeleteAccount />
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Contact us</Text>
           <Text style={styles.description}>

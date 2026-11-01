@@ -5,6 +5,7 @@ import { useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   StyleSheet,
   Text,
@@ -17,14 +18,20 @@ import { authClient } from '../lib/auth-client'
 import { hasApiUrl } from '../lib/config'
 import { requestGoogleIdToken, supportsGoogleSignIn } from '../lib/google-sign-in'
 
+// Matches minPasswordLength in packages/server/src/auth.ts.
+const MIN_PASSWORD_LENGTH = 10
+
 export default function SignInScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const session = authClient.useSession()
+  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
   const [username, setUsername] = useState('')
+  const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [pending, setPending] = useState<'password' | 'google' | null>(null)
+  const signingUp = mode === 'sign-up'
   const isPending = pending !== null
 
   if (session.data) return <Redirect href="/" />
@@ -48,6 +55,51 @@ export default function SignInScreen() {
     }
     queryClient.clear()
     router.replace('/')
+  }
+
+  async function signUp() {
+    if (!hasApiUrl) {
+      setError('Set EXPO_PUBLIC_API_URL before signing in.')
+      return
+    }
+    if (password.length < MIN_PASSWORD_LENGTH) {
+      setError(`Choose a password with at least ${MIN_PASSWORD_LENGTH} characters.`)
+      return
+    }
+    setPending('password')
+    setError(null)
+    // The server stores a placeholder when email is blank and uses the username as the name.
+    const name = username.trim()
+    const result = await authClient.signUp.email({
+      username: name,
+      password,
+      email: email.trim(),
+      name,
+    })
+    if (result.error) {
+      setPending(null)
+      setError(result.error.message ?? 'Could not create the account. Try again.')
+      return
+    }
+    queryClient.clear()
+    router.replace('/')
+  }
+
+  function switchMode() {
+    setMode(signingUp ? 'sign-in' : 'sign-up')
+    setError(null)
+    setPassword('')
+  }
+
+  const submit = signingUp ? signUp : signIn
+  const passwordPending = pending === 'password'
+  let intro = 'Sign in with your username and password.'
+  let submitLabel = passwordPending ? 'Signing in…' : 'Sign in'
+  if (signingUp) {
+    intro = 'Pick a username and password. Email is optional.'
+    submitLabel = passwordPending ? 'Creating account…' : 'Create account'
+  } else if (supportsGoogleSignIn) {
+    intro = 'Sign in with your username or continue with Google.'
   }
 
   async function signInWithGoogle() {
@@ -97,41 +149,72 @@ export default function SignInScreen() {
             <Text style={styles.tagline}>One story, every source, and what came next.</Text>
           </View>
           <View style={styles.form}>
-            <Text style={styles.heading}>Sign in</Text>
-            <Text style={styles.intro}>
-              {supportsGoogleSignIn
-                ? 'Use an administrator-created account or continue with Google.'
-                : 'Use the account an administrator created for you.'}
+            <Text accessibilityRole="header" style={styles.heading}>
+              {signingUp ? 'Create an account' : 'Sign in'}
             </Text>
+            <Text style={styles.intro}>{intro}</Text>
             <View style={styles.fields}>
               <Text style={styles.label}>Username</Text>
               <TextInput
                 accessibilityLabel="Username"
                 autoCapitalize="none"
-                autoComplete="username"
+                autoComplete={signingUp ? 'username-new' : 'username'}
                 autoCorrect={false}
                 editable={!isPending}
                 onChangeText={setUsername}
-                onSubmitEditing={signIn}
+                onSubmitEditing={submit}
                 placeholder="Username"
                 placeholderTextColor={t.color.textMuted}
                 spellCheck={false}
                 style={styles.input}
                 value={username}
               />
+              {signingUp ? (
+                <Text style={styles.hint}>
+                  3–30 letters, numbers, dots or underscores. You sign in with it.
+                </Text>
+              ) : null}
+              {signingUp ? (
+                <>
+                  <Text style={styles.label}>Email (optional)</Text>
+                  <TextInput
+                    accessibilityLabel="Email (optional)"
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    autoCorrect={false}
+                    editable={!isPending}
+                    inputMode="email"
+                    keyboardType="email-address"
+                    onChangeText={setEmail}
+                    onSubmitEditing={submit}
+                    placeholder="you@example.com"
+                    placeholderTextColor={t.color.textMuted}
+                    spellCheck={false}
+                    style={styles.input}
+                    value={email}
+                  />
+                  <Text style={styles.hint}>Only used to contact you about your account.</Text>
+                </>
+              ) : null}
               <Text style={styles.label}>Password</Text>
               <TextInput
                 accessibilityLabel="Password"
-                autoComplete="current-password"
+                autoComplete={signingUp ? 'new-password' : 'current-password'}
                 editable={!isPending}
                 onChangeText={setPassword}
-                onSubmitEditing={signIn}
+                onSubmitEditing={submit}
                 placeholder="Password"
                 placeholderTextColor={t.color.textMuted}
                 secureTextEntry
                 style={styles.input}
                 value={password}
               />
+              {signingUp ? (
+                <Text style={styles.hint}>
+                  At least {MIN_PASSWORD_LENGTH} characters. There’s no password reset yet, so keep
+                  it safe.
+                </Text>
+              ) : null}
             </View>
             {error ? (
               <Text accessibilityLiveRegion="polite" style={styles.error}>
@@ -140,9 +223,9 @@ export default function SignInScreen() {
             ) : null}
             <Button
               disabled={isPending || username.trim().length === 0 || password.length === 0}
-              onPress={signIn}
+              onPress={submit}
             >
-              {pending === 'password' ? 'Signing in…' : 'Sign in'}
+              {submitLabel}
             </Button>
             {supportsGoogleSignIn ? (
               <>
@@ -156,6 +239,18 @@ export default function SignInScreen() {
                 </Button>
               </>
             ) : null}
+            <Pressable
+              accessibilityRole="button"
+              disabled={isPending}
+              hitSlop={8}
+              onPress={switchMode}
+              style={styles.switch}
+            >
+              <Text style={styles.switchText}>
+                {signingUp ? 'Already have an account? ' : 'New to Domino Wire? '}
+                <Text style={styles.switchLink}>{signingUp ? 'Sign in' : 'Create an account'}</Text>
+              </Text>
+            </Pressable>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -213,6 +308,15 @@ const styles = StyleSheet.create({
     minHeight: t.size.tap,
     paddingHorizontal: t.space[3],
   },
+  hint: {
+    color: t.color.textMuted,
+    fontFamily: t.font.regular,
+    fontSize: t.type.meta,
+    lineHeight: 19,
+  },
+  switch: { alignItems: 'center', justifyContent: 'center', minHeight: t.size.tap },
+  switchText: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
+  switchLink: { color: t.color.text, fontFamily: t.font.bold, textDecorationLine: 'underline' },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.body, lineHeight: 22 },
   divider: { alignItems: 'center', flexDirection: 'row', gap: t.space[3] },
   rule: { backgroundColor: t.color.border, flex: 1, height: StyleSheet.hairlineWidth },

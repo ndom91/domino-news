@@ -1,10 +1,12 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import type { ReactNode } from 'react'
 import { Modal, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../ui'
 
 // ConfirmationDialog asks the reader to confirm a destructive account action.
 export function ConfirmationDialog({
   cancelLabel,
+  children,
   confirmLabel,
   detail,
   onCancel,
@@ -14,6 +16,8 @@ export function ConfirmationDialog({
   visible,
 }: {
   cancelLabel: string
+  /** Extra content between the detail and the actions, such as a password field. */
+  children?: ReactNode
   confirmLabel: string
   detail: string
   onCancel: () => void
@@ -32,6 +36,7 @@ export function ConfirmationDialog({
         <View style={styles.dialog}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.detail}>{detail}</Text>
+          {children}
           <View style={styles.actions}>
             <Button onPress={onCancel} tone="light">
               {cancelLabel}

@@ -51,7 +51,7 @@ The server is ready. See `packages/server/src/auth.ts` and AGENTS.md "Mobile app
 
 **Server facts:**
 - **better-auth 1.7.7**, with plugins `username`, `bearer`, `expo`, `passkey` and `tanstackStartCookies`.
-- **Public sign-up is disabled.** Accounts come from `pnpm cli user:create`, or from Google sign-in when that's configured.
+- **Public sign-up is open.** The sign-in screen switches to a username, optional email and password form. Accounts also come from `pnpm cli user:create`, or from Google sign-in when that's configured. Readers delete their account from the Account tab.
 - **App scheme:** `dominonews` by default (`EXPO_APP_SCHEME`). It must equal `"scheme"` in the app's `app.json`. The server trusts `dominonews://`.
 - **Expo Go:** its `exp://…` URLs are trusted only when the server runs with `NODE_ENV=development`. A production build must use the app scheme.
 - **Sessions last 30 days.** Each user has a `role` (`admin` | `user`), and only admins can use `/pipeline` and publisher assessment review.
