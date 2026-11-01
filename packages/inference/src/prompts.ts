@@ -8,7 +8,7 @@ import type { ArticleInput, PrimarySourceInput, StoryInput, SummaryUpdateInput }
 // 30-character IDs back and dropped characters, which failed grounding checks.
 export const PROMPT_VERSIONS = {
   matchStory: 'match-story@6',
-  summarizeStory: 'summarize-story@10',
+  summarizeStory: 'summarize-story@11',
   assessSummaryUpdate: 'assess-summary-update@1',
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
@@ -114,6 +114,7 @@ export function summarizeStoryPrompt(input: { story: StoryInput }) {
 - detail: 2-3 short paragraphs separated by a blank line that continue after the summary for a reader who clicked in:
   background and what led here, what each side or source says, and what happens next. Do not repeat the summary's
   sentences. Use only the source articles; same attribution and [n] citation rules as summary.
+  Write complete sentences in both summary and detail; finish every paragraph without trailing off.
 - sources: the "n" of every article you relied on.
 - regions: 1-3 regions where the events take place or that they directly affect, most relevant first. Not where the publishers are based. Pick from:
   north-america (US, Canada), latin-america (Mexico, Central and South America, Caribbean), europe (incl. UK, Ukraine, Russia), middle-east (Gulf, Levant, Iran, Israel, Turkey, Egypt), africa (excl. Egypt), south-asia (India, Pakistan, Bangladesh, Sri Lanka, Nepal, Afghanistan), east-asia (China, Japan, Koreas, Taiwan, Mongolia), southeast-asia (Indonesia, Philippines, Vietnam, Thailand, Malaysia, Singapore, Myanmar), oceania (Australia, New Zealand, Pacific islands), central-asia (Kazakhstan, Uzbekistan and neighbours).

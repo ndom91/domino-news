@@ -751,6 +751,34 @@ describe('hand-checked lean evidence', () => {
   })
 })
 
+describe('summary paragraph endings', () => {
+  it('accepts terminal punctuation around citations and closing quotes', async () => {
+    const { hasCompleteParagraphEndings } = await import('@dn/server')
+    for (const text of [
+      'It happened[1].',
+      'It happened.[1, 2]',
+      'They asked “Why?”[2]',
+      'First paragraph.\n\nSecond paragraph![1]',
+    ]) {
+      expect(hasCompleteParagraphEndings(text)).toBe(true)
+    }
+  })
+
+  it('rejects unfinished paragraphs and trailing ellipses', async () => {
+    const { hasCompleteParagraphEndings } = await import('@dn/server')
+    for (const text of [
+      '',
+      'It happened. Support for a',
+      'First paragraph.\n\nSupport for a[1]',
+      'First paragraph\n\nSecond paragraph.',
+      'It happened…',
+      'It happened...[1]',
+    ]) {
+      expect(hasCompleteParagraphEndings(text)).toBe(false)
+    }
+  })
+})
+
 describe('local generation adapter', () => {
   const article = (id: string) => ({
     articleId: `art_${id}`,

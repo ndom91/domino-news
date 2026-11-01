@@ -299,7 +299,8 @@ describe('summary versioning', () => {
           storyId: story.id,
           output: {
             headline: 'x',
-            summary: 'y',
+            summary: 'A report.',
+            detail: 'Further details.',
             sourceArticleIds: ['art_elsewhere'],
             observationIds: ['obs_x'],
             regions: ['global'],
@@ -418,14 +419,18 @@ describe('desks', () => {
     // Rolled back at the end so later tests see the original summary.
     await expect(
       db.transaction(async (tx) => {
-        const record = (force: boolean) =>
+        const record = (
+          force: boolean,
+          summary = 'A happened[3].',
+          detail = 'B said so[2].\n\nC disagreed[3].',
+        ) =>
           recordGeneratedSummary(tx, {
             storyId: story.id,
             output: {
               headline: story.title,
               // Shown as [2] and [3]; an uncited first source shifts the display numbers down.
-              summary: 'A happened[3].',
-              detail: 'B said so[2].\n\nC disagreed[3].',
+              summary,
+              detail,
               sourceArticleIds: [a, b],
               observationIds: observations.map((o) => o.id),
               regions: ['global'],
@@ -439,6 +444,12 @@ describe('desks', () => {
             force,
           })
         const unforced = await record(false)
+        await expect(record(true, 'A happened. Support for a')).rejects.toThrow(
+          'story summary has an incomplete paragraph ending',
+        )
+        await expect(record(true, 'A happened.', 'B said so.\n\nC disagreed with')).rejects.toThrow(
+          'story detail has an incomplete paragraph ending',
+        )
         const forced = await record(true)
         if (forced.status !== 'recorded') throw new Error('not recorded')
         const [version] = await tx

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto'
 import { type Db, schema } from '@dn/db'
-import { ID_PREFIX, newId, renumberCitations, slugify } from '@dn/domain'
+import { ID_PREFIX, newId, renumberCitations, slugify, stripCitations } from '@dn/domain'
 import type { StorySummaryOutput } from '@dn/schemas'
 import { and, countDistinct, eq, inArray, isNull } from 'drizzle-orm'
 import { touchStory } from './outbox.ts'
@@ -163,6 +163,17 @@ export async function newsroomOutletCount(db: Db, storyId: string): Promise<numb
 // Joins summary and detail for renumbering; never appears in model text.
 const DETAIL_BREAK = '\u0000'
 
+/** Catch visibly truncated paragraphs; punctuation alone cannot establish grammatical completeness. */
+export function hasCompleteParagraphEndings(text: string): boolean {
+  return text.split(/\n\s*\n/).every((paragraph) => {
+    const plain = stripCitations(paragraph)
+      .trim()
+      .replace(/["'”’»\])}]+$/u, '')
+      .trimEnd()
+    return /[.!?]$/u.test(plain) && !plain.endsWith('...')
+  })
+}
+
 /**
  * Persist a generated summary as a new immutable version, then publish the Story.
  * Rejects stale results (inputs changed since generation) and ungrounded citations.
@@ -200,6 +211,15 @@ export async function recordGeneratedSummary(
       .where(eq(schema.storySummaryVersion.id, supersedesVersionId))
     const refresh = current?.editedByUserId === null && (story.desk === null || input.force)
     if (current?.inputFingerprint === input.inputFingerprint && !refresh) return { status: 'stale' }
+  }
+
+  for (const [name, text] of [
+    ['summary', input.output.summary],
+    ['detail', input.output.detail],
+  ] as const) {
+    if (!hasCompleteParagraphEndings(text)) {
+      throw new DomainError('bad_request', `story ${name} has an incomplete paragraph ending`)
+    }
   }
 
   // Grounding: every cited article must be actively linked to this Story, and every
