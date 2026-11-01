@@ -3,6 +3,13 @@ import { withAndroidManifest } from 'expo/config-plugins'
 
 const developmentBuild = process.env.APP_VARIANT === 'development'
 
+// Google's iOS URL scheme is the iOS OAuth client ID reversed. Google sign-in returns to the app
+// through it, so the plugin is only added once that client exists.
+const googleIosClientId = process.env.EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID?.trim()
+const googleIosUrlScheme = googleIosClientId
+  ? `com.googleusercontent.apps.${googleIosClientId.replace(/\.apps\.googleusercontent\.com$/, '')}`
+  : null
+
 function withDevelopmentCleartext(config: ExpoConfig): ExpoConfig {
   return withAndroidManifest(config, (configuration) => {
     configuration.modResults.manifest.$['android:usesCleartextTraffic'] = 'true'
@@ -21,13 +28,18 @@ const config: ExpoConfig = {
   backgroundColor: '#f3f1ec',
   primaryColor: '#121212',
   icon: '../web/public/icon-512.png',
-  ios: developmentBuild
-    ? {
-        infoPlist: {
-          NSAppTransportSecurity: { NSAllowsArbitraryLoads: true },
-        },
-      }
-    : undefined,
+  ios: {
+    // iOS masks icons to a squircle, so it needs the padded variant to avoid clipping the logo.
+    icon: '../web/public/icon-maskable-512.png',
+    // Permanent once released on the App Store; matches the Android package.
+    bundleIdentifier: 'dev.ndo.dominonews',
+    supportsTablet: false,
+    infoPlist: {
+      // The app only uses standard HTTPS, which is exempt from export compliance.
+      ITSAppUsesNonExemptEncryption: false,
+      ...(developmentBuild ? { NSAppTransportSecurity: { NSAllowsArbitraryLoads: true } } : {}),
+    },
+  },
   android: {
     package: 'dev.ndo.dominonews',
     googleServicesFile: './google-services.json',
@@ -55,6 +67,15 @@ const config: ExpoConfig = {
       },
     ],
     ['expo-notifications', { color: '#ff4d1a', defaultChannel: 'for-you' }],
+    // Without options this plugin switches to its Firebase mode, which also edits Android.
+    ...(googleIosUrlScheme
+      ? [
+          ['@react-native-google-signin/google-signin', { iosUrlScheme: googleIosUrlScheme }] as [
+            string,
+            unknown,
+          ],
+        ]
+      : []),
   ],
 }
 

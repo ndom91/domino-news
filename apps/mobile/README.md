@@ -1,8 +1,8 @@
 # Domino Wire mobile
 
-Expo Router Android application. It consumes the same typed API client, Query options, domain formatting
-utilities and design tokens as the web app. iOS is deferred until its bundle identifier and native Google
-sign-in configuration are chosen.
+Expo Router application for Android and iOS. It consumes the same typed API client, Query options, domain
+formatting utilities and design tokens as the web app. Both platforms use the identifier
+`dev.ndo.dominonews`.
 
 ## Run locally
 
@@ -33,6 +33,18 @@ Run the mobile unit tests with `pnpm --filter @dn/mobile test`.
 Expo Go supports username/password sign-in. Google sign-in needs a custom development build because it
 uses native Google Play services. A development build sets `APP_VARIANT=development` to allow a LAN
 `http://` API; production builds require HTTPS and intentionally do not enable cleartext transport.
+
+## iOS
+
+Run a simulator development build with `npx expo run:ios` from `apps/mobile` (needs Xcode and
+CocoaPods). Simulator builds need no Apple Developer account; TestFlight, App Store and push
+notifications do.
+
+Google sign-in on iOS needs an OAuth client of type **iOS** for bundle ID `dev.ndo.dominonews`, in the
+same Google Cloud project as the web client. Set its client ID as `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` in
+`apps/mobile/.env` and in the EAS environment. The config plugin derives the reversed URL scheme from it,
+so rebuild the native app after setting or changing it. Without it, iOS hides the Google button. The ID
+token is still issued for the web client, so the server needs no iOS-specific setting.
 
 ## For You alerts
 
