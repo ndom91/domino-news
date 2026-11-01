@@ -28,9 +28,10 @@ function TermsPage() {
     >
       <Section id="access" title="Access">
         <p>
-          Domino is open by invitation only. Your account is personal: don’t share it, and keep your
-          password and passkeys safe. We can suspend or close an account that breaks these terms,
-          and we may end access for everyone if the service shuts down.
+          Anyone can create an account, and you can delete it at any time from the Account page.
+          Your account is personal: don’t share it, and keep your password and passkeys safe. We can
+          suspend or close an account that breaks these terms, and we may end access for everyone if
+          the service shuts down.
         </p>
       </Section>
 

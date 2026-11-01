@@ -81,8 +81,8 @@ function AboutPage() {
 
       <Section id="who" title="Who runs Domino">
         <p>
-          Domino is an independent project by {OPERATOR.name}, currently open by invitation only.
-          Questions, corrections and feedback: <Email address={OPERATOR.email} />.
+          Domino is an independent project by {OPERATOR.name}. Questions, corrections and feedback:{' '}
+          <Email address={OPERATOR.email} />.
         </p>
         <p>
           Legal details are in the <Link to="/imprint">imprint</Link> and the{' '}
