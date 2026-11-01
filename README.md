@@ -58,9 +58,17 @@ The Docker build caches dependency installation separately from source changes. 
 BuildKit (enabled by default in current Docker/Compose). It installs the web and worker
 workspaces and their dependencies, not the mobile or Playroom workspaces. Some Expo packages
 are still installed as optional peers of the server's `@better-auth/expo` integration. Web,
-worker, indexer and migrations
-share one image, so they can all be recreated when that image changes; Postgres and Typesense
-are separate images.
+worker, indexer and migrations share one image. The script builds it once, then starts the
+services without rebuilding; the migration must complete successfully before the app services
+start. Compose waits for services to be running or healthy (up to 120 seconds), but the app
+services do not yet have health checks, so this is not an application-readiness guarantee. All
+app services can still be recreated when the image changes; Postgres and Typesense are separate
+images. Test-only files are excluded from the build context.
+
+If startup fails, the script restores the previous local image tag (or removes the new tag if
+there was none), but containers may already have changed and migrations are not rolled back.
+Inspect the stack and database before retrying. If services start but publisher seeding fails,
+the new image remains active; retry with `scripts/deploy.sh cli seed`.
 
 Alternatively, GitHub Actions publishes a multi-architecture GHCR image for each push to
 `main`, tagged with its full commit SHA. Once **Publish container image** has succeeded, the
@@ -75,9 +83,6 @@ using a GitHub account/token with `read:packages` access to the package. New pac
 private by default. For a fork, set `DOMINO_IMAGE_REPOSITORY=ghcr.io/<owner>/<repository>` in
 the shell environment when running the command (lowercase). If publication has not completed
 or the pull fails, the running containers are not changed; retry after the workflow succeeds.
-If startup fails after the pull, the previous local image tag is restored (or removed if there
-was none), but containers may already have changed and migrations are not rolled back. Inspect
-the stack and database before retrying.
 Use `scripts/deploy.sh image-up` to deploy the already checked-out commit without pulling git,
 or `scripts/deploy.sh update` to fall back to a local build. Published images contain the
 committed tree, not local uncommitted changes. Publishing is independent of the CI checks;

@@ -8,6 +8,14 @@ backups
 docs
 .github
 .agents
+/test/
+/e2e/
+/vitest.config.ts
+/playwright.config.ts
+**/*.test.ts
+**/*.test.tsx
+**/*.spec.ts
+**/*.spec.tsx
 **/.expo
 **/.DS_Store
 **/*.tsbuildinfo

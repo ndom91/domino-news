@@ -70,17 +70,54 @@ restore() {
   echo "restore: done"
 }
 
+restore_image_tag() {
+  local previous_image="$1"
+  if [[ -n "$previous_image" ]]; then
+    docker tag "$previous_image" domino-news-app:local || echo "Could not restore the previous local image tag." >&2
+  elif docker image inspect domino-news-app:local > /dev/null 2>&1; then
+    docker image rm domino-news-app:local || echo "Could not remove the new local image tag." >&2
+  fi
+}
+
+start_image() {
+  local previous_image="$1" status
+  if compose up -d --wait --wait-timeout 120 --no-build --pull missing --remove-orphans; then
+    :
+  else
+    status=$?
+    echo "Deployment failed; containers or migrations may have changed. Inspect the stack before retrying." >&2
+    restore_image_tag "$previous_image"
+    return "$status"
+  fi
+  # Once started, keep the new tag even if seeding fails: containers use the new image.
+  if cli seed; then
+    :
+  else
+    status=$?
+    echo "Services started, but publisher seeding failed. Retry with scripts/deploy.sh cli seed." >&2
+    return "$status"
+  fi
+  compose ps
+}
+
 up() {
   [[ -f .env ]] || { echo "Missing .env: copy .env.example and fill it in first." >&2; exit 1; }
-  compose up -d --build --remove-orphans
-  # Upsert, so it's safe on every run and picks up new publishers after an update.
-  cli seed
-  compose ps
+  local previous_image status
+  previous_image=$(docker image inspect --format '{{.Id}}' domino-news-app:local 2>/dev/null) || previous_image=''
+  # Every app service uses this image; building one avoids four exports to the same tag.
+  if compose build web; then
+    start_image "$previous_image"
+  else
+    status=$?
+    echo "Image build failed; services were not started." >&2
+    restore_image_tag "$previous_image"
+    return "$status"
+  fi
 }
 
 image_up() {
   [[ -f .env ]] || { echo "Missing .env: copy .env.example and fill it in first." >&2; exit 1; }
-  local image previous_image status
+  local image previous_image
   image="${DOMINO_IMAGE_REPOSITORY:-ghcr.io/ndom91/domino-news}:$(git rev-parse HEAD)"
   echo "Pulling $image"
   # Pull before changing the local tag or starting anything: a missing image leaves the
@@ -88,20 +125,7 @@ image_up() {
   docker pull "$image"
   previous_image=$(docker image inspect --format '{{.Id}}' domino-news-app:local 2>/dev/null) || previous_image=''
   docker tag "$image" domino-news-app:local
-  if compose up -d --no-build --pull missing --remove-orphans; then
-    :
-  else
-    status=$?
-    echo "Deployment failed; containers or migrations may have changed. Inspect the stack before retrying." >&2
-    if [[ -n "$previous_image" ]]; then
-      docker tag "$previous_image" domino-news-app:local || echo "Could not restore the previous local image tag." >&2
-    else
-      docker image rm domino-news-app:local || echo "Could not remove the new local image tag." >&2
-    fi
-    return "$status"
-  fi
-  cli seed
-  compose ps
+  start_image "$previous_image"
 }
 
 case "${1:-}" in

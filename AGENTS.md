@@ -33,6 +33,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm typecheck` | `tsc` in every package |
 | `pnpm test` | Vitest: unit + integration (needs Compose Postgres; uses database `dn_test`) |
 | `pnpm test:e2e` | Playwright smoke tests against a running app (`E2E_BASE_URL`, `DEV_USERNAME`, `DEV_PASSWORD`) |
+| `bash test/compose-deploy.test.sh <local-app-image>` | Verify migration ordering and failure isolation in disposable local Compose services (requires Docker) |
 | `pnpm db:generate` / `pnpm db:migrate` | Drizzle migrations |
 | `pnpm cli seed` | Upsert publishers and feeds |
 | `pnpm cli ingest [--variant rss-update]` | Poll all feeds now (fixture variant `rss-update` simulates a second poll) |
@@ -119,7 +120,7 @@ The audio briefing POST supports `Accept: application/x-ndjson` for live selecti
 ```bash
 cp .env.example .env    # set BETTER_AUTH_SECRET, BETTER_AUTH_URL (public origin), inference settings
 # optional private CA: put it at infra/compose/certs/inference-ca.pem and set INFERENCE_CA_CERT=/certs/inference-ca.pem
-scripts/deploy.sh up            # compose up --build (migrate runs first), then cli seed
+scripts/deploy.sh up            # build the shared image once, start (migrate first), then cli seed
 scripts/deploy.sh user you      # cli user:create, prompts for the password
 scripts/deploy.sh update        # git pull --ff-only, then the same as up
 scripts/deploy.sh update-image  # git pull, then pull and deploy the commit-tagged GHCR image
