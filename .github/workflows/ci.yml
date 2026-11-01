@@ -48,6 +48,9 @@ jobs:
       # Stories that gain articles wait out this quiet period before re-summarising (default 180s),
       # and the settle check below waits for it. Use the minimum so the pipeline settles sooner.
       PUBLISHED_SUMMARY_DEBOUNCE_SECONDS: "30"
+      # Generate context and claims up front. Otherwise opening a Story starts them, and the page
+      # re-renders the summary while the test clicks a context term.
+      EAGER_OPTIONAL_ENRICHMENT_OUTLETS: "1"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
