@@ -45,6 +45,9 @@ jobs:
       # Only 3 fixture stories have two newsroom publishers; publish single-outlet ones too so
       # the feed, narratives and context popovers have enough stories to test.
       MIN_PUBLISH_OUTLETS: "1"
+      # Stories that gain articles wait out this quiet period before re-summarising (default 180s),
+      # and the settle check below waits for it. Use the minimum so the pipeline settles sooner.
+      PUBLISHED_SUMMARY_DEBOUNCE_SECONDS: "30"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -66,7 +69,9 @@ jobs:
           (cd apps/worker && pnpm start:indexer > ../../indexer.log 2>&1 &)
           pnpm cli ingest
           # Wait for the worker to finish enrichment too: E2E opens context popovers.
-          for i in $(seq 1 60); do
+          # Takes about 3 minutes; each status call is slow, so bound by time, not iterations.
+          deadline=$((SECONDS + 360))
+          while [ "$SECONDS" -lt "$deadline" ]; do
             status=$(pnpm --silent cli status || echo '{}')
             published=$(jq '.pipeline.storiesPublished // 0' <<<"$status")
             pending=$(jq '[.queues[]? | .queued + .active] | add // 0' <<<"$status")

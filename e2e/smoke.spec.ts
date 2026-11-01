@@ -74,6 +74,11 @@ test('Local setup saves a city and shows only filled location badges', async ({ 
   await expectNoHorizontalOverflow(page)
 })
 
+// Base UI also copies each toast into a hidden role="alert" for screen readers; match the visible one.
+function toast(page: Page, text: string) {
+  return page.getByRole('region', { name: 'Notifications' }).getByText(text)
+}
+
 test('failed sign out leaves the reader signed in and allows retry', async ({ page }) => {
   await signIn(page)
   await page.route('**/api/auth/sign-out', (route) =>
@@ -81,7 +86,7 @@ test('failed sign out leaves the reader signed in and allows retry', async ({ pa
   )
   await page.getByRole('button', { name: /Account menu for/ }).click()
   await page.getByRole('menuitem', { name: 'Sign out' }).click()
-  await expect(page.getByText('Couldn’t sign out.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t sign out.')).toBeVisible()
   await page.getByRole('button', { name: /Account menu for/ }).click()
   await expect(page.getByRole('menuitem', { name: 'Sign out' })).toBeEnabled()
 })
@@ -103,11 +108,11 @@ test('account following actions report failed changes', async ({ page }) => {
   await page.getByRole('menuitem', { name: 'Settings' }).click()
   await page.getByRole('tab', { name: 'Following' }).click()
   await page.getByRole('button', { name: 'Unfollow Example publisher' }).click()
-  await expect(page.getByText('Couldn’t unfollow Example publisher.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t unfollow Example publisher.')).toBeVisible()
   await page.getByRole('button', { name: 'Unmute Muted publisher' }).click()
-  await expect(page.getByText('Couldn’t unmute Muted publisher.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t unmute Muted publisher.')).toBeVisible()
   await page.getByRole('button', { name: 'Forget Climate' }).click()
-  await expect(page.getByText('Couldn’t update your feedback.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t update your feedback.')).toBeVisible()
 })
 
 test('concurrent unfollow failures each show a notification', async ({ page }) => {
@@ -136,9 +141,9 @@ test('concurrent unfollow failures each show a notification', async ({ page }) =
   await page.getByRole('tab', { name: 'Following' }).click()
   await page.getByRole('button', { name: 'Unfollow First publisher' }).click()
   await page.getByRole('button', { name: 'Unfollow Second publisher' }).click()
-  await expect(page.getByText('Couldn’t unfollow Second publisher.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t unfollow Second publisher.')).toBeVisible()
   releaseFirst?.()
-  await expect(page.getByText('Couldn’t unfollow First publisher.')).toBeVisible()
+  await expect(toast(page, 'Couldn’t unfollow First publisher.')).toBeVisible()
   await expect(page.locator('.dn-toast')).toHaveCount(2)
 })
 
@@ -484,7 +489,7 @@ test('feed → story → narrative → search', async ({ page }) => {
 
 test('pipeline page lists failed jobs, or says there are none', async ({ page }) => {
   await signIn(page)
-  await page.goto('/pipeline')
+  await page.goto('/pipeline?section=health')
   await expect(page.getByRole('heading', { name: 'Failed jobs' })).toBeVisible()
   const failed = page.locator('#failed-jobs li > details')
   // The list loads after the page: wait for rows or the empty state before deciding.

@@ -203,11 +203,18 @@ describe('/api/v1 contracts', () => {
   })
 
   it('does not group reporting updates from different stories in a narrative', async () => {
-    const narratives = narrativeListResponseSchema.parse(
-      await (await call('/api/v1/narratives')).json(),
+    // The list hides narratives under MIN_NARRATIVE_STORIES, and the fixtures produce at most one
+    // that big. This test only needs two Stories, so pick the narrative straight from the database.
+    const {
+      rows: [narrative],
+    } = await h.ctx.pool.query<{ slug: string }>(
+      `select n.slug from narrative n
+        join narrative_story ns on ns.narrative_id = n.id and ns.removed_at is null
+        join story s on s.id = ns.story_id and s.published_at is not null
+        group by n.id having count(*) >= 2
+        order by count(*) desc, n.id limit 1`,
     )
-    const narrative = narratives.items[0]
-    if (!narrative) throw new Error('empty narratives')
+    if (!narrative) throw new Error('fixtures need a narrative with two published stories')
     const detail = narrativeDetailSchema.parse(
       await (await call(`/api/v1/narratives/${narrative.slug}`)).json(),
     )
