@@ -8,6 +8,12 @@ RUN npm install -g corepack@0.36.0 && corepack enable && corepack prepare pnpm@1
   && pnpm -v && chown -R node:node "$COREPACK_HOME"
 WORKDIR /app
 
+# Host file modes are copied as-is. Fix source permissions before dependencies exist,
+# so the recursive chmod never walks or copies the large node_modules tree.
+FROM base AS source
+COPY . .
+RUN chmod -R a+rX /app
+
 FROM base AS build
 # Copy all workspace manifests before the source so code-only changes reuse the install layer.
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -27,9 +33,7 @@ COPY packages/ui/package.json packages/ui/package.json
 COPY playroom/package.json playroom/package.json
 RUN --mount=type=cache,id=domino-pnpm-store,target=/pnpm/store \
   pnpm install --frozen-lockfile --store-dir=/pnpm/store
-COPY . .
-# Host file modes are copied as-is; the runtime user must be able to read every source file.
-RUN chmod -R a+rX /app
+COPY --from=source /app/ /app/
 RUN pnpm --filter @dn/web build
 
 FROM base AS runtime
