@@ -31,7 +31,7 @@ jobs:
       profile: production
 
   submit_android:
-    name: Submit to Play (internal track)
+    name: Submit to Play (closed testing)
     type: submit
     needs: [build_android]
     params:
