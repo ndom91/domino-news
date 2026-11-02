@@ -10,8 +10,8 @@ Compare how publishers cover a story, see their assessed political lean by count
 
 ## Try the mobile app
 
-<a href="https://play.google.com/apps/testing/dev.ndo.dominonews"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Join the Android beta on Google Play" height="40"></a>
-<a href="https://testflight.apple.com/join/hTE68EBm"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Join the iOS beta on TestFlight" height="40"></a>
+<a href="https://play.google.com/apps/testing/dev.ndo.dominonews"><img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Join the Android beta on Google Play" height="50"></a>
+<a href="https://testflight.apple.com/join/hTE68EBm"><img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Join the iOS beta on TestFlight" width="150"></a>
 
 For Android, first join the [Domino News Testers Google group](https://groups.google.com/u/1/g/domino-news-testers), then open the Google Play testing invite. The iOS link opens the TestFlight invite.
 
