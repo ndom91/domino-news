@@ -100,7 +100,7 @@ function NarrativePage() {
         </aside>
         <div className="max-w-4xl">
           <div className="border-t-2 border-rule">
-            <NarrativeGraph narrative={narrative} Link={RouterLink} />
+            <NarrativeGraph narrative={narrative} newestFirst Link={RouterLink} />
           </div>
           {updates.items.length > 0 ? (
             <section aria-labelledby="updates-heading">

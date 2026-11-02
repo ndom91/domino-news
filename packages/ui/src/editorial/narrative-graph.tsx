@@ -13,7 +13,7 @@ import { Timestamp } from './time.tsx'
 const MARK_Y = 19
 
 /**
- * A Narrative as one timeline, oldest first: one marker per Story on a single line in the
+ * A Narrative as one timeline: one marker per Story on a single line in the
  * Narrative's colour. How Stories connect is written out (Responds to, Follows…), not drawn.
  * The current Story (on a Story page), or else the latest, gets a filled marker.
  */
@@ -21,12 +21,14 @@ export function NarrativeGraph({
   narrative,
   currentStoryId,
   storyIds,
+  newestFirst = false,
   Link = DefaultLink,
 }: {
   narrative: NarrativeDetail
   currentStoryId?: string
   /** Optional chronological slice, used by the Story page's collapsed long timelines. */
   storyIds?: readonly string[]
+  newestFirst?: boolean
   Link?: LinkLike
 }) {
   const stories = storyIds
@@ -35,6 +37,7 @@ export function NarrativeGraph({
   const { rows } = layoutNarrative(stories, narrative.edges)
   const byId = new Map(narrative.stories.map((s) => [s.id, s]))
   const highlightId = currentStoryId ?? rows.at(-1)?.node.id
+  const displayedRows = newestFirst ? [...rows].reverse() : rows
   const storyLink = (id: string) => {
     const story = byId.get(id)
     return story ? (
@@ -46,7 +49,7 @@ export function NarrativeGraph({
 
   return (
     <ol
-      aria-label={`${plural(stories.length, 'story', 'stories')}, oldest first`}
+      aria-label={`${plural(stories.length, 'story', 'stories')}, ${newestFirst ? 'newest' : 'oldest'} first`}
       className={cx(deskKey(narrative.desk), 'flex flex-col')}
       // Desk colour for the line and markers; without a desk the neutral key nearly vanishes
       // on the dark canvas, so use the strong border colour instead.
@@ -54,7 +57,7 @@ export function NarrativeGraph({
         { '--line': narrative.desk ? 'var(--dn-key)' : 'var(--dn-border-strong)' } as CSSProperties
       }
     >
-      {rows.map(({ node, primary, secondary }, i) => {
+      {displayedRows.map(({ node, primary, secondary }, i) => {
         const isCurrent = node.id === currentStoryId
         const filled = node.id === highlightId
         return (
