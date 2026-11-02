@@ -47,7 +47,7 @@ export default function StoryScreen() {
   return (
     <Screen>
       <ScrollView contentContainerStyle={uiStyles.content}>
-        <StoryHeader story={data} />
+        <StoryHeader key={data.id} story={data} />
         {updates.data ? <StoryUpdates items={updates.data.items} /> : null}
         {updates.isError ? (
           <Button tone="light" onPress={() => void updates.refetch()}>

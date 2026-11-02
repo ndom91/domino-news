@@ -425,6 +425,19 @@ test('feed → story → narrative → search', async ({ page }) => {
   // Story: summary, coverage and original reporting with outbound links
   await firstStory.click()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => sessionStorage.setItem('copied-story-url', text),
+      },
+    })
+  })
+  await page.getByRole('button', { name: 'Share' }).click()
+  await expect(page.getByText('Link copied.')).toBeVisible()
+  expect(await page.evaluate(() => sessionStorage.getItem('copied-story-url'))).toBe(
+    new URL(page.url()).origin + new URL(page.url()).pathname,
+  )
   await expect(page.getByRole('heading', { name: 'Original reporting' })).toBeVisible()
   await expect(
     page.locator('section[aria-labelledby="sources-heading"] a[target="_blank"]').first(),

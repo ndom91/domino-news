@@ -91,6 +91,36 @@ function StoryRoute() {
   return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
 }
 
+function ShareStory({ slug }: { slug: string }) {
+  const [status, setStatus] = useState('')
+  async function copyStoryLink() {
+    try {
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/stories/${encodeURIComponent(slug)}`,
+      )
+      setStatus('Link copied.')
+    } catch {
+      setStatus('Could not copy the link. Please copy it from the address bar.')
+    }
+  }
+  return (
+    <div className="mt-4 flex flex-wrap items-center gap-3">
+      <Button
+        type="button"
+        size="sm"
+        variant="secondary"
+        className="min-h-tap"
+        onClick={() => void copyStoryLink()}
+      >
+        Share
+      </Button>
+      <span aria-live="polite" className="text-sm text-text-secondary">
+        {status}
+      </span>
+    </div>
+  )
+}
+
 /**
  * The summary's longer detail, below the lead. Citations lead where the lead's do; a context
  * term gets its popover only where it first appears, counting the lead's summary.
@@ -433,6 +463,7 @@ function StoryPage() {
         kicker={`First reported ${formatDate(story.firstObservedAt)}${regions ? ` · ${regions}` : ''}`}
         Link={RouterLink}
       />
+      <ShareStory key={story.id} slug={story.slug} />
 
       {session.features.summaryEditing && story.summary ? (
         <div className="mt-4">

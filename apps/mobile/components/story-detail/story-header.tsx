@@ -1,8 +1,11 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate } from '@dn/domain'
 import { DESK_LABELS, REGION_LABELS, type StoryDetail } from '@dn/schemas'
+import * as Clipboard from 'expo-clipboard'
 import { useState } from 'react'
 import { StyleSheet, Text, View } from 'react-native'
+import { apiUrl } from '../../lib/config'
+import { Button } from '../ui'
 import { ContextSheet } from './story-background'
 import { SummaryText } from './summary-text'
 
@@ -11,6 +14,17 @@ export function StoryHeader({ story }: { story: StoryDetail }) {
   const [selectedContext, setSelectedContext] = useState<StoryDetail['context'][number] | null>(
     null,
   )
+  const [shareStatus, setShareStatus] = useState('')
+  async function copyStoryLink() {
+    try {
+      const copied = await Clipboard.setStringAsync(
+        `${apiUrl}/stories/${encodeURIComponent(story.slug)}`,
+      )
+      setShareStatus(copied ? 'Link copied.' : 'Could not copy the link. Please try again.')
+    } catch {
+      setShareStatus('Could not copy the link. Please try again.')
+    }
+  }
   const regions = story.regions.map((region) => REGION_LABELS[region]).join(' · ')
   const summary = story.summary
   const detail = summary?.detail
@@ -38,6 +52,14 @@ export function StoryHeader({ story }: { story: StoryDetail }) {
       </Text>
       <Text style={styles.title}>{story.title}</Text>
       <Text style={styles.time}>First reported {formatDate(story.firstObservedAt)}</Text>
+      <View style={styles.share}>
+        <Button tone="light" onPress={() => void copyStoryLink()}>
+          Share
+        </Button>
+        <Text accessibilityLiveRegion="polite" style={styles.time}>
+          {shareStatus}
+        </Text>
+      </View>
       {summary ? (
         <View style={styles.summary}>
           <Text style={styles.summaryHeadline}>{summaryText(summary.headline)}</Text>
@@ -78,6 +100,7 @@ const styles = StyleSheet.create({
     fontSize: t.type.meta,
     marginTop: t.space[3],
   },
+  share: { alignItems: 'flex-start', marginTop: t.space[3] },
   summary: {
     borderLeftColor: t.color.accent,
     borderLeftWidth: 4,
