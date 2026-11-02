@@ -22,7 +22,7 @@ const config: ExpoConfig = {
   description: 'Follow the news as it falls: one story, every source, and what came next.',
   slug: 'domino-news',
   scheme: 'dominonews',
-  version: '0.8.1',
+  version: '0.8.2',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
   backgroundColor: '#f3f1ec',
