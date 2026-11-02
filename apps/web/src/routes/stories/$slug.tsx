@@ -104,17 +104,23 @@ function StoryRoute() {
 function ShareStory({ story, origin }: { story: StoryDetail; origin: string }) {
   const [status, setStatus] = useState('')
   const [canShare, setCanShare] = useState(false)
+  const statusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   useEffect(() => setCanShare(typeof navigator.share === 'function'), [])
+  useEffect(() => () => clearTimeout(statusTimer.current), [])
   const url = `${origin}/stories/${encodeURIComponent(story.slug)}`
   async function copyStoryLink() {
+    clearTimeout(statusTimer.current)
     try {
       await navigator.clipboard.writeText(url)
       setStatus('Link copied.')
+      statusTimer.current = setTimeout(() => setStatus(''), 3000)
     } catch {
       setStatus('Could not copy the link. Please copy it from the address bar.')
     }
   }
   async function shareStory() {
+    clearTimeout(statusTimer.current)
+    setStatus('')
     try {
       await navigator.share({ title: story.title, url })
     } catch (error) {
@@ -129,6 +135,7 @@ function ShareStory({ story, origin }: { story: StoryDetail; origin: string }) {
           <IconButton
             label="Share"
             variant="primary"
+            className="!border-key-text !bg-key-text !text-key hover:not-data-disabled:!bg-key hover:not-data-disabled:!text-key-text"
             icon={<ShareNetworkIcon size={20} aria-hidden />}
           />
         }
@@ -146,7 +153,7 @@ function ShareStory({ story, origin }: { story: StoryDetail; origin: string }) {
           <EnvelopeSimpleIcon size={16} aria-hidden className="mr-3" /> Email
         </MenuLinkItem>
         {canShare ? (
-          <MenuItem onClick={() => void shareStory()}>
+          <MenuItem closeOnClick={false} onClick={() => void shareStory()}>
             <DotsThreeIcon size={16} aria-hidden className="mr-3" /> More options…
           </MenuItem>
         ) : null}

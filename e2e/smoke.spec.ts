@@ -428,6 +428,18 @@ test('story share menu copies, emails and opens system sharing', async ({ page }
   await expect(
     page.locator('section[aria-labelledby="lead-heading"]').getByRole('button', { name: 'Share' }),
   ).toBeVisible()
+  const badge = page.locator('section[aria-labelledby="lead-heading"] .bg-key-text').first()
+  await expect(badge).toBeVisible()
+  const badgeColors = await badge.evaluate((el) => ({
+    background: getComputedStyle(el).backgroundColor,
+    color: getComputedStyle(el).color,
+  }))
+  expect(
+    await share.evaluate((el) => ({
+      background: getComputedStyle(el).backgroundColor,
+      color: getComputedStyle(el).color,
+    })),
+  ).toEqual(badgeColors)
   await share.click()
   const email = page.getByRole('menuitem', { name: 'Email' })
   await expect(email).toHaveAttribute('href', /mailto:.*subject=.*body=/)
@@ -435,11 +447,10 @@ test('story share menu copies, emails and opens system sharing', async ({ page }
   await expect(page.getByText('Link copied.')).toBeVisible()
   const url = new URL(page.url()).origin + new URL(page.url()).pathname
   expect(await page.evaluate(() => sessionStorage.getItem('copied-story-url'))).toBe(url)
+  await expect(page.getByText('Link copied.')).toBeHidden({ timeout: 5000 })
   await share.click()
   await page.getByRole('menuitem', { name: 'More options…' }).click()
   expect(await page.evaluate(() => sessionStorage.getItem('shared-story-url'))).toBe(url)
-  await share.focus()
-  await page.keyboard.press('Enter')
   await expect(page.getByRole('menuitem', { name: 'Copy link' })).toBeVisible()
   await page.keyboard.press('Escape')
   await expect(share).toBeFocused()
