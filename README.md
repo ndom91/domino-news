@@ -1,15 +1,19 @@
-<table>
-  <tr>
-    <td><img src="apps/web/public/icon-512.png" alt="" width="80"></td>
-    <td valign="middle"><h1>Domino Wire</h1></td>
-  </tr>
-</table>
+<h1><img src="apps/web/public/icon-512.png" alt="" width="80" align="middle"> Domino Wire</h1>
 
-A news reader that shows you where every claim comes from.
+A news reader that brings reporting from different publishers together, with citations back to the articles behind each summary.
 
 It reads RSS feeds from a curated set of publishers and groups articles into **Stories**. It writes short summaries that cite their sources, then links related Stories into **Narratives** so you can follow how events unfold.
 
-This is an early prototype.
+Compare how publishers cover a story, see their assessed political lean by country, and follow a timeline of what changed. Explore a personalised feed and audio briefing, or use Blindspot to find coverage you may have missed.
+
+![Domino Wire: follow the news across publishers, understand the context, and see what you might have missed](apps/web/public/og-domino-wire.png)
+
+## Try the mobile app
+
+[![Join the Android beta on Google Play](https://img.shields.io/badge/Google%20Play-Join%20the%20beta-3DDC84?logo=googleplay&logoColor=white)](https://play.google.com/apps/testing/dev.ndo.dominonews)
+[![Join the iOS beta on TestFlight](https://img.shields.io/badge/TestFlight-Join%20the%20beta-0D96F6?logo=apple&logoColor=white)](https://testflight.apple.com/join/hTE68EBm)
+
+For Android, first join the [Domino News Testers Google group](https://groups.google.com/u/1/g/domino-news-testers), then open the Google Play testing invite.
 
 ## Run it locally
 
