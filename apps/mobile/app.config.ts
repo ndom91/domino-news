@@ -23,7 +23,8 @@ const config: ExpoConfig = {
   slug: 'domino-news',
   scheme: 'dominonews',
   version: '0.8.2',
-  orientation: 'portrait',
+  // Unlocked: Android 16 ignores orientation locks on tablets and foldables, and Play flags them.
+  orientation: 'default',
   userInterfaceStyle: 'light',
   backgroundColor: '#f3f1ec',
   primaryColor: '#121212',
