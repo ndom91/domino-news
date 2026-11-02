@@ -296,7 +296,7 @@ GET  /api/v1/front?region=                # lead (prefers the reader's regions),
 GET  /api/v1/edition                     # header strip: editionAt + last-24h story/publisher counts
 GET  /api/v1/stories?cursor=&limit=&region=
 GET  /api/v1/stories/:idOrSlug          # includes summary, sources, context[], claims[], related, enrichment status
-POST /api/v1/stories/:id/summary          # dev-only edit -> new version (ENABLE_SUMMARY_EDITING)
+POST /api/v1/stories/:id/summary          # admin-only edit -> new version (ENABLE_SUMMARY_EDITING)
 GET  /api/v1/narratives
 GET  /api/v1/narratives/:idOrSlug
 GET  /api/v1/search?q=&type=&since=&publisher=&region=

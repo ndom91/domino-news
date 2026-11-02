@@ -465,7 +465,7 @@ function StoryPage() {
       />
       <ShareStory key={story.id} slug={story.slug} />
 
-      {session.features.summaryEditing && story.summary ? (
+      {isAdmin && session.features.summaryEditing && story.summary ? (
         <div className="mt-4">
           {editing ? (
             <SummaryEditor

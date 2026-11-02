@@ -531,7 +531,7 @@ describe('/api/v1 write endpoints', () => {
     await boss.deleteJob('build_story_summary', summaryJob)
   })
 
-  it('limits pipeline routes to admins', async () => {
+  it('limits pipeline and summary editing routes to admins', async () => {
     await createUserAccount(h.ctx.auth, {
       username: 'reader',
       password: 'reader-password',
@@ -557,6 +557,24 @@ describe('/api/v1 write endpoints', () => {
     expect((await asReader('/api/v1/ops/failed')).status).toBe(403)
     expect((await asReader('/api/v1/ops/match-health')).status).toBe(403)
     expect((await asReader('/api/v1/publishers/bbc/evidence')).status).toBe(403)
+    const stories = storyListResponseSchema.parse(
+      await (await call('/api/v1/stories?limit=1')).json(),
+    )
+    const story = stories.items[0]
+    if (!story) throw new Error('no story')
+    const before = storyDetailSchema.parse(await (await call(`/api/v1/stories/${story.id}`)).json())
+    const edit = await asReader(`/api/v1/stories/${story.id}/summary`, {
+      method: 'POST',
+      body: JSON.stringify({
+        headline: 'Unauthorized edit',
+        body: 'Unauthorized edit.',
+        basedOnVersionId: before.summary?.versionId,
+      }),
+    })
+    expect(edit.status).toBe(403)
+    expect(apiErrorSchema.parse(await edit.json()).error.code).toBe('forbidden')
+    const after = storyDetailSchema.parse(await (await call(`/api/v1/stories/${story.id}`)).json())
+    expect(after.summary?.versionId).toBe(before.summary?.versionId)
     const review = await asReader('/api/v1/publishers/bbc/assessment', {
       method: 'POST',
       body: JSON.stringify({

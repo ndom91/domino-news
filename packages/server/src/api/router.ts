@@ -296,21 +296,26 @@ const routes: Route[] = [
     if (!updates) throw new HttpError('not_found', 'story not found')
     return json(updates)
   }),
-  route('POST', '/api/v1/stories/:id/summary', async ({ ctx, request, params, userId }) => {
-    if (!ctx.config.enableSummaryEditing)
-      throw new HttpError('forbidden', 'summary editing is disabled')
-    const body = await readJson(request, summaryEditRequestSchema)
-    const storyId = await resolveStoryId(ctx.db, params.id ?? '')
-    if (!storyId) throw new HttpError('not_found', 'story not found')
-    const versionId = await ctx.db.transaction((tx) =>
-      editSummary(tx, { storyId, userId, ...body }),
-    )
-    // Context anchors refer to the old wording; regenerate them for the edited text.
-    const job = analysisJob(storyId, versionId, 'interactive')
-    await (await ctx.boss()).send(QUEUES.generateContext, job.data, job.options)
-    const story = await getStory(ctx.db, storyId)
-    return json(story)
-  }),
+  route(
+    'POST',
+    '/api/v1/stories/:id/summary',
+    async ({ ctx, request, params, userId }) => {
+      if (!ctx.config.enableSummaryEditing)
+        throw new HttpError('forbidden', 'summary editing is disabled')
+      const body = await readJson(request, summaryEditRequestSchema)
+      const storyId = await resolveStoryId(ctx.db, params.id ?? '')
+      if (!storyId) throw new HttpError('not_found', 'story not found')
+      const versionId = await ctx.db.transaction((tx) =>
+        editSummary(tx, { storyId, userId, ...body }),
+      )
+      // Context anchors refer to the old wording; regenerate them for the edited text.
+      const job = analysisJob(storyId, versionId, 'interactive')
+      await (await ctx.boss()).send(QUEUES.generateContext, job.data, job.options)
+      const story = await getStory(ctx.db, storyId)
+      return json(story)
+    },
+    { adminOnly: true },
+  ),
   route('GET', '/api/v1/narratives', async ({ ctx }) => json(await listNarratives(ctx.db))),
   route('GET', '/api/v1/narratives/:id', async ({ ctx, params }) => {
     const narrative = await getNarrative(ctx.db, params.id ?? '')
