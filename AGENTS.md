@@ -127,7 +127,7 @@ scripts/deploy.sh update        # git pull --ff-only, then the same as up
 scripts/deploy.sh update-image  # git pull, then pull and deploy the commit-tagged GHCR image
 ```
 
-Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) is not included yet. Backups: `scripts/deploy.sh backup` (pg_dump into `backups/` on the host; offsite copies are left to the operator; see README).
+Services: `postgres` (pgvector), `typesense`, `migrate` (one-off), `web` (bound to `WEB_BIND:WEB_PORT`, default `127.0.0.1:4000`), `worker`, `indexer`. Postgres and Typesense always bind to `127.0.0.1`. TLS termination (Caddy) is not included yet. Backups: `scripts/deploy.sh backup` (pg_dump into `backups/` on the host; offsite copies are left to the operator; see below).
 
 ## Operations
 
@@ -174,6 +174,9 @@ scripts/deploy.sh update     # git pull, rebuild, migrate, restart, re-seed publ
 - New model-written fields (desk, regions, topics) are only set when a Story is summarised. Existing Stories stay without them until re-summarised or a full reset.
 - After `fixtures/assessments.json` changes, run `scripts/deploy.sh cli assessments:import`, then `scripts/deploy.sh cli assessments:publish --username <admin>` (try `--dry-run` first). Assessments are append-only, so each changed entry becomes a new version.
 - After adding publishers, run `scripts/deploy.sh cli assessments:import` once so they get ownership and reliability evidence. It is not scheduled: evidence changes rarely, and only reviewed assessments are shown.
+- The local build requires BuildKit and downloads the `docker/dockerfile:1.14` frontend on its first build. Web, worker, indexer and migrations share one image; migrations must succeed before app services start. Compose waits up to 120 seconds for services to be running or healthy, but app services have no health checks, so this does not guarantee readiness.
+- If startup fails, the script restores the previous local image tag (or removes the new tag if there was none), but containers may already have changed and migrations are not rolled back. Inspect the stack and database before retrying. If seeding fails after startup, the new image remains active; retry with `scripts/deploy.sh cli seed`.
+- GitHub Actions publishes multi-architecture GHCR images for commits on `main`. For `update-image`, make the package public or authenticate with `docker login ghcr.io` using a token with `read:packages`; forks can set `DOMINO_IMAGE_REPOSITORY=ghcr.io/<owner>/<repository>` (lowercase). Use `image-up` for the current checkout without pulling git. If publication or pulling fails, running containers are unchanged. Images contain the committed tree, and publication is independent of CI checks.
 
 ### Backups and restore
 
@@ -189,6 +192,7 @@ Nightly cron (adjust the path):
 ```
 
 - `pg_dump` runs inside the Postgres container, so the host needs no Postgres tools.
+- `pg_dump` takes a consistent snapshot while Postgres runs; copying the live data directory does not.
 - Typesense is not backed up; `restore` rebuilds it.
 - Copying `backups/` offsite is up to the operator. Keep `.env` safe too: restored data needs the same `BETTER_AUTH_SECRET`.
 
