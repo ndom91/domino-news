@@ -1,6 +1,6 @@
 import { plural } from '@dn/domain'
 import type { StoryLead } from '@dn/schemas'
-import { useState } from 'react'
+import { type ReactNode, useState } from 'react'
 import { cx } from '../cx.ts'
 import { type CitedSource, SummaryText } from './citation.tsx'
 import { deskKey, deskLabel } from './desk-key.ts'
@@ -58,6 +58,7 @@ export function HeroStory({
   headingLevel = 'h1',
   linkHeadline = true,
   Link = DefaultLink,
+  action,
 }: {
   story: StoryLead
   position?: { index: number; total: number } | null
@@ -66,6 +67,7 @@ export function HeroStory({
   headingLevel?: 'h1' | 'h2'
   linkHeadline?: boolean
   Link?: LinkLike
+  action?: ReactNode
 }) {
   // Hovering a report in the trace or on the board highlights it in both.
   const [activeSource, setActiveSource] = useState<string | null>(null)
@@ -93,7 +95,12 @@ export function HeroStory({
         'max-md:-mx-gutter max-md:mt-4 max-md:px-gutter max-md:pt-5 max-md:pb-8',
       )}
     >
-      <div className="col-span-full mb-7 flex items-baseline justify-between gap-x-4 border-b-2 border-key-text pb-3.5 max-lg:mb-0 max-md:flex-col max-md:gap-1">
+      <div
+        className={cx(
+          'col-span-full mb-7 flex justify-between gap-x-4 border-b-2 border-key-text pb-3.5 max-lg:mb-0',
+          action ? 'items-center' : 'items-baseline max-md:flex-col max-md:gap-1',
+        )}
+      >
         {narrative ? (
           <Link to={`/narratives/${narrative.slug}`} className="type-label hover:underline">
             {narrative.title}
@@ -101,10 +108,15 @@ export function HeroStory({
         ) : (
           <span className="type-label">{deskLabel(story.desk)}</span>
         )}
-        <span className="text-base font-semibold">
-          {kicker}
-          {position && position.total > 1 ? ` · story ${position.index} of ${position.total}` : ''}
-        </span>
+        <div className="flex min-w-0 items-center justify-end gap-3">
+          <span className="text-right text-base font-semibold">
+            {kicker}
+            {position && position.total > 1
+              ? ` · story ${position.index} of ${position.total}`
+              : ''}
+          </span>
+          {action}
+        </div>
       </div>
 
       <div className="min-w-0">

@@ -17,7 +17,11 @@ import {
   Button,
   ContextExplanation,
   HeroStory,
+  IconButton,
   leadCitations,
+  Menu,
+  MenuItem,
+  MenuLinkItem,
   NarrativeGraph,
   PublisherLogo,
   Reveal,
@@ -28,7 +32,13 @@ import {
   SummaryText,
   Timestamp,
 } from '@dn/ui'
-import { CaretDownIcon } from '@phosphor-icons/react'
+import {
+  CaretDownIcon,
+  DotsThreeIcon,
+  EnvelopeSimpleIcon,
+  LinkIcon,
+  ShareNetworkIcon,
+} from '@phosphor-icons/react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
@@ -91,30 +101,68 @@ function StoryRoute() {
   return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
 }
 
-function ShareStory({ slug }: { slug: string }) {
+function ShareStory({ story, origin }: { story: StoryDetail; origin: string }) {
   const [status, setStatus] = useState('')
+  const [canShare, setCanShare] = useState(false)
+  useEffect(() => setCanShare(typeof navigator.share === 'function'), [])
+  const url = `${origin}/stories/${encodeURIComponent(story.slug)}`
   async function copyStoryLink() {
     try {
-      await navigator.clipboard.writeText(
-        `${window.location.origin}/stories/${encodeURIComponent(slug)}`,
-      )
+      await navigator.clipboard.writeText(url)
       setStatus('Link copied.')
     } catch {
       setStatus('Could not copy the link. Please copy it from the address bar.')
     }
   }
+  async function shareStory() {
+    try {
+      await navigator.share({ title: story.title, url })
+    } catch (error) {
+      if (error instanceof DOMException && error.name === 'AbortError') return
+      setStatus('Could not share the link. Please try copying it instead.')
+    }
+  }
   return (
-    <div className="mt-4 flex flex-wrap items-center gap-3">
-      <Button
-        type="button"
-        size="sm"
-        variant="secondary"
-        className="min-h-tap"
-        onClick={() => void copyStoryLink()}
+    <div className="relative shrink-0">
+      <Menu
+        trigger={
+          <IconButton
+            label="Share"
+            variant="primary"
+            icon={<ShareNetworkIcon size={20} aria-hidden />}
+          />
+        }
       >
-        Share
-      </Button>
-      <span aria-live="polite" className="text-sm text-text-secondary">
+        <MenuItem onClick={() => void copyStoryLink()}>
+          <LinkIcon size={16} aria-hidden className="mr-3" /> Copy link
+        </MenuItem>
+        <MenuLinkItem
+          render={
+            <a
+              href={`mailto:?subject=${encodeURIComponent(story.title)}&body=${encodeURIComponent(url)}`}
+            />
+          }
+        >
+          <EnvelopeSimpleIcon size={16} aria-hidden className="mr-3" /> Email
+        </MenuLinkItem>
+        {canShare ? (
+          <MenuItem onClick={() => void shareStory()}>
+            <DotsThreeIcon size={16} aria-hidden className="mr-3" /> More options…
+          </MenuItem>
+        ) : null}
+        <p className="w-60 border-t border-border px-4 py-3 text-sm font-normal leading-normal text-text-secondary">
+          Shares this story’s page, with its summary and all{' '}
+          {plural(story.sources.length, 'report')}.
+        </p>
+      </Menu>
+      <span
+        aria-live="polite"
+        className={
+          status
+            ? 'absolute right-0 top-full z-10 mt-2 w-max max-w-60 bg-elevated px-2 text-sm text-text'
+            : 'sr-only'
+        }
+      >
         {status}
       </span>
     </div>
@@ -462,8 +510,8 @@ function StoryPage() {
         linkHeadline={false}
         kicker={`First reported ${formatDate(story.firstObservedAt)}${regions ? ` · ${regions}` : ''}`}
         Link={RouterLink}
+        action={<ShareStory key={story.id} story={story} origin={session.origin} />}
       />
-      <ShareStory key={story.id} slug={story.slug} />
 
       {isAdmin && session.features.summaryEditing && story.summary ? (
         <div className="mt-4">

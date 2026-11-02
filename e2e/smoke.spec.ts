@@ -409,6 +409,42 @@ test('original reporting groups reports and reveals cited reports', async ({ pag
   await expectNoHorizontalOverflow(page)
 })
 
+test('story share menu copies, emails and opens system sharing', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: {
+        writeText: async (text: string) => sessionStorage.setItem('copied-story-url', text),
+      },
+    })
+    Object.defineProperty(navigator, 'share', {
+      configurable: true,
+      value: async (data: ShareData) => sessionStorage.setItem('shared-story-url', data.url ?? ''),
+    })
+  })
+  await signIn(page)
+  await page.locator('main article h3 a').first().click()
+  const share = page.getByRole('button', { name: 'Share' })
+  await expect(
+    page.locator('section[aria-labelledby="lead-heading"]').getByRole('button', { name: 'Share' }),
+  ).toBeVisible()
+  await share.click()
+  const email = page.getByRole('menuitem', { name: 'Email' })
+  await expect(email).toHaveAttribute('href', /mailto:.*subject=.*body=/)
+  await page.getByRole('menuitem', { name: 'Copy link' }).click()
+  await expect(page.getByText('Link copied.')).toBeVisible()
+  const url = new URL(page.url()).origin + new URL(page.url()).pathname
+  expect(await page.evaluate(() => sessionStorage.getItem('copied-story-url'))).toBe(url)
+  await share.click()
+  await page.getByRole('menuitem', { name: 'More options…' }).click()
+  expect(await page.evaluate(() => sessionStorage.getItem('shared-story-url'))).toBe(url)
+  await share.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('menuitem', { name: 'Copy link' })).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(share).toBeFocused()
+})
+
 test('feed → story → narrative → search', async ({ page }) => {
   await signIn(page)
 
@@ -434,6 +470,8 @@ test('feed → story → narrative → search', async ({ page }) => {
     })
   })
   await page.getByRole('button', { name: 'Share' }).click()
+  await expect(page.getByRole('menuitem', { name: 'Email' })).toHaveAttribute('href', /^mailto:/)
+  await page.getByRole('menuitem', { name: 'Copy link' }).click()
   await expect(page.getByText('Link copied.')).toBeVisible()
   expect(await page.evaluate(() => sessionStorage.getItem('copied-story-url'))).toBe(
     new URL(page.url()).origin + new URL(page.url()).pathname,
