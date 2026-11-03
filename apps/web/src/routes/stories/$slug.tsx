@@ -576,7 +576,9 @@ function StoryPage() {
                     new Date(visible[index - 1]?.createdAt ?? update.createdAt)
                       .toISOString()
                       .slice(0, 10) !== new Date(update.createdAt).toISOString().slice(0, 10) ? (
-                      <p className="relative bg-canvas py-2 pl-[6.25rem] type-label text-text-muted max-sm:pl-[4.75rem]">
+                      <p
+                        className={`relative bg-canvas pl-[6.25rem] type-label text-text-muted max-sm:pl-[4.75rem] ${index === 0 ? 'py-2' : 'py-4'}`}
+                      >
                         {formatDate(update.createdAt)}
                         {multipleUpdateYears
                           ? ` ${new Date(update.createdAt).getUTCFullYear()}`
