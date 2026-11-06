@@ -102,7 +102,7 @@ Create an OAuth client (type "Web application") in Google Cloud and add `${BETTE
 LOGO_DEV_API_KEY=sk_...   # logo.dev secret key
 ```
 
-The web server fetches each publisher's logo once through the logo.dev API, keeps it in memory, and serves it at `/api/v1/logos/<slug>.webp` without a session. It's cached for a year in browsers and at Cloudflare. logo.dev's fair use forbids proxying its CDN (`img.logo.dev`), so only the API is used. Without the key, publishers show no logo.
+The web server fetches each publisher's logo once through the logo.dev API, saves it in Postgres (`publisher_logo`), keeps it in memory, and serves it at `/api/v1/logos/<slug>.webp` without a session. It's cached for a year in browsers and at Cloudflare. Each API call costs a logo.dev credit, so saved logos are never fetched again, even after restarts or deploys. "No logo" answers are saved too and asked again after a day. Delete a row to refetch that logo. logo.dev's fair use forbids proxying its CDN (`img.logo.dev`), so only the API is used. Without the key, only logos already saved are shown. `dev:reset` keeps them, and backups include them.
 
 ### Audio briefing prototype
 

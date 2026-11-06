@@ -42,6 +42,7 @@ const SOURCE_AND_ACCOUNT_TABLES = [
   'publisher_assessment',
   'publisher_evidence',
   'publisher',
+  'publisher_logo',
   'user_follow',
   'user_signal',
   'user_preference',

@@ -1,4 +1,4 @@
-import { createLogoSource } from '@dn/server'
+import { createLogoSource, type LogoStore, type SavedLogo } from '@dn/server'
 import { describe, expect, it, vi } from 'vitest'
 
 const API_OK = () =>
@@ -14,6 +14,21 @@ function stub(api: () => Response, image: () => Response = IMAGE) {
 }
 const apiCalls = (fetch: ReturnType<typeof stub>) =>
   fetch.mock.calls.filter(([input]) => String(input).startsWith('https://api.logo.dev/')).length
+
+// An in-memory LogoStore that records what was saved.
+function memoryStore(initial: Record<string, SavedLogo> = {}) {
+  const rows = new Map(Object.entries(initial))
+  const store: LogoStore & { rows: typeof rows } = {
+    rows,
+    load: async (domain) => rows.get(domain) ?? null,
+    save: async (domain, logo) => {
+      rows.set(domain, { logo, fetchedAt: 0 })
+    },
+  }
+  return store
+}
+const LOGO = { bytes: new Uint8Array([9]), contentType: 'image/webp' }
+const DAY = 24 * 60 * 60_000
 
 describe('logo source', () => {
   it('fetches once through the API, then serves from memory', async () => {
@@ -103,5 +118,75 @@ describe('logo source', () => {
     t += 60 * 60_000
     await logos.get('c.example')
     expect(apiCalls(fetch)).toBe(3)
+  })
+
+  it('saves a fetched logo, and a later process serves it without calling logo.dev', async () => {
+    const store = memoryStore()
+    const first = createLogoSource({ apiKey: 'sk_test', fetch: stub(API_OK), store })
+    expect((await first.get('nytimes.com')).logo?.contentType).toBe('image/webp')
+    expect(store.rows.get('nytimes.com')?.logo?.bytes).toEqual(new Uint8Array([1, 2, 3]))
+
+    const fetch = stub(API_OK)
+    const restarted = createLogoSource({ apiKey: 'sk_test', fetch, store })
+    expect((await restarted.get('nytimes.com')).logo?.bytes).toEqual(new Uint8Array([1, 2, 3]))
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('serves saved logos without a key', async () => {
+    const fetch = stub(API_OK)
+    const store = memoryStore({ 'nytimes.com': { logo: LOGO, fetchedAt: 0 } })
+    const logos = createLogoSource({ apiKey: undefined, fetch, store })
+    expect((await logos.get('nytimes.com')).logo).toEqual(LOGO)
+    expect(await logos.get('other.example')).toEqual({ logo: null, missing: 'retry' })
+    expect(fetch).not.toHaveBeenCalled()
+  })
+
+  it('asks again about a saved missing logo only after a day', async () => {
+    let t = DAY / 2
+    const fetch = stub(() => new Response(null, { status: 404 }))
+    const store = memoryStore({ 'a.example': { logo: null, fetchedAt: 0 } })
+    const logos = createLogoSource({ apiKey: 'sk_test', fetch, store, now: () => t })
+    expect(await logos.get('a.example')).toEqual({ logo: null, missing: 'none' })
+    expect(apiCalls(fetch)).toBe(0)
+    t = DAY
+    expect(await logos.get('a.example')).toEqual({ logo: null, missing: 'none' })
+    expect(apiCalls(fetch)).toBe(1)
+  })
+
+  it('never saves a passing failure', async () => {
+    const store = memoryStore()
+    const save = vi.spyOn(store, 'save')
+    const logos = createLogoSource({
+      apiKey: 'sk_test',
+      fetch: stub(() => new Response(null, { status: 429 })),
+      store,
+    })
+    expect(await logos.get('a.example')).toEqual({ logo: null, missing: 'retry' })
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  it('spends no credit while the store cannot be read, and still serves when saving fails', async () => {
+    const fetch = stub(API_OK)
+    const broken: LogoStore = {
+      load: async () => {
+        throw new Error('db down')
+      },
+      save: async () => {},
+    }
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    expect(
+      await createLogoSource({ apiKey: 'sk_test', fetch, store: broken }).get('a.example'),
+    ).toEqual({ logo: null, missing: 'retry' })
+    expect(fetch).not.toHaveBeenCalled()
+
+    const readOnly: LogoStore = {
+      load: async () => null,
+      save: async () => {
+        throw new Error('db read-only')
+      },
+    }
+    const logos = createLogoSource({ apiKey: 'sk_test', fetch, store: readOnly })
+    expect((await logos.get('a.example')).logo?.contentType).toBe('image/webp')
+    warn.mockRestore()
   })
 })

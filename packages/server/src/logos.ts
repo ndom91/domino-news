@@ -1,7 +1,11 @@
-// Publisher logos from logo.dev, fetched through its API with the secret key and kept in
-// memory. logo.dev's fair-use rules forbid proxying its CDN (img.logo.dev) from a server, but
-// allow downloading through the API and serving our own copy. Browsers and Cloudflare cache
-// the result for a year, so logo.dev sees about one call per publisher per server start.
+// Publisher logos from logo.dev, fetched through its API with the secret key, kept in memory
+// and saved to Postgres. logo.dev's fair-use rules forbid proxying its CDN (img.logo.dev) from
+// a server, but allow downloading through the API and serving our own copy. Each API call
+// costs a credit, so a saved logo is never fetched again, even after a restart. Browsers and
+// Cloudflare cache the result for a year.
+
+import { type Db, schema } from '@dn/db'
+import { eq } from 'drizzle-orm'
 
 export interface Logo {
   bytes: Uint8Array<ArrayBuffer>
@@ -35,13 +39,52 @@ export interface LogoSource {
   get(domain: string): Promise<LogoResult>
 }
 
+/** A saved lookup: a logo, or `null` when logo.dev had none at `fetchedAt`. */
+export interface SavedLogo {
+  logo: Logo | null
+  fetchedAt: number
+}
+
+/** Durable copy of logo.dev answers. Only lasting answers are saved, never passing failures. */
+export interface LogoStore {
+  load(domain: string): Promise<SavedLogo | null>
+  save(domain: string, logo: Logo | null): Promise<void>
+}
+
+export function createDbLogoStore(db: Db): LogoStore {
+  const t = schema.publisherLogo
+  return {
+    async load(domain) {
+      const [row] = await db.select().from(t).where(eq(t.domain, domain)).limit(1)
+      if (!row) return null
+      const logo =
+        row.image && row.contentType ? { bytes: row.image, contentType: row.contentType } : null
+      return { logo, fetchedAt: row.fetchedAt.getTime() }
+    },
+    async save(domain, logo) {
+      const values = {
+        image: logo?.bytes ?? null,
+        contentType: logo?.contentType ?? null,
+        fetchedAt: new Date(),
+      }
+      await db
+        .insert(t)
+        .values({ domain, ...values })
+        .onConflictDoUpdate({ target: t.domain, set: values })
+    },
+  }
+}
+
 export function createLogoSource({
   apiKey,
+  store,
   fetch = globalThis.fetch,
   now = Date.now,
   hourlyLimit = 100,
 }: {
   apiKey: string | undefined
+  /** Where lookups survive restarts. Without it they live only in memory. */
+  store?: LogoStore
   fetch?: typeof globalThis.fetch
   now?: () => number
   /** Safety ceiling on logo.dev calls, against a restart loop or a bug. */
@@ -108,16 +151,43 @@ export function createLogoSource({
     }
   }
 
+  // The saved answer while it's still good, else a fresh one from logo.dev (saved if lasting).
+  async function resolve(domain: string): Promise<Entry | null> {
+    let saved: SavedLogo | null = null
+    try {
+      saved = (await store?.load(domain)) ?? null
+    } catch (error) {
+      // Don't spend a credit on what may well be saved already; try again on the next request.
+      console.warn(`[logos] ${domain}: reading the saved logo failed`, error)
+      return null
+    }
+    if (saved?.logo) return { result: { logo: saved.logo }, until: Number.POSITIVE_INFINITY }
+    if (saved && saved.fetchedAt + RETRY_LATER > now())
+      return { result: NONE, until: saved.fetchedAt + RETRY_LATER }
+    // Without a key, only saved logos are served.
+    if (!apiKey) return { result: RETRY, until: now() + RETRY_SOON }
+
+    const entry = await limited(() => load(domain))
+    if (store && entry && (entry.result.logo || entry.result.missing === 'none')) {
+      try {
+        await store.save(domain, entry.result.logo)
+      } catch (error) {
+        console.warn(`[logos] ${domain}: saving the logo failed`, error)
+      }
+    }
+    return entry
+  }
+
   return {
     async get(domain) {
-      if (!apiKey) return RETRY
       const cached = cache.get(domain)
       if (cached && cached.until > now()) return cached.result
+      if (!apiKey && !store) return RETRY
 
-      // Parallel misses for one domain share a single call.
+      // Parallel misses for one domain share a single lookup.
       let pending = inFlight.get(domain)
       if (!pending) {
-        pending = limited(() => load(domain))
+        pending = resolve(domain)
           .then((entry) => {
             if (entry) cache.set(domain, entry)
             return entry?.result ?? RETRY

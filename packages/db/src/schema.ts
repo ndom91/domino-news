@@ -14,6 +14,7 @@ import {
   bigserial,
   boolean,
   check,
+  customType,
   index,
   integer,
   jsonb,
@@ -116,6 +117,28 @@ export const publisher = pgTable('publisher', {
   policyReviewedAt: ts('policy_reviewed_at'),
   createdAt: createdAt(),
 })
+
+const bytea = customType<{ data: Uint8Array<ArrayBuffer>; driverData: Buffer }>({
+  dataType: () => 'bytea',
+  toDriver: (value) => Buffer.from(value.buffer, value.byteOffset, value.byteLength),
+  fromDriver: (value) => new Uint8Array(value),
+})
+
+// Logos downloaded from logo.dev, kept so a restart doesn't spend API credits fetching them
+// again. Keyed by domain, like the API. A row without an image records that logo.dev has no
+// logo for the domain; it's asked again a day after `fetched_at`.
+export const publisherLogo = pgTable(
+  'publisher_logo',
+  {
+    domain: text('domain').primaryKey(),
+    image: bytea('image'),
+    contentType: text('content_type'),
+    fetchedAt: ts('fetched_at').notNull().defaultNow(),
+  },
+  (t) => [
+    check('publisher_logo_image_type', sql`(${t.image} is null) = (${t.contentType} is null)`),
+  ],
+)
 
 export const feed = pgTable('feed', {
   id: text('id').primaryKey(),

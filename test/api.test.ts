@@ -148,6 +148,22 @@ describe('/api/v1 contracts', () => {
     }
   })
 
+  it('serves a saved logo without asking logo.dev', async () => {
+    const [publisher] = await h.ctx.db
+      .select({ domain: schema.publisher.domain })
+      .from(schema.publisher)
+      .where(eq(schema.publisher.slug, 'guardian'))
+    if (!publisher) throw new Error('fixture publisher missing')
+    const bytes = new Uint8Array([1, 2, 3])
+    await h.ctx.db
+      .insert(schema.publisherLogo)
+      .values({ domain: publisher.domain, image: bytes, contentType: 'image/webp' })
+    const res = await call('/api/v1/logos/guardian.webp', {}, false)
+    expect(res.status).toBe(200)
+    expect(res.headers.get('cache-control')).toBe('public, max-age=31536000, immutable')
+    expect(new Uint8Array(await res.arrayBuffer())).toEqual(bytes)
+  })
+
   it('lists stories and fetches one by slug', async () => {
     const res = await call('/api/v1/stories?limit=5')
     expect(res.status).toBe(200)

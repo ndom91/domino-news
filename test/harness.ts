@@ -1,5 +1,6 @@
 import { createQueues, PriorityLimiter, type WorkerContext } from '@dn/jobs'
 import {
+  createDbLogoStore,
   createLogoSource,
   createServerContext,
   resetIngestedData,
@@ -108,8 +109,8 @@ export async function createTestContext() {
     // Fixture stories are mostly single-outlet; tests opt in to the publish threshold.
     config: { ...base.config, minPublishOutlets: 1, eagerOptionalEnrichmentOutlets: 1 },
     ts,
-    // Never call logo.dev from tests, even if the shell has a key.
-    logos: createLogoSource({ apiKey: undefined }),
+    // Never call logo.dev from tests, even if the shell has a key. Saved logos are served.
+    logos: createLogoSource({ apiKey: undefined, store: createDbLogoStore(base.db) }),
     boss: async () => workerBoss,
     workerBoss,
     gpu: { embeddings: new PriorityLimiter(2), generation: new PriorityLimiter(2) },
