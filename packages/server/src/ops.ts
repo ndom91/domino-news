@@ -1,13 +1,13 @@
 import { type Db, schema } from '@dn/db'
-import type {
-  FailedJob,
-  FailedJobsResponse,
-  InferenceSettingsUpdate,
-  OpsAction,
-  OpsStatus,
+import {
+  type FailedJob,
+  type FailedJobsResponse,
+  type InferenceSettingsUpdate,
+  inferenceSettingsUpdateSchema,
+  type OpsAction,
+  type OpsStatus,
 } from '@dn/schemas'
-import { INFERENCE_SETTINGS_LIMITS } from '@dn/schemas'
-import { and, desc, eq, isNotNull, isNull, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, isNull, lte, or, type SQL, sql } from 'drizzle-orm'
 import { cached } from './cache.ts'
 import type { ServerContext } from './context.ts'
 import { PRIORITY, QUEUES } from './queues.ts'
@@ -17,75 +17,35 @@ const BACKFILL_PAUSED = 'backfill_paused'
 const INFERENCE_SETTINGS = 'inference_settings'
 const INFERENCE_WINDOW_HOURS = 24
 const INFERENCE_METRICS_CACHE_MS = 30_000
-type InferenceSettings = {
-  publishedSummaryDebounceSeconds: number
-  summaryUpdateAssessmentMaxArticles: number
-}
 
 export async function getInferenceSettings(
   ctx: Pick<ServerContext, 'config' | 'db'>,
-): Promise<InferenceSettings> {
-  const fallback = {
-    publishedSummaryDebounceSeconds: ctx.config.publishedSummaryDebounceSeconds,
-    summaryUpdateAssessmentMaxArticles: ctx.config.summaryUpdateAssessmentMaxArticles,
-  }
+): Promise<InferenceSettingsUpdate> {
   const [row] = await ctx.db
     .select({ value: schema.pipelineControl.value })
     .from(schema.pipelineControl)
     .where(eq(schema.pipelineControl.key, INFERENCE_SETTINGS))
-  if (!row || !isInferenceSettings(row.value)) return fallback
-  return row.value
+  // A stored value outside today's bounds falls back to the configured defaults.
+  const stored = inferenceSettingsUpdateSchema.safeParse(row?.value)
+  if (stored.success) return stored.data
+  return {
+    publishedSummaryDebounceSeconds: ctx.config.publishedSummaryDebounceSeconds,
+    summaryUpdateAssessmentMaxArticles: ctx.config.summaryUpdateAssessmentMaxArticles,
+  }
 }
 
+/** `settings` is already checked against the bounds by `inferenceSettingsUpdateSchema`. */
 export async function setInferenceSettings(
   ctx: Pick<ServerContext, 'db'>,
   settings: InferenceSettingsUpdate,
 ) {
-  if (
-    settings.publishedSummaryDebounceSeconds === undefined ||
-    settings.publishedSummaryDebounceSeconds <
-      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min ||
-    settings.publishedSummaryDebounceSeconds >
-      INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max ||
-    settings.summaryUpdateAssessmentMaxArticles === undefined ||
-    settings.summaryUpdateAssessmentMaxArticles <
-      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min ||
-    settings.summaryUpdateAssessmentMaxArticles >
-      INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max
-  ) {
-    throw new DomainError(
-      'bad_request',
-      `Debounce must be ${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min}–${INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max} seconds and assessment articles ${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min}–${INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max}.`,
-    )
-  }
-  const value: InferenceSettings = {
-    publishedSummaryDebounceSeconds: settings.publishedSummaryDebounceSeconds,
-    summaryUpdateAssessmentMaxArticles: settings.summaryUpdateAssessmentMaxArticles,
-  }
   await ctx.db
     .insert(schema.pipelineControl)
-    .values({ key: INFERENCE_SETTINGS, value })
+    .values({ key: INFERENCE_SETTINGS, value: settings })
     .onConflictDoUpdate({
       target: schema.pipelineControl.key,
-      set: { value, updatedAt: new Date() },
+      set: { value: settings, updatedAt: new Date() },
     })
-}
-
-function isInferenceSettings(value: unknown): value is InferenceSettings {
-  if (!value || typeof value !== 'object') return false
-  const settings = value as Partial<InferenceSettings>
-  const debounce = settings.publishedSummaryDebounceSeconds
-  const maxArticles = settings.summaryUpdateAssessmentMaxArticles
-  return (
-    typeof debounce === 'number' &&
-    Number.isInteger(debounce) &&
-    debounce >= INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.min &&
-    debounce <= INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds.max &&
-    typeof maxArticles === 'number' &&
-    Number.isInteger(maxArticles) &&
-    maxArticles >= INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.min &&
-    maxArticles <= INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles.max
-  )
 }
 
 export async function isBackfillPaused(ctx: Pick<ServerContext, 'db'>) {
@@ -153,7 +113,7 @@ async function inferenceMetrics(db: Db) {
 
 export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
   const { db } = ctx
-  const feeds = await db
+  const feedsQuery = db
     .select({
       id: schema.feed.id,
       publisherName: schema.publisher.name,
@@ -170,7 +130,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
 
   // Counted from the job table, not pg-boss's cached queue stats, which lag behind it and
   // would disagree with the failed-jobs list.
-  const { rows: queueRows } = await db.execute<{
+  const queuesQuery = db.execute<{
     name: string
     queued: number
     active: number
@@ -186,7 +146,6 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     from pgboss.job
     where name in ${inList(Object.values(QUEUES))}
     group by name`)
-  const byQueue = new Map(queueRows.map((q) => [q.name, q]))
 
   const scalar = async (q: Promise<{ n: number }[]>) => (await q)[0]?.n ?? 0
   // Matches the outbox_pending_idx partial index (no full-table scan).
@@ -194,19 +153,18 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     isNull(schema.outboxEvent.processedAt),
     isNull(schema.outboxEvent.deadAt),
   )
-  const [oldestOutbox] = await db
+  const oldestOutboxQuery = db
     .select({
       s: sql<number | null>`extract(epoch from now() - min(${schema.outboxEvent.createdAt}))::int`,
     })
     .from(schema.outboxEvent)
     .where(outboxPending)
-  const runs = await db
-    .select()
-    .from(schema.analysisRun)
-    .orderBy(desc(schema.analysisRun.startedAt))
-    .limit(12)
 
   const [
+    feeds,
+    { rows: queueRows },
+    [oldestOutbox],
+    runs,
     articles,
     articlesEmbedded,
     articlesMatched,
@@ -217,7 +175,12 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     outboxFailed,
     metrics,
     settings,
+    backfillPaused,
   ] = await Promise.all([
+    feedsQuery,
+    queuesQuery,
+    oldestOutboxQuery,
+    db.select().from(schema.analysisRun).orderBy(desc(schema.analysisRun.startedAt)).limit(12),
     scalar(db.select({ n: count }).from(schema.article)),
     scalar(db.select({ n: count }).from(schema.articleEmbedding)),
     scalar(
@@ -235,12 +198,14 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
     ),
     cached('ops-inference-metrics', INFERENCE_METRICS_CACHE_MS, () => inferenceMetrics(db)),
     getInferenceSettings(ctx),
+    isBackfillPaused(ctx),
   ])
   const { summaryJobs, updateAssessments } = metrics
+  const byQueue = new Map(queueRows.map((q) => [q.name, q]))
 
   return {
     inferenceMode: ctx.inference.mode,
-    backfillPaused: await isBackfillPaused(ctx),
+    backfillPaused,
     feeds: feeds.map((f) => ({
       ...f,
       lastPolledAt: f.lastPolledAt?.toISOString() ?? null,
@@ -300,6 +265,7 @@ export async function getOpsStatus(ctx: ServerContext): Promise<OpsStatus> {
 
 export const FAILED_PAGE_SIZE = 25
 const STACK_LINES = 12
+const RUNS_PER_JOB = 5
 
 // The analysis_run operation each queue records, so a failed job can show its attempts.
 const QUEUE_OPERATION: Record<string, string> = {
@@ -337,7 +303,7 @@ export async function listFailedJobs(
     order by completed_on desc nulls last, id desc
     limit ${FAILED_PAGE_SIZE + 1}`)
   const page = rows.slice(0, FAILED_PAGE_SIZE)
-  const items = await Promise.all(page.map((row) => describeFailedJob(ctx, row)))
+  const items = await describeFailedJobs(ctx.db, page)
   const last = page[page.length - 1]
   return {
     items,
@@ -350,80 +316,143 @@ export async function listFailedJobs(
   }
 }
 
-async function describeFailedJob(ctx: ServerContext, row: FailedRow): Promise<FailedJob> {
-  const { db } = ctx
-  // pg-boss stores a thrown error as { name, message, stack }.
-  const output = (row.output ?? {}) as { message?: unknown; stack?: unknown }
-  const message = typeof output.message === 'string' ? output.message : null
-  const stack =
-    typeof output.stack === 'string'
-      ? output.stack.split('\n').slice(0, STACK_LINES).join('\n')
-      : null
-  const targetId = (row.data as { targetId?: unknown } | null)?.targetId
-  let target: FailedJob['target'] = null
-  if (typeof targetId === 'string' && targetId.startsWith('sty_')) {
-    const [story] = await db
-      .select({
-        title: schema.story.title,
-        slug: schema.story.slug,
-        publishedAt: schema.story.publishedAt,
-      })
-      .from(schema.story)
-      .where(eq(schema.story.id, targetId))
-    if (story) {
-      target = {
-        type: 'story',
-        id: targetId,
-        title: story.title,
-        href: story.publishedAt ? `/stories/${story.slug}` : null,
-      }
-    }
-  } else if (typeof targetId === 'string' && targetId.startsWith('art_')) {
-    const [article] = await db
-      .select({ title: schema.articleRevision.title, url: schema.article.canonicalUrl })
-      .from(schema.article)
-      .innerJoin(
-        schema.articleRevision,
-        eq(schema.articleRevision.id, schema.article.latestRevisionId),
-      )
-      .where(eq(schema.article.id, targetId))
-    if (article) target = { type: 'article', id: targetId, title: article.title, href: article.url }
-  }
-  const operation = QUEUE_OPERATION[row.name]
-  const runs =
-    operation && typeof targetId === 'string'
-      ? await db
-          .select()
-          .from(schema.analysisRun)
-          .where(
-            and(
-              eq(schema.analysisRun.operation, operation),
-              eq(schema.analysisRun.targetId, targetId),
-            ),
+/**
+ * What a job's payload targets, by its id prefix. The type is also the analysis_run
+ * target_type, so the runs lookup can use analysis_run_target_idx.
+ */
+function targetOf(row: FailedRow): { type: 'story' | 'article'; id: string } | null {
+  const id = (row.data as { targetId?: unknown } | null)?.targetId
+  if (typeof id !== 'string') return null
+  if (id.startsWith('sty_')) return { type: 'story', id }
+  if (id.startsWith('art_')) return { type: 'article', id }
+  return null
+}
+
+/** One query each for the page's Stories, articles and runs, instead of a few per job. */
+async function describeFailedJobs(db: Db, rows: FailedRow[]): Promise<FailedJob[]> {
+  const targets = rows.map(targetOf)
+  const idsOf = (type: 'story' | 'article') =>
+    targets.flatMap((t) => (t?.type === type ? [t.id] : []))
+  const storyIds = idsOf('story')
+  const articleIds = idsOf('article')
+  const runFilters = rows.flatMap((row, i) => {
+    const operation = QUEUE_OPERATION[row.name]
+    const target = targets[i]
+    if (!operation || !target) return []
+    return [
+      and(
+        eq(schema.analysisRun.operation, operation),
+        eq(schema.analysisRun.targetType, target.type),
+        eq(schema.analysisRun.targetId, target.id),
+      ),
+    ]
+  })
+  const [stories, articles, runs] = await Promise.all([
+    storyIds.length
+      ? db
+          .select({
+            id: schema.story.id,
+            title: schema.story.title,
+            slug: schema.story.slug,
+            publishedAt: schema.story.publishedAt,
+          })
+          .from(schema.story)
+          .where(inArray(schema.story.id, storyIds))
+      : [],
+    articleIds.length
+      ? db
+          .select({
+            id: schema.article.id,
+            title: schema.articleRevision.title,
+            url: schema.article.canonicalUrl,
+          })
+          .from(schema.article)
+          .innerJoin(
+            schema.articleRevision,
+            eq(schema.articleRevision.id, schema.article.latestRevisionId),
           )
-          .orderBy(desc(schema.analysisRun.startedAt))
-          .limit(5)
-      : []
-  return {
-    id: row.id,
-    queue: row.name,
-    createdAt: new Date(row.created_on).toISOString(),
-    failedAt: iso(row.completed_on),
-    attempts: row.retry_count + 1,
-    maxAttempts: row.retry_limit + 1,
-    error: message ?? (row.output ? JSON.stringify(row.output).slice(0, 2000) : null),
-    stack,
-    payload: row.data,
-    target,
-    runs: runs.map((r) => ({
-      id: r.id,
-      status: r.status,
-      startedAt: r.startedAt.toISOString(),
-      modelId: r.modelId,
-      promptVersion: r.promptVersion,
-      error: r.error,
-    })),
-  }
+          .where(inArray(schema.article.id, articleIds))
+      : [],
+    runFilters.length ? latestRuns(db, runFilters) : [],
+  ])
+  const storyById = new Map(stories.map((s) => [s.id, s]))
+  const articleById = new Map(articles.map((a) => [a.id, a]))
+
+  return rows.map((row, i) => {
+    // pg-boss stores a thrown error as { name, message, stack }.
+    const output = (row.output ?? {}) as { message?: unknown; stack?: unknown }
+    const message = typeof output.message === 'string' ? output.message : null
+    const stack =
+      typeof output.stack === 'string'
+        ? output.stack.split('\n').slice(0, STACK_LINES).join('\n')
+        : null
+    const operation = QUEUE_OPERATION[row.name]
+    const targetRef = targets[i]
+    let target: FailedJob['target'] = null
+    if (targetRef?.type === 'story') {
+      const story = storyById.get(targetRef.id)
+      if (story) {
+        target = {
+          type: 'story',
+          id: story.id,
+          title: story.title,
+          href: story.publishedAt ? `/stories/${story.slug}` : null,
+        }
+      }
+    } else if (targetRef?.type === 'article') {
+      const article = articleById.get(targetRef.id)
+      if (article)
+        target = { type: 'article', id: article.id, title: article.title, href: article.url }
+    }
+    return {
+      id: row.id,
+      queue: row.name,
+      createdAt: new Date(row.created_on).toISOString(),
+      failedAt: iso(row.completed_on),
+      attempts: row.retry_count + 1,
+      maxAttempts: row.retry_limit + 1,
+      error: message ?? (row.output ? JSON.stringify(row.output).slice(0, 2000) : null),
+      stack,
+      payload: row.data,
+      target,
+      runs: runs
+        .filter((r) => r.operation === operation && r.targetId === targetRef?.id)
+        .map((r) => ({
+          id: r.id,
+          status: r.status,
+          startedAt: r.startedAt.toISOString(),
+          modelId: r.modelId,
+          promptVersion: r.promptVersion,
+          error: r.error,
+        })),
+    }
+  })
+}
+
+/** The newest RUNS_PER_JOB runs for each operation and target, newest first. */
+async function latestRuns(db: Db, filters: (SQL | undefined)[]) {
+  const ranked = db
+    .select({
+      id: schema.analysisRun.id,
+      operation: schema.analysisRun.operation,
+      targetId: schema.analysisRun.targetId,
+      status: schema.analysisRun.status,
+      startedAt: schema.analysisRun.startedAt,
+      modelId: schema.analysisRun.modelId,
+      promptVersion: schema.analysisRun.promptVersion,
+      error: schema.analysisRun.error,
+      rank: sql<number>`row_number() over (partition by ${schema.analysisRun.operation}, ${schema.analysisRun.targetId} order by ${schema.analysisRun.startedAt} desc)`.as(
+        'rank',
+      ),
+    })
+    .from(schema.analysisRun)
+    .where(or(...filters))
+    .as('ranked')
+  return db
+    .select()
+    .from(ranked)
+    .where(lte(ranked.rank, RUNS_PER_JOB))
+    .orderBy(desc(ranked.startedAt))
 }
 
 /** Ids of the given failed jobs, or every failed job in the queue. */

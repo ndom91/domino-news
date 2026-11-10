@@ -558,9 +558,16 @@ export const INFERENCE_SETTINGS_LIMITS = {
   summaryUpdateAssessmentMaxArticles: { min: 1, max: 10 },
 } as const
 
+const intWithin = ({ min, max }: { min: number; max: number }) =>
+  z.int().check(z.gte(min), z.lte(max))
+
 export const inferenceSettingsUpdateSchema = z.object({
-  publishedSummaryDebounceSeconds: z.int().check(z.nonnegative()),
-  summaryUpdateAssessmentMaxArticles: z.int().check(z.positive()),
+  publishedSummaryDebounceSeconds: intWithin(
+    INFERENCE_SETTINGS_LIMITS.publishedSummaryDebounceSeconds,
+  ),
+  summaryUpdateAssessmentMaxArticles: intWithin(
+    INFERENCE_SETTINGS_LIMITS.summaryUpdateAssessmentMaxArticles,
+  ),
 })
 export type InferenceSettingsUpdate = z.infer<typeof inferenceSettingsUpdateSchema>
 
