@@ -2,7 +2,7 @@ import { type Db, schema } from '@dn/db'
 import type { EmbeddingProvider } from '@dn/inference'
 import type { SearchHit, SearchQuery, SearchResponse } from '@dn/schemas'
 import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { publishersByStory, sourceCounts } from '../reader.ts'
+import { publishersByStory, sourceCounts } from '../story-list.ts'
 import type { Typesense } from './typesense.ts'
 
 interface TsResult {

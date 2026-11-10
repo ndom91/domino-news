@@ -3,7 +3,7 @@ import { ID_PREFIX, newId } from '@dn/domain'
 import type { StoryUpdateKind, StoryUpdateOrigin, StoryUpdatesResponse } from '@dn/schemas'
 import { and, desc, eq, inArray, isNull, ne, or, type SQLWrapper, sql } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
-import { resolveStory } from './reader.ts'
+import { resolveStory } from './story-detail.ts'
 
 export const GENERIC_SUMMARY_REVISION_DESCRIPTION =
   'The story summary was updated with the latest reporting.'

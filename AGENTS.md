@@ -223,7 +223,7 @@ Nightly cron (adjust the path):
 Learned from the October 2026 performance pass. Queries are fast (0.1–6 ms); what costs time is round trips, serial awaits and bytes. Check these before adding a read or a page.
 
 **Server reads**
-- Never select `story.embedding` in request paths. Use `storyColumns` from `packages/server/src/reader.ts`, not `select().from(schema.story)`: the vector is about 10 KB per row as text.
+- Never select `story.embedding` in request paths. Use `storyColumns` from `packages/server/src/story-list.ts`, not `select().from(schema.story)`: the vector is about 10 KB per row as text.
 - Run independent queries with `Promise.all`. Await in sequence only when a query needs the previous result.
 - Fetch only what the page renders. Add a slim read rather than reusing a full one, as `getStoryLead` does for the front-page hero instead of `getStory`.
 - Don't run the same work twice in one request. For example, don't build a 30-item list just to pick one item from it.

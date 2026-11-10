@@ -1,7 +1,7 @@
 import type { Db } from '@dn/db'
 import type { LocalFeedResponse, LocalScope, Place } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
-import { storyListItems } from './reader.ts'
+import { storyListItems } from './story-list.ts'
 
 const SCOPE_BY_RANK: Record<number, LocalScope> = { 3: 'city', 2: 'county', 1: 'country' }
 

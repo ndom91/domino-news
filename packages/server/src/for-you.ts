@@ -16,7 +16,7 @@ import { learnedWeights, narrativeTitles, signalLabel, storyFeedback } from './f
 import { listFollows } from './follows.ts'
 import { mutedPublisherIds } from './muted-publishers.ts'
 import { getPreferences } from './preferences.ts'
-import { storyListItems } from './reader.ts'
+import { storyListItems } from './story-list.ts'
 
 // Only recent Stories compete; the window is small enough to rank in memory.
 const WINDOW_HOURS = 72

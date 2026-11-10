@@ -12,7 +12,7 @@ import {
   type Topic,
 } from '@dn/schemas'
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
-import { storyListItems } from './reader.ts'
+import { storyListItems } from './story-list.ts'
 import { DomainError } from './story-service.ts'
 
 // A learned weight halves every HALF_LIFE_DAYS without new feedback, and stays within

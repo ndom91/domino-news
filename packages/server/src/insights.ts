@@ -3,8 +3,9 @@ import type { Desk, Insights, NarrativeRef, Region } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
 import { cached, SHARED_TTL_MS } from './cache.ts'
 import { leanMixByStory } from './lean.ts'
+import { deskByNarrative } from './narratives.ts'
 import { getPreferences, READ_RETENTION_DAYS } from './preferences.ts'
-import { deskByNarrative, storyListItems } from './reader.ts'
+import { storyListItems } from './story-list.ts'
 
 // Below this many reads, a reading mix says nothing, so no gaps are shown.
 const MIN_READS_FOR_GAPS = 5

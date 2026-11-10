@@ -12,7 +12,7 @@ import type {
 import { eq, inArray, sql } from 'drizzle-orm'
 import { latestAssessment } from './assessments.ts'
 import { cached, SHARED_TTL_MS } from './cache.ts'
-import { storyListItems } from './reader.ts'
+import { storyListItems } from './story-list.ts'
 
 // Coverage is measured over published Stories and their active source articles.
 // "First" = the outlet whose article has the earliest report time in that Story.

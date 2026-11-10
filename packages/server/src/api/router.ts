@@ -32,6 +32,7 @@ import { getInsights } from '../insights.ts'
 import { getLocalFeed } from '../local.ts'
 import { getMatchHealth } from '../match-health.ts'
 import { listMutedPublishers, setMutedPublisher } from '../muted-publishers.ts'
+import { getNarrative, listNarratives } from '../narratives.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
 import { ensureStoryContext } from '../optional-enrichment.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
@@ -42,16 +43,10 @@ import {
   removePushSubscription,
   savePushSubscription,
 } from '../push-subscriptions.ts'
-import {
-  getNarrative,
-  getStory,
-  listNarratives,
-  listStories,
-  loadStory,
-  resolveStory,
-} from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { createSpeechProvider } from '../speech-provider.ts'
+import { getStory, loadStory, resolveStory } from '../story-detail.ts'
+import { listStories } from '../story-list.ts'
 import { DomainError, editSummary } from '../story-service.ts'
 import { listNarrativeUpdates, listStoryUpdates } from '../story-updates.ts'
 

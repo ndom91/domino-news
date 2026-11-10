@@ -2,7 +2,7 @@ import { type Db, schema } from '@dn/db'
 import { plural, stripCitations, truncate } from '@dn/domain'
 import { DESK_LABELS, type Desk, type Preview, type PreviewType } from '@dn/schemas'
 import { and, eq, isNotNull, isNull, or, sql } from 'drizzle-orm'
-import { findNarrative } from './reader.ts'
+import { findNarrative } from './narratives.ts'
 
 const DESCRIPTION_MAX = 200
 

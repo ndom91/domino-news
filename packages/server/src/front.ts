@@ -3,7 +3,8 @@ import { pickLead } from '@dn/domain'
 import type { Desk, DevelopingNarrative, Edition, FrontPage, Region } from '@dn/schemas'
 import { and, arrayContains, desc, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
 import { cached, SHARED_TTL_MS } from './cache.ts'
-import { deskByNarrative, edgesWithin, getStoryLead, MIN_NARRATIVE_STORIES } from './reader.ts'
+import { deskByNarrative, edgesWithin, MIN_NARRATIVE_STORIES } from './narratives.ts'
+import { getStoryLead } from './story-detail.ts'
 
 const DAY_MS = 86_400_000
 const DEVELOPING_COUNT = 3
