@@ -55,7 +55,7 @@ export async function resolveStory(db: Db, idOrSlug: string): Promise<StoryRow |
   return alias ? storyRow(db, alias.id) : null
 }
 
-async function publishersByStory(db: Db, storyIds: string[]) {
+export async function publishersByStory(db: Db, storyIds: string[]) {
   const map = new Map<string, PublisherRef[]>()
   if (storyIds.length === 0) return map
   const rows = await db
@@ -269,7 +269,7 @@ async function primarySourceByStory(db: Db, storyIds: string[]) {
   return map
 }
 
-async function sourceCounts(db: Db, storyIds: string[]) {
+export async function sourceCounts(db: Db, storyIds: string[]) {
   if (storyIds.length === 0) return new Map<string, number>()
   const rows = await db
     .select({ storyId: schema.storyArticle.storyId, n: sql<number>`count(*)::int` })
@@ -328,12 +328,24 @@ export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryL
   })
 }
 
+const STORY_PAGE_SIZE = 30
+
+type ListStoriesOptions = { limit?: number; cursor?: string | null; region?: Region }
+
+/**
+ * Latest, newest first. The first page at the default size is the same for every reader, so
+ * it is shared. Nothing else is: cached() never evicts, and cursors and limits are unbounded.
+ */
+export function listStories(db: Db, opts: ListStoriesOptions): Promise<StoryListResponse> {
+  const firstPage = !opts.cursor && (opts.limit ?? STORY_PAGE_SIZE) === STORY_PAGE_SIZE
+  return firstPage
+    ? cached(`stories:${opts.region ?? 'all'}`, SHARED_TTL_MS, () => loadStories(db, opts))
+    : loadStories(db, opts)
+}
+
 // Cursor = "<lastUpdatedAt ISO>|<id>" for stable keyset pagination.
-export async function listStories(
-  db: Db,
-  opts: { limit?: number; cursor?: string | null; region?: Region },
-): Promise<StoryListResponse> {
-  const limit = Math.min(Math.max(opts.limit ?? 30, 1), 100)
+async function loadStories(db: Db, opts: ListStoriesOptions): Promise<StoryListResponse> {
+  const limit = Math.min(Math.max(opts.limit ?? STORY_PAGE_SIZE, 1), 100)
   let cursorFilter = sql`true`
   if (opts.cursor) {
     const [at, id] = opts.cursor.split('|')

@@ -22,7 +22,7 @@ export async function getFrontPage(
 
   const [edition, { lead, leadPosition }, { developing, narrativeCount }] = await Promise.all([
     getEdition(db, now),
-    leadStory(db, opts, now),
+    cached(leadKey(opts), SHARED_TTL_MS, () => leadStory(db, opts, now)),
     cached('developing', SHARED_TTL_MS, () => developingSection(db)),
   ])
 
@@ -59,6 +59,15 @@ async function editionStats(db: Db, now: Date) {
       ),
     )
   return { stories: stats?.stories ?? 0, publishers: stats?.publishers ?? 0 }
+}
+
+/**
+ * The lead depends only on the region filter, or without one on the reader's regions as a
+ * set, so readers with the same picks share it. Regions are a fixed enum: the keys are bounded.
+ */
+function leadKey(opts: { region?: Region; regions?: readonly Region[] }) {
+  if (opts.region) return `front-lead:${opts.region}`
+  return `front-lead:picks:${[...new Set(opts.regions)].sort().join(',')}`
 }
 
 async function leadStory(

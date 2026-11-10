@@ -2,7 +2,7 @@ import { type Db, schema } from '@dn/db'
 import type { EmbeddingProvider } from '@dn/inference'
 import type { SearchHit, SearchQuery, SearchResponse } from '@dn/schemas'
 import { and, eq, inArray, isNotNull, isNull, sql } from 'drizzle-orm'
-import { storyListItems } from '../reader.ts'
+import { publishersByStory, sourceCounts } from '../reader.ts'
 import type { Typesense } from './typesense.ts'
 
 interface TsResult {
@@ -91,43 +91,62 @@ export async function searchAll(
   const scoreOf = (h: NonNullable<TsResult['hits']>[number]) =>
     h.hybrid_search_info?.rank_fusion_score ?? h.text_match ?? null
   const storyHits = storyResult?.hits ?? []
-  const stories = await storyListItems(
-    db,
-    storyHits.map((h) => h.document.id),
-  )
-  const storyScore = new Map(storyHits.map((h) => [h.document.id, scoreOf(h)]))
-
   const narrativeHits = narrativeResult?.hits ?? []
-  const narrativeRows = narrativeHits.length
-    ? await db
-        .select()
-        .from(schema.narrative)
-        .where(
-          inArray(
-            schema.narrative.id,
-            narrativeHits.map((h) => h.document.id),
-          ),
-        )
-    : []
-  const narrativeById = new Map(narrativeRows.map((n) => [n.id, n]))
-  const narrativeCounts = narrativeRows.length
-    ? await db
-        .select({ id: schema.narrativeStory.narrativeId, n: sql<number>`count(*)::int` })
-        .from(schema.narrativeStory)
-        .innerJoin(schema.story, eq(schema.story.id, schema.narrativeStory.storyId))
-        .where(
-          and(
-            inArray(
-              schema.narrativeStory.narrativeId,
-              narrativeRows.map((n) => n.id),
+  const storyIds = storyHits.map((h) => h.document.id)
+  const narrativeIds = narrativeHits.map((h) => h.document.id)
+  // Only what a hit shows: the full list items would cost seven queries.
+  const [storyRows, publishers, counts, narrativeRows] = await Promise.all([
+    storyIds.length
+      ? db
+          .select({
+            id: schema.story.id,
+            slug: schema.story.slug,
+            title: schema.story.title,
+            summary: schema.storySummaryVersion.body,
+            lastUpdatedAt: schema.story.lastUpdatedAt,
+            desk: schema.story.desk,
+            regions: schema.story.regions,
+          })
+          .from(schema.story)
+          .leftJoin(
+            schema.storySummaryVersion,
+            eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+          )
+          .where(inArray(schema.story.id, storyIds))
+      : [],
+    publishersByStory(db, storyIds),
+    sourceCounts(db, storyIds),
+    narrativeIds.length
+      ? db
+          .select({
+            id: schema.narrative.id,
+            slug: schema.narrative.slug,
+            title: schema.narrative.title,
+            description: schema.narrative.description,
+            updatedAt: schema.narrative.updatedAt,
+            storyCount: sql<number>`count(${schema.story.id})::int`,
+          })
+          .from(schema.narrative)
+          .leftJoin(
+            schema.narrativeStory,
+            and(
+              eq(schema.narrativeStory.narrativeId, schema.narrative.id),
+              isNull(schema.narrativeStory.removedAt),
             ),
-            isNull(schema.narrativeStory.removedAt),
-            isNotNull(schema.story.publishedAt),
-          ),
-        )
-        .groupBy(schema.narrativeStory.narrativeId)
-    : []
-  const storyCountOf = new Map(narrativeCounts.map((c) => [c.id, c.n]))
+          )
+          .leftJoin(
+            schema.story,
+            and(
+              eq(schema.story.id, schema.narrativeStory.storyId),
+              isNotNull(schema.story.publishedAt),
+            ),
+          )
+          .where(inArray(schema.narrative.id, narrativeIds))
+          .groupBy(schema.narrative.id)
+      : [],
+  ])
+  const storyById = new Map(storyRows.map((s) => [s.id, s]))
+  const narrativeById = new Map(narrativeRows.map((n) => [n.id, n]))
 
   const hits: SearchHit[] = [
     ...narrativeHits.flatMap((h): SearchHit[] => {
@@ -141,26 +160,30 @@ export async function searchAll(
           title: n.title,
           description: n.description,
           updatedAt: n.updatedAt.toISOString(),
-          storyCount: storyCountOf.get(n.id) ?? 0,
+          storyCount: n.storyCount,
           score: scoreOf(h),
         },
       ]
     }),
-    ...stories.map(
-      (s): SearchHit => ({
-        type: 'story',
-        id: s.id,
-        slug: s.slug,
-        title: s.title,
-        summary: s.summary,
-        lastUpdatedAt: s.lastUpdatedAt,
-        sourceCount: s.sourceCount,
-        publisherNames: s.publishers.map((p) => p.name),
-        desk: s.desk,
-        regions: s.regions,
-        score: storyScore.get(s.id) ?? null,
-      }),
-    ),
+    ...storyHits.flatMap((h): SearchHit[] => {
+      const s = storyById.get(h.document.id)
+      if (!s) return []
+      return [
+        {
+          type: 'story',
+          id: s.id,
+          slug: s.slug,
+          title: s.title,
+          summary: s.summary,
+          lastUpdatedAt: s.lastUpdatedAt.toISOString(),
+          sourceCount: counts.get(s.id) ?? 0,
+          publisherNames: (publishers.get(s.id) ?? []).map((p) => p.name),
+          desk: s.desk,
+          regions: s.regions,
+          score: scoreOf(h),
+        },
+      ]
+    }),
   ]
   return { query: query.q, mode: vector ? 'hybrid' : 'keyword', hits }
 }
