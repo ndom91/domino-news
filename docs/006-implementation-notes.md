@@ -173,10 +173,12 @@ Prompt lessons from the real-model runs (current versions: `match-story@6`, `cla
 | **choose5-anchored** | choose-story@1 | **all candidates side by side, 5 candidates** | **84.0%** | 82.1% | 85.9% | 140 |
 | choose5-anchored (fresh repeat) | choose-story@1 | same, model asked again | 82.9% | 81.5% | 84.3% | 143 |
 | choose5-anchored, llmMin 0.76 | choose-story@1 | higher candidate threshold | 80.3% | 82.0% | 78.6% | — |
+| cap600 (Nov 10) | choose-story@4 | descriptions cut to 600 characters in every prompt | 83.4% | 80.2% | 86.9% | 136 |
 
 Baseline errors: the ceasefire announcement was split into 9 stories, and one 55-article story drifted across both Riyadh attacks, the closure and analysis pieces.
 
 - **Where errors came from** (`errors:` in the report): in the baseline, 52 of 86 wrong placements were the model saying "same" to the wrong story, and only 16 were retrieval. Candidates were judged one at a time with the first "same" winning, so a similar but wrong story ranked first shut out the right one. Prompt wording alone (`@6`) didn't fix it.
 - **Shipped:** `judging: 'choose'` (one call: which of up to 5 candidates, if any, is the same development), stories anchored on their first reports, and the first headline with no summary as the story's text. That's F1 ~77% → 83–84% across two runs, with 40% fewer model calls. The fresh repeat puts run-to-run noise at about 1 point. Fixture mode uses the same policy.
+- **Description cap (shipped, Nov 2026):** a few feeds (Dawn) put whole articles in `<description>`; 4% of set-1's articles carried 42% of its text. Cutting descriptions to 600 characters in every prompt removed about 37% of article text, and F1 stayed within run-to-run noise (83.4%).
 - **Not shipped:** the higher candidate threshold (worse). Top-2 ranking wasn't tried; with choose there's almost no "ranked too low" error left.
 - **Remaining errors:** about 21 articles that should start a new story attach to one, and the Zaporizhzhia attack still mixes with Trump's remarks. The answer key is model-drafted; scores measure agreement with it.

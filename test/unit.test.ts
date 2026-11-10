@@ -867,6 +867,16 @@ describe('local generation adapter', () => {
     }
   })
 
+  it('cuts long article descriptions in prompts', async () => {
+    reply({ choice: 0, rationale: 'Different events.' })
+    const full = { ...article('new'), description: 'x'.repeat(5000) }
+    await (await generation()).chooseStory({ article: full, stories: [story] })
+    const body = JSON.parse(String(vi.mocked(fetch).mock.calls[0]?.[1]?.body))
+    const prompt = body.messages[1].content as string
+    expect(prompt).toContain('x'.repeat(600))
+    expect(prompt).not.toContain('x'.repeat(601))
+  })
+
   it('maps the numbers the model cites back to article and observation IDs', async () => {
     reply({
       headline: 'h',

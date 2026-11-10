@@ -6,14 +6,16 @@ import type { ArticleInput, StoryInput, SummaryUpdateInput } from './types.ts'
 // story; a new event of the same kind is not).
 // @5/@8/@6/@4/@3: sources are numbered and answers cite the numbers. The model used to copy
 // 30-character IDs back and dropped characters, which failed grounding checks.
+// match-story@7, summarize-story@12, assess-summary-update@2, classify-relationship@7,
+// explain-context@6, choose-story@4: article descriptions are cut to MAX_DESCRIPTION_CHARS.
 export const PROMPT_VERSIONS = {
-  matchStory: 'match-story@6',
-  summarizeStory: 'summarize-story@11',
-  assessSummaryUpdate: 'assess-summary-update@1',
-  classifyRelationship: 'classify-relationship@6',
+  matchStory: 'match-story@7',
+  summarizeStory: 'summarize-story@12',
+  assessSummaryUpdate: 'assess-summary-update@2',
+  classifyRelationship: 'classify-relationship@7',
   titleNarrative: 'title-narrative@2',
-  explainContext: 'explain-context@5',
-  chooseStory: 'choose-story@3',
+  explainContext: 'explain-context@6',
+  chooseStory: 'choose-story@4',
 } as const
 
 export const SYSTEM_PROMPT = `You are an analysis component in a news pipeline.
@@ -26,6 +28,10 @@ Sources may be in any language. Always write your output in English, using the u
 Answer only with JSON that matches the requested schema.`
 
 const MAX_BODY_CHARS = 6000
+// Some feeds put the whole article in <description> (Dawn: 6,000+ characters). A few such
+// articles made up 42% of prompt text in the match evaluation set, and metadata-only
+// publishers' bodies must not be processed this way. The opening is enough for every prompt.
+const MAX_DESCRIPTION_CHARS = 600
 
 // Models refer to sources by number ("n"); the adapter maps numbers back to IDs.
 function articleData(a: ArticleInput, n?: number) {
@@ -35,7 +41,7 @@ function articleData(a: ArticleInput, n?: number) {
     sourceType: a.publisherKind ?? 'newsroom',
     publishedAt: a.publishedAt,
     title: a.title,
-    description: a.description,
+    description: a.description?.slice(0, MAX_DESCRIPTION_CHARS) ?? null,
     ...(a.body ? { body: a.body.slice(0, MAX_BODY_CHARS) } : {}),
   }
 }
