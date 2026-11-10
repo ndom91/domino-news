@@ -1,8 +1,10 @@
 import { type Db, schema } from '@dn/db'
 import type {
+  ArticleBodyPolicy,
   CoverageProfile,
   LeanBasis,
   PublisherDetail,
+  PublisherKind,
   PublisherLean,
   PublisherListResponse,
   PublisherStats,
@@ -46,8 +48,8 @@ type StatsRow = {
   name: string
   domain: string
   country_code: string | null
-  article_body_policy: 'metadata_only' | 'transient_body_allowed'
-  kind: 'newsroom' | 'official'
+  article_body_policy: ArticleBodyPolicy
+  kind: PublisherKind
   license: string | null
   stories: number
   first_reports: number

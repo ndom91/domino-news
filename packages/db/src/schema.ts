@@ -1,12 +1,30 @@
 import {
+  ARTICLE_BODY_POLICIES,
   type AudioBriefingStyle,
+  CLAIM_EVIDENCE_RELATIONS,
+  CLAIM_STANCES,
+  CONTEXT_KINDS,
   type Desk,
   EMBEDDING_DIMENSIONS,
+  type EvidenceDimension,
   type FeedbackSignal,
   type FollowTargetType,
+  FUNDING_MODELS,
+  LEAN_BASES,
   type Place,
+  PUBLISHER_KINDS,
+  PUBLISHER_LEANS,
+  RELIABILITY_LEVELS,
   type Region,
   type SignalKind,
+  SOURCE_REFERENCE_KINDS,
+  STORY_RELATIONS,
+  STORY_STATUSES,
+  type StoryUpdateKind,
+  type StoryUpdateOrigin,
+  SUMMARY_FORMATS,
+  type SummaryChangeKind,
+  type SummaryUpdateOutcome,
   type Topic,
 } from '@dn/schemas'
 import { sql } from 'drizzle-orm'
@@ -31,14 +49,11 @@ import {
 const ts = (name: string) => timestamp(name, { withTimezone: true, mode: 'date' })
 const createdAt = () => ts('created_at').notNull().defaultNow()
 
-export const articleBodyPolicy = pgEnum('article_body_policy', [
-  'metadata_only',
-  'transient_body_allowed',
-])
+export const articleBodyPolicy = pgEnum('article_body_policy', ARTICLE_BODY_POLICIES)
 
 // "official" = government, court, regulator or IGO. Shown as such and excluded from
 // outlet coverage stats so a press release never "beats" newsrooms.
-export const publisherKind = pgEnum('publisher_kind', ['newsroom', 'official'])
+export const publisherKind = pgEnum('publisher_kind', PUBLISHER_KINDS)
 
 export const observationType = pgEnum('observation_type', [
   'article_discovered',
@@ -49,24 +64,11 @@ export const observationType = pgEnum('observation_type', [
   'publisher_statement_found',
 ])
 
-export const storyStatus = pgEnum('story_status', ['developing', 'ongoing', 'dormant'])
+export const storyStatus = pgEnum('story_status', STORY_STATUSES)
 
-export const storyRelation = pgEnum('story_relation', [
-  'follows',
-  'branches_from',
-  'responds_to',
-  'corrects',
-  'provides_context_for',
-  'related_to',
-])
+export const storyRelation = pgEnum('story_relation', STORY_RELATIONS)
 
-export const sourceReferenceKind = pgEnum('source_reference_kind', [
-  'publisher_article',
-  'primary_document',
-  'dataset',
-  'official_statement',
-  'other',
-])
+export const sourceReferenceKind = pgEnum('source_reference_kind', SOURCE_REFERENCE_KINDS)
 
 export const analysisRunStatus = pgEnum('analysis_run_status', ['running', 'succeeded', 'failed'])
 
@@ -77,18 +79,13 @@ export const evidenceRelationship = pgEnum('evidence_relationship', [
   'context',
 ])
 
-export const summaryFormat = pgEnum('summary_format', ['paragraph', 'bullets'])
+export const summaryFormat = pgEnum('summary_format', SUMMARY_FORMATS)
 
-export const claimStance = pgEnum('claim_stance', ['asserts', 'denies', 'quotes', 'discusses'])
+export const claimStance = pgEnum('claim_stance', CLAIM_STANCES)
 
-export const claimEvidenceRelation = pgEnum('claim_evidence_relation', [
-  'supports',
-  'contradicts',
-  'context',
-  'inconclusive',
-])
+export const claimEvidenceRelation = pgEnum('claim_evidence_relation', CLAIM_EVIDENCE_RELATIONS)
 
-export const contextKind = pgEnum('context_kind', ['definition', 'background', 'prerequisite'])
+export const contextKind = pgEnum('context_kind', CONTEXT_KINDS)
 
 export const pushDeliveryStatus = pgEnum('push_delivery_status', [
   'planned',
@@ -328,16 +325,10 @@ export const interpretationEvidence = pgTable(
 // perennial sources list) and refreshed on every import. An assessment is a reviewed,
 // append-only snapshot: a new review is a new row, and it freezes the evidence it used.
 
-export const publisherLean = pgEnum('publisher_lean', [
-  'left',
-  'centre_left',
-  'centre',
-  'centre_right',
-  'right',
-])
+export const publisherLean = pgEnum('publisher_lean', PUBLISHER_LEANS)
 
 // Sourced = a survey or rating; estimated = Domino's own research (docs/prompts/lean-estimate.md).
-export const leanBasis = pgEnum('lean_basis', ['sourced', 'estimated'])
+export const leanBasis = pgEnum('lean_basis', LEAN_BASES)
 
 export const publisherEvidence = pgTable(
   'publisher_evidence',
@@ -349,7 +340,7 @@ export const publisherEvidence = pgTable(
     source: text('source')
       .$type<'wikidata' | 'wp_rsp' | 'allsides' | 'reuters_dnr' | 'domino_estimate'>()
       .notNull(),
-    dimension: text('dimension').$type<'ownership' | 'reliability' | 'lean'>().notNull(),
+    dimension: text('dimension').$type<EvidenceDimension>().notNull(),
     value: text('value').notNull(),
     url: text('url').notNull(),
     // Hand-checked lean evidence only (fixtures/lean-evidence.json): the source's rating on
@@ -361,21 +352,10 @@ export const publisherEvidence = pgTable(
   (t) => [index('publisher_evidence_publisher_idx').on(t.publisherId)],
 )
 
-export const publisherFundingModel = pgEnum('publisher_funding_model', [
-  'public_broadcaster',
-  'state',
-  'commercial',
-  'nonprofit',
-  'other',
-])
+export const publisherFundingModel = pgEnum('publisher_funding_model', FUNDING_MODELS)
 
 // Ordinal, best to worst. Mirrors Wikipedia's perennial-sources labels, folded to four steps.
-export const publisherReliability = pgEnum('publisher_reliability', [
-  'reliable',
-  'no_consensus',
-  'unreliable',
-  'deprecated',
-])
+export const publisherReliability = pgEnum('publisher_reliability', RELIABILITY_LEVELS)
 
 export const publisherAssessment = pgTable(
   'publisher_assessment',
@@ -653,17 +633,8 @@ export const summaryUpdateAssessment = pgTable(
       .notNull()
       .references(() => storySummaryVersion.id),
     inputFingerprint: text('input_fingerprint').notNull(),
-    changeKind: text('change_kind')
-      .$type<
-        | 'new_fact'
-        | 'status_change'
-        | 'official_response'
-        | 'consequence'
-        | 'correction'
-        | 'new_perspective'
-      >()
-      .notNull(),
-    outcome: text('outcome').$type<'material' | 'corroboration_only' | 'uncertain'>().notNull(),
+    changeKind: text('change_kind').$type<SummaryChangeKind>().notNull(),
+    outcome: text('outcome').$type<SummaryUpdateOutcome>().notNull(),
     note: text('note').notNull(),
     sourceArticleIds: jsonb('source_article_ids').$type<string[]>().notNull(),
     observationIds: jsonb('observation_ids').$type<string[]>().notNull(),
@@ -713,19 +684,9 @@ export const storyUpdateEvent = pgTable(
     storyId: text('story_id')
       .notNull()
       .references(() => story.id),
-    kind: text('kind')
-      .$type<
-        | 'new_reporting'
-        | 'official_response'
-        | 'consequence'
-        | 'new_primary_source'
-        | 'correction_or_clarification'
-        | 'analysis'
-        | 'summary_revision'
-      >()
-      .notNull(),
+    kind: text('kind').$type<StoryUpdateKind>().notNull(),
     description: text('description').notNull(),
-    origin: text('origin').$type<'system' | 'model' | 'editor'>().notNull(),
+    origin: text('origin').$type<StoryUpdateOrigin>().notNull(),
     summaryVersionId: text('summary_version_id').references(() => storySummaryVersion.id),
     relatedStoryId: text('related_story_id').references(() => story.id),
     analysisRunId: text('analysis_run_id').references(() => analysisRun.id),

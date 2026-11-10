@@ -1,6 +1,6 @@
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
-import type { StoryUpdateKind, StoryUpdatesResponse } from '@dn/schemas'
+import type { StoryUpdateKind, StoryUpdateOrigin, StoryUpdatesResponse } from '@dn/schemas'
 import { and, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm'
 
 export const GENERIC_SUMMARY_REVISION_DESCRIPTION =
@@ -16,7 +16,7 @@ export async function recordStoryUpdate(
     storyId: string
     kind: StoryUpdateKind
     description: string
-    origin: 'system' | 'model' | 'editor'
+    origin: StoryUpdateOrigin
     articleIds?: string[]
     sourceReferenceIds?: string[]
     summaryVersionId?: string

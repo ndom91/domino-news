@@ -1,6 +1,6 @@
 import { z } from 'zod/mini'
 import { DESKS, deskSchema } from './desks.ts'
-import { sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
+import { contextKindSchema, sourceReferenceKindSchema, storyRelationSchema } from './inference.ts'
 import { localScopeSchema, placeSchema } from './places.ts'
 import { REGIONS, regionSchema } from './regions.ts'
 import { TOPICS, topicSchema } from './topics.ts'
@@ -38,13 +38,8 @@ export type PublisherRef = z.infer<typeof publisherRefSchema>
 
 // Lean labels use Domino's shared product scale. countryContext preserves the source market for
 // the evidence behind an assessment and for country-specific insights.
-export const publisherLeanSchema = z.enum([
-  'left',
-  'centre_left',
-  'centre',
-  'centre_right',
-  'right',
-])
+export const PUBLISHER_LEANS = ['left', 'centre_left', 'centre', 'centre_right', 'right'] as const
+export const publisherLeanSchema = z.enum(PUBLISHER_LEANS)
 export type PublisherLean = z.infer<typeof publisherLeanSchema>
 
 export const LEAN_LABELS: Record<PublisherLean, string> = {
@@ -57,17 +52,24 @@ export const LEAN_LABELS: Record<PublisherLean, string> = {
 
 // Where a published lean comes from: a survey or rating (sourced), or Domino's own
 // documented research where none exists (estimated, rubric docs/prompts/lean-estimate.md).
-export const leanBasisSchema = z.enum(['sourced', 'estimated'])
+export const LEAN_BASES = ['sourced', 'estimated'] as const
+export const leanBasisSchema = z.enum(LEAN_BASES)
 export type LeanBasis = z.infer<typeof leanBasisSchema>
 
 // Which side of centre a lean sits on. Centre is neither.
 export const leanSideSchema = z.enum(['left', 'right'])
 export type LeanSide = z.infer<typeof leanSideSchema>
 
+export const ARTICLE_BODY_POLICIES = ['metadata_only', 'transient_body_allowed'] as const
+export type ArticleBodyPolicy = (typeof ARTICLE_BODY_POLICIES)[number]
+
+export const PUBLISHER_KINDS = ['newsroom', 'official'] as const
+export type PublisherKind = (typeof PUBLISHER_KINDS)[number]
+
 export const publisherStatsSchema = z.extend(publisherRefSchema, {
   countryCode: z.nullable(z.string()),
-  bodyPolicy: z.enum(['metadata_only', 'transient_body_allowed']),
-  kind: z.enum(['newsroom', 'official']),
+  bodyPolicy: z.enum(ARTICLE_BODY_POLICIES),
+  kind: z.enum(PUBLISHER_KINDS),
   license: z.nullable(z.string()),
   storiesCovered: z.int().check(z.nonnegative()),
   firstReports: z.int().check(z.nonnegative()),
@@ -102,15 +104,18 @@ export const storySourceSchema = z.object({
 })
 export type StorySource = z.infer<typeof storySourceSchema>
 
+export const SUMMARY_FORMATS = ['paragraph', 'bullets'] as const
+const summaryOriginSchema = z.enum(['generated', 'edited'])
+
 export const summarySchema = z.object({
   versionId: z.string(),
   headline: z.string(),
   body: z.string(),
   // Story page only: 2-3 paragraphs separated by blank lines. Null on older summaries.
   detail: z.nullable(z.string()),
-  format: z.enum(['paragraph', 'bullets']),
+  format: z.enum(SUMMARY_FORMATS),
   createdAt: z.string(),
-  origin: z.enum(['generated', 'edited']),
+  origin: summaryOriginSchema,
   modelId: z.nullable(z.string()),
   citedArticleIds: z.array(z.string()),
 })
@@ -125,12 +130,15 @@ export const narrativeRefSchema = z.object({
 })
 export type NarrativeRef = z.infer<typeof narrativeRefSchema>
 
+export const STORY_STATUSES = ['developing', 'ongoing', 'dormant'] as const
+const storyStatusSchema = z.enum(STORY_STATUSES)
+
 export const storyListItemSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
   summary: z.nullable(z.string()),
-  status: z.enum(['developing', 'ongoing', 'dormant']),
+  status: storyStatusSchema,
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
   sourceCount: z.int().check(z.nonnegative()),
@@ -198,7 +206,7 @@ export const primarySourceSchema = z.object({
 export const storyContextItemSchema = z.object({
   id: z.string(),
   title: z.string(),
-  kind: z.enum(['definition', 'background', 'prerequisite']),
+  kind: contextKindSchema,
   anchorText: z.string(),
   explanation: z.string(),
   // Articles the explanation was grounded in (may come from an earlier Story).
@@ -213,6 +221,14 @@ export const storyContextItemSchema = z.object({
 })
 export type StoryContextItem = z.infer<typeof storyContextItemSchema>
 
+export const CLAIM_STANCES = ['asserts', 'denies', 'quotes', 'discusses'] as const
+export const CLAIM_EVIDENCE_RELATIONS = [
+  'supports',
+  'contradicts',
+  'context',
+  'inconclusive',
+] as const
+
 export const storyClaimSchema = z.object({
   id: z.string(),
   proposition: z.string(),
@@ -222,14 +238,14 @@ export const storyClaimSchema = z.object({
   firstReportedAt: z.nullable(z.string()),
   mentions: z.array(
     z.object({
-      stance: z.enum(['asserts', 'denies', 'quotes', 'discusses']),
+      stance: z.enum(CLAIM_STANCES),
       articleId: z.string(),
       publisher: publisherRefSchema,
     }),
   ),
   evidence: z.array(
     z.object({
-      relationship: z.enum(['supports', 'contradicts', 'context', 'inconclusive']),
+      relationship: z.enum(CLAIM_EVIDENCE_RELATIONS),
       url: z.string(),
       title: z.nullable(z.string()),
     }),
@@ -254,11 +270,13 @@ export const storyLeanSchema = z.object({
 })
 export type StoryLean = z.infer<typeof storyLeanSchema>
 
+const enrichmentStateSchema = z.enum(['pending', 'ready', 'failed'])
+
 export const storyDetailSchema = z.object({
   id: z.string(),
   slug: z.string(),
   title: z.string(),
-  status: z.enum(['developing', 'ongoing', 'dormant']),
+  status: storyStatusSchema,
   firstObservedAt: z.string(),
   lastUpdatedAt: z.string(),
   publishedAt: z.nullable(z.string()),
@@ -271,7 +289,7 @@ export const storyDetailSchema = z.object({
     z.object({
       versionId: z.string(),
       createdAt: z.string(),
-      origin: z.enum(['generated', 'edited']),
+      origin: summaryOriginSchema,
     }),
   ),
   sources: z.array(storySourceSchema),
@@ -282,8 +300,8 @@ export const storyDetailSchema = z.object({
   claims: z.array(storyClaimSchema),
   enrichment: z.optional(
     z.object({
-      context: z.enum(['pending', 'ready', 'failed']),
-      claims: z.enum(['pending', 'ready', 'failed']),
+      context: enrichmentStateSchema,
+      claims: enrichmentStateSchema,
     }),
   ),
   // Newsroom publishers only, most rated first. Publishers without a country are left out.
@@ -291,7 +309,7 @@ export const storyDetailSchema = z.object({
 })
 export type StoryDetail = z.infer<typeof storyDetailSchema>
 
-export const storyUpdateKindSchema = z.enum([
+export const STORY_UPDATE_KINDS = [
   'new_reporting',
   'official_response',
   'consequence',
@@ -299,15 +317,19 @@ export const storyUpdateKindSchema = z.enum([
   'correction_or_clarification',
   'analysis',
   'summary_revision',
-])
+] as const
+export const storyUpdateKindSchema = z.enum(STORY_UPDATE_KINDS)
 export type StoryUpdateKind = z.infer<typeof storyUpdateKindSchema>
+
+export const STORY_UPDATE_ORIGINS = ['system', 'model', 'editor'] as const
+export type StoryUpdateOrigin = (typeof STORY_UPDATE_ORIGINS)[number]
 
 export const storyUpdateEventSchema = z.object({
   id: z.string(),
   storyId: z.string(),
   kind: storyUpdateKindSchema,
   description: z.string(),
-  origin: z.enum(['system', 'model', 'editor']),
+  origin: z.enum(STORY_UPDATE_ORIGINS),
   createdAt: z.string(),
   relatedStory: z.nullable(z.object({ id: z.string(), slug: z.string(), title: z.string() })),
   // Exact stored summary versions; the client can show a reader-controlled before/after comparison.
@@ -670,13 +692,14 @@ export const coverageProfileSchema = z.object({
 })
 export type CoverageProfile = z.infer<typeof coverageProfileSchema>
 
-export const fundingModelSchema = z.enum([
+export const FUNDING_MODELS = [
   'public_broadcaster',
   'state',
   'commercial',
   'nonprofit',
   'other',
-])
+] as const
+export const fundingModelSchema = z.enum(FUNDING_MODELS)
 export type FundingModel = z.infer<typeof fundingModelSchema>
 
 export const FUNDING_LABELS: Record<FundingModel, string> = {
@@ -688,12 +711,8 @@ export const FUNDING_LABELS: Record<FundingModel, string> = {
 }
 
 // Ordinal, best to worst (Wikipedia's perennial-sources labels folded to four steps).
-export const reliabilityLevelSchema = z.enum([
-  'reliable',
-  'no_consensus',
-  'unreliable',
-  'deprecated',
-])
+export const RELIABILITY_LEVELS = ['reliable', 'no_consensus', 'unreliable', 'deprecated'] as const
+export const reliabilityLevelSchema = z.enum(RELIABILITY_LEVELS)
 export type ReliabilityLevel = z.infer<typeof reliabilityLevelSchema>
 
 export const RELIABILITY_LABELS: Record<ReliabilityLevel, string> = {
@@ -720,9 +739,12 @@ export const EVIDENCE_ATTRIBUTION: Record<string, { text: string; url: string }>
   },
 }
 
+export const EVIDENCE_DIMENSIONS = ['ownership', 'reliability', 'lean'] as const
+export type EvidenceDimension = (typeof EVIDENCE_DIMENSIONS)[number]
+
 export const assessmentEvidenceSchema = z.object({
   source: z.string(),
-  dimension: z.enum(['ownership', 'reliability', 'lean']),
+  dimension: z.enum(EVIDENCE_DIMENSIONS),
   value: z.string(),
   url: z.string(),
 })

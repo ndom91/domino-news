@@ -33,19 +33,23 @@ export const storySummarySchema = z.object({
 })
 export type StorySummaryOutput = z.infer<typeof storySummarySchema>
 
+export const SUMMARY_CHANGE_KINDS = [
+  'new_fact',
+  'status_change',
+  'official_response',
+  'consequence',
+  'correction',
+  'new_perspective',
+] as const
+export type SummaryChangeKind = (typeof SUMMARY_CHANGE_KINDS)[number]
+
+export const SUMMARY_UPDATE_OUTCOMES = ['material', 'corroboration_only', 'uncertain'] as const
+export type SummaryUpdateOutcome = (typeof SUMMARY_UPDATE_OUTCOMES)[number]
+
 // Decides whether newly attached reporting warrants replacing a published Story summary.
 export const summaryUpdateAssessmentSchema = z.object({
-  changeKind: z.nullable(
-    z.enum([
-      'new_fact',
-      'status_change',
-      'official_response',
-      'consequence',
-      'correction',
-      'new_perspective',
-    ]),
-  ),
-  outcome: z.enum(['material', 'corroboration_only', 'uncertain']),
+  changeKind: z.nullable(z.enum(SUMMARY_CHANGE_KINDS)),
+  outcome: z.enum(SUMMARY_UPDATE_OUTCOMES),
   note: z.string().check(z.maxLength(300)),
   sourceArticleIds: z.array(z.string()),
   observationIds: z.array(z.string()),
@@ -58,7 +62,8 @@ export const contextEntrySchema = z.object({
   sourceObservationIds: z.array(z.string()).check(z.minLength(1)),
 })
 
-export const contextKindSchema = z.enum(['definition', 'background', 'prerequisite'])
+export const CONTEXT_KINDS = ['definition', 'background', 'prerequisite'] as const
+export const contextKindSchema = z.enum(CONTEXT_KINDS)
 
 // Context for one Story summary. `anchorText` must appear verbatim in the summary.
 export const storyContextOutputSchema = z.object({
@@ -73,7 +78,7 @@ export const storyContextOutputSchema = z.object({
 })
 export type StoryContextOutput = z.infer<typeof storyContextOutputSchema>
 
-export const storyRelationValues = [
+export const STORY_RELATIONS = [
   'follows',
   'branches_from',
   'responds_to',
@@ -81,7 +86,7 @@ export const storyRelationValues = [
   'provides_context_for',
   'related_to',
 ] as const
-export const storyRelationSchema = z.enum(storyRelationValues)
+export const storyRelationSchema = z.enum(STORY_RELATIONS)
 export type StoryRelation = z.infer<typeof storyRelationSchema>
 
 // The newer Story is always `from`; the established Story is `to`.
@@ -109,10 +114,11 @@ export const articleMetadataSchema = z.object({
 })
 export type ArticleMetadata = z.infer<typeof articleMetadataSchema>
 
-export const sourceReferenceKindSchema = z.enum([
+export const SOURCE_REFERENCE_KINDS = [
   'publisher_article',
   'primary_document',
   'dataset',
   'official_statement',
   'other',
-])
+] as const
+export const sourceReferenceKindSchema = z.enum(SOURCE_REFERENCE_KINDS)
