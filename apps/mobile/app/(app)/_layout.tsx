@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Redirect, Stack, usePathname, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { StyleSheet } from 'react-native'
@@ -13,9 +13,19 @@ export default function SignedInLayout() {
   const session = authClient.useSession()
   const router = useRouter()
   const pathname = usePathname()
+  const queryClient = useQueryClient()
   const userId = session.data?.user.id
   const preferences = useQuery({ ...queries.preferences(), enabled: Boolean(session.data) })
   const onOnboarding = pathname === '/onboarding'
+
+  // The feed waits for preferences ("Preparing your feed"). Start Latest's reads alongside them
+  // rather than one round trip later.
+  useEffect(() => {
+    if (!userId) return
+    void queryClient.prefetchQuery(queries.front())
+    void queryClient.prefetchInfiniteQuery(queries.storyList())
+    void queryClient.prefetchQuery(queries.edition())
+  }, [queryClient, userId])
 
   useEffect(() => {
     if (!userId) return
