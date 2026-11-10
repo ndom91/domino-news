@@ -1,24 +1,5 @@
-import type { ComponentProps, ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import { cx } from '../cx.ts'
-
-/** Plain grouping block: a hairline box or a sunken panel. No radius, no shadow. */
-export function Card({
-  tone = 'plain',
-  padded = true,
-  className,
-  ...props
-}: ComponentProps<'div'> & { tone?: 'plain' | 'sunken'; padded?: boolean }) {
-  return (
-    <div
-      {...props}
-      className={cx(
-        tone === 'plain' ? 'border border-border' : 'bg-sunken',
-        padded && 'p-4 md:p-5',
-        className,
-      )}
-    />
-  )
-}
 
 type BadgeTone = 'neutral' | 'ink' | 'success' | 'warning' | 'error'
 

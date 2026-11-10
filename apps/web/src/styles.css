@@ -171,10 +171,6 @@
 
 ::view-transition-new(root) {
   animation-name: theme-reveal;
-}
-
-/* Not during the For You reflow (below): its root doesn't animate, so r would stay 0. */
-html:not(.vt-feed)::view-transition-new(root) {
   /* 1px soft edge so the circle isn't jagged. */
   mask-image: radial-gradient(
     circle at var(--theme-reveal-x, 50vw) var(--theme-reveal-y, 50vh),
@@ -196,23 +192,4 @@ html:not(.vt-feed)::view-transition-new(root) {
   to {
     --theme-reveal-r: var(--theme-reveal-radius, 150vmax);
   }
-}
-
-/*
- * Grid reflow after a hidden card leaves (reflowWithout in routes/for-you.tsx). Only while
- * html.vt-feed is set: cards get names so they glide to their new places, and the root
- * cross-fade is turned off so the theme switch's circle reveal doesn't play.
- */
-html.vt-feed [data-feed-card] {
-  view-transition-name: var(--vt-name);
-}
-
-html.vt-feed::view-transition-old(root),
-html.vt-feed::view-transition-new(root) {
-  animation: none;
-}
-
-html.vt-feed::view-transition-group(*) {
-  animation-duration: var(--dn-duration-enter);
-  animation-timing-function: var(--dn-ease-smooth);
 }

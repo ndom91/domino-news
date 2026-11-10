@@ -20,7 +20,7 @@ export const Route = createFileRoute('/onboarding')({
 const STEPS = [
   {
     title: 'Where do you follow the news?',
-    text: 'Stories about these regions lead your front page and rank higher in For You.',
+    text: 'Stories about these regions lead your front page and rank higher in Briefing.',
   },
   {
     title: 'What do you want more of?',
@@ -28,7 +28,7 @@ const STEPS = [
   },
   {
     title: 'Follow a few publishers',
-    text: 'Stories they cover rank higher in For You. Nothing else is hidden.',
+    text: 'Stories they cover rank higher in Briefing. Nothing else is hidden.',
   },
 ] as const
 
@@ -41,7 +41,7 @@ function OnboardingPage() {
   const [step, setStep] = useState(0)
   const last = step === STEPS.length - 1
   const current = STEPS[step] ?? STEPS[0]
-  const target = safeNext(next, '/for-you')
+  const target = safeNext(next, '/briefing')
 
   function done() {
     finish.mutate({ onboarded: true }, { onSuccess: () => navigate({ to: target, replace: true }) })

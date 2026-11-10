@@ -36,11 +36,6 @@ export default [
     code: '<Textarea label="Summary" description="Saving creates a new version. Earlier versions are kept." defaultValue={fixtureLead.summary.body} />',
   },
   {
-    group: 'Card',
-    name: 'Plain and sunken',
-    code: '<div className="grid gap-4 md:grid-cols-2"><Card>Plain card</Card><Card tone="sunken">Sunken panel</Card></div>',
-  },
-  {
     group: 'Badge',
     name: 'Tones',
     code: '<div className="flex gap-2"><Badge>Fixture</Badge><Badge tone="ink">Edited</Badge><Badge tone="success">OK</Badge><Badge tone="warning">Paused</Badge><Badge tone="error">Failed</Badge></div>',
@@ -89,11 +84,6 @@ export default [
     group: 'Editorial',
     name: 'Developing band',
     code: '<div className="bg-band p-8 text-band-text"><div className="grid gap-8 lg:grid-cols-3">{fixtureDeveloping.map((n, i) => <NarrativeColumn key={n.id} narrative={n} position={i} />)}</div></div>',
-  },
-  {
-    group: 'Editorial',
-    name: 'SourceList',
-    code: '<div className="max-w-reading"><SourceList sources={fixtureLead.sources} /></div>',
   },
   {
     group: 'Editorial',

@@ -838,7 +838,7 @@ function MutedPublishersSection() {
   )
 }
 
-/** What For You learned from thumbs up / down. Every item can be removed, or all reset. */
+/** What Briefing learned from thumbs up / down. Every item can be removed, or all reset. */
 function LearnedSignals() {
   const queryClient = useQueryClient()
   const toast = useToast()
@@ -861,11 +861,11 @@ function LearnedSignals() {
     <SettingsRow
       id="learned"
       title="Learned from your feedback"
-      description="Your thumbs up and down on For You nudge these. Remove one, or reset them all."
+      description="Your thumbs up and down on Briefing nudge these. Remove one, or reset them all."
     >
       {items.length === 0 ? (
         <p className="text-sm text-text-muted">
-          Nothing yet. Use the thumbs on For You cards to see more or less like a story.
+          Nothing yet. Use the thumbs on Briefing cards to see more or less like a story.
         </p>
       ) : (
         <>
@@ -916,7 +916,7 @@ function LearnedSignals() {
                 Reset all
               </Button>
             }
-            title="Reset what For You learned?"
+            title="Reset what Briefing learned?"
             confirmLabel="Reset"
             destructive
             onConfirm={() => update.mutate({ reset: true })}
