@@ -1,15 +1,8 @@
-import type { Db } from '@dn/db'
+import { type Db, schema } from '@dn/db'
 import { plural, stripCitations, truncate } from '@dn/domain'
-import {
-  DESK_LABELS,
-  type Desk,
-  type NarrativeDetail,
-  type Preview,
-  type PreviewType,
-  type StoryDetail,
-} from '@dn/schemas'
-import { getPublisher } from './publishers.ts'
-import { getNarrative, getStory } from './reader.ts'
+import { DESK_LABELS, type Desk, type Preview, type PreviewType } from '@dn/schemas'
+import { and, eq, isNotNull, isNull, or, sql } from 'drizzle-orm'
+import { findNarrative } from './reader.ts'
 
 const DESCRIPTION_MAX = 200
 
@@ -27,7 +20,15 @@ export function firstSentence(text: string | null | undefined): string | null {
 
 const deskLabel = (desk: Desk | null) => (desk ? DESK_LABELS[desk] : 'News')
 
-export function storyPreview(story: StoryDetail): Preview {
+/** A story's share card. A `StoryDetail` has every field it reads. */
+export function storyPreview(story: {
+  slug: string
+  title: string
+  desk: Desk | null
+  lastUpdatedAt: string
+  summary: { versionId: string; body: string } | null
+  narratives: { title: string }[]
+}): Preview {
   const narrative = story.narratives[0]
   return {
     type: 'story',
@@ -40,7 +41,14 @@ export function storyPreview(story: StoryDetail): Preview {
   }
 }
 
-export function narrativePreview(narrative: NarrativeDetail): Preview {
+/** A narrative's share card. A `NarrativeDetail` has every field it reads. */
+export function narrativePreview(narrative: {
+  slug: string
+  title: string
+  desk: Desk | null
+  description: string | null
+  updatedAt: string
+}): Preview {
   return {
     type: 'narrative',
     slug: narrative.slug,
@@ -53,22 +61,75 @@ export function narrativePreview(narrative: NarrativeDetail): Preview {
 }
 
 /**
- * The public face of a story, narrative or publisher. Reuses the full reads (which already
- * hide unpublished stories) and keeps only what a share card shows.
+ * The public face of a story, narrative or publisher, for signed-out visitors and link-preview
+ * crawlers. Each kind reads only what its card shows. Not cached: any slug can be requested,
+ * and cached() never evicts.
  */
 export async function getPreview(db: Db, type: PreviewType, slug: string): Promise<Preview | null> {
-  if (type === 'story') {
-    const story = await getStory(db, slug)
-    return story ? storyPreview(story) : null
-  }
+  if (type === 'story') return previewStory(db, slug)
   if (type === 'narrative') {
-    const narrative = await getNarrative(db, slug)
-    return narrative ? narrativePreview(narrative) : null
+    const row = await findNarrative(db, slug)
+    if (!row) return null
+    const { narrative, desk } = row
+    return narrativePreview({ ...narrative, desk, updatedAt: narrative.updatedAt.toISOString() })
   }
-  const publisher = await getPublisher(db, slug)
+  return previewPublisher(db, slug)
+}
+
+async function previewStory(db: Db, slug: string): Promise<Preview | null> {
+  const [story] = await db
+    .select({
+      slug: schema.story.slug,
+      title: schema.story.title,
+      desk: schema.story.desk,
+      publishedAt: schema.story.publishedAt,
+      lastUpdatedAt: schema.story.lastUpdatedAt,
+      summary: { versionId: schema.storySummaryVersion.id, body: schema.storySummaryVersion.body },
+      narrativeTitle: sql<string | null>`(
+        select n.title from narrative_story ns join narrative n on n.id = ns.narrative_id
+        where ns.story_id = story.id and ns.removed_at is null
+        order by ns.added_at limit 1)`,
+    })
+    .from(schema.story)
+    .leftJoin(
+      schema.storySummaryVersion,
+      eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+    )
+    .where(or(eq(schema.story.id, slug), eq(schema.story.slug, slug)))
+  // Unpublished stories stay private.
+  if (!story?.publishedAt) return null
+  return storyPreview({
+    ...story,
+    lastUpdatedAt: story.lastUpdatedAt.toISOString(),
+    narratives: story.narrativeTitle ? [{ title: story.narrativeTitle }] : [],
+  })
+}
+
+async function previewPublisher(db: Db, slug: string): Promise<Preview | null> {
+  const [publisher] = await db
+    .select({
+      slug: schema.publisher.slug,
+      name: schema.publisher.name,
+      storiesCovered: sql<number>`count(distinct ${schema.story.id})::int`,
+    })
+    .from(schema.publisher)
+    .leftJoin(schema.article, eq(schema.article.publisherId, schema.publisher.id))
+    .leftJoin(
+      schema.storyArticle,
+      and(
+        eq(schema.storyArticle.articleId, schema.article.id),
+        isNull(schema.storyArticle.removedAt),
+      ),
+    )
+    .leftJoin(
+      schema.story,
+      and(eq(schema.story.id, schema.storyArticle.storyId), isNotNull(schema.story.publishedAt)),
+    )
+    .where(eq(schema.publisher.slug, slug))
+    .groupBy(schema.publisher.id)
   if (!publisher) return null
   return {
-    type,
+    type: 'publisher',
     slug: publisher.slug,
     title: publisher.name,
     kicker: 'Publisher',

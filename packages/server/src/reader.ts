@@ -615,7 +615,8 @@ async function relatedStories(db: Db, id: string): Promise<StoryDetail['related'
   })
 }
 
-export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeDetail | null> {
+/** A Narrative's own row by id or slug, with its desk. */
+export async function findNarrative(db: Db, idOrSlug: string) {
   const match = or(eq(schema.narrative.id, idOrSlug), eq(schema.narrative.slug, idOrSlug))
   const desks = narrativeDesks(
     db,
@@ -626,6 +627,11 @@ export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeD
     .from(schema.narrative)
     .leftJoin(desks, eq(desks.narrativeId, schema.narrative.id))
     .where(match)
+  return row ?? null
+}
+
+export async function getNarrative(db: Db, idOrSlug: string): Promise<NarrativeDetail | null> {
+  const row = await findNarrative(db, idOrSlug)
   if (!row) return null
   const { narrative, desk } = row
   const stories = await db

@@ -9,7 +9,7 @@ import type {
   PublisherListResponse,
   PublisherStats,
 } from '@dn/schemas'
-import { eq, sql } from 'drizzle-orm'
+import { eq, inArray, sql } from 'drizzle-orm'
 import { latestAssessment } from './assessments.ts'
 import { cached, SHARED_TTL_MS } from './cache.ts'
 import { storyListItems } from './reader.ts'
@@ -136,14 +136,37 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
     .where(eq(schema.publisher.slug, slug))
   if (!publisher) return null
 
-  const [[stats], recentStories, shared, profile, assessment] = await Promise.all([
+  const [[stats], coverage, assessment] = await Promise.all([
+    // Stats carry the latest assessment's lean, so they stay uncached with the assessment:
+    // a newly published review must show at once.
     statsRows(db, publisher.id),
+    // The same for every reader, and only the pipeline changes it. Keyed by id, so slugs
+    // that match no publisher never add a key.
+    cached(`publisher:${publisher.id}`, SHARED_TTL_MS, () => publisherCoverage(db, publisher.id)),
+    latestAssessment(db, publisher.id),
+  ])
+  if (!stats) return null
+
+  return {
+    ...stats,
+    profile: coverage.profile,
+    assessment,
+    languages: publisher.languages,
+    policyNote: publisher.policyNote,
+    policyReviewedAt: publisher.policyReviewedAt?.toISOString() ?? null,
+    recentStories: coverage.recentStories,
+    coCoverage: coverage.coCoverage,
+  }
+}
+
+async function publisherCoverage(db: Db, publisherId: string) {
+  const [recentStories, shared, profile] = await Promise.all([
     db
       .execute<{ id: string }>(sql`
         select s.id from story s
         where s.published_at is not null and exists (
           select 1 from story_article sa join article a on a.id = sa.article_id
-          where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisher.id}
+          where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisherId}
         )
         order by s.last_updated_at desc
         limit 20`)
@@ -160,32 +183,24 @@ export async function getPublisher(db: Db, slug: string): Promise<PublisherDetai
       domain: string
       shared: number
     }>(sql`
-      with ${links(publisher.id)}
+      with ${links(publisherId)}
       select p.id, p.slug, p.name, p.domain, count(distinct l1.story_id)::int as shared
       from links l1
       join links l2 on l2.story_id = l1.story_id and l2.publisher_id <> l1.publisher_id
       join publisher p on p.id = l2.publisher_id
-      where l1.publisher_id = ${publisher.id}
+      where l1.publisher_id = ${publisherId}
       group by p.id
       order by shared desc, p.name
       limit 8`),
-    coverageProfile(db, publisher.id),
-    latestAssessment(db, publisher.id),
+    coverageProfile(db, publisherId),
   ])
-  if (!stats) return null
-
   return {
-    ...stats,
-    profile,
-    assessment,
-    languages: publisher.languages,
-    policyNote: publisher.policyNote,
-    policyReviewedAt: publisher.policyReviewedAt?.toISOString() ?? null,
     recentStories,
     coCoverage: shared.rows.map(({ shared: sharedStories, ...ref }) => ({
       publisher: ref,
       sharedStories,
     })),
+    profile,
   }
 }
 
@@ -195,21 +210,29 @@ const MAJOR_OUTLETS = 4
 
 /** What an outlet covers compared with everyone, over the last PROFILE_DAYS. Facts only. */
 async function coverageProfile(db: Db, publisherId: string): Promise<CoverageProfile> {
-  const window = sql`now() - make_interval(days => ${PROFILE_DAYS})`
+  // One row per Story, newest first: who covered it, by its active articles.
   const { rows: stories } = await db.execute<{
+    id: string
     desk: string | null
     regions: string[]
+    this_week: boolean
     mine: boolean
     official: boolean
+    newsrooms: number
   }>(sql`
-    select s.desk, s.regions,
-      exists (select 1 from story_article sa join article a on a.id = sa.article_id
-        where sa.story_id = s.id and sa.removed_at is null and a.publisher_id = ${publisherId}) as mine,
-      exists (select 1 from story_article sa join article a on a.id = sa.article_id
-        join publisher p on p.id = a.publisher_id
-        where sa.story_id = s.id and sa.removed_at is null and p.kind = 'official') as official
+    select s.id, s.desk, s.regions,
+      s.published_at > now() - interval '7 days' as this_week,
+      bool_or(a.publisher_id = ${publisherId}) as mine,
+      bool_or(p.kind = 'official') as official,
+      count(distinct a.publisher_id) filter (where p.kind = 'newsroom')::int as newsrooms
     from story s
-    where s.published_at > ${window} and s.merged_into_story_id is null`)
+    join story_article sa on sa.story_id = s.id and sa.removed_at is null
+    join article a on a.id = sa.article_id
+    join publisher p on p.id = a.publisher_id
+    where s.published_at > now() - make_interval(days => ${PROFILE_DAYS})
+      and s.merged_into_story_id is null
+    group by s.id
+    order by s.last_updated_at desc`)
   const mine = stories.filter((s) => s.mine)
 
   const mix = (keysOf: (s: (typeof stories)[number]) => string[]) => {
@@ -229,16 +252,19 @@ async function coverageProfile(db: Db, publisherId: string): Promise<CoveragePro
       .sort((a, b) => b.share - a.share || b.overallShare - a.overallShare)
   }
 
-  const { rows: missed } = await db.execute<{ id: string; slug: string; title: string }>(sql`
-    select s.id, s.slug, s.title from story s
-    join story_article sa on sa.story_id = s.id and sa.removed_at is null
-    join article a on a.id = sa.article_id
-    join publisher p on p.id = a.publisher_id and p.kind = 'newsroom'
-    where s.published_at > now() - interval '7 days' and s.merged_into_story_id is null
-    group by s.id
-    having count(distinct a.publisher_id) >= ${MAJOR_OUTLETS}
-      and not bool_or(a.publisher_id = ${publisherId})
-    order by count(distinct a.publisher_id) desc, s.last_updated_at desc`)
+  // Widely covered this week, and not by this outlet. Rows arrive newest first and the sort
+  // is stable, so equally covered Stories stay newest first.
+  const missed = stories
+    .filter((s) => s.this_week && !s.mine && s.newsrooms >= MAJOR_OUTLETS)
+    .sort((a, b) => b.newsrooms - a.newsrooms)
+  // Titles only for the examples shown, not for every Story in the window.
+  const exampleIds = missed.slice(0, 3).map((s) => s.id)
+  const examples = exampleIds.length
+    ? await db
+        .select({ id: schema.story.id, slug: schema.story.slug, title: schema.story.title })
+        .from(schema.story)
+        .where(inArray(schema.story.id, exampleIds))
+    : []
 
   return {
     days: PROFILE_DAYS,
@@ -246,6 +272,9 @@ async function coverageProfile(db: Db, publisherId: string): Promise<CoveragePro
     desks: mix((s) => (s.desk ? [s.desk] : [])),
     regions: mix((s) => s.regions.filter((r) => r !== 'global')),
     officialShare: mine.length ? mine.filter((s) => s.official).length / mine.length : null,
-    missedMajor: { count: missed.length, examples: missed.slice(0, 3) },
+    missedMajor: {
+      count: missed.length,
+      examples: exampleIds.flatMap((id) => examples.filter((e) => e.id === id)),
+    },
   }
 }
