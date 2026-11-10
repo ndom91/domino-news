@@ -3,7 +3,6 @@ import {
   contextKindSchema,
   narrativeTitleSchema,
   relationshipCandidateSchema,
-  storyMatchSchema,
   storySummarySchema,
   summaryUpdateAssessmentSchema,
 } from '@dn/schemas'
@@ -13,7 +12,6 @@ import {
   chooseStoryPrompt,
   classifyRelationshipPrompt,
   explainContextPrompt,
-  matchStoryPrompt,
   PROMPT_VERSIONS,
   SYSTEM_PROMPT,
   summarizeStoryPrompt,
@@ -144,11 +142,6 @@ const systemOneResponse = z.object({
 const sourceNumbers = z.array(z.int()).check(z.minLength(1))
 const choiceByNumber = (count: number) =>
   z.object({ choice: z.int().check(z.minimum(0), z.maximum(count)), rationale: z.string() })
-const matchByNumber = z.object({
-  decision: storyMatchSchema.shape.decision,
-  evidenceArticles: z.array(z.int()),
-  rationale: z.string(),
-})
 const summaryByNumber = z.extend(
   z.omit(storySummarySchema, { sourceArticleIds: true, observationIds: true }),
   { sources: sourceNumbers },
@@ -261,25 +254,6 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
         throw new InvalidModelOutputError('Audio briefing returned an empty or truncated response')
       }
       return content.trim()
-    },
-    matchStory: async (input) => {
-      const g = await generate(
-        'story_match',
-        matchByNumber,
-        matchStoryPrompt(input),
-        PROMPT_VERSIONS.matchStory,
-      )
-      const { evidenceArticles, ...rest } = g.output
-      const articles = input.story.articles
-      return {
-        ...g,
-        output: {
-          ...rest,
-          evidenceArticleIds: evidenceArticles.map(
-            (n) => numbered('story_match', articles, n).articleId,
-          ),
-        },
-      }
     },
     chooseStory: async (input) => {
       const g = await generate(

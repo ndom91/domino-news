@@ -138,7 +138,7 @@ export const cosine = (a: number[], b: number[]) => {
 /**
  * Replay matching over a set in publish order, entirely in memory: neighbours come from the
  * set's own embeddings (within the production time window), decisions from the same core as
- * the match job (match-core.ts). The model is asked through `judge`, which callers cache.
+ * the match job (match-core.ts). The model is asked through `choose`, which callers cache.
  *
  * Differs from production in two known ways: only articles in the set can be neighbours, and
  * candidate stories carry no summary (titles and articles only).
@@ -155,7 +155,6 @@ export async function replayMatching(
   articles: { id: string; publishedAt: string; embedding: number[] }[],
   policy: MatchPolicy,
   opts: { neighbours: number; windowSeconds: number },
-  judge: (articleId: string, story: StoryState) => Promise<boolean>,
   choose: (articleId: string, stories: StoryState[]) => Promise<string | null>,
   trace?: TraceStep[],
 ): Promise<Map<string, string>> {
@@ -172,25 +171,14 @@ export async function replayMatching(
       .map((o) => ({ articleId: o.id, similarity: cosine(article.embedding, o.embedding) }))
       .sort((a, b) => b.similarity - a.similarity)
       .slice(0, opts.neighbours)
-    const ranked = rankStories(neighbours, (id) => storyOf.get(id), policy.llmMin, policy.ranking)
+    const ranked = rankStories(neighbours, (id) => storyOf.get(id), policy.llmMin)
     const answers = new Map<string, boolean>()
-    const decision = await decideMatch(
-      ranked,
-      policy,
-      async (storyId) => {
-        const story = stories.get(storyId)
-        if (!story) return null
-        const same = await judge(article.id, story)
-        answers.set(storyId, same)
-        return { same }
-      },
-      async (storyIds) => {
-        const shown = storyIds.flatMap((id) => stories.get(id) ?? [])
-        const storyId = await choose(article.id, shown)
-        for (const s of shown) answers.set(s.id, s.id === storyId)
-        return { storyId }
-      },
-    )
+    const decision = await decideMatch(ranked, policy, async (storyIds) => {
+      const shown = storyIds.flatMap((id) => stories.get(id) ?? [])
+      const storyId = await choose(article.id, shown)
+      for (const s of shown) answers.set(s.id, s.id === storyId)
+      return { storyId }
+    })
     const storyId = decision?.storyId ?? `story-${stories.size + 1}`
     const story = stories.get(storyId) ?? { id: storyId, articleIds: [] }
     story.articleIds.push(article.id)
@@ -320,9 +308,9 @@ export async function runMatchEval(
     throw new Error(`no embedding for ${missing.length} articles, e.g. ${missing[0]}`)
   const inputOf = new Map((await loadArticles(ctx.db, ids)).map((a) => [a.articleId, a]))
 
-  // Decisions are cached per prompt version and model, keyed on the exact article and story.
+  // Decisions are cached per prompt version and model, keyed on the exact article and stories.
   const { modelId } = ctx.inference.generation
-  const promptVersion = PROMPT_VERSIONS.matchStory
+  const promptVersion = PROMPT_VERSIONS.chooseStory
   const cacheDir = `${dir}/cache`
   await mkdir(cacheDir, { recursive: true })
   const cacheFile = `${cacheDir}/${opts.name}.${promptVersion}.${modelId.replaceAll('/', '_')}.jsonl`
@@ -336,7 +324,6 @@ export async function runMatchEval(
   let modelCalls = 0
   let cachedCalls = 0
   let failedCalls = 0
-  const chooseVersion = PROMPT_VERSIONS.chooseStory
 
   // Like loadStoryInput: the articles the policy shows, oldest first; the first headline.
   const storyInput = (story: { id: string; articleIds: string[] }) => {
@@ -349,7 +336,7 @@ export async function runMatchEval(
       title: first?.title ?? '',
       summary: null,
       firstObservedAt: first?.publishedAt ?? new Date().toISOString(),
-      articles: storyArticlesShown(oldestFirst, opts.policy.storyArticles),
+      articles: storyArticlesShown(oldestFirst, 'anchored'),
     }
   }
   // Keyed on exactly what the model sees, so runs that show the same articles share answers.
@@ -366,39 +353,13 @@ export async function runMatchEval(
       log(`${modelCalls} model calls, ${cachedCalls} cached`)
   }
 
-  const judge = async (articleId: string, story: { id: string; articleIds: string[] }) => {
-    const article = inputOf.get(articleId)
-    const input = storyInput(story)
-    if (!article || input.articles.length === 0) return false
-    const key = createHash('sha256')
-      .update(`${articleId}|${shownKey(input)}`)
-      .digest('hex')
-    const hit = cache.get(key)
-    if (hit) {
-      cachedCalls++
-      return hit === 'same_development'
-    }
-    let decision: string
-    try {
-      modelCalls++
-      const { output } = await ctx.inference.generation.matchStory({ article, story: input })
-      decision = output.decision
-    } catch (error) {
-      if (!(error instanceof InvalidModelOutputError)) throw error
-      failedCalls++
-      decision = 'invalid_output'
-    }
-    await remember(key, decision)
-    return decision === 'same_development'
-  }
-
   const choose = async (articleId: string, stories: { id: string; articleIds: string[] }[]) => {
     const article = inputOf.get(articleId)
     const inputs = stories.map(storyInput).filter((s) => s.articles.length > 0)
     if (!article || inputs.length === 0) return null
     // The candidates' order matters to the model, so the key keeps them in rank order.
     const key = createHash('sha256')
-      .update(`choose|${chooseVersion}|${articleId}|${inputs.map(shownKey).join(';')}`)
+      .update(`choose|${promptVersion}|${articleId}|${inputs.map(shownKey).join(';')}`)
       .digest('hex')
     const hit = cache.get(key)
     if (hit !== undefined) {
@@ -427,7 +388,6 @@ export async function runMatchEval(
     })),
     opts.policy,
     { neighbours: opts.neighbours, windowSeconds: opts.windowSeconds },
-    judge,
     choose,
     trace,
   )

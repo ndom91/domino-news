@@ -129,27 +129,6 @@ export function createFixtureGeneration(): GenerationProvider {
     async writeAudioBriefing() {
       throw new Error('Audio briefing requires local generation inference to be configured')
     },
-    async matchStory({ article, story }) {
-      const score = jaccard(articleTokens(article), storyTokens(story))
-      const decision =
-        score >= 0.22
-          ? 'same_development'
-          : score >= 0.1
-            ? 'related_development'
-            : score >= 0.06
-              ? 'uncertain'
-              : 'unrelated'
-      return {
-        output: {
-          decision,
-          evidenceArticleIds:
-            decision === 'unrelated' ? [] : story.articles.map((a) => a.articleId),
-          rationale: `fixture: token overlap ${score.toFixed(2)}`,
-        },
-        modelId,
-        promptVersion: PROMPT_VERSIONS.matchStory,
-      }
-    },
     // The story with the most token overlap, if it clears the "same development" bar.
     async chooseStory({ article, stories }) {
       const tokens = articleTokens(article)

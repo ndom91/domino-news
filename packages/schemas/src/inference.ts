@@ -11,13 +11,6 @@ export const EMBEDDING_DIMENSIONS = 768
 // Structured-output contracts for local generation. Valid structure is necessary,
 // not sufficient: callers must also check that referenced IDs exist and are linked.
 
-export const storyMatchSchema = z.object({
-  decision: z.enum(['same_development', 'related_development', 'unrelated', 'uncertain']),
-  evidenceArticleIds: z.array(z.string()),
-  rationale: z.string(),
-})
-export type StoryMatch = z.infer<typeof storyMatchSchema>
-
 // Which of several candidate stories an article belongs to; null = none, start a new story.
 export const storyChoiceSchema = z.object({
   storyId: z.nullable(z.string()),

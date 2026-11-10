@@ -4,7 +4,6 @@ import type {
   RelationshipCandidate,
   StoryChoice,
   StoryContextOutput,
-  StoryMatch,
   StorySummaryOutput,
   SummaryUpdateAssessment,
 } from '@dn/schemas'
@@ -59,7 +58,6 @@ export interface GenerationProvider {
     style: AudioBriefingStyle
     signal: AbortSignal
   }): Promise<string>
-  matchStory(input: { article: ArticleInput; story: StoryInput }): Promise<Generated<StoryMatch>>
   /** One call with several candidates side by side: which one, if any, is the same development. */
   chooseStory(input: {
     article: ArticleInput

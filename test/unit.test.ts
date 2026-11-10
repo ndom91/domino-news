@@ -1177,24 +1177,16 @@ describe('match evaluation', () => {
       { id: 'd', publishedAt: at(4), embedding: [0, 1] }, // far from all: new story
     ]
     const asked: string[] = []
-    const policy = {
-      autoSame: 0.95,
-      llmMin: 0.7,
-      maxCandidates: 3,
-      storyArticles: 'newest' as const,
-      ranking: 'best' as const,
-      judging: 'sequential' as const,
-    }
+    const policy = { autoSame: 0.95, llmMin: 0.7, maxCandidates: 3 }
     const run = () =>
       replayMatching(
         articles,
         policy,
         { neighbours: 12, windowSeconds: 86_400 },
-        async (id) => {
+        async (id, stories) => {
           asked.push(id)
-          return id === 'c'
+          return id === 'c' ? (stories[0]?.id ?? null) : null
         },
-        async () => null,
       )
     const result = await run()
     expect(result.get('b')).toBe(result.get('a'))
@@ -1205,16 +1197,9 @@ describe('match evaluation', () => {
     expect([...(await run())]).toEqual([...result])
   })
 
-  it('choose judging asks once with all candidates and takes its pick, or none', async () => {
+  it('asks once with all candidates and takes its pick, or none', async () => {
     const { decideMatch } = await import('@dn/jobs')
-    const policy = {
-      autoSame: 0.95,
-      llmMin: 0.7,
-      maxCandidates: 2,
-      storyArticles: 'anchored' as const,
-      ranking: 'best' as const,
-      judging: 'choose' as const,
-    }
+    const policy = { autoSame: 0.95, llmMin: 0.7, maxCandidates: 2 }
     const ranked: [string, number][] = [
       ['s1', 0.9],
       ['s2', 0.85],
@@ -1225,18 +1210,15 @@ describe('match evaluation', () => {
       seen.push(ids)
       return { storyId: id }
     }
-    const never = async () => {
-      throw new Error('sequential judge must not run')
-    }
-    // Picks the second-ranked story, which "first yes wins" would never have reached.
-    expect(await decideMatch(ranked, policy, never, pick('s2'))).toMatchObject({
+    // Picks the second-ranked story, which judging one candidate at a time would never reach.
+    expect(await decideMatch(ranked, policy, pick('s2'))).toMatchObject({
       storyId: 's2',
       method: 'llm',
     })
     expect(seen[0]).toEqual(['s1', 's2'])
-    expect(await decideMatch(ranked, policy, never, pick(null))).toBeNull()
+    expect(await decideMatch(ranked, policy, pick(null))).toBeNull()
     // A pick outside the candidates shown is ignored.
-    expect(await decideMatch(ranked, policy, never, pick('s3'))).toBeNull()
+    expect(await decideMatch(ranked, policy, pick('s3'))).toBeNull()
   })
 
   it('requires a model decision even for a very close local neighbour', async () => {
@@ -1244,44 +1226,7 @@ describe('match evaluation', () => {
     const policy = matchPolicy('local')
     const ranked: [string, number][] = [['mixed-story', 0.99]]
     const choose = vi.fn(async () => ({ storyId: null }))
-    expect(await decideMatch(ranked, policy, async () => null, choose)).toBeNull()
+    expect(await decideMatch(ranked, policy, choose)).toBeNull()
     expect(choose).toHaveBeenCalledWith(['mixed-story'])
-  })
-
-  it('omits only a clearly weak final candidate when configured', async () => {
-    const { modelCandidates } = await import('@dn/jobs')
-    const policy = {
-      autoSame: 0.95,
-      llmMin: 0.7,
-      maxCandidates: 5,
-      storyArticles: 'anchored' as const,
-      ranking: 'best' as const,
-      judging: 'choose' as const,
-      tailCandidateMaxGap: 0.03,
-    }
-    expect(
-      modelCandidates(
-        [
-          ['s1', 0.9],
-          ['s2', 0.86],
-          ['s3', 0.82],
-          ['s4', 0.78],
-          ['s5', 0.74],
-        ],
-        policy,
-      ),
-    ).toHaveLength(4)
-    expect(
-      modelCandidates(
-        [
-          ['s1', 0.9],
-          ['s2', 0.86],
-          ['s3', 0.82],
-          ['s4', 0.78],
-          ['s5', 0.76],
-        ],
-        policy,
-      ),
-    ).toHaveLength(5)
   })
 })

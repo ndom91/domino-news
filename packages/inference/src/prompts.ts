@@ -2,14 +2,11 @@ import { DESK_SCOPES, DESKS, TOPIC_LABELS, TOPICS } from '@dn/schemas'
 import type { ArticleInput, StoryInput, SummaryUpdateInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
-// match-story@6: granularity rules from docs/story-granularity.md (reaction waves are one
-// story; a new event of the same kind is not).
-// @5/@8/@6/@4/@3: sources are numbered and answers cite the numbers. The model used to copy
+// @8/@6/@4/@3: sources are numbered and answers cite the numbers. The model used to copy
 // 30-character IDs back and dropped characters, which failed grounding checks.
-// match-story@7, summarize-story@12, assess-summary-update@2, classify-relationship@7,
-// explain-context@6, choose-story@4: article descriptions are cut to MAX_DESCRIPTION_CHARS.
+// summarize-story@12, assess-summary-update@2, classify-relationship@7, explain-context@6,
+// choose-story@4: article descriptions are cut to MAX_DESCRIPTION_CHARS.
 export const PROMPT_VERSIONS = {
-  matchStory: 'match-story@7',
   summarizeStory: 'summarize-story@12',
   assessSummaryUpdate: 'assess-summary-update@2',
   classifyRelationship: 'classify-relationship@7',
@@ -57,7 +54,7 @@ function storyData(s: StoryInput) {
 
 const data = (value: unknown) => `<data>\n${JSON.stringify(value, null, 2)}\n</data>`
 
-// What one development is (docs/story-granularity.md), shared by the match prompts.
+// What one development is (docs/story-granularity.md), for the story-choice prompt.
 const DEVELOPMENT_RULES = `A development is one thing that happened, or one wave of the same kind of statement about it.
 - SAME development:
   - the same event, announcement or ruling, reported by another outlet, in any language or angle;
@@ -74,38 +71,6 @@ const DEVELOPMENT_RULES = `A development is one thing that happened, or one wave
   - a reaction to the event the EXISTING STORY reports, or the event behind a reaction it reports
     (in either order: a reaction can be published before the event's coverage);
   - analysis or an explainer, unless it mostly recaps the event.`
-
-export function matchStoryPrompt(input: { article: ArticleInput; story: StoryInput }) {
-  return `Decide whether the NEW ARTICLE reports the same news development as the EXISTING STORY.
-A development is one thing that happened, or one wave of the same kind of statement about it.
-- "same_development":
-  - the same event, announcement or ruling, reported by another outlet, in any language or angle;
-  - an update to it: a rising toll, new details, a fuller account, a corrected figure;
-  - an official body's statement about its own action, and news coverage of that action;
-  - a live blog or roundup whose main subject is that event;
-  - the same KIND of statement by different actors about the same event, when the EXISTING STORY
-    is itself such statements: e.g. several governments condemning the same attack, or several
-    countries issuing travel warnings. A wave of similar reactions is one development.
-- "related_development": connected, but a distinct development:
-  - a new event of the same kind, even the next day in the same place (a second strike is new);
-  - a move in response: a counter-strike, sanctions, a lawsuit, a resignation, a policy change;
-  - a consequence that is an event itself: a closure, cancellations, a postponement;
-  - a reaction to the event the EXISTING STORY reports, or the event behind a reaction it reports
-    (in either order: a reaction can be published before the event's coverage);
-  - analysis or an explainer, unless it mostly recaps the event.
-- "unrelated": a different topic.
-- "uncertain": not enough information. Prefer "uncertain" over guessing.
-Judge against what the EXISTING STORY is about, set by its first reports, not only its latest ones.
-These differences do NOT make it a different development: another language, a different headline or angle,
-more or less detail, or an official statement versus news coverage of the same announcement, ruling or release.
-evidenceArticles: the "n" of each EXISTING STORY article that supports your decision. Only use numbers from the list.
-
-NEW ARTICLE:
-${data(articleData(input.article))}
-
-EXISTING STORY:
-${data(storyData(input.story))}`
-}
 
 export function summarizeStoryPrompt(input: { story: StoryInput }) {
   return `Write an original, neutral summary of this news story using only the source articles below.

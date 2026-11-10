@@ -8,7 +8,6 @@ import {
 } from './local.ts'
 import type { InferenceProviders } from './types.ts'
 
-export { createCloudGeneration } from './cloud.ts'
 export * from './fixture.ts'
 export * from './local.ts'
 export {

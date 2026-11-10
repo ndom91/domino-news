@@ -1,7 +1,7 @@
 import { type Db, schema } from '@dn/db'
 import type { ArticleInput, StoryInput } from '@dn/inference'
 import { and, eq, inArray, isNull, sql } from 'drizzle-orm'
-import { type MatchPolicy, storyArticlesShown } from './match-core.ts'
+import { storyArticlesShown } from './match-core.ts'
 import { fetchTransientArticle } from './transient-body.ts'
 
 export interface LoadedArticle extends ArticleInput {
@@ -63,9 +63,9 @@ export async function loadArticles(db: Db, articleIds: string[]): Promise<Loaded
 export async function loadStoryInput(
   db: Db,
   storyId: string,
-  // matching: which articles a big story shows (see storyArticlesShown). max: only the
-  // newest few, e.g. for narrative titles.
-  opts: { matching?: MatchPolicy['storyArticles']; max?: number } = {},
+  // matching: show a big story by its anchors (see storyArticlesShown). max: only the newest
+  // few, e.g. for narrative titles.
+  opts: { matching?: boolean; max?: number } = {},
 ): Promise<StoryInput | null> {
   const [story] = await db
     .select({
@@ -94,7 +94,7 @@ export async function loadStoryInput(
   // Summaries keep the newest reports so new sources can be summarised and cited.
   const articles = opts.max
     ? oldestFirst.slice(-opts.max)
-    : storyArticlesShown(oldestFirst, opts.matching ?? 'newest')
+    : storyArticlesShown(oldestFirst, opts.matching ? 'anchored' : 'newest')
   // For matching, a story is what its first report says, not its latest title or summary:
   // those widen as the story grows and pull in neighbouring developments (match evaluation).
   if (opts.matching) {

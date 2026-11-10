@@ -55,9 +55,6 @@ try {
       replayArticles,
       saved.policy,
       { neighbours: NEIGHBOURS, windowSeconds: CANDIDATE_WINDOW_SECONDS },
-      async () => {
-        throw new Error('Unexpected sequential judging')
-      },
       async (articleId, stories) => {
         let choice
         if (baseline) {

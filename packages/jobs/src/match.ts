@@ -40,9 +40,6 @@ export function matchPolicy(mode: keyof typeof THRESHOLDS): MatchPolicy {
     autoSame: mode === 'local' ? Number.POSITIVE_INFINITY : t.autoSame,
     llmMin: t.llmMin,
     maxCandidates: MAX_LLM_CANDIDATES,
-    storyArticles: 'anchored',
-    ranking: 'best',
-    judging: 'choose',
   }
 }
 
@@ -60,7 +57,6 @@ async function rankCandidateStories(
   db: Db,
   neighbours: { articleId: string; similarity: number }[],
   minSimilarity: number,
-  ranking: MatchPolicy['ranking'],
 ) {
   if (neighbours.length === 0) return []
   const memberships = await db
@@ -76,7 +72,7 @@ async function rankCandidateStories(
       ),
     )
   const storyOf = new Map(memberships.map((m) => [m.articleId, m.storyId]))
-  return rankStories(neighbours, (id) => storyOf.get(id), minSimilarity, ranking)
+  return rankStories(neighbours, (id) => storyOf.get(id), minSimilarity)
 }
 
 /** The nearest embedded articles reported within the candidate window around `at` (exact). */
@@ -136,7 +132,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
   const policy = matchPolicy(ctx.inference.mode)
   const at = row.article.publishedAt ?? row.article.firstSeenAt
   const neighbours = await similarArticles(ctx.db, job.targetId, row.embedding.embedding, at)
-  const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin, policy.ranking)
+  const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin)
 
   const [top] = ranked
   // The model needs the article only when the embedding alone doesn't decide.
@@ -153,103 +149,69 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
   }
   const articleInput = needsModel ? (await loadArticles(ctx.db, [job.targetId]))[0] : null
   if (needsModel && !articleInput) return { status: 'stale' }
-  const decision = await decideMatch(
-    ranked,
-    policy,
-    async (storyId) => {
-      const story = await loadStoryInput(ctx.db, storyId, { matching: policy.storyArticles })
-      if (!story || !articleInput) return null
-      const { runId, result } = await withAnalysisRun(
-        ctx.db,
-        {
-          operation: 'story_match',
-          targetType: 'article',
-          targetId: job.targetId,
-          inputFingerprint: `${job.inputFingerprint}|${storyId}`,
-          modelId: ctx.inference.generation.modelId,
-        },
-        () =>
-          ctx.gpu.generation.run(job.priorityClass, () =>
-            ctx.inference.generation.matchStory({ article: articleInput, story }),
-          ),
-      )
-      await recordMatchInterpretation(
-        ctx,
-        runId,
-        job.targetId,
-        articleInput.observationId,
-        result.output,
-      )
-      return { same: result.output.decision === 'same_development', runId }
-    },
-    async (storyIds) => {
-      const stories = (
-        await Promise.all(
-          storyIds.map((id) => loadStoryInput(ctx.db, id, { matching: policy.storyArticles })),
+  const decision = await decideMatch(ranked, policy, async (storyIds) => {
+    const stories = (
+      await Promise.all(storyIds.map((id) => loadStoryInput(ctx.db, id, { matching: true })))
+    ).filter((s) => s !== null)
+    if (!articleInput || stories.length === 0) return { storyId: null }
+    const decisionProvider = ctx.inference.decision
+    if (decisionProvider) {
+      try {
+        const { runId, result } = await withAnalysisRun(
+          ctx.db,
+          {
+            operation: 'story_match',
+            targetType: 'article',
+            targetId: job.targetId,
+            inputFingerprint: `${job.inputFingerprint}|decision|${storyIds.join(',')}`,
+            modelId: decisionProvider.modelId,
+          },
+          () =>
+            ctx.gpu.generation.run(job.priorityClass, () =>
+              decisionProvider.chooseStory({ article: articleInput, stories }),
+            ),
         )
-      ).filter((s) => s !== null)
-      if (!articleInput || stories.length === 0) return { storyId: null }
-      const decisionProvider = ctx.inference.decision
-      if (decisionProvider) {
-        try {
-          const { runId, result } = await withAnalysisRun(
-            ctx.db,
-            {
-              operation: 'story_match',
-              targetType: 'article',
-              targetId: job.targetId,
-              inputFingerprint: `${job.inputFingerprint}|decision|${storyIds.join(',')}`,
-              modelId: decisionProvider.modelId,
-            },
-            () =>
-              ctx.gpu.generation.run(job.priorityClass, () =>
-                decisionProvider.chooseStory({ article: articleInput, stories }),
-              ),
-          )
-          await recordMatchInterpretation(
-            ctx,
-            runId,
-            job.targetId,
-            articleInput.observationId,
-            result.output,
-          )
-          if (acceptsStoryDecision(result.output, ctx.config.matchDecisionConfidence)) {
-            return { storyId: result.output.storyId, runId }
-          }
-        } catch (error) {
-          if (
-            !(
-              error instanceof InferenceUnavailableError || error instanceof InvalidModelOutputError
-            )
-          ) {
-            throw error
-          }
+        await recordMatchInterpretation(
+          ctx,
+          runId,
+          job.targetId,
+          articleInput.observationId,
+          result.output,
+        )
+        if (acceptsStoryDecision(result.output, ctx.config.matchDecisionConfidence)) {
+          return { storyId: result.output.storyId, runId }
+        }
+      } catch (error) {
+        if (
+          !(error instanceof InferenceUnavailableError || error instanceof InvalidModelOutputError)
+        ) {
+          throw error
         }
       }
-      const { runId, result } = await withAnalysisRun(
-        ctx.db,
-        {
-          operation: 'story_match',
-          targetType: 'article',
-          targetId: job.targetId,
-          inputFingerprint: `${job.inputFingerprint}|${storyIds.join(',')}`,
-          modelId: ctx.inference.generation.modelId,
-        },
-        () =>
-          ctx.gpu.generation.run(job.priorityClass, () =>
-            ctx.inference.generation.chooseStory({ article: articleInput, stories }),
-          ),
-      )
-      await recordMatchInterpretation(
-        ctx,
-        runId,
-        job.targetId,
-        articleInput.observationId,
-        result.output,
-      )
-      return { storyId: result.output.storyId, runId }
-    },
-  )
+    }
+    const { runId, result } = await withAnalysisRun(
+      ctx.db,
+      {
+        operation: 'story_match',
+        targetType: 'article',
+        targetId: job.targetId,
+        inputFingerprint: `${job.inputFingerprint}|${storyIds.join(',')}`,
+        modelId: ctx.inference.generation.modelId,
+      },
+      () =>
+        ctx.gpu.generation.run(job.priorityClass, () =>
+          ctx.inference.generation.chooseStory({ article: articleInput, stories }),
+        ),
+    )
+    await recordMatchInterpretation(
+      ctx,
+      runId,
+      job.targetId,
+      articleInput.observationId,
+      result.output,
+    )
+    return { storyId: result.output.storyId, runId }
+  })
 
   // Model calls above run concurrently across jobs; the write below is serialised.
   const storyId = await withTransaction(ctx.pool, async (tx) => {
@@ -264,7 +226,7 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
     // A neighbour may have joined a Story we never evaluated while the model was running.
     // Re-run with full information rather than risk a duplicate Story.
     const considered = new Set(ranked.map(([id]) => id))
-    const current = await rankCandidateStories(tx.db, neighbours, thresholds.llmMin, policy.ranking)
+    const current = await rankCandidateStories(tx.db, neighbours, thresholds.llmMin)
     if (current.some(([id]) => !considered.has(id))) {
       throw new CandidatesChangedError(`candidate stories changed for ${job.targetId}; retrying`)
     }
