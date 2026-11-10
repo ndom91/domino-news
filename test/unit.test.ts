@@ -1,20 +1,26 @@
 import { readFileSync } from 'node:fs'
 import {
+  audioClock,
   clockTime,
   countryFromHeader,
   dayLabel,
   FALLBACK_COUNTRY_NAMES,
   formatDate,
   formatDateTime,
+  forYouReasonText,
   hostnameOf,
   KNOWN_COUNTRIES,
   leanSide,
+  localScopeTitle,
+  nextPlaybackRate,
   normalizeArticleUrl,
   oneSidedCoverage,
   pickLead,
   plural,
+  readingGapLabel,
   recencyPeriod,
   regionForCountry,
+  relationLabel,
   storiesPerDay,
   validateNewEdge,
   zoneName,
@@ -339,6 +345,32 @@ describe('display helpers', () => {
     expect(formatDateTime(at, 'Europe/Berlin')).toBe('11 Oct 2026, 00:30 CEST')
     expect(zoneName(at, 'Europe/Berlin')).toBe('CEST')
     expect(zoneName(at, 'America/Bogota')).toBe('GMT-5')
+  })
+
+  it('words feed reasons, Local headings, reading gaps and story links', () => {
+    expect(forYouReasonText({ kind: 'publisher', label: 'Reuters' })).toBe(
+      'From Reuters, which you follow',
+    )
+    const place = { city: 'Leeds', county: 'West Yorkshire', country: 'GB' }
+    expect(localScopeTitle('city', place)).toBe('In Leeds')
+    expect(localScopeTitle('county', place)).toBe('Across West Yorkshire')
+    expect(localScopeTitle('country', place)).toBe('Elsewhere in United Kingdom')
+    expect(localScopeTitle('country', { ...place, city: null, county: null })).toBe(
+      'Across United Kingdom',
+    )
+    const counts = { storiesThisWeek: 4, yourReads: 0 }
+    expect(readingGapLabel({ ...counts, kind: 'region', key: 'europe' })).toBe('Europe')
+    expect(readingGapLabel({ ...counts, kind: 'desk', key: 'science' })).toBe('Science')
+    expect(relationLabel('follows')).toBe('Follows')
+    expect(relationLabel('follows', 'incoming')).toBe('Followed by')
+  })
+
+  it('formats audio positions and cycles playback speeds', () => {
+    expect(audioClock(245.9)).toBe('4:05')
+    expect(audioClock(Number.NaN)).toBe('0:00')
+    expect(nextPlaybackRate(1)).toBe(1.25)
+    expect(nextPlaybackRate(0.75)).toBe(1)
+    expect(nextPlaybackRate(3)).toBe(1)
   })
 })
 

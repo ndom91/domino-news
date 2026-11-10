@@ -1,6 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { clockTime, formatDate, plural, stripCitations } from '@dn/domain'
-import type { StoryUpdateEvent } from '@dn/schemas'
+import { STORY_UPDATE_LABELS, type StoryUpdateEvent } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -8,15 +8,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { PublisherLogo } from '../publisher-logo'
 import { openExternalLink } from './open-external-link'
 
-const labels: Record<StoryUpdateEvent['kind'], string> = {
-  summary_revision: 'Summary revised',
-  new_reporting: 'New reporting',
-  official_response: 'Official response',
-  consequence: 'Consequence',
-  new_primary_source: 'Primary document added',
-  correction_or_clarification: 'Correction or clarification',
-  analysis: 'Analysis',
-}
 const SHOWN = 5
 
 export function StoryUpdates({
@@ -94,7 +85,7 @@ function UpdateRow({ item }: { item: StoryUpdateEvent }) {
           </View>
         ) : (
           <>
-            <Text style={styles.kind}>{labels[item.kind]}</Text>
+            <Text style={styles.kind}>{STORY_UPDATE_LABELS[item.kind]}</Text>
             <Text style={styles.description}>{item.description}</Text>
             <View style={styles.sourceRow}>
               <SourceLinks sources={item.sources} />

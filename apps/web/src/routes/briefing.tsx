@@ -1,3 +1,4 @@
+import { forYouReasonText } from '@dn/domain'
 import { feedbackMutation } from '@dn/queries'
 import type { BriefingResponse, ForYouReason } from '@dn/schemas'
 import { Button, IconButton, Notice, StoryItem, StoryItemSkeleton } from '@dn/ui'
@@ -185,21 +186,7 @@ function BriefingCard({
 
 function reasonText(reasons: ForYouReason[]) {
   const reason = reasons[0]
-  if (!reason) return 'Included to keep your briefing broad.'
-  switch (reason.kind) {
-    case 'narrative':
-      return `You follow ${reason.label}.`
-    case 'publisher':
-      return `From ${reason.label}, which you follow.`
-    case 'topic':
-      return `Topic you picked: ${reason.label}.`
-    case 'region':
-      return `Region you picked: ${reason.label}.`
-    case 'desk':
-      return `Desk you picked: ${reason.label}.`
-    case 'learned':
-      return `You asked for more ${reason.label}.`
-  }
+  return reason ? `${forYouReasonText(reason)}.` : 'Included to keep your briefing broad.'
 }
 
 function BriefingSkeleton() {

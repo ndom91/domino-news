@@ -1,6 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { formatDate, plural, TEMPORAL_RELATIONS } from '@dn/domain'
-import { DESK_LABELS, DESK_SLOT, type NarrativeDetail, type StoryRelation } from '@dn/schemas'
+import { formatDate, plural, relationLabel, TEMPORAL_RELATIONS } from '@dn/domain'
+import { DESK_LABELS, DESK_SLOT, type NarrativeDetail } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -9,15 +9,6 @@ import { FollowToggle } from '../../../components/follow-toggle'
 import { StoryUpdates } from '../../../components/story-detail/story-updates'
 import { Button, MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
 import { queries } from '../../../lib/api'
-
-const RELATION_LABELS: Record<StoryRelation, string> = {
-  follows: 'Follows',
-  branches_from: 'Branches from',
-  responds_to: 'Responds to',
-  corrects: 'Corrects',
-  provides_context_for: 'Background for',
-  related_to: 'Related to',
-}
 
 export default function NarrativeScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
@@ -154,7 +145,7 @@ function NarrativeContent({
                       <Text style={styles.storyMeta}>{plural(story.sourceCount, 'report')}</Text>
                       {edge && earlier ? (
                         <Text style={styles.relation}>
-                          {RELATION_LABELS[edge.relation]}: {earlier.title}
+                          {relationLabel(edge.relation)}: {earlier.title}
                         </Text>
                       ) : null}
                     </Pressable>

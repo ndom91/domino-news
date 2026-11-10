@@ -321,6 +321,16 @@ export const STORY_UPDATE_KINDS = [
 export const storyUpdateKindSchema = z.enum(STORY_UPDATE_KINDS)
 export type StoryUpdateKind = z.infer<typeof storyUpdateKindSchema>
 
+export const STORY_UPDATE_LABELS: Record<StoryUpdateKind, string> = {
+  new_reporting: 'New reporting',
+  official_response: 'Official response',
+  consequence: 'Consequence',
+  new_primary_source: 'Primary document added',
+  correction_or_clarification: 'Correction or clarification',
+  analysis: 'Analysis',
+  summary_revision: 'Summary revised',
+}
+
 export const STORY_UPDATE_ORIGINS = ['system', 'model', 'editor'] as const
 export type StoryUpdateOrigin = (typeof STORY_UPDATE_ORIGINS)[number]
 

@@ -1,4 +1,4 @@
-import { countryName } from '@dn/domain'
+import { countryName, localScopeTitle } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
 import type { LocalScope, Place, StoryListItem } from '@dn/schemas'
 import { Button, Notice, SectionHeader, Skeleton, StoryItem, TextInput } from '@dn/ui'
@@ -58,7 +58,7 @@ function LocalPage() {
               if (!stories?.length) return null
               return (
                 <section key={scope} aria-labelledby={`local-${scope}`}>
-                  <SectionHeader id={`local-${scope}`} title={scopeTitle(scope, locality)} />
+                  <SectionHeader id={`local-${scope}`} title={localScopeTitle(scope, locality)} />
                   <div className="grid grid-cols-3 gap-x-column gap-y-12 max-lg:grid-cols-2 max-md:grid-cols-1">
                     {stories.map((story) => (
                       <StoryItem key={story.id} story={story} now={now} Link={RouterLink} />
@@ -222,14 +222,6 @@ function LocationLink({ className, label }: { className?: string; label: string 
 
 function localityLabel(place: Place) {
   return place.city ?? place.county ?? countryName(place.country)
-}
-
-function scopeTitle(scope: LocalScope, place: Place) {
-  if (scope === 'city') return `In ${place.city}`
-  if (scope === 'county') return `Across ${place.county}`
-  return place.city || place.county
-    ? `Elsewhere in ${countryName(place.country)}`
-    : `Across ${countryName(place.country)}`
 }
 
 function LocalSkeleton() {

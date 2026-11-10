@@ -1,16 +1,11 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { plural } from '@dn/domain'
+import { audioClock, nextPlaybackRate, plural } from '@dn/domain'
 import Feather from '@expo/vector-icons/Feather'
 import { useAudioPlayerStatus } from 'expo-audio'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { useAudioBriefing } from './audio-briefing-provider'
-
-function clock(seconds: number) {
-  const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
-  return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
-}
 
 export function AudioBriefing({ available }: { available: boolean }) {
   const router = useRouter()
@@ -24,8 +19,7 @@ export function AudioBriefing({ available }: { available: boolean }) {
     : 0
   const progress = duration ? position / duration : 0
   function changeRate() {
-    const speeds = [1, 1.25, 1.5, 2, 0.75]
-    const next = speeds[(speeds.indexOf(rate) + 1) % speeds.length] ?? 1
+    const next = nextPlaybackRate(rate)
     player.setPlaybackRate(next)
     setRate(next)
   }
@@ -77,7 +71,7 @@ export function AudioBriefing({ available }: { available: boolean }) {
         <>
           <View
             accessible
-            accessibilityLabel={`Playback position ${clock(position)} of ${clock(duration)}`}
+            accessibilityLabel={`Playback position ${audioClock(position)} of ${audioClock(duration)}`}
             accessibilityRole="progressbar"
             accessibilityValue={{ min: 0, max: duration || 1, now: position }}
             style={styles.progressTrack}
@@ -85,8 +79,8 @@ export function AudioBriefing({ available }: { available: boolean }) {
             <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
           </View>
           <View style={styles.times}>
-            <Text style={styles.time}>{clock(position)}</Text>
-            <Text style={styles.time}>{clock(duration)}</Text>
+            <Text style={styles.time}>{audioClock(position)}</Text>
+            <Text style={styles.time}>{audioClock(duration)}</Text>
           </View>
           <View style={styles.controls}>
             <Pressable

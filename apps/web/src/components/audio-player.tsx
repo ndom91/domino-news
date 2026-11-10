@@ -1,11 +1,6 @@
-import { plural } from '@dn/domain'
+import { audioClock, nextPlaybackRate, plural } from '@dn/domain'
 import { CaretDownIcon, DownloadSimpleIcon, PauseIcon, PlayIcon } from '@phosphor-icons/react'
 import { type CSSProperties, useRef, useState } from 'react'
-
-function clock(seconds: number) {
-  const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0
-  return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, '0')}`
-}
 
 export function AudioPlayer({
   src,
@@ -45,8 +40,7 @@ export function AudioPlayer({
   function changeRate() {
     const element = audio.current
     if (!element) return
-    const speeds = [1, 1.25, 1.5, 2, 0.75]
-    element.playbackRate = speeds[(speeds.indexOf(rate) + 1) % speeds.length] ?? 1
+    element.playbackRate = nextPlaybackRate(rate)
     setRate(element.playbackRate)
   }
 
@@ -104,7 +98,7 @@ export function AudioPlayer({
             value={Math.min(position, duration || 1)}
             disabled={!duration}
             aria-label="Seek audio briefing"
-            aria-valuetext={`${clock(position)} of ${clock(duration)}`}
+            aria-valuetext={`${audioClock(position)} of ${audioClock(duration)}`}
             onChange={(event) => seek(Number(event.target.value))}
             className="audio-seek"
             style={
@@ -117,12 +111,12 @@ export function AudioPlayer({
             className="-mt-2 flex justify-between text-sm font-bold text-band-muted tabular-nums md:hidden"
             aria-hidden="true"
           >
-            <span>{clock(position)}</span>
-            <span>{clock(duration)}</span>
+            <span>{audioClock(position)}</span>
+            <span>{audioClock(duration)}</span>
           </div>
         </div>
         <span className="audio-player-time hidden text-right text-sm font-bold tabular-nums md:block">
-          {clock(position)} / {clock(duration)}
+          {audioClock(position)} / {audioClock(duration)}
         </span>
         <button
           type="button"

@@ -1,5 +1,5 @@
 import { clockTime, formatDate, formatDateTime, plural, stripCitations } from '@dn/domain'
-import type { StoryUpdateEvent, StoryUpdatesResponse } from '@dn/schemas'
+import { STORY_UPDATE_LABELS, type StoryUpdateEvent, type StoryUpdatesResponse } from '@dn/schemas'
 import { Button, PublisherLogo, SectionHeader } from '@dn/ui'
 import { CaretDownIcon } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
@@ -90,7 +90,7 @@ export function StoryUpdates({ updates }: { updates: StoryUpdatesResponse }) {
                   </div>
                 ) : (
                   <>
-                    <p className="type-label text-text-muted">{UPDATE_LABELS[update.kind]}</p>
+                    <p className="type-label text-text-muted">{STORY_UPDATE_LABELS[update.kind]}</p>
                     <p className="mt-2 max-w-reading text-md font-semibold leading-snug">
                       {update.description}
                     </p>
@@ -229,14 +229,4 @@ function SummaryVersion({ label, text }: { label: string; text: string }) {
       </div>
     </div>
   )
-}
-
-const UPDATE_LABELS: Record<StoryUpdateEvent['kind'], string> = {
-  summary_revision: 'Summary revised',
-  new_reporting: 'New reporting',
-  official_response: 'Official response',
-  consequence: 'Consequence',
-  new_primary_source: 'Primary document added',
-  correction_or_clarification: 'Correction or clarification',
-  analysis: 'Analysis',
 }

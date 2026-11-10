@@ -1,4 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import { forYouReasonText } from '@dn/domain'
 import type { ForYouReason, ForYouResponse } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
 import { useInfiniteQuery } from '@tanstack/react-query'
@@ -168,27 +169,7 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
 
 function reasonText(reasons: ForYouReason[]): string {
   if (reasons.length === 0) return 'One of the most widely covered stories right now.'
-  return reasons
-    .slice(0, 2)
-    .map((reason) => {
-      switch (reason.kind) {
-        case 'narrative':
-          return `You follow ${reason.label}`
-        case 'publisher':
-          return `From ${reason.label}, which you follow`
-        case 'topic':
-          return `Topic you picked: ${reason.label}`
-        case 'region':
-          return `Region you picked: ${reason.label}`
-        case 'desk':
-          return `Desk you picked: ${reason.label}`
-        case 'learned':
-          return `You asked for more ${reason.label}`
-        default:
-          return reason.label
-      }
-    })
-    .join(' · ')
+  return reasons.slice(0, 2).map(forYouReasonText).join(' · ')
 }
 
 const styles = StyleSheet.create({

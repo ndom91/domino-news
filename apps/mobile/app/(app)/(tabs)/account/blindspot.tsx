@@ -1,7 +1,13 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { countryName, ONE_SIDED_MIN_RATED, ONE_SIDED_SHARE, plural } from '@dn/domain'
+import {
+  countryName,
+  ONE_SIDED_MIN_RATED,
+  ONE_SIDED_SHARE,
+  plural,
+  readingGapLabel,
+} from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
-import { DESK_LABELS, type Desk, type Insights, REGION_LABELS, type Region } from '@dn/schemas'
+import type { Insights } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -115,7 +121,7 @@ function ReadingInsights({
           <View style={styles.gaps}>
             {data.gaps.map((gap) => (
               <View key={`${gap.kind}-${gap.key}`} style={styles.gap}>
-                <Text style={styles.gapTitle}>{gapLabel(gap)}</Text>
+                <Text style={styles.gapTitle}>{readingGapLabel(gap)}</Text>
                 <Text style={styles.caption}>
                   {plural(gap.storiesThisWeek, 'story', 'stories')} this week ·{' '}
                   {gap.yourReads === 0 ? 'none read by you' : `${gap.yourReads} read by you`}
@@ -171,10 +177,6 @@ function OneSidedCoverage({ data, now }: { data: Insights['oneSided']; now: stri
       )}
     </View>
   )
-}
-
-function gapLabel(gap: Insights['gaps'][number]) {
-  return gap.kind === 'region' ? REGION_LABELS[gap.key as Region] : DESK_LABELS[gap.key as Desk]
 }
 
 const styles = StyleSheet.create({

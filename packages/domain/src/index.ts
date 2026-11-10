@@ -1,4 +1,6 @@
+export * from './audio.ts'
 export * from './citations.ts'
+export * from './feeds.ts'
 export * from './ids.ts'
 export * from './lean.ts'
 export * from './regions.ts'

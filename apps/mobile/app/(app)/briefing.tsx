@@ -1,4 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import { forYouReasonText } from '@dn/domain'
 import type { BriefingResponse } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
@@ -60,6 +61,7 @@ function BriefingCard({
     item.story.id,
     item.feedback,
   )
+  const reason = item.reasons[0]
   if (hidden)
     return (
       <View style={styles.card}>
@@ -74,9 +76,7 @@ function BriefingCard({
       <StoryCard story={item.story} now={now} />
       {item.update ? <Text style={styles.text}>{item.update.description}</Text> : null}
       <Text style={styles.text}>
-        {item.reasons.length
-          ? item.reasons.map((reason) => reason.label).join(' · ')
-          : 'Included to keep your briefing broad.'}
+        {reason ? `${forYouReasonText(reason)}.` : 'Included to keep your briefing broad.'}
       </Text>
       <View style={styles.actions}>
         <Button

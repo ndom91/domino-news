@@ -1,6 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { countryName } from '@dn/domain'
-import type { LocalScope, Place } from '@dn/schemas'
+import { countryName, localScopeTitle } from '@dn/domain'
 import Feather from '@expo/vector-icons/Feather'
 import { useInfiniteQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -15,12 +14,6 @@ import {
   uiStyles,
 } from '../../../components/ui'
 import { queries } from '../../../lib/api'
-
-function scopeTitle(scope: LocalScope, place: Place) {
-  if (scope === 'city') return `In ${place.city}`
-  if (scope === 'county') return `Across ${place.county}`
-  return `${place.city || place.county ? 'Elsewhere in' : 'Across'} ${countryName(place.country)}`
-}
 
 export default function LocalScreen() {
   const router = useRouter()
@@ -91,7 +84,9 @@ export default function LocalScreen() {
               renderItem={({ item, index }) => (
                 <View style={styles.item}>
                   {first?.locality && (index === 0 || items[index - 1]?.scope !== item.scope) ? (
-                    <Text style={uiStyles.label}>{scopeTitle(item.scope, first.locality)}</Text>
+                    <Text style={uiStyles.label}>
+                      {localScopeTitle(item.scope, first.locality)}
+                    </Text>
                   ) : null}
                   <StoryCard story={item.story} now={now} />
                 </View>

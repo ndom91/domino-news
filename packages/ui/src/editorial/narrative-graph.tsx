@@ -1,11 +1,10 @@
-import { plural, stripCitations } from '@dn/domain'
+import { plural, relationLabel, stripCitations } from '@dn/domain'
 import type { NarrativeDetail } from '@dn/schemas'
 import type { CSSProperties } from 'react'
 import { cx } from '../cx.ts'
 import { deskKey } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 import { layoutNarrative } from './narrative-layout.ts'
-import { relationLabel } from './relations.ts'
 import { Timestamp } from './time.tsx'
 
 // Marker centre from the row top, level with the date line. The line and marker share the

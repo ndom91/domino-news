@@ -1,5 +1,11 @@
-import { countryName, ONE_SIDED_MIN_RATED, ONE_SIDED_SHARE, plural } from '@dn/domain'
-import { DESK_LABELS, type Desk, type Insights, REGION_LABELS, type Region } from '@dn/schemas'
+import {
+  countryName,
+  ONE_SIDED_MIN_RATED,
+  ONE_SIDED_SHARE,
+  plural,
+  readingGapLabel,
+} from '@dn/domain'
+import { type Insights, REGION_LABELS, type Region } from '@dn/schemas'
 import { Notice, PeriodBar, Skeleton, StoryItem } from '@dn/ui'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
@@ -107,7 +113,7 @@ function InsightSections({ data, now }: { data: Insights; now: string }) {
           <ul className="grid gap-6 md:grid-cols-3">
             {data.gaps.map((g) => (
               <li key={`${g.kind}-${g.key}`} className="border-t-2 border-rule pt-3">
-                <p className="type-headline">{gapLabel(g)}</p>
+                <p className="type-headline">{readingGapLabel(g)}</p>
                 <p className="mt-1 text-text-secondary">
                   {plural(g.storiesThisWeek, 'story', 'stories')} this week ·{' '}
                   {g.yourReads === 0 ? 'none read by you' : `${g.yourReads} read by you`}
@@ -141,10 +147,6 @@ function InsightSections({ data, now }: { data: Insights; now: string }) {
       </p>
     </div>
   )
-}
-
-function gapLabel(g: Insights['gaps'][number]) {
-  return g.kind === 'region' ? REGION_LABELS[g.key as Region] : DESK_LABELS[g.key as Desk]
 }
 
 function OneSidedSection({ data, now }: { data: Insights['oneSided']; now: string }) {

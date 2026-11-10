@@ -1,29 +1,11 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { formatDate, hostnameOf, plural } from '@dn/domain'
-import type { NarrativeRef, StoryDetail, StoryRelation } from '@dn/schemas'
+import { formatDate, hostnameOf, plural, relationLabel } from '@dn/domain'
+import type { NarrativeRef, StoryDetail } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
 import { SectionHeading } from './section-heading'
-
-const RELATION_LABELS: Record<StoryRelation, string> = {
-  follows: 'Follows',
-  branches_from: 'Branches from',
-  responds_to: 'Responds to',
-  corrects: 'Corrects',
-  provides_context_for: 'Background for',
-  related_to: 'Related to',
-}
-
-const INCOMING_RELATION_LABELS: Record<StoryRelation, string> = {
-  follows: 'Followed by',
-  branches_from: 'Branched into',
-  responds_to: 'Response',
-  corrects: 'Corrected by',
-  provides_context_for: 'Background',
-  related_to: 'Related to',
-}
 
 type PrimarySource = StoryDetail['primarySources'][number]
 type RelatedStory = StoryDetail['related'][number]
@@ -121,14 +103,6 @@ export function StoryConnections({
       </View>
     </>
   )
-}
-
-function relationLabel(relation: StoryRelation, direction: RelatedStory['direction']) {
-  if (direction === 'outgoing') {
-    return RELATION_LABELS[relation]
-  }
-
-  return INCOMING_RELATION_LABELS[relation]
 }
 
 const styles = StyleSheet.create({
