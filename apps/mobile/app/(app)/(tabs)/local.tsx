@@ -37,7 +37,7 @@ export default function LocalScreen() {
     )
   const first = feed.data.pages[0]
   const items = feed.data.pages.flatMap((page) => page.items)
-  const now = new Date().toISOString()
+  const now = new Date(feed.dataUpdatedAt).toISOString()
   return (
     <Screen>
       <FlatList

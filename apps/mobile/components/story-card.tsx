@@ -4,6 +4,10 @@ import { DESK_LABELS, DESK_SLOT, type StoryListItem } from '@dn/schemas'
 import { useRouter } from 'expo-router'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 
+/**
+ * `now` is when the list was fetched (its query's dataUpdatedAt). Don't pass `new Date()` from
+ * render: the React Compiler caches it for the screen's whole life.
+ */
 export function StoryCard({ story, now }: { story: StoryListItem; now: string }) {
   const router = useRouter()
   const slot = story.desk ? DESK_SLOT[story.desk] : 0

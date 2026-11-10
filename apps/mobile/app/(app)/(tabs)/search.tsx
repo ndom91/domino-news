@@ -67,7 +67,7 @@ export default function SearchScreen() {
         ) : null}
         {search.data ? (
           <SearchResults
-            now={new Date().toISOString()}
+            now={new Date(search.dataUpdatedAt).toISOString()}
             onNarrativePress={(slug) => router.push(`/narratives/${slug}`)}
             results={search.data}
             onStoryPress={(slug) => router.push(`/stories/${slug}`)}

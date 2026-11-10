@@ -33,7 +33,7 @@ export default function NarrativesScreen() {
     )
   }
 
-  const now = new Date().toISOString()
+  const now = new Date(narratives.dataUpdatedAt).toISOString()
 
   return (
     <Screen>

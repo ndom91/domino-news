@@ -17,6 +17,7 @@ export default function LearnedSignalsScreen() {
   const queryClient = useQueryClient()
   const signals = useQuery(queries.signals())
   const hiddenStories = useQuery(queries.hiddenStories())
+  const hiddenAt = new Date(hiddenStories.dataUpdatedAt).toISOString()
   const signalSave = useMutation(updateSignalsMutation(api, queryClient))
   const feedbackSave = useMutation(feedbackMutation(api, queryClient))
   const [confirmReset, setConfirmReset] = useState(false)
@@ -87,7 +88,7 @@ export default function LearnedSignalsScreen() {
           ) : null}
           {hiddenStories.data?.items.map((story) => (
             <View key={story.id} style={styles.hiddenStory}>
-              <StoryCard now={new Date().toISOString()} story={story} />
+              <StoryCard now={hiddenAt} story={story} />
               <Button
                 disabled={feedbackSave.isPending}
                 onPress={() => feedbackSave.mutate({ storyId: story.id, signal: null })}

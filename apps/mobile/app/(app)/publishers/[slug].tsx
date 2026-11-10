@@ -44,6 +44,7 @@ export default function PublisherScreen() {
   }
 
   const data = publisher.data
+  const now = new Date(publisher.dataUpdatedAt).toISOString()
   const languageLabel = data.languages.length ? data.languages.join(', ') : null
 
   return (
@@ -132,7 +133,7 @@ export default function PublisherScreen() {
           ) : (
             <View style={styles.stories}>
               {data.recentStories.map((story) => (
-                <StoryCard key={story.id} now={new Date().toISOString()} story={story} />
+                <StoryCard key={story.id} now={now} story={story} />
               ))}
             </View>
           )}

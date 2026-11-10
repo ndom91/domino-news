@@ -42,7 +42,7 @@ export default function ForYouScreen() {
 
   const first = feed.data.pages[0]
   const items = feed.data.pages.flatMap((page) => page.items)
-  const now = new Date().toISOString()
+  const now = new Date(feed.dataUpdatedAt).toISOString()
   let moreLabel = 'Show more stories'
   if (feed.isFetchNextPageError) moreLabel = 'Try again'
   if (feed.isFetchingNextPage) moreLabel = 'Loading…'

@@ -44,6 +44,7 @@ export default function BlindspotScreen() {
   }
 
   const data = insights.data
+  const now = new Date(insights.dataUpdatedAt).toISOString()
 
   return (
     <Screen>
@@ -81,11 +82,12 @@ export default function BlindspotScreen() {
         ) : (
           <ReadingInsights
             data={data}
+            now={now}
             onManageHistory={() => router.navigate('/account/history')}
           />
         )}
 
-        <OneSidedCoverage data={data.oneSided} />
+        <OneSidedCoverage data={data.oneSided} now={now} />
       </ScrollView>
     </Screen>
   )
@@ -93,12 +95,13 @@ export default function BlindspotScreen() {
 
 function ReadingInsights({
   data,
+  now,
   onManageHistory,
 }: {
   data: Insights
+  now: string
   onManageHistory: () => void
 }) {
-  const now = new Date().toISOString()
   const hasInsights = data.missedDevelopments.length > 0 || data.gaps.length > 0
 
   return (
@@ -157,8 +160,7 @@ function ReadingInsights({
   )
 }
 
-function OneSidedCoverage({ data }: { data: Insights['oneSided'] }) {
-  const now = new Date().toISOString()
+function OneSidedCoverage({ data, now }: { data: Insights['oneSided']; now: string }) {
   const country = data.country ? countryName(data.country) : null
 
   return (
