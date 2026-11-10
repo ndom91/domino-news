@@ -15,7 +15,7 @@ import {
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { deskColors } from './ui'
 
-export type FeedPickSection = 'regions' | 'desks' | 'topics'
+type FeedPickSection = 'regions' | 'desks' | 'topics'
 
 type FeedPickValues = {
   regions: readonly Region[]

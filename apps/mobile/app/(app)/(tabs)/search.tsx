@@ -9,7 +9,6 @@ import { LoadingView, MessageView, Screen, TextField, uiStyles } from '../../../
 import { isUnauthorized, queries } from '../../../lib/api'
 
 export default function SearchScreen() {
-  const router = useRouter()
   const [draft, setDraft] = useState('')
   const [submitted, setSubmitted] = useState('')
   const search = useQuery(queries.search({ q: submitted }))
@@ -65,29 +64,14 @@ export default function SearchScreen() {
           />
         ) : null}
         {search.data ? (
-          <SearchResults
-            now={new Date(search.dataUpdatedAt).toISOString()}
-            onNarrativePress={(slug) => router.push(`/narratives/${slug}`)}
-            results={search.data}
-            onStoryPress={(slug) => router.push(`/stories/${slug}`)}
-          />
+          <SearchResults now={new Date(search.dataUpdatedAt).toISOString()} results={search.data} />
         ) : null}
       </ScrollView>
     </Screen>
   )
 }
 
-function SearchResults({
-  now,
-  onNarrativePress,
-  results,
-  onStoryPress,
-}: {
-  now: string
-  onNarrativePress: (slug: string) => void
-  results: SearchResponse
-  onStoryPress: (slug: string) => void
-}) {
+function SearchResults({ now, results }: { now: string; results: SearchResponse }) {
   if (results.hits.length === 0) {
     return (
       <MessageView
@@ -103,44 +87,14 @@ function SearchResults({
         {results.mode === 'hybrid' ? 'semantic and keyword' : 'keyword'} search
       </Text>
       {results.hits.map((hit) => (
-        <SearchResult
-          hit={hit}
-          key={`${hit.type}-${hit.id}`}
-          now={now}
-          onNarrativePress={onNarrativePress}
-          onStoryPress={onStoryPress}
-        />
+        <SearchResult hit={hit} key={`${hit.type}-${hit.id}`} now={now} />
       ))}
     </View>
   )
 }
 
-function SearchResult({
-  hit,
-  now,
-  onNarrativePress,
-  onStoryPress,
-}: {
-  hit: SearchHit
-  now: string
-  onNarrativePress: (slug: string) => void
-  onStoryPress: (slug: string) => void
-}) {
-  const content = <SearchResultContent hit={hit} now={now} />
-
-  return (
-    <Pressable
-      accessibilityLabel={hit.title}
-      accessibilityRole="link"
-      onPress={() => (hit.type === 'story' ? onStoryPress(hit.slug) : onNarrativePress(hit.slug))}
-      style={({ pressed }) => [styles.result, pressed ? styles.resultPressed : null]}
-    >
-      {content}
-    </Pressable>
-  )
-}
-
-function SearchResultContent({ hit, now }: { hit: SearchHit; now: string }) {
+function SearchResult({ hit, now }: { hit: SearchHit; now: string }) {
+  const router = useRouter()
   const isStory = hit.type === 'story'
   const description = isStory ? hit.summary : hit.description
   const meta = isStory
@@ -148,14 +102,19 @@ function SearchResultContent({ hit, now }: { hit: SearchHit; now: string }) {
     : `${plural(hit.storyCount, 'story', 'stories')} · ${shortRelative(hit.updatedAt, new Date(now))}`
 
   return (
-    <>
+    <Pressable
+      accessibilityLabel={hit.title}
+      accessibilityRole="link"
+      onPress={() => router.push(isStory ? `/stories/${hit.slug}` : `/narratives/${hit.slug}`)}
+      style={({ pressed }) => [styles.result, pressed ? styles.resultPressed : null]}
+    >
       <Text style={styles.resultType}>{isStory ? 'Story' : 'Narrative'}</Text>
       <Text style={styles.resultTitle}>{hit.title}</Text>
       <Text numberOfLines={3} style={styles.resultSummary}>
         {description}
       </Text>
       <Text style={styles.resultMeta}>{meta}</Text>
-    </>
+    </Pressable>
   )
 }
 

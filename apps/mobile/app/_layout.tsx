@@ -43,7 +43,6 @@ export default function RootLayout() {
               !(error instanceof ApiError && error.status >= 400 && error.status < 500) &&
               failures < 3,
           },
-          mutations: { retry: false },
         },
       }),
   )
