@@ -1,13 +1,12 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { feedbackMutation } from '@dn/queries'
 import type { BriefingResponse } from '@dn/schemas'
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQuery } from '@tanstack/react-query'
 import { Redirect } from 'expo-router'
-import { useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../components/ui'
-import { api, isUnauthorized, queries } from '../../lib/api'
+import { isUnauthorized, queries } from '../../lib/api'
+import { useStoryFeedback } from '../../lib/use-story-feedback'
 
 export default function BriefingScreen() {
   const briefing = useQuery({
@@ -72,29 +71,15 @@ function BriefingCard({
   item: BriefingResponse['sections'][number]['items'][number]
   now: string
 }) {
-  const queryClient = useQueryClient()
-  const save = useMutation(feedbackMutation(api, queryClient))
-  const [feedback, setFeedback] = useState(item.feedback)
-  const [hidden, setHidden] = useState(false)
-  function update(signal: 'more' | 'less' | null) {
-    const previous = feedback
-    setFeedback(signal)
-    setHidden(signal === 'less')
-    save.mutate(
-      { storyId: item.story.id, signal },
-      {
-        onError: () => {
-          setFeedback(previous)
-          setHidden(false)
-        },
-      },
-    )
-  }
+  const { signal, hidden, update, isPending, isError } = useStoryFeedback(
+    item.story.id,
+    item.feedback,
+  )
   if (hidden)
     return (
       <View style={styles.card}>
         <Text style={styles.text}>Hidden from your Briefing: {item.story.title}</Text>
-        <Button disabled={save.isPending} onPress={() => update(null)}>
+        <Button disabled={isPending} onPress={() => update(null)}>
           Undo
         </Button>
       </View>
@@ -111,22 +96,22 @@ function BriefingCard({
       <View style={styles.actions}>
         <Button
           tone="light"
-          disabled={save.isPending}
+          disabled={isPending}
           accessibilityLabel={`More stories like ${item.story.title}`}
-          onPress={() => update(feedback === 'more' ? null : 'more')}
+          onPress={() => update(signal === 'more' ? null : 'more')}
         >
-          {feedback === 'more' ? 'Undo more' : 'More'}
+          {signal === 'more' ? 'Undo more' : 'More'}
         </Button>
         <Button
           tone="light"
-          disabled={save.isPending}
+          disabled={isPending}
           accessibilityLabel={`Fewer stories like ${item.story.title}`}
           onPress={() => update('less')}
         >
           Less
         </Button>
       </View>
-      {save.isError ? <Text style={styles.error}>Couldn’t save that. Try again.</Text> : null}
+      {isError ? <Text style={styles.error}>Couldn’t save that. Try again.</Text> : null}
     </View>
   )
 }

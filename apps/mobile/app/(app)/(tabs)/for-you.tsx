@@ -1,15 +1,14 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { feedbackMutation } from '@dn/queries'
 import type { ForYouReason, ForYouResponse } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
-import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useInfiniteQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
-import { useState } from 'react'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { AudioBriefing } from '../../../components/audio-briefing'
 import { StoryCard } from '../../../components/story-card'
 import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
-import { api, isUnauthorized, queries } from '../../../lib/api'
+import { isUnauthorized, queries } from '../../../lib/api'
+import { useStoryFeedback } from '../../../lib/use-story-feedback'
 
 type FeedItem = ForYouResponse['items'][number]
 
@@ -125,24 +124,10 @@ export default function ForYouScreen() {
 }
 
 function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
-  const queryClient = useQueryClient()
-  const feedback = useMutation(feedbackMutation(api, queryClient))
-  const [signal, setSignal] = useState(item.feedback)
-  const [hidden, setHidden] = useState(false)
-
-  function update(next: 'more' | 'less' | null) {
-    const previous = signal
-    setSignal(next)
-    feedback.mutate(
-      { signal: next, storyId: item.story.id },
-      {
-        onError: () => {
-          setSignal(previous)
-          setHidden(false)
-        },
-      },
-    )
-  }
+  const { signal, hidden, update, isPending, isError } = useStoryFeedback(
+    item.story.id,
+    item.feedback,
+  )
 
   if (hidden) {
     return (
@@ -154,7 +139,7 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
         <Text numberOfLines={2} style={styles.hiddenStory}>
           {item.story.title}
         </Text>
-        <Button disabled={feedback.isPending} onPress={() => update(null)} tone="light">
+        <Button disabled={isPending} onPress={() => update(null)} tone="light">
           Undo
         </Button>
       </View>
@@ -172,8 +157,8 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
         <Pressable
           accessibilityLabel="More like this"
           accessibilityRole="button"
-          accessibilityState={{ disabled: feedback.isPending, selected: signal === 'more' }}
-          disabled={feedback.isPending}
+          accessibilityState={{ disabled: isPending, selected: signal === 'more' }}
+          disabled={isPending}
           onPress={() => update(signal === 'more' ? null : 'more')}
           style={({ pressed }) => [
             styles.feedbackButton,
@@ -186,18 +171,15 @@ function ForYouCard({ item, now }: { item: FeedItem; now: string }) {
         <Pressable
           accessibilityLabel="Less like this"
           accessibilityRole="button"
-          accessibilityState={{ disabled: feedback.isPending }}
-          disabled={feedback.isPending}
-          onPress={() => {
-            setHidden(true)
-            update('less')
-          }}
+          accessibilityState={{ disabled: isPending }}
+          disabled={isPending}
+          onPress={() => update('less')}
           style={({ pressed }) => [styles.feedbackButton, pressed ? styles.pressed : null]}
         >
           <Feather color={t.color.text} name="thumbs-down" size={18} />
         </Pressable>
       </View>
-      {feedback.isError ? (
+      {isError ? (
         <Text accessibilityLiveRegion="polite" style={styles.error}>
           Couldn’t save that. Try again.
         </Text>
