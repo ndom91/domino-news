@@ -1,12 +1,5 @@
-import { plural, pluralWord, regionForCountry } from '@dn/domain'
-import {
-  LEAN_LABELS,
-  type PublisherStats,
-  publisherLeanSchema,
-  REGION_LABELS,
-  REGIONS,
-  type Region,
-} from '@dn/schemas'
+import { groupByHomeRegion, plural, pluralWord } from '@dn/domain'
+import { LEAN_LABELS, type PublisherStats, publisherLeanSchema } from '@dn/schemas'
 import { LeanMark, PublisherLogo, positionKey, Select, TextInput, Timestamp } from '@dn/ui'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router'
@@ -45,23 +38,6 @@ export const Route = createFileRoute('/publishers/')({
   head: () => ({ meta: [{ title: 'Publishers · Domino Wire' }] }),
   component: PublishersPage,
 })
-
-/** Groups in REGIONS order, keeping the API's order (most stories first) inside each. */
-function byRegion(items: PublisherStats[]) {
-  const groups = new Map<Region, PublisherStats[]>()
-  for (const p of items) {
-    // Publishers without a country (UN, EU bodies) are "International".
-    const region = regionForCountry(p.countryCode) ?? 'global'
-    groups.set(region, [...(groups.get(region) ?? []), p])
-  }
-  return REGIONS.filter((r) => groups.has(r))
-    .map((region) => ({
-      region,
-      label: region === 'global' ? 'International' : REGION_LABELS[region],
-      items: groups.get(region) ?? [],
-    }))
-    .sort((a, b) => Number(a.region === 'global') - Number(b.region === 'global'))
-}
 
 function PublishersPage() {
   const { data } = useSuspenseQuery(queries.publishers())
@@ -139,7 +115,7 @@ function PublishersPage() {
             .
           </p>
         ) : null}
-        {byRegion(shown).map((group, i) => (
+        {groupByHomeRegion(shown).map((group, i) => (
           <section
             key={group.region}
             aria-labelledby={`region-${group.region}`}

@@ -2,14 +2,17 @@ import { readFileSync } from 'node:fs'
 import {
   audioClock,
   clockTime,
+  combinedStoryLean,
   countryFromHeader,
   dayLabel,
   FALLBACK_COUNTRY_NAMES,
   formatDate,
   formatDateTime,
   forYouReasonText,
+  groupByHomeRegion,
   hostnameOf,
   KNOWN_COUNTRIES,
+  layoutNarrative,
   leanSide,
   localScopeTitle,
   nextPlaybackRate,
@@ -38,8 +41,9 @@ import {
   sendExpoPush,
   wikidataEvidence,
 } from '@dn/jobs'
+import type { PublisherLean } from '@dn/schemas'
 import { clampWeight, decayed, scoreStory } from '@dn/server'
-import { cx, layoutNarrative, THEME_TOKENS } from '@dn/ui'
+import { cx, THEME_TOKENS } from '@dn/ui'
 import { fixtureNarrative } from '@dn/ui/fixtures'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -283,6 +287,20 @@ describe('regions', () => {
     expect(pickLead(stories, ['europe'], now)?.id).toBe('eu')
     expect(pickLead(stories, ['africa', 'europe'], now)?.id).toBe('eu')
     expect(pickLead(stories, ['africa'], now)?.id).toBe('big')
+  })
+
+  it('groups publishers by home region with International last, keeping their order', () => {
+    const groups = groupByHomeRegion([
+      { id: 'un', countryCode: null },
+      { id: 'bbc', countryCode: 'GB' },
+      { id: 'ap', countryCode: 'US' },
+      { id: 'dw', countryCode: 'DE' },
+    ])
+    expect(groups.map((g) => [g.label, g.items.map((p) => p.id)])).toEqual([
+      ['North America', ['ap']],
+      ['Europe', ['bbc', 'dw']],
+      ['International', ['un']],
+    ])
   })
 })
 
@@ -689,6 +707,24 @@ describe('lean', () => {
     expect(oneSidedCoverage(['right', 'centre_right', 'right', 'centre'])).toBe('right')
     expect(oneSidedCoverage(['right', 'centre_right', 'centre', 'centre'])).toBeNull()
     expect(oneSidedCoverage(['left', 'left', 'right', 'right'])).toBeNull()
+  })
+
+  it('combines every country on one scale, where estimates never make it one-sided', () => {
+    const rated = (id: string, lean: PublisherLean, estimated = false) => ({
+      publisher: { id, slug: id, name: id, domain: `${id}.example` },
+      lean,
+      estimated,
+    })
+    const mix = [
+      { country: 'US', publishers: [rated('a', 'left'), rated('b', 'left')], oneSided: null },
+      { country: 'GB', publishers: [rated('c', 'left', true)], oneSided: null },
+    ]
+    expect(combinedStoryLean([])).toBeNull()
+    expect(combinedStoryLean(mix)?.publishers).toHaveLength(3)
+    // Only 2 sourced ratings, below the 3 that one-sided coverage needs.
+    expect(combinedStoryLean(mix)?.oneSided).toBeNull()
+    mix[1]?.publishers.push(rated('d', 'centre_left'))
+    expect(combinedStoryLean(mix)?.oneSided).toBe('left')
   })
 
   it('reads a country from the Cloudflare header', () => {

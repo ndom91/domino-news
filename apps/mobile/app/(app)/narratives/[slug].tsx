@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { formatDate, plural, relationLabel, TEMPORAL_RELATIONS } from '@dn/domain'
+import { formatDate, layoutNarrative, plural, relationLabel } from '@dn/domain'
 import { DESK_LABELS, DESK_SLOT, type NarrativeDetail } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
@@ -44,15 +44,15 @@ function NarrativeContent({
 }) {
   const router = useRouter()
   const [lastMarkerCenter, setLastMarkerCenter] = useState<number | null>(null)
-  const stories = [...narrative.stories].sort((a, b) =>
-    a.firstObservedAt.localeCompare(b.firstObservedAt),
-  )
+  // Oldest first, each with the earlier story it most directly continues, as on the web.
+  const { rows } = layoutNarrative(narrative.stories, narrative.edges)
+  const stories = rows.map((row) => row.node)
   const first = stories[0]
   const last = stories.at(-1)
   const slot = narrative.desk ? DESK_SLOT[narrative.desk] : 0
   const keyColor = t.color.narrative[slot] ?? t.color.narrative[0]
   const keyText = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
-  const storiesById = new Map(stories.map((story) => [story.id, story]))
+  const titleOf = new Map(stories.map((story) => [story.id, story.title]))
 
   return (
     <Screen>
@@ -98,21 +98,8 @@ function NarrativeContent({
                   style={[styles.rail, { height: lastMarkerCenter - markerCenter }]}
                 />
               ) : null}
-              {stories.map((story, index) => {
-                const edge = narrative.edges.find((candidate) => {
-                  if (
-                    candidate.fromStoryId !== story.id ||
-                    !TEMPORAL_RELATIONS.has(candidate.relation)
-                  ) {
-                    return false
-                  }
-                  const earlier = storiesById.get(candidate.toStoryId)
-                  return Boolean(
-                    earlier && earlier.firstObservedAt.localeCompare(story.firstObservedAt) <= 0,
-                  )
-                })
-                const earlier = edge ? storiesById.get(edge.toStoryId) : undefined
-
+              {rows.map(({ node: story, primary }, index) => {
+                const parentTitle = primary ? titleOf.get(primary.parentId) : undefined
                 return (
                   <View
                     key={story.id}
@@ -143,9 +130,9 @@ function NarrativeContent({
                         </Text>
                       ) : null}
                       <Text style={styles.storyMeta}>{plural(story.sourceCount, 'report')}</Text>
-                      {edge && earlier ? (
+                      {primary && parentTitle ? (
                         <Text style={styles.relation}>
-                          {relationLabel(edge.relation)}: {earlier.title}
+                          {relationLabel(primary.relation)}: {parentTitle}
                         </Text>
                       ) : null}
                     </Pressable>

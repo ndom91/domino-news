@@ -1,6 +1,5 @@
-import { regionForCountry } from '@dn/domain'
+import { groupByHomeRegion } from '@dn/domain'
 import { savePreferencesMutation, setFollowMutation } from '@dn/queries'
-import { REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
 import { Button, Notice } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
@@ -106,24 +105,17 @@ function PublisherPicker() {
   const followed = (follows.data?.items ?? [])
     .filter((f) => f.targetType === 'publisher')
     .map((f) => f.id)
-  const newsrooms = publishers.data.items.filter((p) => p.kind === 'newsroom')
+  const newsrooms = publishers.data.items
+    .filter((p) => p.kind === 'newsroom')
+    .toSorted((a, b) => a.name.localeCompare(b.name))
   const nameOf = new Map(newsrooms.map((p) => [p.id, p.name]))
-  const byRegion = new Map<Region | 'global', string[]>()
-  for (const p of newsrooms.toSorted((a, b) => a.name.localeCompare(b.name))) {
-    const region = regionForCountry(p.countryCode) ?? 'global'
-    byRegion.set(region, [...(byRegion.get(region) ?? []), p.id])
-  }
-  // 'global' is in REGIONS; move it last so "International" closes the list.
-  const groups = [...REGIONS.filter((r) => r !== 'global'), 'global' as const].filter((r) =>
-    byRegion.has(r),
-  )
   return (
     <div className="flex flex-col gap-6">
-      {groups.map((region) => (
+      {groupByHomeRegion(newsrooms).map(({ region, label, items }) => (
         <Chips
           key={region}
-          label={region === 'global' ? 'International' : REGION_LABELS[region]}
-          options={byRegion.get(region) ?? []}
+          label={label}
+          options={items.map((p) => p.id)}
           labelOf={(id) => nameOf.get(id) ?? id}
           selected={followed}
           disabled={follows.isPending || save.isPending}

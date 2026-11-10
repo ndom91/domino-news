@@ -1,16 +1,15 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { formatDate, hostnameOf, plural } from '@dn/domain'
-import { LEAN_LABELS, type PublisherLean, type StoryLean, type StorySource } from '@dn/schemas'
+import { formatDate, groupReporting, hostnameOf, plural, type ReportingGroup } from '@dn/domain'
+import { LEAN_LABELS, type StoryLean, type StorySource } from '@dn/schemas'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { groupReporting } from '../../lib/reporting-groups'
 import { PublisherLogo } from '../publisher-logo'
 import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
 import { SectionHeading } from './section-heading'
 
 const EXCERPT_MAX_LENGTH = 360
-const GROUP_COLORS: Record<PublisherLean | 'unrated', string> = {
+const GROUP_COLORS: Record<ReportingGroup, string> = {
   left: t.color.lean.left,
   centre_left: t.color.lean.centreLeft,
   centre: t.color.lean.centre,
@@ -40,11 +39,14 @@ export function StoryReporting({
           heading: null,
           group: null,
         }))
-      : grouped.flatMap(({ group, items }) =>
+      : grouped.flatMap(({ group, items, publishers }) =>
           (expanded ? items : items.slice(0, 2)).map((source, index) => ({
             source,
             group,
-            heading: index === 0 ? (group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]) : null,
+            heading:
+              index === 0
+                ? { title: group === 'unrated' ? 'Not rated' : LEAN_LABELS[group], publishers }
+                : null,
           })),
         )
 
@@ -94,18 +96,9 @@ export function StoryReporting({
           {heading ? (
             <View style={styles.groupHeading}>
               <Text accessibilityRole="header" style={styles.groupTitle}>
-                {heading}
+                {heading.title}
               </Text>
-              <Text style={styles.groupCount}>
-                {plural(
-                  new Set(
-                    grouped
-                      .find((item) => item.group === group)
-                      ?.items.map((item) => item.publisher.id),
-                  ).size,
-                  'publisher',
-                )}
-              </Text>
+              <Text style={styles.groupCount}>{plural(heading.publishers, 'publisher')}</Text>
             </View>
           ) : null}
           <Pressable

@@ -1,11 +1,5 @@
-import { oneSidedCoverage, plural } from '@dn/domain'
-import {
-  LEAN_LABELS,
-  type PublisherLean,
-  publisherLeanSchema,
-  type StoryDetail,
-  type StorySource,
-} from '@dn/schemas'
+import { groupReporting, oneSidedCoverage, plural, type ReportingGroup } from '@dn/domain'
+import { LEAN_LABELS, type StoryDetail, type StorySource } from '@dn/schemas'
 import {
   Badge,
   Button,
@@ -19,11 +13,9 @@ import { useEffect, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from './link.tsx'
 
-type Group = PublisherLean | 'unrated'
-const GROUPS: Group[] = [...publisherLeanSchema.options, 'unrated']
 const GROUP_SHOWN = 2
 const TIME_SHOWN = 5
-const GROUP_BORDER: Record<Group, string> = {
+const GROUP_BORDER: Record<ReportingGroup, string> = {
   left: 'border-lean-left',
   centre_left: 'border-lean-centre-left',
   centre: 'border-text-muted',
@@ -41,38 +33,18 @@ export function OriginalReporting({
   active: 'lean' | 'time'
   onActiveChange: (view: 'lean' | 'time') => void
 }) {
-  const [expanded, setExpanded] = useState<Group[]>([])
+  const [expanded, setExpanded] = useState<ReportingGroup[]>([])
   const [showAll, setShowAll] = useState(false)
-  const ratings = new Map(
-    story.leanMix.flatMap((mix) => mix.publishers.map((p) => [p.publisher.id, p] as const)),
-  )
-  const ordered = story.sources.toSorted((a, b) =>
-    (a.publishedAt ?? a.observedAt).localeCompare(b.publishedAt ?? b.observedAt),
-  )
-  const groups: Record<Group, StorySource[]> = {
-    left: [],
-    centre_left: [],
-    centre: [],
-    centre_right: [],
-    right: [],
-    unrated: [],
-  }
-  for (const source of ordered) {
-    const rating = ratings.get(source.publisher.id)
-    groups[source.official ? 'unrated' : (rating?.lean ?? 'unrated')].push(source)
-  }
+  const { ordered, ratings, groups } = groupReporting(story.sources, story.leanMix)
   const publisherCount = new Set(ordered.map((source) => source.publisher.id)).size
-  // Publishers per group, not reports: one publisher can file several.
   const counts: LeanCounts = {}
-  for (const group of GROUPS) {
-    counts[group] = new Set(groups[group].map((source) => source.publisher.id)).size
-  }
+  for (const { group, publishers } of groups) counts[group] = publishers
   const sourced = [...ratings.values()].filter((rating) => !rating.estimated)
   const oneSided = oneSidedCoverage(sourced.map((rating) => rating.lean))
   const hasHidden =
     active === 'time'
       ? ordered.length > TIME_SHOWN
-      : GROUPS.some((group) => groups[group].length > GROUP_SHOWN)
+      : groups.some(({ items }) => items.length > GROUP_SHOWN)
 
   // A citation must reach its report even when its group or time list is collapsed.
   // biome-ignore lint/correctness/useExhaustiveDependencies: a view change can hide the current citation target.
@@ -109,10 +81,12 @@ export function OriginalReporting({
               <LeanBar counts={counts} className="h-3" />
               <p className="sr-only">
                 Covering publishers:{' '}
-                {GROUPS.map(
-                  (group) =>
-                    `${group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]}: ${counts[group] ?? 0}`,
-                ).join('; ')}
+                {groups
+                  .map(
+                    ({ group, publishers }) =>
+                      `${group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]}: ${publishers}`,
+                  )
+                  .join('; ')}
                 .
               </p>
             </>
@@ -159,11 +133,9 @@ export function OriginalReporting({
 
       {active === 'lean' ? (
         <div id="reports-lean" className="border-t-2 border-rule">
-          {GROUPS.map((group) => {
-            const sources = groups[group]
+          {groups.map(({ group, items: sources, publishers: count }) => {
             const isExpanded = showAll || expanded.includes(group)
             const visible = isExpanded ? sources : sources.slice(0, GROUP_SHOWN)
-            const count = counts[group] ?? 0
             return (
               <section
                 key={group}

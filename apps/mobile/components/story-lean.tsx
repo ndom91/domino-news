@@ -1,5 +1,5 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { oneSidedCoverage, plural } from '@dn/domain'
+import { combinedStoryLean, plural } from '@dn/domain'
 import { LEAN_LABELS, type PublisherLean, type StoryLean } from '@dn/schemas'
 import { StyleSheet, Text, View } from 'react-native'
 import { SectionHeading } from './story-detail/section-heading'
@@ -15,15 +15,8 @@ const colors: Record<PublisherLean, string> = {
 }
 
 export function StoryLeanMeter({ mix }: { mix: StoryLean[] }) {
-  if (mix.length === 0) return null
-  const publishers = mix.flatMap((entry) => entry.publishers)
-  const main: StoryLean = {
-    country: 'global',
-    publishers,
-    oneSided: oneSidedCoverage(
-      publishers.filter((publisher) => !publisher.estimated).map((publisher) => publisher.lean),
-    ),
-  }
+  const main = combinedStoryLean(mix)
+  if (!main) return null
 
   return (
     <View style={styles.section}>

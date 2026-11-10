@@ -1,7 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import { regionForCountry } from '@dn/domain'
+import { groupByHomeRegion } from '@dn/domain'
 import { savePreferencesMutation, setFollowMutation } from '@dn/queries'
-import { REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -145,25 +144,17 @@ function PublisherPicker() {
       .filter((follow) => follow.targetType === 'publisher')
       .map((follow) => follow.id),
   )
-  const newsrooms = [...publishers.data.items]
+  const newsrooms = publishers.data.items
     .filter((publisher) => publisher.kind === 'newsroom')
     .sort((a, b) => a.name.localeCompare(b.name))
-  const groups = [...REGIONS.filter((region) => region !== 'global'), 'global' as const]
-    .map((region) => ({
-      region,
-      publishers: newsrooms.filter(
-        (publisher) => (regionForCountry(publisher.countryCode) ?? 'global') === region,
-      ),
-    }))
-    .filter((group) => group.publishers.length > 0)
 
   return (
     <View style={styles.publisherGroups}>
-      {groups.map(({ region, publishers: groupedPublishers }) => (
+      {groupByHomeRegion(newsrooms).map(({ region, label, items: groupedPublishers }) => (
         <ChipPicker
           disabled={save.isPending}
           key={region}
-          label={region === 'global' ? 'International' : REGION_LABELS[region as Region]}
+          label={label}
           onToggle={(id) =>
             save.mutate({ targetType: 'publisher', targetId: id, follow: !followed.has(id) })
           }

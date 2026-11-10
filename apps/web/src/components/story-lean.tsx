@@ -1,4 +1,4 @@
-import { oneSidedCoverage } from '@dn/domain'
+import { combinedStoryLean } from '@dn/domain'
 import type { StoryLean as StoryLeanData } from '@dn/schemas'
 import { LeanSpread, SectionLabel } from '@dn/ui'
 import { RouterLink } from './link.tsx'
@@ -8,14 +8,8 @@ import { RouterLink } from './link.tsx'
  * publisher retains the country context of the evidence that informed its assessment.
  */
 export function StoryLean({ mix }: { mix: StoryLeanData[] }) {
-  if (mix.length === 0) return null
-  const publishers = mix.flatMap((m) => m.publishers)
-  const lean = {
-    country: 'global',
-    publishers,
-    // Estimates can appear in the bar but cannot make its coverage one-sided.
-    oneSided: oneSidedCoverage(publishers.filter((p) => !p.estimated).map((p) => p.lean)),
-  }
+  const lean = combinedStoryLean(mix)
+  if (!lean) return null
 
   return (
     <section aria-labelledby="lean-heading">

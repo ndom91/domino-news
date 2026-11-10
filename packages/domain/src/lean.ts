@@ -1,4 +1,10 @@
-import type { LeanSide, PublisherLean } from '@dn/schemas'
+import {
+  type LeanSide,
+  PUBLISHER_LEANS,
+  type PublisherLean,
+  type StoryLean,
+  type StorySource,
+} from '@dn/schemas'
 
 // A Story counts as one-sided in a country when at least this many of its publishers there
 // are rated, and at least this share of the rated ones sit on one side.
@@ -23,6 +29,49 @@ export function oneSidedCoverage(leans: (PublisherLean | null)[]): LeanSide | nu
     if (count / rated.length >= ONE_SIDED_SHARE) return side
   }
   return null
+}
+
+/**
+ * A Story's covering publishers from every country on one shared scale, or null with none.
+ * Estimates appear in the mix but never make it one-sided.
+ */
+export function combinedStoryLean(mix: StoryLean[]): StoryLean | null {
+  if (mix.length === 0) return null
+  const publishers = mix.flatMap((entry) => entry.publishers)
+  return {
+    country: 'global',
+    publishers,
+    oneSided: oneSidedCoverage(publishers.filter((p) => !p.estimated).map((p) => p.lean)),
+  }
+}
+
+export type ReportingGroup = PublisherLean | 'unrated'
+// Left to right on the scale; unrated publishers and official sources come last.
+const REPORTING_GROUPS: readonly ReportingGroup[] = [...PUBLISHER_LEANS, 'unrated']
+
+/**
+ * A Story's reports oldest first, and the same reports grouped by their publisher's lean.
+ * Official sources count as unrated, since lean describes newsrooms. A group's `publishers`
+ * counts publishers, not reports: one publisher can file several.
+ */
+export function groupReporting(sources: StorySource[], leanMix: StoryLean[]) {
+  const ratings = new Map(
+    leanMix.flatMap((mix) =>
+      mix.publishers.map((rating) => [rating.publisher.id, rating] as const),
+    ),
+  )
+  const ordered = [...sources].sort((a, b) =>
+    (a.publishedAt ?? a.observedAt).localeCompare(b.publishedAt ?? b.observedAt),
+  )
+  const groups = REPORTING_GROUPS.map((group) => {
+    const items = ordered.filter(
+      (source) =>
+        (source.official ? 'unrated' : (ratings.get(source.publisher.id)?.lean ?? 'unrated')) ===
+        group,
+    )
+    return { group, items, publishers: new Set(items.map((source) => source.publisher.id)).size }
+  })
+  return { ordered, ratings, groups }
 }
 
 /** A plausible ISO 3166-1 alpha-2 code from a header, or null. */

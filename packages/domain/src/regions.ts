@@ -1,4 +1,4 @@
-import type { Region } from '@dn/schemas'
+import { REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
 
 // ISO 3166-1 alpha-2 → macro-region, for publishers' home countries. Used by fixture
 // inference as a stand-in; real models tag the regions a Story is about instead.
@@ -96,4 +96,25 @@ export function pickLead<T extends LeadCandidate>(
     (best, s) => (!best || s.sourceCount > best.sourceCount ? s : best),
     undefined,
   )
+}
+
+/**
+ * Publishers grouped by their home country's region, in REGIONS order with "International"
+ * (no known country, such as UN bodies) last. Each group keeps the input order.
+ */
+export function groupByHomeRegion<T extends { countryCode: string | null }>(publishers: T[]) {
+  const groups = new Map<Region, T[]>()
+  for (const publisher of publishers) {
+    const region = regionForCountry(publisher.countryCode) ?? 'global'
+    const group = groups.get(region)
+    if (group) group.push(publisher)
+    else groups.set(region, [publisher])
+  }
+  return [...REGIONS.filter((region) => region !== 'global'), 'global' as const]
+    .filter((region) => groups.has(region))
+    .map((region) => ({
+      region,
+      label: region === 'global' ? 'International' : REGION_LABELS[region],
+      items: groups.get(region) ?? [],
+    }))
 }
