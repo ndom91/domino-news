@@ -6,6 +6,7 @@ import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { z } from 'zod/mini'
 import { authClient } from '../lib/auth-client.ts'
 import { seo } from '../lib/seo.ts'
+import { LEGAL_LINKS } from '../lib/seo-routes.ts'
 import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/login')({
@@ -292,20 +293,13 @@ function LoginPage() {
           </p>
           <nav aria-label="Legal" className="mt-8 border-t border-border pt-2 text-sm">
             <ul className="flex flex-wrap gap-x-5">
-              {(
-                [
-                  ['/about', 'About'],
-                  ['/privacy', 'Privacy'],
-                  ['/terms', 'Terms'],
-                  ['/imprint', 'Imprint'],
-                ] as const
-              ).map(([to, label]) => (
-                <li key={to}>
+              {LEGAL_LINKS.map((item) => (
+                <li key={item.to}>
                   <Link
-                    to={to}
+                    to={item.to}
                     className="inline-flex min-h-tap items-center text-text-muted underline-offset-4 hover:text-text hover:underline"
                   >
-                    {label}
+                    {item.label}
                   </Link>
                 </li>
               ))}

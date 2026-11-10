@@ -1,7 +1,23 @@
-// Server-only helpers for robots.txt and sitemap.xml.
+// The public pages, and server-only helpers for robots.txt and sitemap.xml.
 
-/** Pages search engines may index: the signed-out landing page and the public pages. */
-export const INDEXED_PATHS = ['/login', '/about', '/privacy', '/terms', '/imprint']
+/** The about, contact and legal pages, linked from every footer and the login page. */
+export const LEGAL_LINKS = [
+  { to: '/about', label: 'About' },
+  { to: '/contact-us', label: 'Contact us' },
+  { to: '/privacy', label: 'Privacy' },
+  { to: '/terms', label: 'Terms' },
+  { to: '/imprint', label: 'Imprint' },
+] as const
+
+/**
+ * Readable without an account (the imprint and privacy policy must be reachable by anyone),
+ * and the only pages search engines may index: sign-in, the pages above and deletion steps.
+ */
+export const PUBLIC_PATHS: readonly string[] = [
+  '/login',
+  ...LEGAL_LINKS.map((link) => link.to),
+  '/delete-account',
+]
 
 /** BETTER_AUTH_URL is the public origin in every deployment; the request is a fallback. */
 export function publicOrigin(request: Request) {

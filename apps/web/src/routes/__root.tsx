@@ -17,20 +17,11 @@ import { NotFoundPage } from '../components/not-found.tsx'
 import { PublicHeader, SiteFooter, SiteHeader } from '../components/site-header.tsx'
 import { queries } from '../lib/api.ts'
 import { seo } from '../lib/seo.ts'
+import { PUBLIC_PATHS } from '../lib/seo-routes.ts'
 import { getSessionInfo } from '../lib/session.ts'
 import { themeScript } from '../lib/theme.ts'
 import appCss from '../styles.css?url'
 
-// Readable without an account: the imprint and privacy policy must be reachable by anyone.
-const PUBLIC_PATHS = new Set([
-  '/login',
-  '/about',
-  '/privacy',
-  '/terms',
-  '/imprint',
-  '/delete-account',
-  '/contact-us',
-])
 // Signed out, these show a teaser (title, one sentence, sign-in button) instead of redirecting,
 // so shared links preview properly. The routes load public preview data when `preview` is set.
 const PREVIEW_PATH = /^\/(stories|narratives|publishers)\/[^/]+\/?$/
@@ -46,7 +37,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     })
     // The whole app sits behind login, apart from the public pages and share teasers.
     const preview = !session.user && PREVIEW_PATH.test(location.pathname)
-    if (!session.user && !preview && !PUBLIC_PATHS.has(location.pathname)) {
+    if (!session.user && !preview && !PUBLIC_PATHS.includes(location.pathname)) {
       throw redirect({ to: '/login', search: { next: location.href } })
     }
     // First visit: onboarding once, then back to where they were going.

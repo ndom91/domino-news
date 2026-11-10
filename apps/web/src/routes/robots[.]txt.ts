@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { INDEXED_PATHS, publicOrigin } from '../lib/seo-routes.ts'
+import { PUBLIC_PATHS, publicOrigin } from '../lib/seo-routes.ts'
 
 // Only the public pages may be crawled; everything else sits behind login (and its signed-out
 // teasers carry noindex). Link-preview bots don't read robots.txt for single URLs anyway.
@@ -10,7 +10,7 @@ export const Route = createFileRoute('/robots.txt')({
         const origin = publicOrigin(request)
         const body = [
           'User-agent: *',
-          ...INDEXED_PATHS.map((path) => `Allow: ${path}$`),
+          ...PUBLIC_PATHS.map((path) => `Allow: ${path}$`),
           'Disallow: /',
           '',
           `Sitemap: ${origin}/sitemap.xml`,

@@ -6,6 +6,7 @@ import { Link, useMatchRoute } from '@tanstack/react-router'
 import { useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { queries } from '../lib/api.ts'
+import { LEGAL_LINKS } from '../lib/seo-routes.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 import { currentTheme, switchTheme, type Theme } from '../lib/theme.ts'
 
@@ -210,14 +211,6 @@ export function PublicHeader() {
   )
 }
 
-const LEGAL = [
-  { to: '/about', label: 'About' },
-  { to: '/contact-us', label: 'Contact us' },
-  { to: '/privacy', label: 'Privacy' },
-  { to: '/terms', label: 'Terms' },
-  { to: '/imprint', label: 'Imprint' },
-] as const
-
 /** Site footer. Signed out (on the public pages) it shows only the legal links and sign-in. */
 export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
   return (
@@ -265,7 +258,7 @@ export function SiteFooter({ user }: { user: { isAdmin: boolean } | null }) {
           <p>© {new Date().getFullYear()} Domino Wire</p>
           <nav aria-label="Legal">
             <ul className="flex flex-wrap gap-x-5 gap-y-2">
-              {LEGAL.map((item) => (
+              {LEGAL_LINKS.map((item) => (
                 <li key={item.to}>
                   <Link
                     to={item.to}
