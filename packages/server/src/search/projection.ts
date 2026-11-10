@@ -71,48 +71,13 @@ async function narrativeDocument(db: Db, narrativeId: string) {
   }
 }
 
-async function articleDocument(db: Db, articleId: string) {
-  const [row] = await db
-    .select({
-      id: schema.article.id,
-      publisherId: schema.article.publisherId,
-      publishedAt: schema.article.publishedAt,
-      firstSeenAt: schema.article.firstSeenAt,
-      title: schema.articleRevision.title,
-      description: schema.articleRevision.description,
-      embedding: schema.articleEmbedding.embedding,
-    })
-    .from(schema.article)
-    .innerJoin(
-      schema.articleRevision,
-      eq(schema.articleRevision.id, schema.article.latestRevisionId),
-    )
-    .innerJoin(schema.articleEmbedding, eq(schema.articleEmbedding.articleId, schema.article.id))
-    .where(eq(schema.article.id, articleId))
-  if (!row) return null
-  return {
-    version: null,
-    doc: {
-      id: row.id,
-      title: row.title,
-      description: row.description ?? undefined,
-      publisher_id: row.publisherId,
-      published_at: seconds(row.publishedAt ?? row.firstSeenAt),
-      embedding: row.embedding,
-    },
-  }
-}
-
 const ALIAS_FOR: Record<AggregateType, Alias> = {
   story: 'stories',
   narrative: 'narratives',
-  article: 'articles',
 }
 
 function buildDocument(db: Db, type: AggregateType, id: string) {
-  if (type === 'story') return storyDocument(db, id)
-  if (type === 'narrative') return narrativeDocument(db, id)
-  return articleDocument(db, id)
+  return type === 'story' ? storyDocument(db, id) : narrativeDocument(db, id)
 }
 
 /**
@@ -247,10 +212,7 @@ async function projectEvent(db: Db, ts: Typesense, event: OutboxRow): Promise<st
         ),
       )
     const alreadyApplied =
-      event.aggregateType !== 'article' &&
-      state !== undefined &&
-      !state.deleted &&
-      state.indexedVersion > event.aggregateVersion
+      state !== undefined && !state.deleted && state.indexedVersion > event.aggregateVersion
     if (!alreadyApplied) {
       await projectAggregate(db, ts, event.aggregateType as AggregateType, event.aggregateId)
     }
@@ -276,11 +238,8 @@ export async function rebuildSearchIndex(db: Db, ts: Typesense, log = console.lo
             .select({ id: schema.story.id })
             .from(schema.story)
             .where(isNotNull(schema.story.publishedAt))
-        : alias === 'narratives'
-          ? await db.select({ id: schema.narrative.id }).from(schema.narrative)
-          : await db.select({ id: schema.articleEmbedding.articleId }).from(schema.articleEmbedding)
-    const type: AggregateType =
-      alias === 'stories' ? 'story' : alias === 'narratives' ? 'narrative' : 'article'
+        : await db.select({ id: schema.narrative.id }).from(schema.narrative)
+    const type: AggregateType = alias === 'stories' ? 'story' : 'narrative'
     // Build documents per aggregate, but send them to Typesense in bulk.
     for (let i = 0; i < ids.length; i += REBUILD_BATCH) {
       const batch = ids.slice(i, i + REBUILD_BATCH)

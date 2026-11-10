@@ -1,7 +1,7 @@
 import { type Db, schema } from '@dn/db'
 import { eq, sql } from 'drizzle-orm'
 
-export type AggregateType = 'story' | 'narrative' | 'article'
+export type AggregateType = 'story' | 'narrative'
 
 /**
  * Delete delivered outbox events and their inbox records after `days`. Pending and

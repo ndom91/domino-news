@@ -30,7 +30,7 @@
 - **Edge direction:** `story_relationship.from_story_id` is always the *newer* Story. Temporal relations (`follows`, `branches_from`, `responds_to`, `corrects`) must point back in time and stay acyclic (`validateNewEdge`). `related_to` is stored once.
 - **Summaries:** each version is immutable; `story.current_summary_id` points at the current one. Human edits are a new version with `edited_by_user_id`, and use optimistic concurrency (`basedOnVersionId` must be current, else `409 conflict`).
 - **Staleness:** `story.input_fingerprint` = hash of the active articles' latest revision IDs. A generated summary is recorded only if its fingerprint is still current and differs from the current version's (so retries and stale jobs never overwrite).
-- **Embeddings:** stored canonically in Postgres (`article_embedding`, `story.embedding`, pgvector 768-d) so Typesense can be rebuilt without re-embedding. Retrieval itself goes through Typesense.
+- **Embeddings:** stored canonically in Postgres (`article_embedding`, `story.embedding`, pgvector 768-d) so Typesense can be rebuilt without re-embedding. Matching finds neighbour articles in Postgres with an exact pgvector query over the ±4-day window (`article_reported_at_idx`); until November 2026 it went through a Typesense `articles` collection, which made every match wait for the indexer. Story retrieval (relationships) and search still go through Typesense.
 - **Merge/split:** `story_lineage_event`, `story_alias` and `story.merged_into_story_id` exist and old IDs/slugs resolve, but no merge/split operation or UI is implemented yet.
 - **Locality:** generated summaries attach up to five event places (city, county/local equivalent and ISO country) to a Story. They describe where the event happens or directly affects, never publisher headquarters. Readers may explicitly save one locality; absent that, the Local API can use the request country without persisting it. Local ranks exact city, then county/local area, then country matches.
 
@@ -38,7 +38,7 @@
 
 ```text
 poll_feed ──► article + revision + observation ──(same tx)──► embed_article
-embed_article ──► article_embedding + outbox(article) ──► match_article (+2s)
+embed_article ──► article_embedding ──► match_article
 match_article ──► attach to Story | new Story ──► summary_debounce ──► release_summary_debounce
 close concurrent follower ──► match_admission ──► resume_match_article ──► match_article
 release_summary_debounce ──► build_story_summary ──► summary version + publish + outbox(story)
@@ -90,7 +90,7 @@ Prompt lessons from the real-model runs (current versions: `match-story@6`, `cla
 
 ## Search
 
-- Typesense collections are versioned (`stories_<ts>`) behind aliases (`stories`, `narratives`, `articles`). `pnpm cli search:rebuild` (or the ops button) builds fresh collections from Postgres and swaps the aliases.
+- Typesense collections are versioned (`stories_<ts>`) behind aliases (`stories`, `narratives`). `pnpm cli search:rebuild` (or the ops button) builds fresh collections from Postgres and swaps the aliases.
 - The indexer never trusts event payloads: it re-reads Postgres for the aggregate, so duplicates, replays and out-of-order events converge. `search_projection_state` records applied versions; withdrawn or unpublished aggregates are deleted.
 - Search is hybrid (keyword + query embedding, `alpha 0.4`). Gotcha: with externally supplied vectors, `embedding` must **not** be listed in `query_by`; the vector part comes only from `vector_query`. Typesense `multi_search` returns HTTP 200 even when an individual search fails, so the client checks each result's `error` and throws (otherwise failures look like "no results"). If the embedding call fails or takes over 2.5s, it falls back to keyword-only and skips embedding for 60s (circuit breaker). Results report `mode: hybrid | keyword`.
 - Typesense only returns candidate IDs and scores; result data is hydrated from Postgres. Documents therefore hold only searchable/filterable fields. Changing a collection schema (`collectionSchema` in `typesense.ts`) requires `pnpm cli search:rebuild` after deploying.

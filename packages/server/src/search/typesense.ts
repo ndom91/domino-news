@@ -72,7 +72,7 @@ class TypesenseError extends Error {
 
 // Collections are versioned and reached through aliases, so a rebuild can
 // populate a fresh collection and then swap the alias.
-export const ALIASES = ['stories', 'narratives', 'articles'] as const
+export const ALIASES = ['stories', 'narratives'] as const
 export type Alias = (typeof ALIASES)[number]
 
 const embedding = {
@@ -108,19 +108,6 @@ function collectionSchema(alias: Alias, name: string) {
           { name: 'updated_at', type: 'int64', sort: true },
         ],
         default_sorting_field: 'updated_at',
-      }
-    case 'articles':
-      // Approved metadata only (title/description), never article bodies.
-      return {
-        name,
-        fields: [
-          { name: 'title', type: 'string' },
-          { name: 'description', type: 'string', optional: true },
-          { name: 'publisher_id', type: 'string', facet: true },
-          { name: 'published_at', type: 'int64', sort: true },
-          embedding,
-        ],
-        default_sorting_field: 'published_at',
       }
   }
 }

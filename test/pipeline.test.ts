@@ -899,7 +899,7 @@ describe('event retention', () => {
 
 describe('concurrent matching', () => {
   it('puts two near-identical articles matched at the same time into one story', async () => {
-    const { db, ts } = h.ctx
+    const { db } = h.ctx
     const { matchArticle, resumeMatchFollower } = await import('@dn/jobs')
     const { ID_PREFIX, newId } = await import('@dn/domain')
     const [publisher] = await db.select().from(schema.publisher).limit(1)
@@ -955,12 +955,6 @@ describe('concurrent matching', () => {
       observedAt: now,
       matchMethod: 'new_story',
     })
-    await db.insert(schema.outboxEvent).values({
-      aggregateType: 'article',
-      aggregateId: candidateId,
-      eventType: 'article.embedded',
-      aggregateVersion: 1,
-    })
     const ids: string[] = []
     for (const suffix of ['a', 'b']) {
       const articleId = newId(ID_PREFIX.article)
@@ -1003,15 +997,8 @@ describe('concurrent matching', () => {
         inputFingerprint: revisionId,
         embedding: pairVector,
       })
-      await db.insert(schema.outboxEvent).values({
-        aggregateType: 'article',
-        aggregateId: articleId,
-        eventType: 'article.embedded',
-        aggregateVersion: 1,
-      })
       ids.push(articleId)
     }
-    await processOutboxBatch(db, ts)
     const jobs = await Promise.all(
       ids.map(async (id) => {
         const [a] = await db.select().from(schema.article).where(eq(schema.article.id, id))

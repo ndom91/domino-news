@@ -5,10 +5,9 @@ import {
   type AnalysisJob,
   attachArticleToStory,
   createStoryWithArticle,
-  nearestByVector,
   refreshFingerprint,
 } from '@dn/server'
-import { and, eq, inArray, isNull } from 'drizzle-orm'
+import { and, cosineDistance, eq, inArray, isNull, ne, sql } from 'drizzle-orm'
 import type { WorkerContext } from './context.ts'
 import { loadArticles, loadStoryInput } from './inputs.ts'
 import { admitMatchFollower } from './match-admission.ts'
@@ -47,7 +46,6 @@ export function matchPolicy(mode: keyof typeof THRESHOLDS): MatchPolicy {
   }
 }
 
-class NotIndexedYetError extends Error {}
 export class CandidatesChangedError extends Error {}
 
 export function acceptsStoryDecision(
@@ -81,18 +79,25 @@ async function rankCandidateStories(
   return rankStories(neighbours, (id) => storyOf.get(id), minSimilarity, ranking)
 }
 
-async function similarArticles(
-  ctx: WorkerContext,
-  articleId: string,
-  embedding: number[],
-  at: Date,
-) {
-  const t = Math.floor(at.getTime() / 1000)
-  const hits = await nearestByVector(ctx.ts, 'articles', embedding, {
-    k: NEIGHBOURS,
-    filter: `id:!=${articleId} && published_at:>=${t - CANDIDATE_WINDOW_SECONDS} && published_at:<=${t + CANDIDATE_WINDOW_SECONDS}`,
-  })
-  return hits.map((h) => ({ articleId: h.id, similarity: h.similarity }))
+/** The nearest embedded articles reported within the candidate window around `at` (exact). */
+async function similarArticles(db: Db, articleId: string, embedding: number[], at: Date) {
+  const windowMs = CANDIDATE_WINDOW_SECONDS * 1000
+  const distance = cosineDistance(schema.articleEmbedding.embedding, embedding)
+  // Matches article_reported_at_idx.
+  const reportedAt = sql`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt})`
+  const rows = await db
+    .select({ articleId: schema.articleEmbedding.articleId, distance })
+    .from(schema.articleEmbedding)
+    .innerJoin(schema.article, eq(schema.article.id, schema.articleEmbedding.articleId))
+    .where(
+      and(
+        ne(schema.article.id, articleId),
+        sql`${reportedAt} between ${new Date(at.getTime() - windowMs)} and ${new Date(at.getTime() + windowMs)}`,
+      ),
+    )
+    .orderBy(distance)
+    .limit(NEIGHBOURS)
+  return rows.map((r) => ({ articleId: r.articleId, similarity: 1 - Number(r.distance) }))
 }
 
 /**
@@ -127,22 +132,10 @@ export async function matchArticle(ctx: WorkerContext, job: AnalysisJob) {
     return { status: 'already_matched', storyId: existing.storyId }
   }
 
-  const [projected] = await ctx.db
-    .select()
-    .from(schema.searchProjectionState)
-    .where(
-      and(
-        eq(schema.searchProjectionState.aggregateType, 'article'),
-        eq(schema.searchProjectionState.aggregateId, job.targetId),
-      ),
-    )
-  if (!projected || projected.deleted)
-    throw new NotIndexedYetError(`article ${job.targetId} not indexed yet`)
-
   const thresholds = THRESHOLDS[ctx.inference.mode]
   const policy = matchPolicy(ctx.inference.mode)
   const at = row.article.publishedAt ?? row.article.firstSeenAt
-  const neighbours = await similarArticles(ctx, job.targetId, row.embedding.embedding, at)
+  const neighbours = await similarArticles(ctx.db, job.targetId, row.embedding.embedding, at)
   const ranked = await rankCandidateStories(ctx.db, neighbours, thresholds.llmMin, policy.ranking)
 
   const [top] = ranked
