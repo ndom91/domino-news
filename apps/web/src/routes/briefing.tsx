@@ -9,7 +9,6 @@ import { AudioBriefingPrototype } from '../components/audio-briefing.tsx'
 import { RouterLink } from '../components/link.tsx'
 import { Page } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
-import { useAudioBriefing } from '../lib/use-audio-briefing.ts'
 
 export const Route = createFileRoute('/briefing')({
   loader: async ({ context }) => {
@@ -24,7 +23,6 @@ export const Route = createFileRoute('/briefing')({
 function BriefingPage() {
   const { now } = Route.useLoaderData()
   const { data: briefing } = useSuspenseQuery(queries.briefing())
-  const audio = useAudioBriefing()
   return (
     <Page className="pt-6 md:pt-6">
       <header className="pb-2">
@@ -38,7 +36,7 @@ function BriefingPage() {
             : 'Your first briefing: a considered view of the news now.'}
         </p>
       </header>
-      <AudioBriefingPrototype preview={briefing.audioStories} audio={audio} />
+      <AudioBriefingPrototype preview={briefing.audioStories} />
       {!briefing.personalised ? (
         <Notice tone="neutral" title="Make this briefing yours" className="mt-8 max-w-reading">
           Pick the regions, desks and topics you care about, or follow a narrative or publisher.

@@ -5,7 +5,7 @@ import { cx } from '../cx.ts'
 import { type CitedSource, SummaryText } from './citation.tsx'
 import { deskKey, deskLabel } from './desk-key.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
-import { SourceBoard } from './source-board.tsx'
+import { type BoardSource, SourceBoard } from './source-board.tsx'
 import { SourceTrace } from './source-trace.tsx'
 import { Timestamp } from './time.tsx'
 
@@ -69,8 +69,6 @@ export function HeroStory({
   Link?: LinkLike
   action?: ReactNode
 }) {
-  // Hovering a report in the trace or on the board highlights it in both.
-  const [activeSource, setActiveSource] = useState<string | null>(null)
   const narrative = story.narratives[0]
   const Heading = headingLevel
   const reports = sortedReports(story.sources)
@@ -161,16 +159,7 @@ export function HeroStory({
             {spanHours > 0 ? ` · ${plural(spanHours, 'hour')}` : ''}
           </span>
         </h2>
-        <SourceTrace
-          variant="full"
-          rows={5}
-          onKey
-          now={now}
-          active={activeSource}
-          onActiveChange={setActiveSource}
-          sources={reports}
-        />
-        <SourceBoard onKey active={activeSource} onActiveChange={setActiveSource} sources={board} />
+        <TraceAndBoard reports={reports} board={board} now={now} />
         {outlets > board.length ? (
           <p className="mt-3 text-sm font-semibold">
             {/* On the Story page the full list is further down. */}
@@ -187,5 +176,35 @@ export function HeroStory({
         ) : null}
       </div>
     </section>
+  )
+}
+
+/**
+ * The trace and board, sharing a hover: pointing at a report in one highlights it in both. The
+ * hover state lives here, so pointer moves don't re-render the headline and summary.
+ */
+function TraceAndBoard({
+  reports,
+  board,
+  now,
+}: {
+  reports: BoardSource[]
+  board: BoardSource[]
+  now: string
+}) {
+  const [active, setActive] = useState<string | null>(null)
+  return (
+    <>
+      <SourceTrace
+        variant="full"
+        rows={5}
+        onKey
+        now={now}
+        active={active}
+        onActiveChange={setActive}
+        sources={reports}
+      />
+      <SourceBoard onKey active={active} onActiveChange={setActive} sources={board} />
+    </>
   )
 }

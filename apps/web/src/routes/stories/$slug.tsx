@@ -59,6 +59,8 @@ export const Route = createFileRoute('/stories/$slug')({
   validateSearch: z.object({
     reporting: z.catch(z.optional(z.enum(REPORTING_VIEWS)), undefined),
   }),
+  // Another story is a fresh page: no open editor, expanded list or share status carries over.
+  remountDeps: ({ params }) => params,
   loader: async ({ context, params }) => {
     // Signed out (e.g. from a shared link): only the public teaser, never the full story.
     if (context.preview) {
@@ -491,9 +493,8 @@ function StoryPage() {
     if (rememberReads) api.recordRead(story.id).catch(() => {})
   }, [rememberReads, story.id])
   const [editing, setEditing] = useState(false)
-  const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
+  const [showAllUpdates, setShowAllUpdates] = useState(false)
   const editButtonRef = useRef<HTMLButtonElement>(null)
-  const showAllUpdates = expandedUpdatesFor === story.id
   const visibleUpdates = showAllUpdates
     ? updates.items
     : updates.items.slice(0, STORY_UPDATES_SHOWN)
@@ -519,7 +520,7 @@ function StoryPage() {
         linkHeadline={false}
         kicker={`First reported ${formatDate(story.firstObservedAt)}${regions ? ` · ${regions}` : ''}`}
         Link={RouterLink}
-        action={<ShareStory key={story.id} story={story} origin={session.origin} />}
+        action={<ShareStory story={story} origin={session.origin} />}
       />
 
       {isAdmin && session.features.summaryEditing && story.summary ? (
@@ -646,9 +647,7 @@ function StoryPage() {
                     variant="secondary"
                     aria-expanded={showAllUpdates}
                     aria-controls="story-updates-list"
-                    onClick={() =>
-                      setExpandedUpdatesFor((current) => (current === story.id ? null : story.id))
-                    }
+                    onClick={() => setShowAllUpdates((show) => !show)}
                   >
                     {showAllUpdates
                       ? 'Show fewer changes'
@@ -664,12 +663,7 @@ function StoryPage() {
             </section>
           ) : null}
 
-          <OriginalReporting
-            key={story.id}
-            active={reporting}
-            onActiveChange={changeReporting}
-            story={story}
-          />
+          <OriginalReporting active={reporting} onActiveChange={changeReporting} story={story} />
 
           {narrative.data ? (
             <section aria-labelledby="development-heading">

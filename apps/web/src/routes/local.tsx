@@ -1,18 +1,11 @@
 import { countryName } from '@dn/domain'
 import { savePreferencesMutation } from '@dn/queries'
 import type { LocalScope, Place, StoryListItem } from '@dn/schemas'
-import {
-  Button,
-  ConfirmDialog,
-  Notice,
-  SectionHeader,
-  Skeleton,
-  StoryItem,
-  TextInput,
-} from '@dn/ui'
+import { Button, Notice, SectionHeader, Skeleton, StoryItem, TextInput } from '@dn/ui'
 import { useInfiniteQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, Link, useBlocker } from '@tanstack/react-router'
+import { createFileRoute, Link } from '@tanstack/react-router'
 import { useState } from 'react'
+import { DiscardGuard } from '../components/discard-guard.tsx'
 import { RouterLink } from '../components/link.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { api, queries } from '../lib/api.ts'
@@ -94,11 +87,6 @@ function LocalHeader({ locality, source }: { locality: Place | null; source?: st
   const [city, setCity] = useState('')
   const configured = Boolean(locality?.city || locality?.county)
   const dirty = Boolean(city.trim()) && !configured && !save.isSuccess
-  const blocker = useBlocker({
-    shouldBlockFn: () => dirty,
-    enableBeforeUnload: dirty,
-    withResolver: true,
-  })
   const places = [
     { key: 'city', label: locality?.city },
     { key: 'county', label: locality?.county },
@@ -200,17 +188,9 @@ function LocalHeader({ locality, source }: { locality: Place | null; source?: st
           </div>
         </div>
       ) : null}
-      <ConfirmDialog
-        open={blocker.status === 'blocked'}
-        title="Discard your location changes?"
-        confirmLabel="Discard changes"
-        cancelLabel="Keep editing"
-        destructive
-        onConfirm={() => blocker.proceed?.()}
-        onCancel={() => blocker.reset?.()}
-      >
+      <DiscardGuard when={dirty} title="Discard your location changes?">
         Your city has not been saved.
-      </ConfirmDialog>
+      </DiscardGuard>
     </header>
   )
 }

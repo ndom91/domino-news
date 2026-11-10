@@ -1,4 +1,5 @@
 import { cx } from '../cx.ts'
+import { HATCH } from './hatch.ts'
 
 type Tone = 'success' | 'warning' | 'error'
 
@@ -8,11 +9,6 @@ const TONE = {
   warning: { fill: 'bg-warning', track: 'bg-warning-subtle', text: 'text-warning', icon: '!' },
   error: { fill: 'bg-error', track: 'bg-error-subtle', text: 'text-error', icon: '✕' },
 } as const
-
-// Hatching for "no value": shape, not colour, says it's empty.
-const HATCH = {
-  backgroundImage: 'repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 6px)',
-}
 
 /**
  * Ordinal state as a stepped scale: one segment per step, best first. The active step is

@@ -1,6 +1,7 @@
 import { LEAN_MIX_MIN_RATED, plural } from '@dn/domain'
 import { LEAN_LABELS, type PublisherLean, publisherLeanSchema, type StoryLean } from '@dn/schemas'
 import { cx } from '../cx.ts'
+import { HATCH } from './hatch.ts'
 import { DefaultLink, type LinkLike } from './link.tsx'
 
 const LEANS = publisherLeanSchema.options
@@ -13,11 +14,6 @@ export const LEAN_FILL: Record<PublisherLean, string> = {
   centre: 'bg-text-muted',
   centre_right: 'bg-lean-centre-right',
   right: 'bg-lean-right',
-}
-
-// Hatching for "not rated": shape, not colour, says it's empty (same as `PositionScale`).
-const HATCH = {
-  backgroundImage: 'repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 6px)',
 }
 
 /**
@@ -44,6 +40,8 @@ export function LeanSpread({
     key,
     publishers: lean.publishers.filter((p) => p.lean === key),
   }))
+  const counts: LeanCounts = { unrated: unrated.length }
+  for (const r of rows) counts[r.key] = r.publishers.length
   const enough = rated >= LEAN_MIX_MIN_RATED
 
   return (
@@ -58,7 +56,7 @@ export function LeanSpread({
 
       {enough && compact ? (
         <>
-          <LeanBar rows={rows} unrated={unrated.length} className="h-2" />
+          <LeanBar counts={counts} className="h-2" />
           <p className="mt-2 text-sm text-text-secondary">
             {[...rows, { key: 'unrated' as const, publishers: unrated }]
               .filter((r) => r.publishers.length)
@@ -75,7 +73,7 @@ export function LeanSpread({
         </>
       ) : enough ? (
         <>
-          <LeanBar rows={rows} unrated={unrated.length} className="h-3" />
+          <LeanBar counts={counts} className="h-3" />
           <div className="mt-1.5 flex justify-between type-meta" aria-hidden>
             <span>Left</span>
             <span>Right</span>
@@ -144,28 +142,23 @@ function LeanRow({
   )
 }
 
-function LeanBar({
-  rows,
-  unrated,
-  className,
-}: {
-  rows: { key: PublisherLean; publishers: StoryLean['publishers'] }[]
-  unrated: number
-  className: string
-}) {
+/** Publishers per lean, plus those not rated. A missing key counts as none. */
+export type LeanCounts = Partial<Record<PublisherLean | 'unrated', number>>
+
+/**
+ * Publishers as one bar: a segment per lean from left to right, each as wide as its count,
+ * then a hatched "not rated" segment. Decorative: pair it with the counts in text.
+ */
+export function LeanBar({ counts, className }: { counts: LeanCounts; className?: string }) {
   return (
     <div className={cx('flex gap-0.5', className)} aria-hidden>
-      {rows.map((r) =>
-        r.publishers.length ? (
-          <span
-            key={r.key}
-            className={LEAN_FILL[r.key]}
-            style={{ flexGrow: r.publishers.length }}
-          />
+      {LEANS.map((key) =>
+        counts[key] ? (
+          <span key={key} className={LEAN_FILL[key]} style={{ flexGrow: counts[key] }} />
         ) : null,
       )}
-      {unrated ? (
-        <span className="text-border-strong" style={{ ...HATCH, flexGrow: unrated }} />
+      {counts.unrated ? (
+        <span className="text-border-strong" style={{ ...HATCH, flexGrow: counts.unrated }} />
       ) : null}
     </div>
   )

@@ -1,5 +1,6 @@
 import { hostnameOf, plural } from '@dn/domain'
 import type { StoryListItem } from '@dn/schemas'
+import { memo } from 'react'
 import { cx } from '../cx.ts'
 import { useReveal } from '../primitives/reveal.tsx'
 import { Skeleton } from '../primitives/surface.tsx'
@@ -32,8 +33,11 @@ function citedSourcesOf(story: Pick<StoryListItem, 'slug' | 'trace'>) {
   return map
 }
 
-/** Feed entry: desk bar, headline, cited summary, relation, primary source and Source Trace. No card. */
-export function StoryItem({
+/**
+ * Feed entry: desk bar, headline, cited summary, relation, primary source and Source Trace. No
+ * card. Memoised: feeds re-render around their cards (feedback, paging) more than the cards change.
+ */
+export const StoryItem = memo(function StoryItem({
   story,
   size = 'standard',
   now,
@@ -144,7 +148,7 @@ export function StoryItem({
       </div>
     </article>
   )
-}
+})
 
 /** Loading state: bar in the sunken colour and three skeleton lines. */
 export function StoryItemSkeleton({ size = 'standard' }: { size?: 'standard' | 'wide' }) {

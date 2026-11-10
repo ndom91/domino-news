@@ -49,6 +49,8 @@ import { api, orNotFound, queries } from '../../lib/api.ts'
 import { seo } from '../../lib/seo.ts'
 
 export const Route = createFileRoute('/publishers/$slug')({
+  // Another publisher is a fresh page: no half-filled assessment form carries over.
+  remountDeps: ({ params }) => params,
   loader: async ({ context, params }) => {
     // Signed out (e.g. from a shared link): only the public teaser.
     if (context.preview) {

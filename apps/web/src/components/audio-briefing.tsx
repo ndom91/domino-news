@@ -4,19 +4,11 @@ import { Button, Notice } from '@dn/ui'
 import { GearIcon, PlayIcon } from '@phosphor-icons/react'
 import { Link } from '@tanstack/react-router'
 import { useState } from 'react'
-import type { useAudioBriefing } from '../lib/use-audio-briefing.ts'
+import { useAudioBriefing } from '../lib/use-audio-briefing.ts'
 import { AudioPlayer } from './audio-player.tsx'
 
-type AudioState = ReturnType<typeof useAudioBriefing>
-
-export function AudioBriefingPrototype({
-  preview,
-  audio,
-}: {
-  preview: BriefingResponse['audioStories']
-  audio: AudioState
-}) {
-  const { briefing, pending, error, stage, selected, generate, cancel } = audio
+export function AudioBriefingPrototype({ preview }: { preview: BriefingResponse['audioStories'] }) {
+  const { briefing, pending, error, stage, selected, generate, cancel } = useAudioBriefing()
   const [transcriptOpen, setTranscriptOpen] = useState(false)
   const [fullTranscript, setFullTranscript] = useState(false)
   const paragraphs = briefing?.transcript.split(/\n\s*\n/) ?? []
@@ -85,7 +77,14 @@ export function AudioBriefingPrototype({
               >
                 Prepare a new briefing
               </button>
-              <AudioSettings />
+              <Link
+                to="/account"
+                search={{ tab: 'preferences' }}
+                hash="audio-style"
+                className="link-inline min-h-tap content-center text-sm font-semibold"
+              >
+                Audio settings
+              </Link>
             </div>
           </div>
         </>
@@ -190,19 +189,6 @@ export function AudioBriefingPrototype({
         </Notice>
       ) : null}
     </section>
-  )
-}
-
-function AudioSettings() {
-  return (
-    <Link
-      to="/account"
-      search={{ tab: 'preferences' }}
-      hash="audio-style"
-      className="link-inline min-h-tap content-center text-sm font-semibold"
-    >
-      Audio settings
-    </Link>
   )
 }
 

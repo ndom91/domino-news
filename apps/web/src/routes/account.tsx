@@ -6,6 +6,7 @@ import {
   setMutedPublisherMutation,
   updateSignalsMutation,
 } from '@dn/queries'
+import type { FollowList, MutedPublisherList } from '@dn/schemas'
 import {
   Button,
   ConfirmDialog,
@@ -20,18 +21,21 @@ import {
   useToast,
 } from '@dn/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { createFileRoute, useBlocker, useRouter } from '@tanstack/react-router'
+import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { type FormEvent, type ReactNode, useState } from 'react'
 import { z } from 'zod/mini'
+import { DiscardGuard } from '../components/discard-guard.tsx'
 import { FeedPicks } from '../components/feed-picks.tsx'
 import { Page, PageTitle } from '../components/page.tsx'
 import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { api, queries } from '../lib/api.ts'
-import { authClient } from '../lib/auth-client.ts'
 import { useSignOut } from '../lib/sign-out.ts'
 
 const TABS = ['preferences', 'following', 'security'] as const
 const ACCOUNT_LIST_ITEMS_SHOWN = 5
+
+// Loaded on first use, as in useSignOut: better-auth and WebAuthn stay out of the page's chunk.
+const loadAuthClient = async () => (await import('../lib/auth-client.ts')).authClient
 
 export const Route = createFileRoute('/account')({
   // An unknown tab falls back to Preferences instead of erroring.
@@ -189,13 +193,9 @@ function NameSection({ name }: { name: string }) {
   const [saved, setSaved] = useState(name)
   const [value, setValue] = useState(name)
   const dirty = value.trim() !== saved
-  const blocker = useBlocker({
-    shouldBlockFn: () => dirty,
-    enableBeforeUnload: dirty,
-    withResolver: true,
-  })
   const save = useMutation({
     mutationFn: async (next: string) => {
+      const authClient = await loadAuthClient()
       const { error } = await authClient.updateUser({ name: next })
       if (error) throw new Error(error.message ?? 'Could not save your name')
     },
@@ -249,17 +249,9 @@ function NameSection({ name }: { name: string }) {
           {save.isSuccess && !dirty ? 'Name saved.' : ''}
         </p>
       </form>
-      <ConfirmDialog
-        open={blocker.status === 'blocked'}
-        title="Discard your name changes?"
-        confirmLabel="Discard changes"
-        cancelLabel="Keep editing"
-        destructive
-        onConfirm={() => blocker.proceed?.()}
-        onCancel={() => blocker.reset?.()}
-      >
+      <DiscardGuard when={dirty} title="Discard your name changes?">
         Your name has not been saved.
-      </ConfirmDialog>
+      </DiscardGuard>
     </SettingsRow>
   )
 }
@@ -275,6 +267,7 @@ function PasskeysSection() {
   const passkeys = useQuery({
     queryKey: passkeysKey,
     queryFn: async () => {
+      const authClient = await loadAuthClient()
       const { data, error } = await authClient.passkey.listUserPasskeys()
       if (error) throw new Error(error.message ?? 'Could not load passkeys')
       // Newest first, so the collapsed list shows the most recent.
@@ -285,6 +278,7 @@ function PasskeysSection() {
   })
   const add = useMutation({
     mutationFn: async (name: string) => {
+      const authClient = await loadAuthClient()
       const result = await authClient.passkey.addPasskey({ name: name || undefined })
       if (result?.error) throw new Error(result.error.message ?? 'Passkey was not added')
     },
@@ -292,6 +286,7 @@ function PasskeysSection() {
   })
   const remove = useMutation({
     mutationFn: async (id: string) => {
+      const authClient = await loadAuthClient()
       const { error } = await authClient.passkey.deletePasskey({ id })
       if (error) throw new Error(error.message ?? 'Passkey was not removed')
     },
@@ -431,6 +426,7 @@ function DangerZone() {
   const accounts = useQuery({
     queryKey: ['account', 'linked'],
     queryFn: async () => {
+      const authClient = await loadAuthClient()
       const { data, error } = await authClient.listAccounts()
       if (error) throw new Error(error.message ?? 'Could not load your sign-in methods')
       return data ?? []
@@ -439,6 +435,7 @@ function DangerZone() {
   const hasPassword = accounts.data?.some((a) => a.providerId === 'credential') ?? false
   const remove = useMutation({
     mutationFn: async () => {
+      const authClient = await loadAuthClient()
       const { error } = await authClient.deleteUser(hasPassword ? { password } : {})
       if (error) {
         if (error.code === 'SESSION_EXPIRED')
@@ -561,11 +558,6 @@ function LocalityForm({
     normalized.city !== (canonical?.city ?? null) ||
     normalized.county !== (canonical?.county ?? null) ||
     normalized.country !== (canonical?.country ?? null)
-  const blocker = useBlocker({
-    shouldBlockFn: () => dirty,
-    enableBeforeUnload: dirty,
-    withResolver: true,
-  })
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -626,17 +618,9 @@ function LocalityForm({
           ) : null}
         </div>
       </fieldset>
-      <ConfirmDialog
-        open={blocker.status === 'blocked'}
-        title="Discard your location changes?"
-        confirmLabel="Discard changes"
-        cancelLabel="Keep editing"
-        destructive
-        onConfirm={() => blocker.proceed?.()}
-        onCancel={() => blocker.reset?.()}
-      >
+      <DiscardGuard when={dirty} title="Discard your location changes?">
         Your city, county or country has not been saved.
-      </ConfirmDialog>
+      </DiscardGuard>
     </form>
   )
 }
@@ -684,26 +668,7 @@ function FeedSection() {
 }
 
 function FollowingSection() {
-  const queryClient = useQueryClient()
-  const toast = useToast()
-  const [showAll, setShowAll] = useState(false)
   const follows = useQuery(queries.follows())
-  const followMutation = setFollowMutation(api, queryClient)
-  const unfollow = useMutation({
-    ...followMutation,
-    mutationFn: ({
-      title: _title,
-      ...request
-    }: Parameters<typeof followMutation.mutationFn>[0] & { title: string }) =>
-      followMutation.mutationFn(request),
-    onError: (_error, variables) =>
-      toast.add({
-        title: `Couldn’t unfollow ${variables.title}.`,
-        description: 'Try again.',
-        type: 'error',
-        priority: 'high',
-      }),
-  })
   const items = [...(follows.data?.items ?? [])].sort((a, b) => a.title.localeCompare(b.title))
   return (
     <SettingsRow
@@ -711,132 +676,143 @@ function FollowingSection() {
       title="Following"
       description="Stories from narratives and publishers you follow rank higher in Briefing."
     >
-      {items.length ? (
-        <>
-          <ul
-            id="following-list"
-            className="flex flex-col divide-y divide-border border-y border-border"
-          >
-            {(showAll ? items : items.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)).map((f) => (
-              <li
-                key={`${f.targetType}-${f.id}`}
-                className="flex items-center justify-between gap-3 py-2.5"
-              >
-                <span>
-                  {f.title}{' '}
-                  <span className="type-meta">
-                    {f.targetType === 'narrative' ? 'Narrative' : 'Publisher'}
-                  </span>
-                </span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  aria-label={`Unfollow ${f.title}`}
-                  loading={unfollow.isPending && unfollow.variables?.targetId === f.id}
-                  onClick={() =>
-                    unfollow.mutate({
-                      targetType: f.targetType,
-                      targetId: f.id,
-                      follow: false,
-                      title: f.title,
-                    })
-                  }
-                >
-                  Unfollow
-                </Button>
-              </li>
-            ))}
-          </ul>
-          {items.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="mt-4"
-              aria-expanded={showAll}
-              aria-controls="following-list"
-              onClick={() => setShowAll((value) => !value)}
-            >
-              {showAll ? 'Show fewer followed items' : 'View all followed items'}
-            </Button>
-          ) : null}
-        </>
-      ) : (
-        <p className="text-sm text-text-muted">
-          Nothing yet. Use Follow on a narrative or publisher page.
-        </p>
-      )}
+      <ShowMoreList
+        id="following-list"
+        noun="followed items"
+        empty="Nothing yet. Use Follow on a narrative or publisher page."
+        rows={items.map((item) => (
+          <UnfollowRow key={`${item.targetType}-${item.id}`} item={item} />
+        ))}
+      />
     </SettingsRow>
   )
 }
 
-function MutedPublishersSection() {
+/** A followed item. Each row has its own mutation, so several can be pending and each can fail. */
+function UnfollowRow({ item }: { item: FollowList['items'][number] }) {
   const queryClient = useQueryClient()
   const toast = useToast()
-  const [showAll, setShowAll] = useState(false)
+  const unfollow = useMutation(setFollowMutation(api, queryClient))
+  return (
+    <li className="flex items-center justify-between gap-3 py-2.5">
+      <span>
+        {item.title}{' '}
+        <span className="type-meta">
+          {item.targetType === 'narrative' ? 'Narrative' : 'Publisher'}
+        </span>
+      </span>
+      <Button
+        size="sm"
+        variant="ghost"
+        aria-label={`Unfollow ${item.title}`}
+        loading={unfollow.isPending}
+        onClick={() =>
+          unfollow.mutate(
+            { targetType: item.targetType, targetId: item.id, follow: false },
+            {
+              onError: () =>
+                toast.add({
+                  title: `Couldn’t unfollow ${item.title}.`,
+                  description: 'Try again.',
+                  type: 'error',
+                  priority: 'high',
+                }),
+            },
+          )
+        }
+      >
+        Unfollow
+      </Button>
+    </li>
+  )
+}
+
+function MutedPublishersSection() {
   const muted = useQuery(queries.mutedPublishers())
-  const muteMutation = setMutedPublisherMutation(api, queryClient)
-  const change = useMutation({
-    ...muteMutation,
-    mutationFn: ({
-      name: _name,
-      ...request
-    }: Parameters<typeof muteMutation.mutationFn>[0] & { name: string }) =>
-      muteMutation.mutationFn(request),
-    onError: (_error, variables) =>
-      toast.add({
-        title: `Couldn’t unmute ${variables.name}.`,
-        description: 'Try again.',
-        type: 'error',
-        priority: 'high',
-      }),
-  })
-  const items = muted.data?.items ?? []
   return (
     <SettingsRow
       id="muted-publishers"
       title="Muted publishers"
       description="Muted publishers do not shape your Briefing. A story still appears when other publishers report it."
     >
-      {items.length ? (
-        <>
-          <ul
-            id="muted-publishers-list"
-            className="flex flex-col divide-y divide-border border-y border-border"
-          >
-            {(showAll ? items : items.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)).map((publisher) => (
-              <li key={publisher.id} className="flex items-center justify-between gap-3 py-2.5">
-                <span>{publisher.name}</span>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  aria-label={`Unmute ${publisher.name}`}
-                  loading={change.isPending && change.variables?.publisherId === publisher.id}
-                  onClick={() =>
-                    change.mutate({ publisherId: publisher.id, muted: false, name: publisher.name })
-                  }
-                >
-                  Unmute
-                </Button>
-              </li>
-            ))}
-          </ul>
-          {items.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
-            <Button
-              size="sm"
-              variant="secondary"
-              className="mt-4"
-              aria-expanded={showAll}
-              aria-controls="muted-publishers-list"
-              onClick={() => setShowAll((value) => !value)}
-            >
-              {showAll ? 'Show fewer muted publishers' : 'View all muted publishers'}
-            </Button>
-          ) : null}
-        </>
-      ) : (
-        <p className="text-sm text-text-muted">No muted publishers.</p>
-      )}
+      <ShowMoreList
+        id="muted-publishers-list"
+        noun="muted publishers"
+        empty="No muted publishers."
+        rows={(muted.data?.items ?? []).map((publisher) => (
+          <UnmuteRow key={publisher.id} publisher={publisher} />
+        ))}
+      />
     </SettingsRow>
+  )
+}
+
+function UnmuteRow({ publisher }: { publisher: MutedPublisherList['items'][number] }) {
+  const queryClient = useQueryClient()
+  const toast = useToast()
+  const unmute = useMutation(setMutedPublisherMutation(api, queryClient))
+  return (
+    <li className="flex items-center justify-between gap-3 py-2.5">
+      <span>{publisher.name}</span>
+      <Button
+        size="sm"
+        variant="ghost"
+        aria-label={`Unmute ${publisher.name}`}
+        loading={unmute.isPending}
+        onClick={() =>
+          unmute.mutate(
+            { publisherId: publisher.id, muted: false },
+            {
+              onError: () =>
+                toast.add({
+                  title: `Couldn’t unmute ${publisher.name}.`,
+                  description: 'Try again.',
+                  type: 'error',
+                  priority: 'high',
+                }),
+            },
+          )
+        }
+      >
+        Unmute
+      </Button>
+    </li>
+  )
+}
+
+/** The first few rows of the followed or muted list, then "View all". */
+function ShowMoreList({
+  id,
+  noun,
+  empty,
+  rows,
+}: {
+  id: string
+  /** Completes "View all …" and "Show fewer …". */
+  noun: string
+  empty: string
+  rows: ReactNode[]
+}) {
+  const [showAll, setShowAll] = useState(false)
+  if (rows.length === 0) return <p className="text-sm text-text-muted">{empty}</p>
+  return (
+    <>
+      <ul id={id} className="flex flex-col divide-y divide-border border-y border-border">
+        {showAll ? rows : rows.slice(0, ACCOUNT_LIST_ITEMS_SHOWN)}
+      </ul>
+      {rows.length > ACCOUNT_LIST_ITEMS_SHOWN ? (
+        <Button
+          size="sm"
+          variant="secondary"
+          className="mt-4"
+          aria-expanded={showAll}
+          aria-controls={id}
+          onClick={() => setShowAll((value) => !value)}
+        >
+          {showAll ? `Show fewer ${noun}` : `View all ${noun}`}
+        </Button>
+      ) : null}
+    </>
   )
 }
 

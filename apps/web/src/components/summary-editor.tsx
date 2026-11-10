@@ -3,9 +3,9 @@ import { editSummaryMutation } from '@dn/queries'
 import type { Summary } from '@dn/schemas'
 import { Button, ConfirmDialog, Notice, Textarea, TextInput } from '@dn/ui'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useBlocker } from '@tanstack/react-router'
 import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { api } from '../lib/api.ts'
+import { DiscardGuard } from './discard-guard.tsx'
 
 const discard = {
   title: 'Discard your changes?',
@@ -30,12 +30,6 @@ export function SummaryEditor({
   const queryClient = useQueryClient()
   const mutation = useMutation(editSummaryMutation(api, queryClient, storyId))
   const [dirty, setDirty] = useState(false)
-  // Guards in-app navigation and closing the tab while there are unsaved edits.
-  const blocker = useBlocker({
-    shouldBlockFn: () => dirty,
-    enableBeforeUnload: dirty,
-    withResolver: true,
-  })
   const headlineRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
@@ -127,12 +121,9 @@ export function SummaryEditor({
           </Button>
         )}
       </div>
-      <ConfirmDialog
-        open={blocker.status === 'blocked'}
-        {...discard}
-        onConfirm={() => blocker.proceed?.()}
-        onCancel={() => blocker.reset?.()}
-      />
+      <DiscardGuard when={dirty} title={discard.title}>
+        {discard.children}
+      </DiscardGuard>
     </form>
   )
 }

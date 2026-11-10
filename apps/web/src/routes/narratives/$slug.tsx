@@ -20,6 +20,8 @@ import { orNotFound, queries } from '../../lib/api.ts'
 import { seo } from '../../lib/seo.ts'
 
 export const Route = createFileRoute('/narratives/$slug')({
+  // Another narrative is a fresh page: an expanded updates list doesn't carry over.
+  remountDeps: ({ params }) => params,
   loader: async ({ context, params }) => {
     // Signed out (e.g. from a shared link): only the public teaser.
     if (context.preview) {
@@ -67,8 +69,7 @@ function NarrativePage() {
   const { slug } = Route.useParams()
   const { data: narrative } = useSuspenseQuery(queries.narrative(slug))
   const { data: updates } = useSuspenseQuery(queries.narrativeUpdates(slug))
-  const [expandedUpdatesFor, setExpandedUpdatesFor] = useState<string | null>(null)
-  const showAllUpdates = expandedUpdatesFor === narrative.id
+  const [showAllUpdates, setShowAllUpdates] = useState(false)
   const first = narrative.stories[0]
   const last = narrative.stories[narrative.stories.length - 1]
   return (
@@ -153,11 +154,7 @@ function NarrativePage() {
                   className="mt-4"
                   aria-expanded={showAllUpdates}
                   aria-controls="narrative-updates-list"
-                  onClick={() =>
-                    setExpandedUpdatesFor((current) =>
-                      current === narrative.id ? null : narrative.id,
-                    )
-                  }
+                  onClick={() => setShowAllUpdates((show) => !show)}
                 >
                   {showAllUpdates ? 'Show fewer updates' : 'View all updates'}
                 </Button>

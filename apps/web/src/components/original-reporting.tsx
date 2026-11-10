@@ -1,13 +1,26 @@
 import { oneSidedCoverage, plural } from '@dn/domain'
-import { LEAN_LABELS, type PublisherLean, type StoryDetail, type StorySource } from '@dn/schemas'
-import { Badge, Button, LEAN_FILL, PublisherLogo, SectionHeader, Timestamp } from '@dn/ui'
+import {
+  LEAN_LABELS,
+  type PublisherLean,
+  publisherLeanSchema,
+  type StoryDetail,
+  type StorySource,
+} from '@dn/schemas'
+import {
+  Badge,
+  Button,
+  LeanBar,
+  type LeanCounts,
+  PublisherLogo,
+  SectionHeader,
+  Timestamp,
+} from '@dn/ui'
 import { useEffect, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { RouterLink } from './link.tsx'
 
-const LEANS = ['left', 'centre_left', 'centre', 'centre_right', 'right'] as const
 type Group = PublisherLean | 'unrated'
-const GROUPS: Group[] = [...LEANS, 'unrated']
+const GROUPS: Group[] = [...publisherLeanSchema.options, 'unrated']
 const GROUP_SHOWN = 2
 const TIME_SHOWN = 5
 const GROUP_BORDER: Record<Group, string> = {
@@ -17,9 +30,6 @@ const GROUP_BORDER: Record<Group, string> = {
   centre_right: 'border-lean-centre-right',
   right: 'border-lean-right',
   unrated: 'border-border-strong',
-}
-const HATCH = {
-  backgroundImage: 'repeating-linear-gradient(135deg, currentColor 0 1px, transparent 1px 6px)',
 }
 
 export function OriginalReporting({
@@ -52,10 +62,11 @@ export function OriginalReporting({
     groups[source.official ? 'unrated' : (rating?.lean ?? 'unrated')].push(source)
   }
   const publisherCount = new Set(ordered.map((source) => source.publisher.id)).size
-  const groupCounts = GROUPS.map((group) => ({
-    group,
-    count: new Set(groups[group].map((source) => source.publisher.id)).size,
-  }))
+  // Publishers per group, not reports: one publisher can file several.
+  const counts: LeanCounts = {}
+  for (const group of GROUPS) {
+    counts[group] = new Set(groups[group].map((source) => source.publisher.id)).size
+  }
   const sourced = [...ratings.values()].filter((rating) => !rating.estimated)
   const oneSided = oneSidedCoverage(sourced.map((rating) => rating.lean))
   const hasHidden =
@@ -95,25 +106,13 @@ export function OriginalReporting({
         <div className="min-w-0">
           {publisherCount ? (
             <>
-              <div className="flex h-3 gap-0.5" aria-hidden>
-                {groupCounts.map(({ group, count }) =>
-                  count ? (
-                    <span
-                      key={group}
-                      className={group === 'unrated' ? 'text-border-strong' : LEAN_FILL[group]}
-                      style={{ flexGrow: count, ...(group === 'unrated' ? HATCH : {}) }}
-                    />
-                  ) : null,
-                )}
-              </div>
+              <LeanBar counts={counts} className="h-3" />
               <p className="sr-only">
                 Covering publishers:{' '}
-                {groupCounts
-                  .map(
-                    ({ group, count }) =>
-                      `${group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]}: ${count}`,
-                  )
-                  .join('; ')}
+                {GROUPS.map(
+                  (group) =>
+                    `${group === 'unrated' ? 'Not rated' : LEAN_LABELS[group]}: ${counts[group] ?? 0}`,
+                ).join('; ')}
                 .
               </p>
             </>
@@ -164,7 +163,7 @@ export function OriginalReporting({
             const sources = groups[group]
             const isExpanded = showAll || expanded.includes(group)
             const visible = isExpanded ? sources : sources.slice(0, GROUP_SHOWN)
-            const count = groupCounts.find((item) => item.group === group)?.count ?? 0
+            const count = counts[group] ?? 0
             return (
               <section
                 key={group}
