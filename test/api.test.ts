@@ -171,13 +171,14 @@ describe('/api/v1 contracts', () => {
     expect(list.items.length).toBeGreaterThan(0)
     const first = list.items[0]
     if (!first) throw new Error('empty list')
-    const detail = storyDetailSchema.parse(
-      await (await call(`/api/v1/stories/${first.slug}`)).json(),
-    )
+    const body = await (await call(`/api/v1/stories/${first.slug}`)).json()
+    const detail = storyDetailSchema.parse(body)
     expect(detail.id).toBe(first.id)
     expect(detail.sources.length).toBeGreaterThan(0)
     // The Story page's longer text: more than one paragraph in fixture mode.
     expect(detail.summary?.detail?.split('\n\n').length).toBeGreaterThan(1)
+    // Outside the contract, for app builds up to 0.8.3 (see the story route).
+    expect(body).toMatchObject({ claims: [], enrichment: { claims: 'ready' } })
   })
 
   it('returns the source-linked update timeline for a story', async () => {

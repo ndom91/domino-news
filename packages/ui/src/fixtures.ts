@@ -297,7 +297,6 @@ export const fixtureLead: StoryDetail = {
       ],
     },
   ],
-  claims: [],
   leanMix: [
     {
       country: 'GB',

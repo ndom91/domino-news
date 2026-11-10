@@ -221,6 +221,7 @@ export const storyContextItemSchema = z.object({
 })
 export type StoryContextItem = z.infer<typeof storyContextItemSchema>
 
+// Claims are no longer generated (see AGENTS.md); the database keeps their tables and enums.
 export const CLAIM_STANCES = ['asserts', 'denies', 'quotes', 'discusses'] as const
 export const CLAIM_EVIDENCE_RELATIONS = [
   'supports',
@@ -228,30 +229,6 @@ export const CLAIM_EVIDENCE_RELATIONS = [
   'context',
   'inconclusive',
 ] as const
-
-export const storyClaimSchema = z.object({
-  id: z.string(),
-  proposition: z.string(),
-  /** When the claim was extracted (claims are re-extracted when the summary changes). */
-  createdAt: z.string(),
-  /** Earliest publish (or first-seen) time among the articles that carry the claim. */
-  firstReportedAt: z.nullable(z.string()),
-  mentions: z.array(
-    z.object({
-      stance: z.enum(CLAIM_STANCES),
-      articleId: z.string(),
-      publisher: publisherRefSchema,
-    }),
-  ),
-  evidence: z.array(
-    z.object({
-      relationship: z.enum(CLAIM_EVIDENCE_RELATIONS),
-      url: z.string(),
-      title: z.nullable(z.string()),
-    }),
-  ),
-})
-export type StoryClaim = z.infer<typeof storyClaimSchema>
 
 // The covering publishers in one country, with their reviewed lean. Leans are only
 // comparable within a country, so a Story gets one of these per country.
@@ -297,13 +274,7 @@ export const storyDetailSchema = z.object({
   narratives: z.array(narrativeRefSchema),
   primarySources: z.array(primarySourceSchema),
   context: z.array(storyContextItemSchema),
-  claims: z.array(storyClaimSchema),
-  enrichment: z.optional(
-    z.object({
-      context: enrichmentStateSchema,
-      claims: enrichmentStateSchema,
-    }),
-  ),
+  enrichment: z.optional(z.object({ context: enrichmentStateSchema })),
   // Newsroom publishers only, most rated first. Publishers without a country are left out.
   leanMix: z.array(storyLeanSchema),
 })

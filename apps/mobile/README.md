@@ -11,8 +11,8 @@ formatting utilities and design tokens as the web app. Both platforms use the id
 2. Start the web/API server with `NODE_ENV=development pnpm dev --host`.
 3. Start Expo Go with `pnpm --filter @dn/mobile start`. Its QR code starts with `exp://`.
 
-Start `pnpm dev:worker` as well when testing a low-coverage Story that does not have context or
-claims yet. Opening its detail screen admits that optional enrichment at interactive priority; the
+Start `pnpm dev:worker` as well when testing a low-coverage Story that does not have context
+yet. Opening its detail screen admits that optional enrichment at interactive priority; the
 shared Story query polls briefly and updates the screen when the exact summary version is ready.
 Previously generated Stories can still be read with the worker stopped.
 

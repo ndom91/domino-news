@@ -17,15 +17,10 @@ describe('story enrichment polling', () => {
     if (typeof interval !== 'function') throw new Error('expected a dynamic polling interval')
 
     expect(interval(query)).toBe(false)
-    query.setData({ enrichment: { context: 'pending', claims: 'ready' } } as StoryDetail)
+    query.setData({ enrichment: { context: 'pending' } } as StoryDetail)
     expect(interval(query)).toBe(15_000)
-    // Claims are no longer generated, so their status never keeps the page polling.
-    for (const enrichment of [
-      { context: 'ready', claims: 'ready' },
-      { context: 'failed', claims: 'ready' },
-      { context: 'ready', claims: 'pending' },
-    ]) {
-      query.setData({ enrichment } as StoryDetail)
+    for (const context of ['ready', 'failed'] as const) {
+      query.setData({ enrichment: { context } } as StoryDetail)
       expect(interval(query)).toBe(false)
     }
   })

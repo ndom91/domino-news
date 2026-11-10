@@ -95,7 +95,7 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.story(id),
         queryFn: ({ signal }) => api.getStory(id, signal),
         staleTime: 30_000,
-        // Context is written on first read; claims are no longer generated (always 'ready').
+        // Context is written on first read; poll until it is ready or has failed.
         refetchInterval: (query) =>
           query.state.data?.enrichment?.context === 'pending' ? 15_000 : false,
       }),

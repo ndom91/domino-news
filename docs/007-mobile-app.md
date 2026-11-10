@@ -113,7 +113,7 @@ export const queries = createQueries(api)
 
 - **Errors:** `ApiError` from `@dn/api-client` has `status` and `code`. `code` is `unauthorized` (session expired: send the user to sign-in), `forbidden`, `not_found`, `bad_request`, `conflict`, `unavailable`, `internal`, or `network` (no connection).
 - **Bearer tokens** also work as an alternative: sign in, read the `set-auth-token` response header, then send `Authorization: Bearer <token>`. Prefer the cookie flow above, which `@better-auth/expo` manages for you.
-- **Optional Story enrichment:** `queries.story(id)` is shared with the web app. When the API reports exact-version context or claims as `pending`, TanStack Query refetches every 15 seconds and stops after durable completion or terminal failure. The native Story screen therefore receives newly generated context without app-specific polling code.
+- **Optional Story enrichment:** `queries.story(id)` is shared with the web app. When the API reports exact-version context as `pending`, TanStack Query refetches every 15 seconds and stops after durable completion or terminal failure. The native Story screen therefore receives newly generated context without app-specific polling code.
 - Contract tests for the native flow live in `test/api.test.ts` ("Expo app sign-in") and `test/unit.test.ts` ("API client on native").
 
 ## 6. Running against a dev server
@@ -128,7 +128,7 @@ export const queries = createQueries(api)
 
 - **Cleartext HTTP.** Android blocks plain `http://` by default in release builds, and iOS has App Transport Security. A LAN dev server over HTTP needs those allowed in development builds only. Production uses HTTPS.
 - **Session cookie name.** The cookie is `better-auth.session_token`. If you change the cookie prefix on the server, set `cookiePrefix` in `expoClient` to match.
-- **The worker is optional only for existing data.** Most screens read what is already in the database, but opening a low-coverage Story can admit missing context and claims. Run `pnpm dev:worker` when testing that path; without it, the Story remains readable but optional enrichment stays pending.
+- **The worker is optional only for existing data.** Most screens read what is already in the database, but opening a low-coverage Story can admit missing context. Run `pnpm dev:worker` when testing that path; without it, the Story remains readable but optional enrichment stays pending.
 
 ## 7. Metro and pnpm
 

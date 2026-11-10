@@ -77,8 +77,6 @@ async function storyDetail(db: Db, story: StoryRow): Promise<StoryDetail | null>
       origin: v.editedByUserId ? ('edited' as const) : ('generated' as const),
     })),
     related,
-    // Claims are no longer generated; the field stays for app builds that still parse it.
-    claims: [],
     leanMix: leanMix.get(story.id) ?? [],
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,

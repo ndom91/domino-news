@@ -282,8 +282,9 @@ const routes: Route[] = [
     const story = await loadStory(ctx.db, target.id)
     if (!story) throw new HttpError('not_found', 'story not found')
     if (story.summary?.versionId !== target.currentSummaryId) context = 'pending'
-    // Claims are no longer generated; `claims` stays for app builds that still parse it.
-    return json({ ...story, enrichment: context && { context, claims: 'ready' } })
+    // App builds up to 0.8.3 reject a story without `claims` and `enrichment.claims`, though
+    // claims are no longer generated. Remove both once those builds are no longer in use.
+    return json({ ...story, claims: [], enrichment: context && { context, claims: 'ready' } })
   }),
   route('GET', '/api/v1/stories/:id/updates', async ({ ctx, params }) => {
     const updates = await listStoryUpdates(ctx.db, params.id ?? '')
