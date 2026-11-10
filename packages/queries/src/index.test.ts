@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { createQueries } from './index.ts'
 
 describe('story enrichment polling', () => {
-  it('polls every 15 seconds only while enrichment is pending', () => {
+  it('polls every 15 seconds only while context is pending', () => {
     const options = createQueries({} as ApiClient).story('story')
     const client = new QueryClient()
     const query = client
@@ -17,15 +17,17 @@ describe('story enrichment polling', () => {
     if (typeof interval !== 'function') throw new Error('expected a dynamic polling interval')
 
     expect(interval(query)).toBe(false)
+    query.setData({ enrichment: { context: 'pending', claims: 'ready' } } as StoryDetail)
+    expect(interval(query)).toBe(15_000)
+    // Claims are no longer generated, so their status never keeps the page polling.
     for (const enrichment of [
-      { context: 'pending', claims: 'ready' },
-      { context: 'failed', claims: 'pending' },
+      { context: 'ready', claims: 'ready' },
+      { context: 'failed', claims: 'ready' },
+      { context: 'ready', claims: 'pending' },
     ]) {
       query.setData({ enrichment } as StoryDetail)
-      expect(interval(query)).toBe(15_000)
+      expect(interval(query)).toBe(false)
     }
-    query.setData({ enrichment: { context: 'ready', claims: 'failed' } } as StoryDetail)
-    expect(interval(query)).toBe(false)
   })
 })
 

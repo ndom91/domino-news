@@ -28,8 +28,12 @@ export const Route = createFileRoute('/narratives/$slug')({
       )
       return { preview, title: preview.title }
     }
-    const n = await orNotFound(context.queryClient.ensureQueryData(queries.narrative(params.slug)))
-    await context.queryClient.prefetchQuery(queries.narrativeUpdates(params.slug))
+    const [n] = await Promise.all([
+      orNotFound(context.queryClient.ensureQueryData(queries.narrative(params.slug))),
+      context.queryClient.prefetchQuery(queries.narrativeUpdates(params.slug)),
+      // The Follow button renders its state in the server HTML.
+      context.queryClient.prefetchQuery(queries.follows()),
+    ])
     return { preview: null, title: n.title }
   },
   head: ({ loaderData, match, params }) => {

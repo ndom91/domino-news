@@ -9,16 +9,20 @@ import { ReadingHistoryToggle } from '../components/reading-history.tsx'
 import { queries } from '../lib/api.ts'
 
 export const Route = createFileRoute('/blindspot')({
-  loader: ({ context }) =>
-    Promise.all([
+  loader: async ({ context }) => {
+    await Promise.all([
       context.queryClient.prefetchQuery(queries.insights()),
       context.queryClient.prefetchQuery(queries.preferences()),
-    ]),
+    ])
+    // Window end for the cards' Source Traces, fixed at load so SSR and hydration agree.
+    return { now: new Date().toISOString() }
+  },
   head: () => ({ meta: [{ title: 'Blindspot · Domino Wire' }] }),
   component: BlindspotPage,
 })
 
 function BlindspotPage() {
+  const { now } = Route.useLoaderData()
   const insights = useQuery(queries.insights())
   return (
     <Page>
@@ -52,17 +56,16 @@ function BlindspotPage() {
               <ReadingHistoryToggle />
             </section>
           ) : (
-            <InsightSections data={insights.data} />
+            <InsightSections data={insights.data} now={now} />
           )}
-          <OneSidedSection data={insights.data.oneSided} />
+          <OneSidedSection data={insights.data.oneSided} now={now} />
         </div>
       )}
     </Page>
   )
 }
 
-function InsightSections({ data }: { data: Insights }) {
-  const now = new Date().toISOString()
+function InsightSections({ data, now }: { data: Insights; now: string }) {
   if (data.missedDevelopments.length === 0 && data.gaps.length === 0) {
     return (
       <p className="max-w-reading text-text-secondary">
@@ -144,8 +147,7 @@ function gapLabel(g: Insights['gaps'][number]) {
   return g.kind === 'region' ? REGION_LABELS[g.key as Region] : DESK_LABELS[g.key as Desk]
 }
 
-function OneSidedSection({ data }: { data: Insights['oneSided'] }) {
-  const now = new Date().toISOString()
+function OneSidedSection({ data, now }: { data: Insights['oneSided']; now: string }) {
   const country = data.country ? countryName(data.country) : null
   return (
     <section aria-labelledby="one-sided-heading" className="flex flex-col gap-6">

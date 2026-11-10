@@ -57,7 +57,12 @@ export const Route = createFileRoute('/publishers/$slug')({
       )
       return { preview, name: preview.title, now: new Date().toISOString() }
     }
-    const p = await orNotFound(context.queryClient.ensureQueryData(queries.publisher(params.slug)))
+    // Follow and Mute render their state in the server HTML instead of flipping after hydration.
+    const [p] = await Promise.all([
+      orNotFound(context.queryClient.ensureQueryData(queries.publisher(params.slug))),
+      context.queryClient.prefetchQuery(queries.follows()),
+      context.queryClient.prefetchQuery(queries.mutedPublishers()),
+    ])
     return { preview: null, name: p.name, now: new Date().toISOString() }
   },
   head: ({ loaderData, match, params }) => {

@@ -13,6 +13,8 @@ import { safeNext } from '../lib/session.ts'
 
 export const Route = createFileRoute('/onboarding')({
   validateSearch: z.object({ next: z.optional(z.string()) }),
+  // The first step's chips render selected and enabled in the server HTML.
+  loader: ({ context }) => context.queryClient.prefetchQuery(queries.preferences()),
   head: () => ({ meta: [{ title: 'Welcome · Domino Wire' }] }),
   component: OnboardingPage,
 })

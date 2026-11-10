@@ -95,10 +95,9 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.story(id),
         queryFn: ({ signal }) => api.getStory(id, signal),
         staleTime: 30_000,
-        refetchInterval: (query) => {
-          const enrichment = query.state.data?.enrichment
-          return enrichment && Object.values(enrichment).includes('pending') ? 15_000 : false
-        },
+        // Context is written on first read; claims are no longer generated (always 'ready').
+        refetchInterval: (query) =>
+          query.state.data?.enrichment?.context === 'pending' ? 15_000 : false,
       }),
     storyUpdates: (id: string) =>
       queryOptions({
@@ -196,6 +195,7 @@ export function createQueries(api: ApiClient) {
       queryOptions({
         queryKey: queryKeys.signals(),
         queryFn: ({ signal }) => api.getSignals(signal),
+        staleTime: 5 * 60_000,
       }),
     insights: () =>
       queryOptions({

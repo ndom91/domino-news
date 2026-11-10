@@ -41,6 +41,8 @@ export const Route = createFileRoute('/account')({
     Promise.all([
       context.queryClient.prefetchQuery(queries.preferences()),
       context.queryClient.prefetchQuery(queries.follows()),
+      context.queryClient.prefetchQuery(queries.mutedPublishers()),
+      context.queryClient.prefetchQuery(queries.signals()),
     ]),
   head: () => ({ meta: [{ title: 'Account · Domino Wire' }] }),
   component: AccountPage,

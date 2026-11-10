@@ -67,8 +67,10 @@ export const Route = createFileRoute('/stories/$slug')({
       )
       return { preview, title: preview.title, now: new Date().toISOString() }
     }
-    const story = await orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug)))
-    await context.queryClient.prefetchQuery(queries.storyUpdates(params.slug))
+    const [story] = await Promise.all([
+      orNotFound(context.queryClient.ensureQueryData(queries.story(params.slug))),
+      context.queryClient.prefetchQuery(queries.storyUpdates(params.slug)),
+    ])
     // The narrative graph renders in the server HTML instead of as a skeleton.
     const narrative = story.narratives[0]
     if (narrative) await context.queryClient.prefetchQuery(queries.narrative(narrative.slug))
