@@ -1,7 +1,6 @@
 export * from './assessments.ts'
 export * from './assessments-publish.ts'
 export * from './backfill.ts'
-export * from './claims.ts'
 export * from './context.ts'
 export * from './dispatcher.ts'
 export * from './embed.ts'

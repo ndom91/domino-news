@@ -1,6 +1,5 @@
 import type {
   AudioBriefingStyle,
-  ClaimsOutput,
   NarrativeTitle,
   RelationshipCandidate,
   StoryChoice,
@@ -24,12 +23,6 @@ export interface ArticleInput {
   publishedAt: string | null
   /** Transient body, only when publisher policy allows. Never persisted or logged. */
   body?: string
-}
-
-export interface PrimarySourceInput {
-  sourceReferenceId: string
-  url: string
-  title: string | null
 }
 
 export interface StoryInput {
@@ -85,10 +78,6 @@ export interface GenerationProvider {
     story: StoryInput
     summary: string
   }): Promise<Generated<StoryContextOutput>>
-  extractClaims(input: {
-    story: StoryInput
-    primarySources: PrimarySourceInput[]
-  }): Promise<Generated<ClaimsOutput>>
 }
 
 /** A bounded-choice model used to accept only high-confidence Story matches. */

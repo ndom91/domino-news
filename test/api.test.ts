@@ -449,10 +449,10 @@ describe('/api/v1 write endpoints', () => {
       ).rows[0]
     // As an older deploy left it.
     await h.ctx.pool.query(
-      `update pgboss.queue set retry_limit = 20, retry_delay = 10 where name = 'extract_claims'`,
+      `update pgboss.queue set retry_limit = 20, retry_delay = 10 where name = 'generate_context'`,
     )
     await createQueues(await h.ctx.boss())
-    expect(await settings('extract_claims')).toEqual({
+    expect(await settings('generate_context')).toEqual({
       retry_limit: 5,
       retry_delay: 60,
       retry_backoff: true,
@@ -495,16 +495,16 @@ describe('/api/v1 write endpoints', () => {
       { targetId: story.id, inputFingerprint: 'f1', pipelineVersion: 'p2', priorityClass: 'fresh' },
       'summary cites invalid observations: obs_x',
     )
-    const claimsJob = await fail(
-      'extract_claims',
+    const contextJob = await fail(
+      'generate_context',
       { targetId: 'sty_missing' },
-      'story_claims: response is not JSON',
+      'story_context: response is not JSON',
     )
 
     const list = async (query = '') =>
       failedJobsResponseSchema.parse(await (await call(`/api/v1/ops/failed${query}`)).json())
     const all = await list()
-    expect(all.items.map((j) => j.id)).toEqual(expect.arrayContaining([summaryJob, claimsJob]))
+    expect(all.items.map((j) => j.id)).toEqual(expect.arrayContaining([summaryJob, contextJob]))
     const summary = all.items.find((j) => j.id === summaryJob)
     expect(summary).toMatchObject({
       queue: 'build_story_summary',
@@ -515,15 +515,15 @@ describe('/api/v1 write endpoints', () => {
     })
     expect(summary?.stack).toContain('at test')
     // A target that no longer exists is just missing, not an error.
-    expect(all.items.find((j) => j.id === claimsJob)?.target).toBeNull()
+    expect(all.items.find((j) => j.id === contextJob)?.target).toBeNull()
 
-    const claimsOnly = await list('?queue=extract_claims')
-    expect(claimsOnly.items.every((j) => j.queue === 'extract_claims')).toBe(true)
+    const contextOnly = await list('?queue=generate_context')
+    expect(contextOnly.items.every((j) => j.queue === 'generate_context')).toBe(true)
 
     // The page's failed counts match the list.
     const status = opsStatusSchema.parse(await (await call('/api/v1/ops/status')).json())
-    expect(status.queues.find((q) => q.name === 'extract_claims')?.failed).toBe(
-      claimsOnly.items.length,
+    expect(status.queues.find((q) => q.name === 'generate_context')?.failed).toBe(
+      contextOnly.items.length,
     )
 
     const state = async (id: string) =>
@@ -537,10 +537,10 @@ describe('/api/v1 write endpoints', () => {
     expect(await state(summaryJob)).toMatch(/created|retry/)
 
     expect(
-      (await post('/api/v1/ops/actions', { action: 'dismiss_jobs', queue: 'extract_claims' }))
+      (await post('/api/v1/ops/actions', { action: 'dismiss_jobs', queue: 'generate_context' }))
         .status,
     ).toBe(200)
-    expect(await state(claimsJob)).toBeUndefined()
+    expect(await state(contextJob)).toBeUndefined()
 
     const unknown = await post('/api/v1/ops/actions', { action: 'retry_jobs', queue: 'nope' })
     expect(unknown.status).toBe(400)

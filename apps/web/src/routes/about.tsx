@@ -35,11 +35,10 @@ function AboutPage() {
           follow from each other into narratives.
         </p>
         <p>
-          Story summaries, background notes and the claims list are written by a language model (an
-          AI system that writes text) that runs on our own servers. Each summary only uses the
-          articles in its story, and every statement links to the article it comes from. A summary
-          says what publishers report, not what Domino has verified. Read the originals for the full
-          picture.
+          Story summaries and background notes are written by a language model (an AI system that
+          writes text) that runs on our own servers. Each summary only uses the articles in its
+          story, and every statement links to the article it comes from. A summary says what
+          publishers report, not what Domino has verified. Read the originals for the full picture.
         </p>
       </Section>
 

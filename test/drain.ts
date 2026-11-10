@@ -3,7 +3,6 @@ import {
   createQueues,
   embedArticles,
   explainStoryContext,
-  extractStoryClaims,
   matchArticle,
   relateStory,
   releaseSummaryDebounce,
@@ -29,7 +28,6 @@ export async function drainPipeline(ctx: WorkerContext, maxRounds = 50) {
       [QUEUES.summarizeStory]: (job) => summarizeStory(ctx, job),
       [QUEUES.relateStory]: (job) => relateStory(ctx, job),
       [QUEUES.generateContext]: (job) => explainStoryContext(ctx, job),
-      [QUEUES.extractClaims]: (job) => extractStoryClaims(ctx, job),
     }
     for (const name of [QUEUES.embedArticle, ...Object.keys(perJob)]) {
       const jobs = (await ctx.workerBoss.fetch<AnalysisJob>(name, {

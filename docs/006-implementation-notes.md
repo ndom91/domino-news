@@ -43,8 +43,8 @@ match_article ──► attach to Story | new Story ──► summary_debounce �
 close concurrent follower ──► match_admission ──► resume_match_article ──► match_article
 release_summary_debounce ──► build_story_summary ──► summary version + publish + outbox(story)
 initial / forced summary ──► relate_story
-summary at ≥ eager threshold ──► generate_context + extract_claims
-authenticated Story detail below threshold ──► missing context / claims at interactive priority
+summary at ≥ eager threshold ──► generate_context
+authenticated Story detail below threshold ──► missing context at interactive priority
 relate_story ──► story embedding, typed edges, narrative membership
 reconcile_deferred_work (each minute) ──► expired match leases + due summary rows
 indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
@@ -136,7 +136,7 @@ Prompt lessons from the real-model runs (current versions: `match-story@6`, `cla
   - Entries are reused by `normalized_key` (slug of the title) without regeneration.
   - A new summary deletes old Story-context links before publication; editing a summary queues context regeneration.
   - Prompt `explain-context@2` introduced skipping countries, major parties, household-name institutions, generic words and news outlets; the current prompt is `explain-context@5`.
-- **Claims** (`claim`, `claim_mention`, `claim_evidence`):
+- **Claims** (`claim`, `claim_mention`, `claim_evidence`). Generation stopped in November 2026: readers stopped showing claims in October (`4ff403d`), so every extraction was unseen inference. The tables and data stay for Compare Coverage (doc 009).
   - Validation keeps only mentions of the Story's active articles and evidence pointing at the Story's own primary sources; claims with no mention are dropped.
   - A new summary and re-extraction set `superseded_at` on earlier claims; nothing is edited in place.
   - Prompt `extract-claims@1` produced specific, attributable claims with sensible stances on the real model (e.g. Trump's "never heard of her" remark is *quoted*, the prize itself *asserted*); the current prompt is `extract-claims@3`.

@@ -374,21 +374,19 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
   const story = id ? await storyRow(db, id) : null
   if (!story?.publishedAt) return null
 
-  const [{ lead, versions, detail, context }, related, primary, claims, leanMix] =
-    await Promise.all([
-      storyLeadParts(db, story),
-      relatedStories(db, story.id),
-      db
-        .select({ ref: schema.sourceReference })
-        .from(schema.storySourceReference)
-        .innerJoin(
-          schema.sourceReference,
-          eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
-        )
-        .where(eq(schema.storySourceReference.storyId, story.id)),
-      storyClaims(db, story.id),
-      leanMixByStory(db, [story.id]),
-    ])
+  const [{ lead, versions, detail, context }, related, primary, leanMix] = await Promise.all([
+    storyLeadParts(db, story),
+    relatedStories(db, story.id),
+    db
+      .select({ ref: schema.sourceReference })
+      .from(schema.storySourceReference)
+      .innerJoin(
+        schema.sourceReference,
+        eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+      )
+      .where(eq(schema.storySourceReference.storyId, story.id)),
+    leanMixByStory(db, [story.id]),
+  ])
 
   return {
     ...lead,
@@ -406,7 +404,8 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
       origin: v.version.editedByUserId ? ('edited' as const) : ('generated' as const),
     })),
     related,
-    claims,
+    // Claims are no longer generated; the field stays for app builds that still parse it.
+    claims: [],
     leanMix: leanMix.get(story.id) ?? [],
     primarySources: primary.map(({ ref }) => ({
       id: ref.id,
@@ -747,64 +746,4 @@ async function storyContext(db: Db, storyId: string): Promise<StoryDetail['conte
       .filter((s) => s.interpretationId === interpretationId)
       .map(({ interpretationId: _, ...s }) => s),
   }))
-}
-
-async function storyClaims(db: Db, storyId: string): Promise<StoryDetail['claims']> {
-  const claims = await db
-    .select({
-      id: schema.claim.id,
-      proposition: schema.claim.proposition,
-      createdAt: schema.claim.createdAt,
-    })
-    .from(schema.claim)
-    .where(and(eq(schema.claim.storyId, storyId), isNull(schema.claim.supersededAt)))
-    .orderBy(schema.claim.createdAt)
-  if (claims.length === 0) return []
-  const ids = claims.map((c) => c.id)
-  const [mentions, evidence] = await Promise.all([
-    db
-      .select({
-        claimId: schema.claimMention.claimId,
-        stance: schema.claimMention.stance,
-        articleId: schema.claimMention.articleId,
-        reportedAt: sql<Date>`coalesce(${schema.article.publishedAt}, ${schema.article.firstSeenAt})`,
-        publisher: {
-          id: schema.publisher.id,
-          slug: schema.publisher.slug,
-          name: schema.publisher.name,
-          domain: schema.publisher.domain,
-        },
-      })
-      .from(schema.claimMention)
-      .innerJoin(schema.article, eq(schema.article.id, schema.claimMention.articleId))
-      .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
-      .where(inArray(schema.claimMention.claimId, ids)),
-    db
-      .select({
-        claimId: schema.claimEvidence.claimId,
-        relationship: schema.claimEvidence.relationship,
-        url: schema.sourceReference.url,
-        title: schema.sourceReference.title,
-      })
-      .from(schema.claimEvidence)
-      .innerJoin(
-        schema.sourceReference,
-        eq(schema.sourceReference.id, schema.claimEvidence.sourceReferenceId),
-      )
-      .where(inArray(schema.claimEvidence.claimId, ids)),
-  ])
-  return claims.map((c) => {
-    const own = mentions.filter((m) => m.claimId === c.id)
-    const first = own.reduce<Date | null>(
-      (min, m) => (!min || new Date(m.reportedAt) < min ? new Date(m.reportedAt) : min),
-      null,
-    )
-    return {
-      ...c,
-      createdAt: iso(c.createdAt),
-      firstReportedAt: first ? iso(first) : null,
-      mentions: own.map(({ claimId: _, reportedAt: __, ...m }) => m),
-      evidence: evidence.filter((e) => e.claimId === c.id).map(({ claimId: _, ...e }) => e),
-    }
-  })
 }

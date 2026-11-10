@@ -400,11 +400,7 @@ export async function editSummary(
   return versionId
 }
 
-/** A new summary must never expose context anchors or claims derived from its predecessor. */
+/** A new summary must never expose context anchors derived from its predecessor. */
 async function clearOptionalEnrichment(db: Db, storyId: string) {
   await db.delete(schema.storyContext).where(eq(schema.storyContext.storyId, storyId))
-  await db
-    .update(schema.claim)
-    .set({ supersededAt: new Date() })
-    .where(and(eq(schema.claim.storyId, storyId), isNull(schema.claim.supersededAt)))
 }

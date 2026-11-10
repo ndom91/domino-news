@@ -10,7 +10,6 @@ export const QUEUES = {
   summarizeStory: 'build_story_summary',
   relateStory: 'relate_story',
   generateContext: 'generate_context',
-  extractClaims: 'extract_claims',
   admitBackfill: 'admit_backfill',
   rebuildSearch: 'rebuild_search_projection',
   pruneEvents: 'prune_delivered_events',
@@ -18,7 +17,7 @@ export const QUEUES = {
 } as const
 
 // Everything keyed on a Story's current summary version.
-export const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext, QUEUES.extractClaims]
+export const ENRICHMENT_QUEUES = [QUEUES.relateStory, QUEUES.generateContext]
 
 export type JobClass = 'interactive' | 'fresh' | 'backfill'
 

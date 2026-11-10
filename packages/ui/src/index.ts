@@ -1,7 +1,6 @@
 export { cx, THEME_TOKENS } from './cx.ts'
 export * from './editorial/assessment-scorecard.tsx'
 export * from './editorial/citation.tsx'
-export * from './editorial/claim-list.tsx'
 export * from './editorial/context-term.tsx'
 export * from './editorial/desk-key.ts'
 export * from './editorial/fallen-dominoes.tsx'

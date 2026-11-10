@@ -1,5 +1,5 @@
 import { DESK_SCOPES, DESKS, TOPIC_LABELS, TOPICS } from '@dn/schemas'
-import type { ArticleInput, PrimarySourceInput, StoryInput, SummaryUpdateInput } from './types.ts'
+import type { ArticleInput, StoryInput, SummaryUpdateInput } from './types.ts'
 
 // Bump a version whenever its prompt text changes; it is recorded on every AnalysisRun.
 // match-story@6: granularity rules from docs/story-granularity.md (reaction waves are one
@@ -13,7 +13,6 @@ export const PROMPT_VERSIONS = {
   classifyRelationship: 'classify-relationship@6',
   titleNarrative: 'title-narrative@2',
   explainContext: 'explain-context@5',
-  extractClaims: 'extract-claims@3',
   chooseStory: 'choose-story@3',
 } as const
 
@@ -219,29 +218,6 @@ ${data(input.summary)}
 
 SOURCE ARTICLES:
 ${data(storyData(input.story).articles)}`
-}
-
-export function extractClaimsPrompt(input: {
-  story: StoryInput
-  primarySources: PrimarySourceInput[]
-}) {
-  return `List the key factual claims made in this story's coverage: at most 5, most important first.
-A claim is a specific, checkable statement (who did/said what, numbers, outcomes), not an opinion or a topic.
-Prefer claims that several sources address or that sources disagree on; skip details one source mentions in passing.
-An "official" source is the body's own statement: its stance on its own actions is "asserts".
-- proposition: one neutral sentence stating the claim itself, without "X reports that".
-- mentions: for each source article that addresses the claim, its number "n" and stance:
-  "asserts" (states it as fact), "denies" (disputes it), "quotes" (attributes it to someone else),
-  "discusses" (mentions it without taking a position).
-- evidence: only if a PRIMARY SOURCE below is the document the claim is about (e.g. the court ruling, the bill):
-  its number "p" and relationship ("supports", "contradicts", "context", "inconclusive"). Otherwise [].
-Use only the information below. Do not judge whether claims are true.
-
-SOURCE ARTICLES:
-${data(storyData(input.story).articles)}
-
-PRIMARY SOURCES:
-${data(input.primarySources.map((p, i) => ({ p: i + 1, url: p.url, title: p.title })))}`
 }
 
 export function chooseStoryPrompt(input: { article: ArticleInput; stories: StoryInput[] }) {

@@ -32,7 +32,6 @@ export const ID_PREFIX = {
   summaryVersion: 'sum',
   publisherEvidence: 'pev',
   publisherAssessment: 'pas',
-  claim: 'clm',
   contextEntry: 'ctx',
   contextEntryVersion: 'ctxv',
   pushDelivery: 'pdl',

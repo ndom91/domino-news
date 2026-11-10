@@ -919,11 +919,16 @@ describe('local generation adapter', () => {
 
   it('rejects a number outside the list', async () => {
     reply({
-      claims: [
-        { proposition: 'A thing happened.', mentions: [{ n: 3, stance: 'asserts' }], evidence: [] },
-      ],
+      headline: 'h',
+      summary: 's[3]',
+      detail: 'd',
+      sources: [3],
+      regions: ['europe'],
+      locations: [],
+      desk: 'politics',
+      topics: [],
     })
-    await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
+    await expect((await generation()).summarizeStory({ story })).rejects.toThrow(
       /cites source 3, but there are 2/,
     )
   })
@@ -933,12 +938,12 @@ describe('local generation adapter', () => {
       'fetch',
       vi.fn(async () =>
         Response.json({
-          choices: [{ message: { content: '{"claims": [{"propos' }, finish_reason: 'length' }],
+          choices: [{ message: { content: '{"headline": "h", "summ' }, finish_reason: 'length' }],
         }),
       ),
     )
-    await expect((await generation()).extractClaims({ story, primarySources: [] })).rejects.toThrow(
-      /truncated at 2400 tokens\. Starts: \{"claims"/,
+    await expect((await generation()).summarizeStory({ story })).rejects.toThrow(
+      /truncated at 2400 tokens\. Starts: \{"headline"/,
     )
   })
 })
@@ -982,7 +987,7 @@ describe('optional enrichment admission', () => {
   it('keeps low-visibility Stories lazy', async () => {
     const { optionalEnrichmentQueues, QUEUES } = await import('@dn/server')
     expect(optionalEnrichmentQueues(2, 3)).toEqual([])
-    expect(optionalEnrichmentQueues(3, 3)).toEqual([QUEUES.generateContext, QUEUES.extractClaims])
+    expect(optionalEnrichmentQueues(3, 3)).toEqual([QUEUES.generateContext])
   })
 })
 

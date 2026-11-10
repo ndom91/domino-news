@@ -1,7 +1,5 @@
 import { stripCitations } from '@dn/domain'
 import {
-  claimEvidenceRelationSchema,
-  claimStanceSchema,
   contextKindSchema,
   narrativeTitleSchema,
   relationshipCandidateSchema,
@@ -15,7 +13,6 @@ import {
   chooseStoryPrompt,
   classifyRelationshipPrompt,
   explainContextPrompt,
-  extractClaimsPrompt,
   matchStoryPrompt,
   PROMPT_VERSIONS,
   SYSTEM_PROMPT,
@@ -173,20 +170,6 @@ const contextByNumber = z.object({
     )
     .check(z.maxLength(6)),
 })
-const claimsByNumber = z.object({
-  claims: z
-    .array(
-      z.object({
-        proposition: z.string().check(z.minLength(8), z.maxLength(300)),
-        mentions: z
-          .array(z.object({ n: z.int(), stance: claimStanceSchema }))
-          .check(z.minLength(1)),
-        evidence: z.array(z.object({ p: z.int(), relationship: claimEvidenceRelationSchema })),
-      }),
-    )
-    .check(z.maxLength(5)),
-})
-
 /** The item a 1-based number in the prompt referred to; a number outside the list is invalid output. */
 function numbered<T>(name: string, list: readonly T[], n: number): T {
   const item = list[n - 1]
@@ -196,7 +179,7 @@ function numbered<T>(name: string, list: readonly T[], n: number): T {
   return item
 }
 
-// Most answers are short; summaries and claims list several sources per item.
+// Most answers are short; summaries list several sources and write detail paragraphs.
 const MAX_TOKENS = { default: 1200, long: 2400 }
 // How much of a bad response to keep in the error, for the Pipeline page.
 const RESPONSE_EXCERPT_CHARS = 300
@@ -387,33 +370,6 @@ export function createLocalGeneration(config: LocalConfig): GenerationProvider {
             sourceObservationIds: sources.map(
               (n) => numbered('story_context', articles, n).observationId,
             ),
-          })),
-        },
-      }
-    },
-    extractClaims: async (input) => {
-      const g = await generate(
-        'story_claims',
-        claimsByNumber,
-        extractClaimsPrompt(input),
-        PROMPT_VERSIONS.extractClaims,
-        MAX_TOKENS.long,
-      )
-      const { articles } = input.story
-      return {
-        ...g,
-        output: {
-          claims: g.output.claims.map((c) => ({
-            proposition: c.proposition,
-            mentions: c.mentions.map((m) => ({
-              articleId: numbered('story_claims', articles, m.n).articleId,
-              stance: m.stance,
-            })),
-            evidence: c.evidence.map((e) => ({
-              sourceReferenceId: numbered('story_claims', input.primarySources, e.p)
-                .sourceReferenceId,
-              relationship: e.relationship,
-            })),
           })),
         },
       }

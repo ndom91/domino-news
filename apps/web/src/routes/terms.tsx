@@ -38,9 +38,9 @@ function TermsPage() {
       <Section id="content" title="What you see on Domino">
         <ul>
           <li>
-            Story summaries, background notes and claims are written by a language model. They can
-            contain mistakes. They describe what publishers report, are not verified facts and are
-            not advice of any kind.
+            Story summaries and background notes are written by a language model. They can contain
+            mistakes. They describe what publishers report, are not verified facts and are not
+            advice of any kind.
           </li>
           <li>
             Articles belong to their publishers. Domino shows their headlines and short descriptions

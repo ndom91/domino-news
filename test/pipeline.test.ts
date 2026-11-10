@@ -215,12 +215,6 @@ describe('summary versioning', () => {
         .from(schema.storyContext)
         .where(eq(schema.storyContext.storyId, currentStory.id)),
     ).toHaveLength(0)
-    expect(
-      await db
-        .select()
-        .from(schema.claim)
-        .where(and(eq(schema.claim.storyId, currentStory.id), isNull(schema.claim.supersededAt))),
-    ).toHaveLength(0)
     const [old] = await db
       .select()
       .from(schema.storySummaryVersion)
@@ -1097,17 +1091,17 @@ describe('summary debounce', () => {
   })
 })
 
-describe('lazy optional enrichment', () => {
-  it('admits missing current work once and stops on success or failure', async () => {
+describe('lazy story context', () => {
+  it('admits missing context once and stops on success or failure', async () => {
     const { PROMPT_VERSIONS } = await import('@dn/inference')
-    const { ensureOptionalEnrichment, QUEUES } = await import('@dn/server')
+    const { ensureStoryContext, QUEUES } = await import('@dn/server')
     const [story] = await h.ctx.db
       .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
       .from(schema.story)
       .where(isNotNull(schema.story.publishedAt))
       .limit(1)
     if (!story?.summaryId) throw new Error('no published story')
-    const modelId = 'lazy-enrichment-test-model'
+    const modelId = 'lazy-context-test-model'
     const ctx = {
       ...h.ctx,
       inference: {
@@ -1115,21 +1109,22 @@ describe('lazy optional enrichment', () => {
         generation: { ...h.ctx.inference.generation, modelId },
       },
     }
-    expect(await ensureOptionalEnrichment(ctx, story.id, story.summaryId)).toEqual({
-      context: 'pending',
-      claims: 'pending',
-    })
-    await ensureOptionalEnrichment(ctx, story.id, story.summaryId)
-    const { rows: queued } = await h.ctx.pool.query<{ name: string; n: number }>(
-      `select name, count(*)::int as n from pgboss.job
-       where name in ($1, $2) and data->>'targetId' = $3 and state in ('created', 'retry', 'active')
-       group by name order by name`,
-      [QUEUES.generateContext, QUEUES.extractClaims, story.id],
+    expect(await ensureStoryContext(ctx, story.id, story.summaryId)).toBe('pending')
+    await ensureStoryContext(ctx, story.id, story.summaryId)
+    const { rows: queued } = await h.ctx.pool.query<{ n: number }>(
+      `select count(*)::int as n from pgboss.job
+       where name = $1 and data->>'targetId' = $2 and data->>'modelId' = $3
+         and state in ('created', 'retry', 'active')`,
+      [QUEUES.generateContext, story.id, modelId],
     )
-    expect(queued).toEqual([
-      { name: QUEUES.extractClaims, n: 1 },
-      { name: QUEUES.generateContext, n: 1 },
-    ])
+    expect(queued[0]?.n).toBe(1)
+
+    await h.ctx.pool.query(
+      `update pgboss.job set state = 'failed', completed_on = now()
+       where name = $1 and data->>'targetId' = $2 and data->>'modelId' = $3`,
+      [QUEUES.generateContext, story.id, modelId],
+    )
+    expect(await ensureStoryContext(ctx, story.id, story.summaryId)).toBe('failed')
 
     await h.ctx.db.insert(schema.optionalEnrichmentCompletion).values({
       storyId: story.id,
@@ -1138,18 +1133,10 @@ describe('lazy optional enrichment', () => {
       modelId,
       promptVersion: PROMPT_VERSIONS.explainContext,
     })
+    expect(await ensureStoryContext(ctx, story.id, story.summaryId)).toBe('ready')
     await h.ctx.pool.query(
-      `update pgboss.job set state = 'failed', completed_on = now()
-       where name = $1 and data->>'targetId' = $2 and data->>'modelId' = $3`,
-      [QUEUES.extractClaims, story.id, modelId],
-    )
-    expect(await ensureOptionalEnrichment(ctx, story.id, story.summaryId)).toEqual({
-      context: 'ready',
-      claims: 'failed',
-    })
-    await h.ctx.pool.query(
-      `delete from pgboss.job where name in ($1, $2) and data->>'targetId' = $3 and data->>'modelId' = $4`,
-      [QUEUES.generateContext, QUEUES.extractClaims, story.id, modelId],
+      `delete from pgboss.job where name = $1 and data->>'targetId' = $2 and data->>'modelId' = $3`,
+      [QUEUES.generateContext, story.id, modelId],
     )
     await h.ctx.db
       .delete(schema.optionalEnrichmentCompletion)
@@ -1551,122 +1538,5 @@ describe('context popovers', () => {
     await expect(
       h.ctx.pool.query(`update context_entry_version set explanation = 'x'`),
     ).rejects.toThrow(/append-only/)
-  })
-})
-
-describe('claims', () => {
-  it('extracts grounded claims for published stories', async () => {
-    const { db } = h.ctx
-    const claims = await db.select().from(schema.claim).where(isNull(schema.claim.supersededAt))
-    expect(claims.length).toBeGreaterThan(0)
-    for (const c of claims) {
-      const mentions = await db
-        .select({ articleId: schema.claimMention.articleId })
-        .from(schema.claimMention)
-        .where(eq(schema.claimMention.claimId, c.id))
-      expect(mentions.length).toBeGreaterThan(0)
-      for (const m of mentions) {
-        const [link] = await db
-          .select()
-          .from(schema.storyArticle)
-          .where(
-            and(
-              eq(schema.storyArticle.storyId, c.storyId),
-              eq(schema.storyArticle.articleId, m.articleId),
-            ),
-          )
-        expect(link).toBeDefined()
-      }
-    }
-  })
-
-  it('drops mentions and evidence that are not part of the story', async () => {
-    const { validClaims } = await import('@dn/jobs')
-    const claim = {
-      proposition: 'The committee awarded the prize.',
-      mentions: [
-        { articleId: 'art_in', stance: 'asserts' as const },
-        { articleId: 'art_out', stance: 'asserts' as const },
-        { articleId: 'art_in', stance: 'quotes' as const },
-      ],
-      evidence: [
-        { sourceReferenceId: 'src_in', relationship: 'supports' as const },
-        { sourceReferenceId: 'src_out', relationship: 'supports' as const },
-      ],
-    }
-    const [kept] = validClaims([claim], new Set(['art_in']), new Set(['src_in']))
-    expect(kept?.mentions).toEqual([{ articleId: 'art_in', stance: 'asserts' }])
-    expect(kept?.evidence).toEqual([{ sourceReferenceId: 'src_in', relationship: 'supports' }])
-    expect(
-      validClaims(
-        [{ ...claim, mentions: [{ articleId: 'art_out', stance: 'asserts' }] }],
-        new Set(['art_in']),
-        new Set(),
-      ),
-    ).toEqual([])
-  })
-
-  it('supersedes earlier claims on re-extraction and links primary-source evidence', async () => {
-    const { db } = h.ctx
-    const { extractStoryClaims } = await import('@dn/jobs')
-    const { ID_PREFIX, newId } = await import('@dn/domain')
-    const [story] = await db
-      .select()
-      .from(schema.story)
-      .where(isNotNull(schema.story.publishedAt))
-      .orderBy(schema.story.id)
-      .limit(1)
-    if (!story?.currentSummaryId) throw new Error('no story')
-    const before = await db
-      .select({ id: schema.claim.id })
-      .from(schema.claim)
-      .where(and(eq(schema.claim.storyId, story.id), isNull(schema.claim.supersededAt)))
-
-    // A primary document linked to this story, and a model that cites it.
-    const refId = newId(ID_PREFIX.sourceReference)
-    await db.insert(schema.sourceReference).values({
-      id: refId,
-      url: `https://www.congress.gov/claims-test/${refId}`,
-      kind: 'primary_document',
-      discoveredAt: new Date(),
-    })
-    await db
-      .insert(schema.storySourceReference)
-      .values({ storyId: story.id, sourceReferenceId: refId, addedAt: new Date() })
-    const real = h.ctx.inference.generation.extractClaims
-    h.ctx.inference.generation.extractClaims = async (input) => {
-      const result = await real(input)
-      return {
-        ...result,
-        output: {
-          claims: result.output.claims.map((c) => ({
-            ...c,
-            evidence: [{ sourceReferenceId: refId, relationship: 'supports' as const }],
-          })),
-        },
-      }
-    }
-    try {
-      const result = await extractStoryClaims(h.ctx, {
-        targetId: story.id,
-        inputFingerprint: story.currentSummaryId,
-        pipelineVersion: 'p2',
-        priorityClass: 'fresh',
-      })
-      expect(result).toMatchObject({ status: 'ok' })
-    } finally {
-      h.ctx.inference.generation.extractClaims = real
-    }
-    const superseded = await db
-      .select({ supersededAt: schema.claim.supersededAt })
-      .from(schema.claim)
-      .where(inArray(schema.claim.id, before.map((b) => b.id).concat('none')))
-    expect(superseded.every((c) => c.supersededAt !== null)).toBe(true)
-
-    const { getStory } = await import('@dn/server')
-    const detail = await getStory(db, story.id)
-    expect(detail?.claims.length).toBeGreaterThan(0)
-    expect(detail?.claims[0]?.evidence[0]).toMatchObject({ relationship: 'supports' })
-    expect(detail?.claims[0]?.mentions[0]?.publisher.name).toBeTruthy()
   })
 })

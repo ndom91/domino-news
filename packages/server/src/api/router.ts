@@ -33,7 +33,7 @@ import { getLocalFeed } from '../local.ts'
 import { getMatchHealth } from '../match-health.ts'
 import { listMutedPublishers, setMutedPublisher } from '../muted-publishers.ts'
 import { getOpsStatus, listFailedJobs, runOpsAction } from '../ops.ts'
-import { ensureOptionalEnrichment } from '../optional-enrichment.ts'
+import { ensureStoryContext } from '../optional-enrichment.ts'
 import { getPreferences, recordRead, savePreferences } from '../preferences.ts'
 import { getPreview, narrativePreview, storyPreview } from '../previews.ts'
 import { getPublisher, listPublishers, publisherDomainBySlug } from '../publishers.ts'
@@ -275,21 +275,20 @@ const routes: Route[] = [
           .where(eq(schema.story.id, storyId))
       : []
     if (!storyId || !target?.publishedAt) throw new HttpError('not_found', 'story not found')
-    let enrichment: NonNullable<StoryDetail['enrichment']> | undefined
+    let context: NonNullable<StoryDetail['enrichment']>['context'] | undefined
     if (target.summaryId) {
       try {
-        enrichment = await ensureOptionalEnrichment(ctx, storyId, target.summaryId)
+        context = await ensureStoryContext(ctx, storyId, target.summaryId)
       } catch (error) {
         console.error(`[story_enrichment] ${storyId} admission failed: ${(error as Error).message}`)
-        enrichment = { context: 'failed', claims: 'failed' }
+        context = 'failed'
       }
     }
     const story = await getStory(ctx.db, storyId)
     if (!story) throw new HttpError('not_found', 'story not found')
-    if (story.summary?.versionId !== target.summaryId) {
-      enrichment = { context: 'pending', claims: 'pending' }
-    }
-    return json({ ...story, enrichment })
+    if (story.summary?.versionId !== target.summaryId) context = 'pending'
+    // Claims are no longer generated; `claims` stays for app builds that still parse it.
+    return json({ ...story, enrichment: context && { context, claims: 'ready' } })
   }),
   route('GET', '/api/v1/stories/:id/updates', async ({ ctx, params }) => {
     const updates = await listStoryUpdates(ctx.db, params.id ?? '')

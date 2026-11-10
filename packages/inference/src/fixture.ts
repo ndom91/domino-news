@@ -264,30 +264,6 @@ export function createFixtureGeneration(): GenerationProvider {
         promptVersion: PROMPT_VERSIONS.explainContext,
       }
     },
-    async extractClaims({ story }) {
-      const [lead] = story.articles
-      return {
-        output: {
-          claims: lead
-            ? [
-                {
-                  proposition: lead.title,
-                  mentions: story.articles.map((a) => ({
-                    articleId: a.articleId,
-                    stance:
-                      a.articleId === lead.articleId
-                        ? ('asserts' as const)
-                        : ('discusses' as const),
-                  })),
-                  evidence: [],
-                },
-              ]
-            : [],
-        },
-        modelId,
-        promptVersion: PROMPT_VERSIONS.extractClaims,
-      }
-    },
     async titleNarrative({ stories }) {
       // Stand-in for a model-written title: the first Story's headline reads like one.
       const first = stories[0]?.title

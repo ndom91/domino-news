@@ -20,7 +20,6 @@ export async function admitBackfill(ctx: WorkerContext) {
     QUEUES.releaseSummaryDebounce,
     QUEUES.summarizeStory,
     QUEUES.generateContext,
-    QUEUES.extractClaims,
   ])
   const queued = queues.reduce((sum, q) => sum + q.queuedCount, 0)
   const room = Math.max(0, MAX_QUEUED_BACKFILL - queued)

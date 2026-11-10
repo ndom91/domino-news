@@ -101,11 +101,6 @@ export default [
     code: '<div className="max-w-2xl"><NarrativeGraph narrative={fixtureNarrative} currentStoryId="sty_pillay" /></div>',
   },
   {
-    group: 'Editorial',
-    name: 'ClaimList',
-    code: '<div className="max-w-reading"><ClaimList claims={fixtureLead.claims} /></div>',
-  },
-  {
     group: 'AssessmentScorecard',
     name: 'Reviewed (public broadcaster, centre)',
     code: '<AssessmentScorecard assessment={fixtureAssessment} />',

@@ -307,7 +307,6 @@ const QUEUE_OPERATION: Record<string, string> = {
   [QUEUES.summarizeStory]: 'story_summary',
   [QUEUES.relateStory]: 'story_relationship',
   [QUEUES.generateContext]: 'story_context',
-  [QUEUES.extractClaims]: 'story_claims',
 }
 
 type FailedRow = {

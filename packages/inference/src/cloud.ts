@@ -18,6 +18,5 @@ export function createCloudGeneration(): GenerationProvider {
     classifyRelationship: disabled,
     titleNarrative: disabled,
     explainContext: disabled,
-    extractClaims: disabled,
   }
 }
