@@ -1,8 +1,19 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import Feather from '@expo/vector-icons/Feather'
 import { Tabs } from 'expo-router'
+import type { ComponentProps } from 'react'
 import { StyleSheet } from 'react-native'
 import { EditionStrip } from '../../../components/edition-strip'
+
+const TINT = { active: t.color.accentText, inactive: t.color.textMuted }
+
+// Coloured from `focused` rather than the tab bar's `color`: React Navigation types that as a
+// ColorValue (which may be null or a number), and Feather takes only strings.
+function tabIcon(name: ComponentProps<typeof Feather>['name']) {
+  return ({ focused, size }: { focused: boolean; size: number }) => (
+    <Feather color={focused ? TINT.active : TINT.inactive} name={name} size={size} />
+  )
+}
 
 export default function TabLayout() {
   return (
@@ -10,8 +21,8 @@ export default function TabLayout() {
       screenOptions={{
         header: () => <EditionStrip />,
         sceneStyle: { backgroundColor: t.color.canvas },
-        tabBarActiveTintColor: t.color.accentText,
-        tabBarInactiveTintColor: t.color.textMuted,
+        tabBarActiveTintColor: TINT.active,
+        tabBarInactiveTintColor: TINT.inactive,
         tabBarIconStyle: { marginBottom: 1 },
         tabBarLabelStyle: { fontFamily: t.font.bold, fontSize: t.type.meta },
         tabBarStyle: {
@@ -27,13 +38,7 @@ export default function TabLayout() {
         options={{
           title: 'Latest',
           tabBarAccessibilityLabel: 'Latest stories',
-          tabBarIcon: ({ color, size }) => (
-            <Feather
-              color={typeof color === 'string' ? color : t.color.textMuted}
-              name="home"
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon('home'),
         }}
       />
       <Tabs.Screen
@@ -41,13 +46,7 @@ export default function TabLayout() {
         options={{
           title: 'For You',
           tabBarAccessibilityLabel: 'Stories picked for you',
-          tabBarIcon: ({ color, size }) => (
-            <Feather
-              color={typeof color === 'string' ? color : t.color.textMuted}
-              name="compass"
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon('compass'),
         }}
       />
       <Tabs.Screen
@@ -55,26 +54,14 @@ export default function TabLayout() {
         options={{
           title: 'Local',
           tabBarAccessibilityLabel: 'Local stories',
-          tabBarIcon: ({ color, size }) => (
-            <Feather
-              color={typeof color === 'string' ? color : t.color.textMuted}
-              name="map-pin"
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon('map-pin'),
         }}
       />
       <Tabs.Screen
         name="search"
         options={{
           title: 'Search',
-          tabBarIcon: ({ color, size }) => (
-            <Feather
-              color={typeof color === 'string' ? color : t.color.textMuted}
-              name="search"
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon('search'),
         }}
       />
       <Tabs.Screen
@@ -83,13 +70,7 @@ export default function TabLayout() {
           // The account stack draws its own headers.
           headerShown: false,
           title: 'Account',
-          tabBarIcon: ({ color, size }) => (
-            <Feather
-              color={typeof color === 'string' ? color : t.color.textMuted}
-              name="user"
-              size={size}
-            />
-          ),
+          tabBarIcon: tabIcon('user'),
         }}
       />
     </Tabs>

@@ -3,10 +3,10 @@ import { savePreferencesMutation } from '@dn/queries'
 import type { AudioBriefingStyle } from '@dn/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { api } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
-import { Button } from '../ui'
+import { Button, TextField } from '../ui'
 import { SectionHeading } from './settings'
 
 export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name: string }) {
@@ -56,13 +56,11 @@ export function AudioSettings({ style, name }: { style: AudioBriefingStyle; name
       {save.isError ? (
         <Text style={styles.error}>Could not save the audio style. Try again.</Text>
       ) : null}
-      <Text style={styles.text}>Name used in your greeting</Text>
-      <TextInput
-        accessibilityLabel="Name used in your greeting"
+      <TextField
         autoComplete="name"
+        label="Name used in your greeting"
         onChangeText={setDraft}
         value={draft}
-        style={styles.input}
       />
       {nameError ? (
         <Text accessibilityRole="alert" style={styles.error}>
@@ -79,12 +77,5 @@ const styles = StyleSheet.create({
   section: { gap: t.space[3] },
   row: { flexDirection: 'row', gap: t.space[2] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
-  input: {
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
   error: { color: t.color.error },
 })

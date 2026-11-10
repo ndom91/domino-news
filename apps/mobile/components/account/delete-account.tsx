@@ -2,9 +2,10 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, Text } from 'react-native'
 import { authClient } from '../../lib/auth-client'
 import { forgetForYouAlerts } from '../../lib/for-you-alerts'
+import { TextField } from '../ui'
 import { ConfirmationDialog } from './confirmation-dialog'
 import { SettingsRow } from './settings'
 
@@ -85,20 +86,15 @@ export function DeleteAccount() {
         visible={confirming}
       >
         {hasPassword ? (
-          <View style={styles.field}>
-            <Text style={styles.label}>Your password</Text>
-            <TextInput
-              accessibilityLabel="Your password"
-              autoComplete="current-password"
-              editable={!remove.isPending}
-              onChangeText={setPassword}
-              placeholder="Password"
-              placeholderTextColor={t.color.textMuted}
-              secureTextEntry
-              style={styles.input}
-              value={password}
-            />
-          </View>
+          <TextField
+            autoComplete="current-password"
+            editable={!remove.isPending}
+            label="Your password"
+            onChangeText={setPassword}
+            placeholder="Password"
+            secureTextEntry
+            value={password}
+          />
         ) : null}
         {remove.isError ? (
           <Text accessibilityLiveRegion="polite" style={styles.error}>
@@ -111,18 +107,6 @@ export function DeleteAccount() {
 }
 
 const styles = StyleSheet.create({
-  field: { gap: t.space[2] },
-  label: { color: t.color.textSecondary, fontFamily: t.font.bold, fontSize: t.type.label },
-  input: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.body, lineHeight: 22 },
   rowError: { paddingHorizontal: t.space[4], paddingVertical: t.space[3] },
 })

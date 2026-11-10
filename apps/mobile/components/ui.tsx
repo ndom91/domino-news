@@ -1,7 +1,16 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import { DESK_SLOT, type Desk } from '@dn/schemas'
 import { Redirect } from 'expo-router'
 import type { ReactNode } from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
+import {
+  ActivityIndicator,
+  Pressable,
+  StyleSheet,
+  Text,
+  TextInput,
+  type TextInputProps,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { isUnauthorized } from '../lib/api'
 
@@ -49,6 +58,43 @@ export function Button({
       </Text>
     </Pressable>
   )
+}
+
+/**
+ * A text input in the shared field style. A `label` shows above it and also names it for screen
+ * readers; a `hint` shows below it.
+ */
+export function TextField({
+  label,
+  hint,
+  style,
+  ...input
+}: TextInputProps & { label?: string; hint?: string }) {
+  const field = (
+    <TextInput
+      accessibilityLabel={label}
+      placeholderTextColor={t.color.textMuted}
+      {...input}
+      style={[styles.input, style]}
+    />
+  )
+  if (!label && !hint) return field
+  return (
+    <View style={styles.field}>
+      {label ? <Text style={styles.fieldLabel}>{label}</Text> : null}
+      {field}
+      {hint ? <Text style={styles.fieldHint}>{hint}</Text> : null}
+    </View>
+  )
+}
+
+/** A desk's fill and the text colour that reads on it; the neutral slot until a story has a desk. */
+export function deskColors(desk: Desk | null): { fill: string; ink: string } {
+  const slot = desk ? DESK_SLOT[desk] : 0
+  return {
+    fill: t.color.narrative[slot] ?? t.color.narrative[0],
+    ink: t.color.narrativeText[slot] ?? t.color.narrativeText[0],
+  }
 }
 
 export function LoadingView({ label = 'Loading' }: { label?: string }) {
@@ -191,6 +237,24 @@ const styles = StyleSheet.create({
   buttonText: { fontFamily: t.font.bold, fontSize: t.type.body },
   buttonTextDark: { color: t.color.bandText },
   buttonTextLight: { color: t.color.text },
+  field: { gap: t.space[2] },
+  fieldLabel: { color: t.color.textSecondary, fontFamily: t.font.bold, fontSize: t.type.label },
+  fieldHint: {
+    color: t.color.textMuted,
+    fontFamily: t.font.regular,
+    fontSize: t.type.meta,
+    lineHeight: 19,
+  },
+  input: {
+    backgroundColor: t.color.surface,
+    borderColor: t.color.borderStrong,
+    borderWidth: 1,
+    color: t.color.text,
+    fontFamily: t.font.regular,
+    fontSize: t.type.body,
+    minHeight: t.size.tap,
+    paddingHorizontal: t.space[3],
+  },
   state: { alignItems: 'center', flex: 1, gap: t.space[3], justifyContent: 'center' },
   stateText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.body },
   message: { gap: t.space[3], padding: t.space[6] },

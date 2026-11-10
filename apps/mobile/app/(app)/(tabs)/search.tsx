@@ -4,8 +4,8 @@ import type { SearchHit, SearchResponse } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Redirect, useRouter } from 'expo-router'
 import { useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native'
-import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { LoadingView, MessageView, Screen, TextField, uiStyles } from '../../../components/ui'
 import { isUnauthorized, queries } from '../../../lib/api'
 
 export default function SearchScreen() {
@@ -27,14 +27,13 @@ export default function SearchScreen() {
         <Text style={styles.heading}>Search</Text>
         <Text style={styles.intro}>Find a story or narrative across the reporting we track.</Text>
         <View style={styles.searchRow}>
-          <TextInput
+          <TextField
             accessibilityLabel="Search stories and narratives"
             autoCapitalize="none"
             autoCorrect={false}
             onChangeText={setDraft}
             onSubmitEditing={submit}
             placeholder="Search the news"
-            placeholderTextColor={t.color.textMuted}
             returnKeyType="search"
             style={styles.input}
             value={draft}
@@ -175,17 +174,7 @@ const styles = StyleSheet.create({
     marginTop: t.space[2],
   },
   searchRow: { flexDirection: 'row', marginTop: t.space[6] },
-  input: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    flex: 1,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
+  input: { flex: 1 },
   submit: {
     alignItems: 'center',
     backgroundColor: t.color.band,

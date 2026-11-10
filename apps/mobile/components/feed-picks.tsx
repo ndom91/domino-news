@@ -1,7 +1,6 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import {
   DESK_LABELS,
-  DESK_SLOT,
   DESKS,
   type Desk,
   REGION_LABELS,
@@ -14,6 +13,7 @@ import {
   type UserPreferencesUpdate,
 } from '@dn/schemas'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { deskColors } from './ui'
 
 export type FeedPickSection = 'regions' | 'desks' | 'topics'
 
@@ -54,8 +54,8 @@ export function FeedPicks({
           onToggle={(desk) => onChange({ desks: toggle(values.desks, desk) })}
           options={DESKS}
           selected={values.desks}
-          textColorFor={(desk) => t.color.narrativeText[DESK_SLOT[desk]] ?? t.color.bandText}
-          tintFor={(desk) => t.color.narrative[DESK_SLOT[desk]] ?? t.color.accent}
+          textColorFor={(desk) => deskColors(desk).ink}
+          tintFor={(desk) => deskColors(desk).fill}
           titleFor={(desk) => DESK_LABELS[desk]}
         />
       ) : null}
@@ -70,8 +70,8 @@ export function FeedPicks({
               onToggle={(topic) => onChange({ topics: toggle(values.topics, topic) })}
               options={TOPICS.filter((topic) => TOPIC_DESK[topic] === desk)}
               selected={values.topics}
-              textColorFor={() => t.color.narrativeText[DESK_SLOT[desk]] ?? t.color.bandText}
-              tintFor={() => t.color.narrative[DESK_SLOT[desk]] ?? t.color.accent}
+              textColorFor={() => deskColors(desk).ink}
+              tintFor={() => deskColors(desk).fill}
               titleFor={(topic) => TOPIC_LABELS[topic]}
             />
           ))}

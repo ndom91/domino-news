@@ -1,12 +1,13 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { plural, stripCitations } from '@dn/domain'
-import { DESK_LABELS, DESK_SLOT, type StoryLead } from '@dn/schemas'
+import { DESK_LABELS, type StoryLead } from '@dn/schemas'
 import { useInfiniteQuery, useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../../components/story-card'
 import {
   Button,
+  deskColors,
   LoadMoreFooter,
   MessageView,
   QueryScreen,
@@ -98,9 +99,7 @@ export default function LatestScreen() {
 function LeadStory({ story }: { story: StoryLead }) {
   const router = useRouter()
   // The same desk fill as the web hero and the story cards' bars.
-  const slot = story.desk ? DESK_SLOT[story.desk] : 0
-  const fill = t.color.narrative[slot] ?? t.color.narrative[0]
-  const ink = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
+  const { fill, ink } = deskColors(story.desk)
   const narrative = story.narratives[0]
   return (
     <Pressable

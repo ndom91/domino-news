@@ -4,9 +4,9 @@ import { LEAN_LABELS, type PublisherStats } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Stack, useRouter } from 'expo-router'
 import { useState } from 'react'
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import { PublisherLogo } from '../../../components/publisher-logo'
-import { MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import { MessageView, QueryScreen, Screen, TextField, uiStyles } from '../../../components/ui'
 import { queries } from '../../../lib/api'
 
 export default function PublishersScreen() {
@@ -42,13 +42,12 @@ export default function PublishersScreen() {
                   <Text style={styles.intro}>
                     See the publishers Domino Wire follows and how their reporting is used.
                   </Text>
-                  <TextInput
+                  <TextField
                     accessibilityLabel="Search publishers by name or domain"
                     autoCapitalize="none"
                     autoCorrect={false}
                     onChangeText={setSearch}
                     placeholder="Search publishers"
-                    placeholderTextColor={t.color.textMuted}
                     style={styles.input}
                     value={search}
                   />
@@ -102,17 +101,7 @@ const styles = StyleSheet.create({
     fontSize: t.type.body,
     lineHeight: 23,
   },
-  input: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    marginTop: t.space[3],
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
+  input: { marginTop: t.space[3] },
   count: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
   item: {
     borderBottomColor: t.color.border,

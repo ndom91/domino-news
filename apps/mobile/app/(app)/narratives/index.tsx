@@ -1,9 +1,10 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { plural, shortRelative } from '@dn/domain'
-import { DESK_LABELS, DESK_SLOT, type NarrativeListResponse } from '@dn/schemas'
+import type { NarrativeListResponse } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
-import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, Text, View } from 'react-native'
+import { cardStyles, DeskCard } from '../../../components/story-card'
 import { MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
 import { queries } from '../../../lib/api'
 
@@ -76,36 +77,19 @@ function NarrativeCard({
   now: string
   onPress: () => void
 }) {
-  const slot = narrative.desk ? DESK_SLOT[narrative.desk] : 0
-  const keyColor = t.color.narrative[slot] ?? t.color.narrative[0]
-  const keyText = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
-
   return (
-    <Pressable
-      accessibilityHint="Opens this narrative"
-      accessibilityLabel={narrative.title}
-      accessibilityRole="link"
-      onPress={onPress}
-      style={({ pressed }) => [styles.card, pressed ? styles.pressed : null]}
-    >
-      <View style={[styles.bar, { backgroundColor: keyColor }]}>
-        <Text numberOfLines={1} style={[styles.barText, { color: keyText }]}>
-          {narrative.desk ? DESK_LABELS[narrative.desk] : 'Narrative'}
+    <DeskCard desk={narrative.desk} kind="narrative" onPress={onPress} title={narrative.title}>
+      <Text style={cardStyles.title}>{narrative.title}</Text>
+      {narrative.description ? (
+        <Text numberOfLines={3} style={cardStyles.summary}>
+          {narrative.description}
         </Text>
-      </View>
-      <View style={styles.cardBody}>
-        <Text style={styles.cardTitle}>{narrative.title}</Text>
-        {narrative.description ? (
-          <Text numberOfLines={3} style={styles.description}>
-            {narrative.description}
-          </Text>
-        ) : null}
-        <Text style={styles.meta}>
-          {plural(narrative.storyCount, 'story', 'stories')} · updated{' '}
-          {shortRelative(narrative.updatedAt, new Date(now))}
-        </Text>
-      </View>
-    </Pressable>
+      ) : null}
+      <Text style={cardStyles.meta}>
+        {plural(narrative.storyCount, 'story', 'stories')} · updated{' '}
+        {shortRelative(narrative.updatedAt, new Date(now))}
+      </Text>
+    </DeskCard>
   )
 }
 
@@ -132,26 +116,4 @@ const styles = StyleSheet.create({
   },
   listHeader: { marginBottom: t.space[6] },
   separator: { height: t.space[4] },
-  card: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.border,
-    borderWidth: StyleSheet.hairlineWidth,
-  },
-  bar: { justifyContent: 'center', minHeight: 28, paddingHorizontal: t.space[3] },
-  barText: {
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
-  },
-  cardBody: { gap: t.space[2], padding: t.space[4] },
-  cardTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: 24, lineHeight: 25 },
-  description: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 23,
-  },
-  meta: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
-  pressed: { opacity: 0.7 },
 })

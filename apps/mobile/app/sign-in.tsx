@@ -9,11 +9,10 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  TextInput,
   View,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Button } from '../components/ui'
+import { Button, TextField } from '../components/ui'
 import { authClient } from '../lib/auth-client'
 import { hasApiUrl } from '../lib/config'
 import { requestGoogleIdToken, supportsGoogleSignIn } from '../lib/google-sign-in'
@@ -36,53 +35,70 @@ export default function SignInScreen() {
 
   if (session.data) return <Redirect href="/" />
 
-  async function signIn() {
+  /**
+   * Every sign-in path: checks the API URL, shows the pressed button as pending, then opens the
+   * app. `attempt` resolves to null once signed in, else to the error to show ('' shows none).
+   */
+  async function authenticate(kind: 'password' | 'google', attempt: () => Promise<string | null>) {
     if (!hasApiUrl) {
       setError('Set EXPO_PUBLIC_API_URL before signing in.')
       return
     }
-    setPending('password')
+    setPending(kind)
     setError(null)
-    const result = await authClient.signIn.username({ username: username.trim(), password })
-    if (result.error) {
-      setPending(null)
-      setError(
-        result.error.status === 401
-          ? 'Username or password is incorrect.'
-          : (result.error.message ?? 'Sign-in failed. Try again.'),
-      )
+    // The auth client throws when the request never reaches the server.
+    const failure = await attempt().catch(
+      () => 'Could not reach Domino Wire. Check your connection and try again.',
+    )
+    if (failure === null) {
+      queryClient.clear()
+      router.replace('/')
       return
     }
-    queryClient.clear()
-    router.replace('/')
+    setPending(null)
+    if (failure) setError(failure)
   }
 
-  async function signUp() {
-    if (!hasApiUrl) {
-      setError('Set EXPO_PUBLIC_API_URL before signing in.')
-      return
-    }
+  function signIn() {
+    void authenticate('password', async () => {
+      const { error } = await authClient.signIn.username({ username: username.trim(), password })
+      if (!error) return null
+      return error.status === 401
+        ? 'Username or password is incorrect.'
+        : (error.message ?? 'Sign-in failed. Try again.')
+    })
+  }
+
+  function signUp() {
     if (password.length < MIN_PASSWORD_LENGTH) {
       setError(`Choose a password with at least ${MIN_PASSWORD_LENGTH} characters.`)
       return
     }
-    setPending('password')
-    setError(null)
-    // The server stores a placeholder when email is blank and uses the username as the name.
-    const name = username.trim()
-    const result = await authClient.signUp.email({
-      username: name,
-      password,
-      email: email.trim(),
-      name,
+    void authenticate('password', async () => {
+      // The server stores a placeholder when email is blank and uses the username as the name.
+      const name = username.trim()
+      const { error } = await authClient.signUp.email({
+        username: name,
+        password,
+        email: email.trim(),
+        name,
+      })
+      return error ? (error.message ?? 'Could not create the account. Try again.') : null
     })
-    if (result.error) {
-      setPending(null)
-      setError(result.error.message ?? 'Could not create the account. Try again.')
-      return
-    }
-    queryClient.clear()
-    router.replace('/')
+  }
+
+  function signInWithGoogle() {
+    void authenticate('google', async () => {
+      try {
+        const token = await requestGoogleIdToken()
+        // No token: the reader closed Google's account picker.
+        if (!token) return ''
+        const { error } = await authClient.signIn.social({ provider: 'google', idToken: { token } })
+        return error ? (error.message ?? 'Google sign-in failed. Try again.') : null
+      } catch {
+        return 'Google sign-in could not be completed. Try again.'
+      }
+    })
   }
 
   function switchMode() {
@@ -100,39 +116,6 @@ export default function SignInScreen() {
     submitLabel = passwordPending ? 'Creating account…' : 'Create account'
   } else if (supportsGoogleSignIn) {
     intro = 'Sign in with your username or continue with Google.'
-  }
-
-  async function signInWithGoogle() {
-    if (!hasApiUrl) {
-      setError('Set EXPO_PUBLIC_API_URL before signing in.')
-      return
-    }
-
-    setPending('google')
-    setError(null)
-    try {
-      const token = await requestGoogleIdToken()
-      if (!token) {
-        setPending(null)
-        return
-      }
-
-      const result = await authClient.signIn.social({
-        provider: 'google',
-        idToken: { token },
-      })
-      if (result.error) {
-        setPending(null)
-        setError(result.error.message ?? 'Google sign-in failed. Try again.')
-        return
-      }
-
-      queryClient.clear()
-      router.replace('/')
-    } catch {
-      setPending(null)
-      setError('Google sign-in could not be completed. Try again.')
-    }
   }
 
   return (
@@ -154,67 +137,55 @@ export default function SignInScreen() {
             </Text>
             <Text style={styles.intro}>{intro}</Text>
             <View style={styles.fields}>
-              <Text style={styles.label}>Username</Text>
-              <TextInput
-                accessibilityLabel="Username"
+              <TextField
                 autoCapitalize="none"
                 autoComplete={signingUp ? 'username-new' : 'username'}
                 autoCorrect={false}
                 editable={!isPending}
+                hint={
+                  signingUp
+                    ? '3–30 letters, numbers, dots or underscores. You sign in with it.'
+                    : undefined
+                }
+                label="Username"
                 onChangeText={setUsername}
                 onSubmitEditing={submit}
                 placeholder="Username"
-                placeholderTextColor={t.color.textMuted}
                 spellCheck={false}
-                style={styles.input}
                 value={username}
               />
               {signingUp ? (
-                <Text style={styles.hint}>
-                  3–30 letters, numbers, dots or underscores. You sign in with it.
-                </Text>
+                <TextField
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  autoCorrect={false}
+                  editable={!isPending}
+                  hint="Only used to contact you about your account."
+                  inputMode="email"
+                  keyboardType="email-address"
+                  label="Email (optional)"
+                  onChangeText={setEmail}
+                  onSubmitEditing={submit}
+                  placeholder="you@example.com"
+                  spellCheck={false}
+                  value={email}
+                />
               ) : null}
-              {signingUp ? (
-                <>
-                  <Text style={styles.label}>Email (optional)</Text>
-                  <TextInput
-                    accessibilityLabel="Email (optional)"
-                    autoCapitalize="none"
-                    autoComplete="email"
-                    autoCorrect={false}
-                    editable={!isPending}
-                    inputMode="email"
-                    keyboardType="email-address"
-                    onChangeText={setEmail}
-                    onSubmitEditing={submit}
-                    placeholder="you@example.com"
-                    placeholderTextColor={t.color.textMuted}
-                    spellCheck={false}
-                    style={styles.input}
-                    value={email}
-                  />
-                  <Text style={styles.hint}>Only used to contact you about your account.</Text>
-                </>
-              ) : null}
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                accessibilityLabel="Password"
+              <TextField
                 autoComplete={signingUp ? 'new-password' : 'current-password'}
                 editable={!isPending}
+                hint={
+                  signingUp
+                    ? `At least ${MIN_PASSWORD_LENGTH} characters. There’s no password reset yet, so keep it safe.`
+                    : undefined
+                }
+                label="Password"
                 onChangeText={setPassword}
                 onSubmitEditing={submit}
                 placeholder="Password"
-                placeholderTextColor={t.color.textMuted}
                 secureTextEntry
-                style={styles.input}
                 value={password}
               />
-              {signingUp ? (
-                <Text style={styles.hint}>
-                  At least {MIN_PASSWORD_LENGTH} characters. There’s no password reset yet, so keep
-                  it safe.
-                </Text>
-              ) : null}
             </View>
             {error ? (
               <Text accessibilityLiveRegion="polite" style={styles.error}>
@@ -291,29 +262,7 @@ const styles = StyleSheet.create({
     fontSize: t.type.body,
     lineHeight: 23,
   },
-  fields: { gap: t.space[2] },
-  label: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.bold,
-    fontSize: t.type.label,
-    marginTop: t.space[2],
-  },
-  input: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
-  hint: {
-    color: t.color.textMuted,
-    fontFamily: t.font.regular,
-    fontSize: t.type.meta,
-    lineHeight: 19,
-  },
+  fields: { gap: t.space[4] },
   switch: { alignItems: 'center', justifyContent: 'center', minHeight: t.size.tap },
   switchText: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
   switchLink: { color: t.color.text, fontFamily: t.font.bold, textDecorationLine: 'underline' },

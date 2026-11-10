@@ -3,9 +3,9 @@ import { savePreferencesMutation } from '@dn/queries'
 import type { Place } from '@dn/schemas'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { StyleSheet, Text, TextInput, View } from 'react-native'
+import { StyleSheet, Text, View } from 'react-native'
 import { api } from '../../lib/api'
-import { Button } from '../ui'
+import { Button, TextField } from '../ui'
 import { SectionHeading } from './settings'
 
 export function LocalitySettings({ locality }: { locality: Place | null }) {
@@ -33,31 +33,17 @@ export function LocalitySettings({ locality }: { locality: Place | null }) {
         Choose a country and optionally a city or local area. Your location is saved to your
         account.
       </Text>
-      <Text style={styles.label}>Country code</Text>
-      <TextInput
-        accessibilityLabel="Country code"
+      <TextField
         autoCapitalize="characters"
         autoCorrect={false}
+        label="Country code"
         maxLength={2}
         onChangeText={setCountry}
         placeholder="US"
         value={country}
-        style={styles.input}
       />
-      <Text style={styles.label}>City (optional)</Text>
-      <TextInput
-        accessibilityLabel="City"
-        onChangeText={setCity}
-        value={city}
-        style={styles.input}
-      />
-      <Text style={styles.label}>County or local area (optional)</Text>
-      <TextInput
-        accessibilityLabel="County or local area"
-        onChangeText={setCounty}
-        value={county}
-        style={styles.input}
-      />
+      <TextField label="City (optional)" onChangeText={setCity} value={city} />
+      <TextField label="County or local area (optional)" onChangeText={setCounty} value={county} />
       {error || save.isError ? (
         <Text accessibilityRole="alert" style={styles.error}>
           {error || 'Could not save your location. Try again.'}
@@ -92,13 +78,5 @@ export function LocalitySettings({ locality }: { locality: Place | null }) {
 const styles = StyleSheet.create({
   section: { gap: t.space[3] },
   text: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.body },
-  label: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
-  input: {
-    borderColor: t.color.borderStrong,
-    borderWidth: 1,
-    color: t.color.text,
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
   error: { color: t.color.error, fontFamily: t.font.medium },
 })

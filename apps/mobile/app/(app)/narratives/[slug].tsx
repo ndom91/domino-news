@@ -1,13 +1,20 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, layoutNarrative, plural, relationLabel } from '@dn/domain'
-import { DESK_LABELS, DESK_SLOT, type NarrativeDetail } from '@dn/schemas'
+import { DESK_LABELS, type NarrativeDetail } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
 import { StoryUpdates } from '../../../components/story-detail/story-updates'
-import { Button, MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import {
+  Button,
+  deskColors,
+  MessageView,
+  QueryScreen,
+  Screen,
+  uiStyles,
+} from '../../../components/ui'
 import { queries } from '../../../lib/api'
 
 export default function NarrativeScreen() {
@@ -49,17 +56,15 @@ function NarrativeContent({
   const stories = rows.map((row) => row.node)
   const first = stories[0]
   const last = stories.at(-1)
-  const slot = narrative.desk ? DESK_SLOT[narrative.desk] : 0
-  const keyColor = t.color.narrative[slot] ?? t.color.narrative[0]
-  const keyText = t.color.narrativeText[slot] ?? t.color.narrativeText[0]
+  const { fill, ink } = deskColors(narrative.desk)
   const titleOf = new Map(stories.map((story) => [story.id, story.title]))
 
   return (
     <Screen>
       <Stack.Screen options={{ title: 'Narrative' }} />
       <ScrollView contentContainerStyle={uiStyles.content}>
-        <View style={[styles.deskBar, { backgroundColor: keyColor }]}>
-          <Text style={[styles.deskBarText, { color: keyText }]}>
+        <View style={[styles.deskBar, { backgroundColor: fill }]}>
+          <Text style={[styles.deskBarText, { color: ink }]}>
             {narrative.desk ? DESK_LABELS[narrative.desk] : 'Narrative'}
           </Text>
         </View>
