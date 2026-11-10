@@ -1215,6 +1215,8 @@ describe('incremental relationships', () => {
         join story newer on newer.id = r.from_story_id
         join story older on older.id = r.to_story_id
         where r.relation in ('related_to', 'provides_context_for')
+          -- An earlier test withdraws a Story; relateStory only links published ones.
+          and newer.published_at is not null and older.published_at is not null
           and a.input_fingerprint = newer.id || ':' || newer.current_summary_id || ':' ||
           newer.input_fingerprint || '|' || older.id || ':' || older.current_summary_id || ':' ||
           older.input_fingerprint
