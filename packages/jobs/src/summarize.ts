@@ -14,7 +14,7 @@ import {
   recordGeneratedSummary,
   recordStoryUpdate,
 } from '@dn/server'
-import { and, desc, eq, gt, isNull } from 'drizzle-orm'
+import { and, desc, eq, gt, isNull, sql } from 'drizzle-orm'
 import { sendInTx, type WorkerContext } from './context.ts'
 import { type LoadedArticle, loadArticles, loadStoryInput, withTransientBodies } from './inputs.ts'
 import { markRunFailed, runStoryGeneration } from './provenance.ts'
@@ -129,11 +129,11 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
       const ref = { url: a.url, title: a.title, kind: 'official_statement' as const }
       await recordPrimarySources(tx.db, story.id, a.articleId, [ref])
     }
-    // Revisions update a Story, not its connections to other Stories. Context and claims follow
-    // the new summary, while relationship inference remains initial-summary work.
+    // Updates change a Story, not its connections to other Stories: relationship inference runs
+    // only for the first summary or a forced refresh. Context follows every new summary.
     const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
     const queues = [
-      ...(assessment ? [] : [QUEUES.relateStory]),
+      ...(story.currentSummaryId && !job.force ? [] : [QUEUES.relateStory]),
       ...optionalEnrichmentQueues(outletCount, ctx.config.eagerOptionalEnrichmentOutlets),
     ]
     for (const queue of queues) await sendInTx(ctx, tx, queue, next.data, next.options)
@@ -207,24 +207,32 @@ async function assessSummaryUpdate(
     .from(schema.storySummaryVersion)
     .where(eq(schema.storySummaryVersion.id, priorSummaryVersionId))
   if (!prior) return null
-  const additions = await ctx.db
-    .select({ articleId: schema.storyArticle.articleId, addedAt: schema.storyArticle.addedAt })
+  // New reporting is any article added, or edited by its publisher, since the prior summary.
+  // An edited headline is judged like a new article rather than forcing a full re-summary.
+  const changedAt = sql`greatest(${schema.storyArticle.addedAt}, ${schema.articleRevision.observedAt})`
+  const changes = await ctx.db
+    .select({ articleId: schema.storyArticle.articleId })
     .from(schema.storyArticle)
+    .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+    .innerJoin(
+      schema.articleRevision,
+      eq(schema.articleRevision.id, schema.article.latestRevisionId),
+    )
     .where(
       and(
         eq(schema.storyArticle.storyId, storyId),
         isNull(schema.storyArticle.removedAt),
-        gt(schema.storyArticle.addedAt, prior.createdAt),
+        gt(changedAt, prior.createdAt),
       ),
     )
-    .orderBy(desc(schema.storyArticle.addedAt))
+    .orderBy(desc(changedAt))
     .limit(maxArticles * 3)
   const articles = assessmentArticles(
     await loadArticles(
       ctx.db,
-      additions.map((addition) => addition.articleId),
+      changes.map((change) => change.articleId),
     ),
-    additions,
+    changes,
     maxArticles,
   )
   if (articles.length === 0) return null
@@ -306,15 +314,14 @@ type AssessmentResult = {
 
 function assessmentArticles(
   articles: LoadedArticle[],
-  additions: { articleId: string; addedAt: Date }[],
+  changes: { articleId: string }[],
   maxArticles: number,
 ) {
-  const addedAt = new Map(additions.map((addition) => [addition.articleId, addition.addedAt]))
-  const newest = articles.toSorted((a, b) => {
-    const aAddedAt = addedAt.get(a.articleId)
-    const bAddedAt = addedAt.get(b.articleId)
-    return (bAddedAt?.getTime() ?? 0) - (aAddedAt?.getTime() ?? 0)
-  })
+  // `changes` is newest first; keep that order.
+  const rank = new Map(changes.map((change, index) => [change.articleId, index]))
+  const newest = articles.toSorted(
+    (a, b) => (rank.get(a.articleId) ?? Infinity) - (rank.get(b.articleId) ?? Infinity),
+  )
   const publishers = new Set<string>()
   const out: LoadedArticle[] = []
   for (const article of newest) {

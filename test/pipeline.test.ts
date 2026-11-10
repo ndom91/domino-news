@@ -154,6 +154,99 @@ describe('ingestion dedupe and revisions', () => {
       expect(current?.inputFingerprint).toBe(story.inputFingerprint)
     }
   })
+
+  it('assesses an edited headline instead of re-summarising the story', async () => {
+    const { db } = h.ctx
+    const { ID_PREFIX, newId } = await import('@dn/domain')
+    const { summarizeStory } = await import('@dn/jobs')
+    const { analysisJob, refreshFingerprint } = await import('@dn/server')
+    const [story] = await db
+      .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
+      .from(schema.story)
+      .where(isNotNull(schema.story.publishedAt))
+      .limit(1)
+    if (!story?.summaryId) throw new Error('no published story')
+    const [article] = await db
+      .select({ id: schema.article.id, revisionId: schema.article.latestRevisionId })
+      .from(schema.storyArticle)
+      .innerJoin(schema.article, eq(schema.article.id, schema.storyArticle.articleId))
+      .where(and(eq(schema.storyArticle.storyId, story.id), isNull(schema.storyArticle.removedAt)))
+      .limit(1)
+    if (!article) throw new Error('no article')
+    // The publisher edits a headline; nothing new joins the Story.
+    const now = new Date()
+    const revisionId = newId(ID_PREFIX.articleRevision)
+    await db.insert(schema.articleRevision).values({
+      id: revisionId,
+      articleId: article.id,
+      observedAt: now,
+      title: 'Zygomorphic headline rewrite',
+      description: null,
+      contentHash: `edited-${revisionId}`,
+      previousRevisionId: article.revisionId,
+    })
+    await db
+      .update(schema.article)
+      .set({ latestRevisionId: revisionId })
+      .where(eq(schema.article.id, article.id))
+    await db.insert(schema.observation).values({
+      id: newId(ID_PREFIX.observation),
+      type: 'article_revision_detected',
+      observedAt: now,
+      sourceUrl: `https://example.com/edited-${article.id}`,
+      collectionMethod: 'rss',
+      subjectType: 'article',
+      subjectId: article.id,
+      payload: { revisionId },
+      schemaVersion: 1,
+    })
+    const fingerprint = await refreshFingerprint(db, story.id)
+    const assessed: string[][] = []
+    const generation = h.ctx.inference.generation
+    const ctx: typeof h.ctx = {
+      ...h.ctx,
+      inference: {
+        ...h.ctx.inference,
+        generation: {
+          ...generation,
+          assessSummaryUpdate: async ({ update }) => {
+            assessed.push(update.articles.map((a) => a.articleId))
+            return {
+              output: {
+                changeKind: null,
+                outcome: 'corroboration_only',
+                note: '',
+                sourceArticleIds: [],
+                observationIds: [],
+              },
+              modelId: generation.modelId,
+              promptVersion: 'test',
+            }
+          },
+          summarizeStory: async () => {
+            throw new Error('an edit must not force a full summary')
+          },
+        },
+      },
+    }
+    try {
+      const result = await summarizeStory(ctx, analysisJob(story.id, fingerprint, 'fresh').data)
+      expect(result).toEqual({ status: 'corroboration_only' })
+      expect(assessed).toEqual([[article.id]])
+      const [after] = await db
+        .select({ summaryId: schema.story.currentSummaryId })
+        .from(schema.story)
+        .where(eq(schema.story.id, story.id))
+      expect(after?.summaryId).toBe(story.summaryId)
+    } finally {
+      // Later tests expect every published Story's summary to match its inputs.
+      await db
+        .update(schema.article)
+        .set({ latestRevisionId: article.revisionId })
+        .where(eq(schema.article.id, article.id))
+      await refreshFingerprint(db, story.id)
+    }
+  })
 })
 
 describe('append-only invariants', () => {
