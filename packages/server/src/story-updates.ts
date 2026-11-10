@@ -1,7 +1,9 @@
 import { type Db, schema } from '@dn/db'
 import { ID_PREFIX, newId } from '@dn/domain'
 import type { StoryUpdateKind, StoryUpdateOrigin, StoryUpdatesResponse } from '@dn/schemas'
-import { and, desc, eq, inArray, isNull, ne, or, sql } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNull, ne, or, type SQLWrapper, sql } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
+import { resolveStory } from './reader.ts'
 
 export const GENERIC_SUMMARY_REVISION_DESCRIPTION =
   'The story summary was updated with the latest reporting.'
@@ -59,10 +61,7 @@ export async function listStoryUpdates(
   idOrSlug: string,
   limit = 20,
 ): Promise<StoryUpdatesResponse | null> {
-  const [story] = await db
-    .select({ id: schema.story.id })
-    .from(schema.story)
-    .where(or(eq(schema.story.id, idOrSlug), eq(schema.story.slug, idOrSlug)))
+  const story = await resolveStory(db, idOrSlug)
   if (!story) return null
   return { items: await loadUpdates(db, [story.id], limit) }
 }
@@ -78,7 +77,7 @@ export async function listNarrativeUpdates(
     .from(schema.narrative)
     .where(or(eq(schema.narrative.id, idOrSlug), eq(schema.narrative.slug, idOrSlug)))
   if (!narrative) return null
-  const stories = await db
+  const storyIds = db
     .select({ id: schema.narrativeStory.storyId })
     .from(schema.narrativeStory)
     .where(
@@ -87,13 +86,7 @@ export async function listNarrativeUpdates(
         isNull(schema.narrativeStory.removedAt),
       ),
     )
-  return {
-    items: await loadUpdates(
-      db,
-      stories.map((story) => story.id),
-      limit,
-    ),
-  }
+  return { items: await loadUpdates(db, storyIds, limit) }
 }
 
 /** Latest reader-visible, non-superseded event for each candidate Story after a checkpoint. */
@@ -128,12 +121,14 @@ export async function latestStoryUpdatesSince(
   return latest
 }
 
+const previousVersion = alias(schema.storySummaryVersion, 'previous_version')
+
 async function loadUpdates(
   db: Db,
-  storyIds: string[],
+  // Story ids, or a subquery that selects them.
+  storyIds: string[] | SQLWrapper,
   limit: number,
 ): Promise<StoryUpdatesResponse['items']> {
-  if (storyIds.length === 0) return []
   const events = await db
     .select({
       id: schema.storyUpdateEvent.id,
@@ -164,102 +159,102 @@ async function loadUpdates(
   const summaryVersionIds = visibleEvents.flatMap((event) =>
     event.summaryVersionId ? [event.summaryVersionId] : [],
   )
-  const [articleSources, primarySources, summaries] = await Promise.all([
+  const [sources, summaries] = await Promise.all([
+    // Each source is an article or a primary source: one side of the left joins is empty.
     db
       .select({
         eventId: schema.storyUpdateEventSource.eventId,
-        title: schema.articleRevision.title,
-        description: schema.articleRevision.description,
-        url: schema.article.canonicalUrl,
+        articleTitle: schema.articleRevision.title,
+        articleDescription: schema.articleRevision.description,
+        articleUrl: schema.article.canonicalUrl,
         publisher: {
           id: schema.publisher.id,
           slug: schema.publisher.slug,
           name: schema.publisher.name,
           domain: schema.publisher.domain,
         },
+        referenceTitle: schema.sourceReference.title,
+        referenceUrl: schema.sourceReference.url,
       })
       .from(schema.storyUpdateEventSource)
-      .innerJoin(schema.article, eq(schema.article.id, schema.storyUpdateEventSource.articleId))
-      .innerJoin(
+      .leftJoin(schema.article, eq(schema.article.id, schema.storyUpdateEventSource.articleId))
+      .leftJoin(
         schema.articleRevision,
         eq(schema.articleRevision.id, schema.article.latestRevisionId),
       )
-      .innerJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
-      .where(inArray(schema.storyUpdateEventSource.eventId, eventIds)),
-    db
-      .select({
-        eventId: schema.storyUpdateEventSource.eventId,
-        title: schema.sourceReference.title,
-        url: schema.sourceReference.url,
-      })
-      .from(schema.storyUpdateEventSource)
-      .innerJoin(
+      .leftJoin(schema.publisher, eq(schema.publisher.id, schema.article.publisherId))
+      .leftJoin(
         schema.sourceReference,
         eq(schema.sourceReference.id, schema.storyUpdateEventSource.sourceReferenceId),
       )
-      .where(inArray(schema.storyUpdateEventSource.eventId, eventIds)),
+      .where(inArray(schema.storyUpdateEventSource.eventId, eventIds))
+      // A stable order (ids start with their creation time), so grouped updates name
+      // their publishers the same way on every request.
+      .orderBy(schema.storyUpdateEventSource.id),
     summaryVersionIds.length
       ? db
           .select({
             id: schema.storySummaryVersion.id,
             body: schema.storySummaryVersion.body,
-            supersedesVersionId: schema.storySummaryVersion.supersedesVersionId,
+            previous: previousVersion.body,
           })
           .from(schema.storySummaryVersion)
+          .leftJoin(
+            previousVersion,
+            eq(previousVersion.id, schema.storySummaryVersion.supersedesVersionId),
+          )
           .where(inArray(schema.storySummaryVersion.id, summaryVersionIds))
       : Promise.resolve([]),
   ])
-  const previousIds = summaries.flatMap((summary) =>
-    summary.supersedesVersionId ? [summary.supersedesVersionId] : [],
-  )
-  const previous = previousIds.length
-    ? await db
-        .select({ id: schema.storySummaryVersion.id, body: schema.storySummaryVersion.body })
-        .from(schema.storySummaryVersion)
-        .where(inArray(schema.storySummaryVersion.id, previousIds))
-    : []
-  const updates = visibleEvents.map((event) => ({
-    id: event.id,
-    storyId: event.storyId,
-    kind: event.kind,
-    description: event.description,
-    origin: event.origin,
-    createdAt: iso(event.createdAt),
-    relatedStory: event.relatedStoryId
-      ? { id: event.relatedStoryId, slug: event.relatedSlug ?? '', title: event.relatedTitle ?? '' }
-      : null,
-    summaryDiff: event.summaryVersionId
-      ? (() => {
-          const current = summaries.find((summary) => summary.id === event.summaryVersionId)
-          if (!current) return null
-          return {
-            previous:
-              previous.find((summary) => summary.id === current.supersedesVersionId)?.body ?? null,
-            current: current.body,
+  const summaryById = new Map(summaries.map((summary) => [summary.id, summary]))
+  const updates = visibleEvents.map((event) => {
+    const summary = event.summaryVersionId ? summaryById.get(event.summaryVersionId) : undefined
+    const eventSources = sources.filter((source) => source.eventId === event.id)
+    return {
+      id: event.id,
+      storyId: event.storyId,
+      kind: event.kind,
+      description: event.description,
+      origin: event.origin,
+      createdAt: iso(event.createdAt),
+      relatedStory: event.relatedStoryId
+        ? {
+            id: event.relatedStoryId,
+            slug: event.relatedSlug ?? '',
+            title: event.relatedTitle ?? '',
           }
-        })()
-      : null,
-    sources: [
-      ...articleSources
-        .filter((source) => source.eventId === event.id)
-        .map((source) => ({
-          type: 'article' as const,
-          title: source.title,
-          description: source.description,
-          url: source.url,
-          publisher: source.publisher,
-        })),
-      ...primarySources
-        .filter((source) => source.eventId === event.id)
-        .map((source) => ({
-          type: 'primary_source' as const,
-          title: source.title ?? 'Primary source',
-          description: null,
-          url: source.url,
-          publisher: null,
-        })),
-    ],
-  }))
+        : null,
+      summaryDiff: summary ? { previous: summary.previous, current: summary.body } : null,
+      sources: [
+        ...eventSources.flatMap(({ articleTitle, articleDescription, articleUrl, publisher }) =>
+          articleTitle !== null && articleUrl !== null && publisher
+            ? [
+                {
+                  type: 'article' as const,
+                  title: articleTitle,
+                  description: articleDescription,
+                  url: articleUrl,
+                  publisher,
+                },
+              ]
+            : [],
+        ),
+        ...eventSources.flatMap(({ referenceTitle, referenceUrl }) =>
+          referenceUrl !== null
+            ? [
+                {
+                  type: 'primary_source' as const,
+                  title: referenceTitle ?? 'Primary source',
+                  description: null,
+                  url: referenceUrl,
+                  publisher: null,
+                },
+              ]
+            : [],
+        ),
+      ],
+    }
+  })
   return coalesceNewReporting(updates)
 }
 
