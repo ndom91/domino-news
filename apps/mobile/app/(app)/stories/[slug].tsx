@@ -1,7 +1,7 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import Feather from '@expo/vector-icons/Feather'
 import { useQuery } from '@tanstack/react-query'
-import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useIsFocused, useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { Alert, Pressable, ScrollView, Share } from 'react-native'
 import { StoryBackground } from '../../../components/story-detail/story-background'
@@ -17,7 +17,9 @@ import { apiUrl } from '../../../lib/config'
 export default function StoryScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const router = useRouter()
-  const story = useQuery(queries.story(slug))
+  // A story page under another screen stops polling for context; it refetches when shown again.
+  const focused = useIsFocused()
+  const story = useQuery({ ...queries.story(slug), subscribed: focused })
   const updates = useQuery(queries.storyUpdates(slug))
   const preferences = useQuery(queries.preferences())
   const storyId = story.data?.id

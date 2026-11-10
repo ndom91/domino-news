@@ -5,12 +5,33 @@ import { Archivo_500Medium } from '@expo-google-fonts/archivo/500Medium'
 import { Archivo_600SemiBold } from '@expo-google-fonts/archivo/600SemiBold'
 import { Archivo_700Bold } from '@expo-google-fonts/archivo/700Bold'
 import { Archivo_900Black } from '@expo-google-fonts/archivo/900Black'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import {
+  focusManager,
+  onlineManager,
+  QueryClient,
+  QueryClientProvider,
+} from '@tanstack/react-query'
 import { useFonts } from 'expo-font'
+import * as Network from 'expo-network'
 import { Stack } from 'expo-router'
 import { useState } from 'react'
-import { ActivityIndicator, StyleSheet, Text, View } from 'react-native'
+import { ActivityIndicator, AppState, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
+
+// React Native has no window focus or online events. Without these, polling (a story's context)
+// keeps running in the background, and nothing refetches when the app or the network comes back.
+focusManager.setEventListener((setFocused) => {
+  const subscription = AppState.addEventListener('change', (state) =>
+    setFocused(state === 'active'),
+  )
+  return () => subscription.remove()
+})
+onlineManager.setEventListener((setOnline) => {
+  const subscription = Network.addNetworkStateListener((state) =>
+    setOnline(Boolean(state.isConnected)),
+  )
+  return () => subscription.remove()
+})
 
 export default function RootLayout() {
   const [queryClient] = useState(
