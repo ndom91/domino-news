@@ -109,12 +109,8 @@ export function scoreStory(
   return { score, reasons }
 }
 
-/** The reader's ranked feed. The cursor is an offset into the ranked window. */
-export async function getForYou(
-  db: Db,
-  userId: string,
-  opts: { cursor?: string | null; limit?: number } = {},
-): Promise<ForYouResponse> {
+/** The reader's whole ranked window, best first, without loading any Story cards. */
+export async function rankForYou(db: Db, userId: string) {
   const [prefs, follows, learned, feedback, rows, muted] = await Promise.all([
     getPreferences(db, userId),
     listFollows(db, userId),
@@ -172,7 +168,16 @@ export async function getForYou(
       ),
     }))
     .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id))
+  return { personalised, ranked, feedback }
+}
 
+/** The reader's ranked feed. The cursor is an offset into the ranked window. */
+export async function getForYou(
+  db: Db,
+  userId: string,
+  opts: { cursor?: string | null; limit?: number } = {},
+): Promise<ForYouResponse> {
+  const { personalised, ranked, feedback } = await rankForYou(db, userId)
   const offset = Math.max(0, Number(opts.cursor) || 0)
   const limit = opts.limit ?? FOR_YOU_PAGE_SIZE
   const page = ranked.slice(offset, offset + limit)

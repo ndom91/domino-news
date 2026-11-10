@@ -3,21 +3,24 @@ import { stripCitations } from '@dn/domain'
 import {
   claimPushDeliveryIntents,
   createPushDeliveryIntents,
-  getForYou,
   markPushDeliveriesUnknown,
   newlyPublishedStoryIds,
   pushRecipientsReadyForAlert,
   pushTicketsAwaitingReceipt,
+  rankForYou,
   reconcileStalePushDeliveries,
   recordPushReceipts,
   recordPushSendResults,
   removeInvalidPushSubscription,
+  storyListItems,
 } from '@dn/server'
 import type { WorkerContext } from './context.ts'
 
 const EXPO_PUSH_URL = 'https://exp.host/--/api/v2/push/send'
 const EXPO_RECEIPTS_URL = 'https://exp.host/--/api/v2/push/getReceipts'
 const EXPO_BATCH_SIZE = 100
+// Alert only for a new Story that ranks this high in the reader's For You.
+const ALERT_RANK_LIMIT = 100
 
 type ExpoMessage = {
   to: string
@@ -55,15 +58,17 @@ export async function deliverForYouPushes(ctx: WorkerContext) {
     const newStoryIds = await newlyPublishedStoryIds(ctx.db, recipient.since)
     if (newStoryIds.size === 0) continue
 
-    const feed = await getForYou(ctx.db, recipient.userId, { limit: 100 })
-    const item = feed.items.find(({ story }) => newStoryIds.has(story.id))
-    if (!item) continue
+    const { ranked } = await rankForYou(ctx.db, recipient.userId)
+    const top = ranked.slice(0, ALERT_RANK_LIMIT).find(({ id }) => newStoryIds.has(id))
+    if (!top) continue
+    const [story] = await storyListItems(ctx.db, [top.id])
+    if (!story) continue
 
     const intents = await withTransaction(ctx.pool, async (tx) => {
       const planned = await createPushDeliveryIntents(
         tx.db,
         recipient.userId,
-        item.story.id,
+        story.id,
         recipient.subscriptions,
       )
       return claimPushDeliveryIntents(
@@ -75,7 +80,7 @@ export async function deliverForYouPushes(ctx: WorkerContext) {
 
     let sent = false
     for (const batch of chunks(intents, EXPO_BATCH_SIZE)) {
-      const messages = batch.map((intent) => forYouExpoMessage(intent.token, item.story))
+      const messages = batch.map((intent) => forYouExpoMessage(intent.token, story))
       let results: ExpoResult[]
       try {
         results = await sendExpoPush(messages, ctx.config.expoAccessToken)
