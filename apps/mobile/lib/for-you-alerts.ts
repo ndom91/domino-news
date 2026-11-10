@@ -2,6 +2,8 @@ import type { NotificationResponse } from 'expo-notifications'
 import { isExpoGo } from './expo-go'
 import type { ForYouAlertsStatus } from './for-you-alerts-task'
 
+export type { ForYouAlertsStatus }
+
 type StoryListener = (storySlug: string) => void
 type Subscription = { remove: () => void }
 
@@ -12,11 +14,6 @@ export const forYouAlertsAvailable = !isExpoGo
 async function taskModule() {
   if (isExpoGo) throw new Error(unavailableMessage)
   return import('./for-you-alerts-task')
-}
-
-export async function forYouAlertsEnabled(): Promise<boolean> {
-  if (isExpoGo) return false
-  return (await taskModule()).forYouAlertsEnabled()
 }
 
 export async function enableForYouAlerts(): Promise<ForYouAlertsStatus> {
@@ -61,16 +58,4 @@ export async function listenForStoryNotifications(listener: StoryListener): Prom
     if (response) await Notifications.clearLastNotificationResponseAsync()
   })
   return Notifications.addNotificationResponseReceivedListener(openStory)
-}
-
-export async function listenForPushTokenChanges(): Promise<Subscription> {
-  if (isExpoGo) return { remove: () => {} }
-  const Notifications = await import('expo-notifications')
-  return Notifications.addPushTokenListener(({ data }) => {
-    void (async () => {
-      try {
-        await (await taskModule()).refreshForYouPushToken(data)
-      } catch {}
-    })()
-  })
 }

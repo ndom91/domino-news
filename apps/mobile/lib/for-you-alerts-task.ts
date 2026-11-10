@@ -18,10 +18,6 @@ Notifications.setNotificationHandler({
   }),
 })
 
-export async function forYouAlertsEnabled(): Promise<boolean> {
-  return Boolean(await SecureStore.getItemAsync(PUSH_TOKEN_KEY))
-}
-
 export async function forYouAlertsStatus(): Promise<ForYouAlertsStatus> {
   const token = await SecureStore.getItemAsync(PUSH_TOKEN_KEY)
   if (!token) return { enabled: false, registered: false }
@@ -32,13 +28,8 @@ export async function forYouAlertsStatus(): Promise<ForYouAlertsStatus> {
 
 /** Re-register an existing opt-in after app updates or server-side subscription loss. */
 export async function syncForYouAlerts(): Promise<ForYouAlertsStatus> {
-  if (!(await forYouAlertsEnabled())) return { enabled: false, registered: false }
-
-  const projectId = expoProjectId()
-  if (!projectId) throw new Error('Push notifications are not configured for this app.')
-  const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
-  await saveToken(token)
-  return { enabled: true, registered: true }
+  const optedIn = await SecureStore.getItemAsync(PUSH_TOKEN_KEY)
+  return optedIn ? register() : { enabled: false, registered: false }
 }
 
 export async function enableForYouAlerts(): Promise<ForYouAlertsStatus> {
@@ -55,17 +46,12 @@ export async function enableForYouAlerts(): Promise<ForYouAlertsStatus> {
     : (await Notifications.requestPermissionsAsync()).status
   if (status !== 'granted')
     throw new Error('Allow notifications in your device settings to turn on alerts.')
-
-  const projectId = expoProjectId()
-  if (!projectId) throw new Error('Push notifications are not configured for this app.')
-  const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
-  await saveToken(token)
-  return { enabled: true, registered: true }
+  return register()
 }
 
 export async function disableForYouAlerts(): Promise<void> {
   const token = await SecureStore.getItemAsync(PUSH_TOKEN_KEY)
-  if (token) await removeToken(token)
+  if (token) await api.removePushSubscription(token)
   await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY)
 }
 
@@ -74,19 +60,15 @@ export async function forgetForYouAlerts(): Promise<void> {
   await SecureStore.deleteItemAsync(PUSH_TOKEN_KEY)
 }
 
-export async function refreshForYouPushToken(token: string) {
-  await saveToken(token)
-}
-
-async function saveToken(token: string) {
+/**
+ * Saves this install's Expo push token on the server, then locally. The token comes from Expo:
+ * the server accepts only ExponentPushToken[…], not the raw FCM/APNs device token.
+ */
+async function register(): Promise<ForYouAlertsStatus> {
+  const projectId = Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId
+  if (!projectId) throw new Error('Push notifications are not configured for this app.')
+  const token = (await Notifications.getExpoPushTokenAsync({ projectId })).data
   await api.savePushSubscription({ token })
   await SecureStore.setItemAsync(PUSH_TOKEN_KEY, token)
-}
-
-async function removeToken(token: string) {
-  await api.removePushSubscription(token)
-}
-
-function expoProjectId() {
-  return Constants.easConfig?.projectId ?? Constants.expoConfig?.extra?.eas?.projectId
+  return { enabled: true, registered: true }
 }

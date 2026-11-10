@@ -50,7 +50,8 @@ token is still issued for the web client, so the server needs no iOS-specific se
 
 The Account screen registers this device's Expo push token for **For You** alerts. The server sends the
 notifications through Expo/FCM, and the app opens the named Story when the reader taps one. The Account
-screen confirms that the server has the device registration.
+screen confirms that the server has the device registration. Every signed-in launch registers the
+current Expo token again, which is how a changed token reaches the server.
 
 ## Local Preview APK
 

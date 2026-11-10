@@ -4,6 +4,7 @@ import { StyleSheet, Switch, Text, View } from 'react-native'
 import {
   disableForYouAlerts,
   enableForYouAlerts,
+  type ForYouAlertsStatus,
   forYouAlertsAvailable,
   forYouAlertsStatus,
   syncForYouAlerts,
@@ -11,11 +12,9 @@ import {
 import { Button } from '../ui'
 import { SectionHeading } from './settings'
 
-type AlertStatus = { enabled: boolean; registered: boolean }
-
 // AlertSettings confirms the installed device's server-side For You alert subscription.
 export function AlertSettings() {
-  const [status, setStatus] = useState<AlertStatus | null>(null)
+  const [status, setStatus] = useState<ForYouAlertsStatus | null>(null)
   const [pending, setPending] = useState(true)
   const [error, setError] = useState<string | null>(null)
 

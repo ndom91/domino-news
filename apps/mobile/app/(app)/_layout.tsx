@@ -7,11 +7,7 @@ import { AudioBriefingProvider } from '../../components/audio-briefing-provider'
 import { LoadingView, Screen } from '../../components/ui'
 import { queries } from '../../lib/api'
 import { authClient } from '../../lib/auth-client'
-import {
-  listenForPushTokenChanges,
-  listenForStoryNotifications,
-  syncForYouAlerts,
-} from '../../lib/for-you-alerts'
+import { listenForStoryNotifications, syncForYouAlerts } from '../../lib/for-you-alerts'
 
 export default function SignedInLayout() {
   const session = authClient.useSession()
@@ -25,7 +21,6 @@ export default function SignedInLayout() {
     if (!userId) return
 
     let subscription: { remove: () => void } | undefined
-    let tokenSubscription: { remove: () => void } | undefined
     let disposed = false
     void syncForYouAlerts().catch((error) => {
       console.warn('Could not refresh push alerts', error)
@@ -36,14 +31,9 @@ export default function SignedInLayout() {
       if (disposed) nextSubscription.remove()
       else subscription = nextSubscription
     })
-    void listenForPushTokenChanges().then((nextSubscription) => {
-      if (disposed) nextSubscription.remove()
-      else tokenSubscription = nextSubscription
-    })
     return () => {
       disposed = true
       subscription?.remove()
-      tokenSubscription?.remove()
     }
   }, [router, userId])
 
