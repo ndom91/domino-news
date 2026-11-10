@@ -1,29 +1,11 @@
-import {
-  clockTime,
-  formatDate,
-  formatDateTime,
-  hostnameOf,
-  plural,
-  stripCitations,
-} from '@dn/domain'
-import {
-  type NarrativeDetail,
-  REGION_LABELS,
-  type StoryDetail,
-  type StoryUpdateEvent,
-} from '@dn/schemas'
+import { formatDate, hostnameOf, plural } from '@dn/domain'
+import { REGION_LABELS, type StoryDetail } from '@dn/schemas'
 import {
   Badge,
   Button,
   ContextExplanation,
   HeroStory,
-  IconButton,
   leadCitations,
-  Menu,
-  MenuItem,
-  MenuLinkItem,
-  NarrativeGraph,
-  PublisherLogo,
   Reveal,
   relationLabel,
   SectionHeader,
@@ -32,22 +14,18 @@ import {
   SummaryText,
   Timestamp,
 } from '@dn/ui'
-import {
-  CaretDownIcon,
-  DotsThreeIcon,
-  EnvelopeSimpleIcon,
-  LinkIcon,
-  ShareNetworkIcon,
-} from '@phosphor-icons/react'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { createFileRoute, Link } from '@tanstack/react-router'
-import { useCallback, useEffect, useId, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { flushSync } from 'react-dom'
 import { z } from 'zod/mini'
 import { RouterLink } from '../../components/link.tsx'
+import { NarrativeBookends } from '../../components/narrative-bookends.tsx'
 import { OriginalReporting } from '../../components/original-reporting.tsx'
 import { PreviewTeaser } from '../../components/preview-teaser.tsx'
+import { ShareStory } from '../../components/share-story.tsx'
 import { StoryLean } from '../../components/story-lean.tsx'
+import { StoryUpdates } from '../../components/story-updates.tsx'
 import { SummaryEditor } from '../../components/summary-editor.tsx'
 import { api, orNotFound, queries } from '../../lib/api.ts'
 import { seo } from '../../lib/seo.ts'
@@ -105,81 +83,6 @@ function StoryRoute() {
   return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
 }
 
-function ShareStory({ story, origin }: { story: StoryDetail; origin: string }) {
-  const [status, setStatus] = useState('')
-  const [canShare, setCanShare] = useState(false)
-  const statusTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
-  useEffect(() => setCanShare(typeof navigator.share === 'function'), [])
-  useEffect(() => () => clearTimeout(statusTimer.current), [])
-  const url = `${origin}/stories/${encodeURIComponent(story.slug)}`
-  async function copyStoryLink() {
-    clearTimeout(statusTimer.current)
-    try {
-      await navigator.clipboard.writeText(url)
-      setStatus('Link copied.')
-      statusTimer.current = setTimeout(() => setStatus(''), 3000)
-    } catch {
-      setStatus('Could not copy the link. Please copy it from the address bar.')
-    }
-  }
-  async function shareStory() {
-    clearTimeout(statusTimer.current)
-    setStatus('')
-    try {
-      await navigator.share({ title: story.title, url })
-    } catch (error) {
-      if (error instanceof DOMException && error.name === 'AbortError') return
-      setStatus('Could not share the link. Please try copying it instead.')
-    }
-  }
-  return (
-    <div className="relative shrink-0">
-      <Menu
-        trigger={
-          <IconButton
-            label="Share"
-            variant="primary"
-            className="!border-key-text !bg-key-text !text-key hover:not-data-disabled:!bg-key hover:not-data-disabled:!text-key-text"
-            icon={<ShareNetworkIcon size={20} aria-hidden />}
-          />
-        }
-      >
-        <MenuItem onClick={() => void copyStoryLink()}>
-          <LinkIcon size={16} aria-hidden className="mr-3" /> Copy link
-        </MenuItem>
-        <MenuLinkItem
-          render={
-            <a
-              href={`mailto:?subject=${encodeURIComponent(story.title)}&body=${encodeURIComponent(url)}`}
-            />
-          }
-        >
-          <EnvelopeSimpleIcon size={16} aria-hidden className="mr-3" /> Email
-        </MenuLinkItem>
-        {canShare ? (
-          <MenuItem closeOnClick={false} onClick={() => void shareStory()}>
-            <DotsThreeIcon size={16} aria-hidden className="mr-3" /> More options…
-          </MenuItem>
-        ) : null}
-        <p className="w-60 border-t border-border px-4 py-3 text-sm font-normal leading-normal text-text-secondary">
-          Shares this story’s page, with its summary and all{' '}
-          {plural(story.sources.length, 'report')}.
-        </p>
-      </Menu>
-      <span
-        aria-live="polite"
-        className={
-          status
-            ? 'absolute right-0 top-full z-10 mt-2 w-max max-w-60 bg-elevated px-2 text-sm text-text'
-            : 'sr-only'
-        }
-      >
-        {status}
-      </span>
-    </div>
-  )
-}
-
 /**
  * The summary's longer detail, below the lead. Citations lead where the lead's do; a context
  * term gets its popover only where it first appears, counting the lead's summary.
@@ -211,127 +114,6 @@ function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }
   )
 }
 
-const STORY_UPDATES_SHOWN = 5
-
-function UpdateDetail({ update }: { update: StoryUpdateEvent }) {
-  const [comparing, setComparing] = useState(false)
-  const comparisonId = useId()
-  if (!update.sources.length && !update.relatedStory && !update.summaryDiff?.previous) return null
-  return (
-    <div className="mt-2 max-w-reading text-sm leading-normal">
-      <div className="flex flex-wrap items-center gap-x-4">
-        <SupportingSources sources={update.sources} />
-        {update.summaryDiff?.previous ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            aria-expanded={comparing}
-            aria-controls={comparisonId}
-            onClick={() => setComparing((open) => !open)}
-            className="min-h-tap"
-          >
-            {comparing ? 'Hide comparison' : 'Compare versions'}
-            <CaretDownIcon
-              size={14}
-              weight="bold"
-              aria-hidden
-              className={`transition-transform duration-(--dn-duration-enter) ${comparing ? 'rotate-180' : ''}`}
-            />
-          </Button>
-        ) : null}
-      </div>
-      {update.summaryDiff?.previous ? (
-        <div
-          id={comparisonId}
-          data-open={comparing}
-          inert={!comparing}
-          className="disclosure-panel"
-        >
-          <div className="disclosure-inner">
-            <SummaryVersions summaryDiff={update.summaryDiff} />
-          </div>
-        </div>
-      ) : null}
-      {update.relatedStory ? (
-        <p className="mt-2 text-text-secondary">
-          <Link
-            to="/stories/$slug"
-            params={{ slug: update.relatedStory.slug }}
-            className="link-inline font-semibold"
-          >
-            {update.relatedStory.title}
-          </Link>
-        </p>
-      ) : null}
-    </div>
-  )
-}
-
-function SupportingSources({ sources }: { sources: StoryUpdateEvent['sources'] }) {
-  if (sources.length === 0) return null
-  return (
-    <span className="inline-flex flex-wrap items-center gap-x-2 text-text-secondary">
-      {sources.map((source) => (
-        <span key={source.url} className="inline-flex items-center gap-1">
-          {source.publisher ? <PublisherLogo slug={source.publisher.slug} size={22} /> : null}
-          <a
-            href={source.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={source.title}
-            className="hover:text-accent-text"
-          >
-            {source.publisher?.name ?? source.title}
-          </a>
-        </span>
-      ))}
-    </span>
-  )
-}
-
-// SummaryVersions keeps the complete immutable texts available without turning rewrites into a word diff.
-function SummaryVersions({
-  summaryDiff,
-}: {
-  summaryDiff: NonNullable<StoryUpdateEvent['summaryDiff']>
-}) {
-  if (!summaryDiff.previous) return null
-  return (
-    <div className="mt-2 flex flex-col gap-4 border-l-2 border-border-strong pl-4">
-      <SummaryVersion label="Before" text={summaryDiff.previous} />
-      <SummaryVersion label="After" text={summaryDiff.current} />
-    </div>
-  )
-}
-
-function SummaryVersion({ label, text }: { label: string; text: string }) {
-  const paragraphs = stripCitations(text).split(/\n\s*\n/)
-  return (
-    <div>
-      <p className="type-label text-text-muted">{label}</p>
-      <div className="mt-1 flex flex-col gap-2 text-text-secondary">
-        {paragraphs.map((paragraph, index) => (
-          // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs are positional summary text
-          <p key={index}>{paragraph}</p>
-        ))}
-      </div>
-    </div>
-  )
-}
-
-const UPDATE_LABELS: Record<StoryUpdateEvent['kind'], string> = {
-  summary_revision: 'Summary revised',
-  new_reporting: 'New reporting',
-  official_response: 'Official response',
-  consequence: 'Consequence',
-  new_primary_source: 'Primary document added',
-  correction_or_clarification: 'Correction or clarification',
-  analysis: 'Analysis',
-}
-
-const TIMELINE_BOOKEND_SIZE = 3
-const TIMELINE_COLLAPSE_AT = 12
 const CONNECTED_STORIES_LIMIT = 5
 
 function connectedStories(stories: StoryDetail['related']) {
@@ -365,108 +147,6 @@ function ConnectedStoryList({ stories }: { stories: StoryDetail['related'] }) {
   )
 }
 
-/** Keeps a Story page's development view legible; the Narrative page remains the full record. */
-function NarrativeBookends({
-  narrative,
-  currentStoryId,
-}: {
-  narrative: NarrativeDetail
-  currentStoryId: string
-}) {
-  const stories = [...narrative.stories].sort(
-    (a, b) => a.firstObservedAt.localeCompare(b.firstObservedAt) || a.id.localeCompare(b.id),
-  )
-  if (stories.length <= TIMELINE_COLLAPSE_AT) {
-    return (
-      <NarrativeGraph narrative={narrative} currentStoryId={currentStoryId} Link={RouterLink} />
-    )
-  }
-  const opening = stories.slice(0, TIMELINE_BOOKEND_SIZE)
-  const recent = stories.slice(-TIMELINE_BOOKEND_SIZE)
-  const bookendIds = new Set([...opening, ...recent].map((story) => story.id))
-  const currentIndex = stories.findIndex((story) => story.id === currentStoryId)
-  const current = currentIndex >= 0 ? stories[currentIndex] : undefined
-  const between = stories.filter(
-    (story) => !bookendIds.has(story.id) && story.id !== currentStoryId,
-  )
-  const indexById = new Map(stories.map((story, index) => [story.id, index]))
-  const beforeCurrent = current
-    ? between.filter((story) => (indexById.get(story.id) ?? 0) < currentIndex)
-    : between
-  const afterCurrent = current
-    ? between.filter((story) => (indexById.get(story.id) ?? 0) > currentIndex)
-    : []
-
-  return (
-    <div>
-      <NarrativeGraph
-        narrative={narrative}
-        currentStoryId={currentStoryId}
-        storyIds={opening.map((story) => story.id)}
-        Link={RouterLink}
-      />
-      <TimelineDisclosure
-        narrative={narrative}
-        currentStoryId={currentStoryId}
-        stories={beforeCurrent}
-      />
-      {current && !bookendIds.has(current.id) ? (
-        <NarrativeGraph
-          narrative={narrative}
-          currentStoryId={currentStoryId}
-          storyIds={[current.id]}
-          Link={RouterLink}
-        />
-      ) : null}
-      <TimelineDisclosure
-        narrative={narrative}
-        currentStoryId={currentStoryId}
-        stories={afterCurrent}
-      />
-      <NarrativeGraph
-        narrative={narrative}
-        currentStoryId={currentStoryId}
-        storyIds={recent.map((story) => story.id)}
-        Link={RouterLink}
-      />
-      <Link
-        to="/narratives/$slug"
-        params={{ slug: narrative.slug }}
-        className="mt-5 inline-block link-inline text-sm font-semibold"
-      >
-        View full narrative
-      </Link>
-    </div>
-  )
-}
-
-function TimelineDisclosure({
-  narrative,
-  currentStoryId,
-  stories,
-}: {
-  narrative: NarrativeDetail
-  currentStoryId: string
-  stories: NarrativeDetail['stories']
-}) {
-  if (stories.length === 0) return null
-  return (
-    <details className="t-acc border-b border-border px-3 py-4">
-      <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
-        Show {plural(stories.length, 'intervening development')}
-      </summary>
-      <div className="mt-4">
-        <NarrativeGraph
-          narrative={narrative}
-          currentStoryId={currentStoryId}
-          storyIds={stories.map((story) => story.id)}
-          Link={RouterLink}
-        />
-      </div>
-    </details>
-  )
-}
-
 function StoryPage() {
   const { slug } = Route.useParams()
   const { reporting = 'lean' } = Route.useSearch()
@@ -493,13 +173,7 @@ function StoryPage() {
     if (rememberReads) api.recordRead(story.id).catch(() => {})
   }, [rememberReads, story.id])
   const [editing, setEditing] = useState(false)
-  const [showAllUpdates, setShowAllUpdates] = useState(false)
   const editButtonRef = useRef<HTMLButtonElement>(null)
-  const visibleUpdates = showAllUpdates
-    ? updates.items
-    : updates.items.slice(0, STORY_UPDATES_SHOWN)
-  const multipleUpdateYears =
-    new Set(visibleUpdates.map((update) => new Date(update.createdAt).getUTCFullYear())).size > 1
   const narrativeRef = story.narratives[0]
   const narrative = useQuery({
     ...queries.narrative(narrativeRef?.slug ?? ''),
@@ -549,119 +223,7 @@ function StoryPage() {
             <SummaryDetail story={story} detail={story.summary.detail} />
           ) : null}
 
-          {updates.items.length > 0 ? (
-            <section aria-labelledby="updates-heading">
-              <SectionHeader
-                id="updates-heading"
-                rule
-                title="What changed"
-                meta={
-                  <span className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm normal-case tracking-normal text-text-secondary">
-                    <span className="inline-flex items-center gap-1.5">
-                      <span aria-hidden className="size-2.5 bg-accent" /> Summary revised
-                    </span>
-                    <span className="inline-flex items-center gap-1.5">
-                      <span aria-hidden className="size-2.5 border-2 border-text" /> Other updates
-                    </span>
-                    <span className="font-semibold text-text">
-                      {plural(updates.items.length, 'update')}
-                    </span>
-                  </span>
-                }
-              />
-              <ol
-                id="story-updates-list"
-                className="relative before:absolute before:top-0 before:bottom-0 before:left-[4.75rem] before:w-px before:bg-text max-sm:before:left-[3.75rem]"
-              >
-                {visibleUpdates.map((update, index, visible) => (
-                  <li key={update.id}>
-                    {index === 0 ||
-                    new Date(visible[index - 1]?.createdAt ?? update.createdAt)
-                      .toISOString()
-                      .slice(0, 10) !== new Date(update.createdAt).toISOString().slice(0, 10) ? (
-                      <p
-                        className={`relative bg-canvas pl-[6.25rem] type-label text-text-muted max-sm:pl-[4.75rem] ${index === 0 ? 'py-2' : 'py-4'}`}
-                      >
-                        {formatDate(update.createdAt)}
-                        {multipleUpdateYears
-                          ? ` ${new Date(update.createdAt).getUTCFullYear()}`
-                          : ''}{' '}
-                        · UTC
-                      </p>
-                    ) : null}
-                    <div className="relative grid grid-cols-[4.75rem_minmax(0,1fr)] max-sm:grid-cols-[3.75rem_minmax(0,1fr)]">
-                      <time
-                        dateTime={update.createdAt}
-                        title={formatDateTime(update.createdAt)}
-                        className="pt-4 pr-3"
-                      >
-                        <span
-                          className={
-                            update.kind === 'summary_revision'
-                              ? 'block type-numeral tabular-nums'
-                              : 'block type-meta font-bold tabular-nums'
-                          }
-                        >
-                          {clockTime(update.createdAt)}
-                        </span>
-                      </time>
-                      <span
-                        aria-hidden
-                        className={
-                          update.kind === 'summary_revision'
-                            ? 'absolute top-5 left-[4.75rem] size-2.5 -translate-x-1/2 bg-accent max-sm:left-[3.75rem]'
-                            : 'absolute top-5 left-[4.75rem] size-2.5 -translate-x-1/2 border-2 border-text bg-surface max-sm:left-[3.75rem]'
-                        }
-                      />
-                      <div className="min-w-0 border-b border-border py-4 pl-6 max-sm:pl-4">
-                        {update.kind === 'new_reporting' &&
-                        update.sources.length &&
-                        !update.relatedStory &&
-                        !update.summaryDiff ? (
-                          <div className="flex flex-wrap items-center gap-x-4">
-                            <span className="type-label text-text-muted">
-                              +{plural(update.sources.length, 'source')}
-                            </span>
-                            <SupportingSources sources={update.sources} />
-                          </div>
-                        ) : (
-                          <>
-                            <p className="type-label text-text-muted">
-                              {UPDATE_LABELS[update.kind]}
-                            </p>
-                            <p className="mt-2 max-w-reading text-md font-semibold leading-snug">
-                              {update.description}
-                            </p>
-                            <UpdateDetail update={update} />
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              {updates.items.length > STORY_UPDATES_SHOWN ? (
-                <div className="mt-5 flex flex-wrap items-center gap-3 pl-[6.25rem] max-sm:pl-[4.75rem]">
-                  <Button
-                    size="sm"
-                    variant="secondary"
-                    aria-expanded={showAllUpdates}
-                    aria-controls="story-updates-list"
-                    onClick={() => setShowAllUpdates((show) => !show)}
-                  >
-                    {showAllUpdates
-                      ? 'Show fewer changes'
-                      : `View all ${updates.items.length} changes`}
-                  </Button>
-                  {!showAllUpdates ? (
-                    <span className="type-meta">
-                      {plural(updates.items.length - STORY_UPDATES_SHOWN, 'earlier update')}
-                    </span>
-                  ) : null}
-                </div>
-              ) : null}
-            </section>
-          ) : null}
+          <StoryUpdates updates={updates} />
 
           <OriginalReporting active={reporting} onActiveChange={changeReporting} story={story} />
 
