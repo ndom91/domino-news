@@ -8,7 +8,7 @@ import {
   validateNewEdge,
 } from '@dn/domain'
 import { PROMPT_VERSIONS, type StoryInput } from '@dn/inference'
-import { relationshipCandidateSchema, type StoryRelation } from '@dn/schemas'
+import { type NarrativeTitle, relationshipCandidateSchema, type StoryRelation } from '@dn/schemas'
 import {
   type AnalysisJob,
   nearestByVector,
@@ -358,23 +358,32 @@ async function assignNarrative(
   const toAdd = members.filter((id) => !alreadyIn.has(id))
   if (target && toAdd.length === 0) return
 
-  const stories = (
-    await Promise.all(members.map((id) => loadStoryInput(ctx.db, id, { max: 3 })))
-  ).filter((s): s is StoryInput => s !== null)
-  const { runId, result } = await withAnalysisRun(
-    ctx.db,
-    {
-      operation: 'narrative_title',
-      targetType: 'narrative',
-      targetId: target?.id ?? `new:${storyId}`,
-      inputFingerprint: [...members].sort().join(','),
-      modelId: ctx.inference.generation.modelId,
-    },
-    () =>
-      ctx.gpu.generation.run(job.priorityClass, () =>
-        ctx.inference.generation.titleNarrative({ stories }),
-      ),
-  )
+  // Titles are meant to last (see the prompt), so an existing narrative is re-titled only when it
+  // grows past a power of two (4, 8, 16… Stories), not for every Story that joins.
+  const before = memberships.filter((m) => m.narrative.id === target?.id).length
+  const after = before + toAdd.length
+  const retitle = !target || Math.floor(Math.log2(after)) > Math.floor(Math.log2(before))
+  let title: { runId: string; output: NarrativeTitle } | null = null
+  if (retitle) {
+    const stories = (
+      await Promise.all(members.map((id) => loadStoryInput(ctx.db, id, { max: 3 })))
+    ).filter((s): s is StoryInput => s !== null)
+    const { runId, result } = await withAnalysisRun(
+      ctx.db,
+      {
+        operation: 'narrative_title',
+        targetType: 'narrative',
+        targetId: target?.id ?? `new:${storyId}`,
+        inputFingerprint: [...members].sort().join(','),
+        modelId: ctx.inference.generation.modelId,
+      },
+      () =>
+        ctx.gpu.generation.run(job.priorityClass, () =>
+          ctx.inference.generation.titleNarrative({ stories }),
+        ),
+    )
+    title = { runId, output: result.output }
+  }
 
   await withTransaction(ctx.pool, async (tx) => {
     const [current] = await tx.db
@@ -392,35 +401,37 @@ async function assignNarrative(
       throw new RelationshipInputsChangedError('Story inputs changed during narrative inference')
     }
     const now = new Date()
-    const interpretationId = newId(ID_PREFIX.interpretation)
     const narrativeId = target?.id ?? newId(ID_PREFIX.narrative)
-    await tx.db.insert(schema.interpretation).values({
-      id: interpretationId,
-      type: 'narrative_title',
-      subjectType: 'narrative',
-      subjectId: narrativeId,
-      output: result.output,
-      analysisRunId: runId,
-      supersedesInterpretationId: target?.titleInterpretationId ?? null,
-    })
-    if (target) {
-      await tx.db
-        .update(schema.narrative)
-        .set({
-          title: result.output.title,
-          description: result.output.description,
+    if (title) {
+      const interpretationId = newId(ID_PREFIX.interpretation)
+      await tx.db.insert(schema.interpretation).values({
+        id: interpretationId,
+        type: 'narrative_title',
+        subjectType: 'narrative',
+        subjectId: narrativeId,
+        output: title.output,
+        analysisRunId: title.runId,
+        supersedesInterpretationId: target?.titleInterpretationId ?? null,
+      })
+      if (target) {
+        await tx.db
+          .update(schema.narrative)
+          .set({
+            title: title.output.title,
+            description: title.output.description,
+            titleInterpretationId: interpretationId,
+          })
+          .where(eq(schema.narrative.id, target.id))
+      } else {
+        await tx.db.insert(schema.narrative).values({
+          id: narrativeId,
+          slug: `${slugify(title.output.title, 60)}-${narrativeId.slice(-6)}`,
+          title: title.output.title,
+          description: title.output.description,
+          updatedAt: now,
           titleInterpretationId: interpretationId,
         })
-        .where(eq(schema.narrative.id, target.id))
-    } else {
-      await tx.db.insert(schema.narrative).values({
-        id: narrativeId,
-        slug: `${slugify(result.output.title, 60)}-${narrativeId.slice(-6)}`,
-        title: result.output.title,
-        description: result.output.description,
-        updatedAt: now,
-        titleInterpretationId: interpretationId,
-      })
+      }
     }
     if (toAdd.length > 0) {
       await tx.db

@@ -97,6 +97,22 @@ describe('fixture pipeline end to end', () => {
     expect(await n(db.select({ n: count() }).from(schema.narrativeStory))).toBeGreaterThan(1)
   })
 
+  it('re-titles a narrative only when it grows past a power of two', async () => {
+    const { rows } = await h.ctx.pool.query<{ members: number; titles: number }>(`
+      select
+        (select count(*)::int from narrative_story ns
+          where ns.narrative_id = n.id and ns.removed_at is null) as members,
+        (select count(*)::int from interpretation i
+          where i.type = 'narrative_title' and i.subject_id = n.id) as titles
+      from narrative n`)
+    expect(rows.length).toBeGreaterThan(0)
+    // Titled when created (2+ Stories), then again at 4, 8, 16… Stories.
+    for (const { members, titles } of rows) {
+      expect(titles).toBeGreaterThan(0)
+      expect(titles).toBeLessThanOrEqual(Math.floor(Math.log2(members)))
+    }
+  })
+
   it('projects published stories into the search index', async () => {
     const published = await n(
       h.ctx.db.select({ n: count() }).from(schema.story).where(isNotNull(schema.story.publishedAt)),
