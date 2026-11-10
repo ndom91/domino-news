@@ -8,7 +8,6 @@ import {
   formatDateTime,
   hostnameOf,
   KNOWN_COUNTRIES,
-  leanBand,
   leanSide,
   normalizeArticleUrl,
   oneSidedCoverage,
@@ -648,15 +647,6 @@ describe('lean', () => {
     expect(leanSide('right')).toBe('right')
     expect(leanSide('centre')).toBeNull()
     expect(leanSide(null)).toBeNull()
-  })
-
-  it('collapses the publisher scale into coverage bands', () => {
-    expect(leanBand('left')).toBe('left')
-    expect(leanBand('centre_left')).toBe('left')
-    expect(leanBand('centre')).toBe('center')
-    expect(leanBand('centre_right')).toBe('right')
-    expect(leanBand('right')).toBe('right')
-    expect(leanBand(null)).toBeNull()
   })
 
   it('needs 3 rated publishers and a 75% share for one-sided coverage', () => {

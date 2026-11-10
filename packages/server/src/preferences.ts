@@ -15,7 +15,6 @@ export async function getPreferences(db: Db, userId: string): Promise<UserPrefer
       audioBriefingStyle: schema.userPreference.audioBriefingStyle,
       country: schema.userPreference.country,
       locality: schema.userPreference.locality,
-      briefingLastOpenedAt: schema.userPreference.briefingLastOpenedAt,
       onboardedAt: schema.userPreference.onboardedAt,
     })
     .from(schema.userPreference)

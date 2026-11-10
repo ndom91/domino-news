@@ -826,7 +826,6 @@ export const mutedPublisherSchema = z.object({
   slug: z.string(),
   name: z.string(),
 })
-export type MutedPublisher = z.infer<typeof mutedPublisherSchema>
 
 export const mutedPublisherListSchema = z.object({ items: z.array(mutedPublisherSchema) })
 export type MutedPublisherList = z.infer<typeof mutedPublisherListSchema>
@@ -886,7 +885,6 @@ export const forYouResponseSchema = z.object({
 export type ForYouResponse = z.infer<typeof forYouResponseSchema>
 
 export const briefingSectionKindSchema = z.enum(['essential', 'following', 'for_you', 'outside'])
-export type BriefingSectionKind = z.infer<typeof briefingSectionKindSchema>
 
 export const briefingSectionSchema = z.object({
   kind: briefingSectionKindSchema,

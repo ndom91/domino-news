@@ -57,7 +57,6 @@ export const contextEntrySchema = z.object({
   explanation: z.string(),
   sourceObservationIds: z.array(z.string()).check(z.minLength(1)),
 })
-export type ContextEntryOutput = z.infer<typeof contextEntrySchema>
 
 export const contextKindSchema = z.enum(['definition', 'background', 'prerequisite'])
 
@@ -117,10 +116,3 @@ export const sourceReferenceKindSchema = z.enum([
   'official_statement',
   'other',
 ])
-
-export const sourceReferenceCandidateSchema = z.object({
-  url: z.url(),
-  title: z.nullable(z.string()),
-  kind: sourceReferenceKindSchema,
-})
-export type SourceReferenceCandidate = z.infer<typeof sourceReferenceCandidateSchema>
