@@ -61,7 +61,7 @@ indexer: outbox ──► Typesense (re-reads Postgres; idempotent)
 - **Optional enrichment:** summary generation stays eager; automatic relationship inference remains initial-summary work (forced refreshes can rerun it). Context is lazy (November 2026; it was eager at 3+ publishers before): opening the authenticated Story detail enqueues missing exact-version work at interactive priority, so summary versions nobody opens cost no context call. A completion marker commits in the same transaction as reader data, so the detail query refetches only until output (including a valid empty result) is durable or the exact job fails. A new summary immediately removes prior context links, so lazy regeneration never exposes stale derived text.
 - **Relating** runs with concurrency 1, so graph edits do not race. Story embeddings are reused only when both their embedding model and summary version still match. Pair decisions reuse successful relationship interpretations only for the exact two summary versions and source fingerprints, generation model and prompt version; graph rebuilds can therefore replay current decisions without inference, while any changed input or model policy forces a fresh call. Cached positive decisions still pass current-input, temporal and cycle validation before an edge is restored.
 - **Narrative titles** are written when a Narrative is created, then again only when it grows past 4, 8, 16… Stories. The prompt asks for titles that still fit months later, so one per joining Story was wasted inference.
-- **Retries:** 20 attempts, 10s initial, exponential, capped at 10 minutes: this rides out an inference outage of several hours. The local adapter also retries 502/503/429 twice in-call. Failed jobs stay in pg-boss and appear on the Pipeline page.
+- **Retries:** 5 attempts, 60s initial, exponential (about 1, 2, 4, 8 and 16 minutes), capped at an hour: enough for a short inference outage without spending many calls on output the model keeps getting wrong. The local adapter also retries 5xx/429 and network errors twice in-call. Failed jobs stay in pg-boss and appear on the Pipeline page.
 - **Transient bodies:** fetched only for publishers with `transient_body_allowed`, held in memory for one inference call, never logged or queued. Outbound links matching primary-document patterns become `source_reference` rows. Of 65 seeded publishers, **10 are `transient_body_allowed`** (Global Voices, Mongabay, Agência Pública and seven official sources under CC BY, OGL or public domain). The rest are `metadata_only` because their licences are non-commercial, unverified or block AI agents. Pages whose author metadata names AP, Reuters or AFP never yield a body. Federal Register and EU Commission pages can't be fetched as plain HTML yet, so they fall back to metadata. Reviews were best-effort, not legal advice (see `policyNote` and `license` in `fixtures/publishers.json`).
 
 ## Matching and relationship thresholds (EmbeddingGemma 2, calibrated on the fixture set)
@@ -76,10 +76,10 @@ Chosen bands (`THRESHOLDS` in `packages/jobs/src/match.ts`):
 
 | | auto-attach | ask Gemma | new Story / no link |
 | --- | --- | --- | --- |
-| Article → Story (`local`) | ≥ 0.93 | 0.72–0.93 | < 0.72 |
-| Story → Story relate (`local`) | — | 0.60–0.93, top 4 | < 0.60 |
+| Article → Story (`local`) | never (≥ 0.93 only marks very close articles for match admission) | ≥ 0.72, top 5 together | < 0.72 |
+| Story → Story relate (`local`) | — | ≥ 0.60, top 4 | < 0.60 |
 
-The model makes nearly all matching decisions; embeddings only shortlist. Fixture mode uses separate, coarser thresholds over hashed bag-of-words vectors.
+In local mode the model makes every matching decision; embeddings only shortlist. A close neighbour can sit in a mixed Story, so similarity alone never attaches. Fixture mode uses separate, coarser thresholds over hashed bag-of-words vectors.
 
 Prompt lessons from the real-model runs (current versions: `match-story@6`, `classify-relationship@6`):
 
