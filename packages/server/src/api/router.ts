@@ -42,7 +42,14 @@ import {
   removePushSubscription,
   savePushSubscription,
 } from '../push-subscriptions.ts'
-import { getNarrative, getStory, listNarratives, listStories, resolveStoryId } from '../reader.ts'
+import {
+  getNarrative,
+  getStory,
+  listNarratives,
+  listStories,
+  loadStory,
+  resolveStory,
+} from '../reader.ts'
 import { searchAll } from '../search/search.ts'
 import { createSpeechProvider } from '../speech-provider.ts'
 import { DomainError, editSummary } from '../story-service.ts'
@@ -263,29 +270,23 @@ const routes: Route[] = [
     json(await listStories(ctx.db, storyListQuery.parse(Object.fromEntries(url.searchParams)))),
   ),
   route('GET', '/api/v1/stories/:id', async ({ ctx, params }) => {
-    const storyId = await resolveStoryId(ctx.db, params.id ?? '')
-    const [target] = storyId
-      ? await ctx.db
-          .select({
-            summaryId: schema.story.currentSummaryId,
-            publishedAt: schema.story.publishedAt,
-          })
-          .from(schema.story)
-          .where(eq(schema.story.id, storyId))
-      : []
-    if (!storyId || !target?.publishedAt) throw new HttpError('not_found', 'story not found')
+    const target = await resolveStory(ctx.db, params.id ?? '')
+    if (!target?.publishedAt) throw new HttpError('not_found', 'story not found')
     let context: NonNullable<StoryDetail['enrichment']>['context'] | undefined
-    if (target.summaryId) {
+    if (target.currentSummaryId) {
       try {
-        context = await ensureStoryContext(ctx, storyId, target.summaryId)
+        context = await ensureStoryContext(ctx, target.id, target.currentSummaryId)
       } catch (error) {
-        console.error(`[story_enrichment] ${storyId} admission failed: ${(error as Error).message}`)
+        console.error(
+          `[story_enrichment] ${target.id} admission failed: ${(error as Error).message}`,
+        )
         context = 'failed'
       }
     }
-    const story = await getStory(ctx.db, storyId)
+    // Read the Story after admission: its summary may have changed meanwhile.
+    const story = await loadStory(ctx.db, target.id)
     if (!story) throw new HttpError('not_found', 'story not found')
-    if (story.summary?.versionId !== target.summaryId) context = 'pending'
+    if (story.summary?.versionId !== target.currentSummaryId) context = 'pending'
     // Claims are no longer generated; `claims` stays for app builds that still parse it.
     return json({ ...story, enrichment: context && { context, claims: 'ready' } })
   }),
@@ -301,12 +302,11 @@ const routes: Route[] = [
       if (!ctx.config.enableSummaryEditing)
         throw new HttpError('forbidden', 'summary editing is disabled')
       const body = await readJson(request, summaryEditRequestSchema)
-      const storyId = await resolveStoryId(ctx.db, params.id ?? '')
-      if (!storyId) throw new HttpError('not_found', 'story not found')
-      await ctx.db.transaction((tx) => editSummary(tx, { storyId, userId, ...body }))
+      const target = await resolveStory(ctx.db, params.id ?? '')
+      if (!target) throw new HttpError('not_found', 'story not found')
+      await ctx.db.transaction((tx) => editSummary(tx, { storyId: target.id, userId, ...body }))
       // The edit cleared context for the old wording; the next view regenerates it.
-      const story = await getStory(ctx.db, storyId)
-      return json(story)
+      return json(await loadStory(ctx.db, target.id))
     },
     { adminOnly: true },
   ),

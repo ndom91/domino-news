@@ -38,18 +38,21 @@ const {
   ...storyColumns
 } = getTableColumns(schema.story)
 
-/** Accepts a Story id, current slug, or a historical alias (merged/renamed stories). */
-export async function resolveStoryId(db: Db, idOrSlug: string): Promise<string | null> {
+/**
+ * Accepts a Story id, current slug, or a historical alias (merged/renamed stories) and
+ * returns the Story's row: one query unless the Story was merged or renamed.
+ */
+export async function resolveStory(db: Db, idOrSlug: string): Promise<StoryRow | null> {
   const [direct] = await db
-    .select({ id: schema.story.id, mergedInto: schema.story.mergedIntoStoryId })
+    .select(storyColumns)
     .from(schema.story)
     .where(or(eq(schema.story.id, idOrSlug), eq(schema.story.slug, idOrSlug)))
-  if (direct) return direct.mergedInto ?? direct.id
+  if (direct) return direct.mergedIntoStoryId ? storyRow(db, direct.mergedIntoStoryId) : direct
   const [alias] = await db
     .select({ id: schema.storyAlias.storyId })
     .from(schema.storyAlias)
     .where(eq(schema.storyAlias.alias, idOrSlug))
-  return alias?.id ?? null
+  return alias ? storyRow(db, alias.id) : null
 }
 
 async function publishersByStory(db: Db, storyIds: string[]) {
@@ -280,15 +283,15 @@ async function sourceCounts(db: Db, storyIds: string[]) {
 
 export async function storyListItems(db: Db, storyIds: string[]): Promise<StoryListItem[]> {
   if (storyIds.length === 0) return []
-  const rows = await db
-    .select({ story: storyColumns, summary: schema.storySummaryVersion.body })
-    .from(schema.story)
-    .leftJoin(
-      schema.storySummaryVersion,
-      eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
-    )
-    .where(inArray(schema.story.id, storyIds))
-  const [publishers, narratives, counts, traces, relations, primary] = await Promise.all([
+  const [rows, publishers, narratives, counts, traces, relations, primary] = await Promise.all([
+    db
+      .select({ story: storyColumns, summary: schema.storySummaryVersion.body })
+      .from(schema.story)
+      .leftJoin(
+        schema.storySummaryVersion,
+        eq(schema.storySummaryVersion.id, schema.story.currentSummaryId),
+      )
+      .where(inArray(schema.story.id, storyIds)),
     publishersByStory(db, storyIds),
     narrativesByStory(db, storyIds),
     sourceCounts(db, storyIds),
@@ -369,13 +372,32 @@ export async function listStories(
   }
 }
 
-export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | null> {
-  const id = await resolveStoryId(db, idOrSlug)
-  const story = id ? await storyRow(db, id) : null
-  if (!story?.publishedAt) return null
+/** The Story page by id. Unpublished Stories read as missing. */
+export async function loadStory(db: Db, id: string): Promise<StoryDetail | null> {
+  const story = await storyRow(db, id)
+  return story ? storyDetail(db, story) : null
+}
 
-  const [{ lead, versions, detail, context }, related, primary, leanMix] = await Promise.all([
+/** `loadStory` for an id, slug or alias (share images): resolving also reads the row. */
+export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | null> {
+  const story = await resolveStory(db, idOrSlug)
+  return story ? storyDetail(db, story) : null
+}
+
+async function storyDetail(db: Db, story: StoryRow): Promise<StoryDetail | null> {
+  if (!story.publishedAt) return null
+  const [{ lead, detail, context }, versions, related, primary, leanMix] = await Promise.all([
     storyLeadParts(db, story),
+    db
+      .select({
+        id: schema.storySummaryVersion.id,
+        createdAt: schema.storySummaryVersion.createdAt,
+        editedByUserId: schema.storySummaryVersion.editedByUserId,
+      })
+      .from(schema.storySummaryVersion)
+      .where(eq(schema.storySummaryVersion.storyId, story.id))
+      .orderBy(desc(schema.storySummaryVersion.createdAt))
+      .limit(10),
     relatedStories(db, story.id),
     db
       .select({ ref: schema.sourceReference })
@@ -399,9 +421,9 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
     regions: story.regions,
     topics: story.topics,
     summaryHistory: versions.map((v) => ({
-      versionId: v.version.id,
-      createdAt: iso(v.version.createdAt),
-      origin: v.version.editedByUserId ? ('edited' as const) : ('generated' as const),
+      versionId: v.id,
+      createdAt: iso(v.createdAt),
+      origin: v.editedByUserId ? ('edited' as const) : ('generated' as const),
     })),
     related,
     // Claims are no longer generated; the field stays for app builds that still parse it.
@@ -423,6 +445,8 @@ export async function getStoryLead(db: Db, id: string): Promise<StoryLead | null
   return story?.publishedAt ? (await storyLeadParts(db, story)).lead : null
 }
 
+type StoryRow = NonNullable<Awaited<ReturnType<typeof storyRow>>>
+
 async function storyRow(db: Db, id: string) {
   const [story] = await db.select(storyColumns).from(schema.story).where(eq(schema.story.id, id))
   return story ?? null
@@ -439,21 +463,7 @@ async function storyLeadParts(
   },
 ) {
   const id = story.id
-  const [versions, current, cited, sources, narratives, context] = await Promise.all([
-    db
-      .select({
-        version: schema.storySummaryVersion,
-        modelId: schema.analysisRun.modelId,
-      })
-      .from(schema.storySummaryVersion)
-      .leftJoin(
-        schema.interpretation,
-        eq(schema.interpretation.id, schema.storySummaryVersion.interpretationId),
-      )
-      .leftJoin(schema.analysisRun, eq(schema.analysisRun.id, schema.interpretation.analysisRunId))
-      .where(eq(schema.storySummaryVersion.storyId, id))
-      .orderBy(desc(schema.storySummaryVersion.createdAt))
-      .limit(10),
+  const [current, cited, sources, narratives, context] = await Promise.all([
     story.currentSummaryId
       ? db
           .select({
@@ -550,7 +560,6 @@ async function storyLeadParts(
   }
   return {
     lead,
-    versions,
     detail,
     context: context.filter((c) => body.includes(c.anchorText) || detail?.includes(c.anchorText)),
   }
