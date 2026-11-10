@@ -1,11 +1,13 @@
 import { schema } from '@dn/db'
 import { feedIds, pollFeed, seedPublishers } from '@dn/jobs'
 import {
+  analysisJob,
   editSummary,
   getStory,
   getStoryLead,
   processOutboxBatch,
   projectAggregate,
+  QUEUES,
   recordGeneratedSummary,
   storyInputFingerprint,
   touchStory,
@@ -35,6 +37,17 @@ beforeAll(async () => {
   await truncateAll(h.ctx)
   await seedPublishers(h.ctx.db, h.ctx.config.fixtureDir)
   await pollAll()
+  await drainPipeline(h.ctx)
+  // Production writes context when a reader first opens a Story; write it for all of them here.
+  const published = await h.ctx.db
+    .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
+    .from(schema.story)
+    .where(isNotNull(schema.story.publishedAt))
+  for (const story of published) {
+    if (!story.summaryId) continue
+    const job = analysisJob(story.id, story.summaryId, 'fresh')
+    await h.ctx.workerBoss.send(QUEUES.generateContext, job.data, job.options)
+  }
   await drainPipeline(h.ctx)
 })
 
@@ -175,7 +188,7 @@ describe('ingestion dedupe and revisions', () => {
     const { db } = h.ctx
     const { ID_PREFIX, newId } = await import('@dn/domain')
     const { summarizeStory } = await import('@dn/jobs')
-    const { analysisJob, refreshFingerprint } = await import('@dn/server')
+    const { refreshFingerprint } = await import('@dn/server')
     const [story] = await db
       .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
       .from(schema.story)
@@ -1203,7 +1216,7 @@ describe('summary debounce', () => {
 describe('lazy story context', () => {
   it('admits missing context once and stops on success or failure', async () => {
     const { PROMPT_VERSIONS } = await import('@dn/inference')
-    const { ensureStoryContext, QUEUES } = await import('@dn/server')
+    const { ensureStoryContext } = await import('@dn/server')
     const [story] = await h.ctx.db
       .select({ id: schema.story.id, summaryId: schema.story.currentSummaryId })
       .from(schema.story)

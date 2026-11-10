@@ -355,9 +355,10 @@ describe('/api/v1 write endpoints', () => {
     // Detail not sent: the previous version's carries over.
     expect(after.summary?.detail).toBe(before.summary?.detail)
     expect(after.summaryHistory.map((v) => v.versionId)).toContain(baseVersion)
-    // Stale anchors are hidden and regeneration is queued for the edited text.
+    // Stale anchors are hidden; the next view queues context for the edited text.
     const text = `Edited body.\n\n${after.summary?.detail ?? ''}`
     expect(after.context.every((c) => text.includes(c.anchorText))).toBe(true)
+    await call(`/api/v1/stories/${story.id}`)
     const { rows } = await h.ctx.pool.query(
       `select count(*)::int as n from pgboss.job where name = 'generate_context' and data->>'inputFingerprint' = $1`,
       [after.summary?.versionId],

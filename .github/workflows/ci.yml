@@ -48,9 +48,6 @@ jobs:
       # Stories that gain articles wait out this quiet period before re-summarising (default 180s),
       # and the settle check below waits for it. Use the minimum so the pipeline settles sooner.
       PUBLISHED_SUMMARY_DEBOUNCE_SECONDS: "30"
-      # Generate context and claims up front. Otherwise opening a Story starts them, and the page
-      # re-renders the summary while the test clicks a context term.
-      EAGER_OPTIONAL_ENRICHMENT_OUTLETS: "1"
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -70,18 +67,24 @@ jobs:
       - run: |
           (cd apps/worker && pnpm start > ../../worker.log 2>&1 &)
           (cd apps/worker && pnpm start:indexer > ../../indexer.log 2>&1 &)
-          pnpm cli ingest
-          # Wait for the worker to finish enrichment too: E2E opens context popovers.
           # Takes about 3 minutes; each status call is slow, so bound by time, not iterations.
-          deadline=$((SECONDS + 360))
-          while [ "$SECONDS" -lt "$deadline" ]; do
-            status=$(pnpm --silent cli status || echo '{}')
-            published=$(jq '.pipeline.storiesPublished // 0' <<<"$status")
-            pending=$(jq '[.queues[]? | .queued + .active] | add // 0' <<<"$status")
-            [ "$published" -gt 5 ] && [ "$pending" -eq 0 ] && exit 0
-            sleep 2
-          done
-          echo "pipeline did not settle in time" && exit 1
+          settle() {
+            deadline=$((SECONDS + 360))
+            while [ "$SECONDS" -lt "$deadline" ]; do
+              status=$(pnpm --silent cli status || echo '{}')
+              published=$(jq '.pipeline.storiesPublished // 0' <<<"$status")
+              pending=$(jq '[.queues[]? | .queued + .active] | add // 0' <<<"$status")
+              [ "$published" -gt 5 ] && [ "$pending" -eq 0 ] && return 0
+              sleep 2
+            done
+            echo "pipeline did not settle in time" && exit 1
+          }
+          pnpm cli ingest
+          settle
+          # Context is written when a reader first opens a Story. E2E clicks context terms, so
+          # write it up front; otherwise the page re-renders while the test clicks.
+          pnpm cli enrich:all
+          settle
       - run: |
           pnpm build
           (cd apps/web && pnpm start > ../../web.log 2>&1 &)

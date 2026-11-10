@@ -45,7 +45,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli match:sample --name n --seed <regex>` / `match:review --name n` | Draw a match evaluation set of real articles into `fixtures/match-eval/`; write a local review page for its story labels (rules: `docs/story-granularity.md`) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives and context for published stories |
-| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one summary call each; relationship inference runs for the new version, while context follows the eager threshold below; edited summaries are kept) |
+| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one summary call each; relationship inference runs for the new version, and context is rewritten on the next view; edited summaries are kept) |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
 | `pnpm cli status` | Pipeline and queue status as JSON |
 | `pnpm cli dev:reset` | Delete all ingested and derived data (keeps users and publishers) |
@@ -58,7 +58,7 @@ The default `.env.example` runs fixture ingest and fixture inference. Older fixt
 
 A Story is published only once `MIN_PUBLISH_OUTLETS` (default 2) newsroom publishers cover it, so single-outlet fixture Stories stay hidden. CI sets it to 1 so e2e data settles quickly.
 
-Context is optional enrichment. It runs eagerly at `EAGER_OPTIONAL_ENRICHMENT_OUTLETS` newsroom publishers (default 3); below that threshold, an authenticated Story-detail request admits the missing work at interactive priority and briefly polls until it is durably complete or terminally failed. Set the test harness threshold to 1 when a test expects eager enrichment.
+Context is optional enrichment, written only when someone reads a Story: an authenticated Story-detail request admits the missing work for that summary version at interactive priority, and the page polls until it is durably complete or terminally failed. Unread versions cost no inference. Tests that need context queue it explicitly (see `test/pipeline.test.ts` setup); `pnpm cli enrich:all` writes it for every published Story.
 
 ### Local inference (EmbeddingGemma 2 + Gemma 4)
 
@@ -335,7 +335,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - Published summary updates use a durable quiet-period row so bursts collapse to the latest Story fingerprint. A once-a-minute reconciler recovers expired match leases and due summary rows whose wake job was lost.
 - Grounded, versioned summaries: citations are validated against the Story's own articles and observations. Edits create new versions, and stale outputs never overwrite newer ones. The same call writes 2-3 more paragraphs (background, each side, what's next) that only the Story page shows, below the one-paragraph summary.
 - Narratives from Stories joined by timeline links (follows, responds to, corrects, branches from), with model-written titles. Loose links (related to, background for) show on Story pages but don't join Narratives. After upgrading, `pnpm cli enrich:all --reset-graph` rebuilds existing Narratives under this rule.
-- **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits clear stale context and queue context regeneration.
+- **Context popovers:** model-written background for names and terms in a summary. Each entry must anchor to the summary's exact text and cite the Story's own articles; entries are shared across Stories and versioned. Human summary edits clear stale context; the next view regenerates it.
 - **Claims:** no longer generated (November 2026): no reader has shown them since October. The `claim*` tables and their data stay for Compare Coverage (doc 009). The story detail API still returns `claims: []` and `enrichment.claims: 'ready'` for older app builds.
 - **Regions:** each generated summary tags 1-3 macro-regions the Story concerns (not where outlets are based). The feed filters by region, and the lead prefers a Story in one of the reader's regions.
 - **For You (`/for-you`):** readers pick regions, desks and topics (on `/onboarding` at first sign-in, `/account` or the page itself) and follow narratives or publishers. Each generated summary tags 0-3 of 25 fixed topics (`TOPICS` in `packages/schemas`). Stories from the last 72 hours are ranked, not filtered: followed narrative +3, topic +2, followed outlet, region and desk +1 each, plus wider coverage, minus age. Every card says why it's there. Paging is an offset into the ranked window. The front page shows the top 4 as a "For you" rail once a reader has picks, follows or learned signals. Thumbs up / down on For You cards nudge learned weights for the Story's topics, desk, regions and narratives (never its publishers): ±1 per tap (regions ±0.5), clamped to ±3 and halved every 30 days. "Less" also hides the Story; undo reverses the tap (approximately, since weights are clamped). Readers see and reset what was learned on `/account`.

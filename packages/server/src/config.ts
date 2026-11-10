@@ -13,12 +13,6 @@ export function readConfig(env = process.env) {
     if (value < min || value > max) throw new Error(`${key} must be between ${min} and ${max}`)
     return value
   }
-  const nonNegativeInt = (key: string, fallback: number) => {
-    const value = num(key, fallback)
-    if (!Number.isInteger(value) || value < 0)
-      throw new Error(`${key} must be a non-negative integer`)
-    return value
-  }
   return {
     databaseUrl: env.DATABASE_URL ?? 'postgres://dn:dn@localhost:5442/dn',
     typesenseUrl: env.TYPESENSE_URL ?? 'http://localhost:8108',
@@ -47,7 +41,6 @@ export function readConfig(env = process.env) {
     // A Story is summarised (and so published) only once this many distinct newsroom
     // publishers cover it. Official sources attach but don't count.
     minPublishOutlets: num('MIN_PUBLISH_OUTLETS', 2),
-    eagerOptionalEnrichmentOutlets: nonNegativeInt('EAGER_OPTIONAL_ENRICHMENT_OUTLETS', 3),
     // Feed items published longer ago than this are not ingested at all.
     maxArticleAgeDays: num('MAX_ARTICLE_AGE_DAYS', 3),
     enableSummaryEditing: env.ENABLE_SUMMARY_EDITING === 'true',

@@ -8,8 +8,6 @@ import {
   DomainError,
   getInferenceSettings,
   newsroomOutletCount,
-  OPTIONAL_ENRICHMENT_SPECS,
-  optionalEnrichmentQueues,
   QUEUES,
   recordGeneratedSummary,
   recordStoryUpdate,
@@ -64,15 +62,6 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
         )
       : null
   if (assessment && assessment.output.outcome !== 'material') {
-    if (story.currentSummaryId) {
-      await enqueueMissingOptionalEnrichment(
-        ctx,
-        story.id,
-        story.currentSummaryId,
-        outletCount,
-        job.priorityClass,
-      )
-    }
     return {
       status: assessment.prefiltered ? 'corroboration_prefilter' : assessment.output.outcome,
     }
@@ -123,58 +112,22 @@ export async function summarizeStory(ctx: WorkerContext, job: AnalysisJob) {
       const refs = links.map((url) => ({ url, kind: 'primary_document' as const }))
       await recordPrimarySources(tx.db, story.id, articleId, refs)
     }
-    // An official body's own article is a primary source: claims can cite it as evidence.
+    // An official body's own article is a primary source for the Story.
     for (const a of input.articles as LoadedArticle[]) {
       if (a.publisherKind !== 'official') continue
       const ref = { url: a.url, title: a.title, kind: 'official_statement' as const }
       await recordPrimarySources(tx.db, story.id, a.articleId, [ref])
     }
     // Updates change a Story, not its connections to other Stories: relationship inference runs
-    // only for the first summary or a forced refresh. Context follows every new summary.
-    const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
-    const queues = [
-      ...(story.currentSummaryId && !job.force ? [] : [QUEUES.relateStory]),
-      ...optionalEnrichmentQueues(outletCount, ctx.config.eagerOptionalEnrichmentOutlets),
-    ]
-    for (const queue of queues) await sendInTx(ctx, tx, queue, next.data, next.options)
+    // only for the first summary or a forced refresh. Context is generated when someone opens
+    // the Story (ensureStoryContext), so unread versions cost nothing.
+    if (!story.currentSummaryId || job.force) {
+      const next = analysisJob(story.id, recorded.versionId, job.priorityClass)
+      await sendInTx(ctx, tx, QUEUES.relateStory, next.data, next.options)
+    }
     return recorded
   })
   return outcome
-}
-
-async function enqueueMissingOptionalEnrichment(
-  ctx: WorkerContext,
-  storyId: string,
-  summaryVersionId: string,
-  outletCount: number,
-  priorityClass: AnalysisJob['priorityClass'],
-) {
-  const queues = optionalEnrichmentQueues(outletCount, ctx.config.eagerOptionalEnrichmentOutlets)
-  if (queues.length === 0) return
-  const completed = await ctx.db
-    .select({
-      kind: schema.optionalEnrichmentCompletion.kind,
-      promptVersion: schema.optionalEnrichmentCompletion.promptVersion,
-      modelId: schema.optionalEnrichmentCompletion.modelId,
-    })
-    .from(schema.optionalEnrichmentCompletion)
-    .where(
-      and(
-        eq(schema.optionalEnrichmentCompletion.storyId, storyId),
-        eq(schema.optionalEnrichmentCompletion.summaryVersionId, summaryVersionId),
-      ),
-    )
-  const job = analysisJob(storyId, summaryVersionId, priorityClass)
-  for (const queue of queues) {
-    const spec = OPTIONAL_ENRICHMENT_SPECS[queue]
-    const ready = completed.some(
-      (row) =>
-        row.kind === spec.kind &&
-        row.modelId === ctx.inference.generation.modelId &&
-        row.promptVersion === spec.promptVersion,
-    )
-    if (!ready) await ctx.workerBoss.send(queue, job.data, job.options)
-  }
 }
 
 // assessSummaryUpdate records one material verdict for a prior-summary/current-input pair.

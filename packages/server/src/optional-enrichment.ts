@@ -5,19 +5,6 @@ import { and, eq, sql } from 'drizzle-orm'
 import type { ServerContext } from './context.ts'
 import { analysisJob, QUEUES } from './queues.ts'
 
-export const OPTIONAL_ENRICHMENT_QUEUES = [QUEUES.generateContext] as const
-
-export const OPTIONAL_ENRICHMENT_SPECS = {
-  [QUEUES.generateContext]: {
-    kind: 'context',
-    promptVersion: PROMPT_VERSIONS.explainContext,
-  },
-} as const
-
-export function optionalEnrichmentQueues(outletCount: number, eagerMinimum: number) {
-  return outletCount >= eagerMinimum ? OPTIONAL_ENRICHMENT_QUEUES : []
-}
-
 type ContextState = NonNullable<StoryDetail['enrichment']>['context']
 
 /** Context for this summary version; when it is missing, admit the job at interactive priority. */
