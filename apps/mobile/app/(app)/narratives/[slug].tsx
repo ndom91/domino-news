@@ -2,13 +2,13 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, plural, TEMPORAL_RELATIONS } from '@dn/domain'
 import { DESK_LABELS, DESK_SLOT, type NarrativeDetail, type StoryRelation } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { FollowToggle } from '../../../components/follow-toggle'
 import { StoryUpdates } from '../../../components/story-detail/story-updates'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
-import { isUnauthorized, queries } from '../../../lib/api'
+import { Button, MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import { queries } from '../../../lib/api'
 
 const RELATION_LABELS: Record<StoryRelation, string> = {
   follows: 'Follows',
@@ -24,32 +24,21 @@ export default function NarrativeScreen() {
   const narrative = useQuery(queries.narrative(slug))
   const updates = useQuery(queries.narrativeUpdates(slug))
 
-  if (narrative.isPending) {
-    return (
-      <Screen>
-        <LoadingView label="Loading narrative" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(narrative.error)) return <Redirect href="/sign-in" />
-  if (narrative.isError || !narrative.data) {
-    return (
-      <Screen>
-        <MessageView
-          action={{ label: 'Try again', onPress: narrative.refetch }}
-          detail="This narrative may no longer be available."
-          title="Narrative unavailable"
-        />
-      </Screen>
-    )
-  }
-
   return (
-    <NarrativeContent
-      narrative={narrative.data}
-      updates={updates.data?.items ?? []}
-      retryUpdates={updates.isError ? () => void updates.refetch() : undefined}
-    />
+    <QueryScreen
+      detail="This narrative may no longer be available."
+      loading="Loading narrative"
+      query={narrative}
+      title="Narrative unavailable"
+    >
+      {(data) => (
+        <NarrativeContent
+          narrative={data}
+          updates={updates.data?.items ?? []}
+          retryUpdates={updates.isError ? () => void updates.refetch() : undefined}
+        />
+      )}
+    </QueryScreen>
   )
 }
 

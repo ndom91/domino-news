@@ -3,11 +3,10 @@ import { queryKeys, savePreferencesMutation } from '@dn/queries'
 import type { UserPreferences, UserPreferencesUpdate } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Redirect } from 'expo-router'
 import type { ComponentProps, ReactNode } from 'react'
 import { Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
-import { api, isUnauthorized, queries } from '../../lib/api'
-import { LoadingView, MessageView, Screen, uiStyles } from '../ui'
+import { api, queries } from '../../lib/api'
+import { QueryScreen, Screen, uiStyles } from '../ui'
 
 /** Saves preferences optimistically, so switches and picks respond before the server does. */
 export function useSavePreferences() {
@@ -48,25 +47,11 @@ export function PreferencesPage({
   children: (settings: UserPreferences) => ReactNode
 }) {
   const preferences = useQuery(queries.preferences())
-  if (preferences.isPending)
-    return (
-      <Screen>
-        <LoadingView label="Loading account" />
-      </Screen>
-    )
-  if (isUnauthorized(preferences.error)) return <Redirect href="/sign-in" />
-  if (preferences.isError) {
-    return (
-      <Screen>
-        <MessageView
-          action={{ label: 'Try again', onPress: preferences.refetch }}
-          detail="Check your connection, then try again."
-          title="Account is unavailable"
-        />
-      </Screen>
-    )
-  }
-  return <>{children(preferences.data)}</>
+  return (
+    <QueryScreen loading="Loading account" query={preferences} title="Account is unavailable">
+      {children}
+    </QueryScreen>
+  )
 }
 
 /** Labels a section of a settings page. The native header already names the page itself. */

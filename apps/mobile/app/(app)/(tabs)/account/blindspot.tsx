@@ -3,93 +3,69 @@ import { countryName, ONE_SIDED_MIN_RATED, ONE_SIDED_SHARE, plural } from '@dn/d
 import { savePreferencesMutation } from '@dn/queries'
 import { DESK_LABELS, type Desk, type Insights, REGION_LABELS, type Region } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Redirect, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../../../components/story-card'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../../components/ui'
-import { api, isUnauthorized, queries } from '../../../../lib/api'
+import { Button, QueryScreen, Screen, uiStyles } from '../../../../components/ui'
+import { api, queries } from '../../../../lib/api'
 
 export default function BlindspotScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const insights = useQuery(queries.insights())
-  const preferences = useQuery(queries.preferences())
   const enableHistory = useMutation(savePreferencesMutation(api, queryClient))
 
-  if (insights.isPending || preferences.isPending) {
-    return (
-      <Screen>
-        <LoadingView label="Loading Blindspot" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(insights.error) || isUnauthorized(preferences.error)) {
-    return <Redirect href="/sign-in" />
-  }
-  if (insights.isError || preferences.isError) {
-    return (
-      <Screen>
-        <MessageView
-          action={{
-            label: 'Try again',
-            onPress: () => {
-              void Promise.all([insights.refetch(), preferences.refetch()])
-            },
-          }}
-          detail="Check your connection, then try again."
-          title="Blindspot is unavailable"
-        />
-      </Screen>
-    )
-  }
-
-  const data = insights.data
-  const now = new Date(insights.dataUpdatedAt).toISOString()
-
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={uiStyles.content}>
-        <View style={styles.hero}>
-          <Text style={uiStyles.eyebrow}>Your reading, in context</Text>
-          <Text style={styles.heading}>Blindspot</Text>
-          {data.enabled ? (
-            <Text style={styles.heroDetail}>{plural(data.readCount, 'story read')}</Text>
-          ) : (
-            <Text style={styles.heroDetail}>Reading history is off</Text>
-          )}
-        </View>
+    <QueryScreen loading="Loading Blindspot" query={insights} title="Blindspot is unavailable">
+      {(data) => {
+        const now = new Date(insights.dataUpdatedAt).toISOString()
+        return (
+          <Screen>
+            <ScrollView contentContainerStyle={uiStyles.content}>
+              <View style={styles.hero}>
+                <Text style={uiStyles.eyebrow}>Your reading, in context</Text>
+                <Text style={styles.heading}>Blindspot</Text>
+                {data.enabled ? (
+                  <Text style={styles.heroDetail}>{plural(data.readCount, 'story read')}</Text>
+                ) : (
+                  <Text style={styles.heroDetail}>Reading history is off</Text>
+                )}
+              </View>
 
-        {!data.enabled ? (
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>See what you miss</Text>
-            <Text style={styles.description}>
-              Blindspot uses only the stories you open to show new developments in narratives you
-              read and regions or desks you rarely read. It never guesses your politics.
-            </Text>
-            <Text style={styles.note}>Stories you open are kept for 30 days.</Text>
-            <Button
-              disabled={enableHistory.isPending}
-              onPress={() => enableHistory.mutate({ rememberReads: true })}
-            >
-              {enableHistory.isPending ? 'Turning on history…' : 'Remember what I read'}
-            </Button>
-            {enableHistory.isError ? (
-              <Text accessibilityLiveRegion="polite" style={styles.error}>
-                Couldn’t turn on reading history. Try again.
-              </Text>
-            ) : null}
-          </View>
-        ) : (
-          <ReadingInsights
-            data={data}
-            now={now}
-            onManageHistory={() => router.navigate('/account/history')}
-          />
-        )}
+              {!data.enabled ? (
+                <View style={styles.section}>
+                  <Text style={styles.sectionTitle}>See what you miss</Text>
+                  <Text style={styles.description}>
+                    Blindspot uses only the stories you open to show new developments in narratives
+                    you read and regions or desks you rarely read. It never guesses your politics.
+                  </Text>
+                  <Text style={styles.note}>Stories you open are kept for 30 days.</Text>
+                  <Button
+                    disabled={enableHistory.isPending}
+                    onPress={() => enableHistory.mutate({ rememberReads: true })}
+                  >
+                    {enableHistory.isPending ? 'Turning on history…' : 'Remember what I read'}
+                  </Button>
+                  {enableHistory.isError ? (
+                    <Text accessibilityLiveRegion="polite" style={styles.error}>
+                      Couldn’t turn on reading history. Try again.
+                    </Text>
+                  ) : null}
+                </View>
+              ) : (
+                <ReadingInsights
+                  data={data}
+                  now={now}
+                  onManageHistory={() => router.navigate('/account/history')}
+                />
+              )}
 
-        <OneSidedCoverage data={data.oneSided} now={now} />
-      </ScrollView>
-    </Screen>
+              <OneSidedCoverage data={data.oneSided} now={now} />
+            </ScrollView>
+          </Screen>
+        )
+      }}
+    </QueryScreen>
   )
 }
 

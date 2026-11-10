@@ -1,7 +1,9 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
+import { Redirect } from 'expo-router'
 import type { ReactNode } from 'react'
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { isUnauthorized } from '../lib/api'
 
 export function Screen({ children, top = false }: { children: ReactNode; top?: boolean }) {
   return (
@@ -80,6 +82,82 @@ export function MessageView({
   )
 }
 
+/** What QueryScreen needs from a query or infinite query result. */
+type ScreenQuery<T> = {
+  data: T | undefined
+  error: unknown
+  isPending: boolean
+  refetch: () => Promise<unknown>
+}
+
+/**
+ * A data screen's loading, signed-out and error states. The error replaces the screen only
+ * before the first data arrives: a failed refetch (such as a story's 15-second poll) keeps
+ * what the reader is looking at.
+ */
+export function QueryScreen<T>({
+  query,
+  loading,
+  title,
+  detail = 'Check your connection, then try again.',
+  top = false,
+  children,
+}: {
+  query: ScreenQuery<T>
+  loading: string
+  title: string
+  detail?: string
+  top?: boolean
+  children: (data: T) => ReactNode
+}) {
+  if (isUnauthorized(query.error)) return <Redirect href="/sign-in" />
+  if (query.data !== undefined) return children(query.data)
+  return (
+    <Screen top={top}>
+      {query.isPending ? (
+        <LoadingView label={loading} />
+      ) : (
+        <MessageView
+          action={{ label: 'Try again', onPress: () => void query.refetch() }}
+          detail={detail}
+          title={title}
+        />
+      )}
+    </Screen>
+  )
+}
+
+/** The footer of a paged list: loads the next page, and offers a retry when one fails. */
+export function LoadMoreFooter({
+  query,
+  label,
+}: {
+  query: {
+    hasNextPage: boolean
+    isFetchingNextPage: boolean
+    isFetchNextPageError: boolean
+    fetchNextPage: () => Promise<unknown>
+  }
+  label: string
+}) {
+  if (!query.hasNextPage && !query.isFetchNextPageError) return null
+  let buttonLabel = label
+  if (query.isFetchNextPageError) buttonLabel = 'Try again'
+  if (query.isFetchingNextPage) buttonLabel = 'Loading…'
+  return (
+    <View style={styles.more}>
+      <Button disabled={query.isFetchingNextPage} onPress={() => void query.fetchNextPage()}>
+        {buttonLabel}
+      </Button>
+      {query.isFetchNextPageError ? (
+        <Text accessibilityRole="alert" style={styles.pageError}>
+          Couldn’t load more stories. Try again.
+        </Text>
+      ) : null}
+    </View>
+  )
+}
+
 export const uiStyles = StyleSheet.create({
   eyebrow: {
     color: t.color.textMuted,
@@ -123,4 +201,6 @@ const styles = StyleSheet.create({
     fontSize: t.type.body,
     lineHeight: t.type.body * t.lineHeight.body,
   },
+  more: { gap: t.space[2], marginTop: t.space[6] },
+  pageError: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
 })

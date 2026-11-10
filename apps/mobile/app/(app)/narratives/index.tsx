@@ -2,10 +2,10 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import { plural, shortRelative } from '@dn/domain'
 import { DESK_LABELS, DESK_SLOT, type NarrativeListResponse } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
-import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
-import { isUnauthorized, queries } from '../../../lib/api'
+import { MessageView, QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import { queries } from '../../../lib/api'
 
 type Narrative = NarrativeListResponse['items'][number]
 
@@ -13,72 +13,57 @@ export default function NarrativesScreen() {
   const router = useRouter()
   const narratives = useQuery(queries.narratives())
 
-  if (narratives.isPending) {
-    return (
-      <Screen>
-        <LoadingView label="Loading narratives" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(narratives.error)) return <Redirect href="/sign-in" />
-  if (narratives.isError && !narratives.data) {
-    return (
-      <Screen>
-        <MessageView
-          action={{ label: 'Try again', onPress: narratives.refetch }}
-          detail="Check your connection, then try again."
-          title="Narratives are unavailable"
-        />
-      </Screen>
-    )
-  }
-
-  const now = new Date(narratives.dataUpdatedAt).toISOString()
-
   return (
-    <Screen>
-      <FlatList
-        contentContainerStyle={uiStyles.content}
-        data={narratives.data.items}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        keyExtractor={(narrative) => narrative.id}
-        ListEmptyComponent={
-          <MessageView
-            detail="A narrative appears once several related stories are linked together."
-            title="No narratives yet"
-          />
-        }
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={uiStyles.eyebrow}>Connected reporting</Text>
-            <Text style={styles.heading}>Narratives</Text>
-            <Text style={styles.intro}>
-              Follow connected stories over time, from what happened first to what followed.
-            </Text>
-            <Text accessibilityLiveRegion="polite" style={styles.count}>
-              {plural(narratives.data.items.length, 'narrative')}
-            </Text>
-          </View>
-        }
-        ListHeaderComponentStyle={narratives.data.items.length ? styles.listHeader : undefined}
-        refreshControl={
-          <RefreshControl
-            onRefresh={async () => {
-              await narratives.refetch()
-            }}
-            refreshing={narratives.isRefetching}
-            tintColor={t.color.accentText}
-          />
-        }
-        renderItem={({ item }) => (
-          <NarrativeCard
-            narrative={item}
-            now={now}
-            onPress={() => router.push(`/narratives/${item.slug}`)}
-          />
-        )}
-      />
-    </Screen>
+    <QueryScreen loading="Loading narratives" query={narratives} title="Narratives are unavailable">
+      {({ items }) => {
+        const now = new Date(narratives.dataUpdatedAt).toISOString()
+        return (
+          <Screen>
+            <FlatList
+              contentContainerStyle={uiStyles.content}
+              data={items}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              keyExtractor={(narrative) => narrative.id}
+              ListEmptyComponent={
+                <MessageView
+                  detail="A narrative appears once several related stories are linked together."
+                  title="No narratives yet"
+                />
+              }
+              ListHeaderComponent={
+                <View style={styles.header}>
+                  <Text style={uiStyles.eyebrow}>Connected reporting</Text>
+                  <Text style={styles.heading}>Narratives</Text>
+                  <Text style={styles.intro}>
+                    Follow connected stories over time, from what happened first to what followed.
+                  </Text>
+                  <Text accessibilityLiveRegion="polite" style={styles.count}>
+                    {plural(items.length, 'narrative')}
+                  </Text>
+                </View>
+              }
+              ListHeaderComponentStyle={items.length ? styles.listHeader : undefined}
+              refreshControl={
+                <RefreshControl
+                  onRefresh={async () => {
+                    await narratives.refetch()
+                  }}
+                  refreshing={narratives.isRefetching}
+                  tintColor={t.color.accentText}
+                />
+              }
+              renderItem={({ item }) => (
+                <NarrativeCard
+                  narrative={item}
+                  now={now}
+                  onPress={() => router.push(`/narratives/${item.slug}`)}
+                />
+              )}
+            />
+          </Screen>
+        )
+      }}
+    </QueryScreen>
   )
 }
 

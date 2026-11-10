@@ -2,12 +2,19 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import type { ForYouReason, ForYouResponse } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
 import { useInfiniteQuery } from '@tanstack/react-query'
-import { Redirect, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native'
 import { AudioBriefing } from '../../../components/audio-briefing'
 import { StoryCard } from '../../../components/story-card'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
-import { isUnauthorized, queries } from '../../../lib/api'
+import {
+  Button,
+  LoadMoreFooter,
+  MessageView,
+  QueryScreen,
+  Screen,
+  uiStyles,
+} from '../../../components/ui'
+import { queries } from '../../../lib/api'
 import { useStoryFeedback } from '../../../lib/use-story-feedback'
 
 type FeedItem = ForYouResponse['items'][number]
@@ -20,106 +27,77 @@ export default function ForYouScreen() {
     await feed.refetch()
   }
 
-  if (feed.isPending) {
-    return (
-      <Screen>
-        <LoadingView label="Building your feed" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(feed.error)) return <Redirect href="/sign-in" />
-  if (feed.isError && !feed.data) {
-    return (
-      <Screen>
-        <MessageView
-          action={{ label: 'Try again', onPress: refresh }}
-          detail="Check your connection, then try again."
-          title="For You is unavailable"
-        />
-      </Screen>
-    )
-  }
-
-  const first = feed.data.pages[0]
-  const items = feed.data.pages.flatMap((page) => page.items)
-  const now = new Date(feed.dataUpdatedAt).toISOString()
-  let moreLabel = 'Show more stories'
-  if (feed.isFetchNextPageError) moreLabel = 'Try again'
-  if (feed.isFetchingNextPage) moreLabel = 'Loading…'
-
   return (
-    <Screen>
-      <FlatList
-        contentContainerStyle={uiStyles.content}
-        data={items}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        keyExtractor={(item) => item.story.id}
-        ListEmptyComponent={
-          <MessageView
-            detail="Check back soon for newly reported stories."
-            title="Nothing new yet"
-          />
-        }
-        ListFooterComponent={
-          feed.hasNextPage || feed.isFetchNextPageError ? (
-            <View style={styles.more}>
-              <Button disabled={feed.isFetchingNextPage} onPress={() => feed.fetchNextPage()}>
-                {moreLabel}
-              </Button>
-              {feed.isFetchNextPageError ? (
-                <Text accessibilityRole="alert" style={styles.pageError}>
-                  Couldn’t load more stories. Try again.
-                </Text>
-              ) : null}
-            </View>
-          ) : undefined
-        }
-        ListHeaderComponent={
-          <>
-            <View style={styles.masthead}>
-              <View style={styles.kickerMark} />
-              <Text style={styles.eyebrow}>Your edition</Text>
-              <Text style={styles.heading}>For You</Text>
-              <Text style={styles.intro}>
-                Ranked around the regions, desks and topics you pick. Wider news still appears.
-              </Text>
-              <AudioBriefing
-                available={
-                  first?.items.slice(0, 5).some(({ story }) => Boolean(story.summary?.trim())) ??
-                  false
-                }
-              />
-              <Pressable
-                accessibilityRole="link"
-                onPress={() => router.push('/briefing')}
-                style={({ pressed }) => [styles.briefingLink, pressed && styles.pressed]}
-              >
-                <Text style={styles.briefingLinkText}>Read your briefing</Text>
-                <Feather name="arrow-right" size={16} color={t.color.bandText} />
-              </Pressable>
-            </View>
-            {!first?.personalised ? (
-              <View style={styles.setup}>
-                <Text style={styles.setupTitle}>Make this feed yours</Text>
-                <Text style={styles.setupText}>
-                  Pick what matters to you and matching stories will move to the top.
-                </Text>
-                <Button onPress={() => router.push('/account')}>Choose your picks</Button>
-              </View>
-            ) : null}
-          </>
-        }
-        ListHeaderComponentStyle={items.length ? styles.listHeader : undefined}
-        refreshControl={
-          <RefreshControl
-            onRefresh={refresh}
-            refreshing={feed.isRefetching}
-            tintColor={t.color.accentText}
-          />
-        }
-        renderItem={({ item }) => <ForYouCard item={item} now={now} />}
-      />
-    </Screen>
+    <QueryScreen loading="Building your feed" query={feed} title="For You is unavailable">
+      {({ pages }) => {
+        const first = pages[0]
+        const items = pages.flatMap((page) => page.items)
+        const now = new Date(feed.dataUpdatedAt).toISOString()
+        return (
+          <Screen>
+            <FlatList
+              contentContainerStyle={uiStyles.content}
+              data={items}
+              ItemSeparatorComponent={() => <View style={styles.separator} />}
+              keyExtractor={(item) => item.story.id}
+              ListEmptyComponent={
+                <MessageView
+                  detail="Check back soon for newly reported stories."
+                  title="Nothing new yet"
+                />
+              }
+              ListFooterComponent={<LoadMoreFooter label="Show more stories" query={feed} />}
+              ListHeaderComponent={
+                <>
+                  <View style={styles.masthead}>
+                    <View style={styles.kickerMark} />
+                    <Text style={styles.eyebrow}>Your edition</Text>
+                    <Text style={styles.heading}>For You</Text>
+                    <Text style={styles.intro}>
+                      Ranked around the regions, desks and topics you pick. Wider news still
+                      appears.
+                    </Text>
+                    <AudioBriefing
+                      available={
+                        first?.items
+                          .slice(0, 5)
+                          .some(({ story }) => Boolean(story.summary?.trim())) ?? false
+                      }
+                    />
+                    <Pressable
+                      accessibilityRole="link"
+                      onPress={() => router.push('/briefing')}
+                      style={({ pressed }) => [styles.briefingLink, pressed && styles.pressed]}
+                    >
+                      <Text style={styles.briefingLinkText}>Read your briefing</Text>
+                      <Feather name="arrow-right" size={16} color={t.color.bandText} />
+                    </Pressable>
+                  </View>
+                  {!first?.personalised ? (
+                    <View style={styles.setup}>
+                      <Text style={styles.setupTitle}>Make this feed yours</Text>
+                      <Text style={styles.setupText}>
+                        Pick what matters to you and matching stories will move to the top.
+                      </Text>
+                      <Button onPress={() => router.push('/account')}>Choose your picks</Button>
+                    </View>
+                  ) : null}
+                </>
+              }
+              ListHeaderComponentStyle={items.length ? styles.listHeader : undefined}
+              refreshControl={
+                <RefreshControl
+                  onRefresh={refresh}
+                  refreshing={feed.isRefetching}
+                  tintColor={t.color.accentText}
+                />
+              }
+              renderItem={({ item }) => <ForYouCard item={item} now={now} />}
+            />
+          </Screen>
+        )
+      }}
+    </QueryScreen>
   )
 }
 
@@ -299,6 +277,4 @@ const styles = StyleSheet.create({
   hiddenStory: { color: t.color.textSecondary, fontFamily: t.font.regular, fontSize: t.type.meta },
   error: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
   pressed: { opacity: 0.65 },
-  more: { marginTop: t.space[8] },
-  pageError: { color: t.color.error, fontFamily: t.font.medium, fontSize: t.type.meta },
 })

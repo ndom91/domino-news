@@ -7,7 +7,7 @@ import {
   RELIABILITY_LABELS,
 } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect, Stack, useLocalSearchParams, useRouter } from 'expo-router'
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router'
 import type { ReactNode } from 'react'
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
 import { MutePublisher } from '../../../components/account/muted-publishers'
@@ -15,131 +15,120 @@ import { FollowToggle } from '../../../components/follow-toggle'
 import { PublisherLogo } from '../../../components/publisher-logo'
 import { StoryCard } from '../../../components/story-card'
 import { openExternalLink } from '../../../components/story-detail/open-external-link'
-import { LoadingView, MessageView, Screen, uiStyles } from '../../../components/ui'
-import { isUnauthorized, queries } from '../../../lib/api'
+import { QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import { queries } from '../../../lib/api'
 
 export default function PublisherScreen() {
   const { slug } = useLocalSearchParams<{ slug: string }>()
   const router = useRouter()
   const publisher = useQuery(queries.publisher(slug))
 
-  if (publisher.isPending) {
-    return (
-      <Screen>
-        <LoadingView label="Loading publisher" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(publisher.error)) return <Redirect href="/sign-in" />
-  if (publisher.isError) {
-    return (
-      <Screen>
-        <MessageView
-          action={{ label: 'Try again', onPress: publisher.refetch }}
-          detail="This publisher may no longer be available."
-          title="Publisher unavailable"
-        />
-      </Screen>
-    )
-  }
-
-  const data = publisher.data
-  const now = new Date(publisher.dataUpdatedAt).toISOString()
-  const languageLabel = data.languages.length ? data.languages.join(', ') : null
-
   return (
-    <Screen>
-      <Stack.Screen options={{ title: data.name }} />
-      <ScrollView contentContainerStyle={uiStyles.content}>
-        <Text style={uiStyles.eyebrow}>Publisher</Text>
-        <View style={styles.titleRow}>
-          <View style={styles.titleLockup}>
-            <PublisherLogo size={48} slug={data.slug} />
-            <Text style={styles.title}>{data.name}</Text>
-          </View>
-          <FollowToggle name={data.name} targetId={data.id} targetType="publisher" />
-        </View>
-        <Pressable
-          accessibilityHint="Opens the publisher website"
-          accessibilityLabel={`Open ${data.domain}`}
-          accessibilityRole="link"
-          onPress={() => void openExternalLink(`https://${data.domain}`)}
-          style={({ pressed }) => [styles.domainLink, pressed ? styles.pressed : null]}
-        >
-          <Text style={styles.domain}>{data.domain}</Text>
-        </Pressable>
-        <Text style={styles.metadata}>
-          {[
-            data.countryCode ? countryName(data.countryCode) : 'International',
-            languageLabel,
-            data.kind === 'official' ? 'Official source' : 'Newsroom',
-          ]
-            .filter(Boolean)
-            .join(' · ')}
-        </Text>
-        <MutePublisher id={data.id} name={data.name} />
-
-        <View style={styles.counts}>
-          <Count label="Stories" value={data.storiesCovered} />
-          <Count label="First reports" value={data.firstReports} />
-          <Count label="Articles seen" value={data.articleCount} />
-        </View>
-
-        <Section title="Assessment">
-          <Assessment assessment={data.assessment} />
-        </Section>
-
-        <Section title="Source use">
-          <Text style={styles.body}>
-            {data.bodyPolicy === 'metadata_only'
-              ? 'Headlines and descriptions only'
-              : 'Article text processed, not stored'}
-          </Text>
-          {data.policyNote ? <Text style={styles.body}>{data.policyNote}</Text> : null}
-          {data.license ? <Text style={styles.meta}>Licence: {data.license}</Text> : null}
-          {data.policyReviewedAt ? (
-            <Text style={styles.meta}>Reviewed {formatDate(data.policyReviewedAt)}</Text>
-          ) : null}
-        </Section>
-
-        <Section title="Often covers the same stories as">
-          {data.coCoverage.length === 0 ? (
-            <Text style={styles.empty}>No shared stories yet.</Text>
-          ) : (
-            data.coCoverage.map((coverage) => (
-              <Pressable
-                accessibilityHint="Opens this publisher"
-                accessibilityLabel={coverage.publisher.name}
-                accessibilityRole="link"
-                key={coverage.publisher.id}
-                onPress={() => router.push(`/publishers/${coverage.publisher.slug}`)}
-                style={({ pressed }) => [styles.coverage, pressed ? styles.pressed : null]}
-              >
-                <View style={styles.coverageTitle}>
-                  <PublisherLogo size={28} slug={coverage.publisher.slug} />
-                  <Text style={styles.coverageName}>{coverage.publisher.name}</Text>
+    <QueryScreen
+      detail="This publisher may no longer be available."
+      loading="Loading publisher"
+      query={publisher}
+      title="Publisher unavailable"
+    >
+      {(data) => {
+        const now = new Date(publisher.dataUpdatedAt).toISOString()
+        const languageLabel = data.languages.length ? data.languages.join(', ') : null
+        return (
+          <Screen>
+            <Stack.Screen options={{ title: data.name }} />
+            <ScrollView contentContainerStyle={uiStyles.content}>
+              <Text style={uiStyles.eyebrow}>Publisher</Text>
+              <View style={styles.titleRow}>
+                <View style={styles.titleLockup}>
+                  <PublisherLogo size={48} slug={data.slug} />
+                  <Text style={styles.title}>{data.name}</Text>
                 </View>
-                <Text style={styles.coverageCount}>
-                  {plural(coverage.sharedStories, 'shared story')}
-                </Text>
+                <FollowToggle name={data.name} targetId={data.id} targetType="publisher" />
+              </View>
+              <Pressable
+                accessibilityHint="Opens the publisher website"
+                accessibilityLabel={`Open ${data.domain}`}
+                accessibilityRole="link"
+                onPress={() => void openExternalLink(`https://${data.domain}`)}
+                style={({ pressed }) => [styles.domainLink, pressed ? styles.pressed : null]}
+              >
+                <Text style={styles.domain}>{data.domain}</Text>
               </Pressable>
-            ))
-          )}
-        </Section>
+              <Text style={styles.metadata}>
+                {[
+                  data.countryCode ? countryName(data.countryCode) : 'International',
+                  languageLabel,
+                  data.kind === 'official' ? 'Official source' : 'Newsroom',
+                ]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </Text>
+              <MutePublisher id={data.id} name={data.name} />
 
-        <Section title={`Recent stories with ${data.name}`}>
-          {data.recentStories.length === 0 ? (
-            <Text style={styles.empty}>No published stories yet.</Text>
-          ) : (
-            <View style={styles.stories}>
-              {data.recentStories.map((story) => (
-                <StoryCard key={story.id} now={now} story={story} />
-              ))}
-            </View>
-          )}
-        </Section>
-      </ScrollView>
-    </Screen>
+              <View style={styles.counts}>
+                <Count label="Stories" value={data.storiesCovered} />
+                <Count label="First reports" value={data.firstReports} />
+                <Count label="Articles seen" value={data.articleCount} />
+              </View>
+
+              <Section title="Assessment">
+                <Assessment assessment={data.assessment} />
+              </Section>
+
+              <Section title="Source use">
+                <Text style={styles.body}>
+                  {data.bodyPolicy === 'metadata_only'
+                    ? 'Headlines and descriptions only'
+                    : 'Article text processed, not stored'}
+                </Text>
+                {data.policyNote ? <Text style={styles.body}>{data.policyNote}</Text> : null}
+                {data.license ? <Text style={styles.meta}>Licence: {data.license}</Text> : null}
+                {data.policyReviewedAt ? (
+                  <Text style={styles.meta}>Reviewed {formatDate(data.policyReviewedAt)}</Text>
+                ) : null}
+              </Section>
+
+              <Section title="Often covers the same stories as">
+                {data.coCoverage.length === 0 ? (
+                  <Text style={styles.empty}>No shared stories yet.</Text>
+                ) : (
+                  data.coCoverage.map((coverage) => (
+                    <Pressable
+                      accessibilityHint="Opens this publisher"
+                      accessibilityLabel={coverage.publisher.name}
+                      accessibilityRole="link"
+                      key={coverage.publisher.id}
+                      onPress={() => router.push(`/publishers/${coverage.publisher.slug}`)}
+                      style={({ pressed }) => [styles.coverage, pressed ? styles.pressed : null]}
+                    >
+                      <View style={styles.coverageTitle}>
+                        <PublisherLogo size={28} slug={coverage.publisher.slug} />
+                        <Text style={styles.coverageName}>{coverage.publisher.name}</Text>
+                      </View>
+                      <Text style={styles.coverageCount}>
+                        {plural(coverage.sharedStories, 'shared story')}
+                      </Text>
+                    </Pressable>
+                  ))
+                )}
+              </Section>
+
+              <Section title={`Recent stories with ${data.name}`}>
+                {data.recentStories.length === 0 ? (
+                  <Text style={styles.empty}>No published stories yet.</Text>
+                ) : (
+                  <View style={styles.stories}>
+                    {data.recentStories.map((story) => (
+                      <StoryCard key={story.id} now={now} story={story} />
+                    ))}
+                  </View>
+                )}
+              </Section>
+            </ScrollView>
+          </Screen>
+        )
+      }}
+    </QueryScreen>
   )
 }
 

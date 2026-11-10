@@ -1,11 +1,10 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import type { BriefingResponse } from '@dn/schemas'
 import { useQuery } from '@tanstack/react-query'
-import { Redirect } from 'expo-router'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { StoryCard } from '../../components/story-card'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../components/ui'
-import { isUnauthorized, queries } from '../../lib/api'
+import { Button, QueryScreen, Screen, uiStyles } from '../../components/ui'
+import { queries } from '../../lib/api'
 import { useStoryFeedback } from '../../lib/use-story-feedback'
 
 export default function BriefingScreen() {
@@ -15,53 +14,39 @@ export default function BriefingScreen() {
     refetchOnReconnect: false,
     retry: false,
   })
-  if (briefing.isPending)
-    return (
-      <Screen>
-        <LoadingView label="Loading briefing" />
-      </Screen>
-    )
-  if (isUnauthorized(briefing.error)) return <Redirect href="/sign-in" />
-  if (!briefing.data)
-    return (
-      <Screen>
-        <MessageView
-          title="Briefing unavailable"
-          detail="Check your connection, then try again."
-          action={{ label: 'Try again', onPress: briefing.refetch }}
-        />
-      </Screen>
-    )
-  const data = briefing.data
   return (
-    <Screen>
-      <ScrollView contentContainerStyle={uiStyles.content}>
-        <Text style={uiStyles.eyebrow}>Your news desk</Text>
-        <Text style={styles.heading}>Briefing</Text>
-        <Text style={styles.text}>
-          {data.since
-            ? 'What changed since your last briefing.'
-            : 'Your first briefing: a considered view of the news now.'}
-        </Text>
-        {!data.personalised ? (
-          <Text style={styles.text}>
-            Choose regions, desks and topics in Account to make this briefing yours.
-          </Text>
-        ) : null}
-        {!data.sections.length ? (
-          <Text style={styles.text}>No stories in the last three days yet.</Text>
-        ) : null}
-        {data.sections.map((section) => (
-          <View key={section.kind} style={styles.section}>
-            <Text style={uiStyles.label}>{section.title}</Text>
-            <Text style={styles.text}>{section.description}</Text>
-            {section.items.map((item) => (
-              <BriefingCard key={item.story.id} item={item} now={data.openedAt} />
+    <QueryScreen loading="Loading briefing" query={briefing} title="Briefing unavailable">
+      {(data) => (
+        <Screen>
+          <ScrollView contentContainerStyle={uiStyles.content}>
+            <Text style={uiStyles.eyebrow}>Your news desk</Text>
+            <Text style={styles.heading}>Briefing</Text>
+            <Text style={styles.text}>
+              {data.since
+                ? 'What changed since your last briefing.'
+                : 'Your first briefing: a considered view of the news now.'}
+            </Text>
+            {!data.personalised ? (
+              <Text style={styles.text}>
+                Choose regions, desks and topics in Account to make this briefing yours.
+              </Text>
+            ) : null}
+            {!data.sections.length ? (
+              <Text style={styles.text}>No stories in the last three days yet.</Text>
+            ) : null}
+            {data.sections.map((section) => (
+              <View key={section.kind} style={styles.section}>
+                <Text style={uiStyles.label}>{section.title}</Text>
+                <Text style={styles.text}>{section.description}</Text>
+                {section.items.map((item) => (
+                  <BriefingCard key={item.story.id} item={item} now={data.openedAt} />
+                ))}
+              </View>
             ))}
-          </View>
-        ))}
-      </ScrollView>
-    </Screen>
+          </ScrollView>
+        </Screen>
+      )}
+    </QueryScreen>
   )
 }
 function BriefingCard({

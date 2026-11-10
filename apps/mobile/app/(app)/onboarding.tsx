@@ -3,12 +3,19 @@ import { regionForCountry } from '@dn/domain'
 import { savePreferencesMutation, setFollowMutation } from '@dn/queries'
 import { REGION_LABELS, REGIONS, type Region } from '@dn/schemas'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Redirect, useRouter } from 'expo-router'
+import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { ScrollView, StyleSheet, Text, View } from 'react-native'
 import { ChipPicker, FeedPicks } from '../../components/feed-picks'
-import { Button, LoadingView, MessageView, Screen, uiStyles } from '../../components/ui'
-import { api, isUnauthorized, queries } from '../../lib/api'
+import {
+  Button,
+  LoadingView,
+  MessageView,
+  QueryScreen,
+  Screen,
+  uiStyles,
+} from '../../components/ui'
+import { api, queries } from '../../lib/api'
 
 const STEPS = [
   {
@@ -33,26 +40,6 @@ export default function OnboardingScreen() {
   const save = useMutation(savePreferencesMutation(api, queryClient))
   const [step, setStep] = useState(0)
 
-  if (preferences.isPending) {
-    return (
-      <Screen top>
-        <LoadingView label="Preparing onboarding" />
-      </Screen>
-    )
-  }
-  if (isUnauthorized(preferences.error)) return <Redirect href="/sign-in" />
-  if (preferences.isError) {
-    return (
-      <Screen top>
-        <MessageView
-          action={{ label: 'Try again', onPress: preferences.refetch }}
-          detail="Check your connection, then try again."
-          title="Onboarding is unavailable"
-        />
-      </Screen>
-    )
-  }
-
   const current = STEPS[step] ?? STEPS[0]
   const last = step === STEPS.length - 1
 
@@ -61,63 +48,72 @@ export default function OnboardingScreen() {
   }
 
   return (
-    <Screen top>
-      <ScrollView contentContainerStyle={uiStyles.content}>
-        <View style={styles.masthead}>
-          <Text style={styles.step}>
-            Step {step + 1} of {STEPS.length}
-          </Text>
-          <Text style={styles.title}>{current.title}</Text>
-          <Text style={styles.intro}>{current.text}</Text>
-        </View>
+    <QueryScreen
+      loading="Preparing onboarding"
+      query={preferences}
+      title="Onboarding is unavailable"
+      top
+    >
+      {(values) => (
+        <Screen top>
+          <ScrollView contentContainerStyle={uiStyles.content}>
+            <View style={styles.masthead}>
+              <Text style={styles.step}>
+                Step {step + 1} of {STEPS.length}
+              </Text>
+              <Text style={styles.title}>{current.title}</Text>
+              <Text style={styles.intro}>{current.text}</Text>
+            </View>
 
-        <View style={styles.picker}>
-          {step === 0 ? (
-            <FeedPicks
-              disabled={save.isPending}
-              onChange={(update) => save.mutate(update)}
-              sections={['regions']}
-              values={preferences.data}
-            />
-          ) : null}
-          {step === 1 ? (
-            <FeedPicks
-              disabled={save.isPending}
-              onChange={(update) => save.mutate(update)}
-              sections={['desks', 'topics']}
-              values={preferences.data}
-            />
-          ) : null}
-          {step === 2 ? <PublisherPicker /> : null}
-        </View>
+            <View style={styles.picker}>
+              {step === 0 ? (
+                <FeedPicks
+                  disabled={save.isPending}
+                  onChange={(update) => save.mutate(update)}
+                  sections={['regions']}
+                  values={values}
+                />
+              ) : null}
+              {step === 1 ? (
+                <FeedPicks
+                  disabled={save.isPending}
+                  onChange={(update) => save.mutate(update)}
+                  sections={['desks', 'topics']}
+                  values={values}
+                />
+              ) : null}
+              {step === 2 ? <PublisherPicker /> : null}
+            </View>
 
-        {save.isError ? (
-          <Text accessibilityLiveRegion="polite" style={styles.error}>
-            Your choices could not be saved. Try again.
-          </Text>
-        ) : null}
+            {save.isError ? (
+              <Text accessibilityLiveRegion="polite" style={styles.error}>
+                Your choices could not be saved. Try again.
+              </Text>
+            ) : null}
 
-        <View style={styles.actions}>
-          {step > 0 ? (
-            <Button disabled={save.isPending} onPress={() => setStep(step - 1)} tone="light">
-              Back
-            </Button>
-          ) : null}
-          {last ? (
-            <Button disabled={save.isPending} onPress={finish}>
-              Show my feed
-            </Button>
-          ) : (
-            <Button disabled={save.isPending} onPress={() => setStep(step + 1)}>
-              Next
-            </Button>
-          )}
-          <Button disabled={save.isPending} onPress={finish} tone="light">
-            Skip for now
-          </Button>
-        </View>
-      </ScrollView>
-    </Screen>
+            <View style={styles.actions}>
+              {step > 0 ? (
+                <Button disabled={save.isPending} onPress={() => setStep(step - 1)} tone="light">
+                  Back
+                </Button>
+              ) : null}
+              {last ? (
+                <Button disabled={save.isPending} onPress={finish}>
+                  Show my feed
+                </Button>
+              ) : (
+                <Button disabled={save.isPending} onPress={() => setStep(step + 1)}>
+                  Next
+                </Button>
+              )}
+              <Button disabled={save.isPending} onPress={finish} tone="light">
+                Skip for now
+              </Button>
+            </View>
+          </ScrollView>
+        </Screen>
+      )}
+    </QueryScreen>
   )
 }
 
