@@ -1,10 +1,11 @@
+import { ApiError } from '@dn/api-client'
+import type { AudioBriefingResult } from '@dn/schemas'
 import { setAudioModeAsync, useAudioPlayer } from 'expo-audio'
 import * as FileSystem from 'expo-file-system/legacy'
 import { createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react'
-import { authClient } from '../lib/auth-client'
-import { apiUrl } from '../lib/config'
+import { api } from '../lib/api'
 
-type Result = { transcript: string; stories: { title: string; slug: string }[] }
+type Result = Pick<AudioBriefingResult, 'transcript' | 'stories'>
 
 function useBriefingPlayer() {
   const player = useAudioPlayer(null)
@@ -33,18 +34,13 @@ function useBriefingPlayer() {
     setError('')
     let path: string | null = null
     try {
-      const cookie = await authClient.getCookie()
-      const response = await fetch(`${apiUrl}/api/v1/briefing/audio-prototype`, {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', accept: 'application/json', cookie },
-        body: JSON.stringify({ timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }),
-        signal: abort.signal,
-      })
-      const body = await response.json()
-      if (!response.ok) throw new Error(body.error?.message ?? 'Could not prepare your briefing.')
+      const briefing = await api.prepareAudioBriefing(
+        { timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone },
+        abort.signal,
+      )
       if (!FileSystem.cacheDirectory) throw new Error('Audio storage is unavailable.')
       path = `${FileSystem.cacheDirectory}briefing-${Date.now()}.wav`
-      await FileSystem.writeAsStringAsync(path, body.audio, {
+      await FileSystem.writeAsStringAsync(path, briefing.audio, {
         encoding: FileSystem.EncodingType.Base64,
       })
       if (abort.signal.aborted) return
@@ -55,10 +51,9 @@ function useBriefingPlayer() {
       file.current = path
       path = null
       if (previous) void FileSystem.deleteAsync(previous, { idempotent: true }).catch(console.warn)
-      setResult({ transcript: body.transcript, stories: body.stories })
+      setResult({ transcript: briefing.transcript, stories: briefing.stories })
     } catch (err) {
-      if (!abort.signal.aborted)
-        setError(err instanceof Error ? err.message : 'Could not prepare your briefing.')
+      if (!abort.signal.aborted) setError(preparationError(err))
     } finally {
       if (path) void FileSystem.deleteAsync(path, { idempotent: true }).catch(console.warn)
       controller.current = null
@@ -93,6 +88,14 @@ function useBriefingPlayer() {
     }
   }
   return { player, result, pending, error, generate, cancel, play }
+}
+
+// API errors carry a message for the reader; a failed connection only carries the platform's.
+function preparationError(error: unknown): string {
+  if (error instanceof ApiError && error.code === 'network') {
+    return 'Could not reach Domino Wire. Check your connection and try again.'
+  }
+  return error instanceof Error ? error.message : 'Could not prepare your briefing.'
 }
 
 const AudioBriefingContext = createContext<ReturnType<typeof useBriefingPlayer> | null>(null)

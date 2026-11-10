@@ -1,7 +1,9 @@
 import {
   type ApiErrorCode,
   type AssessmentRequest,
+  type AudioBriefingResult,
   apiErrorSchema,
+  audioBriefingResultSchema,
   type BriefingResponse,
   briefingResponseSchema,
   type Edition,
@@ -147,6 +149,13 @@ export function createApiClient({
       request<FrontPage>(frontPageSchema, `/front${qs({ region: opts.region })}`, { signal }),
     getBriefing: (signal?: AbortSignalLike) =>
       request<BriefingResponse>(briefingResponseSchema, '/briefing', { signal }),
+    /** The reader's spoken briefing: a written script, then speech. Slow; the web streams it. */
+    prepareAudioBriefing: (body: { timeZone?: string }, signal?: AbortSignalLike) =>
+      request<AudioBriefingResult>(audioBriefingResultSchema, '/briefing/audio-prototype', {
+        method: 'POST',
+        body,
+        signal,
+      }),
     getEdition: (signal?: AbortSignalLike) =>
       request<Edition>(editionSchema, '/edition', { signal }),
     listStories: (

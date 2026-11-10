@@ -839,6 +839,16 @@ export type PublisherDetail = z.infer<typeof publisherDetailSchema>
 export const audioBriefingStyleSchema = z.enum(['professional', 'radio'])
 export type AudioBriefingStyle = z.infer<typeof audioBriefingStyleSchema>
 
+// POST /briefing/audio-prototype. Nothing is stored: the client keeps the audio for the session.
+export const audioBriefingResultSchema = z.object({
+  transcript: z.string(),
+  // Base64-encoded, in `contentType` (WAV).
+  audio: z.string(),
+  contentType: z.string(),
+  stories: z.array(z.object({ title: z.string(), slug: z.string() })),
+})
+export type AudioBriefingResult = z.infer<typeof audioBriefingResultSchema>
+
 export const userPreferencesSchema = z.object({
   // For You picks. Empty = no preference. They rank Stories up, never hide others.
   regions: z.array(regionSchema).check(z.maxLength(REGIONS.length)),

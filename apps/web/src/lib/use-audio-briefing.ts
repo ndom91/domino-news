@@ -1,3 +1,4 @@
+import type { AudioBriefingResult } from '@dn/schemas'
 import { useEffect, useRef, useState } from 'react'
 
 export function useAudioBriefing() {
@@ -39,13 +40,7 @@ export function useAudioBriefing() {
         const body = await response.json()
         throw new Error(body.error?.message || 'Could not prepare your audio briefing.')
       }
-      type Result = {
-        audio: string
-        contentType: string
-        transcript: string
-        stories: { title: string; slug: string }[]
-      }
-      let data: Result | undefined
+      let data: AudioBriefingResult | undefined
       if (response.headers.get('content-type')?.includes('application/x-ndjson')) {
         if (!response.body) throw new Error('Could not read the briefing response.')
         const reader = response.body.pipeThrough(new TextDecoderStream()).getReader()
@@ -64,7 +59,7 @@ export function useAudioBriefing() {
               (event.stage === 'writing' || event.stage === 'recording')
             )
               setStage(event.stage)
-            else if (event.type === 'result') data = event as Result
+            else if (event.type === 'result') data = event as AudioBriefingResult
             else if (event.type === 'error')
               throw new Error(event.message || 'Could not prepare your briefing.')
             newline = buffer.indexOf('\n')
@@ -73,7 +68,7 @@ export function useAudioBriefing() {
         if (buffer.trim() || !data)
           throw new Error('The briefing response was incomplete. Please try again.')
       } else {
-        data = (await response.json()) as Result
+        data = (await response.json()) as AudioBriefingResult
       }
       const bytes = Uint8Array.from(atob(data.audio), (char) => char.charCodeAt(0))
       setBriefing({
