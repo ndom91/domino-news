@@ -53,8 +53,8 @@ const USAGE = `Usage: pnpm cli <command> [options]
   backfill:pause | backfill:resume
   enrich:all [--reset-graph]        Re-run relationships, narratives, context and claims for published stories
                                     (--reset-graph clears relationships/narratives first)
-  summaries:refresh [--all]         Re-summarise published stories that have no desk yet, or every published
-                                    story with --all (backfill priority; edited summaries are kept)
+  summaries:refresh --all           Re-summarise every published story (backfill priority; edited
+                                    summaries are kept)
   status                            Print pipeline/queue status as JSON
   dev:reset                         Delete all ingested/derived data and search collections (keeps users, publishers)`
 
@@ -240,17 +240,18 @@ try {
       break
     }
     case 'summaries:refresh': {
-      // Same inputs, so the job's fingerprint is unchanged; recordGeneratedSummary allows
-      // the new version because the Story has no desk, or because the job is forced.
-      const all = values.all
+      // One summary call per published Story, so the scope must be explicit.
+      if (!values.all)
+        throw new Error('summaries:refresh re-summarises every published story: pass --all')
+      // Same inputs, so the job's fingerprint is unchanged; `force` lets the new version replace it.
       const { rows } = await ctx.pool.query<{ id: string; input_fingerprint: string }>(
-        `select id, input_fingerprint from story where published_at is not null ${all ? '' : 'and desk is null'} and input_fingerprint is not null order by last_updated_at desc`,
+        'select id, input_fingerprint from story where published_at is not null and input_fingerprint is not null order by last_updated_at desc',
       )
       for (const r of rows) {
         const job = analysisJob(r.id, r.input_fingerprint, 'backfill')
-        await ctx.workerBoss.send(QUEUES.summarizeStory, { ...job.data, force: all }, job.options)
+        await ctx.workerBoss.send(QUEUES.summarizeStory, { ...job.data, force: true }, job.options)
       }
-      console.log(`enqueued summaries for ${rows.length} stories${all ? '' : ' without a desk'}`)
+      console.log(`enqueued summaries for ${rows.length} stories`)
       break
     }
     case 'status':

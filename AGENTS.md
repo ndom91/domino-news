@@ -45,7 +45,7 @@ e2e/, test/       Playwright and Vitest suites
 | `pnpm cli match:sample --name n --seed <regex>` / `match:review --name n` | Draw a match evaluation set of real articles into `fixtures/match-eval/`; write a local review page for its story labels (rules: `docs/story-granularity.md`) |
 | `pnpm cli search:rebuild` | Rebuild Typesense from Postgres and swap aliases |
 | `pnpm cli enrich:all [--reset-graph]` | Re-run relationships, narratives and context for published stories |
-| `pnpm cli summaries:refresh [--all]` | Re-summarise published stories that have no desk yet, or all of them with `--all` (one summary call each; relationship inference runs for the new version, and context is rewritten on the next view; edited summaries are kept) |
+| `pnpm cli summaries:refresh --all` | Re-summarise every published story (one summary call each, at backfill priority; relationship inference runs for the new version, and context is rewritten on the next view; edited summaries are kept) |
 | `pnpm cli backfill:pause` / `backfill:resume` | Control backfill admission |
 | `pnpm cli status` | Pipeline and queue status as JSON |
 | `pnpm cli dev:reset` | Delete all ingested and derived data (keeps users and publishers) |

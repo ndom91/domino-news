@@ -203,13 +203,12 @@ export async function recordGeneratedSummary(
   const supersedesVersionId = story.currentSummaryId
   if (supersedesVersionId) {
     // Same inputs already summarised (retry/duplicate) or a human edit on these inputs wins.
-    // Exceptions: a generated summary from before desk tagging may be refreshed to get one,
-    // and a forced refresh replaces any generated summary.
+    // Only a forced refresh replaces a generated summary on unchanged inputs.
     const [current] = await db
       .select()
       .from(schema.storySummaryVersion)
       .where(eq(schema.storySummaryVersion.id, supersedesVersionId))
-    const refresh = current?.editedByUserId === null && (story.desk === null || input.force)
+    const refresh = current?.editedByUserId === null && input.force
     if (current?.inputFingerprint === input.inputFingerprint && !refresh) return { status: 'stale' }
   }
 
