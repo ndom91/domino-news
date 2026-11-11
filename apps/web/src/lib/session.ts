@@ -1,3 +1,4 @@
+import { countryFromHeader } from '@dn/domain'
 import type { Region } from '@dn/schemas'
 import { createServerFn } from '@tanstack/react-start'
 
@@ -25,7 +26,6 @@ interface SessionInfo {
 export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
   async (): Promise<SessionInfo> => {
     const { getPreferences, getServerContext } = await import('@dn/server')
-    const { countryFromHeader } = await import('@dn/domain')
     const { getRequestHeaders } = await import('@tanstack/react-start/server')
     const { requestSession } = await import('../server/api-bridge.ts')
     const ctx = getServerContext()
