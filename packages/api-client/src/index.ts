@@ -123,6 +123,7 @@ export function createApiClient({
         credentials,
       })
     } catch (error) {
+      if (error instanceof ApiError) throw error
       throw new ApiError(0, 'network', String(error))
     }
     const json = await res.json().catch(() => null)

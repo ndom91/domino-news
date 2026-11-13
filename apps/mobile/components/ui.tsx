@@ -1,3 +1,4 @@
+import { ApiError } from '@dn/api-client'
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { DESK_SLOT, type Desk } from '@dn/schemas'
 import { Redirect } from 'expo-router'
@@ -133,6 +134,7 @@ type ScreenQuery<T> = {
   data: T | undefined
   error: unknown
   isPending: boolean
+  isPaused?: boolean
   refetch: () => Promise<unknown>
 }
 
@@ -158,17 +160,22 @@ export function QueryScreen<T>({
 }) {
   if (isUnauthorized(query.error)) return <Redirect href="/sign-in" />
   if (query.data !== undefined) return children(query.data)
+  if (query.isPending && !query.isPaused) {
+    return (
+      <Screen top={top}>
+        <LoadingView label={loading} />
+      </Screen>
+    )
+  }
+  const errorDetail =
+    query.error instanceof ApiError && query.error.code === 'network' ? query.error.message : detail
   return (
     <Screen top={top}>
-      {query.isPending ? (
-        <LoadingView label={loading} />
-      ) : (
-        <MessageView
-          action={{ label: 'Try again', onPress: () => void query.refetch() }}
-          detail={detail}
-          title={title}
-        />
-      )}
+      <MessageView
+        action={{ label: 'Try again', onPress: () => void query.refetch() }}
+        detail={query.isPaused ? 'Check your connection, then try again.' : errorDetail}
+        title={query.isPaused ? 'Waiting for a connection' : title}
+      />
     </Screen>
   )
 }
