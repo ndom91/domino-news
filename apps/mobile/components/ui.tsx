@@ -134,6 +134,7 @@ type ScreenQuery<T> = {
   data: T | undefined
   error: unknown
   isPending: boolean
+  isFetching?: boolean
   isPaused?: boolean
   refetch: () => Promise<unknown>
 }
@@ -160,7 +161,7 @@ export function QueryScreen<T>({
 }) {
   if (isUnauthorized(query.error)) return <Redirect href="/sign-in" />
   if (query.data !== undefined) return children(query.data)
-  if (query.isPending && !query.isPaused) {
+  if ((query.isPending || query.isFetching) && !query.isPaused) {
     return (
       <Screen top={top}>
         <LoadingView label={loading} />

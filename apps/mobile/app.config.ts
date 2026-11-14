@@ -22,7 +22,7 @@ const config: ExpoConfig = {
   description: 'Follow the news as it falls: one story, every source, and what came next.',
   slug: 'domino-news',
   scheme: 'dominonews',
-  version: '0.8.4',
+  version: '0.8.5',
   // Unlocked: Android 16 ignores orientation locks on tablets and foldables, and Play flags them.
   orientation: 'default',
   userInterfaceStyle: 'light',

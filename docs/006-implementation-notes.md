@@ -117,6 +117,7 @@ Prompt lessons from the real-model runs (current versions: `match-story@6`, `cla
 
 ## Configuration gotchas
 
+- **Mobile connectivity is advisory for reads.** React Query's default `online` mode can pause a Story request before its fetch timeout even starts; calling `refetch()` while the native offline flag is stale just waits again. Mobile queries use `networkMode: 'always'` so initial loads and manual retries attempt the API with the existing JSON deadline and bounded retries. `refetchOnReconnect: true` is explicit because `always` otherwise disables it. Native connectivity is also sampled at startup and on foreground, with newer events taking precedence over pending snapshots; unknown connectivity is not treated as disconnected. Cached content stays visible on failed refreshes, and retries without cached data show the loading state.
 - `NODE_EXTRA_CA_CERTS` is ignored when set through `--env-file` (Node reads it before). Use `INFERENCE_CA_CERT=/path/ca.pem` instead; the inference package registers it at runtime.
 - `BETTER_AUTH_URL` must match the origin users load the app from, or sign-in fails the origin check.
 - **Node 25+ no longer bundles corepack.** CI and the Dockerfile install it with `npm install -g corepack`; locally run the same once per Node version.
