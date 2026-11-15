@@ -1,3 +1,4 @@
+import { narrativeListResponseSchema, storyListResponseSchema } from '@dn/schemas'
 import { expect, type Page, test } from '@playwright/test'
 import { signIn } from './sign-in.ts'
 
@@ -524,9 +525,27 @@ test('feed → story → narrative → search', async ({ page }) => {
   await expect(page.getByRole('form', { name: 'Local news location' })).toBeVisible()
   await expectNoHorizontalOverflow(page)
 
-  // Narrative graph with clickable story nodes
+  // The index only lists narratives with 4+ published stories; fixtures may only make smaller ones.
+  const narrativesResponse = await page.request.get('/api/v1/narratives')
+  expect(narrativesResponse.ok()).toBe(true)
+  const narratives = narrativeListResponseSchema.parse(await narrativesResponse.json())
   await page.goto('/narratives')
-  const narrative = page.locator('main li a').first()
+  await expect(page.getByRole('heading', { level: 1, name: 'Narratives' })).toBeVisible()
+  await expect(page.locator('main li a[href^="/narratives/"]')).toHaveCount(narratives.items.length)
+  if (narratives.items.length === 0) {
+    await expect(page.getByText('No narratives yet', { exact: true })).toBeVisible()
+  }
+  await expectNoHorizontalOverflow(page)
+
+  // Smaller narratives remain reachable from their stories. Exercise that real reader path
+  // without depending on the fixture matcher producing a narrative large enough for the index.
+  const storiesResponse = await page.request.get('/api/v1/stories?limit=100')
+  expect(storiesResponse.ok()).toBe(true)
+  const stories = storyListResponseSchema.parse(await storiesResponse.json())
+  const storyInNarrative = stories.items.find((story) => story.narratives.length > 0)
+  if (!storyInNarrative) throw new Error('fixtures need a published story in a narrative')
+  await page.goto(`/stories/${storyInNarrative.slug}`)
+  const narrative = page.locator('section[aria-labelledby="development-heading"] a').first()
   await expect(narrative).toBeVisible()
   await narrative.click()
   await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
