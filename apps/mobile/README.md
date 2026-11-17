@@ -90,5 +90,31 @@ root and preserves package exports. If that changes, start with `pnpm --filter @
 `expo install --check` currently identifies newer SDK 58 patch releases, but they are intentionally
 not installable until they pass the workspace's seven-day minimum release age.
 
+## Changing the public domain
+
+For the transition to `dominowire.com`, configure the server with:
+
+```dotenv
+BETTER_AUTH_URL=https://dominowire.com
+BETTER_AUTH_ADDITIONAL_ORIGINS=https://domino-wire.ndo.dev
+```
+
+Serve both origins from the same application, database and `BETTER_AUTH_SECRET`. Preserve the public
+`Host` header at the reverse proxy. Keep `/api/auth/*` and `/api/v1/*` working on the old origin without
+redirecting them: installed apps still use their bundled URL. Better Auth selects the matching origin
+for authentication callbacks and keeps cookies host-only. Existing mobile session cookies and bearer
+tokens remain valid; browser sessions are separate for each domain. Web passkeys work only on the
+hostname where they were registered.
+
+Keep both Google web OAuth callback URLs authorised during the transition:
+`https://dominowire.com/api/auth/callback/google` and
+`https://domino-wire.ndo.dev/api/auth/callback/google`. The native Google client IDs, app identifiers,
+`dominonews` scheme and EAS project stay the same.
+
+Set `EXPO_PUBLIC_API_URL=https://dominowire.com` in the EAS **preview** environment (both preview and
+production build profiles currently use it), and release new iOS and Android builds. Once old builds
+are retired, remove `BETTER_AUTH_ADDITIONAL_ORIGINS` and restart the server. Then the old website can
+redirect to the new one. No database migration is required.
+
 The app scheme is `dominonews`, matching `EXPO_APP_SCHEME` on the server. Android uses the permanent
 application ID `dev.ndo.dominonews`. An iOS bundle identifier has not been chosen yet.

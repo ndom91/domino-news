@@ -21,6 +21,29 @@ import { eq } from 'drizzle-orm'
  */
 export function createAuth(db: Db, env = process.env) {
   const baseURL = env.BETTER_AUTH_URL ?? 'http://localhost:4000'
+  const publicURL = new URL(baseURL)
+  const additionalOrigins = (env.BETTER_AUTH_ADDITIONAL_ORIGINS ?? '')
+    .split(',')
+    .map((origin) => origin.trim())
+    .filter(Boolean)
+    .map((origin) => {
+      const url = new URL(origin)
+      if (
+        !['http:', 'https:'].includes(url.protocol) ||
+        url.protocol !== publicURL.protocol ||
+        url.username ||
+        url.password ||
+        url.pathname !== '/' ||
+        url.search ||
+        url.hash ||
+        url.hostname.includes('*')
+      ) {
+        throw new Error(
+          'BETTER_AUTH_ADDITIONAL_ORIGINS must list exact origins using the BETTER_AUTH_URL protocol',
+        )
+      }
+      return url.origin
+    })
   const googleClientId = env.GOOGLE_CLIENT_ID
   const googleClientSecret = env.GOOGLE_CLIENT_SECRET
   // Behind proxies X-Forwarded-For holds several hops, which better-auth won't trust, so rate
@@ -36,7 +59,15 @@ export function createAuth(db: Db, env = process.env) {
     .map((header) => header.trim().toLowerCase())
     .filter(Boolean)
   return betterAuth({
-    baseURL,
+    // Resolve callbacks on the requested, explicitly allowed host during domain migrations.
+    // Keep the canonical URL as the fallback for server-side API calls without a request.
+    baseURL: additionalOrigins.length
+      ? {
+          allowedHosts: [baseURL, ...additionalOrigins],
+          fallback: baseURL,
+          protocol: publicURL.protocol === 'https:' ? 'https' : 'http',
+        }
+      : baseURL,
     secret: env.BETTER_AUTH_SECRET,
     trustedOrigins,
     database: drizzleAdapter(db, {
@@ -84,8 +115,12 @@ export function createAuth(db: Db, env = process.env) {
       username(),
       bearer(),
       expo(),
-      // WebAuthn is bound to the public origin: rpID must be its hostname.
-      passkey({ rpID: new URL(baseURL).hostname, rpName: 'Domino Wire', origin: baseURL }),
+      // In multi-host mode the plugin derives rpID from the resolved request URL and verifies
+      // the browser's checked Origin. Existing passkeys stay bound to their original hostname.
+      passkey({
+        rpName: 'Domino Wire',
+        ...(additionalOrigins.length ? {} : { rpID: publicURL.hostname, origin: baseURL }),
+      }),
       // Writes cookies set by server-side auth.api calls (e.g. getSession's sliding refresh)
       // onto the TanStack Start response. Must stay last.
       tanstackStartCookies(),
