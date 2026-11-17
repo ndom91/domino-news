@@ -133,7 +133,7 @@ export default function AccountScreen() {
             <SettingsRow
               kind="external"
               icon="message-circle"
-              onPress={() => void openContact('https://domino-wire.ndo.dev/contact-us')}
+              onPress={() => void openContact('https://dominowire.com/contact-us')}
               title="Contact page"
             />
           </SettingsGroup>

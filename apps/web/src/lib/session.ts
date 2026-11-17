@@ -18,7 +18,7 @@ interface SessionInfo {
   // Saved preference, else the request's country (Cloudflare); null when neither is known.
   country: string | null
   features: { summaryEditing: boolean; googleSignIn: boolean }
-  /** Public origin ("https://domino-wire.ndo.dev"), for absolute URLs in share tags. */
+  /** Public origin ("https://dominowire.com"), for absolute URLs in share tags. */
   origin: string
 }
 

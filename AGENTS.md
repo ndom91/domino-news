@@ -52,6 +52,14 @@ e2e/, test/       Playwright and Vitest suites
 
 ## Configuration
 
+### Public origin
+
+The production web app and API are served at **https://dominowire.com**. Set server
+`BETTER_AUTH_URL=https://dominowire.com` and mobile `EXPO_PUBLIC_API_URL=https://dominowire.com`
+(no API path). Keep local development URLs pointing at localhost or the host's LAN address.
+During the domain transition, `BETTER_AUTH_ADDITIONAL_ORIGINS` keeps the old origin working for
+installed apps; see [the mobile domain migration guide](apps/mobile/README.md#changing-the-public-domain).
+
 ### Fixture mode
 
 The default `.env.example` runs fixture ingest and fixture inference. Older fixture items count as backfill and are admitted at `BACKFILL_ADMIT_PER_MINUTE` (20/min), so the full set settles in 2–3 minutes. Watch progress on **Pipeline** (`/pipeline`).

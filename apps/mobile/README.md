@@ -57,7 +57,7 @@ current Expo token again, which is how a changed token reaches the server.
 
 Use the production-style Preview APK for native Google sign-in and push-notification testing:
 
-1. In `apps/mobile/.env`, set `EXPO_PUBLIC_API_URL` to your HTTPS API origin and
+1. In `apps/mobile/.env`, set `EXPO_PUBLIC_API_URL=https://dominowire.com` for production and
    `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` to the OAuth 2.0 **Web application** client ID.
 2. Run `pnpm mobile:build:preview` from the repository root.
 3. Install `apps/mobile/dist/domino-wire-preview.apk` on the device.

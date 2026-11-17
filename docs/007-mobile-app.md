@@ -71,7 +71,7 @@ import { usernameClient } from 'better-auth/client/plugins'
 import * as SecureStore from 'expo-secure-store'
 
 export const authClient = createAuthClient({
-  baseURL: process.env.EXPO_PUBLIC_API_URL, // e.g. https://news.example.com (no /api/auth)
+  baseURL: process.env.EXPO_PUBLIC_API_URL, // https://dominowire.com in production (no /api/auth)
   plugins: [
     usernameClient(),
     expoClient({ scheme: 'dominonews', storagePrefix: 'dominonews', storage: SecureStore }),

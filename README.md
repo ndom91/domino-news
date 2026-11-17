@@ -2,6 +2,8 @@
 
 A news reader that brings reporting from different publishers together, with citations back to the articles behind each summary.
 
+Read it at [dominowire.com](https://dominowire.com).
+
 It reads RSS feeds from a curated set of publishers and groups articles into **Stories**. It writes short summaries that cite their sources, then links related Stories into **Narratives** so you can follow how events unfold.
 
 Compare how publishers cover a story, see their assessed political lean by country, and follow a timeline of what changed. Explore a personalised feed and audio briefing, or use Blindspot to find coverage you may have missed.
@@ -47,8 +49,8 @@ The host only needs Docker and git. `scripts/deploy.sh` wraps the Compose comman
 ```bash
 git clone <repo> && cd domino-news
 cp .env.example .env
-# Edit .env: BETTER_AUTH_SECRET, BETTER_AUTH_URL (public https origin), INGEST_MODE=live,
-# INFERENCE_* settings, and WEB_BIND if your reverse proxy runs on another machine.
+# Edit .env: BETTER_AUTH_SECRET, BETTER_AUTH_URL (https://dominowire.com in production),
+# INGEST_MODE=live, INFERENCE_* settings, and WEB_BIND if your reverse proxy runs on another machine.
 scripts/deploy.sh up            # build, migrate, start, seed publishers
 scripts/deploy.sh user you      # create your login (prompts for a password)
 ```
