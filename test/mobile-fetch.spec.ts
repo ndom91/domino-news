@@ -49,6 +49,53 @@ describe('mobile JSON request deadline', () => {
     await assert.rejects(api.getStory('test'), (error) => error === timeout)
   })
 
+  it('lets an audio briefing finish after the normal read deadline', async () => {
+    mock.timers.enable({ apis: ['setTimeout'] })
+    let signal: AbortSignal | undefined
+    const stub = mock.method(globalThis, 'fetch', async (_url, init) => {
+      signal = init?.signal as AbortSignal
+      return new Promise<Response>((resolve) => {
+        setTimeout(() => resolve(Response.json({ audio: 'prepared' })), 25_000)
+      })
+    })
+    try {
+      const request = fetchJson('https://dominowire.com/api/v1/briefing/audio-prototype')
+      mock.timers.tick(20_000)
+      assert.equal(signal?.aborted, false)
+      mock.timers.tick(5_000)
+      assert.deepEqual(await (await request).json(), { audio: 'prepared' })
+    } finally {
+      mock.timers.reset()
+      stub.mock.restore()
+    }
+  })
+
+  it('still bounds a stalled audio briefing after the script and speech budgets', async () => {
+    mock.timers.enable({ apis: ['setTimeout'] })
+    let signal: AbortSignal | undefined
+    const stub = mock.method(globalThis, 'fetch', async (_url, init) => {
+      signal = init?.signal as AbortSignal
+      return new Promise<Response>(() => {})
+    })
+    try {
+      const request = fetchJson('https://dominowire.com/api/v1/briefing/audio-prototype')
+      const failure = assert.rejects(request, (error: unknown) => {
+        assert.ok(error instanceof Error)
+        assert.equal((error as ApiError).status, 408)
+        assert.equal((error as ApiError).code, 'network')
+        return true
+      })
+      mock.timers.tick(300_000)
+      assert.equal(signal?.aborted, false)
+      mock.timers.tick(30_000)
+      await failure
+      assert.equal(signal?.aborted, true)
+    } finally {
+      mock.timers.reset()
+      stub.mock.restore()
+    }
+  })
+
   it('forwards query cancellation to the native request', async () => {
     const controller = new AbortController()
     let signal: AbortSignal | undefined

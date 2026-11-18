@@ -116,5 +116,22 @@ production build profiles currently use it), and release new iOS and Android bui
 are retired, remove `BETTER_AUTH_ADDITIONAL_ORIGINS` and restart the server. Then the old website can
 redirect to the new one. No database migration is required.
 
-The app scheme is `dominonews`, matching `EXPO_APP_SCHEME` on the server. Android uses the permanent
-application ID `dev.ndo.dominonews`. An iOS bundle identifier has not been chosen yet.
+## Release to the stores
+
+The app version lives in `app.config.ts`. Commit the version bump on `main`, then push a matching
+`mobile-v<version>` tag (for example, `mobile-v0.8.7`). The EAS GitHub integration runs
+`.eas/workflows/release.yml`, builds both platforms with the `production` profile, then uploads iOS
+to App Store Connect/TestFlight and Android to Google Play's `alpha` (closed testing) track.
+Build numbers auto-increment in EAS; do not change the app identifiers or signing credentials.
+
+Before tagging, check the EAS **preview** environment: `EXPO_PUBLIC_API_URL` must be
+`https://dominowire.com`, and both `EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID` and
+`EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` must be set. Both store-build profiles use that environment.
+
+The workflow does not sync `store.config.json` or publish a public store rollout. Update listing URLs
+separately in App Store Connect and Google Play Console (or use EAS Metadata for Apple's listing).
+Apple still requires processing and any beta/App Review steps; a public Play release requires
+promotion from closed testing.
+
+The app scheme is `dominonews`, matching `EXPO_APP_SCHEME` on the server. Android's application ID and
+iOS's bundle identifier are both `dev.ndo.dominonews`.
