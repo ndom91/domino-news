@@ -6,7 +6,14 @@ import { drizzleAdapter } from 'better-auth/adapters/drizzle'
 import { APIError, createAuthMiddleware } from 'better-auth/api'
 import { bearer, username } from 'better-auth/plugins'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
-import { eq } from 'drizzle-orm'
+import { and, eq } from 'drizzle-orm'
+import {
+  type AppleConfig,
+  appleFallbackName,
+  exchangeAppleCode,
+  readAppleConfig,
+  revokeAppleToken,
+} from './apple.ts'
 
 /**
  * Whole app sits behind login: username + password or passkeys (added after a password
@@ -14,7 +21,9 @@ import { eq } from 'drizzle-orm'
  * authenticate without cookies.
  * Public sign-up (POST /api/auth/sign-up/email) takes a username and password; email is optional.
  * `pnpm cli user:create` still creates accounts directly. Google sign-in is optional
- * (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET), and any Google account can sign up.
+ * (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET), and any Google account can sign up. Sign in with
+ * Apple is optional too (APPLE_TEAM_ID + APPLE_KEY_ID + APPLE_PRIVATE_KEY, iOS app only; see apple.ts).
+ * Neither links to an account whose email isn't verified, so password accounts are never taken over.
  * Roles: CLI-created accounts are admins by default; public and Google sign-ups are plain users.
  * Mobile: the Expo app signs in through the expo() plugin. Native requests have no Origin, so
  * the app sends its scheme in `expo-origin`, which must be listed in trustedOrigins.
@@ -46,6 +55,7 @@ export function createAuth(db: Db, env = process.env) {
     })
   const googleClientId = env.GOOGLE_CLIENT_ID
   const googleClientSecret = env.GOOGLE_CLIENT_SECRET
+  const apple = readAppleConfig(env)
   // Behind proxies X-Forwarded-For holds several hops, which better-auth won't trust, so rate
   // limits would fall back to one bucket shared by everyone. E.g. cf-connecting-ip behind Cloudflare.
   // The Expo app's URL scheme (app.json "scheme"). Expo Go uses exp:// URLs, which are only
@@ -81,11 +91,24 @@ export function createAuth(db: Db, env = process.env) {
       },
     }),
     emailAndPassword: { enabled: true, minPasswordLength: 10 },
-    hooks: { before: optionalSignUpEmail },
-    socialProviders:
-      googleClientId && googleClientSecret
+    hooks: { before: optionalSignUpEmail, after: storeAppleRefreshToken(db, apple) },
+    socialProviders: {
+      ...(googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
-        : {},
+        : {}),
+      // Native ID-token sign-in only: without a clientSecret better-auth refuses the web redirect
+      // flow. The token's audience must be the bundle ID.
+      ...(apple
+        ? {
+            apple: {
+              clientId: apple.clientId,
+              appBundleIdentifier: apple.clientId,
+              mapProfileToUser: (profile: { name?: string; email?: string }) =>
+                profile.name ? {} : { name: appleFallbackName(profile.email) },
+            },
+          }
+        : {}),
+    },
     user: {
       // input: false keeps clients from setting their own role at sign-up or via update-user.
       additionalFields: { role: { type: 'string', defaultValue: 'user', input: false } },
@@ -106,6 +129,7 @@ export function createAuth(db: Db, env = process.env) {
               message:
                 'This account has published publisher assessments, so it can’t be deleted here. Ask an operator to remove it.',
             })
+          await revokeAppleTokens(db, apple, user.id)
         },
       },
     },
@@ -151,6 +175,59 @@ const optionalSignUpEmail = createAuthMiddleware(async (ctx) => {
   body.email = email || placeholderEmail(body.username)
   if (typeof body.name !== 'string' || !body.name.trim()) body.name = body.username.trim()
 })
+
+/**
+ * After an Apple sign-in, exchange the app's authorization code for a refresh token and keep it
+ * on the Apple account, so deleting the account can revoke it. Failures only log: the reader is
+ * signed in either way, and deleting an Apple account signs in with Apple again first.
+ */
+function storeAppleRefreshToken(db: Db, apple: AppleConfig | null) {
+  return createAuthMiddleware(async (ctx) => {
+    const body = ctx.body as { provider?: unknown; authorizationCode?: unknown } | undefined
+    const userId = ctx.context.newSession?.user.id
+    if (ctx.path !== '/sign-in/social' || body?.provider !== 'apple' || !apple || !userId) return
+    if (typeof body.authorizationCode !== 'string') return
+    try {
+      const { refreshToken, sub } = await exchangeAppleCode(apple, body.authorizationCode)
+      // Matching on the Apple user ID keeps a code for another Apple ID off this account.
+      const updated = await db
+        .update(schema.authAccount)
+        .set({ refreshToken, updatedAt: new Date() })
+        .where(
+          and(
+            eq(schema.authAccount.userId, userId),
+            eq(schema.authAccount.providerId, 'apple'),
+            eq(schema.authAccount.accountId, sub),
+          ),
+        )
+        .returning({ id: schema.authAccount.id })
+      if (!updated.length) console.error('[apple] authorization code is for a different Apple ID')
+    } catch (error) {
+      console.error('[apple] storing the refresh token failed', error)
+    }
+  })
+}
+
+/**
+ * Guideline 5.1.1(v): revoke Apple's tokens when the account is deleted. A failed revocation is
+ * logged loudly but doesn't block deletion: the reader asked for their data to go, and they can
+ * still remove the app under Settings > Apple ID > Sign in with Apple.
+ */
+async function revokeAppleTokens(db: Db, apple: AppleConfig | null, userId: string) {
+  const accounts = await db
+    .select({ refreshToken: schema.authAccount.refreshToken })
+    .from(schema.authAccount)
+    .where(and(eq(schema.authAccount.userId, userId), eq(schema.authAccount.providerId, 'apple')))
+  for (const { refreshToken } of accounts) {
+    if (!apple || !refreshToken) {
+      console.error(`[apple] user ${userId}: no Apple token to revoke; deleting without revoking`)
+      continue
+    }
+    await revokeAppleToken(apple, refreshToken).catch((error) =>
+      console.error(`[apple] user ${userId}: revocation failed; deleting anyway`, error),
+    )
+  }
+}
 
 export type UserRole = 'admin' | 'user'
 

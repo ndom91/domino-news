@@ -93,7 +93,7 @@ The server is ready for an Expo client through better-auth's `expo()` plugin:
 - The app talks to `/api/v1` with `@dn/api-client` and the session cookie: `createApiClient({ baseUrl, fetch, credentials: 'omit', headers: async () => ({ cookie: await authClient.getCookie() }) })`. Bearer tokens (`set-auth-token`) also work.
 - Native fetch isn't subject to CORS, so `/api/v1` needs no CORS headers for the app (only Expo web would).
 - To reach the dev server from a phone, run `pnpm dev --host` (Vite binds to localhost otherwise) and point the app at `http://<LAN IP>:4000`.
-- Not supported on native yet: passkeys (WebAuthn needs a native passkey library plus `assetlinks.json` / `apple-app-site-association` on the site) and Google sign-in (needs Android and iOS OAuth client IDs).
+- Not supported on native yet: passkeys (WebAuthn needs a native passkey library plus `assetlinks.json` / `apple-app-site-association` on the site). Google sign-in needs Android and iOS OAuth client IDs; Sign in with Apple (iOS only) needs the server config above.
 
 ### Google sign-in (optional)
 
@@ -103,6 +103,23 @@ GOOGLE_CLIENT_SECRET=...
 ```
 
 Create an OAuth client (type "Web application") in Google Cloud and add `${BETTER_AUTH_URL}/api/auth/callback/google` as an authorised redirect URI. The login page shows the Google button only when both client values are set. Any Google account can sign up. It does not link to existing `user:create` accounts.
+
+### Sign in with Apple (optional, iOS app)
+
+```bash
+APPLE_TEAM_ID=...
+APPLE_KEY_ID=...
+APPLE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----"   # the .p8, one line
+APPLE_BUNDLE_ID=dev.ndo.dominonews                                               # default
+```
+
+App Review requires it on iOS because the app offers Google sign-in (Guideline 4.8). The provider is registered only when all three secrets are set, so every Apple account can be revoked later. The iOS app shows Apple's button whenever the device supports it, so set these before shipping a build. Create the key in the Apple Developer portal (Keys → Sign in with Apple, tied to the `dev.ndo.dominonews` App ID with the capability enabled).
+
+- The app signs in natively and sends better-auth the identity token (audience = bundle ID) and the raw nonce; Apple got its SHA-256. There is no web or Android Apple sign-in.
+- Apple shares the name only on the first authorization, and only with the app. The app passes it along. Without one, the name is the email's local part, or "Reader" for a Hide My Email relay address. Readers can rename themselves on the Account page. Apple accounts have no username.
+- better-auth stores no Apple refresh token on this path, so an after hook (`packages/server/src/auth.ts`) exchanges the app's authorization code for one at each sign-in, signing the request with the key (`packages/server/src/apple.ts`).
+- Deleting an account revokes its Apple token (Guideline 5.1.1(v)). In the iOS app, Apple accounts confirm with Apple first, which also refreshes the stored token. If revocation fails, the server logs `[apple] … revocation failed` and deletes the account anyway; the reader can also remove the app under Settings → Apple ID → Sign in with Apple.
+- Linking: like Google, Apple links to an existing account only when both sides verified the email, so it never takes over a username/password account. The app then asks the reader to sign in with their password. In practice only a Google-created account with the same address links.
 
 ### Publisher logos (optional)
 
@@ -356,7 +373,7 @@ Contracts are Zod schemas in `packages/schemas`. `packages/api-client` and `pack
 - **Publisher coverage:** publisher stats (stories, first to report) and per-publisher pages with source-use policy, co-coverage and a coverage profile: desk and region mix against all Stories (30 days), how often an official source sits alongside it, and widely covered Stories it missed this week.
 - Transactional outbox → idempotent indexer → Typesense; alias-swapped rebuild; hybrid search with automatic keyword fallback during an inference outage.
 - Web: feed, Briefing, Story, Narrative (timeline), Blindspot, publishers, search, pipeline, account and onboarding pages, and a 404 page. Desktop-first and checked at 375px; below 1024px the header nav becomes a section menu.
-- Auth: username/password, passkeys and optional Google sign-in (better-auth), bearer tokens for API clients; public sign-up with a username, password and optional email (web and mobile), plus self-serve account deletion on both. An `admin` role gates the Pipeline page and assessment review.
+- Auth: username/password, passkeys, optional Google sign-in and optional Sign in with Apple on iOS (better-auth), bearer tokens for API clients; public sign-up with a username, password and optional email (web and mobile), plus self-serve account deletion on both. An `admin` role gates the Pipeline page and assessment review.
 - Tests: Vitest (invariants, pipeline, API contracts) and Playwright smoke tests (desktop and mobile).
 
 ## Fixture-only or limited
