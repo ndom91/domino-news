@@ -52,7 +52,7 @@
       "firstName": "Nico",
       "lastName": "Domino",
       "email": "domino-wire@ndo.dev",
-      "notes": "Sign in with the demo username (not an email address) and password provided in App Store Connect. Content is public news coverage grouped from publishers' RSS feeds, so the app needs an internet connection. Story summaries are AI-written from the grouped articles and cite each source; links open the original article in Safari.\n\nAccount deletion: Account tab > Delete account (asks for the password).\nPush alerts: Account tab > Notifications."
+      "notes": "Sign in with the demo username (not an email address) and password provided in App Store Connect. Content is public news coverage grouped from publishers' RSS feeds, so the app needs an internet connection. Story summaries are AI-written from the grouped articles and cite each source; links open the original article in Safari.\n\nThe demo account uses username and password. Sign in with Apple is also offered on the sign-in screen.\n\nAccount deletion: Account tab > Delete account (asks for the password; accounts created with Sign in with Apple confirm with Apple instead, and their Apple token is revoked).\nPush alerts: Account tab > Notifications."
     }
   }
 }

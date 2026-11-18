@@ -2,7 +2,12 @@ import { nativeTokens as t } from '@dn/design-tokens/native'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
-import { StyleSheet, Text } from 'react-native'
+import { Platform, StyleSheet, Text } from 'react-native'
+import {
+  appleSignInError,
+  requestAppleCredential,
+  signInWithAppleCredential,
+} from '../../lib/apple-sign-in'
 import { authClient } from '../../lib/auth-client'
 import { forgetForYouAlerts } from '../../lib/for-you-alerts'
 import { TextField } from '../ui'
@@ -12,6 +17,8 @@ import { SettingsRow } from './settings'
 /**
  * Self-serve account deletion, as on the web Account page. better-auth wants the password, or
  * for accounts without one (Google) a session under a day old; otherwise the reader signs in again.
+ * Accounts with Sign in with Apple confirm with Apple first: that signs in afresh, and gives the
+ * server a token it revokes as it deletes the account (App Store Guideline 5.1.1(v)).
  */
 export function DeleteAccount() {
   const router = useRouter()
@@ -27,8 +34,23 @@ export function DeleteAccount() {
     },
   })
   const hasPassword = accounts.data?.some((a) => a.providerId === 'credential') ?? false
+  // Apple's sheet exists only on iOS. Elsewhere the token stored at sign-in is revoked instead.
+  const appleAccount =
+    Platform.OS === 'ios' ? accounts.data?.find((a) => a.providerId === 'apple') : undefined
   const remove = useMutation({
     mutationFn: async () => {
+      if (appleAccount) {
+        const credential = await requestAppleCredential().catch(() => {
+          throw new Error('Apple sign-in could not be completed. Your account was not deleted.')
+        })
+        if (!credential) throw new Error('Your account was not deleted.')
+        if (credential.user !== appleAccount.accountId)
+          throw new Error(
+            'That Apple ID isn’t the one this account uses. Your account was not deleted.',
+          )
+        const { error } = await signInWithAppleCredential(credential)
+        if (error) throw new Error(appleSignInError(error))
+      }
       const { error } = await authClient.deleteUser(hasPassword ? { password } : {})
       if (error) {
         if (error.code === 'SESSION_EXPIRED')
@@ -78,7 +100,7 @@ export function DeleteAccount() {
       <ConfirmationDialog
         cancelLabel="Keep account"
         confirmLabel={remove.isPending ? 'Deleting…' : 'Delete account'}
-        detail="Your preferences, follows, reading history and feedback are deleted straight away. This can’t be undone."
+        detail={`Your preferences, follows, reading history and feedback are deleted straight away. This can’t be undone.${appleAccount ? ' You’ll confirm with Apple first.' : ''}`}
         onCancel={cancel}
         onConfirm={() => remove.mutate()}
         pending={remove.isPending || (hasPassword && password.length === 0)}

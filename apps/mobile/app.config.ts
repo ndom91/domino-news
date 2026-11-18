@@ -36,6 +36,8 @@ const config: ExpoConfig = {
     // Permanent once released on the App Store; matches the Android package.
     bundleIdentifier: 'dev.ndo.dominonews',
     supportsTablet: false,
+    // Adds the Sign in with Apple entitlement; the App ID needs the capability too.
+    usesAppleSignIn: true,
     infoPlist: {
       // The app only uses standard HTTPS, which is exempt from export compliance.
       ITSAppUsesNonExemptEncryption: false,
@@ -57,6 +59,7 @@ const config: ExpoConfig = {
   plugins: [
     'expo-router',
     'expo-secure-store',
+    'expo-apple-authentication',
     [
       'expo-audio',
       { microphonePermission: false, recordAudioAndroid: false, enableBackgroundPlayback: true },

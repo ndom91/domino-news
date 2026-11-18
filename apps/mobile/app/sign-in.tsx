@@ -1,5 +1,10 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
 import { useQueryClient } from '@tanstack/react-query'
+import {
+  AppleAuthenticationButton,
+  AppleAuthenticationButtonStyle,
+  AppleAuthenticationButtonType,
+} from 'expo-apple-authentication'
 import { Redirect, useRouter } from 'expo-router'
 import { useState } from 'react'
 import {
@@ -13,6 +18,12 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextField } from '../components/ui'
+import {
+  appleSignInError,
+  requestAppleCredential,
+  signInWithAppleCredential,
+  useAppleSignInAvailable,
+} from '../lib/apple-sign-in'
 import { authClient } from '../lib/auth-client'
 import { hasApiUrl } from '../lib/config'
 import { requestGoogleIdToken, supportsGoogleSignIn } from '../lib/google-sign-in'
@@ -24,12 +35,13 @@ export default function SignInScreen() {
   const router = useRouter()
   const queryClient = useQueryClient()
   const session = authClient.useSession()
+  const supportsAppleSignIn = useAppleSignInAvailable()
   const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in')
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState<'password' | 'google' | null>(null)
+  const [pending, setPending] = useState<SignInKind | null>(null)
   const signingUp = mode === 'sign-up'
   const isPending = pending !== null
 
@@ -39,7 +51,7 @@ export default function SignInScreen() {
    * Every sign-in path: checks the API URL, shows the pressed button as pending, then opens the
    * app. `attempt` resolves to null once signed in, else to the error to show ('' shows none).
    */
-  async function authenticate(kind: 'password' | 'google', attempt: () => Promise<string | null>) {
+  async function authenticate(kind: SignInKind, attempt: () => Promise<string | null>) {
     if (!hasApiUrl) {
       setError('Set EXPO_PUBLIC_API_URL before signing in.')
       return
@@ -101,6 +113,20 @@ export default function SignInScreen() {
     })
   }
 
+  function signInWithApple() {
+    void authenticate('apple', async () => {
+      try {
+        const credential = await requestAppleCredential()
+        // No credential: the reader closed Apple's sheet.
+        if (!credential) return ''
+        const { error } = await signInWithAppleCredential(credential)
+        return error ? appleSignInError(error) : null
+      } catch {
+        return 'Apple sign-in could not be completed. Try again.'
+      }
+    })
+  }
+
   function switchMode() {
     setMode(signingUp ? 'sign-in' : 'sign-up')
     setError(null)
@@ -114,8 +140,9 @@ export default function SignInScreen() {
   if (signingUp) {
     intro = 'Pick a username and password. Email is optional.'
     submitLabel = passwordPending ? 'Creating account…' : 'Create account'
-  } else if (supportsGoogleSignIn) {
-    intro = 'Sign in with your username or continue with Google.'
+  } else if (supportsAppleSignIn || supportsGoogleSignIn) {
+    const providers = [supportsAppleSignIn && 'Apple', supportsGoogleSignIn && 'Google']
+    intro = `Sign in with your username, or continue with ${providers.filter(Boolean).join(' or ')}.`
   }
 
   return (
@@ -198,17 +225,38 @@ export default function SignInScreen() {
             >
               {submitLabel}
             </Button>
+            {supportsAppleSignIn || supportsGoogleSignIn ? (
+              <View style={styles.divider}>
+                <View style={styles.rule} />
+                <Text style={styles.or}>or</Text>
+                <View style={styles.rule} />
+              </View>
+            ) : null}
+            {supportsAppleSignIn ? (
+              // Apple's own button (required by its guidelines), first and full width so it's at
+              // least as prominent as Google's. It has no disabled state, so pending dims it.
+              <View
+                accessibilityState={{ busy: pending === 'apple', disabled: isPending }}
+                pointerEvents={isPending ? 'none' : 'auto'}
+                style={isPending ? styles.applePending : null}
+              >
+                <AppleAuthenticationButton
+                  buttonStyle={AppleAuthenticationButtonStyle.BLACK}
+                  buttonType={
+                    signingUp
+                      ? AppleAuthenticationButtonType.SIGN_UP
+                      : AppleAuthenticationButtonType.CONTINUE
+                  }
+                  cornerRadius={0}
+                  onPress={signInWithApple}
+                  style={styles.apple}
+                />
+              </View>
+            ) : null}
             {supportsGoogleSignIn ? (
-              <>
-                <View style={styles.divider}>
-                  <View style={styles.rule} />
-                  <Text style={styles.or}>or</Text>
-                  <View style={styles.rule} />
-                </View>
-                <Button disabled={isPending} onPress={signInWithGoogle} tone="light">
-                  {pending === 'google' ? 'Connecting to Google…' : 'Continue with Google'}
-                </Button>
-              </>
+              <Button disabled={isPending} onPress={signInWithGoogle} tone="light">
+                {pending === 'google' ? 'Connecting to Google…' : 'Continue with Google'}
+              </Button>
             ) : null}
             <Pressable
               accessibilityRole="button"
@@ -270,4 +318,8 @@ const styles = StyleSheet.create({
   divider: { alignItems: 'center', flexDirection: 'row', gap: t.space[3] },
   rule: { backgroundColor: t.color.border, flex: 1, height: StyleSheet.hairlineWidth },
   or: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
+  apple: { height: t.size.tap, width: '100%' },
+  applePending: { opacity: 0.45 },
 })
+
+type SignInKind = 'password' | 'google' | 'apple'

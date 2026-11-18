@@ -46,6 +46,11 @@ same Google Cloud project as the web client. Set its client ID as `EXPO_PUBLIC_G
 so rebuild the native app after setting or changing it. Without it, iOS hides the Google button. The ID
 token is still issued for the web client, so the server needs no iOS-specific setting.
 
+Sign in with Apple needs no app-side env var: iOS shows Apple's button whenever the device supports it
+(not in Expo Go, and not reliably in the Simulator). App Review requires it next to Google. The App ID
+needs the Sign in with Apple capability, and the server needs `APPLE_TEAM_ID`, `APPLE_KEY_ID` and
+`APPLE_PRIVATE_KEY` (see AGENTS.md), or sign-in fails with "Provider not found".
+
 ## For You alerts
 
 The Account screen registers this device's Expo push token for **For You** alerts. The server sends the
