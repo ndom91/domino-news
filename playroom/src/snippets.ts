@@ -1,5 +1,10 @@
 // Typed, deterministic snippets: variants, states and editorial compositions.
 export default [
+  ...['long', 'extra', 'short', 'updating', 'dark'].map((state) => ({
+    group: 'Story hero',
+    name: state,
+    code: `<StoryHeroStatePreview state="${state}" />`,
+  })),
   {
     group: 'Toast',
     name: 'Stacked notifications',

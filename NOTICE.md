@@ -14,7 +14,7 @@ The licence covers our code, not third-party material the code handles or ships 
 | Ownership evidence from Wikidata | [CC0](https://creativecommons.org/publicdomain/zero/1.0/). |
 | Reliability evidence from Wikipedia's perennial sources list | [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/). |
 | `fixtures/assessments.json` | Our own reviewed assessments, citing the sources above. |
-| Archivo typeface (`@fontsource-variable/archivo`) | SIL Open Font License 1.1. |
+| Archivo typeface (`@fontsource-variable/archivo`, bundled native condensed cuts) | SIL Open Font License 1.1. |
 | Phosphor icons (`@phosphor-icons/react`) | MIT. |
 
 Other dependencies are listed in each `package.json` under their own licences.

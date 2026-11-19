@@ -68,5 +68,28 @@ export const nativeTokens = {
     semibold: 'Archivo_600SemiBold',
     bold: 'Archivo_700Bold',
     black: 'Archivo_900Black',
+    condensed: 'ArchivoExtraCondensedExtraBold',
+    condensedBold: 'ArchivoCondensedBold',
+  },
+} as const
+
+/** The same dark semantic colours as design-tokens.css; desk fills retain their identity. */
+export const nativeDarkTokens = {
+  ...nativeTokens,
+  color: {
+    ...nativeTokens.color,
+    canvas: '#121212',
+    surface: '#1b1a18',
+    sunken: '#0b0b0a',
+    elevated: '#242320',
+    text: '#f3f1ec',
+    textSecondary: '#cfcbc2',
+    textMuted: '#a29e96',
+    border: '#33312d',
+    borderStrong: '#737067',
+    rule: '#f3f1ec',
+    accentText: '#ff7a52',
+    narrative: ['#2a2926', ...nativeTokens.color.narrative.slice(1)],
+    narrativeText: ['#f3f1ec', ...nativeTokens.color.narrativeText.slice(1)],
   },
 } as const

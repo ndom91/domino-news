@@ -1,7 +1,8 @@
 import { type Db, schema } from '@dn/db'
 import type { Desk, StoryDetail, StoryLead } from '@dn/schemas'
-import { and, desc, eq, inArray, isNotNull, isNull, or } from 'drizzle-orm'
+import { and, desc, eq, inArray, isNotNull, isNull, or, sql } from 'drizzle-orm'
 import { leanMixByStory } from './lean.ts'
+import { QUEUES } from './queues.ts'
 import { narrativesByStory, storyColumns } from './story-list.ts'
 
 const iso = (d: Date) => d.toISOString()
@@ -37,32 +38,35 @@ export async function getStory(db: Db, idOrSlug: string): Promise<StoryDetail | 
 
 async function storyDetail(db: Db, story: StoryRow): Promise<StoryDetail | null> {
   if (!story.publishedAt) return null
-  const [{ lead, detail, context }, versions, related, primary, leanMix] = await Promise.all([
-    storyLeadParts(db, story),
-    db
-      .select({
-        id: schema.storySummaryVersion.id,
-        createdAt: schema.storySummaryVersion.createdAt,
-        editedByUserId: schema.storySummaryVersion.editedByUserId,
-      })
-      .from(schema.storySummaryVersion)
-      .where(eq(schema.storySummaryVersion.storyId, story.id))
-      .orderBy(desc(schema.storySummaryVersion.createdAt))
-      .limit(10),
-    relatedStories(db, story.id),
-    db
-      .select({ ref: schema.sourceReference })
-      .from(schema.storySourceReference)
-      .innerJoin(
-        schema.sourceReference,
-        eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
-      )
-      .where(eq(schema.storySourceReference.storyId, story.id)),
-    leanMixByStory(db, [story.id]),
-  ])
+  const [{ lead, detail, context }, versions, related, primary, leanMix, summaryUpdate] =
+    await Promise.all([
+      storyLeadParts(db, story),
+      db
+        .select({
+          id: schema.storySummaryVersion.id,
+          createdAt: schema.storySummaryVersion.createdAt,
+          editedByUserId: schema.storySummaryVersion.editedByUserId,
+        })
+        .from(schema.storySummaryVersion)
+        .where(eq(schema.storySummaryVersion.storyId, story.id))
+        .orderBy(desc(schema.storySummaryVersion.createdAt))
+        .limit(10),
+      relatedStories(db, story.id),
+      db
+        .select({ ref: schema.sourceReference })
+        .from(schema.storySourceReference)
+        .innerJoin(
+          schema.sourceReference,
+          eq(schema.sourceReference.id, schema.storySourceReference.sourceReferenceId),
+        )
+        .where(eq(schema.storySourceReference.storyId, story.id)),
+      leanMixByStory(db, [story.id]),
+      pendingSummaryUpdate(db, story),
+    ])
 
   return {
     ...lead,
+    ...(summaryUpdate ? { summaryUpdate } : {}),
     summary: lead.summary && { ...lead.summary, detail },
     context,
     status: story.status,
@@ -86,6 +90,33 @@ async function storyDetail(db: Db, story: StoryRow): Promise<StoryDetail | null>
       discoveredAt: iso(ref.discoveredAt),
     })),
   }
+}
+
+/** Durable debounce intent or an active job, plus reports attached after this version. */
+async function pendingSummaryUpdate(db: Db, story: StoryRow) {
+  if (!story.currentSummaryId || !story.inputFingerprint) return undefined
+  const {
+    rows: [state],
+  } = await db.execute<{ newReports: number; debounce: boolean; queueInstalled: boolean }>(sql`
+    select
+      (select count(*)::int from story_article
+        where story_id = ${story.id} and removed_at is null
+          and added_at > (select created_at from story_summary_version where id = ${story.currentSummaryId})) as "newReports",
+      exists (select 1 from summary_debounce
+        where story_id = ${story.id} and input_fingerprint = ${story.inputFingerprint}) as debounce,
+      to_regclass('pgboss.job') is not null as "queueInstalled"`)
+  const newReports = state?.newReports ?? 0
+  if (!newReports) return undefined
+  if (state?.debounce) return { newReports }
+  if (!state?.queueInstalled) return undefined
+  const { rows } = await db.execute<{ pending: boolean }>(sql`
+    select exists (
+      select 1 from pgboss.job where name = ${QUEUES.summarizeStory}
+        and state in ('created', 'retry', 'active')
+        and data->>'targetId' = ${story.id}
+        and data->>'inputFingerprint' = ${story.inputFingerprint}
+    ) as pending`)
+  return rows[0]?.pending ? { newReports } : undefined
 }
 
 /** The front page's lead: only what the lead block shows (a fraction of getStory's reads). */

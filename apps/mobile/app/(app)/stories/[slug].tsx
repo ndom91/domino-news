@@ -1,17 +1,19 @@
 import { nativeTokens as t } from '@dn/design-tokens/native'
-import Feather from '@expo/vector-icons/Feather'
 import { useQuery } from '@tanstack/react-query'
 import { Stack, useIsFocused, useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect } from 'react'
-import { Alert, Pressable, ScrollView, Share, StyleSheet, Text, View } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { Alert, ScrollView, type ScrollViewInstance, Share, StyleSheet, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { StoryBackground } from '../../../components/story-detail/story-background'
 import { StoryConnections } from '../../../components/story-detail/story-connections'
 import { StoryHeader } from '../../../components/story-detail/story-header'
+import { StoryNavigation } from '../../../components/story-detail/story-navigation'
 import { StoryReporting } from '../../../components/story-detail/story-reporting'
+import { useStoryTheme } from '../../../components/story-detail/story-theme'
 import { StoryUpdates } from '../../../components/story-detail/story-updates'
+import { WhoReported } from '../../../components/story-detail/who-reported'
 import { StoryLeanMeter } from '../../../components/story-lean'
-import { Button, QueryScreen, Screen, uiStyles } from '../../../components/ui'
+import { Button, QueryScreen } from '../../../components/ui'
 import { api, queries } from '../../../lib/api'
 import { apiUrl } from '../../../lib/config'
 
@@ -24,6 +26,14 @@ export default function StoryScreen() {
   const updates = useQuery(queries.storyUpdates(slug))
   const preferences = useQuery(queries.preferences())
   const storyId = story.data?.id
+  const theme = useStoryTheme()
+  const scroll = useRef<ScrollViewInstance>(null)
+  const heroHeight = useRef(0)
+  const reportingY = useRef(0)
+  const sectionsY = useRef(0)
+  const [scrolled, setScrolled] = useState(false)
+  const [reportRequest, setReportRequest] = useState(0)
+  const [now] = useState(() => new Date().toISOString())
 
   useEffect(() => {
     if (storyId && preferences.data?.rememberReads) {
@@ -36,33 +46,12 @@ export default function StoryScreen() {
       <Stack.Screen
         options={{
           header: () => (
-            <SafeAreaView edges={['top', 'left', 'right']} style={styles.header}>
-              <View style={styles.headerRow}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Back"
-                  onPress={() => (router.canGoBack() ? router.back() : router.replace('/'))}
-                  style={styles.headerButton}
-                >
-                  <Feather name="chevron-left" size={26} color={t.color.bandText} />
-                </Pressable>
-                <Text accessibilityRole="header" style={styles.headerTitle}>
-                  Story
-                </Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Share story"
-                  onPress={() => void shareStory(story.data?.slug ?? slug)}
-                  style={styles.headerButton}
-                >
-                  <Feather
-                    name={process.env.EXPO_OS === 'ios' ? 'share' : 'share-2'}
-                    size={20}
-                    color={t.color.bandText}
-                  />
-                </Pressable>
-              </View>
-            </SafeAreaView>
+            <StoryNavigation
+              headline={story.data?.title ?? 'Story'}
+              scrolled={scrolled}
+              onBack={() => (router.canGoBack() ? router.back() : router.replace('/'))}
+              onShare={() => void shareStory(story.data?.slug ?? slug)}
+            />
           ),
         }}
       />
@@ -73,31 +62,70 @@ export default function StoryScreen() {
         title="Story unavailable"
       >
         {(data) => (
-          <Screen>
-            <ScrollView contentContainerStyle={uiStyles.content}>
-              <StoryHeader key={data.id} story={data} />
-              {updates.data ? <StoryUpdates items={updates.data.items} /> : null}
-              {updates.isError ? (
-                <Button tone="light" onPress={() => void updates.refetch()}>
-                  Retry story changes
-                </Button>
-              ) : null}
-              <StoryLeanMeter mix={data.leanMix} />
-              <StoryBackground entries={data.context} />
-              <StoryReporting
-                onPublisherPress={(publisherSlug) => router.push(`/publishers/${publisherSlug}`)}
+          <SafeAreaView
+            edges={['left', 'right', 'bottom']}
+            style={[styles.screen, { backgroundColor: theme.color.canvas }]}
+          >
+            <ScrollView
+              ref={scroll}
+              scrollEventThrottle={16}
+              onScroll={(event) =>
+                setScrolled(event.nativeEvent.contentOffset.y >= heroHeight.current)
+              }
+              contentContainerStyle={styles.content}
+            >
+              <StoryHeader
+                key={data.id}
+                story={data}
+                now={now}
+                onHeroLayout={(event) => {
+                  heroHeight.current = event.nativeEvent.layout.height
+                }}
+              />
+              <WhoReported
                 sources={data.sources}
-                leanMix={data.leanMix}
+                now={now}
+                onSeeReports={() => {
+                  setReportRequest((request) => request + 1)
+                  scroll.current?.scrollTo({ y: reportingY.current, animated: true })
+                }}
               />
-              <StoryConnections
-                narrative={data.narratives[0]}
-                onNarrativePress={(narrativeSlug) => router.push(`/narratives/${narrativeSlug}`)}
-                onStoryPress={(storySlug) => router.push(`/stories/${storySlug}`)}
-                primarySources={data.primarySources}
-                related={data.related}
-              />
+              <View
+                style={styles.sections}
+                onLayout={(event) => {
+                  sectionsY.current = event.nativeEvent.layout.y
+                }}
+              >
+                {updates.data ? <StoryUpdates items={updates.data.items} /> : null}
+                {updates.isError ? (
+                  <Button tone="light" onPress={() => void updates.refetch()}>
+                    Retry story changes
+                  </Button>
+                ) : null}
+                <StoryLeanMeter mix={data.leanMix} />
+                <StoryBackground entries={data.context} />
+                <View
+                  onLayout={(event) => {
+                    reportingY.current = sectionsY.current + event.nativeEvent.layout.y
+                  }}
+                />
+                <StoryReporting
+                  key={`${data.id}-${reportRequest}`}
+                  showAll={reportRequest > 0}
+                  onPublisherPress={(publisherSlug) => router.push(`/publishers/${publisherSlug}`)}
+                  sources={data.sources}
+                  leanMix={data.leanMix}
+                />
+                <StoryConnections
+                  narrative={data.narratives[0]}
+                  onNarrativePress={(narrativeSlug) => router.push(`/narratives/${narrativeSlug}`)}
+                  onStoryPress={(storySlug) => router.push(`/stories/${storySlug}`)}
+                  primarySources={data.primarySources}
+                  related={data.related}
+                />
+              </View>
             </ScrollView>
-          </Screen>
+          </SafeAreaView>
         )}
       </QueryScreen>
     </>
@@ -105,21 +133,9 @@ export default function StoryScreen() {
 }
 
 const styles = StyleSheet.create({
-  header: { backgroundColor: t.color.band },
-  headerRow: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    minHeight: 56,
-    paddingHorizontal: t.space[2],
-  },
-  headerButton: {
-    alignItems: 'center',
-    height: t.size.tap,
-    justifyContent: 'center',
-    width: t.size.tap,
-  },
-  headerTitle: { color: t.color.bandText, fontFamily: t.font.black, fontSize: t.type.body },
+  screen: { flex: 1 },
+  content: { paddingBottom: t.space[12] },
+  sections: { paddingHorizontal: t.space[4] },
 })
 
 async function shareStory(slug: string) {

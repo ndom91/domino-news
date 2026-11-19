@@ -12,11 +12,15 @@ export type BoardSource = TraceSource & { href: string }
 export function SourceBoard({
   sources,
   onKey = false,
+  idPrefix = 'source',
+  legend = true,
   active = null,
   onActiveChange,
 }: {
   sources: BoardSource[]
   onKey?: boolean
+  idPrefix?: string
+  legend?: boolean
   active?: string | null
   onActiveChange?: (id: string | null) => void
 }) {
@@ -28,7 +32,7 @@ export function SourceBoard({
         {ordered.map((s) => (
           <li
             key={s.id}
-            id={`source-${s.id}`}
+            id={`${idPrefix}-${s.id}`}
             data-active={active === s.id || undefined}
             onPointerEnter={() => onActiveChange?.(s.id)}
             onPointerLeave={() => onActiveChange?.(null)}
@@ -78,16 +82,18 @@ export function SourceBoard({
           </li>
         ))}
       </ol>
-      <div className="mt-3.5 flex flex-wrap gap-x-4.5 gap-y-1 text-sm font-semibold">
-        <span className="inline-flex items-center gap-2">
-          <i aria-hidden className="h-[11px] w-3.5 bg-current" />
-          Cited in summary
-        </span>
-        <span className="inline-flex items-center gap-2">
-          <i aria-hidden className="h-[11px] w-3.5 shadow-[inset_0_0_0_2px_currentColor]" />
-          Reported, not cited
-        </span>
-      </div>
+      {legend ? (
+        <div className="mt-3.5 flex flex-wrap gap-x-4.5 gap-y-1 text-sm font-semibold">
+          <span className="inline-flex items-center gap-2">
+            <i aria-hidden className="h-[11px] w-3.5 bg-current" />
+            Cited in summary
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <i aria-hidden className="h-[11px] w-3.5 shadow-[inset_0_0_0_2px_currentColor]" />
+            Reported, not cited
+          </span>
+        </div>
+      ) : null}
     </>
   )
 }

@@ -1,4 +1,3 @@
-import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, groupReporting, hostnameOf, plural, type ReportingGroup } from '@dn/domain'
 import { LEAN_LABELS, type StoryLean, type StorySource } from '@dn/schemas'
 import { useState } from 'react'
@@ -7,28 +6,33 @@ import { PublisherLogo } from '../publisher-logo'
 import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
 import { SectionHeading } from './section-heading'
+import { type StoryTokens, useStoryTheme } from './story-theme'
 
 const EXCERPT_MAX_LENGTH = 360
-const GROUP_COLORS: Record<ReportingGroup, string> = {
-  left: t.color.lean.left,
-  centre_left: t.color.lean.centreLeft,
-  centre: t.color.lean.centre,
-  centre_right: t.color.lean.centreRight,
-  right: t.color.lean.right,
-  unrated: t.color.lean.unrated,
-}
 
 // StoryReporting renders the publisher articles covering a story.
 export function StoryReporting({
   onPublisherPress,
   sources,
   leanMix,
+  showAll = false,
 }: {
   onPublisherPress: (slug: string) => void
   sources: StorySource[]
   leanMix: StoryLean[]
+  showAll?: boolean
 }) {
-  const [expanded, setExpanded] = useState(false)
+  const t = useStoryTheme()
+  const styles = createStyles(t)
+  const GROUP_COLORS: Record<ReportingGroup, string> = {
+    left: t.color.lean.left,
+    centre_left: t.color.lean.centreLeft,
+    centre: t.color.lean.centre,
+    centre_right: t.color.lean.centreRight,
+    right: t.color.lean.right,
+    unrated: t.color.lean.unrated,
+  }
+  const [expanded, setExpanded] = useState(showAll)
   const [view, setView] = useState<'lean' | 'time'>('lean')
   const publisherCount = new Set(sources.map((source) => source.publisher.id)).size
   const { ordered: orderedSources, ratings, groups: grouped } = groupReporting(sources, leanMix)
@@ -157,53 +161,59 @@ function firstParagraph(text: string) {
   return `${paragraph.slice(0, boundary > 0 ? boundary : EXCERPT_MAX_LENGTH)}…`
 }
 
-const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginTop: t.space[10] },
-  caption: {
-    color: t.color.textMuted,
-    fontFamily: t.font.regular,
-    fontSize: t.type.meta,
-    marginTop: -t.space[1],
-  },
-  intro: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 22,
-  },
-  source: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    paddingBottom: t.space[3],
-  },
-  groupHeading: {
-    borderTopColor: t.color.rule,
-    borderTopWidth: 2,
-    gap: t.space[1],
-    paddingTop: t.space[3],
-  },
-  groupTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.bodyLarge },
-  groupCount: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
-  publisher: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], minHeight: t.size.tap },
-  publisherText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
-  article: { gap: t.space[1], minHeight: t.size.tap, paddingBottom: t.space[1] },
-  title: {
-    color: t.color.text,
-    fontFamily: t.font.bold,
-    fontSize: t.type.bodyLarge,
-    lineHeight: 23,
-  },
-  description: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 22,
-  },
-  metadata: {
-    color: t.color.textMuted,
-    fontFamily: t.font.regular,
-    fontSize: t.type.meta,
-    lineHeight: 18,
-  },
-  pressed: { opacity: 0.7 },
-})
+const createStyles = (t: StoryTokens) =>
+  StyleSheet.create({
+    section: { gap: t.space[3], marginTop: t.space[10] },
+    caption: {
+      color: t.color.textMuted,
+      fontFamily: t.font.regular,
+      fontSize: t.type.meta,
+      marginTop: -t.space[1],
+    },
+    intro: {
+      color: t.color.textSecondary,
+      fontFamily: t.font.regular,
+      fontSize: t.type.body,
+      lineHeight: 22,
+    },
+    source: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      paddingBottom: t.space[3],
+    },
+    groupHeading: {
+      borderTopColor: t.color.rule,
+      borderTopWidth: 2,
+      gap: t.space[1],
+      paddingTop: t.space[3],
+    },
+    groupTitle: { color: t.color.text, fontFamily: t.font.black, fontSize: t.type.bodyLarge },
+    groupCount: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
+    publisher: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: t.space[2],
+      minHeight: t.size.tap,
+    },
+    publisherText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
+    article: { gap: t.space[1], minHeight: t.size.tap, paddingBottom: t.space[1] },
+    title: {
+      color: t.color.text,
+      fontFamily: t.font.bold,
+      fontSize: t.type.bodyLarge,
+      lineHeight: 23,
+    },
+    description: {
+      color: t.color.textSecondary,
+      fontFamily: t.font.regular,
+      fontSize: t.type.body,
+      lineHeight: 22,
+    },
+    metadata: {
+      color: t.color.textMuted,
+      fontFamily: t.font.regular,
+      fontSize: t.type.meta,
+      lineHeight: 18,
+    },
+    pressed: { opacity: 0.7 },
+  })

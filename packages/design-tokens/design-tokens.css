@@ -208,6 +208,11 @@
   --dn-band: #1d1c1a; /* lifted slightly so the band still reads as a band */
   --dn-band-line: #3a3834;
 
+  /* Resolve dependent trace tokens on this element too, for nested dark previews. */
+  --dn-trace-cited: var(--dn-text);
+  --dn-trace-observed: var(--dn-text);
+  --dn-trace-cell: var(--dn-border);
+
   --dn-text: #f3f1ec;
   --dn-text-secondary: #cfcbc2;
   --dn-text-muted: #a29e96;

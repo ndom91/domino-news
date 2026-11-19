@@ -56,6 +56,8 @@ export default function RootLayout() {
     Archivo_600SemiBold,
     Archivo_700Bold,
     Archivo_900Black,
+    ArchivoExtraCondensedExtraBold: require('../assets/fonts/Archivo-ExtraCondensed-ExtraBold.ttf'),
+    ArchivoCondensedBold: require('../assets/fonts/Archivo-Condensed-Bold.ttf'),
   })
 
   if (!fontsLoaded && !fontError) {

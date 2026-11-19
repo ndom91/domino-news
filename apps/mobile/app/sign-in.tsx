@@ -270,6 +270,11 @@ export default function SignInScreen() {
                 <Text style={styles.switchLink}>{signingUp ? 'Sign in' : 'Create an account'}</Text>
               </Text>
             </Pressable>
+            {__DEV__ ? (
+              <Button tone="light" onPress={() => router.push('/dev/story-hero')}>
+                Story design preview
+              </Button>
+            ) : null}
           </View>
         </ScrollView>
       </KeyboardAvoidingView>

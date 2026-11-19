@@ -1,4 +1,3 @@
-import { nativeTokens as t } from '@dn/design-tokens/native'
 import type { StoryContextItem } from '@dn/schemas'
 import { useEffect, useRef, useState } from 'react'
 import {
@@ -14,9 +13,12 @@ import {
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { openExternalLink } from './open-external-link'
 import { SectionHeading } from './section-heading'
+import { type StoryTokens, useStoryTheme } from './story-theme'
 
 // StoryBackground presents expandable background notes and their grounding links.
 export function StoryBackground({ entries }: { entries: StoryContextItem[] }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const [selected, setSelected] = useState<StoryContextItem | null>(null)
 
   if (entries.length === 0) {
@@ -55,6 +57,8 @@ export function ContextSheet({
   entry: StoryContextItem | null
   onClose: () => void
 }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const { height } = useWindowDimensions()
   const insets = useSafeAreaInsets()
   const translateY = useRef(new Animated.Value(height)).current
@@ -146,64 +150,69 @@ export function ContextSheet({
   )
 }
 
-const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginTop: t.space[10] },
-  entry: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: t.space[1],
-    minHeight: t.size.tap,
-    paddingBottom: t.space[3],
-    paddingTop: t.space[1],
-  },
-  entryTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
-  entryPreview: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 22,
-  },
-  pressed: { opacity: 0.7 },
-  sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
-  sheet: { backgroundColor: t.color.elevated, maxHeight: '85%' },
-  sheetContent: { gap: t.space[4], padding: t.space[5] },
-  sheetHeader: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: t.space[4],
-    justifyContent: 'space-between',
-  },
-  sheetTitle: {
-    color: t.color.text,
-    flex: 1,
-    fontFamily: t.font.black,
-    fontSize: t.type.headline,
-    lineHeight: 29,
-  },
-  close: {
-    alignItems: 'center',
-    borderColor: t.color.rule,
-    borderWidth: 1,
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[3],
-  },
-  closeText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
-  sheetBody: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.bodyLarge,
-    lineHeight: 26,
-  },
-  grounding: { gap: t.space[1] },
-  groundingLabel: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
-  groundingLink: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    paddingVertical: t.space[2],
-  },
-  groundingPublisher: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
-  groundingTitle: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.body },
-})
+const createStyles = (t: StoryTokens) =>
+  StyleSheet.create({
+    section: { gap: t.space[3], marginTop: t.space[10] },
+    entry: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      gap: t.space[1],
+      minHeight: t.size.tap,
+      paddingBottom: t.space[3],
+      paddingTop: t.space[1],
+    },
+    entryTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+    entryPreview: {
+      color: t.color.textSecondary,
+      fontFamily: t.font.regular,
+      fontSize: t.type.body,
+      lineHeight: 22,
+    },
+    pressed: { opacity: 0.7 },
+    sheetScrim: { backgroundColor: 'rgba(18, 18, 18, 0.48)', flex: 1, justifyContent: 'flex-end' },
+    sheet: { backgroundColor: t.color.elevated, maxHeight: '85%' },
+    sheetContent: { gap: t.space[4], padding: t.space[5] },
+    sheetHeader: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: t.space[4],
+      justifyContent: 'space-between',
+    },
+    sheetTitle: {
+      color: t.color.text,
+      flex: 1,
+      fontFamily: t.font.black,
+      fontSize: t.type.headline,
+      lineHeight: 29,
+    },
+    close: {
+      alignItems: 'center',
+      borderColor: t.color.rule,
+      borderWidth: 1,
+      justifyContent: 'center',
+      minHeight: t.size.tap,
+      paddingHorizontal: t.space[3],
+    },
+    closeText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
+    sheetBody: {
+      color: t.color.textSecondary,
+      fontFamily: t.font.regular,
+      fontSize: t.type.bodyLarge,
+      lineHeight: 26,
+    },
+    grounding: { gap: t.space[1] },
+    groundingLabel: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
+    groundingLink: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      justifyContent: 'center',
+      minHeight: t.size.tap,
+      paddingVertical: t.space[2],
+    },
+    groundingPublisher: {
+      color: t.color.accentText,
+      fontFamily: t.font.bold,
+      fontSize: t.type.meta,
+    },
+    groundingTitle: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.body },
+  })

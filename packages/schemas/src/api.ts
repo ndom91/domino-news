@@ -262,6 +262,8 @@ export const storyDetailSchema = z.object({
   // Null until the Story is summarised with a desk.
   desk: z.nullable(deskSchema),
   summary: z.nullable(summarySchema),
+  // Present only while the pipeline has newer reporting queued for this summary.
+  summaryUpdate: z.optional(z.object({ newReports: z.int().check(z.positive()) })),
   summaryHistory: z.array(
     z.object({
       versionId: z.string(),

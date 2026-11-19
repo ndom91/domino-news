@@ -56,7 +56,7 @@ export function SourceTrace({
   const box = useRef<HTMLDivElement>(null)
   // Server render (and the first client paint) use the compact width until measured.
   const measured = useWidth(box)
-  const width = fill ? (measured ?? 216) : widthProp
+  const width = fill ? (measured && measured > 0 ? measured : 216) : widthProp
   const current = active === undefined ? ownActive : active
   const setActive = onActiveChange ?? setOwnActive
   // No reports means no time window to draw (Math.max() of nothing is -Infinity).

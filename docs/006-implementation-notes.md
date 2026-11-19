@@ -183,3 +183,10 @@ Baseline errors: the ceasefire announcement was split into 9 stories, and one 55
 - **Description cap (shipped, Nov 2026):** a few feeds (Dawn) put whole articles in `<description>`; 4% of set-1's articles carried 42% of its text. Cutting descriptions to 600 characters in every prompt removed about 37% of article text, and F1 stayed within run-to-run noise (83.4%).
 - **Not shipped:** the higher candidate threshold (worse). Top-2 ranking wasn't tried; with choose there's almost no "ranked too low" error left.
 - **Remaining errors:** about 21 articles that should start a new story attach to one, and the Zaporizhzhia attack still mixes with Trump's remarks. The answer key is model-drafted; scores measure agreement with it.
+
+## Story summary sheet (November 2026)
+
+- The story page uses `StoryHero`, independently of the front-page `HeroStory`. On desktop the left summary spans the board and sidebar rows, so the sheet starts after the lead without waiting for the board. Below 1024px, the reporting board follows the complete summary and shows four reports.
+- `summaryParagraphs` in `@dn/domain` splits the stored body and detail at blank lines, preserving citation markers and context anchors. One paragraph means no sheet. Both clients use the same paragraph helper and the five states in `fixtures/story-hero.ts`.
+- `summaryUpdate.newReports` is returned only for active reports attached after the current summary version when a matching durable debounce or queued/running summary job exists. Old fingerprints and terminal jobs do not keep the notice visible. The story query polls every 15 seconds while this state or optional context is pending.
+- Native uses static Archivo width/weight instances with distinct PostScript names (see `apps/mobile/assets/fonts/README.md`); retaining the variable source’s names causes an iOS registration collision. The story screen follows the system theme, including its continuation sheet, context and reporting sections. The desk fill extends into iOS overscroll inside the scroll view, below the fixed dark navigation bar.

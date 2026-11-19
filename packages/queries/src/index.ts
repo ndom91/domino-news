@@ -95,9 +95,11 @@ export function createQueries(api: ApiClient) {
         queryKey: queryKeys.story(id),
         queryFn: ({ signal }) => api.getStory(id, signal),
         staleTime: 30_000,
-        // Context is written on first read; poll until it is ready or has failed.
+        // Poll while context or a newer summary is pending; stop on completion or failure.
         refetchInterval: (query) =>
-          query.state.data?.enrichment?.context === 'pending' ? 15_000 : false,
+          query.state.data?.enrichment?.context === 'pending' || query.state.data?.summaryUpdate
+            ? 15_000
+            : false,
       }),
     storyUpdates: (id: string) =>
       queryOptions({

@@ -8,23 +8,31 @@ module.exports = {
   themes: './src/themes.ts',
   outputPath: './dist',
   title: 'Domino Wire UI',
-  widths: [375, 768, 1440],
+  widths: [375, 390, 768, 1440],
   port: 9000,
   openBrowser: false,
   typeScriptFiles: ['../packages/ui/src/**/*.{ts,tsx}', '!**/node_modules'],
   webpackConfig: () => ({
+    output: { publicPath: '/' },
     resolve: { extensions: ['.ts', '.tsx', '.js', '.mjs'] },
     module: {
       rules: [
         {
           test: /\.tsx?$/,
-          include: [path.resolve(__dirname, 'src'), path.resolve(__dirname, '../packages')],
+          include: [
+            path.resolve(__dirname, 'src'),
+            path.resolve(__dirname, '../packages'),
+            path.resolve(__dirname, '../fixtures'),
+          ],
           use: {
             loader: require.resolve('babel-loader'),
             options: {
               presets: [
                 require.resolve('@babel/preset-typescript'),
-                [require.resolve('@babel/preset-react'), { runtime: 'automatic' }],
+                [
+                  require.resolve('@babel/preset-react'),
+                  { runtime: 'automatic', development: false },
+                ],
               ],
             },
           },

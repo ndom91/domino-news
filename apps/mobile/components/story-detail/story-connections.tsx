@@ -1,4 +1,3 @@
-import { nativeTokens as t } from '@dn/design-tokens/native'
 import { formatDate, hostnameOf, plural, relationLabel } from '@dn/domain'
 import type { NarrativeRef, StoryDetail } from '@dn/schemas'
 import { useState } from 'react'
@@ -6,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { Button } from '../ui'
 import { openExternalLink } from './open-external-link'
 import { SectionHeading } from './section-heading'
+import { type StoryTokens, useStoryTheme } from './story-theme'
 
 type PrimarySource = StoryDetail['primarySources'][number]
 type RelatedStory = StoryDetail['related'][number]
@@ -25,6 +25,8 @@ export function StoryConnections({
   primarySources: PrimarySource[]
   related: RelatedStory[]
 }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const [relatedExpanded, setRelatedExpanded] = useState(false)
   const shownRelated = relatedExpanded ? related : related.slice(0, RELATED_STORIES_LIMIT)
 
@@ -105,49 +107,50 @@ export function StoryConnections({
   )
 }
 
-const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginTop: t.space[10] },
-  narrative: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.border,
-    borderWidth: StyleSheet.hairlineWidth,
-    gap: t.space[1],
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    padding: t.space[4],
-  },
-  narrativeTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.bodyLarge },
-  narrativeMeta: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
-  related: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: t.space[1],
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    paddingVertical: t.space[2],
-  },
-  relation: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
-  relatedTitle: {
-    color: t.color.text,
-    fontFamily: t.font.bold,
-    fontSize: t.type.bodyLarge,
-    lineHeight: 23,
-  },
-  empty: {
-    color: t.color.textMuted,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 22,
-  },
-  primary: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: t.space[1],
-    justifyContent: 'center',
-    minHeight: t.size.tap,
-    paddingVertical: t.space[2],
-  },
-  primaryKind: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
-  primaryTitle: { color: t.color.accentText, fontFamily: t.font.medium, fontSize: t.type.body },
-  pressed: { opacity: 0.7 },
-})
+const createStyles = (t: StoryTokens) =>
+  StyleSheet.create({
+    section: { gap: t.space[3], marginTop: t.space[10] },
+    narrative: {
+      backgroundColor: t.color.surface,
+      borderColor: t.color.border,
+      borderWidth: StyleSheet.hairlineWidth,
+      gap: t.space[1],
+      justifyContent: 'center',
+      minHeight: t.size.tap,
+      padding: t.space[4],
+    },
+    narrativeTitle: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.bodyLarge },
+    narrativeMeta: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: t.type.meta },
+    related: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      gap: t.space[1],
+      justifyContent: 'center',
+      minHeight: t.size.tap,
+      paddingVertical: t.space[2],
+    },
+    relation: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
+    relatedTitle: {
+      color: t.color.text,
+      fontFamily: t.font.bold,
+      fontSize: t.type.bodyLarge,
+      lineHeight: 23,
+    },
+    empty: {
+      color: t.color.textMuted,
+      fontFamily: t.font.regular,
+      fontSize: t.type.body,
+      lineHeight: 22,
+    },
+    primary: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      gap: t.space[1],
+      justifyContent: 'center',
+      minHeight: t.size.tap,
+      paddingVertical: t.space[2],
+    },
+    primaryKind: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
+    primaryTitle: { color: t.color.accentText, fontFamily: t.font.medium, fontSize: t.type.body },
+    pressed: { opacity: 0.7 },
+  })

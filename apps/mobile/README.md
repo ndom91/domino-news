@@ -34,6 +34,19 @@ Expo Go supports username/password sign-in. Google sign-in needs a custom develo
 uses native Google Play services. A development build sets `APP_VARIANT=development` to allow a LAN
 `http://` API; production builds require HTTPS and intentionally do not enable cleartext transport.
 
+## Story design previews
+
+In a development build or Expo Go, tap **Story design preview** on the sign-in screen. The
+`/dev/story-hero` screen uses the same shared iOS/Android hero and reporting components with five
+fixed states: `long`, `extra`, `short`, `updating`, and `dark` (also selectable with `?state=…`).
+It needs no account. The route redirects home in release builds. Playroom has the matching
+**Story hero** snippets at 375, 390, 768, and 1440 pixels.
+
+Story screens follow the system colour scheme; desk fills stay the same in both themes.
+The Archivo static cuts in `assets/fonts/` are instantiated from Google Fonts’ Archivo variable
+source at width 66 / weight 800 (headlines) and width 75 / weight 700 (board times). They retain
+the SIL Open Font License in that directory. See `assets/fonts/README.md` for regeneration.
+
 ## iOS
 
 Run a simulator development build with `npx expo run:ios` from `apps/mobile` (needs Xcode and

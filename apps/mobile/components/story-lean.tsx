@@ -1,20 +1,14 @@
-import { nativeTokens as t } from '@dn/design-tokens/native'
 import { combinedStoryLean, plural } from '@dn/domain'
 import { LEAN_LABELS, type PublisherLean, type StoryLean } from '@dn/schemas'
 import { StyleSheet, Text, View } from 'react-native'
 import { SectionHeading } from './story-detail/section-heading'
+import { type StoryTokens, useStoryTheme } from './story-detail/story-theme'
 
 const leans: PublisherLean[] = ['left', 'centre_left', 'centre', 'centre_right', 'right']
 
-const colors: Record<PublisherLean, string> = {
-  left: t.color.lean.left,
-  centre_left: t.color.lean.centreLeft,
-  centre: t.color.lean.centre,
-  centre_right: t.color.lean.centreRight,
-  right: t.color.lean.right,
-}
-
 export function StoryLeanMeter({ mix }: { mix: StoryLean[] }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const main = combinedStoryLean(mix)
   if (!main) return null
 
@@ -31,6 +25,15 @@ export function StoryLeanMeter({ mix }: { mix: StoryLean[] }) {
 }
 
 function LeanSpread({ lean }: { lean: StoryLean }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
+  const colors: Record<PublisherLean, string> = {
+    left: t.color.lean.left,
+    centre_left: t.color.lean.centreLeft,
+    centre: t.color.lean.centre,
+    centre_right: t.color.lean.centreRight,
+    right: t.color.lean.right,
+  }
   const rated = ratedCount(lean)
   const estimated = lean.publishers.filter(
     (publisher) => publisher.lean && publisher.estimated,
@@ -105,6 +108,8 @@ function LeanRow({
   publishers: StoryLean['publishers']
   unrated?: boolean
 }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   return (
     <View style={[styles.row, publishers.length === 0 ? styles.rowEmpty : null]}>
       <View style={styles.rowLabel}>
@@ -136,61 +141,62 @@ function barLabel(
   return labels.join(', ')
 }
 
-const styles = StyleSheet.create({
-  section: { gap: t.space[3], marginTop: t.space[10] },
-  spread: { gap: t.space[2] },
-  spreadHeading: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: t.space[1],
-    justifyContent: 'space-between',
-  },
-  country: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
-  count: { color: t.color.textSecondary, fontFamily: t.font.medium, fontSize: t.type.meta },
-  bar: { flexDirection: 'row', gap: 2, height: 12 },
-  segment: { minWidth: 4 },
-  unrated: {
-    backgroundColor: t.color.surface,
-    borderColor: t.color.lean.unrated,
-    borderWidth: 1,
-  },
-  axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: -t.space[1] },
-  axisText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: 11 },
-  rows: { gap: t.space[1], marginTop: t.space[1] },
-  row: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], minHeight: 24 },
-  rowEmpty: { opacity: 0.55 },
-  rowLabel: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], width: 116 },
-  swatch: { height: 12, width: 12 },
-  rowText: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.meta },
-  rowCount: {
-    color: t.color.text,
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    textAlign: 'right',
-    width: 18,
-  },
-  publisherNames: {
-    color: t.color.textSecondary,
-    flex: 1,
-    fontFamily: t.font.regular,
-    fontSize: t.type.meta,
-    lineHeight: 18,
-  },
-  oneSided: {
-    borderLeftColor: t.color.rule,
-    borderLeftWidth: 2,
-    color: t.color.text,
-    fontFamily: t.font.bold,
-    fontSize: t.type.body,
-    lineHeight: 22,
-    marginTop: t.space[2],
-    paddingLeft: t.space[3],
-  },
-  note: {
-    color: t.color.textMuted,
-    fontFamily: t.font.regular,
-    fontSize: 12,
-    lineHeight: 18,
-    marginTop: t.space[1],
-  },
-})
+const createStyles = (t: StoryTokens) =>
+  StyleSheet.create({
+    section: { gap: t.space[3], marginTop: t.space[10] },
+    spread: { gap: t.space[2] },
+    spreadHeading: {
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      gap: t.space[1],
+      justifyContent: 'space-between',
+    },
+    country: { color: t.color.textMuted, fontFamily: t.font.bold, fontSize: t.type.meta },
+    count: { color: t.color.textSecondary, fontFamily: t.font.medium, fontSize: t.type.meta },
+    bar: { flexDirection: 'row', gap: 2, height: 12 },
+    segment: { minWidth: 4 },
+    unrated: {
+      backgroundColor: t.color.surface,
+      borderColor: t.color.lean.unrated,
+      borderWidth: 1,
+    },
+    axis: { flexDirection: 'row', justifyContent: 'space-between', marginTop: -t.space[1] },
+    axisText: { color: t.color.textMuted, fontFamily: t.font.medium, fontSize: 11 },
+    rows: { gap: t.space[1], marginTop: t.space[1] },
+    row: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], minHeight: 24 },
+    rowEmpty: { opacity: 0.55 },
+    rowLabel: { alignItems: 'center', flexDirection: 'row', gap: t.space[2], width: 116 },
+    swatch: { height: 12, width: 12 },
+    rowText: { color: t.color.text, fontFamily: t.font.medium, fontSize: t.type.meta },
+    rowCount: {
+      color: t.color.text,
+      fontFamily: t.font.bold,
+      fontSize: t.type.meta,
+      textAlign: 'right',
+      width: 18,
+    },
+    publisherNames: {
+      color: t.color.textSecondary,
+      flex: 1,
+      fontFamily: t.font.regular,
+      fontSize: t.type.meta,
+      lineHeight: 18,
+    },
+    oneSided: {
+      borderLeftColor: t.color.rule,
+      borderLeftWidth: 2,
+      color: t.color.text,
+      fontFamily: t.font.bold,
+      fontSize: t.type.body,
+      lineHeight: 22,
+      marginTop: t.space[2],
+      paddingLeft: t.space[3],
+    },
+    note: {
+      color: t.color.textMuted,
+      fontFamily: t.font.regular,
+      fontSize: 12,
+      lineHeight: 18,
+      marginTop: t.space[1],
+    },
+  })

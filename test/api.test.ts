@@ -22,7 +22,14 @@ import {
   storyUpdatesResponseSchema,
   userPreferencesSchema,
 } from '@dn/schemas'
-import { clearCache, createUserAccount, recordStoryUpdate, setFeedback } from '@dn/server'
+import {
+  analysisJob,
+  clearCache,
+  createUserAccount,
+  QUEUES,
+  recordStoryUpdate,
+  setFeedback,
+} from '@dn/server'
 import { handleApiRequest } from '@dn/server/api'
 import { eq } from 'drizzle-orm'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -179,6 +186,68 @@ describe('/api/v1 contracts', () => {
     expect(detail.summary?.detail?.split('\n\n').length).toBeGreaterThan(1)
     // Outside the contract, for app builds up to 0.8.3 (see the story route).
     expect(body).toMatchObject({ claims: [], enrichment: { claims: 'ready' } })
+  })
+
+  it('shows newer reports only while re-summarisation is durably pending', async () => {
+    const list = storyListResponseSchema.parse(await (await call('/api/v1/stories?limit=1')).json())
+    const story = list.items[0]
+    if (!story) throw new Error('empty list')
+    const read = async () =>
+      storyDetailSchema.parse(await (await call(`/api/v1/stories/${story.id}`)).json())
+    const [row] = await h.ctx.db.select().from(schema.story).where(eq(schema.story.id, story.id))
+    if (!row?.currentSummaryId || !row.inputFingerprint) throw new Error('missing summary')
+    const [version] = await h.ctx.db
+      .select()
+      .from(schema.storySummaryVersion)
+      .where(eq(schema.storySummaryVersion.id, row.currentSummaryId))
+    if (!version) throw new Error('missing version')
+    const [attachment] = await h.ctx.db
+      .select()
+      .from(schema.storyArticle)
+      .where(eq(schema.storyArticle.storyId, story.id))
+      .limit(1)
+    if (!attachment) throw new Error('missing report')
+    const boss = await h.ctx.boss()
+    let jobId: string | null = null
+    try {
+      await h.ctx.db
+        .update(schema.storyArticle)
+        .set({ addedAt: new Date(Date.now() + 1_000) })
+        .where(eq(schema.storyArticle.id, attachment.id))
+      expect((await read()).summaryUpdate).toBeUndefined()
+      await h.ctx.db.insert(schema.summaryDebounce).values({
+        storyId: story.id,
+        inputFingerprint: row.inputFingerprint,
+        priorityClass: 'fresh',
+        dueAt: new Date(Date.now() + 60_000),
+      })
+      expect((await read()).summaryUpdate).toEqual({ newReports: 1 })
+      await h.ctx.db
+        .delete(schema.summaryDebounce)
+        .where(eq(schema.summaryDebounce.storyId, story.id))
+      const job = analysisJob(story.id, row.inputFingerprint, 'fresh')
+      jobId = await boss.send(QUEUES.summarizeStory, job.data, { ...job.options, retryLimit: 0 })
+      expect(jobId).not.toBeNull()
+      expect((await read()).summaryUpdate).toEqual({ newReports: 1 })
+      if (jobId) await boss.fail(QUEUES.summarizeStory, jobId)
+      expect((await read()).summaryUpdate).toBeUndefined()
+      await h.ctx.db.insert(schema.summaryDebounce).values({
+        storyId: story.id,
+        inputFingerprint: 'stale-fingerprint',
+        priorityClass: 'fresh',
+        dueAt: new Date(),
+      })
+      expect((await read()).summaryUpdate).toBeUndefined()
+    } finally {
+      await h.ctx.db
+        .delete(schema.summaryDebounce)
+        .where(eq(schema.summaryDebounce.storyId, story.id))
+      await h.ctx.db
+        .update(schema.storyArticle)
+        .set({ addedAt: attachment.addedAt })
+        .where(eq(schema.storyArticle.id, attachment.id))
+      if (jobId) await boss.deleteJob(QUEUES.summarizeStory, jobId)
+    }
   })
 
   it('returns the source-linked update timeline for a story', async () => {

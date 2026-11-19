@@ -3,21 +3,29 @@ import { splitCitations } from '@dn/domain'
 import type { StoryContextItem, StorySource } from '@dn/schemas'
 import { StyleSheet, Text } from 'react-native'
 import { openExternalLink } from './open-external-link'
+import { useStoryTheme } from './story-theme'
 
 type SummaryPart = { text: string } | { text: string; item: StoryContextItem }
 
-/** Mobile equivalent of the web summary renderer: citation-free prose with tappable context terms. */
+/** Mobile equivalent of the web summary renderer: cited prose with tappable context terms. */
 export function SummaryText({
   context,
   onContextPress,
   text,
   sources,
+  ink,
 }: {
   context: StoryContextItem[]
   onContextPress: (item: StoryContextItem) => void
   text: string
   sources: StorySource[]
+  ink?: string
 }) {
+  const theme = useStoryTheme()
+  const linkStyle = [
+    styles.contextTerm,
+    { color: ink ?? theme.color.accentText, textDecorationColor: ink ?? theme.color.accentText },
+  ]
   return (
     <>
       {splitCitations(text).flatMap((part, index) => {
@@ -31,7 +39,7 @@ export function SummaryText({
                   accessibilityRole="link"
                   accessibilityLabel={`Read source ${part.citation}: ${source.publisher.name}`}
                   onPress={() => void openExternalLink(source.url)}
-                  style={styles.contextTerm}
+                  style={[linkStyle, styles.citation]}
                 >
                   [{part.citation}]
                 </Text>,
@@ -46,7 +54,7 @@ export function SummaryText({
               accessibilityRole="button"
               key={part.item.id}
               onPress={() => onContextPress(part.item)}
-              style={styles.contextTerm}
+              style={linkStyle}
             >
               {part.text}
             </Text>
@@ -78,6 +86,7 @@ function annotateText(text: string, items: StoryContextItem[]): SummaryPart[] {
 }
 
 const styles = StyleSheet.create({
+  citation: { fontSize: 11, fontFamily: t.font.bold },
   contextTerm: {
     // Nested Text cannot use Pressable's hitSlop. Its vertical padding gives short inline terms
     // a reliable 44 px touch target while preserving text wrapping.

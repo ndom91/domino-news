@@ -25,7 +25,7 @@ const config: ExpoConfig = {
   version: '0.8.8',
   // Unlocked: Android 16 ignores orientation locks on tablets and foldables, and Play flags them.
   orientation: 'default',
-  userInterfaceStyle: 'light',
+  userInterfaceStyle: 'automatic',
   backgroundColor: '#f3f1ec',
   primaryColor: '#121212',
   icon: '../web/public/icon-512.png',

@@ -4,14 +4,12 @@ import {
   Badge,
   Button,
   ContextExplanation,
-  HeroStory,
-  leadCitations,
   Reveal,
   relationLabel,
   SectionHeader,
   SectionLabel,
   Skeleton,
-  SummaryText,
+  StoryHero,
   Timestamp,
 } from '@dn/ui'
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
@@ -81,37 +79,6 @@ export const Route = createFileRoute('/stories/$slug')({
 function StoryRoute() {
   const { preview } = Route.useLoaderData()
   return preview ? <PreviewTeaser preview={preview} /> : <StoryPage />
-}
-
-/**
- * The summary's longer detail, below the lead. Citations lead where the lead's do; a context
- * term gets its popover only where it first appears, counting the lead's summary.
- */
-function SummaryDetail({ story, detail }: { story: StoryDetail; detail: string }) {
-  const sources = leadCitations(story.sources)
-  let shown = story.summary?.body ?? ''
-  const paragraphs = detail
-    .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean)
-  return (
-    // Two newspaper columns on wide screens: fills the main column at a readable line length.
-    <div
-      data-summary-detail
-      className="mt-10 max-w-reading text-md leading-normal lg:max-w-none lg:columns-2 lg:gap-x-column lg:[column-rule:1px_solid_var(--dn-border)] [&>p+p]:mt-4"
-    >
-      {paragraphs.map((text, i) => {
-        const context = story.context.filter((c) => !shown.includes(c.anchorText))
-        shown += `\n${text}`
-        return (
-          // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs are positional and never reorder
-          <p key={i}>
-            <SummaryText text={text} sources={sources} context={context} />
-          </p>
-        )
-      })}
-    </div>
-  )
 }
 
 const CONNECTED_STORIES_LIMIT = 5
@@ -187,161 +154,158 @@ function StoryPage() {
   return (
     // No Page wrapper: the lead block sets its own top spacing, as on the front page.
     <div className="mx-auto max-w-page px-gutter">
-      <HeroStory
+      <StoryHero
         story={story}
         now={now}
-        headingLevel="h1"
-        linkHeadline={false}
         kicker={`First reported ${formatDate(story.firstObservedAt)}${regions ? ` · ${regions}` : ''}`}
         Link={RouterLink}
         action={<ShareStory story={story} origin={session.origin} />}
-      />
+        editAction={
+          isAdmin && session.features.summaryEditing && story.summary ? (
+            <div className={editing ? 'w-full' : undefined}>
+              {editing ? (
+                <SummaryEditor
+                  storyId={story.id}
+                  summary={story.summary}
+                  onDone={() => {
+                    // The editor took focus when it opened; hand it back to the button that opened it.
+                    flushSync(() => setEditing(false))
+                    editButtonRef.current?.focus()
+                  }}
+                />
+              ) : (
+                <Button
+                  className="min-h-tap"
+                  ref={editButtonRef}
+                  size="sm"
+                  onClick={() => setEditing(true)}
+                >
+                  Edit summary
+                </Button>
+              )}
+            </div>
+          ) : null
+        }
+        sidebar={
+          <div className="flex flex-col gap-10">
+            <StoryLean mix={story.leanMix} />
 
-      {isAdmin && session.features.summaryEditing && story.summary ? (
-        <div className="mt-4">
-          {editing ? (
-            <SummaryEditor
-              storyId={story.id}
-              summary={story.summary}
-              onDone={() => {
-                // The editor took focus when it opened; hand it back to the button that opened it.
-                flushSync(() => setEditing(false))
-                editButtonRef.current?.focus()
-              }}
-            />
-          ) : (
-            <Button ref={editButtonRef} size="sm" onClick={() => setEditing(true)}>
-              Edit summary
-            </Button>
-          )}
-        </div>
-      ) : null}
-
-      <div className="grid gap-x-14 lg:grid-cols-[minmax(0,1fr)_20rem]">
-        <div className="min-w-0">
-          {story.summary?.detail ? (
-            <SummaryDetail story={story} detail={story.summary.detail} />
-          ) : null}
-
-          <StoryUpdates updates={updates} />
-
-          <OriginalReporting active={reporting} onActiveChange={changeReporting} story={story} />
-
-          {narrative.data ? (
-            <section aria-labelledby="development-heading">
-              <SectionHeader
-                id="development-heading"
-                rule
-                title="How this developed"
-                meta={
-                  <Link
-                    to="/narratives/$slug"
-                    params={{ slug: narrative.data.slug }}
-                    className="underline underline-offset-3 hover:text-accent-text"
-                  >
-                    {narrative.data.title}
-                  </Link>
-                }
-              />
-              <Reveal>
-                <NarrativeBookends narrative={narrative.data} currentStoryId={story.id} />
-              </Reveal>
-            </section>
-          ) : narrativeRef && narrative.isPending ? (
-            <Skeleton className="mt-12 h-40 w-full" />
-          ) : null}
-        </div>
-
-        <aside className="flex flex-col gap-10 pt-12">
-          <StoryLean mix={story.leanMix} />
-
-          {story.context.length > 0 ? (
-            <section aria-labelledby="background-heading">
-              <SectionLabel id="background-heading">Background</SectionLabel>
-              <dl className="flex flex-col gap-5 text-sm">
-                {story.context.map((item) => (
-                  <div key={item.id}>
-                    <dt className="font-bold leading-snug">{item.title}</dt>
-                    <dd className="mt-1 leading-normal text-text-secondary">
-                      <ContextExplanation item={item} />
-                    </dd>
-                  </div>
-                ))}
-              </dl>
-            </section>
-          ) : null}
-
-          <section aria-labelledby="related-heading">
-            <SectionLabel id="related-heading">Connected stories</SectionLabel>
-            {story.related.length === 0 ? (
-              <p className="text-sm text-text-muted">No connected stories found yet.</p>
-            ) : (
-              <>
-                <ConnectedStoryList stories={shownRelated} />
-                {hiddenRelated.length > 0 ? (
-                  <details className="t-acc mt-3 border-t border-border pt-3">
-                    <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
-                      Show{' '}
-                      {plural(
-                        hiddenRelated.length,
-                        'more connected story',
-                        'more connected stories',
-                      )}
-                    </summary>
-                    <div className="mt-3">
-                      <ConnectedStoryList stories={hiddenRelated} />
+            {story.context.length > 0 ? (
+              <section aria-labelledby="background-heading">
+                <SectionLabel id="background-heading">Background</SectionLabel>
+                <dl className="flex flex-col gap-5 text-sm">
+                  {story.context.map((item) => (
+                    <div key={item.id}>
+                      <dt className="font-bold leading-snug">{item.title}</dt>
+                      <dd className="mt-1 leading-normal text-text-secondary">
+                        <ContextExplanation item={item} />
+                      </dd>
                     </div>
-                  </details>
-                ) : null}
-              </>
-            )}
-          </section>
+                  ))}
+                </dl>
+              </section>
+            ) : null}
 
-          <section aria-labelledby="primary-heading">
-            <SectionLabel id="primary-heading">Primary sources</SectionLabel>
-            {story.primarySources.length === 0 ? (
-              <p className="text-sm text-text-muted">
-                No primary documents found. We only look for them in articles from publishers that
-                let us read the full text.
-              </p>
-            ) : (
-              <ul className="flex flex-col gap-3 text-sm">
-                {story.primarySources.map((p) => (
-                  <li key={p.id}>
-                    <a
-                      href={p.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-inline font-semibold"
-                    >
-                      {p.title ?? hostnameOf(p.url) ?? p.url} ↗
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </section>
-
-          {isAdmin ? (
-            <section aria-labelledby="history-heading">
-              <SectionLabel id="history-heading">Summary versions</SectionLabel>
-              <ol className="flex flex-col gap-2 text-sm">
-                {story.summaryHistory.map((v, i) => (
-                  <li key={v.versionId} className="flex items-center justify-between gap-3">
-                    <Timestamp at={v.createdAt} format="datetime" className="type-meta" />
-                    <span className="flex items-center gap-2">
-                      {i === 0 ? <Badge tone="ink">Current</Badge> : null}
-                      <span className="type-meta">
-                        {v.origin === 'edited' ? 'Edited' : 'Generated'}
-                      </span>
-                    </span>
-                  </li>
-                ))}
-              </ol>
+            <section aria-labelledby="related-heading">
+              <SectionLabel id="related-heading">Connected stories</SectionLabel>
+              {story.related.length === 0 ? (
+                <p className="text-sm text-text-muted">No connected stories found yet.</p>
+              ) : (
+                <>
+                  <ConnectedStoryList stories={shownRelated} />
+                  {hiddenRelated.length > 0 ? (
+                    <details className="t-acc mt-3 border-t border-border pt-3">
+                      <summary className="cursor-pointer font-semibold text-text-secondary underline underline-offset-3 hover:text-accent-text">
+                        Show{' '}
+                        {plural(
+                          hiddenRelated.length,
+                          'more connected story',
+                          'more connected stories',
+                        )}
+                      </summary>
+                      <div className="mt-3">
+                        <ConnectedStoryList stories={hiddenRelated} />
+                      </div>
+                    </details>
+                  ) : null}
+                </>
+              )}
             </section>
-          ) : null}
-        </aside>
-      </div>
+
+            <section aria-labelledby="primary-heading">
+              <SectionLabel id="primary-heading">Primary sources</SectionLabel>
+              {story.primarySources.length === 0 ? (
+                <p className="text-sm text-text-muted">
+                  No primary documents found. We only look for them in articles from publishers that
+                  let us read the full text.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3 text-sm">
+                  {story.primarySources.map((p) => (
+                    <li key={p.id}>
+                      <a
+                        href={p.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="link-inline font-semibold"
+                      >
+                        {p.title ?? hostnameOf(p.url) ?? p.url} ↗
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {isAdmin ? (
+              <section aria-labelledby="history-heading">
+                <SectionLabel id="history-heading">Summary versions</SectionLabel>
+                <ol className="flex flex-col gap-2 text-sm">
+                  {story.summaryHistory.map((v, i) => (
+                    <li key={v.versionId} className="flex items-center justify-between gap-3">
+                      <Timestamp at={v.createdAt} format="datetime" className="type-meta" />
+                      <span className="flex items-center gap-2">
+                        {i === 0 ? <Badge tone="ink">Current</Badge> : null}
+                        <span className="type-meta">
+                          {v.origin === 'edited' ? 'Edited' : 'Generated'}
+                        </span>
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ) : null}
+          </div>
+        }
+      >
+        <StoryUpdates updates={updates} />
+
+        <OriginalReporting active={reporting} onActiveChange={changeReporting} story={story} />
+
+        {narrative.data ? (
+          <section aria-labelledby="development-heading">
+            <SectionHeader
+              id="development-heading"
+              rule
+              title="How this developed"
+              meta={
+                <Link
+                  to="/narratives/$slug"
+                  params={{ slug: narrative.data.slug }}
+                  className="underline underline-offset-3 hover:text-accent-text"
+                >
+                  {narrative.data.title}
+                </Link>
+              }
+            />
+            <Reveal>
+              <NarrativeBookends narrative={narrative.data} currentStoryId={story.id} />
+            </Reveal>
+          </section>
+        ) : narrativeRef && narrative.isPending ? (
+          <Skeleton className="mt-12 h-40 w-full" />
+        ) : null}
+      </StoryHero>
     </div>
   )
 }

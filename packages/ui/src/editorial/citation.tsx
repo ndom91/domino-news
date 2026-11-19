@@ -33,7 +33,10 @@ function CitationMarker({
       <a
         href={source.href}
         aria-label={label}
-        className={cx(className, 'relative before:absolute before:-inset-x-1 before:-inset-y-2')}
+        className={cx(
+          className,
+          'relative before:absolute before:left-1/2 before:top-1/2 before:min-h-tap before:min-w-tap before:-translate-x-1/2 before:-translate-y-1/2',
+        )}
       >
         [{n}]
       </a>
@@ -82,7 +85,7 @@ export function SummaryText({
           <Fragment key={i}>
             {annotated.map((p) =>
               'item' in p ? (
-                <ContextTerm key={p.item.id} item={p.item}>
+                <ContextTerm key={p.item.id} item={p.item} inherit={inherit}>
                   {p.text}
                 </ContextTerm>
               ) : (

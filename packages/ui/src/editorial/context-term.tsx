@@ -1,5 +1,6 @@
 import type { StoryContextItem } from '@dn/schemas'
 import type { ReactNode } from 'react'
+import { cx } from '../cx.ts'
 import { Popover } from '../primitives/overlay.tsx'
 
 // "Background" is the default and goes unlabelled.
@@ -9,7 +10,15 @@ const KIND_LABEL: Record<Exclude<StoryContextItem['kind'], 'background'>, string
 }
 
 /** Inline term that opens a background explanation. Click, tap or keyboard; never hover-only. */
-export function ContextTerm({ item, children }: { item: StoryContextItem; children: ReactNode }) {
+export function ContextTerm({
+  item,
+  children,
+  inherit = false,
+}: {
+  item: StoryContextItem
+  children: ReactNode
+  inherit?: boolean
+}) {
   return (
     <Popover
       title={item.title}
@@ -18,7 +27,10 @@ export function ContextTerm({ item, children }: { item: StoryContextItem; childr
       trigger={
         <span
           data-context-term
-          className="cursor-pointer text-inherit underline decoration-current/50 decoration-dotted decoration-2 underline-offset-4 hover:decoration-accent hover:decoration-solid"
+          className={cx(
+            'relative cursor-pointer underline decoration-current decoration-dotted decoration-2 underline-offset-4 hover:decoration-solid before:absolute before:inset-x-0 before:top-1/2 before:min-h-tap before:-translate-y-1/2',
+            inherit ? 'text-inherit' : 'text-accent-text',
+          )}
         >
           {children}
         </span>

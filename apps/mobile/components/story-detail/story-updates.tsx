@@ -1,4 +1,3 @@
-import { nativeTokens as t } from '@dn/design-tokens/native'
 import { clockTime, formatDate, plural, stripCitations } from '@dn/domain'
 import { STORY_UPDATE_LABELS, type StoryUpdateEvent } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
@@ -7,6 +6,7 @@ import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
 import { PublisherLogo } from '../publisher-logo'
 import { openExternalLink } from './open-external-link'
+import { type StoryTokens, useStoryTheme } from './story-theme'
 
 const SHOWN = 5
 
@@ -17,6 +17,8 @@ export function StoryUpdates({
   items: StoryUpdateEvent[]
   title?: string
 }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const [expanded, setExpanded] = useState(false)
   const visible = expanded ? items : items.slice(0, SHOWN)
   if (!items.length) return null
@@ -60,6 +62,8 @@ export function StoryUpdates({
 }
 
 function UpdateRow({ item }: { item: StoryUpdateEvent }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   const router = useRouter()
   const [compare, setCompare] = useState(false)
   const compact =
@@ -128,6 +132,8 @@ function UpdateRow({ item }: { item: StoryUpdateEvent }) {
 }
 
 function SourceLinks({ sources }: { sources: StoryUpdateEvent['sources'] }) {
+  const t = useStoryTheme()
+  const styles = createStyles(t)
   return (
     <View style={styles.sources}>
       {sources.map((source) => (
@@ -154,101 +160,102 @@ function SourceLinks({ sources }: { sources: StoryUpdateEvent['sources'] }) {
   )
 }
 
-const styles = StyleSheet.create({
-  section: { marginTop: t.space[10] },
-  sectionHeader: {
-    alignItems: 'baseline',
-    borderBottomColor: t.color.accent,
-    borderBottomWidth: 4,
-    flexDirection: 'row',
-    gap: t.space[2],
-    justifyContent: 'space-between',
-    paddingBottom: t.space[2],
-  },
-  heading: {
-    color: t.color.text,
-    flexShrink: 1,
-    fontFamily: t.font.black,
-    fontSize: t.type.headline,
-    textTransform: 'uppercase',
-  },
-  count: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
-  date: {
-    color: t.color.textMuted,
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    marginLeft: 60,
-    paddingTop: t.space[2],
-    textTransform: 'uppercase',
-  },
-  row: { flexDirection: 'row' },
-  time: {
-    color: t.color.textMuted,
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    fontVariant: ['tabular-nums'],
-    paddingTop: t.space[3],
-    width: 54,
-  },
-  timeImportant: { color: t.color.text, fontSize: t.type.body },
-  line: { alignItems: 'center', borderLeftColor: t.color.rule, borderLeftWidth: 1, width: 16 },
-  marker: { height: 9, left: -5, position: 'absolute', top: 16, width: 9 },
-  revision: { backgroundColor: t.color.accent },
-  other: { backgroundColor: t.color.canvas, borderColor: t.color.text, borderWidth: 2 },
-  content: {
-    borderBottomColor: t.color.border,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    flex: 1,
-    gap: t.space[1],
-    paddingVertical: t.space[3],
-  },
-  compactContent: { paddingVertical: 0 },
-  kind: {
-    color: t.color.textMuted,
-    fontFamily: t.font.bold,
-    fontSize: t.type.meta,
-    textTransform: 'uppercase',
-  },
-  description: { color: t.color.text, fontFamily: t.font.bold, fontSize: 15, lineHeight: 21 },
-  sourceRow: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[1] },
-  sources: { flexDirection: 'row', flexShrink: 1, flexWrap: 'wrap' },
-  source: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    gap: t.space[1],
-    minHeight: t.size.tap,
-    paddingRight: t.space[2],
-  },
-  sourceName: {
-    color: t.color.textSecondary,
-    flexShrink: 1,
-    fontFamily: t.font.regular,
-    fontSize: t.type.meta,
-  },
-  compare: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: 'auto',
-    minHeight: t.size.tap,
-    paddingHorizontal: t.space[2],
-  },
-  compareText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
-  related: { justifyContent: 'center', minHeight: t.size.tap },
-  versions: { gap: t.space[2], paddingBottom: t.space[2] },
-  body: {
-    color: t.color.textSecondary,
-    fontFamily: t.font.regular,
-    fontSize: t.type.body,
-    lineHeight: 23,
-  },
-  pressed: { opacity: 0.7 },
-  allButton: {
-    alignItems: 'center',
-    borderColor: t.color.rule,
-    borderWidth: 1,
-    justifyContent: 'center',
-    marginTop: t.space[4],
-    minHeight: t.size.tap,
-  },
-  allButtonText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
-})
+const createStyles = (t: StoryTokens) =>
+  StyleSheet.create({
+    section: { marginTop: t.space[10] },
+    sectionHeader: {
+      alignItems: 'baseline',
+      borderBottomColor: t.color.accent,
+      borderBottomWidth: 4,
+      flexDirection: 'row',
+      gap: t.space[2],
+      justifyContent: 'space-between',
+      paddingBottom: t.space[2],
+    },
+    heading: {
+      color: t.color.text,
+      flexShrink: 1,
+      fontFamily: t.font.condensed,
+      fontSize: t.type.headline,
+      textTransform: 'uppercase',
+    },
+    count: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
+    date: {
+      color: t.color.textMuted,
+      fontFamily: t.font.bold,
+      fontSize: t.type.meta,
+      marginLeft: 60,
+      paddingTop: t.space[2],
+      textTransform: 'uppercase',
+    },
+    row: { flexDirection: 'row' },
+    time: {
+      color: t.color.textMuted,
+      fontFamily: t.font.bold,
+      fontSize: t.type.meta,
+      fontVariant: ['tabular-nums'],
+      paddingTop: t.space[3],
+      width: 54,
+    },
+    timeImportant: { color: t.color.text, fontSize: t.type.body },
+    line: { alignItems: 'center', borderLeftColor: t.color.rule, borderLeftWidth: 1, width: 16 },
+    marker: { height: 9, left: -5, position: 'absolute', top: 16, width: 9 },
+    revision: { backgroundColor: t.color.accent },
+    other: { backgroundColor: t.color.canvas, borderColor: t.color.text, borderWidth: 2 },
+    content: {
+      borderBottomColor: t.color.border,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      flex: 1,
+      gap: t.space[1],
+      paddingVertical: t.space[3],
+    },
+    compactContent: { paddingVertical: 0 },
+    kind: {
+      color: t.color.textMuted,
+      fontFamily: t.font.bold,
+      fontSize: t.type.meta,
+      textTransform: 'uppercase',
+    },
+    description: { color: t.color.text, fontFamily: t.font.bold, fontSize: 15, lineHeight: 21 },
+    sourceRow: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[1] },
+    sources: { flexDirection: 'row', flexShrink: 1, flexWrap: 'wrap' },
+    source: {
+      alignItems: 'center',
+      flexDirection: 'row',
+      gap: t.space[1],
+      minHeight: t.size.tap,
+      paddingRight: t.space[2],
+    },
+    sourceName: {
+      color: t.color.textSecondary,
+      flexShrink: 1,
+      fontFamily: t.font.regular,
+      fontSize: t.type.meta,
+    },
+    compare: {
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginLeft: 'auto',
+      minHeight: t.size.tap,
+      paddingHorizontal: t.space[2],
+    },
+    compareText: { color: t.color.accentText, fontFamily: t.font.bold, fontSize: t.type.meta },
+    related: { justifyContent: 'center', minHeight: t.size.tap },
+    versions: { gap: t.space[2], paddingBottom: t.space[2] },
+    body: {
+      color: t.color.textSecondary,
+      fontFamily: t.font.regular,
+      fontSize: t.type.body,
+      lineHeight: 23,
+    },
+    pressed: { opacity: 0.7 },
+    allButton: {
+      alignItems: 'center',
+      borderColor: t.color.rule,
+      borderWidth: 1,
+      justifyContent: 'center',
+      marginTop: t.space[4],
+      minHeight: t.size.tap,
+    },
+    allButtonText: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.body },
+  })
