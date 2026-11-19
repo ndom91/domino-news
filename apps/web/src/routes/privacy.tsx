@@ -40,7 +40,8 @@ function PrivacyPage() {
       lead={
         <p>
           Domino collects as little as it can: what it needs to run your account and the features
-          you choose. We also use Rybbit analytics. There are no ads.
+          you choose. The website also uses Rybbit analytics; the mobile apps have no analytics.
+          There are no ads.
         </p>
       }
     >
