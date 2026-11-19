@@ -42,7 +42,10 @@
       "violenceCartoonOrFantasy": "NONE",
       "violenceRealistic": "INFREQUENT_OR_MILD",
       "violenceRealisticProlongedGraphicOrSadistic": "NONE",
-      "seventeenPlus": false
+      "seventeenPlus": false,
+      "kidsAgeBand": null,
+      "ageRatingOverride": "NONE",
+      "koreaAgeRatingOverride": "NONE"
     },
     "release": {
       "automaticRelease": false,
