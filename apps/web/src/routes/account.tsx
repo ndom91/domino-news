@@ -418,7 +418,7 @@ function SignOutButton() {
 
 /**
  * Self-serve account deletion. better-auth wants the password, or for accounts without one
- * (Google, passkeys only) a session under a day old; otherwise the reader signs in again.
+ * (Google, Apple, passkeys only) a session under a day old; otherwise the reader signs in again.
  */
 function DangerZone() {
   const queryClient = useQueryClient()

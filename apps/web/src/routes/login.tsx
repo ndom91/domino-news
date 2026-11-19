@@ -27,6 +27,13 @@ export const Route = createFileRoute('/login')({
 // Fixed seed: the same illustration for everyone, every visit.
 const MARBLE_SEED = 'Ledger'
 
+/** Google and Apple sign-in failures come back as /login?error=<better-auth code>. */
+function oauthErrorMessage(code: string) {
+  if (code === 'account_not_linked')
+    return 'An account with this email already exists. Sign in with your username and password.'
+  return 'That account couldn’t sign in. Try again, or use your username and password.'
+}
+
 // Matches minPasswordLength in packages/server/src/auth.ts.
 const MIN_PASSWORD_LENGTH = 10
 
@@ -37,10 +44,12 @@ function LoginPage() {
   const signingUp = mode === 'sign-up'
   const { session } = Route.useRouteContext()
   const [error, setError] = useState<string | null>(
-    oauthError ? "This Google account isn't allowed to sign in." : null,
+    oauthError ? oauthErrorMessage(oauthError) : null,
   )
   // Which sign-in method is in flight, so only its button spins.
-  const [pending, setPending] = useState<null | 'password' | 'sign-up' | 'passkey' | 'google'>(null)
+  const [pending, setPending] = useState<
+    null | 'password' | 'sign-up' | 'passkey' | 'google' | 'apple'
+  >(null)
   // Wrong credentials shake the fields. Remove, reflow, re-add so repeat failures replay it.
   const fieldsRef = useRef<HTMLDivElement>(null)
   function shakeFields() {
@@ -82,18 +91,18 @@ function LoginPage() {
     await finishSignIn()
   }
 
-  async function signInWithGoogle() {
-    setPending('google')
+  async function signInWith(provider: 'google' | 'apple') {
+    setPending(provider)
     setError(null)
-    // Success leaves the page for Google; failures come back to /login?error=...
+    // Success leaves the page for the provider; failures come back to /login?error=...
     const { error } = await authClient.signIn.social({
-      provider: 'google',
+      provider,
       callbackURL: target,
       errorCallbackURL: '/login',
     })
     if (error) {
       setPending(null)
-      setError(error.message ?? 'Google sign-in failed.')
+      setError(error.message ?? 'Sign-in failed. Try again.')
     }
   }
 
@@ -270,10 +279,20 @@ function LoginPage() {
               Sign in with a passkey
             </Button>
           )}
-          {session.features.googleSignIn ? (
+          {session.features.appleSignIn ? (
             <Button
               className={signingUp ? 'mt-4 w-full' : 'mt-3 w-full'}
-              onClick={signInWithGoogle}
+              onClick={() => signInWith('apple')}
+              loading={pending === 'apple'}
+              disabled={pending !== null}
+            >
+              Continue with Apple
+            </Button>
+          ) : null}
+          {session.features.googleSignIn ? (
+            <Button
+              className={signingUp && !session.features.appleSignIn ? 'mt-4 w-full' : 'mt-3 w-full'}
+              onClick={() => signInWith('google')}
               loading={pending === 'google'}
               disabled={pending !== null}
             >

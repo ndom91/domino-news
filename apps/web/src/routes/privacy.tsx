@@ -58,9 +58,9 @@ function PrivacyPage() {
             <strong>Your account:</strong> username, name, email address (optional), a hashed
             password (we never store the password itself) and any passkeys you add. With Google
             sign-in, also the name, email address and profile picture Google shares. With Sign in
-            with Apple (iOS app), also the name and email address Apple shares, which may be a
-            private relay address, and a token from Apple that we revoke when you delete your
-            account. Needed to provide the service (Art. 6(1)(b) GDPR).
+            with Apple, also the name and email address Apple shares, which may be a private relay
+            address, and a token from Apple that we revoke when you delete your account. Needed to
+            provide the service (Art. 6(1)(b) GDPR).
           </li>
           <li>
             <strong>Sessions:</strong> when you sign in, we store a session with your IP address and
@@ -124,9 +124,9 @@ function PrivacyPage() {
             policy applies to that sign-in.
           </li>
           <li>
-            <strong>Apple</strong>, only if you choose Sign in with Apple in the iOS app. Apple’s
-            own privacy policy applies to that sign-in. When you delete your account, we ask Apple
-            to revoke our access.
+            <strong>Apple</strong>, only if you choose Sign in with Apple. Apple’s own privacy
+            policy applies to that sign-in. When you delete your account, we ask Apple to revoke our
+            access.
           </li>
           <li>
             <strong>Expo</strong> delivers push alerts. It receives your device’s push token and the

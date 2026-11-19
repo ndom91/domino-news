@@ -1,4 +1,5 @@
 import { INFERENCE_SETTINGS_LIMITS } from '@dn/schemas'
+import { readAppleConfig } from './apple.ts'
 
 // Central env parsing for server-side processes (web, worker, indexer).
 export function readConfig(env = process.env) {
@@ -45,6 +46,8 @@ export function readConfig(env = process.env) {
     maxArticleAgeDays: num('MAX_ARTICLE_AGE_DAYS', 3),
     enableSummaryEditing: env.ENABLE_SUMMARY_EDITING === 'true',
     googleSignIn: Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET),
+    // The web redirect flow needs the Services ID; the iOS app works without it.
+    appleSignIn: Boolean(readAppleConfig(env)?.webClientId),
     eventRetentionDays: num('EVENT_RETENTION_DAYS', 7),
     expoPushDeliveryCron: env.EXPO_PUSH_DELIVERY_CRON ?? '*/5 * * * *',
     expoAccessToken: env.EXPO_ACCESS_TOKEN || undefined,

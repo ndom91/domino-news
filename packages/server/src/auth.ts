@@ -9,6 +9,7 @@ import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { and, eq } from 'drizzle-orm'
 import {
   type AppleConfig,
+  appleClientSecret,
   appleFallbackName,
   exchangeAppleCode,
   readAppleConfig,
@@ -22,7 +23,8 @@ import {
  * Public sign-up (POST /api/auth/sign-up/email) takes a username and password; email is optional.
  * `pnpm cli user:create` still creates accounts directly. Google sign-in is optional
  * (GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET), and any Google account can sign up. Sign in with
- * Apple is optional too (APPLE_TEAM_ID + APPLE_KEY_ID + APPLE_PRIVATE_KEY, iOS app only; see apple.ts).
+ * Apple is optional too (APPLE_TEAM_ID + APPLE_KEY_ID + APPLE_PRIVATE_KEY for the iOS app, plus
+ * APPLE_SERVICES_ID for the web; see apple.ts).
  * Neither links to an account whose email isn't verified, so password accounts are never taken over.
  * Roles: CLI-created accounts are admins by default; public and Google sign-ups are plain users.
  * Mobile: the Expo app signs in through the expo() plugin. Native requests have no Origin, so
@@ -64,6 +66,8 @@ export function createAuth(db: Db, env = process.env) {
   const trustedOrigins = [
     `${appScheme}://`,
     ...(env.NODE_ENV === 'development' ? ['exp://', 'exp://**', 'exp://192.168.*.*:*/**'] : []),
+    // Apple's web flow POSTs the result back to /callback/apple from this origin.
+    ...(apple?.webClientId ? ['https://appleid.apple.com'] : []),
   ]
   const ipAddressHeaders = env.AUTH_IP_HEADERS?.split(',')
     .map((header) => header.trim().toLowerCase())
@@ -96,13 +100,20 @@ export function createAuth(db: Db, env = process.env) {
       ...(googleClientId && googleClientSecret
         ? { google: { clientId: googleClientId, clientSecret: googleClientSecret } }
         : {}),
-      // Native ID-token sign-in only: without a clientSecret better-auth refuses the web redirect
-      // flow. The token's audience must be the bundle ID.
+      // The app signs in with an identity token whose audience is the bundle ID
+      // (appBundleIdentifier). The web redirect flow, only with a Services ID, uses that as
+      // clientId plus a client secret. better-auth keeps this object, so the getter signs a fresh
+      // short-lived secret per token request instead of one that expires within six months.
       ...(apple
         ? {
             apple: {
-              clientId: apple.clientId,
+              clientId: apple.webClientId ?? apple.clientId,
               appBundleIdentifier: apple.clientId,
+              // Not spread from another object: a spread would copy one value, not the getter.
+              get clientSecret() {
+                const { webClientId } = apple
+                return webClientId ? appleClientSecret(apple, webClientId) : undefined
+              },
               mapProfileToUser: (profile: { name?: string; email?: string }) =>
                 profile.name ? {} : { name: appleFallbackName(profile.email) },
             },

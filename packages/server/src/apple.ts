@@ -9,6 +9,8 @@ import { createPrivateKey, sign } from 'node:crypto'
 export type AppleConfig = {
   /** The iOS bundle ID: the identity token audience and the client_id for token calls. */
   clientId: string
+  /** The Services ID for the web redirect flow (APPLE_SERVICES_ID). Unset: iOS app only. */
+  webClientId?: string
   teamId: string
   keyId: string
   /** The Sign in with Apple key (.p8, PKCS#8 PEM). */
@@ -26,6 +28,7 @@ export function readAppleConfig(env: NodeJS.ProcessEnv): AppleConfig | null {
   if (!teamId || !keyId || !privateKey) return null
   return {
     clientId: env.APPLE_BUNDLE_ID?.trim() || 'dev.ndo.dominonews',
+    webClientId: env.APPLE_SERVICES_ID?.trim() || undefined,
     teamId,
     keyId,
     privateKey,
@@ -34,15 +37,22 @@ export function readAppleConfig(env: NodeJS.ProcessEnv): AppleConfig | null {
 
 const base64url = (value: object) => Buffer.from(JSON.stringify(value)).toString('base64url')
 
-/** The ES256 client secret JWT Apple wants on /auth/token and /auth/revoke. */
-export function appleClientSecret(config: AppleConfig, now = Date.now()) {
+/**
+ * The ES256 client secret JWT Apple wants on /auth/token and /auth/revoke, for one client (the
+ * bundle ID or the Services ID). Short-lived and signed on each use, so it never goes stale.
+ */
+export function appleClientSecret(
+  config: AppleConfig,
+  clientId = config.clientId,
+  now = Date.now(),
+) {
   const iat = Math.floor(now / 1000)
   const input = `${base64url({ alg: 'ES256', kid: config.keyId })}.${base64url({
     iss: config.teamId,
     iat,
     exp: iat + 300,
     aud: APPLE,
-    sub: config.clientId,
+    sub: clientId,
   })}`
   // JWS wants the raw r||s signature, not Node's default DER encoding.
   const signature = sign('sha256', Buffer.from(input), {
@@ -52,13 +62,18 @@ export function appleClientSecret(config: AppleConfig, now = Date.now()) {
   return `${input}.${signature.toString('base64url')}`
 }
 
-async function post(config: AppleConfig, path: string, params: Record<string, string>) {
+async function post(
+  config: AppleConfig,
+  path: string,
+  params: Record<string, string>,
+  clientId = config.clientId,
+) {
   return fetch(`${APPLE}${path}`, {
     method: 'POST',
     headers: { 'content-type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
-      client_id: config.clientId,
-      client_secret: appleClientSecret(config),
+      client_id: clientId,
+      client_secret: appleClientSecret(config, clientId),
       ...params,
     }),
     signal: AbortSignal.timeout(10_000),
@@ -82,17 +97,32 @@ export async function exchangeAppleCode(config: AppleConfig, code: string) {
   return { refreshToken: body.refresh_token, sub }
 }
 
+/**
+ * Apple ties a refresh token to the client that got it: the app's (bundle ID) or the web's
+ * (Services ID). Sign-ins on either overwrite the same account row, so revoke with every client:
+ * Apple may answer 200 for a token it doesn't know, so one success proves nothing. Throws only
+ * if no client accepted the request.
+ */
 export async function revokeAppleToken(config: AppleConfig, refreshToken: string) {
-  const res = await post(config, '/auth/revoke', {
-    token: refreshToken,
-    token_type_hint: 'refresh_token',
-  })
-  if (!res.ok) throw new Error(`Apple token revocation failed: ${res.status} ${await res.text()}`)
+  const clientIds = [config.clientId, config.webClientId].filter((id): id is string => !!id)
+  const errors: string[] = []
+  for (const clientId of clientIds) {
+    const res = await post(
+      config,
+      '/auth/revoke',
+      { token: refreshToken, token_type_hint: 'refresh_token' },
+      clientId,
+    )
+    if (!res.ok) errors.push(`${clientId}: ${res.status} ${await res.text()}`)
+  }
+  if (errors.length === clientIds.length)
+    throw new Error(`Apple token revocation failed: ${errors.join('; ')}`)
 }
 
 /**
- * Apple sends the reader's name only on the first authorization, and only to the app. Without
- * one, use the email's local part, unless it's a Hide My Email relay address (random letters).
+ * Apple sends the reader's name only on the first authorization, and only to the client (the app,
+ * or the web callback's form POST), never in the identity token. Without one, use the email's
+ * local part, unless it's a Hide My Email relay address (random letters).
  */
 export function appleFallbackName(email: string | undefined) {
   const local = email?.split('@')[0]?.trim()

@@ -17,7 +17,7 @@ interface SessionInfo {
   } | null
   // Saved preference, else the request's country (Cloudflare); null when neither is known.
   country: string | null
-  features: { summaryEditing: boolean; googleSignIn: boolean }
+  features: { summaryEditing: boolean; googleSignIn: boolean; appleSignIn: boolean }
   /** Public origin ("https://dominowire.com"), for absolute URLs in share tags. */
   origin: string
 }
@@ -49,6 +49,7 @@ export const getSessionInfo = createServerFn({ method: 'GET' }).handler(
       features: {
         summaryEditing: ctx.config.enableSummaryEditing,
         googleSignIn: ctx.config.googleSignIn,
+        appleSignIn: ctx.config.appleSignIn,
       },
       // BETTER_AUTH_URL is the public origin in every deployment; the request is a fallback.
       origin:
