@@ -88,7 +88,6 @@ export function StoryHeader({
               ink={ink}
               onContextPress={setSelectedContext}
             />
-            {hasSheet ? ' …' : ''}
           </Text>
         ) : (
           <Text style={[styles.body, { color: ink }]}>This story is still being summarised.</Text>
@@ -110,9 +109,6 @@ export function StoryHeader({
             { backgroundColor: theme.color.canvas, borderTopColor: theme.color.rule },
           ]}
         >
-          <Text accessibilityRole="header" style={[styles.label, { color: theme.color.text }]}>
-            Summary
-          </Text>
           {notice}
           {rest.map((paragraph, index) => (
             // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs belong to a fixed summary version
@@ -183,7 +179,6 @@ const styles = StyleSheet.create({
     paddingTop: t.space[5],
     gap: t.space[4],
   },
-  label: { fontFamily: t.font.bold, fontSize: t.type.meta, textTransform: 'uppercase' },
   sheetProvenance: {
     borderTopWidth: StyleSheet.hairlineWidth,
     paddingTop: t.space[3],

@@ -95,7 +95,6 @@ export function StoryHero({
           {lead ? (
             <p data-summary-lead className="max-w-reading text-lg leading-normal max-md:text-md">
               <SummaryText {...lead} sources={citations} inherit />
-              {hasSheet ? ' …' : ''}
             </p>
           ) : (
             <p>This story is still being summarised.</p>
@@ -112,7 +111,6 @@ export function StoryHero({
             data-summary-detail
             className="relative mt-8 border-t-6 border-rule bg-canvas px-10 pt-7 pb-6 text-text max-lg:mx-2 max-lg:-mt-13 max-md:px-4 max-md:pt-4.5 max-md:pb-4.5"
           >
-            <h2 className="mb-4 type-label">Summary</h2>
             <SummaryUpdating newReports={story.summaryUpdate?.newReports} />
             <div className="max-w-reading text-[calc((var(--dn-text-md)+var(--dn-text-lg))/2)] leading-normal max-md:text-md">
               {rest.map((paragraph, index) => (
