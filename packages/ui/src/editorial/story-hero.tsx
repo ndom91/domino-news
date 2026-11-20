@@ -109,10 +109,10 @@ export function StoryHero({
           <section
             aria-label="Summary continued"
             data-summary-detail
-            className="relative mt-8 border-t-6 border-rule bg-canvas px-10 pt-7 pb-6 text-text max-lg:mx-2 max-lg:-mt-13 max-md:px-4 max-md:pt-4.5 max-md:pb-4.5"
+            className="relative mt-8 border-t-6 border-rule bg-key-sheet px-10 pt-7 pb-6 text-text [--dn-accent-text:var(--dn-accent-text-on-sheet)] max-lg:mx-2 max-lg:-mt-13 max-md:px-4 max-md:pt-4.5 max-md:pb-4.5"
           >
             <SummaryUpdating newReports={story.summaryUpdate?.newReports} />
-            <div className="max-w-reading text-[calc((var(--dn-text-md)+var(--dn-text-lg))/2)] leading-normal max-md:text-md">
+            <div className="max-w-reading text-[calc((var(--dn-text-md)+var(--dn-text-lg))/2)] leading-[1.55] max-md:text-md">
               {rest.map((paragraph, index) => (
                 // biome-ignore lint/suspicious/noArrayIndexKey: paragraphs belong to a fixed summary version
                 <p key={index} className="mt-5 first:mt-0">
@@ -156,7 +156,7 @@ function SummaryUpdating({ newReports }: { newReports?: number }) {
   return (
     <p
       role="status"
-      className="mb-5 flex items-center gap-2.5 bg-sunken px-3 py-2.5 text-xs leading-normal text-text"
+      className="mb-5 flex items-center gap-2.5 bg-canvas px-3 py-2.5 text-xs leading-normal text-text"
     >
       <span aria-hidden className="h-2.5 w-2.5 shrink-0 bg-accent" />
       <span>

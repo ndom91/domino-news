@@ -3,6 +3,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import { compile } from 'tailwindcss'
 import { describe, expect, it } from 'vitest'
+import { nativeDarkTokens, nativeTokens } from './native.ts'
 
 const here = path.dirname(new URL(import.meta.url).pathname)
 const twIndex = createRequire(import.meta.url).resolve('tailwindcss/index.css')
@@ -52,4 +53,44 @@ describe('theme keys', () => {
       expect(rules, cls).toHaveLength(1)
     }
   })
+})
+
+function luminance(hex: string) {
+  const [red = 0, green = 0, blue = 0] = [1, 3, 5].map((offset) => {
+    const value = Number.parseInt(hex.slice(offset, offset + 2), 16) / 255
+    return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
+  })
+  return red * 0.2126 + green * 0.7152 + blue * 0.0722
+}
+
+function contrast(a: string, b: string) {
+  const light = luminance(a)
+  const dark = luminance(b)
+  return (Math.max(light, dark) + 0.05) / (Math.min(light, dark) + 0.05)
+}
+
+describe('summary sheets', () => {
+  it.each([
+    ['light', '[data-theme="light"]', nativeTokens],
+    ['dark', '[data-theme="dark"]', nativeDarkTokens],
+    ['system dark', ':root:not([data-theme])', nativeDarkTokens],
+  ] as const)(
+    'keeps %s web and native colours in sync and text above AA',
+    (_, selector, tokens) => {
+      const css = readFileSync(path.join(here, 'design-tokens.css'), 'utf8')
+      const block = css.split(`${selector} {`)[1]?.split('}')[0] ?? ''
+      const value = (name: string) => block.match(new RegExp(`--dn-${name}: (#[a-f\\d]+)`))?.[1]
+      expect(value('accent-text-on-sheet')).toBe(tokens.color.accentTextOnSheet)
+      for (const [desk, fill] of Object.entries(tokens.color.deskSheet)) {
+        expect(value(`desk-${desk}-sheet`), desk).toBe(fill)
+        for (const ink of [
+          tokens.color.text,
+          tokens.color.textMuted,
+          tokens.color.accentTextOnSheet,
+        ]) {
+          expect(contrast(ink, fill), `${desk}: ${ink} on ${fill}`).toBeGreaterThanOrEqual(4.5)
+        }
+      }
+    },
+  )
 })

@@ -27,6 +27,14 @@
   --color-rule: var(--dn-rule);
   --color-accent: var(--dn-accent);
   --color-accent-text: var(--dn-accent-text);
+  --color-accent-text-on-sheet: var(--dn-accent-text-on-sheet);
+  --color-desk-politics-sheet: var(--dn-desk-politics-sheet);
+  --color-desk-economy-sheet: var(--dn-desk-economy-sheet);
+  --color-desk-science-sheet: var(--dn-desk-science-sheet);
+  --color-desk-justice-sheet: var(--dn-desk-justice-sheet);
+  --color-desk-culture-sheet: var(--dn-desk-culture-sheet);
+  --color-desk-conflict-sheet: var(--dn-desk-conflict-sheet);
+  --color-desk-none-sheet: var(--dn-desk-none-sheet);
   --color-accent-contrast: var(--dn-accent-contrast);
   --color-accent-shade: var(--dn-accent-shade);
   --color-focus: var(--dn-focus-ring);
@@ -56,6 +64,7 @@
   --color-narrative-6-text: var(--dn-narrative-6-text);
   /* The active Narrative colour, set per element with the narrative-* key utilities below. */
   --color-key: var(--dn-key, var(--dn-narrative-0));
+  --color-key-sheet: var(--dn-key-sheet, var(--dn-desk-none-sheet));
   --color-key-text: var(--dn-key-text, var(--dn-narrative-0-text));
   /* Secondary text on a key fill. A solid mix, not opacity: ≥4.6:1 on every Narrative fill. */
   --color-key-text-muted: color-mix(
@@ -234,30 +243,37 @@
 
 /* Narrative keys: set once on a container, then use bg-key / text-key-text / border-key inside it. */
 @utility narrative-0 {
+  --dn-key-sheet: var(--dn-desk-none-sheet);
   --dn-key: var(--dn-narrative-0);
   --dn-key-text: var(--dn-narrative-0-text);
 }
 @utility narrative-1 {
+  --dn-key-sheet: var(--dn-desk-politics-sheet);
   --dn-key: var(--dn-narrative-1);
   --dn-key-text: var(--dn-narrative-1-text);
 }
 @utility narrative-2 {
+  --dn-key-sheet: var(--dn-desk-science-sheet);
   --dn-key: var(--dn-narrative-2);
   --dn-key-text: var(--dn-narrative-2-text);
 }
 @utility narrative-3 {
+  --dn-key-sheet: var(--dn-desk-economy-sheet);
   --dn-key: var(--dn-narrative-3);
   --dn-key-text: var(--dn-narrative-3-text);
 }
 @utility narrative-4 {
+  --dn-key-sheet: var(--dn-desk-culture-sheet);
   --dn-key: var(--dn-narrative-4);
   --dn-key-text: var(--dn-narrative-4-text);
 }
 @utility narrative-5 {
+  --dn-key-sheet: var(--dn-desk-justice-sheet);
   --dn-key: var(--dn-narrative-5);
   --dn-key-text: var(--dn-narrative-5-text);
 }
 @utility narrative-6 {
+  --dn-key-sheet: var(--dn-desk-conflict-sheet);
   --dn-key: var(--dn-narrative-6);
   --dn-key-text: var(--dn-narrative-6-text);
 }

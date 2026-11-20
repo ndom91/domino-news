@@ -6,7 +6,7 @@ export function StoryHeroStatePreview({ state = 'long' }: { state?: StoryHeroSta
   const story = storyHeroFixture(state)
   return (
     <div
-      data-theme={state === 'dark' ? 'dark' : undefined}
+      data-theme={state.startsWith('dark') ? 'dark' : undefined}
       className="-mx-4 bg-canvas px-gutter pb-10 text-text md:-mx-8"
     >
       <StoryHero

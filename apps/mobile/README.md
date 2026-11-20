@@ -37,8 +37,8 @@ uses native Google Play services. A development build sets `APP_VARIANT=developm
 ## Story design previews
 
 In a development build or Expo Go, tap **Story design preview** on the sign-in screen. The
-`/dev/story-hero` screen uses the same shared iOS/Android hero and reporting components with five
-fixed states: `long`, `extra`, `short`, `updating`, and `dark` (also selectable with `?state=…`).
+`/dev/story-hero` screen uses the same shared iOS/Android hero and reporting components with seven
+fixed states: `long`, `extra`, `short`, `updating`, `dark`, `dark-long`, and `none` (also selectable with `?state=…`).
 It needs no account. The route redirects home in release builds. Playroom has the matching
 **Story hero** snippets at 375, 390, 768, and 1440 pixels.
 

@@ -1,6 +1,8 @@
+import { storyHeroStates } from '../../fixtures/story-hero.ts'
+
 // Typed, deterministic snippets: variants, states and editorial compositions.
 export default [
-  ...['long', 'extra', 'short', 'updating', 'dark'].map((state) => ({
+  ...storyHeroStates.map((state) => ({
     group: 'Story hero',
     name: state,
     code: `<StoryHeroStatePreview state="${state}" />`,

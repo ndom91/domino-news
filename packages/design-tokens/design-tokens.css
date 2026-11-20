@@ -62,6 +62,7 @@
   /* ── Brand / interaction ──────────────────────────────── */
   --dn-accent: #ff4d1a; /* signal orange: masthead dot, active nav, hover underlines. Fill/decoration only */
   --dn-accent-text: #c7330b; /* orange when it must be read as text: citation markers (4.8:1) */
+  --dn-accent-text-on-sheet: #b02d09; /* ≥4.5:1 on every desk-tinted summary sheet */
   --dn-accent-contrast: #121212; /* text on an --dn-accent fill (5.7:1) */
   --dn-focus-ring: #c7330b;
   /* Marble illustration on the sign-in page, with --dn-accent. Decoration only, never a key. */
@@ -111,6 +112,16 @@
   --dn-narrative-5-text: #121212; /* teal */
   --dn-narrative-6: #56607a;
   --dn-narrative-6-text: #ffffff; /* slate */
+
+  /* Summary continuation: desk mixed into canvas (10% light, 16% dark).
+   * Precomputed to match the plain-hex React Native theme. */
+  --dn-desk-politics-sheet: #dfe1ee;
+  --dn-desk-economy-sheet: #f4ebd8;
+  --dn-desk-science-sheet: #dbe9df;
+  --dn-desk-justice-sheet: #dde9e6;
+  --dn-desk-culture-sheet: #f3e3e3;
+  --dn-desk-conflict-sheet: #e3e2e1;
+  --dn-desk-none-sheet: #f1efea;
 
   /* ── Source Trace ─────────────────────────────────────── */
   --dn-trace-cited: var(--dn-text); /* solid mark = cited in the summary */
@@ -222,6 +233,14 @@
   --dn-rule: #f3f1ec;
 
   --dn-accent-text: #ff7a52;
+  --dn-accent-text-on-sheet: #ff7a52;
+  --dn-desk-politics-sheet: #171b38;
+  --dn-desk-economy-sheet: #382c14;
+  --dn-desk-science-sheet: #0f2920;
+  --dn-desk-justice-sheet: #12292b;
+  --dn-desk-culture-sheet: #361f26;
+  --dn-desk-conflict-sheet: #1d1e23;
+  --dn-desk-none-sheet: #161615;
   --dn-focus-ring: #ff7a52;
 
   --dn-success: #5cc283;
@@ -257,6 +276,14 @@
     --dn-border-strong: #737067;
     --dn-rule: #f3f1ec;
     --dn-accent-text: #ff7a52;
+    --dn-accent-text-on-sheet: #ff7a52;
+    --dn-desk-politics-sheet: #171b38;
+    --dn-desk-economy-sheet: #382c14;
+    --dn-desk-science-sheet: #0f2920;
+    --dn-desk-justice-sheet: #12292b;
+    --dn-desk-culture-sheet: #361f26;
+    --dn-desk-conflict-sheet: #1d1e23;
+    --dn-desk-none-sheet: #161615;
     --dn-focus-ring: #ff7a52;
     --dn-success: #5cc283;
     --dn-success-subtle: #12301d;

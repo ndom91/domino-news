@@ -41,7 +41,7 @@ export function StoryHeader({
     <View
       accessibilityRole="text"
       accessibilityLiveRegion="polite"
-      style={[styles.updating, { backgroundColor: theme.color.sunken }]}
+      style={[styles.updating, { backgroundColor: theme.color.canvas }]}
     >
       <View aria-hidden style={styles.square} />
       <Text style={[styles.updatingText, { color: theme.color.text }]}>
@@ -106,7 +106,10 @@ export function StoryHeader({
         <View
           style={[
             styles.sheet,
-            { backgroundColor: theme.color.canvas, borderTopColor: theme.color.rule },
+            {
+              backgroundColor: theme.color.deskSheet[story.desk ?? 'none'],
+              borderTopColor: theme.color.rule,
+            },
           ]}
         >
           {notice}
@@ -116,6 +119,7 @@ export function StoryHeader({
               <SummaryText
                 {...paragraph}
                 sources={story.sources}
+                ink={theme.color.accentTextOnSheet}
                 onContextPress={setSelectedContext}
               />
             </Text>

@@ -39,6 +39,8 @@ describe('summary paragraph reading order', () => {
     ['short', 1],
     ['updating', 3],
     ['dark', 2],
+    ['dark-long', 3],
+    ['none', 2],
   ] as const)('keeps the %s design state in %i structured paragraphs', (state, count) => {
     expect(summaryParagraphs(storyHeroFixture(state).summary)).toHaveLength(count)
   })

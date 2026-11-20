@@ -2,7 +2,15 @@ import type { StoryDetail } from '@dn/schemas'
 
 /** Fictional, deterministic design states shared by Playroom and the native dev screen. */
 export const storyHeroNow = '2026-11-19T12:48:00.000Z'
-export const storyHeroStates = ['long', 'extra', 'short', 'updating', 'dark'] as const
+export const storyHeroStates = [
+  'long',
+  'extra',
+  'short',
+  'updating',
+  'dark',
+  'dark-long',
+  'none',
+] as const
 export type StoryHeroState = (typeof storyHeroStates)[number]
 const names = [
   'Meridian Wire',
@@ -93,6 +101,22 @@ const content = {
     detail:
       'Harrowgate Transit runs the region’s four commuter rail lines and has been in talks with the union over night-shift safety staffing since August[2]. The strike would have been the first on the network in eleven years[1].\n\nThe operator says normal services will run in the meantime and that refunds issued for strike days will be honoured[3]. The ruling text has not yet been published.',
   },
+  'dark-long': {
+    desk: 'culture',
+    title: 'Debut novelist wins the Halden Prize for fiction',
+    narrative: null,
+    body: 'The prize jury called the book “a quiet storm”, according to Southbank Herald[1].',
+    detail:
+      'The novel follows three generations of a family running a lighthouse on the northern coast. It was published by a small independent press in March and had sold fewer than 4,000 copies before the shortlist was announced[1].\n\nLakeshore Times reports that the publisher has ordered a reprint of 60,000 copies[2]. The prize is worth 50,000 euros.',
+  },
+  none: {
+    desk: null,
+    title: 'Ferry operator adds winter sailings to the islands',
+    narrative: null,
+    body: 'Coastline Ferries will run two extra daily crossings from December, Lakeshore Times reports[1].',
+    detail:
+      'The new sailings run until the end of February and use the larger of the operator’s two vessels[1]. Fares are unchanged.',
+  },
   dark: {
     desk: 'conflict',
     title: 'Ceasefire monitors report shelling near northern border crossing',
@@ -114,7 +138,9 @@ const content = {
 
 export function storyHeroFixture(state: StoryHeroState): StoryDetail {
   const item = content[state]
-  const count = state === 'extra' ? 2 : state === 'short' ? 4 : state === 'dark' ? 5 : 8
+  const count = { long: 8, extra: 2, short: 4, updating: 8, dark: 5, 'dark-long': 2, none: 2 }[
+    state
+  ]
   const sources = base.sources
     .slice(0, count)
     .map((source, index) =>

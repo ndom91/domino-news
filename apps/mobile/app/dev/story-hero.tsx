@@ -19,7 +19,7 @@ import { StoryReporting } from '../../components/story-detail/story-reporting'
 import { StoryTheme } from '../../components/story-detail/story-theme'
 import { WhoReported } from '../../components/story-detail/who-reported'
 
-/** Development only: /dev/story-hero?state=long|extra|short|updating|dark, no account needed. */
+/** Development only: /dev/story-hero?state=long|extra|short|updating|dark|dark-long|none, no account needed. */
 export default function StoryHeroDevScreen() {
   const { state } = useLocalSearchParams<{ state?: string }>()
   const selected = storyHeroStates.find((item) => item === state) ?? 'long'
@@ -31,7 +31,7 @@ export default function StoryHeroDevScreen() {
   const [scrolled, setScrolled] = useState(false)
   if (!__DEV__) return <Redirect href="/" />
   return (
-    <StoryTheme value={selected === 'dark' ? 'dark' : 'light'}>
+    <StoryTheme value={selected.startsWith('dark') ? 'dark' : 'light'}>
       <Stack.Screen
         options={{
           headerShown: true,
@@ -49,7 +49,7 @@ export default function StoryHeroDevScreen() {
         edges={['left', 'right', 'bottom']}
         style={[
           styles.screen,
-          { backgroundColor: selected === 'dark' ? t.color.band : t.color.canvas },
+          { backgroundColor: selected.startsWith('dark') ? t.color.band : t.color.canvas },
         ]}
       >
         <ScrollView
