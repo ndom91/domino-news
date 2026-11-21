@@ -96,7 +96,7 @@ export default function StoryScreen() {
                   sectionsY.current = event.nativeEvent.layout.y
                 }}
               >
-                {updates.data ? <StoryUpdates items={updates.data.items} /> : null}
+                {updates.data ? <StoryUpdates items={updates.data.items} now={now} /> : null}
                 {updates.isError ? (
                   <Button tone="light" onPress={() => void updates.refetch()}>
                     Retry story changes

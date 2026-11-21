@@ -92,6 +92,7 @@ export const nativeDarkTokens = {
     surface: '#1b1a18',
     sunken: '#0b0b0a',
     elevated: '#242320',
+    band: '#1d1c1a',
     text: '#f3f1ec',
     textSecondary: '#cfcbc2',
     textMuted: '#a29e96',

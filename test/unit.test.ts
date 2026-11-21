@@ -4,6 +4,7 @@ import {
   clockTime,
   combinedStoryLean,
   countryFromHeader,
+  dayDateLabel,
   dayLabel,
   FALLBACK_COUNTRY_NAMES,
   formatDate,
@@ -433,6 +434,16 @@ describe('date grouping', () => {
     expect(dayLabel('2026-10-10T00:30:00Z', now)).toBe('Today')
     expect(dayLabel('2026-10-09T23:59:00Z', now)).toBe('Yesterday')
     expect(dayLabel('2026-10-08T12:00:00Z', now)).toBe('Thursday 8 Oct')
+  })
+  it('labels update log day bands with UTC dates', () => {
+    const bandNow = '2025-11-21T16:00:00Z'
+    expect(dayDateLabel('2025-11-21T15:34:00Z', bandNow)).toBe('Today, 21 Nov')
+    expect(dayDateLabel('2025-11-20T22:04:00Z', bandNow)).toBe('Yesterday, 20 Nov')
+    expect(dayDateLabel('2025-11-19T12:41:00Z', bandNow)).toBe('Wednesday, 19 Nov')
+    expect(dayDateLabel('2025-11-22T00:05:00Z', bandNow)).toBe('Saturday, 22 Nov')
+    expect(dayDateLabel('2024-12-31T23:59:00Z', '2025-01-01T00:01:00Z', true)).toBe(
+      'Yesterday, 31 Dec 2024',
+    )
   })
   it('buckets by recency', () => {
     expect(recencyPeriod('2026-10-10T01:00:00Z', now)).toBe('today')

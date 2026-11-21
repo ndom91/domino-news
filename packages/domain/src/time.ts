@@ -124,6 +124,32 @@ export function dayLabel(iso: string, now: string | Date = new Date()): string {
 }
 
 /**
+ * UTC day heading with calendar date: "Today, 21 Nov", "Yesterday, 20 Nov", or
+ * "Wednesday, 19 Nov" (with year when `includeYear` is set).
+ */
+export function dayDateLabel(
+  iso: string,
+  now: string | Date = new Date(),
+  includeYear = false,
+): string {
+  const date = new Date(iso)
+  const diff = utcDay(new Date(now).getTime()) - utcDay(date.getTime())
+  const day =
+    diff === 0
+      ? 'Today'
+      : diff === 1
+        ? 'Yesterday'
+        : dateFormat({ weekday: 'long', timeZone: 'UTC' }).format(date)
+  const calendarDate = dateFormat({
+    day: 'numeric',
+    month: 'short',
+    ...(includeYear ? { year: 'numeric' } : {}),
+    timeZone: 'UTC',
+  }).format(date)
+  return `${day}, ${calendarDate}`
+}
+
+/**
  * Stories per UTC day, from `leadIn` empty days before the first Story through the last one.
  * The lead-in gives the line a baseline to rise from.
  */

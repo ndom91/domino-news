@@ -1,3 +1,4 @@
+import { dayDateLabel } from '@dn/domain'
 import { narrativeListResponseSchema, storyListResponseSchema } from '@dn/schemas'
 import { expect, type Page, test } from '@playwright/test'
 import { signIn } from './sign-in.ts'
@@ -308,12 +309,20 @@ test('story changes show a timeline with expandable updates and versions', async
   await page.locator('main article h3 a').first().click()
   const changes = page.locator('section[aria-labelledby="updates-heading"]')
   await expect(changes.getByRole('heading', { name: 'What changed' })).toBeVisible()
-  await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)
+  await expect(changes.getByRole('listitem')).toHaveCount(5)
   await expect(changes.getByText('18:35').first()).toBeVisible()
-  await expect(changes.getByText('26 Oct · UTC')).toHaveCount(1)
-  await expect(changes.getByText('25 Oct · UTC')).toHaveCount(1)
+  const dayBands = changes.getByRole('heading', { level: 3 })
+  await expect(dayBands).toHaveCount(2)
+  await expect(dayBands.nth(0).locator('time[datetime="2026-10-26"]')).toHaveText(
+    dayDateLabel('2026-10-26T18:35:00.000Z'),
+  )
+  await expect(dayBands.nth(0)).toContainText('UTC')
+  await expect(dayBands.nth(1).locator('time[datetime="2026-10-25"]')).toHaveText(
+    dayDateLabel('2026-10-25T18:35:00.000Z'),
+  )
+  await expect(dayBands.nth(1)).toContainText('UTC')
   await expect(changes.getByText('+2 sources')).toBeVisible()
-  const reporting = changes.locator('#story-updates-list > li').nth(1)
+  const reporting = changes.getByRole('listitem').nth(1)
   await expect(reporting.getByRole('link', { name: 'Other Publisher' })).toHaveAttribute(
     'href',
     'https://example.com/other',
@@ -323,6 +332,10 @@ test('story changes show a timeline with expandable updates and versions', async
     'text-decoration-line',
     'none',
   )
+  await expect(reporting.getByRole('link', { name: 'Test Publisher' })).toHaveCSS(
+    'white-space',
+    'nowrap',
+  )
   await expect(changes.getByRole('link', { name: 'Test Publisher' }).first()).toHaveAttribute(
     'href',
     'https://example.com/report',
@@ -330,7 +343,7 @@ test('story changes show a timeline with expandable updates and versions', async
   await expect(changes.getByText('Timeline update 2')).toHaveCount(0)
   await expect(changes.getByText('Official response')).toBeVisible()
   await expect(changes.getByText('Timeline update 3')).toBeVisible()
-  const revision = changes.locator('#story-updates-list > li').first()
+  const revision = changes.getByRole('listitem').first()
   const toggle = revision.getByRole('button', { name: 'Compare versions' })
   const publisher = revision.getByRole('link', { name: 'Test Publisher' })
   const positionBefore = await toggle.boundingBox()
@@ -358,9 +371,9 @@ test('story changes show a timeline with expandable updates and versions', async
   )
   await expect(changes.getByText('Earlier summary')).toBeHidden()
   await changes.getByRole('button', { name: 'View all 6 changes' }).click()
-  await expect(changes.locator('#story-updates-list > li')).toHaveCount(6)
+  await expect(changes.getByRole('listitem')).toHaveCount(6)
   await changes.getByRole('button', { name: 'Show fewer changes' }).click()
-  await expect(changes.locator('#story-updates-list > li')).toHaveCount(5)
+  await expect(changes.getByRole('listitem')).toHaveCount(5)
   await expectNoHorizontalOverflow(page)
 })
 

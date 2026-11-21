@@ -278,7 +278,7 @@ function StoryPage() {
           </div>
         }
       >
-        <StoryUpdates updates={updates} />
+        <StoryUpdates updates={updates} now={now} />
 
         <OriginalReporting active={reporting} onActiveChange={changeReporting} story={story} />
 

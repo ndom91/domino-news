@@ -1,4 +1,4 @@
-import { clockTime, formatDate, plural, stripCitations } from '@dn/domain'
+import { clockTime, dayDateLabel, plural, stripCitations } from '@dn/domain'
 import { STORY_UPDATE_LABELS, type StoryUpdateEvent } from '@dn/schemas'
 import Feather from '@expo/vector-icons/Feather'
 import { useRouter } from 'expo-router'
@@ -10,20 +10,40 @@ import { type StoryTokens, useStoryTheme } from './story-theme'
 
 const SHOWN = 5
 
+function utcDayKey(iso: string): string {
+  return new Date(iso).toISOString().slice(0, 10)
+}
+
+function groupUpdatesByUtcDay(items: StoryUpdateEvent[]) {
+  const days: { dayKey: string; firstCreatedAt: string; items: StoryUpdateEvent[] }[] = []
+  for (const item of items) {
+    const dayKey = utcDayKey(item.createdAt)
+    const last = days[days.length - 1]
+    if (last?.dayKey === dayKey) last.items.push(item)
+    else days.push({ dayKey, firstCreatedAt: item.createdAt, items: [item] })
+  }
+  return days
+}
+
 export function StoryUpdates({
   items,
+  now,
   title = 'What changed',
 }: {
   items: StoryUpdateEvent[]
+  now?: string
   title?: string
 }) {
   const t = useStoryTheme()
   const styles = createStyles(t)
   const [expanded, setExpanded] = useState(false)
-  const visible = expanded ? items : items.slice(0, SHOWN)
+  const [defaultNow] = useState(() => new Date().toISOString())
   if (!items.length) return null
+  const referenceNow = now ?? defaultNow
+  const visible = expanded ? items : items.slice(0, SHOWN)
   const multipleYears =
     new Set(visible.map((item) => new Date(item.createdAt).getUTCFullYear())).size > 1
+  const dayGroups = groupUpdatesByUtcDay(visible)
   return (
     <View style={styles.section}>
       <View style={styles.sectionHeader}>
@@ -32,17 +52,20 @@ export function StoryUpdates({
         </Text>
         <Text style={styles.count}>{plural(items.length, 'update')}</Text>
       </View>
-      {visible.map((item, index) => (
-        <View key={item.id}>
-          {index === 0 ||
-          new Date(visible[index - 1]?.createdAt ?? item.createdAt).toISOString().slice(0, 10) !==
-            new Date(item.createdAt).toISOString().slice(0, 10) ? (
-            <Text style={styles.date}>
-              {formatDate(item.createdAt)}
-              {multipleYears ? ` ${new Date(item.createdAt).getUTCFullYear()}` : ''} · UTC
+      {dayGroups.map((group, groupIndex) => (
+        <View
+          key={group.items[0]?.id ?? group.dayKey}
+          style={groupIndex === 0 ? undefined : styles.dayGroup}
+        >
+          <View accessible accessibilityRole="header" style={styles.dayBand}>
+            <Text style={styles.dayBandText}>
+              {dayDateLabel(group.firstCreatedAt, referenceNow, multipleYears)}
             </Text>
-          ) : null}
-          <UpdateRow item={item} />
+            <Text style={styles.dayBandZone}>UTC</Text>
+          </View>
+          {group.items.map((item) => (
+            <UpdateRow key={item.id} item={item} />
+          ))}
         </View>
       ))}
       {items.length > SHOWN ? (
@@ -84,7 +107,9 @@ function UpdateRow({ item }: { item: StoryUpdateEvent }) {
       <View style={[styles.content, compact && styles.compactContent]}>
         {compact ? (
           <View style={styles.sourceRow}>
-            <Text style={styles.kind}>+{plural(item.sources.length, 'source')}</Text>
+            <Text numberOfLines={1} style={styles.kind}>
+              +{plural(item.sources.length, 'source')}
+            </Text>
             <SourceLinks sources={item.sources} />
           </View>
         ) : (
@@ -134,8 +159,9 @@ function UpdateRow({ item }: { item: StoryUpdateEvent }) {
 function SourceLinks({ sources }: { sources: StoryUpdateEvent['sources'] }) {
   const t = useStoryTheme()
   const styles = createStyles(t)
+  if (sources.length === 0) return null
   return (
-    <View style={styles.sources}>
+    <>
       {sources.map((source) => (
         <Pressable
           key={source.url}
@@ -153,10 +179,12 @@ function SourceLinks({ sources }: { sources: StoryUpdateEvent['sources'] }) {
           ) : (
             <Feather name="file-text" size={18} color={t.color.textSecondary} />
           )}
-          <Text style={styles.sourceName}>{source.publisher?.name ?? source.title}</Text>
+          <Text numberOfLines={1} style={styles.sourceName}>
+            {source.publisher?.name ?? source.title}
+          </Text>
         </Pressable>
       ))}
-    </View>
+    </>
   )
 }
 
@@ -170,6 +198,7 @@ const createStyles = (t: StoryTokens) =>
       flexDirection: 'row',
       gap: t.space[2],
       justifyContent: 'space-between',
+      marginBottom: t.space[5],
       paddingBottom: t.space[2],
     },
     heading: {
@@ -180,13 +209,31 @@ const createStyles = (t: StoryTokens) =>
       textTransform: 'uppercase',
     },
     count: { color: t.color.text, fontFamily: t.font.bold, fontSize: t.type.meta },
-    date: {
-      color: t.color.textMuted,
-      fontFamily: t.font.bold,
-      fontSize: t.type.meta,
-      marginLeft: 60,
-      paddingTop: t.space[2],
+    dayGroup: { marginTop: 22 },
+    dayBand: {
+      alignItems: 'center',
+      backgroundColor: t.color.band,
+      flexDirection: 'row',
+      gap: t.space[4],
+      justifyContent: 'space-between',
+      paddingBottom: 8,
+      paddingHorizontal: 14,
+      paddingTop: 9,
+    },
+    dayBandText: {
+      color: t.color.bandText,
+      flexShrink: 1,
+      fontFamily: t.font.condensed,
+      fontSize: 22,
+      letterSpacing: -0.22,
+      lineHeight: 22,
       textTransform: 'uppercase',
+    },
+    dayBandZone: {
+      color: t.color.bandMuted,
+      fontFamily: t.font.semibold,
+      fontSize: t.type.meta,
+      lineHeight: t.type.meta,
     },
     row: { flexDirection: 'row' },
     time: {
@@ -217,14 +264,18 @@ const createStyles = (t: StoryTokens) =>
       textTransform: 'uppercase',
     },
     description: { color: t.color.text, fontFamily: t.font.bold, fontSize: 15, lineHeight: 21 },
-    sourceRow: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[1] },
-    sources: { flexDirection: 'row', flexShrink: 1, flexWrap: 'wrap' },
+    sourceRow: {
+      alignItems: 'center',
+      columnGap: t.space[3],
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+    },
     source: {
       alignItems: 'center',
       flexDirection: 'row',
       gap: t.space[1],
+      maxWidth: '100%',
       minHeight: t.size.tap,
-      paddingRight: t.space[2],
     },
     sourceName: {
       color: t.color.textSecondary,

@@ -80,6 +80,7 @@ describe('summary sheets', () => {
       const css = readFileSync(path.join(here, 'design-tokens.css'), 'utf8')
       const block = css.split(`${selector} {`)[1]?.split('}')[0] ?? ''
       const value = (name: string) => block.match(new RegExp(`--dn-${name}: (#[a-f\\d]+)`))?.[1]
+      expect(value('band')).toBe(tokens.color.band)
       expect(value('accent-text-on-sheet')).toBe(tokens.color.accentTextOnSheet)
       for (const [desk, fill] of Object.entries(tokens.color.deskSheet)) {
         expect(value(`desk-${desk}-sheet`), desk).toBe(fill)
