@@ -113,9 +113,9 @@
   --dn-narrative-6: #56607a;
   --dn-narrative-6-text: #ffffff; /* slate */
 
-  /* Summary continuation: desk mixed into canvas (10% light, 16% dark).
-   * Precomputed to match the plain-hex React Native theme. */
-  --dn-desk-politics-sheet: #dfe1ee;
+  /* Precomputed summary sheet tints (10% light, 16% dark), matching React Native.
+   * Light Politics is hand-picked: keep its supplied hex rather than regenerating it. */
+  --dn-desk-politics-sheet: #e5ebf1;
   --dn-desk-economy-sheet: #f4ebd8;
   --dn-desk-science-sheet: #dbe9df;
   --dn-desk-justice-sheet: #dde9e6;

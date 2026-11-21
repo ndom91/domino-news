@@ -18,7 +18,7 @@ export const nativeTokens = {
     accentText: '#c7330b',
     accentTextOnSheet: '#b02d09',
     deskSheet: {
-      politics: '#dfe1ee',
+      politics: '#e5ebf1', // Hand-picked light tint; do not regenerate from the desk fill.
       economy: '#f4ebd8',
       science: '#dbe9df',
       justice: '#dde9e6',
