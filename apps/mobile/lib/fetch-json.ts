@@ -1,12 +1,7 @@
 import { ApiError } from '@dn/api-client'
 
 /** Bound the complete JSON response, including a body that stalls after headers arrive. */
-export async function fetchJson(
-  url: string,
-  init?: RequestInit,
-  // Briefing generation allows 120s for the script, 180s for speech, plus response transfer.
-  timeoutMs = url.endsWith('/api/v1/briefing/audio-prototype') ? 330_000 : 20_000,
-) {
+export async function fetchJson(url: string, init?: RequestInit, timeoutMs = 20_000) {
   const controller = new AbortController()
   const cancel = () => controller.abort()
   const signal = init?.signal

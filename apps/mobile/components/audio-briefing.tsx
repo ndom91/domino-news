@@ -5,11 +5,21 @@ import { useAudioPlayerStatus } from 'expo-audio'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { Pressable, StyleSheet, Text, View } from 'react-native'
-import { useAudioBriefing } from './audio-briefing-provider'
+import { type BriefingStage, useAudioBriefing } from './audio-briefing-provider'
+
+const STAGES: BriefingStage[] = ['selecting', 'writing', 'recording']
+const STAGE_STATUS: Record<BriefingStage, string> = {
+  selecting: 'Choosing stories…',
+  writing: 'Writing the script…',
+  recording: 'Recording the voice…',
+}
+const STEP_SUFFIX = { done: ', done', active: ', in progress', todo: '' }
 
 export function AudioBriefing({ available }: { available: boolean }) {
   const router = useRouter()
-  const { player, result, pending, error, generate, cancel, play } = useAudioBriefing()
+  const { player, result, pending, error, stage, selected, generate, cancel, play } =
+    useAudioBriefing()
+  const stageIndex = STAGES.indexOf(stage)
   const status = useAudioPlayerStatus(player)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [rate, setRate] = useState(1)
@@ -46,8 +56,18 @@ export function AudioBriefing({ available }: { available: boolean }) {
         )}
         <View style={styles.heading}>
           <View style={styles.headingRow}>
-            <Text style={styles.title}>Listen to your briefing</Text>
-            <Text style={styles.beta}>Beta</Text>
+            <View style={styles.titleGroup}>
+              <Text style={styles.title}>Listen to your briefing</Text>
+              <Text style={styles.beta}>Beta</Text>
+            </View>
+            <Pressable
+              accessibilityRole="link"
+              accessibilityLabel="Audio settings"
+              onPress={() => router.push('/account')}
+              style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
+            >
+              <Feather name="settings" size={19} color={t.color.bandText} />
+            </Pressable>
           </View>
           <Text style={styles.subhead}>
             {result
@@ -57,14 +77,6 @@ export function AudioBriefing({ available }: { available: boolean }) {
                 : 'No recent stories with summaries yet.'}
           </Text>
         </View>
-        <Pressable
-          accessibilityRole="link"
-          accessibilityLabel="Audio settings"
-          onPress={() => router.push('/account')}
-          style={({ pressed }) => [styles.iconButton, pressed && styles.pressed]}
-        >
-          <Feather name="settings" size={19} color={t.color.bandText} />
-        </Pressable>
       </View>
 
       {result ? (
@@ -127,14 +139,46 @@ export function AudioBriefing({ available }: { available: boolean }) {
       ) : null}
 
       {pending ? (
-        <View style={styles.preparation}>
-          <Text accessibilityLiveRegion="polite" style={styles.subhead}>
-            Preparing your briefing…
-          </Text>
-          <Pressable accessibilityRole="button" onPress={cancel} style={styles.inlineAction}>
-            <Text style={styles.actionText}>Cancel</Text>
-          </Pressable>
-        </View>
+        <>
+          <View style={styles.steps}>
+            {[
+              selected ? `Picked ${plural(selected.length, 'story', 'stories')}` : 'Choose stories',
+              'Write the script',
+              'Record the voice',
+            ].map((label, index) => {
+              let state: keyof typeof STEP_SUFFIX = 'todo'
+              if (index < stageIndex) state = 'done'
+              else if (index === stageIndex) state = 'active'
+              return (
+                <View
+                  key={label}
+                  accessible
+                  accessibilityLabel={`${label}${STEP_SUFFIX[state]}`}
+                  style={styles.step}
+                >
+                  <View
+                    style={[
+                      styles.stepBar,
+                      state === 'done' && styles.stepBarDone,
+                      state === 'active' && styles.stepBarActive,
+                    ]}
+                  />
+                  <Text style={[styles.stepLabel, state === 'active' && styles.stepLabelActive]}>
+                    {label}
+                  </Text>
+                </View>
+              )
+            })}
+          </View>
+          <View style={styles.preparation}>
+            <Text accessibilityLiveRegion="polite" style={styles.subhead}>
+              {STAGE_STATUS[stage]}
+            </Text>
+            <Pressable accessibilityRole="button" onPress={cancel} style={styles.inlineAction}>
+              <Text style={styles.actionText}>Cancel</Text>
+            </Pressable>
+          </View>
+        </>
       ) : (
         <Pressable
           accessibilityRole="button"
@@ -213,7 +257,14 @@ const styles = StyleSheet.create({
     width: 56,
   },
   heading: { flex: 1, gap: t.space[1] },
-  headingRow: { alignItems: 'center', flexDirection: 'row', flexWrap: 'wrap', gap: t.space[2] },
+  headingRow: { alignItems: 'center', flexDirection: 'row', gap: t.space[2] },
+  titleGroup: {
+    alignItems: 'center',
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: t.space[2],
+  },
   title: {
     color: t.color.bandText,
     fontFamily: t.font.bold,
@@ -234,12 +285,27 @@ const styles = StyleSheet.create({
     fontSize: t.type.meta,
     lineHeight: 19,
   },
+  // Negative margins keep the 44px tap target without pushing the subhead down,
+  // so the gear centres on the title line.
   iconButton: {
     alignItems: 'center',
     justifyContent: 'center',
+    marginVertical: -t.space[2],
     minHeight: t.size.tap,
     minWidth: t.size.tap,
   },
+  steps: { flexDirection: 'row', gap: t.space[1], marginTop: t.space[2] },
+  step: { flex: 1, gap: t.space[2] },
+  stepBar: { borderColor: t.color.bandMuted, borderWidth: 1, height: 6 },
+  stepBarDone: { backgroundColor: t.color.bandText, borderColor: t.color.bandText },
+  stepBarActive: { backgroundColor: t.color.accent, borderColor: t.color.accent },
+  stepLabel: {
+    color: t.color.bandMuted,
+    fontFamily: t.font.regular,
+    fontSize: t.type.meta,
+    paddingRight: t.space[2],
+  },
+  stepLabelActive: { color: t.color.bandText, fontFamily: t.font.bold },
   progressTrack: { backgroundColor: t.color.bandMuted, height: 4, marginTop: t.space[3] },
   progressFill: { backgroundColor: t.color.accent, height: '100%' },
   times: { flexDirection: 'row', justifyContent: 'space-between' },
